@@ -1,0 +1,32 @@
+name: 'Setup poetry on ubuntu'
+inputs:
+  github-repo-token:
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - run: df -h
+      shell: sh
+    - name: "node-cleanup"
+      shell: sh
+      run: |
+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+        sudo docker image prune --all --force
+        sudo docker builder prune -a
+    - run: df -h
+      shell: sh
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      shell: sh
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 - --version 2.1.2
+        export PATH=$HOME/.local/bin:$PATH
+        # Use HTTPS instead of SSH because that allows to use read-only token, the same as for docker build.
+        git config --global url."https://x-token-auth:${{ inputs.github-repo-token }}@github.com".insteadOf "ssh://git@github.com"
+        poetry config system-git-client true
+        poetry install --all-extras
+    - run: df -h
+      shell: sh

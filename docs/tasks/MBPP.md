@@ -1,0 +1,12 @@
+# MBPP
+
+````
+NAME = MBPPDATASET_PATH = google-research-datasets/mbppSAMPLE_SPLIT = testFEWSHOT_SPLIT = trainRESPONSE_TYPE = COMPLETIONMETRICS = [CodeCompletionAssertion]SUBJECTS = ['full']LANGUAGE = <Language.ENG: 'English'>````
+
+- Module: [eval_framework.tasks.benchmarks.mbpp](eval_framework.tasks.benchmarks.mbpp)
+
+- File: [src/eval_framework/tasks/benchmarks/mbpp.py](../../src/eval_framework/tasks/benchmarks/mbpp.py)
+
+- Link to dataset: [https://huggingface.co/datasets/google-research-datasets/mbpp](https://huggingface.co/datasets/google-research-datasets/mbpp)
+
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MBPP"`.
