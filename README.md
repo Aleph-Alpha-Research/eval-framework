@@ -5,7 +5,7 @@
 
 ## Features
 
-- 150+ Benchmarks: Covers reasoning, knowledge, coding, long-context, and safety tasks.
+- 90+ Benchmarks: Covers reasoning, knowledge, coding, long-context, and safety tasks.
 - Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
 - Distributed Evaluation: Integration with Determined AI for scalable distributed evaluation.
 - Docker Support: Pre-configured Dockerfiles for local and distributed setups.
@@ -64,7 +64,7 @@ Evaluation metrics include:
 - **LLM Metrics:** Chatbot Style Judge, Instruction Judge
 - **Efficiency Metrics:** Bytes per Sequence Position
 
-For the full list of tasks and metrics, see [Detailed Task Table](tasks_and_metrics.md).
+For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmarks_and_metrics.md).
 
 
 ## Quick Start
@@ -172,7 +172,7 @@ poetry run eval_framework \
 ```
 
 
-For more detailed CLI usage instructions, see the [CLI Usage Guide](cli_usage.md).
+For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usage.md).
 
 
 ## Documentation
