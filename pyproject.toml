@@ -1,0 +1,144 @@
+[project]
+name = "eval-framework"
+version = "0.1.0"
+description = "Evalulation Framework"
+readme = "README.md"
+dynamic = ["dependencies"]
+
+[tool.poetry.dependencies]
+python = "~3.12"
+pyyaml = "^6.0.1"
+xmltodict = "^0.13.0"
+pydantic = "^2.7.1"
+datasets = ">=2.19.1,<4.0.0"   # dataset v4 has breaking changes we'd need to adapt to
+sacrebleu = "^2.4.3"
+pycountry = "^24.6.1"
+nltk = "^3.9.1"
+types-pyyaml = "^6.0.12.20240917"
+psutil = "^6.1.0"
+python-dotenv = "^1.0.1"
+lingua-language-detector = "^2.0.2"
+google-crc32c = "1.5.0"
+kubernetes = "^31.0.0"  # required by llm-sandbox though actually not needed
+seaborn = "^0.13.2"
+langdetect = "^1.0.9"  # required by the original ifeval implementation
+spacy = "^3.8.3"
+jsonschema = "^4.23.0"
+mysql-connector-python = "^9.0.0"  # required for sql-related tasks
+psycopg2-binary = "^2.9.9"  # required for sql-related tasks
+redis = "^5.2.1"
+sympy = "1.13.1"
+antlr4-python3-runtime = "4.11.1"
+llm-sandbox = {version="0.1.8", extras=["docker"]}
+jsonlines = "^4.0.0"
+types-python-dateutil = "^2.9.0.20241206"
+determined = { optional = true, git = "https://github.com/mys007/determined.git", subdirectory = "harness"}  # fork with unpinned `requests`
+tensorboard = { version = "==2.19.0", optional = true }
+aleph-alpha-client = { version = "^10.0.0", optional = true }
+openai = { version = "^1.62.0", optional = true}
+tiktoken = {version = "^0.9.0", optional = true}
+# Transformers must be an optional dependency because these need the latest flash attention, which is not compatible
+# with the nvidia base image with torch=2.4 used in scaling.
+transformers = { version = "^4.45.2", optional = true }
+# We don't overwrite system libraries in Docker image (unlike scaling) so we don't need to freeze torch version.
+torch = { version = "*", source = "pytorch-cu124",  optional=true}
+types-requests = "^2.32.0.20250328"
+toml = "^0.10.2"
+lxml = "^6.0.0"
+aenum = "^3.1.16"
+python-iso639 = ">=2025.2.18"
+typing-extensions = "^4.14.1"  # from template-formatting
+jinja2 = { version = "^3.1.6", optional = true }  # from template-formatting
+mistral-common = { version = "^1.7.0", optional = true }  # from template-formatting
+huggingface-hub = { version = "^0.33.2", optional = true }  # from template-formattingvllm = { version = "^0.8.5", optional=true}
+vllm = { version = "^0.8.5", optional=true}
+unbabel-comet = "^2.2.6"
+
+[project.optional-dependencies]
+determined = ["determined", "tensorboard"]
+api = ["aleph-alpha-client"]
+openai = ["openai", "tiktoken"]
+transformers = ["transformers", "torch"]
+accelerate = ["accelerate"]
+vllm = ["vllm", "torch"]
+
+optional = ["transformers", "jinja2"]  # from template-formatting
+mistral = ["mistral-common", "huggingface-hub"]  # from template-formatting
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.7.1"
+mypy = "^1.10.0"
+pytest = "^8.3.3"
+pytest-xdist = "^3.6.1"
+black = "^24.10.0"
+types-pyyaml = "^6.0.12.20240917"
+types-toml = "^0.10.8.20240310"
+plotly = "^5.24.1"
+types-redis = "^4.6.0.20241004"
+transformers = "^4.45.2"
+accelerate = { version = "*" }
+vllm = "^0.8.5"
+torch = { version = "*", source = "pytorch-cu124" }
+ruff = "^0.12.8"
+
+[[tool.poetry.source]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["I", "E", "F"]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+plugins = "pydantic.mypy"
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["./tests"]
+markers = [
+    "gpu: needs a GPU runner, otherwise test can not be run",
+    "cpu_slow: runs for a long time (on CPU)",
+    "external_api: needs external services for execution",
+    "vllm: tests that specifically require vLLM functionality",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:datasets.utils._dill:",
+]
+
+[tool.poetry.scripts]
+eval_framework = "eval_framework.run:run"
+
+[tool.bumpversion]
+current_version = "0.1.0"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+tag = true
+sign_tags = false
+tag_name = "v{new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+commit_args = ""
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "src/eval_framework/__init__.py"
+search = '__version__ = "{current_version}"'
+replace = '__version__ = "{new_version}"'
