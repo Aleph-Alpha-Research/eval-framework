@@ -125,33 +125,29 @@ def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_
             for formatter in formatters:
                 f.write(f"## Example prompt with {formatter.__class__.__name__} ({num_fewshot}-shot)\n\n")
                 formatted_sample = formatter.format(s.messages, output_mode="string")
-                f.write("```\n")
+                f.write("````\n")
                 f.write(f'"{formatted_sample}"')
                 f.write("\n````\n\n")
 
             f.write("## Possible completions:\n\n")
-            f.write("```\n")
-            if isinstance(s.possible_completions, list):
-                completions = [item for item in s.possible_completions if item is not None]
-            else:
-                completions = [s.possible_completions] if s.possible_completions is not None else []
-
-            for item in completions:
-                if item is not None:
+            f.write("````\n")
+            if s.possible_completions:
+                for item in (
+                    s.possible_completions if isinstance(s.possible_completions, list) else [s.possible_completions]
+                ):
                     f.write(f'- "{item}"\n')
-            f.write("```\n\n")
+            else:
+                f.write("None\n")
+            f.write("````\n\n")
 
             f.write("## Ground truth:\n\n")
-            f.write("```\n")
-            if isinstance(s.ground_truth, list):
-                ground_truths = [item for item in s.ground_truth if item is not None]
-            else:
-                ground_truths = [s.ground_truth] if s.ground_truth is not None else []
-
-            for item in ground_truths:
-                if item is not None:
+            f.write("````\n")
+            if s.ground_truth:
+                for item in s.ground_truth if isinstance(s.ground_truth, list) else [s.ground_truth]:
                     f.write(f'- "{item}"\n')
-            f.write("```\n")
+            else:
+                f.write("None\n")
+            f.write("````\n")
 
 
 def generate_readme_list() -> None:
