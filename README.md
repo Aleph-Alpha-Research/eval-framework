@@ -9,69 +9,6 @@ Why Choose This Framework?
 - **Comprehensive**: Comes pre-loaded with over 150 tasks covering everything from reasoning and coding to safety and long-context.
 - **Robust Analysis**: Built-in support for perturbation testing, statistical significance, and LLM-as-a-judge evaluations.
 
-## Features
-
-- 90+ Benchmarks: Covers reasoning, knowledge, coding, long-context, and safety tasks.
-- Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
-- Distributed Evaluation: Integration with Determined AI for scalable distributed evaluation.
-- Docker Support: Pre-configured Dockerfiles for local and distributed setups.
-- Flexible Model Integration: Supports models loaded via HuggingFace Transformers or custom implementations using the BaseLLM class.
-- Custom Metrics: Easily define new metrics using the BaseMetric class.
-- Rich Outputs: Generates JSON results, plots, and detailed analysis reports.
-- Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
-- Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
-- LLM-as-a-Judge: Evaluation using LLM judges.
-
-
-![eval-framework](docs/eval-framework.png "eval-framework")
-
-
-## Benchmark Coverage & Task Categories
-
-### Core Capabilities
-
-| **Reasoning** | **Knowledge** | **Coding** | **Long Context** |
-|---------------|---------------|------------|------------------|
-| MMLU (57 subjects) | TriviaQA | HumanEval | InfiniteBench |
-| SQuAD v1/v2 | MBPP |
-| ARC | Natural Questions | CodeT5 | ZeroSCROLLS |
-| HellaSwag | QuAC | Programming | QuALITY |
-| Winogrande | COPA | Debugging  |
-
-### Languages & Domains
-
-| **Multilingual** | **Specialized** | **Safety & Bias** | **Efficiency** |
-|------------------|-----------------|-------------------|----------------|
-| WMT Translation | Legal (CaseHold) | TruthfulQA | Token counting |
-| FLORES-200 | Winogender | Latency metrics |
-| Multilingual MMLU | Medical (MedQA) | Stereotype detection | Memory usage |
-| German/Finnish tasks | Scientific (SciQ) | Harmful content | Cost analysis |
-
-### Completion
-Tasks focused on logical reasoning, text distillation, instruction following, and output control. Examples include:
-- **AIME 2024:** Logical Reasoning (Math)
-- **DUC Abstractive:** Text Distillation (Extraction)
-- **Custom Data: Complaint Summarization:** Text Distillation (Summarization)
-
-### Loglikelihoods
-Tasks emphasizing classification, reasoning, and open QA. Examples include:
-- **Abstract Reasoning Challenge (ARC):** Classification
-- **Casehold:** Open QA
-
-### Long-Context
-Tasks designed for long-context scenarios, including QA, summarization, and aggregation. Examples include:
-- **InfiniteBench_CodeDebug:** Programming
-- **ZeroSCROLLS GovReport:** QA (Government)
-
-### Metrics
-Evaluation metrics include:
-- **Completion Metrics:** Accuracy, Bleu, F1, Rouge
-- **Loglikelihood Metrics:** Accuracy Loglikelihood, Probability Mass
-- **LLM Metrics:** Chatbot Style Judge, Instruction Judge
-- **Efficiency Metrics:** Bytes per Sequence Position
-
-For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmarks_and_metrics.md).
-
 ## Quick Start
 
 ### Installation
@@ -147,6 +84,69 @@ While the CLI is great for quick runs, the Python interface offers maximum flexi
      # Run evaluation and get results
      results = main(llm=llm, config=config)
 ```
+
+## Features
+
+- 90+ Benchmarks: Covers reasoning, knowledge, coding, long-context, and safety tasks.
+- Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
+- Distributed Evaluation: Integration with Determined AI for scalable distributed evaluation.
+- Docker Support: Pre-configured Dockerfiles for local and distributed setups.
+- Flexible Model Integration: Supports models loaded via HuggingFace Transformers or custom implementations using the BaseLLM class.
+- Custom Metrics: Easily define new metrics using the BaseMetric class.
+- Rich Outputs: Generates JSON results, plots, and detailed analysis reports.
+- Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
+- Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
+- LLM-as-a-Judge: Evaluation using LLM judges.
+
+
+![eval-framework](docs/eval-framework.png "eval-framework")
+
+
+## Benchmark Coverage & Task Categories
+
+### Core Capabilities
+
+| **Reasoning** | **Knowledge** | **Coding** | **Long Context** |
+|---------------|---------------|------------|------------------|
+| MMLU (57 subjects) | TriviaQA | HumanEval | InfiniteBench |
+| SQuAD v1/v2 | MBPP |
+| ARC | Natural Questions | CodeT5 | ZeroSCROLLS |
+| HellaSwag | QuAC | Programming | QuALITY |
+| Winogrande | COPA | Debugging  |
+
+### Languages & Domains
+
+| **Multilingual** | **Specialized** | **Safety & Bias** | **Efficiency** |
+|------------------|-----------------|-------------------|----------------|
+| WMT Translation | Legal (CaseHold) | TruthfulQA | Token counting |
+| FLORES-200 | Winogender | Latency metrics |
+| Multilingual MMLU | Medical (MedQA) | Stereotype detection | Memory usage |
+| German/Finnish tasks | Scientific (SciQ) | Harmful content | Cost analysis |
+
+### Completion
+Tasks focused on logical reasoning, text distillation, instruction following, and output control. Examples include:
+- **AIME 2024:** Logical Reasoning (Math)
+- **DUC Abstractive:** Text Distillation (Extraction)
+- **Custom Data: Complaint Summarization:** Text Distillation (Summarization)
+
+### Loglikelihoods
+Tasks emphasizing classification, reasoning, and open QA. Examples include:
+- **Abstract Reasoning Challenge (ARC):** Classification
+- **Casehold:** Open QA
+
+### Long-Context
+Tasks designed for long-context scenarios, including QA, summarization, and aggregation. Examples include:
+- **InfiniteBench_CodeDebug:** Programming
+- **ZeroSCROLLS GovReport:** QA (Government)
+
+### Metrics
+Evaluation metrics include:
+- **Completion Metrics:** Accuracy, Bleu, F1, Rouge
+- **Loglikelihood Metrics:** Accuracy Loglikelihood, Probability Mass
+- **LLM Metrics:** Chatbot Style Judge, Instruction Judge
+- **Efficiency Metrics:** Bytes per Sequence Position
+
+For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmarks_and_metrics.md).
 
 ## Understanding the Evaluation Framework
 
