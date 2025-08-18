@@ -2,9 +2,9 @@ import math
 
 import numpy as np
 import pandas as pd
+import wandb
 from tqdm import tqdm
 
-import wandb
 from eval_framework.constants import RED, RESET
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.efficiency_metrics.bytes_per_sequence_position import (
