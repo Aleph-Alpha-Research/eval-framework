@@ -189,7 +189,6 @@ For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usa
 
 ### Scaling & Production
 - **[Using Determined](docs/using_determined.md)** - Guide for distributed evaluation using Determined AI
-- **[AA API Client](docs/aa_api_client.md)** - Instructions for using the Aleph Alpha API client with parameter tips
 - **[Controlling Upload Results](docs/controlling_upload_results.md)** - How to manage and control the upload of evaluation results
 
 

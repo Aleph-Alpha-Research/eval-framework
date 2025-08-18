@@ -108,8 +108,8 @@ jobs:
           poetry run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
 
   build:
-    needs: [lint, changes]
-    if: ${{ needs.changes.outputs.poetry_changed == 'true' || github.event_name == 'workflow_dispatch' }}
+    # needs: [lint, changes]
+    # if: ${{ needs.changes.outputs.poetry_changed == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
     env:
@@ -142,7 +142,8 @@ jobs:
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache]
+    # needs: [lint, hf-datasets-cache]
+    needs: [hf-datasets-cache]
     steps:
       - uses: actions/checkout@v4
       - name: Setup poetry
@@ -162,7 +163,8 @@ jobs:
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache]
+    # needs: [lint, hf-datasets-cache]
+    needs: [hf-datasets-cache]
     steps:
       - uses: actions/checkout@v4
       - name: Setup poetry
@@ -182,11 +184,12 @@ jobs:
 
   test-gpu:
     runs-on: EvalFrameworkGPURunner
-    needs: [build, test-cpu, test-cpu-slow]
-    if: ${{ always()
-          && needs.test-cpu.result == 'success'
-          && needs.test-cpu-slow.result == 'success'
-          && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    # needs: [build, test-cpu, test-cpu-slow]
+    needs: [build]
+    # if: ${{ always()
+    #       && needs.test-cpu.result == 'success'
+    #       && needs.test-cpu-slow.result == 'success'
+    #       && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -224,12 +227,13 @@ jobs:
 
   test-gpu-vllm:
     runs-on: EvalFrameworkGPURunner
-    needs: [build, test-cpu, test-cpu-slow, test-gpu]
-    if: ${{ always()
-          && needs.test-cpu.result == 'success'
-          && needs.test-cpu-slow.result == 'success'
-          && (needs.build.result == 'success' || needs.build.result == 'skipped')
-          && (needs.test-gpu.result == 'success' || needs.test-gpu.result == 'skipped') }}
+    # needs: [build, test-cpu, test-cpu-slow, test-gpu]
+    needs: [build]
+    # if: ${{ always()
+    #       && needs.test-cpu.result == 'success'
+    #       && needs.test-cpu-slow.result == 'success'
+    #       && (needs.build.result == 'success' || needs.build.result == 'skipped')
+    #       && (needs.test-gpu.result == 'success' || needs.test-gpu.result == 'skipped') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

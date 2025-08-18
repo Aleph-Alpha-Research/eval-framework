@@ -25,6 +25,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [DUC_ABSTRACTIVE](DUC_ABSTRACTIVE.md)
 - [DUC_EXTRACTIVE](DUC_EXTRACTIVE.md)
 - [FLORES200](FLORES200.md)
+- [FLORES_PLUS](FLORES_PLUS.md)
 - [FULL_TEXT_MMLU](FULL_TEXT_MMLU.md)
 - [GPQA](GPQA.md)
 - [GPQA_COT](GPQA_COT.md)
