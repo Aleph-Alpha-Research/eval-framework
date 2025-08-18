@@ -200,8 +200,7 @@ If you use Eval-Framework in your research, please cite:
 
 ```bibtex
 @software{eval_framework,
-  title={...},
-  author={},
+  title={Eval Framework},
   year={2025},
   url={https://github.com/Aleph-Alpha-Research/eval-framework}
 }
