@@ -48,6 +48,7 @@ class Hyperparameters(BaseModel):
     output_dir: Path
     hf_upload_dir: str | None = None
     hf_upload_repo: str | None = None
+    wandb_project: str | None = None
     description: str | None = None
     task_args: TaskArgs
     llm_args: dict[str, Any] | None = {}
@@ -85,7 +86,15 @@ class DeterminedContext(EvalContext):
 
         self.hparams = Hyperparameters(**info.trial.hparams)
 
-        for name in ["llm_name", "llm_args", "output_dir", "hf_upload_dir", "hf_upload_repo", "description"]:
+        for name in [
+            "llm_name",
+            "llm_args",
+            "output_dir",
+            "hf_upload_dir",
+            "hf_upload_repo",
+            "wandb_project",
+            "description",
+        ]:
             val_cli = getattr(self, name, None)
             val_hparams = getattr(self.hparams, name, None)
             if val_cli and val_hparams and val_cli != val_hparams:

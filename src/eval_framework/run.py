@@ -2,6 +2,8 @@ import argparse
 import datetime
 from pathlib import Path
 
+import wandb
+
 try:
     from eval_framework.context.determined import DeterminedContext
 except ImportError:
@@ -149,6 +151,13 @@ def parse_args() -> argparse.Namespace:
         help="Folder name for the HuggingFace git repository where runs will be stored",
     )
     parser.add_argument(
+        "--wandb-project",
+        type=str,
+        default=None,
+        required=False,
+        help="The name of the Weights & Biases project to log runs to.",
+    )
+    parser.add_argument(
         "--description",
         type=str,
         required=False,
@@ -249,12 +258,17 @@ def run_with_kwargs(kwargs: dict) -> None:
         perturbation_type=kwargs["perturbation_type"],
         perturbation_probability=kwargs["perturbation_probability"],
         perturbation_seed=kwargs["perturbation_seed"],
+        wandb_project=kwargs["wandb_project"],
         # save_logs=kwargs["save_logs"],
     )
 
     with context as ctx:
         if ctx.config is None:
             raise ValueError(f"Context configuration is not set for '{type(ctx)}'.")
+
+        # check if wandb is enabled
+        wandb_project = ctx.config.wandb_project
+        wandb.init(project=wandb_project)
 
         main(
             llm=ctx.config.llm_class(**ctx.config.llm_args),

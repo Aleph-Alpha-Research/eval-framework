@@ -32,6 +32,7 @@ class LocalContext(EvalContext):
             output_dir=self.output_dir,
             hf_upload_dir=self.hf_upload_dir,
             hf_upload_repo=self.hf_upload_repo,
+            wandb_project=self.wandb_project,
             llm_judge_class=self.llm_judge_class,
             judge_model_args=self.judge_model_args,
             batch_size=self.batch_size,
