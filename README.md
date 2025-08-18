@@ -1,7 +1,13 @@
 # Aleph Alpha Eval-Framework
 
 
-> **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 150+ benchmarks.
+> **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 150+ benchmarks. It is designed for both rapid experimentation and large-scale, reproducible research.
+
+Why Choose This Framework?
+- **Scalability**: Built for distributed evaluation using an integration with Determined AI.
+- **Extensibility**: Easily add custom models, benchmarks, and metrics with object-oriented base classes.
+- **Comprehensive**: Comes pre-loaded with over 150 tasks covering everything from reasoning and coding to safety and long-context.
+- **Robust Analysis**: Built-in support for perturbation testing, statistical significance, and LLM-as-a-judge evaluations.
 
 ## Features
 
@@ -66,11 +72,11 @@ Evaluation metrics include:
 
 For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmarks_and_metrics.md).
 
-
 ## Quick Start
 
-The codebase is tested and compatible with Python 3.12 and PyTorch 2.5
-You will also need the appropriate CUDA dependencies and version installed on your system for GPU support.
+### Installation
+First, ensure you have **Python 3.12+**, **Poetry**, and the necessary **CUDA drivers** installed for GPU support.
+
 Clone this repository and install via [poetry](https://python-poetry.org/docs/):
 
 **Option 1: Using conda environment (recommended)**
@@ -91,9 +97,58 @@ poetry run pip install --no-build-isolation flash-attn==2.7.2.post1
 
 After installation, task documentation can be generated with `poetry run python utils/generate-task-docs.py` (see [docs/installation.md(docs/installation.md)) for more details.
 
-## Getting Started
+### Run Your First Evaluation
+Run a simple evaluation on the GSM8K benchmark using a small, pre-configured open-source model directly from the command line.
 
-### Understanding the Evaluation Framework
+```bash
+poetry run eval_framework \
+    --models src/eval_framework/llm/models.py \
+    --llm-name Llama31_8B_Instruct_HF \
+    --task-name "GSM8K" \
+    --output-dir ./eval \
+    --num-fewshot 5 \
+    --num-samples 10
+```
+For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usage.md).
+
+### Review Results
+The output will be saved in the `./eval/` directory. Our [results guide](docs/understanding_results_guide.md) has details for how to interpret them.
+
+### Advanced Usage
+
+While the CLI is great for quick runs, the Python interface offers maximum flexibility. Here is how you can run an evaluation using a HuggingFace model:
+
+```python
+ from pathlib import Path
+
+ from eval_framework.llm.huggingface_llm import HFLLM
+ from eval_framework.main import main
+ from eval_framework.tasks.eval_config import EvalConfig
+ from template_formatting.formatter import HFFormatter
+
+ # Define your model
+ class MyHuggingFaceModel(HFLLM):
+     LLM_NAME = "microsoft/DialoGPT-medium"
+     DEFAULT_FORMATTER = HFFormatter("microsoft/DialoGPT-medium")
+
+ if __name__ == "__main__":
+     # Initialize your model
+     llm = MyHuggingFaceModel()
+
+     # Running evaluation on GSM8K task using 5 few-shot examples and 10 samples
+     config = EvalConfig(
+         output_dir=Path("./eval_results"),
+         num_fewshot=5,
+         num_samples=10,
+         task_name="GSM8K",
+         llm_class=MyHuggingFaceModel,
+     )
+
+     # Run evaluation and get results
+     results = main(llm=llm, config=config)
+```
+
+## Understanding the Evaluation Framework
 
 Eval-Framework provides a unified interface for evaluating language models across diverse benchmarks. The framework follows this interaction model:
 
@@ -111,44 +166,6 @@ Eval-Framework provides a unified interface for evaluating language models acros
 - **Formatters**: Handle prompt construction and model-specific formatting
 - **Results**: Structured outputs with sample-level details and aggregated statistics
 
-### Your First Evaluation
-
-1. **Install the framework** (see Quick Start above)
-
-2. **Create and run your first evaluation using HuggingFace model**:
-
-   ```python
-    from pathlib import Path
-
-    from eval_framework.llm.huggingface_llm import HFLLM
-    from eval_framework.main import main
-    from eval_framework.tasks.eval_config import EvalConfig
-    from template_formatting.formatter import HFFormatter
-
-    # Define your model
-    class MyHuggingFaceModel(HFLLM):
-        LLM_NAME = "microsoft/DialoGPT-medium"
-        DEFAULT_FORMATTER = HFFormatter("microsoft/DialoGPT-medium")
-
-    if __name__ == "__main__":
-        # Initialize your model
-        llm = MyHuggingFaceModel()
-
-        # Running evaluation on GSM8K task using 5 few-shot examples and 10 samples
-        config = EvalConfig(
-            output_dir=Path("./eval_results"),
-            num_fewshot=5,
-            num_samples=10,
-            task_name="GSM8K",
-            llm_class=MyHuggingFaceModel,
-        )
-
-        # Run evaluation and get results
-        results = main(llm=llm, config=config)
-   ```
-
-3. **Review results** - Check `./eval_results/` for detailed outputs and use our [results guide](docs/understanding_results_guide.md) to interpret them
-
 ### Next Steps
 
 - **Use CLI interface**: See [CLI usage guide](docs/cli_usage.md) for command-line evaluation options
@@ -156,23 +173,6 @@ Eval-Framework provides a unified interface for evaluating language models acros
 - **Create custom benchmarks**: Follow our [benchmark creation guide](docs/add_new_benchmark_guide.md)
 - **Scale your evaluations**: Use [Determined AI integration](docs/using_determined.md) for distributed evaluation
 - **Understand your results**: Read our [results interpretation guide](docs/understanding_results_guide.md)
-
-### Example CLI Usage
-
-To evaluate a single benchmark locally, you can use the following command:
-
-```bash
-poetry run eval_framework \
-    --models src/eval_framework/llm/models.py \
-    --llm-name Llama31_8B_Instruct_HF \
-    --task-name "GSM8K" \
-    --output-dir ./eval \
-    --num-fewshot 5 \
-    --num-samples 10
-```
-
-
-For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usage.md).
 
 
 ## Documentation
