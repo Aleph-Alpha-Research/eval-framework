@@ -85,6 +85,14 @@ While the CLI is great for quick runs, the Python interface offers maximum flexi
      results = main(llm=llm, config=config)
 ```
 
+### Next Steps
+
+- **Use CLI interface**: See [CLI usage guide](docs/cli_usage.md) for command-line evaluation options
+- **Evaluate HuggingFace models**: Follow our [HuggingFace evaluation guide](docs/evaluate_huggingface_model.md)
+- **Create custom benchmarks**: Follow our [benchmark creation guide](docs/add_new_benchmark_guide.md)
+- **Scale your evaluations**: Use [Determined AI integration](docs/using_determined.md) for distributed evaluation
+- **Understand your results**: Read our [results interpretation guide](docs/understanding_results_guide.md)
+
 ## Features
 
 - 90+ Benchmarks: Covers reasoning, knowledge, coding, long-context, and safety tasks.
@@ -165,15 +173,6 @@ Eval-Framework provides a unified interface for evaluating language models acros
 - **Metrics**: Automatic scoring via [`BaseMetric`](docs/benchmarks_and_metrics.md) classes
 - **Formatters**: Handle prompt construction and model-specific formatting
 - **Results**: Structured outputs with sample-level details and aggregated statistics
-
-### Next Steps
-
-- **Use CLI interface**: See [CLI usage guide](docs/cli_usage.md) for command-line evaluation options
-- **Evaluate HuggingFace models**: Follow our [HuggingFace evaluation guide](docs/evaluate_huggingface_model.md)
-- **Create custom benchmarks**: Follow our [benchmark creation guide](docs/add_new_benchmark_guide.md)
-- **Scale your evaluations**: Use [Determined AI integration](docs/using_determined.md) for distributed evaluation
-- **Understand your results**: Read our [results interpretation guide](docs/understanding_results_guide.md)
-
 
 ## Documentation
 
