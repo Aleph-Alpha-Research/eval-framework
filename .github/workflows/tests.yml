@@ -4,9 +4,41 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.detignore'
+      - '**.example'
+      - '**.json'
+      - '**.md'
+      - '**.png'
+      - '**.sample'
+      - '**.TAG'
+      - '**.yaml'
+      - '**.yml'
+      - 'docs/**'
+      - 'scripts/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - 'changelog/**'
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**.detignore'
+      - '**.example'
+      - '**.json'
+      - '**.md'
+      - '**.png'
+      - '**.sample'
+      - '**.TAG'
+      - '**.yaml'
+      - '**.yml'
+      - 'docs/**'
+      - 'scripts/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.pre-commit-config.yaml'
+      - 'changelog/**'
 
 permissions:
   contents: read
