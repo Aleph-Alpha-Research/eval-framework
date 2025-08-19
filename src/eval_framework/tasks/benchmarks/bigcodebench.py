@@ -1,3 +1,4 @@
+import os
 import random
 import re
 from typing import Any
@@ -14,6 +15,7 @@ from eval_framework.tasks.base import (
     Sample,
     SubjectType,
 )
+from eval_framework.tasks.utils import BIG_CODE_BENCH_PACKAGE_MAPPING, CallableSerializer, _parse_unittest_output
 
 PROMPT_INSTRUCTION = (
     "Please provide a self-contained Python script, without tests or example usage, that solves the following "
@@ -41,6 +43,7 @@ class BigCodeBench(BaseTask[str]):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for BigCodeBench"
+        self.serializer = CallableSerializer()
         super().__init__(num_fewshot)
 
     def _load_dataset(self, subject: SubjectType) -> None:
@@ -71,7 +74,22 @@ class BigCodeBench(BaseTask[str]):
         return None
 
     def _get_context(self, item: dict[str, Any]) -> CodeExecutionPassAtOneContext:
-        return CodeExecutionPassAtOneContext(code_prompt=item["code_prompt"], test_code=item["test"])
+        def merge_snippets(code: str, test_code: str) -> str:
+            if "unittest.main(" not in test_code:
+                test_code += "\n\nif __name__ == '__main__':\n  unittest.main()"
+
+            # Combine the implementation code and test code
+            combined_code = code + "\n\n" + test_code
+            return combined_code
+
+        return CodeExecutionPassAtOneContext(
+            run_env=os.environ.get("DOCKER_CODE_EXECUTION"),
+            code_prompt=item["code_prompt"],
+            test_code=item["test"],
+            snippet_merge_fn=self.serializer.encode(merge_snippets),
+            output_parse_fn=self.serializer.encode(_parse_unittest_output),
+            package_downloads=BIG_CODE_BENCH_PACKAGE_MAPPING,
+        )
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         if sample is not None and sample.context is not None and sample.subject == "calibrated":
