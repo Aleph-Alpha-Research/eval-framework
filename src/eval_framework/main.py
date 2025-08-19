@@ -43,9 +43,11 @@ def main(
 
     if preemption_data is None:
         output_dir = generate_output_dir(llm.name, config)
+        preempted_wandb_run = None  # no wandb run exists, must start new one
     else:
         logger.info("Found preempted run restarting ...")
         output_dir = preemption_data["output_dir"]
+        preempted_wandb_run = preemption_data.get("wandb_run_id", None)
 
     logger.info(f"Output directory: {output_dir}")
     assert output_dir is not None
@@ -54,7 +56,7 @@ def main(
     # id from preemption, then we resume the original wandb run
     wandb.init(
         project=config.wandb_project,
-        id=preemption_data.get("wandb_run_id", None),
+        id=preempted_wandb_run,
     )
 
     file_processor = ResultsFileProcessor(output_dir)
