@@ -2,8 +2,6 @@ import argparse
 import datetime
 from pathlib import Path
 
-import wandb
-
 try:
     from eval_framework.context.determined import DeterminedContext
 except ImportError:
@@ -247,6 +245,7 @@ def run_with_kwargs(kwargs: dict) -> None:
         task_subjects=kwargs["task_subjects"],
         hf_revision=kwargs["hf_revision"],
         output_dir=kwargs["output_dir"],
+        wandb_project=kwargs["wandb_project"],
         hf_upload_dir=kwargs["hf_upload_dir"],
         hf_upload_repo=kwargs["hf_upload_repo"],
         llm_args=kwargs["llm_args"],
@@ -258,17 +257,12 @@ def run_with_kwargs(kwargs: dict) -> None:
         perturbation_type=kwargs["perturbation_type"],
         perturbation_probability=kwargs["perturbation_probability"],
         perturbation_seed=kwargs["perturbation_seed"],
-        wandb_project=kwargs["wandb_project"],
         # save_logs=kwargs["save_logs"],
     )
 
     with context as ctx:
         if ctx.config is None:
             raise ValueError(f"Context configuration is not set for '{type(ctx)}'.")
-
-        # check if wandb is enabled
-        wandb_project = ctx.config.wandb_project
-        wandb.init(project=wandb_project)
 
         main(
             llm=ctx.config.llm_class(**ctx.config.llm_args),

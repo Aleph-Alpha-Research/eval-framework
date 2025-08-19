@@ -3,6 +3,8 @@ import logging
 from pathlib import Path
 from typing import Any, Callable
 
+import wandb
+
 from eval_framework.constants import RED, RESET
 from eval_framework.evaluation_generator import EvaluationGenerator, Result
 from eval_framework.llm.base import BaseLLM
@@ -22,7 +24,7 @@ def main(
     trial_id: int | None = None,
 ) -> list[Result]:
     """Runs the entire evaluation process: responses generation and evaluation."""
-
+    wandb.init(project=config.wandb_project)
     # Set up centralized logging early
     output_dir = generate_output_dir(llm.__class__.__name__, config)
     print(f"Output directory for evaluation: {output_dir}")

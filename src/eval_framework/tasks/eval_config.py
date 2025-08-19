@@ -15,6 +15,7 @@ from eval_framework.tasks.perturbation import PerturbationConfig
 
 class EvalConfig(BaseConfig):
     output_dir: Path = Field(ROOT_DIR)
+    wandb_project: str | None = Field(None)
     hf_upload_dir: str | None = Field(None)
     hf_upload_repo: str | None = Field(None)
     num_fewshot: int = Field(0, ge=0)
