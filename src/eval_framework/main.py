@@ -24,7 +24,6 @@ def main(
     trial_id: int | None = None,
 ) -> list[Result]:
     """Runs the entire evaluation process: responses generation and evaluation."""
-    wandb.init(project=config.wandb_project)
     # Set up centralized logging early
     output_dir = generate_output_dir(llm.__class__.__name__, config)
     print(f"Output directory for evaluation: {output_dir}")
@@ -51,13 +50,20 @@ def main(
     logger.info(f"Output directory: {output_dir}")
     assert output_dir is not None
 
+    # take care of init after preemption handling. If we have a run
+    # id from preemption, then we resume the original wandb run
+    wandb.init(
+        project=config.wandb_project,
+        id=preemption_data.get("wandb_run_id", None),
+    )
+
     file_processor = ResultsFileProcessor(output_dir)
     response_generator = ResponseGenerator(llm, config, file_processor)
     _, preempted = response_generator.generate(should_preempt_callable)
     if preempted:
         logger.info("Response generation was preempted")
         assert trial_id is not None
-        _save_preemption_data(config, trial_id, output_dir)
+        _save_preemption_data(config, trial_id, output_dir, wandb_run_id=wandb.run.id)
         return []
 
     if trial_id is not None:
@@ -88,14 +94,15 @@ def _read_preemption_data(config: EvalConfig, trial_id: int) -> dict[str, Any] |
     with open(preemption_file, "rb") as f:
         preemption_data = json.load(f)
         preemption_data["output_dir"] = Path(preemption_data["output_dir"])
+        preemption_data["wandb_run_id"] = preemption_data.get("wandb_run_id", "")
         logger.info(f"Loaded preemption data from {preemption_file}")
         return preemption_data
 
 
-def _save_preemption_data(config: EvalConfig, trial_id: int, output_dir: Path) -> None:
+def _save_preemption_data(config: EvalConfig, trial_id: int, output_dir: Path, wandb_run_id: str = "") -> None:
     preemption_file = config.output_dir / f"preemption_trial_{trial_id}.json"
     with open(preemption_file, "w") as f:
-        json.dump({"output_dir": str(output_dir)}, f)
+        json.dump({"output_dir": str(output_dir), "wandb_run_id": wandb_run_id}, f)
 
 
 def _delete_preemption_file(config: EvalConfig, trial_id: int) -> None:
