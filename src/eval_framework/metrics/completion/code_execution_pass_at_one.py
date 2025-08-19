@@ -1,15 +1,35 @@
-import os
 import traceback
+from typing import Callable, Self
 
-from eval_framework.logger import logger
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, extract_context_metric
-from eval_framework.tasks.utils import BIG_CODE_BENCH_PACKAGE_MAPPING, execute_python_code_with_tests
+from eval_framework.tasks.utils import CallableSerializer, ExecutionResult, get_external_dependencies, run_python_code
 
 
 class CodeExecutionPassAtOneContext(BaseMetricContext):
+    run_env: str
     code_prompt: str
     test_code: str
+    benchmark_timeout: int = 60
+    snippet_merge_fn: str
+    output_parse_fn: str
+    package_downloads: dict[str, str | None]
+
+
+class RealtimeCodeExectionContext(CodeExecutionPassAtOneContext):
+    snippet_merge_fn: Callable[[str, str], str]
+    output_parse_fn: Callable[[str], ExecutionResult]
+
+    @classmethod
+    def from_context(cls, context: CodeExecutionPassAtOneContext) -> Self:
+        return cls(
+            code_prompt=context.code_prompt,
+            test_code=context.test_code,
+            benchmark_timeout=context.benchmark_timeout,
+            snippet_merge_fn=CallableSerializer.decode(context.snippet_merge_fn),
+            output_parse_fn=CallableSerializer.decode(context.output_parse_fn),
+            package_downloads=context.package_downloads,
+        )
 
 
 class CodeExecutionPassAtOne(BaseMetric[Completion]):
@@ -17,24 +37,20 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
 
     def __init__(self) -> None:
         self.k = 1
-        # Get Docker image from environment variable
-        self.python_image = os.environ.get("DOCKER_CODE_EXECUTION")
-        if not self.python_image:
-            raise ValueError(
-                "Environment variable 'DOCKER_CODE_EXECUTION' must be set with a pre-built Docker image name. "
-                "You can build the Docker image from the Dockerfile_codebench available in the repository's "
-                "home directory."
-            )
+        self.serializer = CallableSerializer()
 
     def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
-        context = extract_context_metric(response, CodeExecutionPassAtOneContext)
+        try:
+            context = extract_context_metric(response, CodeExecutionPassAtOneContext)
+            parsed_context = RealtimeCodeExectionContext.from_context(context)
+        except Exception as e:
+            raise Exception(f"Failed to rebuild parsing functions => {e}")
 
         n = 1  # we only support N=1 at the moment
         try:
-            c, output = self._count_correct_samples(response.completion, context.test_code)
+            c, output = self._count_correct_samples(response.completion, parsed_context)
         except Exception as e:
             error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=error)]
@@ -50,11 +66,14 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
             )
         ]
 
-    def _count_correct_samples(self, completion: str, test_code: str) -> tuple[int, str]:
-        result = execute_python_code_with_tests(
-            completion, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING, image=self.python_image
+    def _count_correct_samples(self, completion: str, context: RealtimeCodeExectionContext) -> tuple[int, str]:
+        combined_code = context.snippet_merge_fn(completion, context.test_code)
+        packages = get_external_dependencies(combined_code, context.package_downloads)
+        # Run the combined code in the sandbox
+        output = run_python_code(
+            combined_code, image=context.run_env, timeout=context.benchmark_timeout, packages=packages
         )
-        logger.info(f"Output of code execution: {result.output}")
+        result = context.output_parse_fn(output)
         return (1 if result.success else 0), result.output
 
 

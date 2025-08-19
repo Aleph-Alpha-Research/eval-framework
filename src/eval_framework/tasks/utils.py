@@ -1,11 +1,13 @@
+import base64
 import logging
 import os
 import random
 import re
 import string
 from pathlib import Path
-from typing import Literal, NamedTuple
+from typing import Literal, NamedTuple, Callable, Any
 
+import dill
 import numpy as np
 from llm_sandbox import SandboxSession
 
@@ -63,32 +65,20 @@ class ExecutionResult(NamedTuple):
     output: str
 
 
-def execute_python_code_with_tests(
-    code: str, test_code: str, package_mapping: dict[str, str | None], image: str | None = None, timeout: int = 60
-) -> ExecutionResult:
-    """
-    Executes the given code with test cases in a sandboxed environment.
+class CallableSerializer:
+    @staticmethod
+    def encode(fn: Callable[..., Any]) -> str:
+        try:
+            return base64.b64encode(dill.dumps(fn)).decode("utf-8")
+        except:
+            raise
 
-    :param code: The code to be tested.
-    :param test_code: The test cases to run against the code.
-    :param package_mapping: Mapping of package names to install commands.
-    :param image: Docker image to use.
-    :param timeout: Timeout for the execution in seconds.
-    :return: An ExecutionResult named tuple with success status and output or errors.
-    """
-    # Add unittest.main() if not present (note that without "if" sometimes it just reports "Ran 0 tests" errorneously).
-    if "unittest.main(" not in test_code:
-        test_code += "\n\nif __name__ == '__main__':\n  unittest.main()"
-
-    # Combine the implementation code and test code
-    combined_code = code + "\n\n" + test_code
-    packages = get_external_dependencies(combined_code, package_mapping)
-
-    # Run the combined code in the sandbox
-    output = run_python_code(combined_code, image=image, timeout=timeout, packages=packages)
-
-    # Parse the output to determine success
-    return _parse_unittest_output(output)
+    @staticmethod
+    def decode(fn: str) -> Callable[..., Any]:
+        try:
+            return dill.loads(base64.b64decode(fn.encode("utf-8")))
+        except:
+            raise
 
 
 def _parse_unittest_output(output: str) -> ExecutionResult:
