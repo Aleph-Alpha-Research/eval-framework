@@ -146,6 +146,7 @@ class DeterminedContext(EvalContext):
             judge_model_args=self.hparams.task_args.judge_model_args or self.judge_model_args,
             hf_upload_dir=self.hparams.hf_upload_dir or self.hf_upload_dir,
             hf_upload_repo=self.hparams.hf_upload_repo or self.hf_upload_repo,
+            wandb_project=self.hparams.wandb_project or self.wandb_project,
             batch_size=self.hparams.task_args.batch_size or self.batch_size,
             description=self.hparams.description or self.description,
         )
