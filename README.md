@@ -209,4 +209,14 @@ If you use Eval-Framework in your research, please cite:
 
 This project is licensed under the [Apache License 2.0](LICENSE).
 
+<br><br>
 ---
+
+This project has received funding from the European Union’s Digital Europe Programme under grant agreement No. 101195233 (OpenEuroLLM).
+
+The contents of this publication are the sole responsibility of the OpenEuroLLM consortium and do not necessarily reflect the opinion of the European Union.
+
+<p align="center">
+  <img src="docs/OELLM_1.png" alt="OELLM 1" width="100" style="margin-right: 50px;"/>
+  <img src="docs/OELLM_2.png" alt="OELLM 2" width="350"/>
+</p>
