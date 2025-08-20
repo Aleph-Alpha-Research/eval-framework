@@ -163,6 +163,6 @@ def _wandb_safe_init(**kwargs: Any) -> wandb.Run:
         else:
             print("wandb login detected. Using online mode.")
     except Exception as e:
-        print(f"wandb login check failed: {e}. Using offline mode.")
-        kwargs["mode"] = "offline"
+        print(f"wandb login check failed: {e}. Disabling wandb logging.")
+        kwargs["mode"] = "disabled"
     return wandb.init(**kwargs)
