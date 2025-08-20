@@ -147,7 +147,7 @@ def _configure_logging(output_dir: Path) -> None:
         root_logger.setLevel(logging.INFO)
 
 
-def _wandb_safe_init(**kwargs) -> wandb.Run:
+def _wandb_safe_init(**kwargs: Any) -> wandb.Run:
     """
     Checks to see if a WandB API key is found. If not, wandb starts in offline mode.
     """

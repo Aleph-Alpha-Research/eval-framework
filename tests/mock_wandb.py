@@ -72,7 +72,7 @@ class MockWandb:
     def init(self, **kwargs: Unpack[InitKwargs]) -> MockWandbRun:
         # get the intersection between initkwargs and runinitkwargs.
         # some are used in the actual init and others are generated. we just need the intersection for tests.
-        run_kwargs = RunInitKwargs(**{k: v for k, v in kwargs.items() if k in RunInitKwargs.__annotations__})
+        run_kwargs: dict[str, Any] = {k: v for k, v in kwargs.items() if k in RunInitKwargs.__annotations__}
         self.run = MockWandbRun(**run_kwargs)
         return self.run
 
