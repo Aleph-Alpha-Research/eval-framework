@@ -54,10 +54,7 @@ def main(
 
     # take care of init after preemption handling. If we have a run
     # id from preemption, then we resume the original wandb run
-    wandb.init(
-        project=config.wandb_project,
-        id=preempted_wandb_run,
-    )
+    run = wandb.init(project=config.wandb_project, id=preempted_wandb_run, resume="allow")
 
     file_processor = ResultsFileProcessor(output_dir)
     response_generator = ResponseGenerator(llm, config, file_processor)
@@ -65,7 +62,8 @@ def main(
     if preempted:
         logger.info("Response generation was preempted")
         assert trial_id is not None
-        _save_preemption_data(config, trial_id, output_dir, wandb_run_id=wandb.run.id)
+        run.mark_preempting()
+        _save_preemption_data(config, trial_id, output_dir, wandb_run_id=run.id)
         return []
 
     if trial_id is not None:
