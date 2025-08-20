@@ -64,6 +64,7 @@ def main(
         assert trial_id is not None
         run.mark_preempting()
         _save_preemption_data(config, trial_id, output_dir, wandb_run_id=run.id)
+        wandb.finish(exit_code=1)
         return []
 
     if trial_id is not None:
