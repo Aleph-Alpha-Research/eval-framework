@@ -54,7 +54,7 @@ def main(
 
     # take care of init after preemption handling. If we have a run
     # id from preemption, then we resume the original wandb run
-    run = wandb.init(project=config.wandb_project, id=preempted_wandb_run, resume="allow")
+    run = _wandb_safe_init(project=config.wandb_project, id=preempted_wandb_run, resume="allow")
 
     file_processor = ResultsFileProcessor(output_dir)
     response_generator = ResponseGenerator(llm, config, file_processor)
@@ -145,3 +145,23 @@ def _configure_logging(output_dir: Path) -> None:
     # Set logging level if not already set
     if root_logger.level == logging.NOTSET:
         root_logger.setLevel(logging.INFO)
+
+
+def _wandb_safe_init(**kwargs) -> wandb.Run:
+    """
+    Checks to see if a WandB API key is found. If not, wandb starts in offline mode.
+    """
+    try:
+        api_key = wandb.api.api_key
+        if api_key is None:
+            print(
+                """No wandb API key found. Using offline mode.
+                If you have a WandB account set the environment variable 'WANDB_API_KEY'"""
+            )
+            kwargs["mode"] = "offline"
+        else:
+            print("wandb login detected. Using online mode.")
+    except Exception as e:
+        print(f"wandb login check failed: {e}. Using offline mode.")
+        kwargs["mode"] = "offline"
+    return wandb.init(**kwargs)
