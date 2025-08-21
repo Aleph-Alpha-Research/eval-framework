@@ -3,7 +3,7 @@ import re
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Literal, overload
+from typing import Any, Literal, overload
 
 from pydantic import BaseModel, Field, field_serializer, field_validator
 from typing_extensions import override
@@ -289,58 +289,43 @@ class Llama3Formatter(BaseFormatter):
     strip_content = True  # stripping content to ensure consistency with HF chat template formatter
 
 
-class Qwen3Formatter(BaseFormatter):
-    template = ChatTemplate(
-        begin_of_text="",
-        end_of_text="<|endoftext|>",
-        begin_system_prompt="<|im_start|>system\n",
-        system_prompt="",
-        end_system_prompt="<|im_end|>\n",
-        begin_assistant_id="<|im_start|>assistant\n",
-        end_assistant_id="<|im_end|>\n",
-        begin_user_id="<|im_start|>user\n",
-        end_user_id="<|im_end|>\n",
-    )
-    never_strip = True
-
-    def _format_message(self, message: Message, is_last: bool, output_mode: Literal["string", "list"]) -> str:
-        result = super()._format_message(message, is_last, output_mode)
-        if message.role == Role.USER and is_last and output_mode == "string":
-            result = f"{result}<think>\n\n</think>\n\n"
-        elif message.role == Role.ASSISTANT and is_last and output_mode == "string":
-            result = (
-                f"<think>\n\n</think>\n\n{result}{self.template.end_assistant_id}"
-                f"{self.template.begin_assistant_id}<think>\n\n</think>\n\n"
-            )
-        return result
-
-
 class HFFormatter(BaseFormatter):
-    def __init__(self, hf_llm_name: str) -> None:
+    def __init__(self, hf_llm_name: str, chat_template_kwargs: dict[str, Any] | None = None) -> None:
+        super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained(hf_llm_name)
-        assert self.tokenizer.chat_template is not None, "Chat template is not available for this HF model."
+        self.chat_template_kwargs = chat_template_kwargs or {}
+
+        if self.tokenizer.chat_template is None:
+            raise ValueError(f"Chat template is not available for HF model: {hf_llm_name}")
+
+    def _to_hf_message(self, message: Message) -> dict[str, str]:
+        if message.role is None:
+            raise ValueError("Message role cannot be None")
+        return {"role": message.role.value, "content": message.content}
 
     @override
     def format(  # type: ignore[override]
         self, messages: Sequence[Message], output_mode: Literal["string", "list"] = "string"
     ) -> str:
-        hf_chat = [{"role": m.role.value, "content": m.content} for m in messages if m.role is not None] or ValueError(
-            "Message role cannot be None"
-        )
+        hf_chat = [self._to_hf_message(message) for message in messages]
+
+        template_kwargs = {"tokenize": False, **self.chat_template_kwargs}
+
+        # output_mode encodes whether or not treat a trailing assistant message
+        # as a pre-fill. Training uses 'list' mode, eval uses 'string' mode.
+        # The naming is legacy, hence I wrote this comment to clarify. Both
+        # code paths return strings.
         if output_mode == "string":
-            # if the last message is an assistant message, don't add <|eot_id|> but continue the message
-            # (i.e., cueing the assistant within the eval framework)
-            does_prefilling = messages[-1].role == Role.ASSISTANT
-            return self.tokenizer.apply_chat_template(
-                hf_chat,
-                tokenize=False,
-                add_generation_prompt=not does_prefilling,
-                continue_final_message=does_prefilling,
+            # if the last message is an assistant message, treat it as a pre-fill (i.e., assistant cue in evals)
+            is_prefill = messages[-1].role == Role.ASSISTANT
+            template_kwargs.update(
+                {
+                    "add_generation_prompt": not is_prefill,
+                    "continue_final_message": is_prefill,
+                }
             )
-        else:  # output_mode == "list": a little confusing here, because it always returns a string, but only used for tests, so ok
-            return self.tokenizer.apply_chat_template(
-                hf_chat, tokenize=False
-            )  # will apply default values for add_generation_prompt and continue_final_message (both False)
+
+        return self.tokenizer.apply_chat_template(hf_chat, **template_kwargs)
 
 
 class ReasoningFormatter(BaseFormatter):
@@ -538,46 +523,6 @@ class ReasoningFormatter(BaseFormatter):
                 return self._parse_output(output_str), None
             case _:
                 raise ValueError("Invalid status")
-
-
-class Qwen3ReasoningFormatter(ReasoningFormatter):
-    template: ReasoningTemplate
-    never_strip = True
-    remove_previous_thoughts = True
-
-    def __init__(self, base_formatter: type[BaseFormatter] = Qwen3Formatter, disable_thinking: bool = False) -> None:
-        if not issubclass(base_formatter, Qwen3Formatter):
-            raise ValueError("Qwen3ReasoningFormatter requires Qwen3Formatter as base_formatter")
-
-        self.base_formatter = base_formatter()
-        self.disable_thinking = disable_thinking
-        self.template = ReasoningTemplate(
-            **asdict(base_formatter.template),
-            begin_thought_id="<think>\n",
-            end_thought_id="\n</think>\n\n",
-            begin_solution_id="",
-            end_solution_id="",
-            begin_answer_id="",
-            end_answer_id="",
-        )
-
-    def _format_message(self, message: Message, is_last: bool, output_mode: Literal["string", "list"]) -> str:
-        if self.disable_thinking:
-            return self.base_formatter._format_message(message, is_last, output_mode)
-        else:
-            result = super()._format_message(message, is_last, output_mode)
-            if message.role == Role.ASSISTANT and is_last and output_mode == "string":
-                result = (
-                    f"{self.template.begin_thought_id}{self.template.end_thought_id}{result}"
-                    f"{self.template.end_assistant_id}{self.template.begin_assistant_id}{self.template.begin_thought_id}"
-                )
-            return result
-
-    def _format_assistant(self, message: Message, is_last: bool, output_mode: Literal["string", "list"]) -> str:
-        if self.disable_thinking:
-            return self.base_formatter._format_assistant(message, is_last, output_mode)
-        else:
-            return super()._format_assistant(message, is_last, output_mode)
 
 
 def get_formatter(llm_name: str) -> BaseFormatter:
