@@ -2,11 +2,61 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths-ignore:
+      - '*.detignore'
+      - '**/*.detignore'
+      - '*.example'
+      - '**/*.example'
+      - '*.json'
+      - '**/*.json'
+      - '*.md'
+      - '**/*.md'
+      - '*.png'
+      - '**/*.png'
+      - '*.sample'
+      - '**/*.sample'
+      - '*.TAG'
+      - '**/*.TAG'
+      # Ignore YAML/YML, but NOT workflow files
+      - '*.yaml'
+      - '**/*.yaml'
+      - '*.yml'
+      - '**/*.yml'
+      - '!/.github/workflows/**'   # keep workflows triggering
+      - 'docs/**'
+      # - 'scripts/**'             # uncomment only if you truly want to skip scripts
+      - 'LICENSE'
+      - '.gitignore'
+      - 'changelog/**'
   pull_request:
-    branches:
-      - main
+    branches: [main]
+    paths-ignore:
+      - '*.detignore'
+      - '**/*.detignore'
+      - '*.example'
+      - '**/*.example'
+      - '*.json'
+      - '**/*.json'
+      - '*.md'
+      - '**/*.md'
+      - '*.png'
+      - '**/*.png'
+      - '*.sample'
+      - '**/*.sample'
+      - '*.TAG'
+      - '**/*.TAG'
+      # Ignore YAML/YML, but NOT workflow files
+      - '*.yaml'
+      - '**/*.yaml'
+      - '*.yml'
+      - '**/*.yml'
+      - '!/.github/workflows/**'
+      - 'docs/**'
+      # - 'scripts/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - 'changelog/**'
 
 permissions:
   contents: read

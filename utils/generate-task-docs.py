@@ -7,7 +7,7 @@ import tqdm
 
 from eval_framework.task_loader import load_extra_tasks
 from eval_framework.task_names import TaskName
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Qwen3ReasoningFormatter
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 
 OUTPUT_DOCS_DIRECTORY = "docs/tasks"
 
@@ -191,9 +191,7 @@ if __name__ == "__main__":
     print(f"Found {len(filtered_tasks)} tasks to process: {', '.join([task_name for task_name in filtered_tasks])}")
 
     # List the formatters to use
-    supported_formatters = {
-        f.__class__.__name__: f for f in [ConcatFormatter(), Llama3Formatter(), Qwen3ReasoningFormatter()]
-    }
+    supported_formatters = {f.__class__.__name__: f for f in [ConcatFormatter(), Llama3Formatter()]}
     formatters = []
     for f in args.formatter:
         if f in supported_formatters:

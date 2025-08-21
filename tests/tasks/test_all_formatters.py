@@ -3,7 +3,7 @@ from typing import Type
 import pytest
 
 from eval_framework.task_names import TaskName
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Qwen3ReasoningFormatter
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.utils import DatasetPatcher, assert_hash_string
 
 # Tasks to skip temporarily (due to known issues).
@@ -96,7 +96,7 @@ SPECIAL_ARGS = {
 }
 
 
-@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter, Qwen3ReasoningFormatter])
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
 @pytest.mark.parametrize("task_name", list(TaskName))
 def test_all_tasks_formatter(task_name: TaskName, formatter_cls: Type["BaseFormatter"]) -> None:
     """
