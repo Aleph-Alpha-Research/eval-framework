@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Literal, TypedDict, Unpack
 
 import wandb
 
@@ -15,6 +15,17 @@ from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.utils.logging_config import get_logger, setup_logging
 
 logger = get_logger(__name__)
+
+
+class WandbInitKwargs(TypedDict, total=False):
+    entity: str | None
+    project: str | None
+    group: str | None
+    job_type: str | None
+    id: str | None
+    config: dict[str, Any] | str | None
+    mode: Literal["online", "offline", "disabled"] | None
+    resume: bool | Literal["allow", "never", "must", "auto"] | None
 
 
 def main(
@@ -155,7 +166,7 @@ def _configure_logging(output_dir: Path) -> None:
         root_logger.setLevel(logging.INFO)
 
 
-def _wandb_safe_init(**kwargs) -> wandb.Run:
+def _wandb_safe_init(**kwargs: Unpack[WandbInitKwargs]) -> wandb.Run:
     """
     Checks to see if a WandB API key is found. If not, wandb starts in offline mode.
     """
