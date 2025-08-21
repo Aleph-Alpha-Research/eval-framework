@@ -49,6 +49,7 @@ class Hyperparameters(BaseModel):
     hf_upload_dir: str | None = None
     hf_upload_repo: str | None = None
     wandb_project: str | None = None
+    wandb_entity: str | None = None
     description: str | None = None
     task_args: TaskArgs
     llm_args: dict[str, Any] | None = {}
@@ -147,6 +148,7 @@ class DeterminedContext(EvalContext):
             hf_upload_dir=self.hparams.hf_upload_dir or self.hf_upload_dir,
             hf_upload_repo=self.hparams.hf_upload_repo or self.hf_upload_repo,
             wandb_project=self.hparams.wandb_project or self.wandb_project,
+            wandb_entity=self.hparams.wandb_entity or self.wandb_entity,
             batch_size=self.hparams.task_args.batch_size or self.batch_size,
             description=self.hparams.description or self.description,
         )

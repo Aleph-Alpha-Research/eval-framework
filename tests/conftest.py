@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Sequence
+from typing import Callable, List, Sequence
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -22,7 +22,7 @@ from eval_framework.llm.models import (
 )
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
-from tests.mock_wandb import MockWandb, MockWandbRun
+from tests.mock_wandb import MockWandb
 
 
 class MockLLM(BaseLLM):
@@ -102,7 +102,7 @@ def should_preempt_callable() -> Callable[[], bool]:
 
 
 @pytest.fixture(autouse=True)
-def mock_wandb(monkeypatch: Any) -> MockWandb:
+def mock_wandb(monkeypatch):
     """Automatically mock wandb for all tests."""
     mock_wandb_instance = MockWandb()
     monkeypatch.setattr("wandb.init", mock_wandb_instance.init)
@@ -113,6 +113,6 @@ def mock_wandb(monkeypatch: Any) -> MockWandb:
 
 
 @pytest.fixture
-def wandb_run(mock_wandb: MockWandb) -> MockWandbRun:
+def wandb_run(mock_wandb):
     """Provide a wandb run for tests that need to verify logging."""
     return mock_wandb.init(project="test-project")

@@ -54,36 +54,43 @@ def main(
 
     # take care of init after preemption handling. If we have a run
     # id from preemption, then we resume the original wandb run
-    run = _wandb_safe_init(project=config.wandb_project, id=preempted_wandb_run, resume="allow")
+    with _wandb_safe_init(
+        entity=config.wandb_entity,
+        project=config.wandb_project,
+        group=config.llm_class.__name__,
+        job_type=config.task_name.name,
+        id=preempted_wandb_run,
+        config=config.as_dict(),
+        resume="allow",
+    ) as run:
+        file_processor = ResultsFileProcessor(output_dir)
+        response_generator = ResponseGenerator(llm, config, file_processor)
+        _, preempted = response_generator.generate(should_preempt_callable)
+        if preempted:
+            logger.info("Response generation was preempted")
+            assert trial_id is not None
+            run.mark_preempting()
+            _save_preemption_data(config, trial_id, output_dir, wandb_run_id=run.id)
+            wandb.finish(exit_code=1)
+            return []
 
-    file_processor = ResultsFileProcessor(output_dir)
-    response_generator = ResponseGenerator(llm, config, file_processor)
-    _, preempted = response_generator.generate(should_preempt_callable)
-    if preempted:
-        logger.info("Response generation was preempted")
-        assert trial_id is not None
-        run.mark_preempting()
-        _save_preemption_data(config, trial_id, output_dir, wandb_run_id=run.id)
-        wandb.finish(exit_code=1)
-        return []
+        if trial_id is not None:
+            _delete_preemption_file(config, trial_id)
 
-    if trial_id is not None:
-        _delete_preemption_file(config, trial_id)
+        evaluator = EvaluationGenerator(config, file_processor)
+        results = evaluator.run_eval()
 
-    evaluator = EvaluationGenerator(config, file_processor)
-    results = evaluator.run_eval()
-
-    if config.hf_upload_dir:
-        hf_processor = HFProcessor(config, output_dir)
-        status = hf_processor.upload_responses_to_HF()
-        if not status:
-            status_message = "*** Warning: Result upload to HF failed ***"
+        if config.hf_upload_dir:
+            hf_processor = HFProcessor(config, output_dir)
+            status = hf_processor.upload_responses_to_HF()
+            if not status:
+                status_message = "*** Warning: Result upload to HF failed ***"
+            else:
+                status_message = "Successfully uploaded results to HuggingFace"
         else:
-            status_message = "Successfully uploaded results to HuggingFace"
-    else:
-        status_message = f"{RED}[ Results not persisted in a HuggingFace repo ------- ]{RESET}"
+            status_message = f"{RED}[ Results not persisted in a HuggingFace repo ------- ]{RESET}"
 
-    logger.info(status_message)
+        logger.info(status_message)
 
     return results
 
@@ -148,7 +155,7 @@ def _configure_logging(output_dir: Path) -> None:
         root_logger.setLevel(logging.INFO)
 
 
-def _wandb_safe_init(**kwargs: Any) -> wandb.Run:
+def _wandb_safe_init(**kwargs) -> wandb.Run:
     """
     Checks to see if a WandB API key is found. If not, wandb starts in offline mode.
     """
@@ -163,6 +170,6 @@ def _wandb_safe_init(**kwargs: Any) -> wandb.Run:
         else:
             print("wandb login detected. Using online mode.")
     except Exception as e:
-        print(f"wandb login check failed: {e}. Disabling wandb logging.")
-        kwargs["mode"] = "disabled"
+        print(f"wandb login check failed: {e}. Using offline mode.")
+        kwargs["mode"] = "offline"
     return wandb.init(**kwargs)
