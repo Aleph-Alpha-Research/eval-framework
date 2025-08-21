@@ -104,7 +104,8 @@ class HFLLM(BaseLLM):
         for single_messages in messages:
             # format
             prompt = self._formatter.format(single_messages, output_mode="string")
-            inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
+            # add_special_tokens would add a second BOS token without explicitly setting it False
+            inputs = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False).to(self.device)
 
             prompt_token_count = len(inputs["input_ids"][0])
             pad_token_id = self.tokenizer.eos_token_id
