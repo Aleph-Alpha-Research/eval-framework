@@ -190,6 +190,8 @@ class ResponseGenerator:
                     ground_truth=sample.ground_truth,
                     prompt=raw_completion.prompt,
                     prompt_sequence_positions=raw_completion.prompt_sequence_positions,
+                    prompt_concat=raw_completion.prompt_concat,
+                    prompt_concat_sequence_positions=raw_completion.prompt_concat_sequence_positions,
                     messages=messages,
                     completion=completion,
                     raw_completion=raw_completion.completion,
@@ -219,6 +221,8 @@ class ResponseGenerator:
                 RawLoglikelihood(
                     prompt="",
                     prompt_sequence_positions=0,
+                    prompt_concat="",
+                    prompt_concat_sequence_positions=0,
                     loglikelihoods={},
                     loglikelihoods_sequence_positions={},
                     raw_loglikelihood_error=Error(
@@ -239,6 +243,8 @@ class ResponseGenerator:
                     ground_truth=sample.ground_truth,
                     prompt=raw_loglikelihood.prompt,
                     prompt_sequence_positions=raw_loglikelihood.prompt_sequence_positions,
+                    prompt_concat=raw_loglikelihood.prompt_concat,
+                    prompt_concat_sequence_positions=raw_loglikelihood.prompt_concat_sequence_positions,
                     loglikelihoods=raw_loglikelihood.loglikelihoods,
                     loglikelihoods_sequence_positions=raw_loglikelihood.loglikelihoods_sequence_positions,
                     error=raw_loglikelihood.raw_loglikelihood_error,
