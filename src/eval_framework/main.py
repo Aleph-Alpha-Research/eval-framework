@@ -52,19 +52,19 @@ def main(
     logger.info(f"Output directory: {output_dir}")
     assert output_dir is not None
 
+    file_processor = ResultsFileProcessor(output_dir)
+    response_generator = ResponseGenerator(llm, config, file_processor)
     # take care of init after preemption handling. If we have a run
     # id from preemption, then we resume the original wandb run
     with _wandb_safe_init(
         entity=config.wandb_entity,
         project=config.wandb_project,
-        group=config.llm_class.__name__,
+        group=llm.name,
         job_type=config.task_name.name,
         id=preempted_wandb_run,
-        config=config.as_dict(),
+        config=response_generator._get_metadata(),
         resume="allow",
     ) as run:
-        file_processor = ResultsFileProcessor(output_dir)
-        response_generator = ResponseGenerator(llm, config, file_processor)
         _, preempted = response_generator.generate(should_preempt_callable)
         if preempted:
             logger.info("Response generation was preempted")
@@ -73,7 +73,7 @@ def main(
             _save_preemption_data(config, trial_id, output_dir, wandb_run_id=run.id)
             wandb.finish(exit_code=1)
             return []
-
+        # update config from response generator with get metadata
         if trial_id is not None:
             _delete_preemption_file(config, trial_id)
 
