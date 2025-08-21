@@ -1,6 +1,7 @@
 import gc
+import logging
 import time
-from typing import Any, List, Type, TypeVar
+from typing import Any, List, Sequence, Type, TypeVar
 from unittest.mock import Mock, patch
 
 import pytest
@@ -308,16 +309,109 @@ def test_vllm_checkpoint_name_formatting() -> None:
 
 
 @pytest.mark.vllm
-@pytest.mark.gpu
-def test_correct_sampling_params() -> None:
-    vllm_model = safe_vllm_setup(model_fn=Qwen3_0_6B_VLLM, kwargs={"max_model_len": 30})
-    samplingParams = vllm_model._resolve_sampling_params(max_tokens=30, stop_sequences=[], temperature=0.0)
+def test_resolve_params_overrides_temperature() -> None:
+    sampling_params = SamplingParams(temperature=0.6, top_p=0.9)
 
-    assert samplingParams.temperature == 0.6
-    assert samplingParams.top_p == 0.95
-    assert samplingParams.top_k == 20
-    assert samplingParams.min_p == 0
-    assert samplingParams.max_tokens == 30
+    result = VLLMModel._resolve_sampling_params(sampling_params, 50, ["STOP"], 0.8)
+
+    assert result.max_tokens == 50
+    assert result.stop == ["STOP"]
+    assert result.temperature == 0.8
+    assert result is sampling_params
+
+
+@pytest.mark.vllm
+def test_resolve_params_uses_default_temperature_when_none() -> None:
+    sampling_params = SamplingParams(temperature=0.7, max_tokens=100)
+
+    result = VLLMModel._resolve_sampling_params(sampling_params, 25, ["STOP"], None)
+
+    assert result.temperature == 0.7
+    assert result.max_tokens == 25
+    assert result.stop == ["STOP"]
+
+
+@pytest.mark.vllm
+def test_resolve_params_logs_temperature_override(caplog: pytest.LogCaptureFixture) -> None:
+    sampling_params = SamplingParams(temperature=0.5)
+
+    with caplog.at_level(logging.WARNING):
+        result = VLLMModel._resolve_sampling_params(sampling_params, 15, None, 0.9)
+
+    assert result.temperature == 0.9
+    assert "Overriding sampling params temperature 0.5 with custom value 0.9" in caplog.text
+
+
+@pytest.mark.vllm
+def test_resolve_params_always_updates_tokens_and_stop() -> None:
+    sampling_params = SamplingParams(temperature=0.8, max_tokens=50)
+
+    result = VLLMModel._resolve_sampling_params(sampling_params, 100, ["END"], 1.0)
+
+    assert result.max_tokens == 100
+    assert result.stop == ["END"]
+    assert result.temperature == 1.0
+    assert result is sampling_params
+
+
+@pytest.mark.vllm
+def test_resolve_params_logs_default_temperature_usage(caplog: pytest.LogCaptureFixture) -> None:
+    sampling_params = SamplingParams(temperature=0.3)
+
+    with caplog.at_level(logging.INFO):
+        result = VLLMModel._resolve_sampling_params(sampling_params, 50, None, None)
+
+    assert result.temperature == 0.3
+    assert "Using sampling params temperature value: 0.3" in caplog.text
+    assert "as no custom temperature value was provided" in caplog.text
+
+
+@pytest.mark.vllm
+@pytest.mark.gpu
+def test_dict_sampling_params_conversion() -> None:
+    params_dict = {"temperature": 0.8, "top_p": 0.95, "max_tokens": 150}
+    model = safe_vllm_setup(Qwen3_0_6B_VLLM, {"max_model_len": 30, "sampling_params": params_dict})
+
+    assert model.sampling_params.temperature == 0.8
+    assert model.sampling_params.top_p == 0.95
+    assert model.sampling_params.max_tokens == 150
+
+
+@pytest.mark.vllm
+@pytest.mark.gpu
+def test_sampling_params_object_unchanged() -> None:
+    params_obj = SamplingParams(temperature=0.5, max_tokens=75)
+    model = safe_vllm_setup(Qwen3_0_6B_VLLM, {"max_model_len": 30, "sampling_params": params_obj})
+
+    assert model.sampling_params is params_obj
+
+
+@pytest.mark.vllm
+@pytest.mark.gpu
+def test_dict_overrides_model_defaults() -> None:
+    model_with_defaults = safe_vllm_setup(Qwen3_0_6B_VLLM, {"max_model_len": 30})
+    model_with_dict = safe_vllm_setup(Qwen3_0_6B_VLLM, {"max_model_len": 30, "sampling_params": {"temperature": 0.1}})
+
+    assert model_with_dict.sampling_params.temperature == 0.1
+    assert model_with_dict.sampling_params.temperature != model_with_defaults.sampling_params.temperature
+
+
+@pytest.mark.vllm
+@pytest.mark.gpu
+def test_invalid_sampling_param_raises() -> None:
+    with pytest.raises(TypeError):
+        safe_vllm_setup(Qwen3_0_6B_VLLM, {"max_model_len": 30, "sampling_params": {"invalid_param": "value"}})
+
+
+@pytest.mark.vllm
+@pytest.mark.gpu
+def test_mistral_inherits_dict_conversion() -> None:
+    class TestMistralVLLM(MistralVLLM):
+        LLM_NAME = "Qwen/Qwen3-0.6B"
+
+    model = safe_vllm_setup(TestMistralVLLM, {"max_model_len": 30, "sampling_params": {"temperature": 0.9}})
+
+    assert model.sampling_params.temperature == 0.9
 
 
 @pytest.mark.vllm
@@ -328,7 +422,6 @@ def test_correct_sampling_params() -> None:
         (Qwen3_0_6B_VLLM, {"max_model_len": 32, "dtype": "bfloat16", "tensor_parallel_size": 2}),
     ],
 )
-@pytest.mark.skipif(torch.cuda.device_count() < 2, reason="Requires >=2 GPUs for tensor_parallel_size=2")
 def test_logprobs_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
     """
     Test that batched logprobs inference produces identical results to single-sample inference.
@@ -473,6 +566,93 @@ def test_logprobs_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
         )
         assert single_result.raw_loglikelihood_error == batched_result.raw_loglikelihood_error, (
             f"Sample {i}: Error states don't match"
+        )
+
+
+@pytest.mark.vllm
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    "model_fn, kwargs",
+    [
+        (
+            Qwen3_0_6B_VLLM,
+            {
+                "max_model_len": 1024,
+                "tensor_parallel_size": 2,
+                "sampling_params": SamplingParams(max_tokens=25, temperature=0.0, stop=["\n"]),
+            },
+        ),
+    ],
+)
+def test_completions_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
+    """
+    Test that batched completion inference produces identical results to single-message inference.
+    """
+    model = safe_vllm_setup(model_fn, kwargs)
+
+    messages_1: Sequence[Message] = [
+        Message(
+            role=Role.USER,
+            content="What is the capital of France? Provide a brief one-sentence answer.",
+        ),
+    ]
+
+    messages_2: Sequence[Message] = [
+        Message(
+            role=Role.USER,
+            content="Explain photosynthesis in one sentence.",
+        ),
+    ]
+
+    messages_3: Sequence[Message] = [
+        Message(
+            role=Role.USER,
+            content="What is 2 + 2? Answer with just the number.",
+        ),
+    ]
+
+    test_message_sequences = [messages_1, messages_2, messages_3]
+
+    max_tokens = 25
+    temperature = 0.0
+    stop_sequences = ["\n"]
+
+    single_results: List[RawCompletion] = []
+    for messages in test_message_sequences:
+        result = model.generate_from_messages(
+            messages=[messages], max_tokens=max_tokens, temperature=temperature, stop_sequences=stop_sequences
+        )
+        single_results.extend(result)
+
+    del model
+    clean_up()
+
+    kwargs["batch_size"] = 10
+    model = safe_vllm_setup(model_fn, kwargs)
+
+    batched_results: List[RawCompletion] = model.generate_from_messages(
+        messages=test_message_sequences,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        stop_sequences=stop_sequences,
+    )
+
+    assert len(single_results) == len(batched_results) == 3
+
+    for i, (single_result, batched_result) in enumerate(zip(single_results, batched_results)):
+        assert single_result.prompt == batched_result.prompt, f"Message {i}: Prompts don't match"
+        assert single_result.prompt_sequence_positions == batched_result.prompt_sequence_positions, (
+            f"Message {i}: Prompt sequence positions don't match"
+        )
+        assert single_result.completion == batched_result.completion, (
+            f"Message {i}: Completions don't match "
+            f"(single: '{single_result.completion}', batched: '{batched_result.completion}')"
+        )
+        assert single_result.completion_sequence_positions == batched_result.completion_sequence_positions, (
+            f"Message {i}: Completion sequence positions don't match"
+        )
+        assert single_result.raw_completion_error == batched_result.raw_completion_error, (
+            f"Message {i}: Error states don't match"
         )
 
 
