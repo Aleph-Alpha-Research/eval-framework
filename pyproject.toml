@@ -1,6 +1,6 @@
 [project]
 name = "eval-framework"
-version = "0.1.7"
+version = "0.1.8"
 description = "Evalulation Framework"
 readme = "README.md"
 dynamic = ["dependencies"]
@@ -120,7 +120,7 @@ filterwarnings = [
 eval_framework = "eval_framework.run:run"
 
 [tool.bumpversion]
-current_version = "0.1.7"
+current_version = "0.1.8"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
 serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
