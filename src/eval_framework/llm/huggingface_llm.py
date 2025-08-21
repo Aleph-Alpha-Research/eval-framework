@@ -195,10 +195,10 @@ class HFLLM(BaseLLM):
             error: Error | None = None
 
             for choice in sample.possible_completions or []:
-                num_choice_tokens = len(self.tokenizer.encode(choice))
+                num_choice_tokens = len(self.tokenizer.encode(choice, add_special_tokens=False))
                 prompt_and_choice = f"{prompt}{choice}"
 
-                total_tokens_count = len(self.tokenizer.encode(prompt_and_choice))
+                total_tokens_count = len(self.tokenizer.encode(prompt_and_choice, add_special_tokens=False))
 
                 min_max_tokens = min(filter(None, [self.SEQ_LENGTH, self.seq_length]))
 
@@ -223,7 +223,7 @@ class HFLLM(BaseLLM):
             results.append(
                 RawLoglikelihood(
                     prompt=prompt,
-                    prompt_sequence_positions=len(self.tokenizer.encode(prompt)),
+                    prompt_sequence_positions=len(self.tokenizer.encode(prompt, add_special_tokens=False)),
                     loglikelihoods=choices_log_probs,
                     loglikelihoods_sequence_positions=choices_log_probs_sequence_positions,
                     raw_loglikelihood_error=error,
@@ -234,7 +234,7 @@ class HFLLM(BaseLLM):
     @redis_cache(version_id="v8")
     def _model_log_probs(self, prompt: str, num_choice_tokens: int) -> float:
         with torch.no_grad():
-            inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
+            inputs = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False).to(self.device)
             outputs = self.model(**inputs, labels=inputs["input_ids"])
             logits = outputs.logits[:, :-1, :].squeeze(0)
             target_ids = inputs["input_ids"][:, 1:].squeeze(0)
