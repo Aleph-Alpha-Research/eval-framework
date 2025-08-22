@@ -52,6 +52,13 @@ class MockWandbRun:
         self.logged_data: list[dict] = []  # Store all logged data for testing
         self._finished: bool = False
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.finish()
+        return False
+
     def log(self, data: dict, step: int | None = None, commit: bool = True) -> None:
         if not self._finished:
             log_entry = {"data": data, "step": step, "commit": commit}
