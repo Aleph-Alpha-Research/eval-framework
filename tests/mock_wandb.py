@@ -53,7 +53,7 @@ class MockWandbRun:
         self.project: str = kwargs.get("project") or ""
         self.logged_data: list[dict] = []  # Store all logged data for testing
         self._finished: bool = False
-        self.id: str = kwargs.get("id") or "mock_run_id"
+        self.id: str = str(kwargs.get("id") or "mock_run_id")
 
     def __enter__(self) -> "MockWandbRun":
         return self
