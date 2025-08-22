@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 import wandb
 
@@ -156,15 +156,13 @@ def _configure_logging(output_dir: Path) -> None:
         root_logger.setLevel(logging.INFO)
 
 
-def _wandb_mode(project: str | None) -> str:
+def _wandb_mode(project: str | None) -> Literal["online", "disabled"] | None:
     """
     Checks to see if a WandB API key is found. If not, wandb starts in offline mode.
     """
-    mode = "online"
-
     if project is None:
         logger.warning("No WandB project specified, disabling logging.")
-        mode = "disabled"
+        return "disabled"
     else:
         try:
             api_key = wandb.api.api_key
@@ -173,11 +171,10 @@ def _wandb_mode(project: str | None) -> str:
                     """No wandb API key found. Disabling Wandb logging.
                     If you have a WandB account set the environment variable 'WANDB_API_KEY'"""
                 )
-                mode = "disabled"
+                return "disabled"
             else:
                 logger.info("wandb login detected. Using online mode.")
         except Exception as e:
             logger.warning(f"wandb login check failed: {e}. Disabling Wandb logging.")
-            mode = "disabled"
-
-    return mode
+            return "disabled"
+    return "online"

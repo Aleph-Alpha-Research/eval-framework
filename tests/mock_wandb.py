@@ -1,3 +1,5 @@
+import traceback
+from types import TracebackType
 from typing import Any, Dict, Literal, Optional, Sequence, TypedDict, Unpack
 
 from wandb import Settings
@@ -52,19 +54,29 @@ class MockWandbRun:
         self.logged_data: list[dict] = []  # Store all logged data for testing
         self._finished: bool = False
 
-    def __enter__(self):
+    def __enter__(self) -> "MockWandbRun":
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.finish()
-        return False
+    def __exit__(
+        self,
+        exc_type: type[BaseException],
+        exc_val: BaseException,
+        exc_tb: TracebackType,
+    ) -> bool:
+        exception_raised = exc_type is not None
+        if exception_raised:
+            traceback.print_exception(exc_type, exc_val, exc_tb)
+        exit_code = 1 if exception_raised else 0
+        self.finish(exit_code=exit_code)
+        return not exception_raised
 
     def log(self, data: dict, step: int | None = None, commit: bool = True) -> None:
         if not self._finished:
             log_entry = {"data": data, "step": step, "commit": commit}
             self.logged_data.append(log_entry)
 
-    def finish(self) -> None:
+    def finish(self, exit_code: int = 0) -> None:
+        self.exit_code = exit_code
         self._finished = True
 
     def get_logged_data(self) -> list[dict]:
@@ -90,6 +102,6 @@ class MockWandb:
     def login(self, key: str | None = None, **kwargs: Any) -> None:
         self._login_called = True
 
-    def finish(self) -> None:
+    def finish(self, exit_code: int = 0) -> None:
         if self.run:
-            self.run.finish()
+            self.run.finish(exit_code)
