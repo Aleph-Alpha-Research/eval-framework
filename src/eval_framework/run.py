@@ -153,7 +153,8 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         required=False,
-        help="The name of the Weights & Biases project to log runs to.",
+        help="The name of the Weights & Biases project to log runs to. "
+        "The environment variable WANDB_API_KEY must be set",
     )
     parser.add_argument(
         "--wandb-entity",

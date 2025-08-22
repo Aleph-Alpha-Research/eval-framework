@@ -84,11 +84,16 @@ def main(
 
         if config.hf_upload_dir:
             hf_processor = HFProcessor(config, output_dir)
-            status = hf_processor.upload_responses_to_HF()
+            status, hf_url = hf_processor.upload_responses_to_HF()
             if not status:
                 status_message = "*** Warning: Result upload to HF failed ***"
             else:
                 status_message = "Successfully uploaded results to HuggingFace"
+                if hf_url and run:
+                    try:
+                        run.notes = f"Results uploaded to HuggingFace: [{hf_url}]({hf_url})"
+                    except Exception as e:
+                        logger.warning(f"Failed to update wandb notes with HF URL: {e}")
         else:
             status_message = f"{RED}[ Results not persisted in a HuggingFace repo ------- ]{RESET}"
 
