@@ -1,11 +1,9 @@
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Generic, List, Optional, Protocol, Sequence, TypeVar, cast, override
+from typing import Any, Generic, Protocol, Sequence, TypeVar, cast, override
 
 import torch
-from template_formatting.formatter import BaseFormatter, HFFormatter, Message
-from template_formatting.mistral_formatter import MistralSerializer
 from vllm import LLM, SamplingParams
 from vllm.inputs.data import TokensPrompt
 from vllm.outputs import RequestOutput
@@ -16,6 +14,8 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors, redis_cache
+from template_formatting.formatter import BaseFormatter, HFFormatter, Message
+from template_formatting.mistral_formatter import MistralSerializer
 
 logger = logging.getLogger(__name__)
 
