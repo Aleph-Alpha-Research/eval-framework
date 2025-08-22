@@ -94,7 +94,8 @@ class DeterminedContext(EvalContext):
             "hf_upload_dir",
             "hf_upload_repo",
             "wandb_project",
-            "wandb_entitydescription",
+            "wandb_entity",
+            "description",
         ]:
             val_cli = getattr(self, name, None)
             val_hparams = getattr(self.hparams, name, None)
