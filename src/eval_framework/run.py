@@ -34,7 +34,7 @@ def parse_args() -> argparse.Namespace:
         "--models",
         type=Path,
         required=False,
-        default="src/eval_framework/llm/models.py",
+        default=Path(__file__).parent / "llm" / "models.py",
         help="The path to the Python module file containing model classes.",
     )
     parser.add_argument(
