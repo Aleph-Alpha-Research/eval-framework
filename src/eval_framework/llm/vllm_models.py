@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Generic, Protocol, Sequence, TypeVar, cast, override
+from typing import Any, Generic, Literal, Protocol, Sequence, TypeVar, cast, override
 
 import torch
 from vllm import LLM, SamplingParams
@@ -182,6 +182,12 @@ class VLLMModel(BaseLLM):
             self._tokenizer = VLLMTokenizer(target_mdl=self.LLM_NAME)
         return self._tokenizer
 
+    def _get_formatter_output_mode(self) -> Literal["string", "list"]:
+        """Determine the correct output mode for the formatter based on tokenizer type."""
+        if isinstance(self.tokenizer, MistralAdapter):
+            return "list"
+        return "string"
+
     @property
     def name(self) -> str:
         if self.checkpoint_name:
@@ -211,7 +217,8 @@ class VLLMModel(BaseLLM):
         sampling_params = self._resolve_sampling_params(self.sampling_params, max_tokens, stop_sequences, temperature)
 
         for i, single_messages in enumerate(messages):
-            prompt: str | list[Message] = self._formatter.format(single_messages)
+            output_mode = self._get_formatter_output_mode()
+            prompt: str | list[Message] = self._formatter.format(single_messages, output_mode=output_mode)
             prompt_obj: TokenizedContainer = self.tokenizer.encode_formatted_struct(prompt)
             prompt_token_count = len(prompt_obj.tokens)
 
@@ -301,7 +308,8 @@ class VLLMModel(BaseLLM):
         sample_choice_indices = []  # Maps batch index back to (sample_index, choice)
 
         for sample_idx, sample in enumerate(samples):
-            prompt: str | list[Message] = self._formatter.format(sample.messages)
+            output_mode = self._get_formatter_output_mode()
+            prompt: str | list[Message] = self._formatter.format(sample.messages, output_mode=output_mode)
             prompt_obj: TokenizedContainer = self.tokenizer.encode_formatted_struct(prompt)
 
             choices_log_probs: dict[str, float] = {}
