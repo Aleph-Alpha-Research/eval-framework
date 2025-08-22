@@ -53,6 +53,7 @@ class MockWandbRun:
         self.project: str = kwargs.get("project") or ""
         self.logged_data: list[dict] = []  # Store all logged data for testing
         self._finished: bool = False
+        self.id: str = kwargs.get("id") or "mock_run_id"
 
     def __enter__(self) -> "MockWandbRun":
         return self
@@ -78,6 +79,9 @@ class MockWandbRun:
     def finish(self, exit_code: int = 0) -> None:
         self.exit_code = exit_code
         self._finished = True
+
+    def mark_preempting(self) -> None:
+        pass
 
     def get_logged_data(self) -> list[dict]:
         return self.logged_data
