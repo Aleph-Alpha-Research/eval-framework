@@ -17,6 +17,7 @@ class EvalConfig(BaseConfig):
     output_dir: Path = Field(ROOT_DIR)
     wandb_project: str | None = Field(None)
     wandb_entity: str | None = Field(None)
+    wandb_run_id: str | None = Field(None)
     hf_upload_dir: str | None = Field(None)
     hf_upload_repo: str | None = Field(None)
     num_fewshot: int = Field(0, ge=0)

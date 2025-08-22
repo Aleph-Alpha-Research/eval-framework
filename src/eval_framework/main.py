@@ -43,11 +43,12 @@ def main(
 
     if preemption_data is None:
         output_dir = generate_output_dir(llm.name, config)
-        preempted_wandb_run = None  # no wandb run exists, must start new one
+        # config.wandb_run_id  defaults to none, if no run_id is provided then it starts a new one
+        wandb_run_id = config.wandb_run_id
     else:
         logger.info("Found preempted run restarting ...")
         output_dir = preemption_data["output_dir"]
-        preempted_wandb_run = preemption_data.get("wandb_run_id", None)
+        wandb_run_id = preemption_data.get("wandb_run_id", None)
 
     logger.info(f"Output directory: {output_dir}")
     assert output_dir is not None
@@ -61,7 +62,7 @@ def main(
         project=config.wandb_project,
         group=llm.name,
         job_type=config.task_name.name,
-        id=preempted_wandb_run,
+        id=wandb_run_id,
         config=response_generator._get_metadata(),
         resume="allow",
         mode=_wandb_mode(config.wandb_project),

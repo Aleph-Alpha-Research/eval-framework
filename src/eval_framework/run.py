@@ -163,6 +163,13 @@ def parse_args() -> argparse.Namespace:
         help="The name of the Weights & Biases entity to log runs to.",
     )
     parser.add_argument(
+        "--wandb-run-id",
+        type=str,
+        default=None,
+        required=False,
+        help="The ID of an existing Weights & Biases run to resume.",
+    )
+    parser.add_argument(
         "--description",
         type=str,
         required=False,
@@ -254,6 +261,7 @@ def run_with_kwargs(kwargs: dict) -> None:
         output_dir=kwargs["output_dir"],
         wandb_project=kwargs["wandb_project"],
         wandb_entity=kwargs["wandb_entity"],
+        wandb_run_id=kwargs["wandb_run_id"],
         hf_upload_dir=kwargs["hf_upload_dir"],
         hf_upload_repo=kwargs["hf_upload_repo"],
         llm_args=kwargs["llm_args"],
