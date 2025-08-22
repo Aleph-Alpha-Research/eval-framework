@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Callable, Literal, TypedDict, Unpack
+from typing import Any, Callable
 
 import wandb
 
@@ -15,17 +15,6 @@ from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.utils.logging_config import get_logger, setup_logging
 
 logger = get_logger(__name__)
-
-
-class WandbInitKwargs(TypedDict, total=False):
-    entity: str | None
-    project: str | None
-    group: str | None
-    job_type: str | None
-    id: str | None
-    config: dict[str, Any] | str | None
-    mode: Literal["online", "offline", "disabled"] | None
-    resume: bool | Literal["allow", "never", "must", "auto"] | None
 
 
 def main(
@@ -67,7 +56,7 @@ def main(
     response_generator = ResponseGenerator(llm, config, file_processor)
     # take care of init after preemption handling. If we have a run
     # id from preemption, then we resume the original wandb run
-    with _wandb_safe_init(
+    with wandb.init(
         entity=config.wandb_entity,
         project=config.wandb_project,
         group=llm.name,
@@ -75,6 +64,7 @@ def main(
         id=preempted_wandb_run,
         config=response_generator._get_metadata(),
         resume="allow",
+        mode=_wandb_mode(config.wandb_project),
     ) as run:
         _, preempted = response_generator.generate(should_preempt_callable)
         if preempted:
@@ -166,21 +156,28 @@ def _configure_logging(output_dir: Path) -> None:
         root_logger.setLevel(logging.INFO)
 
 
-def _wandb_safe_init(**kwargs: Unpack[WandbInitKwargs]) -> wandb.Run:
+def _wandb_mode(project: str | None) -> str:
     """
     Checks to see if a WandB API key is found. If not, wandb starts in offline mode.
     """
-    try:
-        api_key = wandb.api.api_key
-        if api_key is None:
-            print(
-                """No wandb API key found. Using offline mode.
-                If you have a WandB account set the environment variable 'WANDB_API_KEY'"""
-            )
-            kwargs["mode"] = "offline"
-        else:
-            print("wandb login detected. Using online mode.")
-    except Exception as e:
-        print(f"wandb login check failed: {e}. Using offline mode.")
-        kwargs["mode"] = "offline"
-    return wandb.init(**kwargs)
+    mode = "online"
+
+    if project is None:
+        logger.warning("No WandB project specified, disabling logging.")
+        mode = "disabled"
+    else:
+        try:
+            api_key = wandb.api.api_key
+            if api_key is None:
+                logger.warning(
+                    """No wandb API key found. Disabling Wandb logging.
+                    If you have a WandB account set the environment variable 'WANDB_API_KEY'"""
+                )
+                mode = "disabled"
+            else:
+                logger.info("wandb login detected. Using online mode.")
+        except Exception as e:
+            logger.warning(f"wandb login check failed: {e}. Disabling Wandb logging.")
+            mode = "disabled"
+
+    return mode
