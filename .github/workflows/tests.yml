@@ -18,14 +18,12 @@ on:
       - '**/*.sample'
       - '*.TAG'
       - '**/*.TAG'
-      # Ignore YAML/YML, but NOT workflow files
       - '*.yaml'
       - '**/*.yaml'
       - '*.yml'
       - '**/*.yml'
-      - '!/.github/workflows/**'   # keep workflows triggering
+      - '!/.github/workflows/**'
       - 'docs/**'
-      # - 'scripts/**'             # uncomment only if you truly want to skip scripts
       - 'LICENSE'
       - '.gitignore'
       - 'changelog/**'
@@ -46,21 +44,21 @@ on:
       - '**/*.sample'
       - '*.TAG'
       - '**/*.TAG'
-      # Ignore YAML/YML, but NOT workflow files
       - '*.yaml'
       - '**/*.yaml'
       - '*.yml'
       - '**/*.yml'
       - '!/.github/workflows/**'
       - 'docs/**'
-      # - 'scripts/**'
       - 'LICENSE'
       - '.gitignore'
       - 'changelog/**'
+  pull_request_target:
+    types: [labeled, closed]
+  workflow_dispatch:
 
 permissions:
   contents: read
-  packages: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -68,20 +66,44 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
+  OWNER_LC: aleph-alpha-research
   IMAGE_NAME: eval_framework_public
-  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # <- single source of truth
+  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets
 
 jobs:
+  decide:
+    name: Decide (fork vs branch) + compute tag
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.out.outputs.PR_NUMBER }}
+      tag: ${{ steps.out.outputs.TAG }}
+    steps:
+      - id: out
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "pull_request_target" ]]; then
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          else
+            PR_NUMBER=""
+            HEAD_SHA=""
+          fi
+          echo "PR_NUMBER=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+
+          if [[ -n "$PR_NUMBER" ]]; then
+            TAG="pr-${PR_NUMBER}-${HEAD_SHA}"
+          else
+            TAG="latest"
+          fi
+          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
 
   lint:
-    runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Setup poetry
         uses: ./.github/actions/setup-poetry-on-ubuntu
-        with:
-          github-repo-token: ${{ secrets.TOKEN_AA_GITHUB_REPO_READER }}
       - name: Run Pre-Commit
         run: |
           poetry run pre-commit install
@@ -90,233 +112,302 @@ jobs:
         run: |
           poetry run mypy src tests utils
 
-  changes:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      poetry_changed: ${{ steps.detect.outputs.poetry_changed }}
-    steps:
-      - name: Checkout PR head (or commit on push)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-
-      - name: Fetch base ref (only needed for PR)
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
-
-      - name: Detect changes in poetry files
-        id: detect
-        run: |
-          set -euo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-          else
-            if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-              BASE_SHA=$(git rev-parse HEAD^)
-            else
-              BASE_SHA=$(git hash-object -t tree /dev/null)
-            fi
-            HEAD_SHA="${{ github.sha }}"
-          fi
-
-          echo "Comparing $BASE_SHA...$HEAD_SHA"
-          if git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -E '^(pyproject\.toml|poetry\.lock)$' >/dev/null; then
-            echo "poetry_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "poetry_changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
+  # Warm the HF datasets cache only on main (org repo)
   hf-datasets-cache:
-    runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
-    container: derskythe/github-runner-base:ubuntu-noble  # has the right python, sudo and curl:)
+    if: github.repository_owner == 'Aleph-Alpha-Research' && github.ref == 'refs/heads/main'
+    runs-on: cpu-runner-8c-32gb-01
+    container: derskythe/github-runner-base:ubuntu-noble
+    needs: [decide]
     steps:
       - uses: actions/checkout@v4
-        if: github.ref == 'refs/heads/main'
       - name: Setup poetry
         uses: ./.github/actions/setup-poetry-on-ubuntu
-        if: github.ref == 'refs/heads/main'
         with:
           github-repo-token: ${{ secrets.TOKEN_AA_GITHUB_REPO_READER }}
       - name: Huggingface datasets cache
         uses: actions/cache@v4
-        if: github.ref == 'refs/heads/main'
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- use shared env
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-${{ github.run_id }}
           restore-keys: |
             hf-datasets-
       - name: Download datasets
-        if: github.ref == 'refs/heads/main'
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
           export PATH=$HOME/.local/bin:$PATH
           poetry run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
 
-  build:
-    needs: [lint, changes]
-    if: ${{ needs.changes.outputs.poetry_changed == 'true' || github.event_name == 'workflow_dispatch' }}
+  # Same-repo PRs & main pushes build the image
+  build_regular:
+    needs: [decide, lint]
+    if: >
+      github.event_name != 'pull_request_target' && (
+        github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
+      )
     runs-on: cpu-runner-8c-32gb-01
+    permissions:
+      contents: read
+      packages: write
     container: docker:dind
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: eval_framework_public
-      REPO_OWNER_LC: aleph-alpha-research
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Registry Authentication
-        uses: docker/login-action@v2
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Docker BuildX
-        uses: docker/setup-buildx-action@v1
-
-      - name: Build and Push Image
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build & push (immutable tag)
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
 
+  # Fork PRs (base context) — gated by label
+  publish_fork_image:
+    name: Publish fork PR image to org GHCR
+    needs: [decide, lint]
+    if: >
+      github.event_name == 'pull_request_target' &&
+      github.event.action == 'labeled' &&
+      github.event.pull_request.head.repo.fork == true &&
+      contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout PR merge ref
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ needs.decide.outputs.pr_number }}/merge
+          fetch-depth: 0
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build & push PR image (immutable tag)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          provenance: false
+          sbom: false
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
+
+  # CPU tests (same-repo PRs & pushes; forks only if labeled)
   test-cpu:
-    runs-on: cpu-runner-8c-32gb-01
+    needs: [decide, lint]
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork &&
+      contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
-      - name: Huggingface datasets cache
+      - name: Setup Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          poetry --version
+          poetry install -n || true
+      - name: Restore HF datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
       - name: Run tests
         run: |
-          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
           export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
-          export PATH=$HOME/.local/bin:$PATH
+          export PATH="$HOME/.local/bin:$PATH"
           poetry run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
+    needs: [decide, lint]
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork &&
+      contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
-      - name: Huggingface datasets cache
+      - name: Setup Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          poetry --version
+          poetry install -n || true
+      - name: Restore HF datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
-      - name: Run tests
+      - name: Run tests (slow)
         run: |
-          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
           export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
-          export PATH=$HOME/.local/bin:$PATH
-          poetry run python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
+          export PATH="$HOME/.local/bin:$PATH"
+          poetry run python -c "import nltk; nltk.download('punkt_tab')"
           poetry run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
+  # GPU tests only in your org; proceed if a build succeeded
   test-gpu:
+    if: >
+      github.repository_owner == 'Aleph-Alpha-Research' &&
+      always() &&
+      needs.test-cpu.result == 'success' &&
+      needs.test-cpu-slow.result == 'success' &&
+      (needs.build_regular.result == 'success' || needs.publish_fork_image.result == 'success')
+    needs: [decide, build_regular, publish_fork_image, test-cpu, test-cpu-slow]
     runs-on: EvalFrameworkGPURunner
-    needs: [build, test-cpu, test-cpu-slow]
-    if: ${{ always()
-          && needs.test-cpu.result == 'success'
-          && needs.test-cpu-slow.result == 'success'
-          && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    permissions:
+      contents: read
+      packages: read
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Normalize repo owner to lowercase
-        run: |
-          echo "REPO_OWNER_LC=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-      - name: Huggingface datasets cache
+      - uses: actions/checkout@v4
+      - name: Restore HF datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
-
-      - name: Log in to GitHub Container Registry
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Pull container image
-        run: |
-          docker pull "${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest"
-
+        run: docker pull "${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}"
       - name: Run GPU tests inside container with GPU access
         run: |
           timeout 20m docker run --rm --gpus all \
             -v ${{ github.workspace }}:/eval_framework \
             -w /eval_framework \
-            -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
             -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
+            "${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}" \
             bash -c 'poetry run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
 
   test-gpu-vllm:
+    if: >
+      github.repository_owner == 'Aleph-Alpha-Research' &&
+      always() &&
+      needs.test-cpu.result == 'success' &&
+      needs.test-cpu-slow.result == 'success' &&
+      (needs.build_regular.result == 'success' || needs.publish_fork_image.result == 'success') &&
+      (needs.test-gpu.result == 'success' || needs.test-gpu.result == 'skipped')
+    needs: [decide, build_regular, publish_fork_image, test-cpu, test-cpu-slow, test-gpu]
     runs-on: EvalFrameworkGPURunner
-    needs: [build, test-cpu, test-cpu-slow, test-gpu]
-    if: ${{ always()
-          && needs.test-cpu.result == 'success'
-          && needs.test-cpu-slow.result == 'success'
-          && (needs.build.result == 'success' || needs.build.result == 'skipped')
-          && (needs.test-gpu.result == 'success' || needs.test-gpu.result == 'skipped') }}
+    permissions:
+      contents: read
+      packages: read
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Normalize repo owner to lowercase
-        run: |
-          echo "REPO_OWNER_LC=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-      - name: Huggingface datasets cache
+      - uses: actions/checkout@v4
+      - name: Restore HF datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
-
-      - name: Log in to GitHub Container Registry
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Pull container image
-        run: |
-          docker pull "${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest"
-
+        run: docker pull "${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}"
       - name: Run GPU tests inside container with GPU access
         run: |
           timeout 20m docker run --rm --gpus all \
             -v ${{ github.workspace }}:/eval_framework \
             -w /eval_framework \
-            -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
-            -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
             -e VLLM_LOGGING_LEVEL=DEBUG \
             -e VLLM_WORKER_MULTIPROC_METHOD=spawn \
             -e VLLM_USE_MODELSCOPE=False \
             -e VLLM_NCCL_SO_PATH="" \
             -e VLLM_USE_TRITON_FLASH_ATTN=0 \
             -e VLLM_DISABLE_CUSTOM_ALL_REDUCE=1 \
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
+            "${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}" \
             bash -c 'curl -sSL https://install.python-poetry.org | python3 - && export PATH="$HOME/.local/bin:$PATH" && poetry --version && poetry run pytest --log-cli-level=INFO -v -m "vllm"'
+
+  # Promote merged PR image to :latest (no rebuild)
+  promote_latest_on_merge:
+    name: Promote PR image to latest on merge
+    if: >
+      github.event_name == 'pull_request_target' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Promote pr-<PR>-<HEAD_SHA> -> latest (server-side retag)
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"
+          DEST="${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:latest"
+          if ! docker buildx imagetools inspect "$SRC" >/dev/null 2>&1; then
+            echo "Source tag $SRC not found; skipping promotion."
+            exit 0
+          fi
+          docker buildx imagetools create --tag "$DEST" "$SRC"
+          echo "Promoted $SRC -> $DEST"
+
+  # Cleanup: when PR is merged, remove pr-<num>-* tags from GHCR to free space
+  cleanup_pr_images:
+    name: Cleanup GHCR tags for merged PR
+    needs: [promote_latest_on_merge]
+    if: >
+      github.event_name == 'pull_request_target' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      OWNER: ${{ github.repository_owner }}
+      PACKAGE: ${{ env.IMAGE_NAME }}
+    steps:
+      - name: Install jq
+        run: sudo apt-get update -y && sudo apt-get install -y jq
+      - name: Delete GHCR versions for this PR (org-owned)
+        shell: bash
+        run: |
+          set -euo pipefail
+          PREFIX="pr-${{ github.event.pull_request.number }}-"
+
+          gh api -H "Accept: application/vnd.github+json" \
+            "/orgs/${OWNER}/packages/container/${PACKAGE}/versions?per_page=100" --paginate \
+            --jq '.[] | {id: .id, tags: (.metadata.container.tags // [])}' \
+          | jq -r --arg prefix "$PREFIX" '
+              select([.tags[]? | select(startswith($prefix))] | length > 0)
+              | .id
+            ' \
+          | xargs -r -n1 -I{} gh api -X DELETE -H "Accept: application/vnd.github+json" \
+              "/orgs/${OWNER}/packages/container/${PACKAGE}/versions/{}"
+
+          echo "Cleanup complete for PR #${{ github.event.pull_request.number }}"
