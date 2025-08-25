@@ -72,6 +72,7 @@ env:
 
 jobs:
   # Decide (fork vs branch) + compute tag
+  # Decide (fork vs branch) + compute tag
   decide:
     runs-on: ubuntu-latest
     outputs:
@@ -225,6 +226,53 @@ jobs:
 
   # Fork PRs (base context) — gated by label
   # Publish fork PR image to org GHCR
+  # publish_fork_image:
+  #   needs: [decide]
+  #   if: >
+  #     (
+  #       github.event_name == 'pull_request_target' &&
+  #       needs.decide.outputs.is_fork == 'true' &&
+  #       (
+  #         (github.event.action == 'labeled' && github.event.label.name == 'trusted_contributor') ||
+  #         (
+  #           contains(github.event.pull_request.labels.*.name, 'trusted_contributor') &&
+  #           (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize')
+  #         )
+  #       )
+  #     ) ||
+  #     (
+  #       github.event_name == 'pull_request' &&
+  #       needs.decide.outputs.is_fork == 'true' &&
+  #       contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
+  #     )
+  #   runs-on: cpu-runner-8c-32gb-01
+  #   permissions:
+  #     contents: read
+  #     packages: write
+  #   steps:
+  #     - name: Checkout PR merge ref
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: refs/pull/${{ needs.decide.outputs.pr_number }}/merge
+  #         fetch-depth: 0
+  #     - name: Login to GHCR
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ${{ env.REGISTRY }}
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Setup Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #     - name: Build & push PR image (immutable tag)
+  #       uses: docker/build-push-action@v6
+  #       with:
+  #         context: .
+  #         file: Dockerfile
+  #         push: true
+  #         provenance: false
+  #         sbom: false
+  #         tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
+
   publish_fork_image:
     needs: [decide]
     if: >
@@ -232,57 +280,47 @@ jobs:
       needs.decide.outputs.is_fork == 'true' &&
       (
         (github.event.action == 'labeled' && github.event.label.name == 'trusted_contributor') ||
-        (
-          contains(github.event.pull_request.labels.*.name, 'trusted_contributor') &&
-          (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize')
-        )
+        (contains(github.event.pull_request.labels.*.name, 'trusted_contributor') &&
+        (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize'))
       )
     runs-on: cpu-runner-8c-32gb-01
+
     permissions:
       contents: read
       packages: write
+
+    env:
+      REGISTRY: ghcr.io
+      OWNER_LC: ${{ github.repository_owner }}
+      IMAGE_NAME: eval_framework_public
+
     steps:
-      - name: Debug why this might be skipped
-        if: always()
-        run: |
-          echo "=== DEBUG PUBLISH_FORK_IMAGE ==="
-          echo "Event: ${{ github.event_name }}"
-          echo "Event action: ${{ github.event.action }}"
-          echo "Is fork output from decide: '${{ needs.decide.outputs.is_fork }}'"
-          echo ""
-          echo "Condition 1 (event): ${{ github.event_name == 'pull_request_target' }}"
-          echo "Condition 2 (is_fork): ${{ needs.decide.outputs.is_fork == 'true' }}"
-          echo ""
-          echo "Label conditions:"
-          echo "  - Action is 'labeled': ${{ github.event.action == 'labeled' }}"
-          echo "  - Label name: '${{ github.event.label.name }}'"
-          echo "  - Label is 'trusted_contributor': ${{ github.event.label.name == 'trusted_contributor' }}"
-          echo ""
-          echo "PR labels: ${{ toJson(github.event.pull_request.labels.*.name) }}"
-          echo "Contains trusted_contributor: ${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}"
-          echo ""
-          echo "Other PR event conditions:"
-          echo "  - opened: ${{ github.event.action == 'opened' }}"
-          echo "  - reopened: ${{ github.event.action == 'reopened' }}"
-          echo "  - synchronize: ${{ github.event.action == 'synchronize' }}"
-          echo ""
-          echo "Full label condition (labeled): ${{ (github.event.action == 'labeled' && github.event.label.name == 'trusted_contributor') }}"
-          echo "Full label condition (existing): ${{ (contains(github.event.pull_request.labels.*.name, 'trusted_contributor') && (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize')) }}"
-          echo "=== END DEBUG ==="
-      - name: Checkout PR merge ref
+      - name: Checkout PR HEAD (no creds)
         uses: actions/checkout@v4
         with:
-          ref: refs/pull/${{ needs.decide.outputs.pr_number }}/merge
-          fetch-depth: 0
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Build & push PR image (immutable tag)
+
+      - name: Login to GHCR (owner + base token)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute tag
+        id: meta
+        run: |
+          SHA="${{ github.event.pull_request.head.sha }}"
+          SHORT=${SHA:0:8}
+          echo "tag=ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:pr-${{ needs.decide.outputs.pr_number }}-${SHORT}" >> $GITHUB_OUTPUT
+
+      - name: Build & push PR image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -290,7 +328,8 @@ jobs:
           push: true
           provenance: false
           sbom: false
-          tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
+          tags: ${{ steps.meta.outputs.tag }}
+
 
 
   # Debug PR labels
