@@ -41,13 +41,13 @@ class HFProcessor:
             logger.info("Could not login into HuggingFace. Check credentials")
             return None
 
-    def upload_responses_to_HF(self) -> bool:
+    def upload_responses_to_HF(self) -> tuple[bool, str | None]:
         hf_repo_name = self.hf_upload_repo
         assert hf_repo_name is not None, "No HF upload repository configured (hf_upload_repo)!"
 
         if self.hf_api is None:
             logger.info("Not logged into HuggingFace")
-            return False
+            return False, None
 
         try:
             self.upload_dir = Path(self.current_dir).relative_to(Path(self.output_dir))
@@ -56,7 +56,7 @@ class HFProcessor:
 
         except Exception as e:
             logger.info(f"Upload path not properly defined: {e}")
-            return False
+            return False, None
 
         upload_counter = 0
         for filename in tqdm(os.listdir(self.current_dir)):
@@ -77,7 +77,11 @@ class HFProcessor:
             except Exception as e:
                 self.status = "Problem during HF file upload: " + str(e)
                 logger.info(self.status)
-                break
+                return False, None
 
         logger.info(f"uploaded {upload_counter} files")
-        return True
+
+        hf_url = f"https://huggingface.co/datasets/{hf_repo_name}/tree/main/{self.upload_dir}"
+        logger.info(f"Results uploaded to: {hf_url}")
+
+        return True, hf_url

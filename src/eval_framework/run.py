@@ -149,6 +149,30 @@ def parse_args() -> argparse.Namespace:
         help="Folder name for the HuggingFace git repository where runs will be stored",
     )
     parser.add_argument(
+        "--wandb-project",
+        type=str,
+        default=None,
+        required=False,
+        help="The name of the Weights & Biases project to log runs to. "
+        "The environment variable WANDB_API_KEY must be set",
+    )
+    parser.add_argument(
+        "--wandb-entity",
+        type=str,
+        default=None,
+        required=False,
+        help="The name of the Weights & Biases entity to log runs to. Defaults to the user's default entity",
+    )
+    parser.add_argument(
+        "--wandb-run-id",
+        type=str,
+        default=None,
+        required=False,
+        help="The ID of an existing Weights & Biases run to resume. "
+        "If not given, creates a new fun. If given and exists, "
+        "will continue the run but will overwrite the pthon command logged in wandb.",
+    )
+    parser.add_argument(
         "--description",
         type=str,
         required=False,
@@ -238,6 +262,9 @@ def run_with_kwargs(kwargs: dict) -> None:
         task_subjects=kwargs["task_subjects"],
         hf_revision=kwargs["hf_revision"],
         output_dir=kwargs["output_dir"],
+        wandb_project=kwargs["wandb_project"],
+        wandb_entity=kwargs["wandb_entity"],
+        wandb_run_id=kwargs["wandb_run_id"],
         hf_upload_dir=kwargs["hf_upload_dir"],
         hf_upload_repo=kwargs["hf_upload_repo"],
         llm_args=kwargs["llm_args"],
