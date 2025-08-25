@@ -28,6 +28,7 @@ on:
       - '.gitignore'
       - 'changelog/**'
   pull_request:
+    types: [opened, reopened, synchronize, closed]
     branches: [main]
     paths-ignore:
       - '*.detignore'
