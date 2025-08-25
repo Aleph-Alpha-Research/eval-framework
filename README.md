@@ -157,7 +157,8 @@ Evaluation metrics include:
 For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmarks_and_metrics.md).
 
 ## Understanding the Evaluation Framework
-![eval-framework-steps](docs/Prompt Preparation.png "eval-framework-steps")
+
+![eval-framework-steps](docs/prompt_preparation.png "eval-framework-steps")
 
 Eval-Framework provides a unified interface for evaluating language models across diverse benchmarks. The framework follows this interaction model:
 
