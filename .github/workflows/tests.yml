@@ -293,6 +293,33 @@ jobs:
           sbom: false
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
 
+
+  # Debug PR labels
+  debug-pr-labels:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+    steps:
+      - name: Show PR labels
+        run: |
+          echo "=== PR LABELS DEBUG ==="
+          echo "Event: ${{ github.event_name }}"
+          echo "Action: ${{ github.event.action }}"
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo ""
+          echo "All PR labels (JSON):"
+          echo '${{ toJson(github.event.pull_request.labels) }}'
+          echo ""
+          echo "Label names only:"
+          echo '${{ toJson(github.event.pull_request.labels.*.name) }}'
+          echo ""
+          echo "Has trusted_contributor label: ${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}"
+          echo ""
+          if [[ "${{ github.event.action }}" == "labeled" ]]; then
+            echo "Just added label: ${{ github.event.label.name }}"
+          fi
+          echo "=== END PR LABELS DEBUG ==="
+
+
   # CPU tests (same-repo PRs & pushes; forks only if labeled)
   test-cpu:
     needs: [decide, hf-datasets-cache] #lint
