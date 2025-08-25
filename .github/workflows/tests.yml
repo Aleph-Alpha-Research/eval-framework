@@ -146,10 +146,8 @@ jobs:
   build_regular:
     needs: [decide]
     if: >
-      github.event_name != 'pull_request_target' && (
-        github.event_name == 'push' ||
-        (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true')
-      )
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true')
     runs-on: cpu-runner-8c-32gb-01
     permissions:
       contents: read
