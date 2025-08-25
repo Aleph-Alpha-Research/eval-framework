@@ -72,7 +72,6 @@ env:
 
 jobs:
   # Decide (fork vs branch) + compute tag
-  # Decide (fork vs branch) + compute tag
   decide:
     runs-on: ubuntu-latest
     outputs:
@@ -229,21 +228,14 @@ jobs:
   publish_fork_image:
     needs: [decide]
     if: >
+      github.event_name == 'pull_request_target' &&
+      needs.decide.outputs.is_fork == 'true' &&
       (
-        github.event_name == 'pull_request_target' &&
-        needs.decide.outputs.is_fork == 'true' &&
+        (github.event.action == 'labeled' && github.event.label.name == 'trusted_contributor') ||
         (
-          (github.event.action == 'labeled' && github.event.label.name == 'trusted_contributor') ||
-          (
-            contains(github.event.pull_request.labels.*.name, 'trusted_contributor') &&
-            (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize')
-          )
+          contains(github.event.pull_request.labels.*.name, 'trusted_contributor') &&
+          (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize')
         )
-      ) ||
-      (
-        github.event_name == 'pull_request' &&
-        needs.decide.outputs.is_fork == 'true' &&
-        contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
       )
     runs-on: cpu-runner-8c-32gb-01
     permissions:
