@@ -116,13 +116,84 @@ jobs:
             echo "TAG=latest" >> "$GITHUB_OUTPUT"
           fi
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # For pull_request_target, checkout the PR code
+          repository: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+      - name: Setup poetry
+        uses: ./.github/actions/setup-poetry-on-ubuntu
+      - name: Run Pre-Commit
+        run: |
+          poetry run pre-commit install
+          poetry run pre-commit run -a
+      - name: Run MyPy
+        run: |
+          poetry run mypy src tests utils
+
+  hf-datasets-cache:
+    if: github.repository_owner == 'Aleph-Alpha-Research' && github.ref == 'refs/heads/main'
+    runs-on: cpu-runner-8c-32gb-01
+    container: derskythe/github-runner-base:ubuntu-noble
+    needs: [decide]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup poetry
+        uses: ./.github/actions/setup-poetry-on-ubuntu
+        with:
+          github-repo-token: ${{ secrets.TOKEN_AA_GITHUB_REPO_READER }}
+      - name: Huggingface datasets cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          key: hf-datasets-${{ github.run_id }}
+          restore-keys: |
+            hf-datasets-
+      - name: Download datasets
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: |
+          export PATH=$HOME/.local/bin:$PATH
+          poetry run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
+
+  build_regular:
+    needs: [decide]
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true')
+    runs-on: cpu-runner-8c-32gb-01
+    permissions:
+      contents: read
+      packages: write
+    container: docker:dind
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build & push (immutable tag)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
+
   publish_fork_image:
     needs: [decide]
     if: github.event_name == 'pull_request_target'
     runs-on: cpu-runner-8c-32gb-01
     permissions:
       contents: read
-      # packages: write   # not needed if you only use PAT
       pull-requests: read
     steps:
       - name: Debug gate inputs
@@ -168,6 +239,302 @@ jobs:
           sbom: false
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
 
+  test-cpu:
+    needs: [decide, lint]
+    if: >
+      always() &&
+      needs.decide.result == 'success' &&
+      needs.lint.result == 'success' &&
+      (
+        github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') ||
+        (github.event_name == 'pull_request_target' && needs.decide.outputs.is_fork == 'true' &&
+         contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
+      )
+    runs-on: cpu-runner-8c-32gb-01
+    container: derskythe/github-runner-base:ubuntu-noble
+    steps:
+      - name: Wait for HF datasets cache on main
+        if: github.repository_owner == 'Aleph-Alpha-Research' && github.ref == 'refs/heads/main'
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: hf-datasets-cache
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+      - uses: actions/checkout@v4
+        with:
+          # For pull_request_target, checkout PR merge commit
+          repository: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Setup poetry
+        uses: ./.github/actions/setup-poetry-on-ubuntu
+      - name: Huggingface datasets cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          key: hf-datasets-
+      - name: Run tests
+        run: |
+          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
+          export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
+          export PATH=$HOME/.local/bin:$PATH
+          poetry run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
+
+  test-cpu-slow:
+    needs: [decide, lint]
+    if: >
+      always() &&
+      needs.decide.result == 'success' &&
+      needs.lint.result == 'success' &&
+      (
+        github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') ||
+        (github.event_name == 'pull_request_target' && needs.decide.outputs.is_fork == 'true' &&
+         contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
+      )
+    runs-on: cpu-runner-8c-32gb-01
+    container: derskythe/github-runner-base:ubuntu-noble
+    steps:
+      - name: Wait for HF datasets cache on main
+        if: github.repository_owner == 'Aleph-Alpha-Research' && github.ref == 'refs/heads/main'
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: hf-datasets-cache
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+      - uses: actions/checkout@v4
+        with:
+          # For pull_request_target, checkout PR merge commit
+          repository: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Setup poetry
+        uses: ./.github/actions/setup-poetry-on-ubuntu
+      - name: Huggingface datasets cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          key: hf-datasets-
+      - name: Run tests
+        run: |
+          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
+          export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
+          export PATH=$HOME/.local/bin:$PATH
+          poetry run python -c "import nltk; nltk.download('punkt_tab')"
+          poetry run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
+
+  test-gpu:
+    if: >
+      github.repository_owner == 'Aleph-Alpha-Research' &&
+      always() &&
+      needs.test-cpu.result == 'success' &&
+      needs.test-cpu-slow.result == 'success' &&
+      (needs.build_regular.result == 'success' || needs.publish_fork_image.result == 'success')
+    needs: [decide, build_regular, publish_fork_image, test-cpu, test-cpu-slow]
+    runs-on: EvalFrameworkGPURunner
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore HF datasets cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          key: hf-datasets-
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull container image
+        run: docker pull "${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}"
+      - name: Run GPU tests inside container with GPU access
+        run: |
+          timeout 20m docker run --rm --gpus all \
+            -v ${{ github.workspace }}:/eval_framework \
+            -w /eval_framework \
+            -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
+            "${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}" \
+            bash -c 'poetry run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
+########### Trial 2 ###############
+
+# name: CI
+
+# on:
+#   push:
+#     branches: [main]
+#     paths-ignore:
+#       - '*.detignore'
+#       - '**/*.detignore'
+#       - '*.example'
+#       - '**/*.example'
+#       - '*.json'
+#       - '**/*.json'
+#       - '*.md'
+#       - '**/*.md'
+#       - '*.png'
+#       - '**/*.png'
+#       - '*.sample'
+#       - '**/*.sample'
+#       - '*.TAG'
+#       - '**/*.TAG'
+#       - '*.yaml'
+#       - '**/*.yaml'
+#       - '*.yml'
+#       - '**/*.yml'
+#       - '!/.github/workflows/**'
+#       - 'docs/**'
+#       - 'LICENSE'
+#       - '.gitignore'
+#       - 'changelog/**'
+#   pull_request:
+#     types: [opened, reopened, synchronize, labeled]
+#     branches: [main]
+#     paths-ignore:
+#       - '*.detignore'
+#       - '**/*.detignore'
+#       - '*.example'
+#       - '**/*.example'
+#       - '*.json'
+#       - '**/*.json'
+#       - '*.md'
+#       - '**/*.md'
+#       - '*.png'
+#       - '**/*.png'
+#       - '*.sample'
+#       - '**/*.sample'
+#       - '*.TAG'
+#       - '**/*.TAG'
+#       - '*.yaml'
+#       - '**/*.yaml'
+#       - '*.yml'
+#       - '**/*.yml'
+#       - '!/.github/workflows/**'
+#       - 'docs/**'
+#       - 'LICENSE'
+#       - '.gitignore'
+#       - 'changelog/**'
+#   pull_request_target:
+#     types: [opened, reopened, synchronize, labeled]
+#     branches: [main]
+#     paths-ignore:
+#       - '*.detignore'
+#       - '**/*.detignore'
+#       - '*.example'
+#       - '**/*.example'
+#       - '*.json'
+#       - '**/*.json'
+#       - '*.md'
+#       - '**/*.md'
+#       - '*.png'
+#       - '**/*.png'
+#       - '*.sample'
+#       - '**/*.sample'
+#       - '*.TAG'
+#       - '**/*.TAG'
+#       - '*.yaml'
+#       - '**/*.yaml'
+#       - '*.yml'
+#       - '**/*.yml'
+#       - '!/.github/workflows/**'
+#       - 'docs/**'
+#       - 'LICENSE'
+#       - '.gitignore'
+#       - 'changelog/**'
+
+# permissions:
+#   contents: read
+
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+#   cancel-in-progress: true
+
+# env:
+#   REGISTRY: ghcr.io
+#   OWNER_LC: aleph-alpha-research
+#   IMAGE_NAME: eval_framework_public
+#   HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets
+
+# jobs:
+#   decide:
+#     runs-on: ubuntu-latest
+#     outputs:
+#       pr_number: ${{ steps.out.outputs.PR_NUMBER }}
+#       tag: ${{ steps.out.outputs.TAG }}
+#       is_fork: ${{ steps.out.outputs.IS_FORK }}
+#     steps:
+#       - id: out
+#         shell: bash
+#         run: |
+#           if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "pull_request_target" ]]; then
+#             echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+#             echo "IS_FORK=${{ github.event.pull_request.head.repo.fork }}" >> "$GITHUB_OUTPUT"
+#             echo "TAG=pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+#           else
+#             echo "PR_NUMBER=" >> "$GITHUB_OUTPUT"
+#             echo "IS_FORK=false" >> "$GITHUB_OUTPUT"
+#             echo "TAG=latest" >> "$GITHUB_OUTPUT"
+#           fi
+
+#   publish_fork_image:
+#     needs: [decide]
+#     if: github.event_name == 'pull_request_target'
+#     runs-on: cpu-runner-8c-32gb-01
+#     permissions:
+#       contents: read
+#       # packages: write   # not needed if you only use PAT
+#       pull-requests: read
+#     steps:
+#       - name: Debug gate inputs
+#         run: |
+#           echo "is_fork=${{ needs.decide.outputs.is_fork }}"
+#           echo "labels=${{ join(github.event.pull_request.labels.*.name, ',') }}"
+#           echo "event=${{ github.event_name }}"
+#           echo "action=${{ github.event.action }}"
+#           echo "head_repo=${{ github.event.pull_request.head.repo.full_name }}"
+#           echo "head_sha=${{ github.event.pull_request.head.sha }}"
+
+#       - name: Stop unless trusted fork
+#         if: >
+#           !(
+#             needs.decide.outputs.is_fork == 'true' &&
+#             contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
+#           )
+#         run: echo "Not a trusted fork — skipping build."; exit 0
+
+#       - name: Checkout fork code (PR head)
+#         uses: actions/checkout@v4
+#         with:
+#           repository: ${{ github.event.pull_request.head.repo.full_name }}
+#           ref: ${{ github.event.pull_request.head.sha }}
+
+#       - name: Login to GHCR with PAT
+#         uses: docker/login-action@v3
+#         with:
+#           registry: ${{ env.REGISTRY }}
+#           username: ${{ secrets.GHCR_PAT_USERNAME }}
+#           password: ${{ secrets.GHCR_PAT_TOKEN }}
+
+#       - name: Setup Buildx
+#         uses: docker/setup-buildx-action@v3
+
+#       - name: Build & push PR image (immutable tag)
+#         uses: docker/build-push-action@v6
+#         with:
+#           context: .
+#           file: Dockerfile
+#           push: true
+#           provenance: false
+#           sbom: false
+#           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
+
+
+          ########### Trial 1 #############
 # name: CI
 
 # on:
