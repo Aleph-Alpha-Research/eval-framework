@@ -245,7 +245,7 @@ jobs:
         needs.decide.outputs.is_fork == 'true' &&
         contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
       )
-    runs-on: ubuntu-latest
+    runs-on: cpu-runner-8c-32gb-01
     permissions:
       contents: read
       packages: write
@@ -329,18 +329,32 @@ jobs:
 
   # CPU tests (same-repo PRs & pushes; forks only if labeled)
   test-cpu:
-    needs: [decide, hf-datasets-cache, lint]
+    needs: [decide, lint]
     # Run on: push, same-repo PRs, and fork PRs with the trusted label
     if: >
-      github.event_name == 'push' ||
-      (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') ||
-      (github.event_name == 'pull_request_target' && needs.decide.outputs.is_fork == 'true' &&
-       contains(github.event.pull_request.labels.*.name, 'trusted_contributor')) ||
-      (github.event_name == 'pull_request' && needs.decide.outputs.is_fork == 'true' &&
-       contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
+      always() &&
+      needs.decide.result == 'success' &&
+      needs.lint.result == 'success' &&
+      (
+        github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') ||
+        (github.event_name == 'pull_request_target' && needs.decide.outputs.is_fork == 'true' &&
+         contains(github.event.pull_request.labels.*.name, 'trusted_contributor')) ||
+        (github.event_name == 'pull_request' && needs.decide.outputs.is_fork == 'true' &&
+         contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
+      )
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
     steps:
+      # Wait for HF cache job if we're on main
+      - name: Wait for HF datasets cache on main
+        if: github.repository_owner == 'Aleph-Alpha-Research' && github.ref == 'refs/heads/main'
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: hf-datasets-cache
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'pull_request_target' && format('refs/pull/{0}/merge', github.event.pull_request.number) || '' }}
@@ -360,17 +374,31 @@ jobs:
           poetry run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
-    needs: [decide, lint, hf-datasets-cache]
+    needs: [decide, lint]
     if: >
-      github.event_name == 'push' ||
-      (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') ||
-      (github.event_name == 'pull_request_target' && needs.decide.outputs.is_fork == 'true' &&
-       contains(github.event.pull_request.labels.*.name, 'trusted_contributor')) ||
-      (github.event_name == 'pull_request' && needs.decide.outputs.is_fork == 'true' &&
-       contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
+      always() &&
+      needs.decide.result == 'success' &&
+      needs.lint.result == 'success' &&
+      (
+        github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') ||
+        (github.event_name == 'pull_request_target' && needs.decide.outputs.is_fork == 'true' &&
+         contains(github.event.pull_request.labels.*.name, 'trusted_contributor')) ||
+        (github.event_name == 'pull_request' && needs.decide.outputs.is_fork == 'true' &&
+         contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
+      )
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
     steps:
+      # Wait for HF cache job if we're on main
+      - name: Wait for HF datasets cache on main
+        if: github.repository_owner == 'Aleph-Alpha-Research' && github.ref == 'refs/heads/main'
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: hf-datasets-cache
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'pull_request_target' && format('refs/pull/{0}/merge', github.event.pull_request.number) || '' }}
