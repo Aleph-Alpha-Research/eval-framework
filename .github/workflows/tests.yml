@@ -248,6 +248,7 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
 
   # Fork PRs — Now can build from pull_request event using PAT!
+  # Fork PRs — Now can build from pull_request event using PAT!
   publish_fork_image:
     needs: [decide]
     if: >
@@ -275,6 +276,24 @@ jobs:
           echo "Fork repo: ${{ github.event.pull_request.head.repo.full_name }}"
           echo "Fork SHA: ${{ github.event.pull_request.head.sha }}"
           echo "Using PAT for authentication"
+
+      # Debug secrets availability
+      - name: Check secrets availability
+        run: |
+          echo "=== CHECKING SECRETS ==="
+          if [ -z "${{ secrets.GHCR_PAT_USERNAME }}" ]; then
+            echo "ERROR: GHCR_PAT_USERNAME secret is not set!"
+          else
+            echo "GHCR_PAT_USERNAME is set (length: ${#GHCR_PAT_USERNAME})"
+          fi
+
+          if [ -z "${{ secrets.GHCR_PAT_TOKEN }}" ]; then
+            echo "ERROR: GHCR_PAT_TOKEN secret is not set!"
+          else
+            echo "GHCR_PAT_TOKEN is set"
+          fi
+        env:
+          GHCR_PAT_USERNAME: ${{ secrets.GHCR_PAT_USERNAME }}
 
       # Checkout the appropriate code based on event type
       - name: Checkout code
@@ -305,6 +324,8 @@ jobs:
           provenance: false
           sbom: false
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
+
+
 
   # Debug PR labels
   debug-pr-labels:
