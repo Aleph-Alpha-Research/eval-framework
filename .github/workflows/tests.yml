@@ -71,7 +71,6 @@ env:
   HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets
 
 jobs:
-  # Decide (fork vs branch) + compute tag
   decide:
     runs-on: ubuntu-latest
     outputs:
@@ -82,7 +81,6 @@ jobs:
       - id: out
         shell: bash
         run: |
-          # Debug: Show event details
           echo "=== DEBUG START ==="
           echo "Event Name: ${{ github.event_name }}"
           echo "Event Action: ${{ github.event.action }}"
@@ -105,7 +103,6 @@ jobs:
             IS_FORK="false"
           fi
 
-          # Debug: Show computed values
           echo "=== COMPUTED VALUES ==="
           echo "PR_NUMBER=$PR_NUMBER"
           echo "IS_FORK=$IS_FORK"
@@ -125,7 +122,6 @@ jobs:
 
           echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
 
-  # Add a debug job to see the outputs
   debug-outputs:
     needs: [decide]
     runs-on: ubuntu-latest
@@ -141,14 +137,12 @@ jobs:
           echo "is_fork != 'true': ${{ needs.decide.outputs.is_fork != 'true' }}"
           echo "=== CONTEXT INFO ==="
           echo "event_name: ${{ github.event_name }}"
-          echo "repository_owner: ${{ toLower(github.repository_owner) }}"
           echo "ref: ${{ github.ref }}"
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: Setup poetry
         uses: ./.github/actions/setup-poetry-on-ubuntu
       - name: Run Pre-Commit
@@ -159,7 +153,6 @@ jobs:
         run: |
           poetry run mypy src tests utils
 
-  # Warm the HF datasets cache only on main (org repo)
   hf-datasets-cache:
     if: github.repository_owner == 'Aleph-Alpha-Research' && github.ref == 'refs/heads/main'
     runs-on: cpu-runner-8c-32gb-01
@@ -185,7 +178,6 @@ jobs:
           export PATH=$HOME/.local/bin:$PATH
           poetry run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
 
-  # Same-repo PRs & main pushes build the image
   build_regular:
     needs: [decide]
     if: >
@@ -195,7 +187,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    container: docker:dind
     steps:
       - name: Debug why this might be skipped
         if: always()
@@ -207,11 +198,11 @@ jobs:
           echo "Condition 2b (not fork): ${{ needs.decide.outputs.is_fork != 'true' }}"
           echo "Full condition: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') }}"
       - uses: actions/checkout@v4
-      - name: Login to GHCR
+      - name: Login to GHCR (owner)
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ toLower(github.repository_owner) }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v3
@@ -222,55 +213,6 @@ jobs:
           file: Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
-
-  # Fork PRs (base context) — gated by label
-  # Publish fork PR image to org GHCR
-  # publish_fork_image:
-  #   needs: [decide]
-  #   if: >
-  #     (
-  #       github.event_name == 'pull_request_target' &&
-  #       needs.decide.outputs.is_fork == 'true' &&
-  #       (
-  #         (github.event.action == 'labeled' && github.event.label.name == 'trusted_contributor') ||
-  #         (
-  #           contains(github.event.pull_request.labels.*.name, 'trusted_contributor') &&
-  #           (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize')
-  #         )
-  #       )
-  #     ) ||
-  #     (
-  #       github.event_name == 'pull_request' &&
-  #       needs.decide.outputs.is_fork == 'true' &&
-  #       contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
-  #     )
-  #   runs-on: cpu-runner-8c-32gb-01
-  #   permissions:
-  #     contents: read
-  #     packages: write
-  #   steps:
-  #     - name: Checkout PR merge ref
-  #       uses: actions/checkout@v4
-  #       with:
-  #         ref: refs/pull/${{ needs.decide.outputs.pr_number }}/merge
-  #         fetch-depth: 0
-  #     - name: Login to GHCR
-  #       uses: docker/login-action@v3
-  #       with:
-  #         registry: ${{ env.REGISTRY }}
-  #         username: ${{ github.repository_owner }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Setup Buildx
-  #       uses: docker/setup-buildx-action@v3
-  #     - name: Build & push PR image (immutable tag)
-  #       uses: docker/build-push-action@v6
-  #       with:
-  #         context: .
-  #         file: Dockerfile
-  #         push: true
-  #         provenance: false
-  #         sbom: false
-  #         tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
 
   publish_fork_image:
     needs: [decide]
@@ -292,16 +234,9 @@ jobs:
         contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
       )
     runs-on: cpu-runner-8c-32gb-01
-
     permissions:
       contents: read
       packages: write
-
-    env:
-      REGISTRY: ghcr.io
-      OWNER_LC: ${{ toLower(github.repository_owner) }}
-      IMAGE_NAME: eval_framework_public
-
     steps:
       - name: Checkout PR HEAD (no creds)
         uses: actions/checkout@v4
@@ -314,11 +249,12 @@ jobs:
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to GHCR (owner + base token)
+      - name: Login to GHCR (only on pull_request_target)
+        if: github.event_name == 'pull_request_target'
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ toLower(github.repository_owner) }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compute tag
@@ -326,21 +262,19 @@ jobs:
         run: |
           SHA="${{ github.event.pull_request.head.sha }}"
           SHORT=${SHA:0:8}
-          echo "tag=ghcr.io/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:pr-${{ needs.decide.outputs.pr_number }}-${SHORT}" >> $GITHUB_OUTPUT
+          echo "tag=${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:pr-${{ needs.decide.outputs.pr_number }}-${SHORT}" >> $GITHUB_OUTPUT
 
       - name: Build & push PR image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
-          push: true
+          # only push when secrets are available
+          push: ${{ github.event_name == 'pull_request_target' }}
           provenance: false
           sbom: false
           tags: ${{ steps.meta.outputs.tag }}
 
-
-
-  # Debug PR labels
   debug-pr-labels:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
@@ -365,11 +299,8 @@ jobs:
           fi
           echo "=== END PR LABELS DEBUG ==="
 
-
-  # CPU tests (same-repo PRs & pushes; forks only if labeled)
   test-cpu:
     needs: [decide, lint]
-    # Run on: push, same-repo PRs, and fork PRs with the trusted label
     if: >
       always() &&
       needs.decide.result == 'success' &&
@@ -385,7 +316,6 @@ jobs:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
     steps:
-      # Wait for HF cache job if we're on main
       - name: Wait for HF datasets cache on main
         if: github.repository_owner == 'Aleph-Alpha-Research' && github.ref == 'refs/heads/main'
         uses: lewagon/wait-on-check-action@v1.3.4
@@ -429,7 +359,6 @@ jobs:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
     steps:
-      # Wait for HF cache job if we're on main
       - name: Wait for HF datasets cache on main
         if: github.repository_owner == 'Aleph-Alpha-Research' && github.ref == 'refs/heads/main'
         uses: lewagon/wait-on-check-action@v1.3.4
@@ -457,7 +386,6 @@ jobs:
           poetry run python -c "import nltk; nltk.download('punkt_tab')"
           poetry run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
-  # GPU tests only in your org; proceed if a build succeeded
   test-gpu:
     if: >
       github.repository_owner == 'Aleph-Alpha-Research' &&
@@ -477,11 +405,11 @@ jobs:
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
-      - name: Login to GHCR
+      - name: Login to GHCR (owner)
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ toLower(github.repository_owner) }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull container image
         run: docker pull "${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}"
@@ -513,11 +441,11 @@ jobs:
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
-      - name: Login to GHCR
+      - name: Login to GHCR (owner)
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ toLower(github.repository_owner) }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull container image
         run: docker pull "${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}"
@@ -535,7 +463,6 @@ jobs:
             "${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}" \
             bash -c 'curl -sSL https://install.python-poetry.org | python3 - && export PATH="$HOME/.local/bin:$PATH" && poetry --version && poetry run pytest --log-cli-level=INFO -v -m "vllm"'
 
-  # Promote merged PR image to :latest (no rebuild)
   promote_latest_on_merge:
     if: >
       github.event_name == 'pull_request_target' &&
@@ -546,11 +473,11 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: Login to GHCR
+      - name: Login to GHCR (owner)
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ toLower(github.repository_owner) }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v3
@@ -567,7 +494,6 @@ jobs:
           docker buildx imagetools create --tag "$DEST" "$SRC"
           echo "Promoted $SRC -> $DEST"
 
-  # Cleanup: when PR is merged, remove pr-<num>-* tags from GHCR to free space
   cleanup_pr_images:
     needs: [promote_latest_on_merge]
     if: >
@@ -580,7 +506,7 @@ jobs:
       packages: write
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      OWNER: ${{ toLower(github.repository_owner) }}
+      OWNER: ${{ env.OWNER_LC }}
       PACKAGE: eval_framework_public
     steps:
       - name: Install jq
