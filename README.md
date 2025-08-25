@@ -85,6 +85,11 @@ While the CLI is great for quick runs, the Python interface offers maximum flexi
      # Run evaluation and get results
      results = main(llm=llm, config=config)
 ```
+| Local Prototyping | Cluster Execution |
+| :--- | :--- |
+| **Run Method:** Execute single tasks on a dev node with the CLI. | **Run Method:** Run ensembles of tasks and models with Determined experiments. |
+| **Use Case:** Rapidly test, debug, and develop new custom benchmarks or models. | **Use Case:** Perform large-scale, reproducible evaluations for research or pre-production testing. |
+| **Tools:** Includes a JSON visualizer and plotting templates for immediate feedback. | **Tools:** Leverages distributed computing to run many evaluations in parallel efficiently. |
 
 ### Next Steps
 
