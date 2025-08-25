@@ -54,7 +54,7 @@ on:
       - '.gitignore'
       - 'changelog/**'
   pull_request_target:
-    types: [labeled, closed]
+    types: [opened, reopened, synchronize, labeled, closed]
   workflow_dispatch:
 
 permissions:
@@ -71,8 +71,8 @@ env:
   HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets
 
 jobs:
+  # Decide (fork vs branch) + compute tag
   decide:
-    name: Decide (fork vs branch) + compute tag
     runs-on: ubuntu-latest
     outputs:
       pr_number: ${{ steps.out.outputs.PR_NUMBER }}
@@ -170,14 +170,19 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
 
   # Fork PRs (base context) — gated by label
+  # Publish fork PR image to org GHCR
   publish_fork_image:
-    name: Publish fork PR image to org GHCR
     needs: [decide, lint]
     if: >
       github.event_name == 'pull_request_target' &&
-      github.event.action == 'labeled' &&
       github.event.pull_request.head.repo.fork == true &&
-      contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
+      (
+        (github.event.action == 'labeled' && github.event.label.name == 'trusted_contributor') ||
+        (
+          contains(github.event.pull_request.labels.*.name, 'trusted_contributor') &&
+          (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize')
+        )
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -208,32 +213,36 @@ jobs:
 
   # CPU tests (same-repo PRs & pushes; forks only if labeled)
   test-cpu:
-    needs: [decide, lint]
+    needs: [lint, hf-datasets-cache]
+    # Run on: push, same-repo PRs, and fork PRs with the trusted label
     if: >
       github.event_name == 'push' ||
       (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) ||
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork &&
+      (github.event_name == 'pull_request_target' &&
+      github.event.pull_request.head.repo.fork &&
       contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
-    runs-on: cpu-runner-8c-32gb-01
-    container: derskythe/github-runner-base:ubuntu-noble
+    runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space due to hf cache
+    container: derskythe/github-runner-base:ubuntu-noble  # has the right python, sudo and curl:)
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          poetry --version
-          poetry install -n || true
-      - name: Restore HF datasets cache
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && format('refs/pull/{0}/merge', github.event.pull_request.number) || '' }}
+          fetch-depth: 0
+      - name: Setup poetry
+        uses: ./.github/actions/setup-poetry-on-ubuntu
+      - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
       - name: Run tests
         run: |
+          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
           export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
-          export PATH="$HOME/.local/bin:$PATH"
+          export PATH=$HOME/.local/bin:$PATH
           poetry run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
+
+
 
   test-cpu-slow:
     needs: [decide, lint]
@@ -246,23 +255,24 @@ jobs:
     container: derskythe/github-runner-base:ubuntu-noble
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          poetry --version
-          poetry install -n || true
-      - name: Restore HF datasets cache
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && format('refs/pull/{0}/merge', github.event.pull_request.number) || '' }}
+          fetch-depth: 0
+      - name: Setup poetry
+        uses: ./.github/actions/setup-poetry-on-ubuntu
+      - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
           key: hf-datasets-
-      - name: Run tests (slow)
+      - name: Run tests
         run: |
+          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
           export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
-          export PATH="$HOME/.local/bin:$PATH"
-          poetry run python -c "import nltk; nltk.download('punkt_tab')"
+          export PATH=$HOME/.local/bin:$PATH
+          poetry run python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
           poetry run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
+
 
   # GPU tests only in your org; proceed if a build succeeded
   test-gpu:
@@ -345,7 +355,6 @@ jobs:
 
   # Promote merged PR image to :latest (no rebuild)
   promote_latest_on_merge:
-    name: Promote PR image to latest on merge
     if: >
       github.event_name == 'pull_request_target' &&
       github.event.action == 'closed' &&
@@ -378,7 +387,6 @@ jobs:
 
   # Cleanup: when PR is merged, remove pr-<num>-* tags from GHCR to free space
   cleanup_pr_images:
-    name: Cleanup GHCR tags for merged PR
     needs: [promote_latest_on_merge]
     if: >
       github.event_name == 'pull_request_target' &&
