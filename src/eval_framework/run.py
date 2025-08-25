@@ -161,8 +161,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         required=False,
-        help="The name of the Weights & Biases entity to log runs to. "
-        "Defaults to the user's default entity",
+        help="The name of the Weights & Biases entity to log runs to. Defaults to the user's default entity",
     )
     parser.add_argument(
         "--wandb-run-id",
