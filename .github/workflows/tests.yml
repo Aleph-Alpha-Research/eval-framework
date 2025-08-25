@@ -77,6 +77,7 @@ jobs:
     outputs:
       pr_number: ${{ steps.out.outputs.PR_NUMBER }}
       tag: ${{ steps.out.outputs.TAG }}
+      is_fork: ${{ steps.out.outputs.IS_FORK }}
     steps:
       - id: out
         shell: bash
@@ -84,11 +85,14 @@ jobs:
           if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "pull_request_target" ]]; then
             PR_NUMBER="${{ github.event.pull_request.number }}"
             HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            IS_FORK="${{ github.event.pull_request.head.repo.fork }}"
           else
             PR_NUMBER=""
             HEAD_SHA=""
+            IS_FORK="false"
           fi
           echo "PR_NUMBER=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "IS_FORK=$IS_FORK" >> "$GITHUB_OUTPUT"
 
           if [[ -n "$PR_NUMBER" ]]; then
             TAG="pr-${PR_NUMBER}-${HEAD_SHA}"
@@ -140,11 +144,11 @@ jobs:
 
   # Same-repo PRs & main pushes build the image
   build_regular:
-    needs: [decide, lint]
+    needs: [decide]
     if: >
       github.event_name != 'pull_request_target' && (
         github.event_name == 'push' ||
-        (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
+        (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true')
       )
     runs-on: cpu-runner-8c-32gb-01
     permissions:
@@ -172,10 +176,10 @@ jobs:
   # Fork PRs (base context) — gated by label
   # Publish fork PR image to org GHCR
   publish_fork_image:
-    needs: [decide, lint]
+    needs: [decide]
     if: >
       github.event_name == 'pull_request_target' &&
-      github.event.pull_request.head.repo.fork == true &&
+      needs.decide.outputs.is_fork == 'true' &&
       (
         (github.event.action == 'labeled' && github.event.label.name == 'trusted_contributor') ||
         (
@@ -213,16 +217,15 @@ jobs:
 
   # CPU tests (same-repo PRs & pushes; forks only if labeled)
   test-cpu:
-    needs: [lint, hf-datasets-cache]
+    needs: [decide, hf-datasets-cache] #lint
     # Run on: push, same-repo PRs, and fork PRs with the trusted label
     if: >
       github.event_name == 'push' ||
-      (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) ||
-      (github.event_name == 'pull_request_target' &&
-      github.event.pull_request.head.repo.fork &&
-      contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
-    runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space due to hf cache
-    container: derskythe/github-runner-base:ubuntu-noble  # has the right python, sudo and curl:)
+      (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') ||
+      (github.event_name == 'pull_request_target' && needs.decide.outputs.is_fork == 'true' &&
+       contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
+    runs-on: cpu-runner-8c-32gb-01
+    container: derskythe/github-runner-base:ubuntu-noble
     steps:
       - uses: actions/checkout@v4
         with:
@@ -242,15 +245,13 @@ jobs:
           export PATH=$HOME/.local/bin:$PATH
           poetry run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
-
-
   test-cpu-slow:
-    needs: [decide, lint]
+    needs: [decide] #lint
     if: >
       github.event_name == 'push' ||
-      (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) ||
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork &&
-      contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
+      (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') ||
+      (github.event_name == 'pull_request_target' && needs.decide.outputs.is_fork == 'true' &&
+       contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
     steps:
@@ -263,16 +264,15 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
       - name: Run tests
         run: |
           export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
           export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
           export PATH=$HOME/.local/bin:$PATH
-          poetry run python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
+          poetry run python -c "import nltk; nltk.download('punkt_tab')"
           poetry run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
-
 
   # GPU tests only in your org; proceed if a build succeeded
   test-gpu:
@@ -317,9 +317,8 @@ jobs:
       always() &&
       needs.test-cpu.result == 'success' &&
       needs.test-cpu-slow.result == 'success' &&
-      (needs.build_regular.result == 'success' || needs.publish_fork_image.result == 'success') &&
-      (needs.test-gpu.result == 'success' || needs.test-gpu.result == 'skipped')
-    needs: [decide, build_regular, publish_fork_image, test-cpu, test-cpu-slow, test-gpu]
+      (needs.build_regular.result == 'success' || needs.publish_fork_image.result == 'success')
+    needs: [decide, build_regular, publish_fork_image, test-cpu, test-cpu-slow]
     runs-on: EvalFrameworkGPURunner
     permissions:
       contents: read
