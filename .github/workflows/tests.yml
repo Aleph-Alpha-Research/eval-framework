@@ -85,7 +85,11 @@ jobs:
           if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "pull_request_target" ]]; then
             PR_NUMBER="${{ github.event.pull_request.number }}"
             HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-            IS_FORK="${{ github.event.pull_request.head.repo.fork }}"
+            if [[ "${{ github.event.pull_request.head.repo.fork }}" == "true" ]]; then
+              IS_FORK="true"
+            else
+              IS_FORK="false"
+            fi
           else
             PR_NUMBER=""
             HEAD_SHA=""
