@@ -214,6 +214,7 @@ jobs:
       (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) ||
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork &&
       contains(github.event.pull_request.labels.*.name, 'trusted_contributor'))
+    runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
     steps:
       - uses: actions/checkout@v4
@@ -390,7 +391,7 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       OWNER: ${{ github.repository_owner }}
-      PACKAGE: ${{ env.IMAGE_NAME }}
+      PACKAGE: eval_framework_public
     steps:
       - name: Install jq
         run: sudo apt-get update -y && sudo apt-get install -y jq
