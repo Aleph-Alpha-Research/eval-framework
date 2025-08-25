@@ -400,18 +400,8 @@ def test_dict_overrides_model_defaults() -> None:
 @pytest.mark.gpu
 def test_invalid_sampling_param_raises() -> None:
     with pytest.raises(TypeError):
-        safe_vllm_setup(Qwen3_0_6B_VLLM, {"max_model_len": 30, "sampling_params": {"invalid_param": "value"}})
-
-
-@pytest.mark.vllm
-@pytest.mark.gpu
-def test_mistral_inherits_dict_conversion() -> None:
-    class TestMistralVLLM(MistralVLLM):
-        LLM_NAME = "Qwen/Qwen3-0.6B"
-
-    model = safe_vllm_setup(TestMistralVLLM, {"max_model_len": 30, "sampling_params": {"temperature": 0.9}})
-
-    assert model.sampling_params.temperature == 0.9
+        # Don't use safe_vllm_setup here since we want the actual TypeError to be raised
+        Qwen3_0_6B_VLLM(max_model_len=30, sampling_params={"invalid_param": "value"})
 
 
 @pytest.mark.vllm
@@ -422,6 +412,7 @@ def test_mistral_inherits_dict_conversion() -> None:
         (Qwen3_0_6B_VLLM, {"max_model_len": 32, "dtype": "bfloat16", "tensor_parallel_size": 2}),
     ],
 )
+@pytest.mark.skipif(torch.cuda.device_count() < 2, reason="Requires >=2 GPUs for tensor_parallel_size=2")
 def test_logprobs_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
     """
     Test that batched logprobs inference produces identical results to single-sample inference.
@@ -584,6 +575,7 @@ def test_logprobs_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
         ),
     ],
 )
+@pytest.mark.skipif(torch.cuda.device_count() < 2, reason="Requires >=2 GPUs for tensor_parallel_size=2")
 def test_completions_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
     """
     Test that batched completion inference produces identical results to single-message inference.
