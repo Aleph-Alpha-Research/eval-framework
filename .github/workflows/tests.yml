@@ -248,16 +248,9 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
 
   # Fork PRs — Now can build from pull_request event using PAT!
-  # Fork PRs — Now can build from pull_request event using PAT!
-  # Fork PRs — Now can build from pull_request event using PAT!
   publish_fork_image:
     needs: [decide]
     if: >
-      (
-        github.event_name == 'pull_request' &&
-        needs.decide.outputs.is_fork == 'true' &&
-        contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
-      ) ||
       (
         github.event_name == 'pull_request_target' &&
         needs.decide.outputs.is_fork == 'true' &&
