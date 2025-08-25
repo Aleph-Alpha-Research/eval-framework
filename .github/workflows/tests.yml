@@ -329,7 +329,7 @@ jobs:
 
   # CPU tests (same-repo PRs & pushes; forks only if labeled)
   test-cpu:
-    needs: [decide, hf-datasets-cache] #lint
+    needs: [decide, hf-datasets-cache, lint]
     # Run on: push, same-repo PRs, and fork PRs with the trusted label
     if: >
       github.event_name == 'push' ||
@@ -360,7 +360,7 @@ jobs:
           poetry run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
-    needs: [decide] #lint
+    needs: [decide, lint, hf-datasets-cache]
     if: >
       github.event_name == 'push' ||
       (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') ||
