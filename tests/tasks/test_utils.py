@@ -649,7 +649,7 @@ def test_redis_cache() -> None:
             messages: List[Sequence[Message]],
             stop_sequences: list[str] | None = None,
             max_tokens: int | None = None,
-            temperature: float = 0.0,
+            temperature: float | None = None,
         ) -> List[RawCompletion]:
             return [self.do_one(single_messages) for single_messages in messages]
 
@@ -730,7 +730,7 @@ def test_redis_cache() -> None:
             messages: List[Sequence[Message]],
             stop_sequences: list[str] | None = None,
             max_tokens: int | None = None,
-            temperature: float = 0.0,
+            temperature: float | None = None,
         ) -> List[RawCompletion]:
             return [self.do_one(single_messages) for single_messages in messages]
 

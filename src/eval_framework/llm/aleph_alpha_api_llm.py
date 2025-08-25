@@ -239,8 +239,16 @@ class AlephAlphaAPIModel(BaseLLM):
         messages: List[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-        temperature: float = 0.0,
+        temperature: float | None = None,
     ) -> List[RawCompletion]:
+        if temperature is None:
+            effective_temperature = 0.0  # Current default, TODO: refactor to use model's default
+            logger.info(
+                f"Using default temperature value: {effective_temperature} as no custom temperature value was provided"
+            )
+        else:
+            effective_temperature = temperature
+
         requests = []
         assert self._formatter, "We need a formatter to generate from messages"
 
@@ -250,7 +258,7 @@ class AlephAlphaAPIModel(BaseLLM):
                     prompt=Prompt.from_text(self._formatter.format(single_messages, output_mode="string")),
                     maximum_tokens=max_tokens,
                     stop_sequences=stop_sequences,
-                    temperature=temperature,
+                    temperature=effective_temperature,
                 )
             )
 

@@ -20,7 +20,7 @@ class BaseLLM(ABC):
         messages: List[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-        temperature: float = 0.0,
+        temperature: float | None = None,
     ) -> List[RawCompletion]:
         """
         stop_sequences and max_tokens are injected by the task if exist. They should be overwritten or
@@ -52,7 +52,7 @@ class BaseLLM(ABC):
         samples: List[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-        temperature: float = 0.0,
+        temperature: float | None = None,
     ) -> List[RawCompletion]:
         messages: List[Sequence[Message]] = [sample.messages for sample in samples]
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
