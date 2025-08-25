@@ -48,6 +48,9 @@ class EvalContext(AbstractContextManager):
         task_subjects: list[str] | None = None,
         hf_revision: str | None = None,
         output_dir: Path | None = None,
+        wandb_project: str | None = None,
+        wandb_entity: str | None = None,
+        wandb_run_id: str | None = None,
         hf_upload_dir: str | None = None,
         hf_upload_repo: str | None = None,
         llm_args: dict[str, Any] | None = None,
@@ -69,6 +72,9 @@ class EvalContext(AbstractContextManager):
         self.task_subjects = task_subjects
         self.hf_revision = hf_revision
         self.output_dir = output_dir
+        self.wandb_project = wandb_project
+        self.wandb_entity = wandb_entity
+        self.wandb_run_id = wandb_run_id
         self.hf_upload_dir = hf_upload_dir
         self.hf_upload_repo = hf_upload_repo
         self.llm_args = llm_args

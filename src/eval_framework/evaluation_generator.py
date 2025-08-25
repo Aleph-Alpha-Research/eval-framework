@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 import pandas as pd
+import wandb
 from tqdm import tqdm
 
 from eval_framework.constants import RED, RESET
@@ -219,8 +220,10 @@ class EvaluationGenerator:
             raise ValueError("No saved completions found. Run 'run_completions' first.")
 
         metrics_results = self._run_metric_calculators(responses)
-
         aggregated_results = self._aggregate_results(metrics_results)
+
+        wandb.log(aggregated_results)
+
         self.result_processor.save_aggregated_results(aggregated_results)
         logger.info(aggregated_results)
         logger.info(f"{RED}[ Evaluation completed and results saved! ]{RESET}")

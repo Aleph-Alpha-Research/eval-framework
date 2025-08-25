@@ -37,6 +37,15 @@ options:
   --hf-revision HF_REVISION
         A tag name, a branch name, or commit hash for the task HF dataset.
 
+  --wandb-project WANDB_PROJECT
+      The name of the Weights & Biases project to log runs to.
+
+  --wandb-entity WANDB_ENTITY
+      The name of the Weights & Biases entity to log runs to.
+
+  --wandb-run-id WANDB_RUN_ID
+      The ID of an existing Weights & Biases run to resume.
+
   --task-subjects TASK_SUBJECTS [TASK_SUBJECTS ...]
         The subjects of the task to evaluate. If empty, all subjects are evaluated. Subjects in the form of tuples can be specified in a comma-delimited way, possibly using wildcard * in some dimensions of a tuple. Examples: "DE_DE, *" "FR_FR, astronomy".
 
