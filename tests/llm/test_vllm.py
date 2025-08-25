@@ -397,11 +397,10 @@ def test_dict_overrides_model_defaults() -> None:
 
 
 @pytest.mark.vllm
-@pytest.mark.gpu
 def test_invalid_sampling_param_raises() -> None:
     with pytest.raises(TypeError):
-        # Don't use safe_vllm_setup here since we want the actual TypeError to be raised
-        Qwen3_0_6B_VLLM(max_model_len=30, sampling_params={"invalid_param": "value"})
+        # Call the method on the class directly to avoid gpu context
+        VLLMModel._process_sampling_params(None, {"invalid_param": "value"})
 
 
 @pytest.mark.vllm
