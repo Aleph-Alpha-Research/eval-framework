@@ -18,18 +18,17 @@ on:
       - '**/*.sample'
       - '*.TAG'
       - '**/*.TAG'
-      # Ignore YAML/YML, but NOT workflow files
       - '*.yaml'
       - '**/*.yaml'
       - '*.yml'
       - '**/*.yml'
-      - '!/.github/workflows/**'   # keep workflows triggering
+      - '!/.github/workflows/**'
       - 'docs/**'
-      # - 'scripts/**'             # uncomment only if you truly want to skip scripts
       - 'LICENSE'
       - '.gitignore'
       - 'changelog/**'
   pull_request:
+    types: [opened, reopened, synchronize, labeled]
     branches: [main]
     paths-ignore:
       - '*.detignore'
@@ -46,14 +45,39 @@ on:
       - '**/*.sample'
       - '*.TAG'
       - '**/*.TAG'
-      # Ignore YAML/YML, but NOT workflow files
       - '*.yaml'
       - '**/*.yaml'
       - '*.yml'
       - '**/*.yml'
       - '!/.github/workflows/**'
       - 'docs/**'
-      # - 'scripts/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - 'changelog/**'
+  pull_request_target:
+    types: [opened, reopened, synchronize, labeled]
+    branches: [main]
+    paths-ignore:
+      - '*.detignore'
+      - '**/*.detignore'
+      - '*.example'
+      - '**/*.example'
+      - '*.json'
+      - '**/*.json'
+      - '*.md'
+      - '**/*.md'
+      - '*.png'
+      - '**/*.png'
+      - '*.sample'
+      - '**/*.sample'
+      - '*.TAG'
+      - '**/*.TAG'
+      - '*.yaml'
+      - '**/*.yaml'
+      - '*.yml'
+      - '**/*.yml'
+      - '!/.github/workflows/**'
+      - 'docs/**'
       - 'LICENSE'
       - '.gitignore'
       - 'changelog/**'
