@@ -247,15 +247,20 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
 
-  # Fork PRs (base context) — gated by label
-  # Publish fork PR image to org GHCR
-
+  # Fork PRs — Now can build from pull_request event using PAT!
   publish_fork_image:
     needs: [decide]
     if: >
-      github.event_name == 'pull_request_target' &&
-      needs.decide.outputs.is_fork == 'true' &&
-      contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
+      (
+        github.event_name == 'pull_request' &&
+        needs.decide.outputs.is_fork == 'true' &&
+        contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
+      ) ||
+      (
+        github.event_name == 'pull_request_target' &&
+        needs.decide.outputs.is_fork == 'true' &&
+        contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
+      )
     runs-on: cpu-runner-8c-32gb-01
     permissions:
       contents: read
@@ -264,25 +269,29 @@ jobs:
     steps:
       - name: Debug context
         run: |
-          echo "=== SECURITY CONTEXT ==="
-          echo "Running with repository context: ${{ github.repository }}"
-          echo "This job has YOUR org's permissions!"
+          echo "=== FORK BUILD CONTEXT ==="
+          echo "Event: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
           echo "Fork repo: ${{ github.event.pull_request.head.repo.full_name }}"
           echo "Fork SHA: ${{ github.event.pull_request.head.sha }}"
+          echo "Using PAT for authentication"
 
-      # IMPORTANT: Explicitly checkout the FORK's code
-      - name: Checkout fork PR code
+      # Checkout the appropriate code based on event type
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.sha }}
+          # For pull_request_target, explicitly get fork's code
+          # For pull_request, it's already the fork's code
+          repository: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
 
-      - name: Login to GHCR
+      # Use PAT for login to have write permissions
+      - name: Login to GHCR with PAT
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.GHCR_PAT_USERNAME }}
+          password: ${{ secrets.GHCR_PAT_TOKEN }}
 
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v3
@@ -296,31 +305,6 @@ jobs:
           provenance: false
           sbom: false
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
-
-    # Add a debug job specifically for fork build conditions
-  debug-fork-build:
-    needs: [decide]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_target'
-    steps:
-      - name: Debug fork build conditions
-        run: |
-          echo "=== FORK BUILD CONDITIONS DEBUG ==="
-          echo "Event: ${{ github.event_name }}"
-          echo "Event == pull_request_target: ${{ github.event_name == 'pull_request_target' }}"
-          echo "Is fork (from decide): ${{ needs.decide.outputs.is_fork }}"
-          echo "Is fork == 'true': ${{ needs.decide.outputs.is_fork == 'true' }}"
-          echo "PR labels: ${{ toJson(github.event.pull_request.labels.*.name) }}"
-          echo "Has trusted_contributor: ${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}"
-          echo ""
-          echo "=== FULL CONDITION CHECK ==="
-          echo "Condition 1 (event): ${{ github.event_name == 'pull_request_target' }}"
-          echo "Condition 2 (fork): ${{ needs.decide.outputs.is_fork == 'true' }}"
-          echo "Condition 3 (label): ${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}"
-          echo ""
-          echo "All conditions met: ${{ github.event_name == 'pull_request_target' && needs.decide.outputs.is_fork == 'true' && contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}"
-
-
 
   # Debug PR labels
   debug-pr-labels:
