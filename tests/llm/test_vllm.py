@@ -400,7 +400,7 @@ def test_dict_overrides_model_defaults() -> None:
 def test_invalid_sampling_param_raises() -> None:
     with pytest.raises(TypeError):
         # Call the method on the class directly to avoid gpu context
-        VLLMModel._process_sampling_params(None, {"invalid_param": "value"})
+        VLLMModel._process_sampling_params(None, {"invalid_param": "value"})  # type: ignore[arg-type]
 
 
 @pytest.mark.vllm
