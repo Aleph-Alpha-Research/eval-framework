@@ -97,16 +97,31 @@ jobs:
 
   publish_fork_image:
     needs: [decide]
-    if: >
-      github.event_name == 'pull_request_target' &&
-      needs.decide.outputs.is_fork == 'true' &&
-      contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
-    runs-on: cpu-runner-8c-32gb-01 # consider GitHub-hosted for public repos
+    # ✅ only require PR-TARGET at the job level so you always get logs for that run
+    if: github.event_name == 'pull_request_target'
+    runs-on: cpu-runner-8c-32gb-01
     permissions:
       contents: read
-      packages: write   # only needed if you ever switch to GITHUB_TOKEN for GHCR
+      # packages: write   # not needed if you only use PAT
       pull-requests: read
     steps:
+      - name: Debug gate inputs
+        run: |
+          echo "is_fork=${{ needs.decide.outputs.is_fork }}"
+          echo "labels=${{ join(github.event.pull_request.labels.*.name, ',') }}"
+          echo "event=${{ github.event_name }}"
+          echo "action=${{ github.event.action }}"
+          echo "head_repo=${{ github.event.pull_request.head.repo.full_name }}"
+          echo "head_sha=${{ github.event.pull_request.head.sha }}"
+
+      - name: Stop unless trusted fork
+        if: >
+          !(
+            needs.decide.outputs.is_fork == 'true' &&
+            contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
+          )
+        run: echo "Not a trusted fork — skipping build."; exit 0
+
       - name: Checkout fork code (PR head)
         uses: actions/checkout@v4
         with:
