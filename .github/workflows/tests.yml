@@ -55,6 +55,31 @@ on:
       - 'changelog/**'
   pull_request_target:
     types: [opened, reopened, synchronize, labeled, closed]
+    branches: [main]
+    paths-ignore:
+      - '*.detignore'
+      - '**/*.detignore'
+      - '*.example'
+      - '**/*.example'
+      - '*.json'
+      - '**/*.json'
+      - '*.md'
+      - '**/*.md'
+      - '*.png'
+      - '**/*.png'
+      - '*.sample'
+      - '**/*.sample'
+      - '*.TAG'
+      - '**/*.TAG'
+      - '*.yaml'
+      - '**/*.yaml'
+      - '*.yml'
+      - '**/*.yml'
+      - '!/.github/workflows/**'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - 'changelog/**'
   workflow_dispatch:
 
 permissions:
@@ -227,22 +252,9 @@ jobs:
   publish_fork_image:
     needs: [decide]
     if: >
-      (
-        github.event_name == 'pull_request_target' &&
-        needs.decide.outputs.is_fork == 'true' &&
-        (
-          (github.event.action == 'labeled' && github.event.label.name == 'trusted_contributor') ||
-          (
-            contains(github.event.pull_request.labels.*.name, 'trusted_contributor') &&
-            (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize')
-          )
-        )
-      ) ||
-      (
-        github.event_name == 'pull_request' &&
-        needs.decide.outputs.is_fork == 'true' &&
-        contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
-      )
+      github.event_name == 'pull_request_target' &&
+      needs.decide.outputs.is_fork == 'true' &&
+      contains(github.event.pull_request.labels.*.name, 'trusted_contributor')
     runs-on: cpu-runner-8c-32gb-01
     permissions:
       contents: read
