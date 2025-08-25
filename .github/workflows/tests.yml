@@ -72,6 +72,7 @@ env:
 
 jobs:
   # Decide (fork vs branch) + compute tag
+  # Decide (fork vs branch) + compute tag
   decide:
     runs-on: ubuntu-latest
     outputs:
@@ -82,6 +83,15 @@ jobs:
       - id: out
         shell: bash
         run: |
+          # Debug: Show event details
+          echo "=== DEBUG START ==="
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Event Action: ${{ github.event.action }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "Is Fork (raw): ${{ github.event.pull_request.head.repo.fork }}"
+          echo "=== DEBUG END ==="
+
           if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.event_name }}" == "pull_request_target" ]]; then
             PR_NUMBER="${{ github.event.pull_request.number }}"
             HEAD_SHA="${{ github.event.pull_request.head.sha }}"
@@ -95,6 +105,13 @@ jobs:
             HEAD_SHA=""
             IS_FORK="false"
           fi
+
+          # Debug: Show computed values
+          echo "=== COMPUTED VALUES ==="
+          echo "PR_NUMBER=$PR_NUMBER"
+          echo "IS_FORK=$IS_FORK"
+          echo "HEAD_SHA=$HEAD_SHA"
+
           echo "PR_NUMBER=$PR_NUMBER" >> "$GITHUB_OUTPUT"
           echo "IS_FORK=$IS_FORK" >> "$GITHUB_OUTPUT"
 
@@ -103,7 +120,30 @@ jobs:
           else
             TAG="latest"
           fi
+
+          echo "TAG=$TAG"
+          echo "=== END COMPUTED VALUES ==="
+
           echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+
+  # Add a debug job to see the outputs
+  debug-outputs:
+    needs: [decide]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Show outputs
+        run: |
+          echo "=== OUTPUTS FROM DECIDE ==="
+          echo "pr_number: ${{ needs.decide.outputs.pr_number }}"
+          echo "tag: ${{ needs.decide.outputs.tag }}"
+          echo "is_fork: ${{ needs.decide.outputs.is_fork }}"
+          echo "is_fork == 'true': ${{ needs.decide.outputs.is_fork == 'true' }}"
+          echo "is_fork != 'true': ${{ needs.decide.outputs.is_fork != 'true' }}"
+          echo "=== CONTEXT INFO ==="
+          echo "event_name: ${{ github.event_name }}"
+          echo "repository_owner: ${{ github.repository_owner }}"
+          echo "ref: ${{ github.ref }}"
 
   lint:
     runs-on: ubuntu-latest
@@ -158,6 +198,15 @@ jobs:
       packages: write
     container: docker:dind
     steps:
+      - name: Debug why this might be skipped
+        if: always()
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Is fork output: ${{ needs.decide.outputs.is_fork }}"
+          echo "Condition 1 (push): ${{ github.event_name == 'push' }}"
+          echo "Condition 2a (PR): ${{ github.event_name == 'pull_request' }}"
+          echo "Condition 2b (not fork): ${{ needs.decide.outputs.is_fork != 'true' }}"
+          echo "Full condition: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && needs.decide.outputs.is_fork != 'true') }}"
       - uses: actions/checkout@v4
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -194,6 +243,33 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Debug why this might be skipped
+        if: always()
+        run: |
+          echo "=== DEBUG PUBLISH_FORK_IMAGE ==="
+          echo "Event: ${{ github.event_name }}"
+          echo "Event action: ${{ github.event.action }}"
+          echo "Is fork output from decide: '${{ needs.decide.outputs.is_fork }}'"
+          echo ""
+          echo "Condition 1 (event): ${{ github.event_name == 'pull_request_target' }}"
+          echo "Condition 2 (is_fork): ${{ needs.decide.outputs.is_fork == 'true' }}"
+          echo ""
+          echo "Label conditions:"
+          echo "  - Action is 'labeled': ${{ github.event.action == 'labeled' }}"
+          echo "  - Label name: '${{ github.event.label.name }}'"
+          echo "  - Label is 'trusted_contributor': ${{ github.event.label.name == 'trusted_contributor' }}"
+          echo ""
+          echo "PR labels: ${{ toJson(github.event.pull_request.labels.*.name) }}"
+          echo "Contains trusted_contributor: ${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}"
+          echo ""
+          echo "Other PR event conditions:"
+          echo "  - opened: ${{ github.event.action == 'opened' }}"
+          echo "  - reopened: ${{ github.event.action == 'reopened' }}"
+          echo "  - synchronize: ${{ github.event.action == 'synchronize' }}"
+          echo ""
+          echo "Full label condition (labeled): ${{ (github.event.action == 'labeled' && github.event.label.name == 'trusted_contributor') }}"
+          echo "Full label condition (existing): ${{ (contains(github.event.pull_request.labels.*.name, 'trusted_contributor') && (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize')) }}"
+          echo "=== END DEBUG ==="
       - name: Checkout PR merge ref
         uses: actions/checkout@v4
         with:
