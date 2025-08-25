@@ -161,14 +161,17 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         required=False,
-        help="The name of the Weights & Biases entity to log runs to.",
+        help="The name of the Weights & Biases entity to log runs to. "
+        "Defaults to the user's default entity",
     )
     parser.add_argument(
         "--wandb-run-id",
         type=str,
         default=None,
         required=False,
-        help="The ID of an existing Weights & Biases run to resume.",
+        help="The ID of an existing Weights & Biases run to resume. "
+        "If not given, creates a new fun. If given and exists, "
+        "will continue the run but will overwrite the pthon command logged in wandb.",
     )
     parser.add_argument(
         "--description",

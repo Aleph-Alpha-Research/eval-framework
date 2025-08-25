@@ -41,10 +41,10 @@ options:
       The name of the Weights & Biases project to log runs to.
 
   --wandb-entity WANDB_ENTITY
-      The name of the Weights & Biases entity to log runs to.
+      The name of the Weights & Biases entity to log runs to. Defaults to the user's default entity.
 
   --wandb-run-id WANDB_RUN_ID
-      The ID of an existing Weights & Biases run to resume.
+      The ID of an existing Weights & Biases run to resume. If not given, creates a new run. If given and exists, will continue the run but will overwrite the python command logged in WandB
 
   --task-subjects TASK_SUBJECTS [TASK_SUBJECTS ...]
         The subjects of the task to evaluate. If empty, all subjects are evaluated. Subjects in the form of tuples can be specified in a comma-delimited way, possibly using wildcard * in some dimensions of a tuple. Examples: "DE_DE, *" "FR_FR, astronomy".
