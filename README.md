@@ -86,7 +86,7 @@ While the CLI is great for quick runs, the Python interface offers maximum flexi
      results = main(llm=llm, config=config)
 ```
 
-#### How to choose the between local and cluster execution
+#### How to choose between local and cluster execution
 
 | Local Prototyping | Cluster Execution |
 | :--- | :--- |
