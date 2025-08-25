@@ -151,6 +151,18 @@ jobs:
 
           echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
 
+  debug-fork-job-condition:
+    needs: [decide]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target'
+    steps:
+      - run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "is_fork: ${{ needs.decide.outputs.is_fork }}"
+          echo "Labels: ${{ toJson(github.event.pull_request.labels.*.name) }}"
+          echo "Has trusted_contributor: ${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}"
+
+
   # Add a debug job to see the outputs
   debug-outputs:
     needs: [decide]
