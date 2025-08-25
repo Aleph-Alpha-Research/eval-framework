@@ -249,6 +249,7 @@ jobs:
 
   # Fork PRs — Now can build from pull_request event using PAT!
   # Fork PRs — Now can build from pull_request event using PAT!
+  # Fork PRs — Now can build from pull_request event using PAT!
   publish_fork_image:
     needs: [decide]
     if: >
@@ -324,8 +325,6 @@ jobs:
           provenance: false
           sbom: false
           tags: ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.decide.outputs.tag }}
-
-
 
   # Debug PR labels
   debug-pr-labels:
