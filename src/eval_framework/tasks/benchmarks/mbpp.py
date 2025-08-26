@@ -8,6 +8,7 @@ from eval_framework.metrics.completion_metrics.code_assertion import (
 )
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +39,8 @@ class MBPP(BaseTask[str]):
     SUBJECTS = ["full"]  # , "sanitized"]  # these are HF dataset SUBSETS!
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences = [END]
 
     @staticmethod

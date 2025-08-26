@@ -9,6 +9,7 @@ from typing import Any
 from eval_framework.exceptions import LogicError
 from eval_framework.metrics.completion_metrics.rouge_l import ROUGE_L
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 from eval_framework.tasks.utils import run_python_code
 from template_formatting.formatter import Role
 
@@ -41,13 +42,13 @@ class TableBench(BaseTask[tuple[str, str]]):
     SUBJECTS = list(product(TABLE_BENCH_INSTRUCTION_TYPES, TABLE_BENCH_SUBJECTS))
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for TableBench"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _load_dataset(self, subject: tuple[str, str]) -> None:
         instruction_type, qtype = subject
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=None)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=None)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)

@@ -18,9 +18,6 @@ class PAWSX(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Ja", "Nein", "Paraphrasen", "Yes", "No", "paraphrases"]
     LANGUAGE = {"en": Language.ENG, "de": Language.DEU}
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        self.num_fewshot = num_fewshot
-
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         # PARAPHRASUS seems to use English prompt for all languages but that's a bit weird, let's do it properly.
         match item["subject"]:

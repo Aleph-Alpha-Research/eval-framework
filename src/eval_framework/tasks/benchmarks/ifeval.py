@@ -2,6 +2,7 @@ from typing import Any
 
 from eval_framework.metrics.completion_metrics.ifeval import IFEvalMetric, IFEvalMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataloader import Dataloader
 
 
 class IFEval(BaseTask[str]):
@@ -16,8 +17,8 @@ class IFEval(BaseTask[str]):
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = {NO_SUBJECT: Language.ENG}
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         assert num_fewshot == 0, "IFEval does not support few-shot prompting."
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

@@ -18,6 +18,7 @@ from typing import Any
 
 from eval_framework.metrics.completion_metrics import AccuracyCompletion  # Import your metrics
 from eval_framework.tasks.base import BaseTask, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 
 class YourBenchmarkTask(BaseTask[str]):  # Replace with your class name
@@ -30,8 +31,8 @@ class YourBenchmarkTask(BaseTask[str]):  # Replace with your class name
     METRICS = [AccuracyCompletion]  # List your metric classes
     SUBJECTS = ["subject1", "subject2"]  # Define your subjects/categories
 
-    def __init__(self, subjects: list[str] | None = None, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, subjects: list[str] | None = None, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.subjects = subjects or self.SUBJECTS
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -94,8 +95,8 @@ class GeographyQATask(BaseTask[str]):
     METRICS = [AccuracyCompletion]
     SUBJECTS = ["Europe", "Asia"]
 
-    def __init__(self, subjects: list[str] | None = None, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, subjects: list[str] | None = None, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.subjects = subjects or self.SUBJECTS
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

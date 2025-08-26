@@ -4,6 +4,7 @@ import pycountry
 
 from eval_framework.metrics.completion_metrics.bleu import BLEU
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 FLORES_LANGUAGES = [
     "deu_Latn",
@@ -33,8 +34,8 @@ class Flores200(BaseTask[str]):
         "nld_Latn": Language.NLD,
     }
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences = ["\n"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

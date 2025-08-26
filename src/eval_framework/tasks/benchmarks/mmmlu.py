@@ -11,6 +11,7 @@ from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import 
 )
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.benchmarks.mmlu import MMLU_SUBJECTS
+from eval_framework.tasks.dataloader import Dataloader
 from eval_framework.tasks.utils import get_n_letters
 
 MMMLU_LANGS = ["FR_FR", "DE_DE", "ES_LA", "IT_IT", "PT_BR", "AR_XY"]
@@ -432,13 +433,13 @@ class MMMLU(BaseTask[tuple[str, str]]):
         for subject in subjects
     }
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.keys = get_n_letters(4)
 
     def _load_dataset(self, subject: tuple[str, str]) -> None:
         lang, current_subject = subject
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=lang)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=lang)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)
@@ -490,9 +491,9 @@ class MMMLU_GERMAN_COT(MMMLU):
 
     ANS_RE = re.compile(r"Daher lautet die Antwort: ([ABCD])")
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for MMMLU_GERMAN_COT"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["Frage:", "Question:"]
 
     def _extract_answer(self, completion: str) -> str:

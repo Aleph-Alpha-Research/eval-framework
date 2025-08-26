@@ -140,7 +140,7 @@ class TRUTHFULQA_EU20_DE(TRUTHFULQA):
         subject names to huggingface."""
 
         self.target_identifier = f"{str(subject)}_targets"
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name="mc_DE")
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name="mc_DE")
         self.dataset = {}
         self.rnd = random.Random(RANDOM_SEED)
 
@@ -186,7 +186,7 @@ class TRUTHFULQA_EU20_FR(TRUTHFULQA):
 
     def _load_dataset(self, subject: SubjectType) -> None:
         self.target_identifier = f"{str(subject)}_targets"
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name="mc_FR")
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name="mc_FR")
         self.dataset = {}
         self.rnd = random.Random(RANDOM_SEED)
 
@@ -223,7 +223,7 @@ class MMLU_EU20_DE(MMLU):
     def _load_dataset(self, subject: SubjectType) -> None:
         name = subject if subject != NO_SUBJECT else None
 
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)
@@ -329,7 +329,7 @@ class MMLU_EU20_FR(MMLU):
     def _load_dataset(self, subject: SubjectType) -> None:
         name = subject if subject != NO_SUBJECT else None
 
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)

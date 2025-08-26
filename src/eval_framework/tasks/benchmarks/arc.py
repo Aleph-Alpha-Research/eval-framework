@@ -5,6 +5,7 @@ from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import 
     AccuracyNormLoglikelihood,
 )
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
+from eval_framework.tasks.dataloader import Dataloader
 from eval_framework.tasks.utils import get_n_letters
 
 
@@ -21,8 +22,8 @@ class ARC(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"] + get_n_letters(5)
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
         self.keys = get_n_letters(5)  # needs to be 5 because there is one sample with 5 answer possibilities
         self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}

@@ -3,6 +3,7 @@ from typing import Any
 
 from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 ANS_RE = re.compile(r"#### (\-?[0-9\.\,]+)")
 
@@ -98,8 +99,8 @@ class GSM8K(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
         # until: https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/gsm8k/gsm8k.yaml
         self.stop_sequences: list[str] = ["Question:"]
@@ -134,9 +135,9 @@ class GSM8KLlamaVersion(GSM8K):
     NAME = "GSM8K Llama Version"
     FEWSHOT_SPLIT = ""  # Changed to empty string since we're using predefined examples
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot <= len(FEWSHOT_ITEMS), f"Fewshot larger than {len(FEWSHOT_ITEMS)} is not supported for GSM8K"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         # Remove the bracketed computations from the question

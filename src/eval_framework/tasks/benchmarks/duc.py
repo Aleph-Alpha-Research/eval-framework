@@ -6,6 +6,7 @@ from typing import Any
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 
 class DUC(BaseTask[str], ABC):
@@ -20,9 +21,8 @@ class DUC(BaseTask[str], ABC):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Text", "Keyphrase"]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
-
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["Text:"]
         self.max_tokens = 50  # longest keyphrase is less than 50 characters long
 
@@ -68,16 +68,13 @@ class DUC_ABSTRACTIVE(DUC):
 
     def _load_dataset(self, subject: str) -> None:
         # not all samples have abstractive keyphrases
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=subject)
         self.dataset = {}
-
         for split, data in hf_dataset.items():
             data_list = list(filter(lambda x: len(x["abstractive_keyphrases"]) > 0, data))
-
             if split == self.SAMPLE_SPLIT:
                 self.rnd = random.Random(RANDOM_SEED)
                 self.rnd.shuffle(data_list)
-
             if split in [self.SAMPLE_SPLIT, self.FEWSHOT_SPLIT]:
                 self.dataset[split] = data_list
 

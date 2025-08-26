@@ -14,6 +14,7 @@ from eval_framework.tasks.base import (
     Sample,
     SubjectType,
 )
+from eval_framework.tasks.dataloader import Dataloader
 
 PROMPT_INSTRUCTION = (
     "Please provide a self-contained Python script, without tests or example usage, that solves the following "
@@ -39,12 +40,12 @@ class BigCodeBench(BaseTask[str]):
     SUBJECTS = ["original", "calibrated"]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for BigCodeBench"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _load_dataset(self, subject: SubjectType) -> None:
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=None)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=None)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)

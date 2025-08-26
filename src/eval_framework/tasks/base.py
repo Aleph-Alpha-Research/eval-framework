@@ -1,17 +1,13 @@
-import os
 import random
 from abc import ABC, abstractmethod
 from enum import Enum
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Generic, Iterable, TypeVar
 
 import iso639
-from datasets import DownloadConfig, load_dataset
-from huggingface_hub import HfApi
-from huggingface_hub.errors import RevisionNotFoundError
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext
+from eval_framework.tasks.dataloader import Dataloader
 from template_formatting.formatter import Message, Role
 
 if TYPE_CHECKING:
@@ -89,41 +85,26 @@ class BaseTask(ABC, Generic[SubjectType]):
     # language by subtopic, or `None` (for tasks not specific to a single language).
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         self.num_fewshot = num_fewshot
         self.stop_sequences: list[str] | None = None
         self.max_tokens: int | None = None
-
-    def _load_hf_dataset(self, **kwargs: Any) -> Any:
-        # Check if the HF_REVISION is valid before loading the dataset
-        if self.HF_REVISION:
-            try:
-                _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=self.HF_REVISION, timeout=100.0)
-            except Exception as e:
-                if isinstance(e, RevisionNotFoundError):
-                    raise e
-
-        cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
-        download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
-        try:
-            return load_dataset(
-                **kwargs,
-                revision=self.HF_REVISION,
-                trust_remote_code=True,
-                cache_dir=cache_dir,
-                download_config=download_config,
-            )
-        except Exception:
-            return load_dataset(
-                **kwargs,
-                revision=self.HF_REVISION,
-                trust_remote_code=True,
-                cache_dir=f"{Path.home()}/.cache/eval-framework",
-            )
+        self.dataloader = dataloader
 
     def _load_dataset(self, subject: SubjectType) -> None:
         name = subject if subject != NO_SUBJECT else None
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        hf_dataset = (
+            self.dataloader.load(
+                path=self.DATASET_PATH,
+                name=name,
+                hf_revision=self.HF_REVISION,
+            )
+            if self.HF_REVISION
+            else self.dataloader.load(
+                path=self.DATASET_PATH,
+                name=name,
+            )
+        )
         self.dataset = {}
         self.rnd = random.Random(RANDOM_SEED)
 

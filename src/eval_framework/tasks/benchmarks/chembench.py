@@ -6,6 +6,7 @@ from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import 
     AccuracyNormLoglikelihood,
 )
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
+from eval_framework.tasks.dataloader import Dataloader
 from eval_framework.tasks.utils import get_n_letters
 
 CHEMBENCH_SUBJECTS = [
@@ -33,10 +34,9 @@ class ChemBenchMultipleChoice(BaseTask[str]):
     SUBJECTS = CHEMBENCH_SUBJECTS
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for ChemBench"
-        super().__init__(num_fewshot)
-
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.keys = get_n_letters(16)
 
     def _load_dataset(self, subject: str) -> None:

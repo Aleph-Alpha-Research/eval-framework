@@ -91,6 +91,7 @@ from eval_framework.tasks.benchmarks.zero_scrolls import (
     ZERO_SCROLLS_SPACE_DIGEST,
     ZERO_SCROLLS_SQUALITY,
 )
+from eval_framework.tasks.dataloader import HFDataloader
 
 logger = logging.getLogger(__name__)
 
@@ -224,7 +225,7 @@ TaskName._check_no_duplicate_names()
 
 def make_sure_all_hf_datasets_are_in_cache() -> None:
     for task_name in TaskName:
-        task = task_name.value()
+        task = task_name.value(dataloader=HFDataloader())
         for attempt in range(100):
             try:
                 for _ in task.iterate_samples(num_samples=1):

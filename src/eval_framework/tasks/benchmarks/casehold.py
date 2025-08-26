@@ -21,7 +21,7 @@ class CASEHOLD(BaseTask[str]):
     def _load_dataset(self, subject: str) -> None:
         name = subject if subject != NO_SUBJECT else None
 
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)

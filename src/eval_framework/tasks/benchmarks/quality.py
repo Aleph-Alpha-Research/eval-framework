@@ -6,6 +6,7 @@ from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import 
     AccuracyNormLoglikelihood,
 )
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
+from eval_framework.tasks.dataloader import Dataloader
 
 
 class QUALITY(BaseTask[str]):
@@ -20,12 +21,12 @@ class QUALITY(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Article", "Question", "Answer"]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "QuALITY only supports zero fewshot examples"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _load_dataset(self, subject: SubjectType) -> None:
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)
