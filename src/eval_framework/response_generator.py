@@ -156,6 +156,8 @@ class ResponseGenerator:
                 RawCompletion(
                     prompt="",
                     prompt_sequence_positions=0,
+                    prompt_concat="",
+                    prompt_concat_sequence_positions=0,
                     completion="",
                     completion_sequence_positions=0,
                     raw_completion_error=Error(
