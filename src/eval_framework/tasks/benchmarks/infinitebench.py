@@ -1,10 +1,8 @@
-import os
 import re
 from abc import ABC
-from pathlib import Path
 from typing import Any
 
-from datasets import DownloadConfig, Features, Sequence, Value, load_dataset
+from datasets import Features, Sequence, Value
 
 from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import AccuracyLoglikelihood
@@ -26,30 +24,17 @@ class InfiniteBench(BaseTask[str], ABC):
     def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Few-shots are not supported for long-context InfiniteBench tasks"
         super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
-
-    def _load_hf_dataset(self, **kwargs: Any) -> Any:
-        cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
-        download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
-        ft = Features(
-            {
-                "id": Value("int64"),
-                "context": Value("string"),
-                "input": Value("string"),
-                "answer": Sequence(Value("string")),
-                "options": Sequence(Value("string")),
-            }
+        dataloader.set_features(
+            Features(
+                {
+                    "id": Value("int64"),
+                    "context": Value("string"),
+                    "input": Value("string"),
+                    "answer": Sequence(Value("string")),
+                    "options": Sequence(Value("string")),
+                }
+            )
         )
-        try:
-            return load_dataset(
-                **kwargs, trust_remote_code=True, cache_dir=cache_dir, download_config=download_config, features=ft
-            )
-        except Exception:
-            return load_dataset(
-                **kwargs,
-                trust_remote_code=True,
-                cache_dir=f"{Path.home()}/.cache/eval-framework",
-                features=ft,
-            )
 
 
 class InfiniteBenchLoglikelihood(InfiniteBench, ABC):
