@@ -1,7 +1,7 @@
 # Aleph Alpha Eval-Framework
 
 
-> **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 150+ benchmarks. It is designed for both rapid experimentation and large-scale, reproducible research.
+> **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 90+ benchmarks. It is designed for both rapid experimentation and large-scale, reproducible research.
 
 ![eval-framework](docs/eval-framework.png "eval-framework")
 
