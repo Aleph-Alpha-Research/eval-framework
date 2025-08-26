@@ -3,8 +3,10 @@
 
 > **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 150+ benchmarks. It is designed for both rapid experimentation and large-scale, reproducible research.
 
+![eval-framework](docs/eval-framework.png "eval-framework")
+
 Why Choose This Framework?
-![advantages](docs/advantages.png "advantages")
+<!--- ![advantages](docs/advantages.png "advantages") --->
 - **Scalability**: Built for distributed evaluation using an integration with Determined AI.
 - **Extensibility**: Easily add custom models, benchmarks, and metrics with object-oriented base classes.
 - **Comprehensive**: Comes pre-loaded with over 150 tasks covering everything from reasoning and coding to safety and long-context.
@@ -114,9 +116,6 @@ While the CLI is great for quick runs, the Python interface offers maximum flexi
 - Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
 - Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
 - LLM-as-a-Judge: Evaluation using LLM judges.
-
-
-![eval-framework](docs/eval-framework.png "eval-framework")
 
 
 ## Benchmark Coverage & Task Categories
