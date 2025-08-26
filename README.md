@@ -3,10 +3,10 @@
 
 > **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 90+ benchmarks. It is designed for both rapid experimentation and large-scale, reproducible research.
 
-![eval-framework](docs/eval-framework.png "eval-framework")
+<!--- ![eval-framework](docs/eval-framework.png "eval-framework") --->
+![advantages](docs/advantages.png "advantages")
 
 Why Choose This Framework?
-<!--- ![advantages](docs/advantages.png "advantages") --->
 - **Scalability**: Built for distributed evaluation using an integration with Determined AI.
 - **Extensibility**: Easily add custom models, benchmarks, and metrics with object-oriented base classes.
 - **Comprehensive**: Comes pre-loaded with over 150 tasks covering everything from reasoning and coding to safety and long-context.
