@@ -171,7 +171,7 @@ For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmark
 Eval-Framework provides a unified interface for evaluating language models across diverse benchmarks. The framework follows this interaction model:
 
 1. **Define Your Model** - Specify which model to evaluate (HuggingFace, API, or custom)
-2. **Choose Your Task** - Select from 150+ available benchmarks or create custom ones
+2. **Choose Your Task** - Select from 90+ available benchmarks or create custom ones
 3. **Configure Evaluation** - Set parameters like few-shot examples, sample count, and output format
 4. **Run Evaluation** - Execute locally via CLI/script or distribute via Determined AI
 5. **Analyze Results** - Review detailed JSON outputs, metrics, and generated reports
