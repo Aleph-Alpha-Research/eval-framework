@@ -19,7 +19,7 @@ from eval_framework.tasks.benchmarks.chembench import ChemBenchMultipleChoice
 from eval_framework.tasks.benchmarks.copa import COPA
 from eval_framework.tasks.benchmarks.duc import DUC_ABSTRACTIVE, DUC_EXTRACTIVE
 from eval_framework.tasks.benchmarks.flores200 import Flores200
-from eval_framework.tasks.benchmarks.flores_plus import FloresPlus
+# from eval_framework.tasks.benchmarks.flores_plus import FloresPlus
 from eval_framework.tasks.benchmarks.gpqa import GPQA, GPQA_COT
 from eval_framework.tasks.benchmarks.gsm8k import GSM8K, GSM8KLlamaVersion
 from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
@@ -119,7 +119,7 @@ class TaskName(TaskNameEnum):
     DUC_ABSTRACTIVE = DUC_ABSTRACTIVE
     DUC_EXTRACTIVE = DUC_EXTRACTIVE
     FLORES200 = Flores200
-    FLORES_PLUS = FloresPlus
+    # FLORES_PLUS = FloresPlus
     GPQA = GPQA
     GPQA_COT = GPQA_COT
     GSM8K = GSM8K
