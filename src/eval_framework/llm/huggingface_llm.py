@@ -98,8 +98,16 @@ class HFLLM(BaseLLM):
         messages: List[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-        temperature: float = 0.0,
+        temperature: float | None = None,
     ) -> List[RawCompletion]:
+        if temperature is None:
+            effective_temperature = 0.0  # Current default, TODO: refactor to use model's default
+            logger.info(
+                f"Using default temperature value: {effective_temperature} as no custom temperature value was provided"
+            )
+        else:
+            effective_temperature = temperature
+
         raw_completions = []
         for single_messages in messages:
             # format
@@ -148,7 +156,7 @@ class HFLLM(BaseLLM):
                 continue
 
             completion, completion_token_count = self._model_generate(
-                redis_key=(prompt, stop_sequences, max_tokens_to_generate, temperature),
+                redis_key=(prompt, stop_sequences, max_tokens_to_generate, effective_temperature),
                 prompt_token_count=prompt_token_count,
                 inputs=inputs["input_ids"],
                 max_new_tokens=max_tokens_to_generate,
@@ -157,8 +165,8 @@ class HFLLM(BaseLLM):
                 pad_token_id=pad_token_id,
                 return_dict_in_generate=False,
                 output_scores=False,
-                do_sample=False,  # Ensure deterministic output
-                temperature=temperature if temperature > 0 else None,
+                do_sample=effective_temperature > 0,
+                temperature=effective_temperature if effective_temperature > 0 else None,
             )
 
             raw_completions.append(

@@ -21,7 +21,7 @@ class OpenAIModel(BaseLLM):
         self,
         model_name: str = "gpt-4o",
         formatter: BaseFormatter | None = None,
-        temperature: float = 0.0,
+        temperature: float | None = None,
         api_key: str | None = None,
         organization: str | None = None,
         base_url: str | None = None,
@@ -58,8 +58,15 @@ class OpenAIModel(BaseLLM):
         messages: List[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-        temperature: float = 0.0,
+        temperature: float | None = None,
     ) -> List[RawCompletion]:
+        if temperature is None:
+            effective_temperature = 0.0  # Current default, TODO: refactor to use model's default
+            logger.info(
+                f"Using default temperature value: {effective_temperature} as no custom temperature value was provided"
+            )
+        else:
+            effective_temperature = temperature
         """Generate completion from messages.
         Args:
             messages: Sequence of messages
@@ -76,7 +83,7 @@ class OpenAIModel(BaseLLM):
                 response = self._client.completions.create(
                     model=self._model_name,
                     prompt=prompt,
-                    temperature=self._temperature,
+                    temperature=effective_temperature,
                     max_tokens=max_tokens,
                     stop=stop_sequences,
                 )
@@ -109,7 +116,7 @@ class OpenAIModel(BaseLLM):
                 chat_response = self._client.chat.completions.create(
                     model=self._model_name,
                     messages=chat_messages,
-                    temperature=self._temperature,
+                    temperature=effective_temperature,
                     max_tokens=max_tokens,
                     stop=stop_sequences,
                 )

@@ -1,7 +1,9 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Literal
+
+import wandb
 
 from eval_framework.constants import RED, RESET
 from eval_framework.evaluation_generator import EvaluationGenerator, Result
@@ -22,14 +24,13 @@ def main(
     trial_id: int | None = None,
 ) -> list[Result]:
     """Runs the entire evaluation process: responses generation and evaluation."""
-
     # Set up centralized logging early
-    output_dir = generate_output_dir(llm.__class__.__name__, config)
+    output_dir = generate_output_dir(llm.name, config)
     print(f"Output directory for evaluation: {output_dir}")
     setup_logging(output_dir=output_dir, log_level=logging.INFO, log_filename="evaluation.log")
 
     logger.info(f"{RED}[ Running full evaluation process ------- ]{RESET}")
-    logger.info(f"Evaluating {llm.__class__.__name__} on {config.task_name.name}")
+    logger.info(f"Evaluating {llm.name} on {config.task_name.name}")
     logger.info(f"Configuration: num_fewshot={config.num_fewshot}, num_samples={config.num_samples}")
     logger.info(f"Output directory: {output_dir}")
 
@@ -42,39 +43,61 @@ def main(
 
     if preemption_data is None:
         output_dir = generate_output_dir(llm.name, config)
+        # config.wandb_run_id  defaults to none, if no run_id is provided then it starts a new one
+        wandb_run_id = config.wandb_run_id
     else:
         logger.info("Found preempted run restarting ...")
         output_dir = preemption_data["output_dir"]
+        wandb_run_id = preemption_data.get("wandb_run_id", None)
 
     logger.info(f"Output directory: {output_dir}")
     assert output_dir is not None
 
     file_processor = ResultsFileProcessor(output_dir)
     response_generator = ResponseGenerator(llm, config, file_processor)
-    _, preempted = response_generator.generate(should_preempt_callable)
-    if preempted:
-        logger.info("Response generation was preempted")
-        assert trial_id is not None
-        _save_preemption_data(config, trial_id, output_dir)
-        return []
+    # take care of init after preemption handling. If we have a run
+    # id from preemption, then we resume the original wandb run
+    with wandb.init(
+        entity=config.wandb_entity,
+        project=config.wandb_project,
+        group=llm.name,
+        job_type=config.task_name.name,
+        id=wandb_run_id,
+        config=response_generator._get_metadata(),
+        resume="allow",
+        mode=_wandb_mode(config.wandb_project),
+    ) as run:
+        _, preempted = response_generator.generate(should_preempt_callable)
+        if preempted:
+            logger.info("Response generation was preempted")
+            assert trial_id is not None
+            run.mark_preempting()
+            _save_preemption_data(config, trial_id, output_dir, wandb_run_id=run.id)
+            wandb.finish(exit_code=1)
+            return []
+        # update config from response generator with get metadata
+        if trial_id is not None:
+            _delete_preemption_file(config, trial_id)
 
-    if trial_id is not None:
-        _delete_preemption_file(config, trial_id)
+        evaluator = EvaluationGenerator(config, file_processor)
+        results = evaluator.run_eval()
 
-    evaluator = EvaluationGenerator(config, file_processor)
-    results = evaluator.run_eval()
-
-    if config.hf_upload_dir:
-        hf_processor = HFProcessor(config, output_dir)
-        status = hf_processor.upload_responses_to_HF()
-        if not status:
-            status_message = "*** Warning: Result upload to HF failed ***"
+        if config.hf_upload_dir:
+            hf_processor = HFProcessor(config, output_dir)
+            status, hf_url = hf_processor.upload_responses_to_HF()
+            if not status:
+                status_message = "*** Warning: Result upload to HF failed ***"
+            else:
+                status_message = "Successfully uploaded results to HuggingFace"
+                if hf_url and run:
+                    try:
+                        run.notes = f"Results uploaded to HuggingFace: [{hf_url}]({hf_url})"
+                    except Exception as e:
+                        logger.warning(f"Failed to update wandb notes with HF URL: {e}")
         else:
-            status_message = "Successfully uploaded results to HuggingFace"
-    else:
-        status_message = f"{RED}[ Results not persisted in a HuggingFace repo ------- ]{RESET}"
+            status_message = f"{RED}[ Results not persisted in a HuggingFace repo ------- ]{RESET}"
 
-    logger.info(status_message)
+        logger.info(status_message)
 
     return results
 
@@ -86,14 +109,15 @@ def _read_preemption_data(config: EvalConfig, trial_id: int) -> dict[str, Any] |
     with open(preemption_file, "rb") as f:
         preemption_data = json.load(f)
         preemption_data["output_dir"] = Path(preemption_data["output_dir"])
+        preemption_data["wandb_run_id"] = preemption_data.get("wandb_run_id", "")
         logger.info(f"Loaded preemption data from {preemption_file}")
         return preemption_data
 
 
-def _save_preemption_data(config: EvalConfig, trial_id: int, output_dir: Path) -> None:
+def _save_preemption_data(config: EvalConfig, trial_id: int, output_dir: Path, wandb_run_id: str = "") -> None:
     preemption_file = config.output_dir / f"preemption_trial_{trial_id}.json"
     with open(preemption_file, "w") as f:
-        json.dump({"output_dir": str(output_dir)}, f)
+        json.dump({"output_dir": str(output_dir), "wandb_run_id": wandb_run_id}, f)
 
 
 def _delete_preemption_file(config: EvalConfig, trial_id: int) -> None:
@@ -136,3 +160,27 @@ def _configure_logging(output_dir: Path) -> None:
     # Set logging level if not already set
     if root_logger.level == logging.NOTSET:
         root_logger.setLevel(logging.INFO)
+
+
+def _wandb_mode(project: str | None) -> Literal["online", "disabled"] | None:
+    """
+    Checks to see if a WandB API key is found. If not, wandb starts in offline mode.
+    """
+    if project is None:
+        logger.warning("No WandB project specified, disabling logging.")
+        return "disabled"
+    else:
+        try:
+            api_key = wandb.api.api_key
+            if api_key is None:
+                logger.warning(
+                    """No wandb API key found. Disabling Wandb logging.
+                    If you have a WandB account set the environment variable 'WANDB_API_KEY'"""
+                )
+                return "disabled"
+            else:
+                logger.info("wandb login detected. Using online mode.")
+        except Exception as e:
+            logger.warning(f"wandb login check failed: {e}. Disabling Wandb logging.")
+            return "disabled"
+    return "online"

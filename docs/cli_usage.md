@@ -37,6 +37,15 @@ options:
   --hf-revision HF_REVISION
         A tag name, a branch name, or commit hash for the task HF dataset.
 
+  --wandb-project WANDB_PROJECT
+      The name of the Weights & Biases project to log runs to.
+
+  --wandb-entity WANDB_ENTITY
+      The name of the Weights & Biases entity to log runs to. Defaults to the user's default entity.
+
+  --wandb-run-id WANDB_RUN_ID
+      The ID of an existing Weights & Biases run to resume. If not given, creates a new run. If given and exists, will continue the run but will overwrite the python command logged in WandB
+
   --task-subjects TASK_SUBJECTS [TASK_SUBJECTS ...]
         The subjects of the task to evaluate. If empty, all subjects are evaluated. Subjects in the form of tuples can be specified in a comma-delimited way, possibly using wildcard * in some dimensions of a tuple. Examples: "DE_DE, *" "FR_FR, astronomy".
 
@@ -96,3 +105,31 @@ poetry run eval_framework \
 ```
 
 This approach allows you to evaluate any model available on Hugging Face by specifying the `model_name` and appropriate `formatter` in the `--llm-args` parameter.
+
+## Configuring Sampling Parameters for vLLM Models
+
+vLLM models now support configurable sampling parameters through the `--llm-args` parameter. You can specify individual sampling parameters using dot notation:
+
+```bash
+poetry run eval_framework \
+    --models src/eval_framework/llm/models.py \
+    --llm-name Qwen3_0_6B_VLLM \
+    --llm-args sampling_params.temperature=0.7 sampling_params.top_p=0.95 sampling_params.max_tokens=150 \
+    --task-name "GSM8K" \
+    --output-dir ./eval \
+    --num-fewshot 5 \
+    --num-samples 10
+```
+
+You can also combine sampling parameters with other model arguments:
+
+```bash
+poetry run eval_framework \
+    --models src/eval_framework/llm/models.py \
+    --llm-name Qwen3_0_6B_VLLM \
+    --llm-args max_model_len=2048 sampling_params.temperature=0.8 sampling_params.top_p=0.9 \
+    --task-name "GSM8K" \
+    --output-dir ./eval \
+    --num-fewshot 5 \
+    --num-samples 10
+```
