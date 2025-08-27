@@ -46,15 +46,18 @@ def load_extra_tasks(module_paths: Sequence[str]) -> None:
 
         for name, obj in inspect.getmembers(user_module):
             if inspect.isclass(obj) and issubclass(obj, BaseTask) and obj is not BaseTask:
-                name_upper = obj.NAME.upper()
-                if hasattr(TaskName, obj.NAME) or hasattr(TaskName, name_upper):
-                    logger.info(obj.__module__)
-
-                    if "eval_framework.tasks.benchmarks" not in obj.__module__:
-                        # skip if import comes from eval_framework's built-in tasks
-                        raise ValueError(f"Duplicate user task name found (case-insensitive): {obj.NAME}")
+                # check unique name of BaseTask subclasses (when they have a NAME attribute)
+                if not hasattr(obj, "NAME"):
+                    logger.info(f"[User Task Loader] Skipping {obj.__module__} - no NAME attribute present.")
                 else:
-                    # setattr(TaskName, name_upper, obj)
-                    class_obj = getattr(user_module, name)
-                    extend_enum(TaskName, name_upper, class_obj)
-                    logger.info(f"[User Task Loader] Registered task: {name_upper}")
+                    name_upper = obj.NAME.upper()
+                    if hasattr(TaskName, obj.NAME) or hasattr(TaskName, name_upper):
+                        logger.info(obj.__module__)
+
+                        if "eval_framework.tasks.benchmarks" not in obj.__module__:
+                            # skip if import comes from eval_framework's built-in tasks
+                            raise ValueError(f"Duplicate user task name found (case-insensitive): {obj.NAME}")
+                    else:
+                        class_obj = getattr(user_module, name)
+                        extend_enum(TaskName, name_upper, class_obj)
+                        logger.info(f"[User Task Loader] Registered task: {name_upper}")
