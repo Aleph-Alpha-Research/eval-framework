@@ -9,7 +9,7 @@ from openai import OpenAI
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import BaseFormatter, Message, Role
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Message, Role
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,7 @@ class OpenAIModel(BaseLLM):
         self._model_name = model_name
         logger.info(f"Using {model_name} as a judge")
         self._formatter = formatter or self.DEFAULT_FORMATTER
+        self._concat_formatter = ConcatFormatter()
         self._temperature = temperature
         # Initialize OpenAI client
         self._client = OpenAI(
@@ -80,6 +81,7 @@ class OpenAIModel(BaseLLM):
             if self._formatter is not None:
                 # Use formatter for text completion API
                 prompt = self._formatter.format(single_messages, output_mode="string")
+                prompt_concat = self._concat_formatter.format(single_messages, output_mode="string")
                 response = self._client.completions.create(
                     model=self._model_name,
                     prompt=prompt,
@@ -96,6 +98,8 @@ class OpenAIModel(BaseLLM):
                     RawCompletion(
                         prompt=prompt,
                         prompt_sequence_positions=prompt_sequence_positions,
+                        prompt_concat=prompt_concat,
+                        prompt_concat_sequence_positions=self._count_tokens(prompt_concat),
                         completion=completion,
                         completion_sequence_positions=completion_sequence_positions,
                     )
@@ -136,6 +140,8 @@ class OpenAIModel(BaseLLM):
                     RawCompletion(
                         prompt=prompt,
                         prompt_sequence_positions=prompt_sequence_positions,
+                        prompt_concat=prompt,
+                        prompt_concat_sequence_positions=prompt_sequence_positions,
                         completion=completion,
                         completion_sequence_positions=completion_sequence_positions,
                     )
