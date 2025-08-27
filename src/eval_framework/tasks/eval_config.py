@@ -1,3 +1,4 @@
+import ast
 import json
 from pathlib import Path
 from typing import Any
@@ -61,17 +62,20 @@ class EvalConfig(BaseConfig):
     @field_validator("llm_args", mode="before")
     @classmethod
     def validate_llm_args(cls, value: dict[str, Any]) -> dict[str, Any]:
-        typed_value = {}
-        for k, v in value.items():
-            try:  # maybe this llm argument is actually a number?
-                if "." in str(v):
-                    v = float(v)
-                else:
-                    v = int(v)
-            except ValueError:
-                pass
-            typed_value[k] = v
-        return typed_value
+        def convert_value(v: Any) -> Any:
+            if isinstance(v, dict):
+                # Recursively process nested dictionaries (like sampling_params)
+                return {k: convert_value(nested_v) for k, nested_v in v.items()}
+            elif isinstance(v, str):
+                try:
+                    # Try to evaluate as a Python literal (int, float, bool, None, list, dict, etc.)
+                    return ast.literal_eval(v)
+                except (ValueError, SyntaxError):
+                    return v  # keep as string if not a valid literal
+            else:
+                return v  # already proper type
+
+        return convert_value(value)
 
     @field_validator("judge_model_args", mode="before")
     @classmethod

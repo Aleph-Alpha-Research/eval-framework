@@ -25,12 +25,12 @@ def main(
 ) -> list[Result]:
     """Runs the entire evaluation process: responses generation and evaluation."""
     # Set up centralized logging early
-    output_dir = generate_output_dir(llm.__class__.__name__, config)
+    output_dir = generate_output_dir(llm.name, config)
     print(f"Output directory for evaluation: {output_dir}")
     setup_logging(output_dir=output_dir, log_level=logging.INFO, log_filename="evaluation.log")
 
     logger.info(f"{RED}[ Running full evaluation process ------- ]{RESET}")
-    logger.info(f"Evaluating {llm.__class__.__name__} on {config.task_name.name}")
+    logger.info(f"Evaluating {llm.name} on {config.task_name.name}")
     logger.info(f"Configuration: num_fewshot={config.num_fewshot}, num_samples={config.num_samples}")
     logger.info(f"Output directory: {output_dir}")
 

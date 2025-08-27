@@ -1,6 +1,7 @@
 import argparse
 import datetime
 from pathlib import Path
+from typing import Any
 
 try:
     from eval_framework.context.determined import DeterminedContext
@@ -212,13 +213,21 @@ def parse_args() -> argparse.Namespace:
         help=("The args of the judge model used within OpenAIModel wrapper."),
     )
 
-    llm_args = {}
+    llm_args: dict[str, Any] = {}
     args = parser.parse_args()
 
     for arg in args.llm_args or []:
         if "=" in arg:
             key, value = arg.split("=", 1)
-            llm_args[key] = value
+
+            # Handle nested keys like "sampling_params.temperature=0.7"
+            if "." in key:
+                nested_key, sub_key = key.split(".", 1)
+                if nested_key not in llm_args:
+                    llm_args[nested_key] = {}
+                llm_args[nested_key][sub_key] = value
+            else:
+                llm_args[key] = value
 
     args.llm_args = llm_args
 
