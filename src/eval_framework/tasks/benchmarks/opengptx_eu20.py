@@ -220,7 +220,7 @@ class MMLU_EU20_DE(MMLU):
     PERTURBATION_UNMODIFIABLE_WORDS = MMLU.PERTURBATION_UNMODIFIABLE_WORDS + ["Frage"]
     LANGUAGE = Language.DEU
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: str) -> None:
         name = subject if subject != NO_SUBJECT else None
 
         hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)
@@ -326,7 +326,7 @@ class MMLU_EU20_FR(MMLU):
     SUBJECTS = [i + "_FR" for i in MMLU_SUBJECTS]
     LANGUAGE = Language.FRA
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: str) -> None:
         name = subject if subject != NO_SUBJECT else None
 
         hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)

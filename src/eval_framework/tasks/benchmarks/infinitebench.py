@@ -20,21 +20,19 @@ class InfiniteBench(BaseTask[str], ABC):
     SUBJECTS = ["default"]
     LANGUAGE = Language.ENG
     PERTURBATION_UNMODIFIABLE_WORDS = None
+    FEATURES = Features(
+        {
+            "id": Value("int64"),
+            "context": Value("string"),
+            "input": Value("string"),
+            "answer": Sequence(Value("string")),
+            "options": Sequence(Value("string")),
+        }
+    )
 
     def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Few-shots are not supported for long-context InfiniteBench tasks"
         super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
-        dataloader.set_features(
-            Features(
-                {
-                    "id": Value("int64"),
-                    "context": Value("string"),
-                    "input": Value("string"),
-                    "answer": Sequence(Value("string")),
-                    "options": Sequence(Value("string")),
-                }
-            )
-        )
 
 
 class InfiniteBenchLoglikelihood(InfiniteBench, ABC):

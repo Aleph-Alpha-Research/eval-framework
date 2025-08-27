@@ -484,7 +484,7 @@ class MATH(MATHReasoning):
 class MATHLvl5(MATH):
     NAME = "Math Lvl 5"
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: str) -> None:
         name = subject if subject != NO_SUBJECT else None
 
         hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)

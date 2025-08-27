@@ -9,7 +9,7 @@ from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import 
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
-from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
+from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.dataloader import Dataloader
 from eval_framework.tasks.utils import get_n_letters
 
@@ -36,7 +36,7 @@ class GPQA(BaseTask[str]):
         self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}
         self.rnd_choice_shuffle = random.Random(RANDOM_SEED)
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: str) -> None:
         name = subject if subject != NO_SUBJECT else None
 
         hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)

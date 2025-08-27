@@ -1,9 +1,10 @@
 import random
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Generic, Iterable, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Iterable, TypeVar, cast
 
 import iso639
+from datasets import Features
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext
@@ -77,6 +78,7 @@ class BaseTask(ABC, Generic[SubjectType]):
     METRICS: list[type["BaseMetric"]]
     SUBJECTS: list[SubjectType]
     HF_REVISION: str | None = None  # tag name, or branch name, or commit hash to ensure reproducibility
+    FEATURES: Features | None = None
 
     # Words in _get_instruction_text() not to be perturbed. List of words is case insensitive. No special characters
     # or whitespace should be included.
@@ -92,11 +94,9 @@ class BaseTask(ABC, Generic[SubjectType]):
         self.dataloader = dataloader
 
     def _load_dataset(self, subject: SubjectType) -> None:
-        name = subject if subject != NO_SUBJECT else None
+        name = cast(str, subject) if subject != NO_SUBJECT else None
         hf_dataset = self.dataloader.load(
-            path=self.DATASET_PATH,
-            name=name,
-            revision=self.HF_REVISION,
+            path=self.DATASET_PATH, name=name, revision=self.HF_REVISION, features=self.FEATURES
         )
         self.dataset = {}
         self.rnd = random.Random(RANDOM_SEED)
