@@ -52,10 +52,12 @@ def test_hf_processor_with_mocked_hf_api(monkeypatch: MonkeyPatch) -> None:
     _ = hf_processor._login_into_hf()
 
     # next we test the file upload with the mock object
-    result = hf_processor.upload_responses_to_HF()
+    result, hf_url = hf_processor.upload_responses_to_HF()
     os.unlink(output_file)
     os.rmdir(storage_dir)
     assert result is True
+    assert hf_url is not None
+    assert "huggingface.co" in hf_url
 
 
 def test_hf_processor_with_mocked_hf_api_2(monkeypatch: MonkeyPatch) -> None:
@@ -89,7 +91,9 @@ def test_hf_processor_with_mocked_hf_api_2(monkeypatch: MonkeyPatch) -> None:
     _ = hf_processor._login_into_hf()
 
     # next we test the file upload with the mock object
-    result = hf_processor.upload_responses_to_HF()
+    result, hf_url = hf_processor.upload_responses_to_HF()
     os.unlink(output_file)
     os.rmdir(storage_dir)
     assert result is True
+    assert hf_url is not None
+    assert "huggingface.co" in hf_url

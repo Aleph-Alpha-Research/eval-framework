@@ -57,7 +57,7 @@ class VLLMTokenizerAPI(ABC, Generic[prompt_type]):
 
 
 class HFTokenizerProtocol(Protocol):
-    def encode(self, text: str, add_special_tokens: bool = False) -> List[int]:
+    def encode(self, text: str, add_special_tokens: bool = False) -> list[int]:
         """Encode text to token IDs."""
         ...
 
@@ -124,7 +124,7 @@ class VLLMModel(BaseLLM):
         batch_size: int = 1,
         checkpoint_path: str | None = None,
         checkpoint_name: str | None = None,
-        sampling_params: SamplingParams | None = None,
+        sampling_params: SamplingParams | dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         # Store the max_model_len for later use
@@ -141,26 +141,29 @@ class VLLMModel(BaseLLM):
             **kwargs,
         }
 
-        # This is added to support running vllm tests on GitHub runners
-        # (Tesla T4) which have an older compute capability of 7.5 needing
-        # the dtype to be set to float16 instead of the default bfloat16.
-        # Auto-detect GPU capability and set appropriate dtype.
-        if torch.cuda.is_available() and "dtype" not in kwargs:
-            capability = torch.cuda.get_device_capability()
-            if capability[0] < 8:
-                model_args["dtype"] = "half"
-                logger.info(f"GPU compute capability {capability[0]}.{capability[1]} < 8.0, using float16")
-
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
         self.batch_size = batch_size
         self._tokenizer: None | VLLMTokenizerAPI = None
 
         self.model = LLM(**model_args, device=device)
-        self.sampling_params: SamplingParams | None = self._get_sampling_params(sampling_params)
+
+        self.sampling_params: SamplingParams = self._process_sampling_params(sampling_params)
 
         logger.info(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
         self._set_formatter(formatter)
+
+    def _process_sampling_params(self, sampling_params: SamplingParams | dict[str, Any] | None) -> SamplingParams:
+        processed_sampling_params: SamplingParams | None = None
+        if isinstance(sampling_params, dict):
+            processed_sampling_params = SamplingParams(**sampling_params)
+            logger.info(f"Converted sampling_params dict to SamplingParams: {processed_sampling_params}")
+        elif sampling_params is not None:
+            processed_sampling_params = sampling_params
+        else:
+            processed_sampling_params = self.model.get_default_sampling_params()
+
+        return processed_sampling_params
 
     def _set_formatter(self, formatter: BaseFormatter | None = None) -> None:
         if formatter is not None:
@@ -182,6 +185,12 @@ class VLLMModel(BaseLLM):
             self._tokenizer = VLLMTokenizer(target_mdl=self.LLM_NAME)
         return self._tokenizer
 
+    def _get_formatter_output_mode(self) -> Literal["string", "list"]:
+        """Determine the correct output mode for the formatter based on tokenizer type."""
+        if isinstance(self.tokenizer, MistralAdapter):
+            return "list"
+        return "string"
+
     @property
     def name(self) -> str:
         if self.checkpoint_name:
@@ -189,7 +198,7 @@ class VLLMModel(BaseLLM):
         return self.__class__.__name__
 
     def build_redis_key_from_prompt_objs(
-        self, prompt_objs: List[TokenizedContainer], sampling_params: SamplingParams
+        self, prompt_objs: list[TokenizedContainer], sampling_params: SamplingParams
     ) -> Any:
         """
         Build a redis key from a list of prompt objects and sampling parameters.
@@ -199,19 +208,20 @@ class VLLMModel(BaseLLM):
 
     def generate_from_messages(
         self,
-        messages: List[Sequence[Message]],
+        messages: list[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-        temperature: float = 0.0,
-    ) -> List[RawCompletion]:
-        raw_completions: List[Optional[RawCompletion]] = [None] * len(messages)
+        temperature: float | None = None,
+    ) -> list[RawCompletion]:
+        raw_completions: list[RawCompletion | None] = [None] * len(messages)
         prompt_objs = []
         valid_indices = []
 
-        sampling_params = self._resolve_sampling_params(max_tokens, stop_sequences, temperature)
+        sampling_params = self._resolve_sampling_params(self.sampling_params, max_tokens, stop_sequences, temperature)
 
         for i, single_messages in enumerate(messages):
-            prompt: str | list[Message] = self._formatter.format(single_messages, output_mode="string")
+            output_mode = self._get_formatter_output_mode()
+            prompt: str | list[Message] = self._formatter.format(single_messages, output_mode=output_mode)
             prompt_obj: TokenizedContainer = self.tokenizer.encode_formatted_struct(prompt)
             prompt_token_count = len(prompt_obj.tokens)
 
@@ -259,54 +269,50 @@ class VLLMModel(BaseLLM):
                 )
 
         # Ensure all positions are filled (should never be None at this point)
-        return cast(List[RawCompletion], raw_completions)
+        return cast(list[RawCompletion], raw_completions)
 
+    @staticmethod
     def _resolve_sampling_params(
-        self, max_tokens: int | None, stop_sequences: list[str] | None, temperature: float
+        sampling_params: SamplingParams,
+        max_tokens: int | None,
+        stop_sequences: list[str] | None,
+        temperature: float | None,
     ) -> SamplingParams:
-        if self.sampling_params is not None:
-            self.sampling_params.max_tokens = max_tokens
-            self.sampling_params.stop = stop_sequences
-            if self.sampling_params.temperature is None:
-                self.sampling_params.temperature = temperature
-            else:
-                logger.warning(
-                    f"User provided temperature: {temperature} is ignored when calling generate_from_messages"
-                    f"using {self.sampling_params.temperature} instead"
-                )
-        else:
-            self.sampling_params = SamplingParams(
-                max_tokens=max_tokens,
-                stop=stop_sequences,
-                temperature=temperature,
+        sampling_params.max_tokens = max_tokens
+        sampling_params.stop = stop_sequences
+        if temperature is not None:
+            logger.warning(
+                f"Overriding sampling params temperature {sampling_params.temperature} with custom value {temperature}"
             )
-        return self.sampling_params
-
-    def _get_sampling_params(self, sampling_params: SamplingParams | None) -> SamplingParams | None:
-        if sampling_params is not None:
-            return sampling_params
-        return self.model.get_default_sampling_params()
+            sampling_params.temperature = temperature
+        else:
+            logger.info(
+                f"Using sampling params temperature value: {sampling_params.temperature} "
+                f"as no custom temperature value was provided"
+            )
+        return sampling_params
 
     def _model_generate(
         self,
-        prompt_objs: List[TokenizedContainer],
+        prompt_objs: list[TokenizedContainer],
         sampling_params: SamplingParams,
-    ) -> List[RequestOutput]:
+    ) -> list[RequestOutput]:
         vllm_token_prompt = [TokensPrompt(prompt_token_ids=prompt_obj.tokens) for prompt_obj in prompt_objs]
         outputs = self.model.generate(vllm_token_prompt, sampling_params)
 
         return outputs
 
-    def logprobs(self, samples: List[Sample]) -> List[RawLoglikelihood]:
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         """Batched version of logprobs for improved performance."""
-        results: List[Optional[RawLoglikelihood]] = [None] * len(samples)
+        results: list[RawLoglikelihood | None] = [None] * len(samples)
 
         # Collect all prompt-choice combinations
         batch_data = []
         sample_choice_indices = []  # Maps batch index back to (sample_index, choice)
 
         for sample_idx, sample in enumerate(samples):
-            prompt: str | list[Message] = self._formatter.format(sample.messages, output_mode="string")
+            output_mode = self._get_formatter_output_mode()
+            prompt: str | list[Message] = self._formatter.format(sample.messages, output_mode=output_mode)
             prompt_obj: TokenizedContainer = self.tokenizer.encode_formatted_struct(prompt)
 
             choices_log_probs: dict[str, float] = {}
@@ -364,10 +370,10 @@ class VLLMModel(BaseLLM):
                 if result is not None:
                     result.loglikelihoods[choice] = logprob
 
-        return cast(List[RawLoglikelihood], results)
+        return cast(list[RawLoglikelihood], results)
 
     @redis_cache(version_id="v10")
-    def _model_log_probs(self, batch_data: List[tuple[TokenizedContainer, TokenizedContainer]]) -> List[float]:
+    def _model_log_probs(self, batch_data: list[tuple[TokenizedContainer, TokenizedContainer]]) -> list[float]:
         """Batched version of _model_log_probs for processing multiple prompt-choice pairs at once."""
         sampling_params = SamplingParams(
             max_tokens=1,
@@ -445,7 +451,7 @@ class MistralVLLM(VLLMModel):
         batch_size: int = 1,
         checkpoint_path: str | None = None,
         checkpoint_name: str | None = None,
-        sampling_params: SamplingParams | None = None,
+        sampling_params: SamplingParams | dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         model_args = {"tokenizer_mode": "mistral", "config_format": "mistral", "load_format": "mistral"}

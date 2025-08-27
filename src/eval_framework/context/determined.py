@@ -48,6 +48,9 @@ class Hyperparameters(BaseModel):
     output_dir: Path
     hf_upload_dir: str | None = None
     hf_upload_repo: str | None = None
+    wandb_project: str | None = None
+    wandb_entity: str | None = None
+    wandb_run_id: str | None = None
     description: str | None = None
     task_args: TaskArgs
     llm_args: dict[str, Any] | None = {}
@@ -85,7 +88,17 @@ class DeterminedContext(EvalContext):
 
         self.hparams = Hyperparameters(**info.trial.hparams)
 
-        for name in ["llm_name", "llm_args", "output_dir", "hf_upload_dir", "hf_upload_repo", "description"]:
+        for name in [
+            "llm_name",
+            "llm_args",
+            "output_dir",
+            "hf_upload_dir",
+            "hf_upload_repo",
+            "wandb_project",
+            "wandb_entity",
+            "wandb_run_id",
+            "description",
+        ]:
             val_cli = getattr(self, name, None)
             val_hparams = getattr(self.hparams, name, None)
             if val_cli and val_hparams and val_cli != val_hparams:
@@ -137,6 +150,9 @@ class DeterminedContext(EvalContext):
             judge_model_args=self.hparams.task_args.judge_model_args or self.judge_model_args,
             hf_upload_dir=self.hparams.hf_upload_dir or self.hf_upload_dir,
             hf_upload_repo=self.hparams.hf_upload_repo or self.hf_upload_repo,
+            wandb_project=self.hparams.wandb_project or self.wandb_project,
+            wandb_entity=self.hparams.wandb_entity or self.wandb_entity,
+            wandb_run_id=self.hparams.wandb_run_id or self.wandb_run_id,
             batch_size=self.hparams.task_args.batch_size or self.batch_size,
             description=self.hparams.description or self.description,
         )
