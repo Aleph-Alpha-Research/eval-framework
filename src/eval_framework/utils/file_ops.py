@@ -175,10 +175,7 @@ def find_hf_checkpoint_root(file_tree: dict, base_path: str = "") -> str | None:
         >>> find_hf_checkpoint_root(tree)
         'models/qwen-3-32b'
     """
-    # Required files that indicate a HuggingFace checkpoint
     REQUIRED_HF_FILES = {"config.json"}
-    
-    # Optional files commonly found in HF checkpoints  
     COMMON_HF_FILES = {
         "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json",
         "vocab.json", "merges.txt", "tokenizer.model",
@@ -197,12 +194,11 @@ def find_hf_checkpoint_root(file_tree: dict, base_path: str = "") -> str | None:
         # Should have at least one tokenizer or model file
         return bool(file_set.intersection(COMMON_HF_FILES))
     
-    # Check current level files
     current_files = file_tree.get("files", [])
     if has_hf_checkpoint(current_files):
         return base_path if base_path else "."
     
-    # Recursively check subdirectories
+    # check subdirectories as well
     for key, value in file_tree.items():
         if key != "files" and isinstance(value, dict):
             subfolder_path = f"{base_path}/{key}" if base_path else key
@@ -235,33 +231,27 @@ def find_hf_checkpoint_root_from_path_list(file_paths: List[str]) -> str | None:
     if not file_paths:
         return None
         
-    # Build file tree from paths
     tree = {"files": []}
     
     for file_path in file_paths:
-        # Remove S3 prefix if present and normalize path
         clean_path = file_path
         if clean_path.startswith("s3://"):
-            # Remove s3://bucket/ prefix
             parts = clean_path.split("/", 3)
             if len(parts) > 3:
                 clean_path = parts[3]
             else:
                 continue
                 
-        # Split path into directories and filename
         path_parts = clean_path.split("/")
         filename = path_parts[-1]
         dirs = path_parts[:-1]
         
-        # Navigate/create tree structure
         current = tree
         for directory in dirs:
             if directory not in current:
                 current[directory] = {"files": []}
             current = current[directory]
             
-        # Add file to the appropriate directory
         current["files"].append(filename)
     
     return find_hf_checkpoint_root(tree)
