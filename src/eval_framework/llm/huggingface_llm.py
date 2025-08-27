@@ -10,7 +10,7 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors, redis_cache
-from template_formatting.formatter import BaseFormatter, HFFormatter, Message
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +89,8 @@ class HFLLM(BaseLLM):
         else:
             raise ValueError("No formatter specified and no default formatter available.")
 
+        self._concat_formatter = ConcatFormatter()
+
         logger.info(
             f"{RED}[ Using default formatter --------------------- {RESET}{self._formatter.__class__.__name__} {RED}]{RESET}"  # noqa: E501
         )
@@ -112,8 +114,11 @@ class HFLLM(BaseLLM):
         for single_messages in messages:
             # format
             prompt = self._formatter.format(single_messages, output_mode="string")
+            prompt_concat = self._concat_formatter.format(single_messages, output_mode="string")
+
             # add_special_tokens would add a second BOS token without explicitly setting it False
             inputs = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False).to(self.device)
+            prompt_concat_token_count = len(self.tokenizer(prompt_concat, add_special_tokens=False)["input_ids"])
 
             prompt_token_count = len(inputs["input_ids"][0])
             pad_token_id = self.tokenizer.eos_token_id
@@ -144,6 +149,8 @@ class HFLLM(BaseLLM):
                     RawCompletion(
                         prompt=prompt,
                         prompt_sequence_positions=prompt_token_count,
+                        prompt_concat=prompt_concat,
+                        prompt_concat_sequence_positions=prompt_concat_token_count,
                         completion="",
                         completion_sequence_positions=0,
                         raw_completion_error=Error(
@@ -173,6 +180,8 @@ class HFLLM(BaseLLM):
                 RawCompletion(
                     prompt=prompt,
                     prompt_sequence_positions=prompt_token_count,
+                    prompt_concat=prompt_concat,
+                    prompt_concat_sequence_positions=prompt_concat_token_count,
                     completion=completion,
                     completion_sequence_positions=completion_token_count,
                 )
@@ -198,6 +207,9 @@ class HFLLM(BaseLLM):
         for sample in samples:
             # format
             prompt = self._formatter.format(sample.messages, output_mode="string")
+            prompt_concat = self._concat_formatter.format(sample.messages, output_mode="string")
+            prompt_concat_token_count = len(self.tokenizer(prompt_concat, add_special_tokens=False)["input_ids"])
+
             choices_log_probs: dict[str, float] = {}
             choices_log_probs_sequence_positions: dict[str, float] = {}
             error: Error | None = None
@@ -232,6 +244,8 @@ class HFLLM(BaseLLM):
                 RawLoglikelihood(
                     prompt=prompt,
                     prompt_sequence_positions=len(self.tokenizer.encode(prompt, add_special_tokens=False)),
+                    prompt_concat=prompt_concat,
+                    prompt_concat_sequence_positions=prompt_concat_token_count,
                     loglikelihoods=choices_log_probs,
                     loglikelihoods_sequence_positions=choices_log_probs_sequence_positions,
                     raw_loglikelihood_error=error,
