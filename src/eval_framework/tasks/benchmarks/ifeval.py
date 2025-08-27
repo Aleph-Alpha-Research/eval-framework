@@ -18,8 +18,8 @@ class IFEval(BaseTask[str]):
     LANGUAGE = {NO_SUBJECT: Language.ENG}
 
     def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         assert num_fewshot == 0, "IFEval does not support few-shot prompting."
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return item["prompt"]

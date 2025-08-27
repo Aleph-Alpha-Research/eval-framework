@@ -97,7 +97,7 @@ class BaseTask(ABC, Generic[SubjectType]):
             self.dataloader.load(
                 path=self.DATASET_PATH,
                 name=name,
-                hf_revision=self.HF_REVISION,
+                revision=self.HF_REVISION,
             )
             if self.HF_REVISION is not None
             else self.dataloader.load(
