@@ -180,11 +180,9 @@ class BaseTask[SubjectType](ABC):
                 cache_dir=f"{Path.home()}/.cache/eval-framework",
             )
 
-    def _load_dataset(self, subject: SubjectType) -> None:
-        name = subject if subject != NO_SUBJECT else None
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
-        self.dataset = {}
-        self.rnd = random.Random(RANDOM_SEED)
+    def _shuffle_splits(self, hf_dataset):
+        dataset = {}
+        rnd = random.Random(RANDOM_SEED)
 
         for split, data in hf_dataset.items():
             if split not in [self.SAMPLE_SPLIT, self.FEWSHOT_SPLIT]:
@@ -192,12 +190,17 @@ class BaseTask[SubjectType](ABC):
 
             data_list = list(data)
 
-            # We shuffle the data to make sure the data distribution
-            # is the same when restricting the number of samples.
             if split == self.SAMPLE_SPLIT:
-                self.rnd.shuffle(data_list)
+                rnd.shuffle(data_list)
 
-            self.dataset[split] = data_list
+            dataset[split] = data_list
+
+        return dataset, rnd
+
+    def _load_dataset(self, subject: SubjectType) -> None:
+        name = subject if subject != NO_SUBJECT else None
+        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        self.dataset, self.rnd = self._shuffle_splits(hf_dataset=hf_dataset)
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         return completion_text
