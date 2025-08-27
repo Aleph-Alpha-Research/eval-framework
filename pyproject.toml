@@ -58,7 +58,7 @@ jinja2 = { version = "^3.1.6", optional = true }  # from template-formatting
 mistral-common = { version = "^1.7.0", optional = true }  # from template-formatting
 huggingface-hub = { version = "^0.33.2", optional = true }  # from template-formatting
 vllm = { version = "^0.8.5", optional=true}
-wandb = ">=0.21.1"
+# wandb = ">=0.21.1"
 # unbabel-comet = "^2.2.6"
 
 [project.optional-dependencies]
