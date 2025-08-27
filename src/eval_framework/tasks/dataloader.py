@@ -27,7 +27,7 @@ class HFDataloader(Dataloader):
 
     def load(self, **kwargs: Any) -> Union[DatasetDict, Dataset, IterableDatasetDict, IterableDataset]:
         # Check if the HF_REVISION is valid before loading the dataset
-        if "hf_revision" in kwargs:
+        if "revision" in kwargs:
             try:
                 _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=kwargs["hf_revision"], timeout=100.0)
             except Exception as e:

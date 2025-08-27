@@ -156,7 +156,7 @@ class DatasetPatcher(Generic[T]):
         if self.tmp_cache_dir.exists():
             shutil.rmtree(self.tmp_cache_dir)
 
-        # Patch the dataloader's load_hf_dataset method to return the data subsets we extracted
+        # Patch the dataloader's load method to return the data subsets we extracted
         mock_load_hf_dataset = create_mock_load_hf_dataset(task.SUBJECTS, captured_kwargs)
         self.patch_obj = patch.object(dataloader, "load", mock_load_hf_dataset)  # type: ignore[assignment]
         assert self.patch_obj is not None
