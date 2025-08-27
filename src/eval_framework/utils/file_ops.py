@@ -7,32 +7,35 @@ import urllib
 import tempfile
 import os
 from concurrent.futures import ThreadPoolExecutor
+from wandb.sdk.lib.paths import FilePathStr, LogicalPath, StrPath, URIStr
+
 
 class FileSystem(Enum):
     LOCAL = "local"
     S3 = "s3"
 
+
 class WandbFs:
     def __init__(self):
         self.api = wandb.Api()
-        self.temp_dir=None
+        self.temp_dir = None
         self._setup_s3_client()
 
     def _setup_s3_client(self):
-        required_env_vars = ['AWS_ENDPOINT_URL', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
+        required_env_vars = ["AWS_ENDPOINT_URL", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]
         for var in required_env_vars:
             if var not in os.environ:
                 raise ValueError(f"Missing required environment variable: {var}")
-        endpoint = os.environ['AWS_ENDPOINT_URL']
-        if not endpoint.startswith(('http://', 'https://')):
+        endpoint = os.environ["AWS_ENDPOINT_URL"]
+        if not endpoint.startswith(("http://", "https://")):
             endpoint = f"http://{endpoint}"
         try:
             self.s3_client = boto3.client(
-                's3',
+                "s3",
                 endpoint_url=endpoint,
-                aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
-                aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
-                verify=False  # <-- disables SSL certificate validation
+                aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+                aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+                verify=False,  # <-- disables SSL certificate validation
             )
         except Exception as e:
             raise ConnectionError(f"Failed to create S3 client: {e}")
@@ -55,17 +58,17 @@ class WandbFs:
                     c = c[d]
         return tree
 
-    def get_artifact(self, artifact_id: str, version: str="latest"):
+    def get_artifact(self, artifact_id: str, version: str = "latest"):
         return self.api.artifact(f"wandb-registry-model/{artifact_id}:{version}")
 
-    def get_bucket_prefix(self, artifact: str)-> Tuple[str, str]:
+    def get_bucket_prefix(self, artifact: str) -> Tuple[str, str]:
         _, bucket, prefix, *_ = urllib.parse.urlparse(artifact)
         return bucket, prefix
 
     def ls(self, artifact: wandb.Artifact) -> list:
         file_list = list(map(lambda x: x.path_uri, [x for x in artifact.files()]))
         return file_list
-        
+
     def file_system_detector(self, file_list: List[str]):
         if all(file.startswith("s3://") for file in file_list):
             return FileSystem.S3
@@ -74,7 +77,7 @@ class WandbFs:
     def download_artifacts(self, artifact: wandb.Artifact) -> Path:
         """download_artifacts downloads all artifacts associated with a registered artifact
 
-        If the filesystem is local, then the artifact references the path of the checkpoint directory. 
+        If the filesystem is local, then the artifact references the path of the checkpoint directory.
         """
         file_list = self.ls(artifact)
         with ThreadPoolExecutor() as executor:
@@ -91,10 +94,17 @@ class WandbFs:
         local_temp_path = Path(os.path.join(self.temp_dir.name, str(local_path).strip("/")))
         local_temp_path.parent.mkdir(parents=True, exist_ok=True)
         with open(local_temp_path, "wb") as f:
-            self.s3_client.download_fileobj(Bucket=bucket, Key=prefix.lstrip('/'), Fileobj=f)
+            self.s3_client.download_fileobj(Bucket=bucket, Key=prefix.lstrip("/"), Fileobj=f)
 
-
-    def use_artifact(self, artifact):
+    def download_and_use_artifact(
+        self,
+        artifact: wandb.Artifact,
+        root: StrPath | None = None,
+        allow_missing_references: bool = False,
+        skip_cache: bool | None = None,
+        path_prefix: StrPath | None = None,
+        multipart: bool | None = None,
+    ):
         """
         use_artifact determines the filesystem that the artifact is on, and does one of two things:
         1. if the file system is remote (s3 type storage) then it will download the artifact to a temp diectory
@@ -102,13 +112,32 @@ class WandbFs:
 
         2. if the file system is local, then we just call wandb.use_artifact
         """
-        file_system = self.file_system_detector(self.ls(artifact))
-        if file_system == FileSystem.LOCAL:
-            pass
-        elif file_system == FileSystem.S3:
-            artifact_dir = self.download_artifacts(artifact)
-        return artifact_dir
 
+        artifact = wandb.use_artifact(artifact)
+
+        file_system = self.file_system_detector(self.ls(artifact))
+        if file_system == FileSystem.S3:
+            try:
+                artifact_path = artifact.download(
+                    root=root,
+                    allow_missing_references=allow_missing_references,
+                    skip_cache=skip_cache,
+                    path_prefix=path_prefix,
+                    multipart=multipart,
+                )
+            except Exception as e:
+                raise RuntimeError(f"Failed to download artifact: {e}")
+            artifact_path = self.download_artifacts(artifact)
+        else:
+            artifact_path = artifact.download(
+                root=root,
+                allow_missing_references=allow_missing_references,
+                skip_cache=skip_cache,
+                path_prefix=path_prefix,
+                multipart=multipart,
+            )
+
+        return artifact_path
 
     def __enter__(self):
         return self
@@ -119,7 +148,125 @@ class WandbFs:
             self.temp_dir.cleanup()
 
 
+def find_hf_checkpoint_root(file_tree: dict, base_path: str = "") -> str | None:
+    """Find the root folder of a HuggingFace formatted checkpoint within a file tree.
     
+    A HuggingFace checkpoint is identified by the presence of config.json and typically
+    includes tokenizer files and model files.
+    
+    Args:
+        file_tree: Dictionary representing file tree structure. Structure should be:
+                  {"files": ["file1.txt", "file2.json"], "subfolder": {"files": [...]}}
+        base_path: Current path being explored (used for recursion)
+        
+    Returns:
+        str | None: Path to the HuggingFace checkpoint root folder, or None if not found
+        
+    Example:
+        >>> tree = {
+        ...     "models": {
+        ...         "qwen-3-32b": {
+        ...             "files": ["config.json", "tokenizer.json", "model.safetensors"],
+        ...             "subdir": {"files": ["other.txt"]}
+        ...         }
+        ...     },
+        ...     "files": ["readme.txt"]
+        ... }
+        >>> find_hf_checkpoint_root(tree)
+        'models/qwen-3-32b'
+    """
+    # Required files that indicate a HuggingFace checkpoint
+    REQUIRED_HF_FILES = {"config.json"}
+    
+    # Optional files commonly found in HF checkpoints  
+    COMMON_HF_FILES = {
+        "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json",
+        "vocab.json", "merges.txt", "tokenizer.model",
+        "pytorch_model.bin", "model.safetensors", "model.onnx",
+        "generation_config.json", "preprocessor_config.json"
+    }
+    
+    def has_hf_checkpoint(files: List[str]) -> bool:
+        """Check if the current directory contains a HuggingFace checkpoint."""
+        file_set = set(files)
+        
+        # Must have config.json
+        if not REQUIRED_HF_FILES.issubset(file_set):
+            return False
+            
+        # Should have at least one tokenizer or model file
+        return bool(file_set.intersection(COMMON_HF_FILES))
+    
+    # Check current level files
+    current_files = file_tree.get("files", [])
+    if has_hf_checkpoint(current_files):
+        return base_path if base_path else "."
+    
+    # Recursively check subdirectories
+    for key, value in file_tree.items():
+        if key != "files" and isinstance(value, dict):
+            subfolder_path = f"{base_path}/{key}" if base_path else key
+            result = find_hf_checkpoint_root(value, subfolder_path)
+            if result:
+                return result
+                
+    return None
+
+
+def find_hf_checkpoint_root_from_path_list(file_paths: List[str]) -> str | None:
+    """Find HuggingFace checkpoint root from a list of file paths.
+    
+    Args:
+        file_paths: List of file paths (can be S3 URIs or local paths)
+        
+    Returns:
+        str | None: Path to the HuggingFace checkpoint root folder, or None if not found
+        
+    Example:
+        >>> paths = [
+        ...     "s3://bucket/models/qwen-3-32b/config.json",
+        ...     "s3://bucket/models/qwen-3-32b/tokenizer.json", 
+        ...     "s3://bucket/models/qwen-3-32b/model.safetensors",
+        ...     "s3://bucket/other/readme.txt"
+        ... ]
+        >>> find_hf_checkpoint_root_from_path_list(paths)
+        'models/qwen-3-32b'
+    """
+    if not file_paths:
+        return None
+        
+    # Build file tree from paths
+    tree = {"files": []}
+    
+    for file_path in file_paths:
+        # Remove S3 prefix if present and normalize path
+        clean_path = file_path
+        if clean_path.startswith("s3://"):
+            # Remove s3://bucket/ prefix
+            parts = clean_path.split("/", 3)
+            if len(parts) > 3:
+                clean_path = parts[3]
+            else:
+                continue
+                
+        # Split path into directories and filename
+        path_parts = clean_path.split("/")
+        filename = path_parts[-1]
+        dirs = path_parts[:-1]
+        
+        # Navigate/create tree structure
+        current = tree
+        for directory in dirs:
+            if directory not in current:
+                current[directory] = {"files": []}
+            current = current[directory]
+            
+        # Add file to the appropriate directory
+        current["files"].append(filename)
+    
+    return find_hf_checkpoint_root(tree)
+
+
 def rec(directory, current_path):
     if len(directory):
         for direc in directory:
@@ -127,9 +274,13 @@ def rec(directory, current_path):
     else:
         os.makedirs(current_path)
 
+
 if __name__ == "__main__":
     with WandbFs() as wandb_fs:
         name = "qwen-3-32b-dccp"
         version = "latest"
         artifact = wandb_fs.get_artifact(name, version)
-        wandb_fs.download_artifacts(artifact)
+        file_list = wandb_fs.ls(artifact)
+        temp_dir = wandb_fs.download_artifacts(artifact)
+        file_root = find_hf_checkpoint_root_from_path_list(file_list)
+        local_artifact_path = os.path.join(Path(wandb_fs.temp_dir.name),Path(file_root))
