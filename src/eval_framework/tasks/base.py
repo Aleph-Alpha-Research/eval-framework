@@ -93,17 +93,10 @@ class BaseTask(ABC, Generic[SubjectType]):
 
     def _load_dataset(self, subject: SubjectType) -> None:
         name = subject if subject != NO_SUBJECT else None
-        hf_dataset = (
-            self.dataloader.load(
-                path=self.DATASET_PATH,
-                name=name,
-                revision=self.HF_REVISION,
-            )
-            if self.HF_REVISION is not None
-            else self.dataloader.load(
-                path=self.DATASET_PATH,
-                name=name,
-            )
+        hf_dataset = self.dataloader.load(
+            path=self.DATASET_PATH,
+            name=name,
+            revision=self.HF_REVISION,
         )
         self.dataset = {}
         self.rnd = random.Random(RANDOM_SEED)

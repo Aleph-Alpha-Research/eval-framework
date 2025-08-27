@@ -48,7 +48,7 @@ class TableBench(BaseTask[tuple[str, str]]):
 
     def _load_dataset(self, subject: tuple[str, str]) -> None:
         instruction_type, qtype = subject
-        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=None)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=None, revision=self.HF_REVISION)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)
