@@ -3,7 +3,6 @@ name = "eval-framework"
 version = "0.1.14"
 description = "Evalulation Framework"
 readme = "README.md"
-dynamic = ["dependencies"]
 license = { file = "LICENSE" }
 requires-python = ">=3.12,<3.13"
 authors = [
@@ -63,6 +62,7 @@ vllm = [
   "vllm>=0.8.5,<0.9",
   "torch"
 ]
+flash_attn = ["flash-attn==2.7.2.post1"]
 # from template-formatting
 optional = [
   "transformers>=4.45.2,<5",
@@ -79,41 +79,42 @@ repository = "https://github.com/Aleph-Alpha-Research/eval-framework"
 [project.scripts]
 eval_framework = "eval_framework.run:run"
 
-[tool.poetry]
-packages = [
-  { include = "eval_framework", from = "src" },
-  { include = "template_formatting", from = "src" }
+[dependency-groups]
+dev = [
+  "mypy>=1.10,<2",
+  "pytest>=8.3.3,<9",
+  "pytest-xdist>=3.6.1,<4",
+  "types-pyyaml>=6.0.12.20240917,<7",
+  "types-toml>=0.10.8.20240310,<0.11",
+  "plotly>=5.24.1,<6",
+  "types-redis>=4.6.0.20241004,<5",
+  "ruff>=0.12.8",
 ]
 
-[tool.poetry.dependencies]
-determined = { optional = true, git = "https://github.com/mys007/determined.git", subdirectory = "harness"}  # fork with unpinned `requests`
-# We don't overwrite system libraries in Docker image (unlike scaling) so we don't need to freeze torch version.
-torch = { version = "*", source = "pytorch-cu124",  optional=true}
+[build-system]
+requires = ["uv_build>=0.8.10,<0.9.0"]
+build-backend = "uv_build"
 
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^3.7.1"
-mypy = "^1.10.0"
-pytest = "^8.3.3"
-pytest-xdist = "^3.6.1"
-black = "^24.10.0"
-types-pyyaml = "^6.0.12.20240917"
-types-toml = "^0.10.8.20240310"
-plotly = "^5.24.1"
-types-redis = "^4.6.0.20241004"
-transformers = "^4.45.2"
-accelerate = { version = "*" }
-vllm = "^0.8.5"
-torch = { version = "*", source = "pytorch-cu124" }
-ruff = "^0.12.8"
+[tool.uv.build-backend]
+module-name = ["eval_framework", "template_formatting"]
 
-[[tool.poetry.source]]
+[tool.uv]
+override-dependencies = [
+  "requests>=2.32,<3",  # fix for determined
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }
+
+[[tool.uv.index]]
 name = "pytorch-cu124"
 url = "https://download.pytorch.org/whl/cu124"
-priority = "explicit"
+explicit = true
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv.extra-build-dependencies]
+# Build flash-attn with the same torch version as in the container. Details at:
+# https://docs.astral.sh/uv/concepts/projects/config/#augmenting-build-dependencies
+flash-attn = [{ requirement = "torch", match-runtime = true }]
 
 [tool.ruff]
 line-length = 120
@@ -140,7 +141,6 @@ markers = [
 filterwarnings = [
     "ignore::DeprecationWarning:datasets.utils._dill:",
 ]
-
 
 [tool.bumpversion]
 current_version = "0.1.14"

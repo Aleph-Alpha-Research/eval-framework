@@ -102,17 +102,19 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
+      
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
         with:
-          github-repo-token: ${{ secrets.TOKEN_AA_GITHUB_REPO_READER }}
+          version: "~=0.8.10"
+
       - name: Run Pre-Commit
         run: |
-          poetry run pre-commit install
-          poetry run pre-commit run -a
+          uvx tool install pre-commit
+          pre-commit run --all
+
       - name: Run MyPy
-        run: |
-          poetry run mypy src tests utils
+        run: uv run --all-extras mypy src tests utils
 
   changes:
     runs-on: ubuntu-latest
@@ -161,11 +163,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         if: github.ref == 'refs/heads/main'
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
+    
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
         if: github.ref == 'refs/heads/main'
         with:
-          github-repo-token: ${{ secrets.TOKEN_AA_GITHUB_REPO_READER }}
+          version: "~=0.8.10"
+
       - name: Huggingface datasets cache
         uses: actions/cache@v4
         if: github.ref == 'refs/heads/main'
@@ -176,10 +180,11 @@ jobs:
             hf-datasets-
       - name: Download datasets
         if: github.ref == 'refs/heads/main'
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
           export PATH=$HOME/.local/bin:$PATH
-          poetry run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
+          uv run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
 
   build:
     needs: [lint, changes]
@@ -219,19 +224,25 @@ jobs:
     needs: [lint, hf-datasets-cache]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        if: github.ref == 'refs/heads/main'
+        with:
+          version: "~=0.8.10"
+
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
           key: hf-datasets-
+
       - name: Run tests
         run: |
           export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
           export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
           export PATH=$HOME/.local/bin:$PATH
-          poetry run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
+          uv run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
@@ -239,20 +250,27 @@ jobs:
     needs: [lint, hf-datasets-cache]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        if: github.ref == 'refs/heads/main'
+        with:
+          version: "~=0.8.10"
+
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
           key: hf-datasets-
+
       - name: Run tests
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+          HF_DATASET_CACHE_DIR: ${{ env.HF_DATASET_CACHE_DIR }}
         run: |
-          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
-          export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
           export PATH=$HOME/.local/bin:$PATH
-          poetry run python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
-          poetry run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
+          uv run python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
+          uv run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
   test-gpu:
     runs-on: EvalFrameworkGPURunner
@@ -294,7 +312,7 @@ jobs:
             -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
             -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
             ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
-            bash -c 'poetry run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
+            bash -c 'uv run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
 
   test-gpu-vllm:
     runs-on: EvalFrameworkGPURunner
@@ -343,4 +361,4 @@ jobs:
             -e VLLM_USE_TRITON_FLASH_ATTN=0 \
             -e VLLM_DISABLE_CUSTOM_ALL_REDUCE=1 \
             ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
-            bash -c 'curl -sSL https://install.python-poetry.org | python3 - && export PATH="$HOME/.local/bin:$PATH" && poetry --version && poetry run pytest --log-cli-level=INFO -v -m "vllm"'
+            bash -c 'curl -sSL https://install.python-poetry.org | python3 - && export PATH="$HOME/.local/bin:$PATH" && poetry --version && uv run pytest --log-cli-level=INFO -v -m "vllm"'
