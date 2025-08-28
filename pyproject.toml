@@ -111,6 +111,11 @@ name = "pytorch-cu124"
 url = "https://download.pytorch.org/whl/cu124"
 explicit = true
 
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
 [tool.uv.extra-build-dependencies]
 # Build flash-attn with the same torch version as in the container. Details at:
 # https://docs.astral.sh/uv/concepts/projects/config/#augmenting-build-dependencies
