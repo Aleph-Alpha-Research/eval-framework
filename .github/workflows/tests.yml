@@ -174,12 +174,12 @@ jobs:
           key: hf-datasets-${{ github.run_id }}
           restore-keys: |
             hf-datasets-
+
       - name: Download datasets
         if: github.ref == 'refs/heads/main'
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          export PATH=$HOME/.local/bin:$PATH
           uv run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
 
   build:
@@ -237,9 +237,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
           HF_DATASET_CACHE_DIR: ${{ env.HF_DATASET_CACHE_DIR }}
-        run: |
-          export PATH=$HOME/.local/bin:$PATH
-          uv run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
+        run: uv run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
@@ -250,7 +248,6 @@ jobs:
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
-        if: github.ref == 'refs/heads/main'
         with:
           version: "~=0.8.10"
 
@@ -265,7 +262,6 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
           HF_DATASET_CACHE_DIR: ${{ env.HF_DATASET_CACHE_DIR }}
         run: |
-          export PATH=$HOME/.local/bin:$PATH
           uv run python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
           uv run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
@@ -358,4 +354,4 @@ jobs:
             -e VLLM_USE_TRITON_FLASH_ATTN=0 \
             -e VLLM_DISABLE_CUSTOM_ALL_REDUCE=1 \
             ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
-            bash -c 'curl -sSL https://install.python-poetry.org | python3 - && export PATH="$HOME/.local/bin:$PATH" && poetry --version && uv run pytest --log-cli-level=INFO -v -m "vllm"'
+            bash -c 'uv --version && uv run pytest --log-cli-level=INFO -v -m "vllm"'
