@@ -234,9 +234,10 @@ jobs:
           key: hf-datasets-
 
       - name: Run tests
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+          HF_DATASET_CACHE_DIR: ${{ env.HF_DATASET_CACHE_DIR }}
         run: |
-          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
-          export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
           export PATH=$HOME/.local/bin:$PATH
           uv run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
