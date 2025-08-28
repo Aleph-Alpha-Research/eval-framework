@@ -106,3 +106,44 @@ def test_derived_user_task_registration(monkeypatch: pytest.MonkeyPatch) -> None
         monkeypatch.syspath_prepend(tmpdir)
         load_extra_tasks([task_file])
         assert TaskName.from_name("MyCOPA")
+
+
+def test_user_task_registration_with_repeated_names(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test that loading user tasks with duplicate names raises an error."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        task_file = os.path.join(tmpdir, "my_custom_task.py")
+        with open(task_file, "w") as f:
+            f.write(
+                textwrap.dedent("""
+                from eval_framework.tasks.base import BaseTask, Language
+                class MyCustomTask(BaseTask):
+                    NAME = "MyCustomTask"
+                    DATASET_PATH = "dummy"
+                    SAMPLE_SPLIT = "test"
+                    FEWSHOT_SPLIT = "test"
+                    RESPONSE_TYPE = None
+                    METRICS = []
+                    SUBJECTS = []
+                    LANGUAGE = Language.ENG
+
+                class MyCustomTask2(BaseTask):
+                    NAME = "MyCustomTask" # repeated name
+                    DATASET_PATH = "dummy"
+                    SAMPLE_SPLIT = "test"
+                    FEWSHOT_SPLIT = "test"
+                    RESPONSE_TYPE = None
+                    METRICS = []
+                    SUBJECTS = []
+                    LANGUAGE = Language.ENG
+            """)
+            )
+        monkeypatch.syspath_prepend(tmpdir)
+        try:
+            load_extra_tasks([task_file])
+            raise AssertionError("the test should have raised an error due to duplicate task names")
+        except ValueError as e:
+            if str(e) == "Duplicate user task name found (case-insensitive): MyCustomTask":
+                # this was the expected we tested against, all is fine
+                pass
+            else:
+                raise AssertionError(f"another error was encountered than the one expected: {e}")
