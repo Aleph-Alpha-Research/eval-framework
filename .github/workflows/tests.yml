@@ -111,7 +111,7 @@ jobs:
         run: uvx pre-commit run --all-files
 
       - name: Run MyPy
-        run: uv run --all-extras --no-extra flash_attn mypy
+        run: uv run --all-extras --group cpu mypy
 
   changes:
     runs-on: ubuntu-latest
@@ -237,7 +237,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
           HF_DATASET_CACHE_DIR: ${{ env.HF_DATASET_CACHE_DIR }}
-        run: uv run --all-extras --no-extra flash_attn pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
+        run: uv run --all-extras --group cpu pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
@@ -262,8 +262,8 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
           HF_DATASET_CACHE_DIR: ${{ env.HF_DATASET_CACHE_DIR }}
         run: |
-          uv run --all-extras --no-extra flash_attn python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
-          uv run --all-extras --no-extra flash_attn pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
+          uv run --all-extras --group cpu python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
+          uv run --all-extras --group cpu pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
   test-gpu:
     runs-on: EvalFrameworkGPURunner
