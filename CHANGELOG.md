@@ -5,6 +5,7 @@
 ### Added
 
 - 2025-08-27: Adds support for weights and biases + determined pre-emption
+- 2025-08-27: fix loading of extra task modules, add test that no task with same names get registered
 
 ### Changed
 
