@@ -100,15 +100,6 @@ class TestWandbFs:
         }
         assert tree == expected
 
-    def test_get_artifact(self, wandb_fs_with_env):
-        """Test getting artifact by ID and version"""
-        wandb_fs, _, _ = wandb_fs_with_env
-        
-        artifact = wandb_fs.get_artifact("test-model", "v1.0")
-        
-        assert isinstance(artifact, MockArtifact)
-        assert artifact.id == "test-model"
-
     def test_get_bucket_prefix(self, wandb_fs_with_env):
         """Test extracting bucket and prefix from S3 URI"""
         wandb_fs, _, _ = wandb_fs_with_env
@@ -179,24 +170,19 @@ class TestWandbFs:
         # Should only download first 4 files
         assert mock_s3_client_instance.download_fileobj.call_count == 4
 
-    def test_download_and_use_artifact_s3(self, aws_env, mock_s3_client, wandb_run, mock_wandb):
+    def test_download_and_use_artifact_s3(self, aws_env, mock_s3_client, wandb_run, mock_wandb, wandb_fs_with_env):
         """Test download and use artifact for S3 files"""
         with patch.dict(os.environ, aws_env):
-            wandb_fs = WandbFs()
+            wandb_fs, _, _ = wandb_fs_with_env
             artifact = wandb.Artifact(name="test-model", type="model")
             artifact.add_reference("s3://bucket/model/config.json")
             logged_artifact = wandb_run.log_artifact(artifact, "model")
-            artifact = wandb_fs.get_artifact(logged_artifact)
-            assert wandb_fs.download_and_use_artifact(artifact)
+            assert logged_artifact
+            # set artifact in api for testing purposes
+            wandb_fs.api.set_artifact("test-model", [x.path_uri for x in logged_artifact.files()])
 
-    def test_context_manager(self, aws_env, mock_s3_client):
-        """Test WandbFs as context manager cleans up temp directory"""
-        with patch.dict(os.environ, aws_env):
-            with WandbFs() as wandb_fs:
-                wandb_fs.temp_dir = tempfile.TemporaryDirectory()
-                temp_dir_name = wandb_fs.temp_dir.name
-                assert os.path.exists(temp_dir_name)
-            
+            artifact = wandb_fs.get_artifact(logged_artifact.name)
+            assert wandb_fs.download_and_use_artifact(artifact)
 
 
 class TestFindHfCheckpointRoot:

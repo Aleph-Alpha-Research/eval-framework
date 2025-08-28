@@ -163,10 +163,10 @@ class MockArtifact:
         self.metadata = metadata
         self.incremental = incremental
         self.use_as = use_as
-        self._files = [] 
+        self.files_ = [] 
 
     def files(self):
-        return self._files
+        return self.files_
 
     def download(
         self,
@@ -185,7 +185,7 @@ class MockArtifact:
         self, uri: str, name: StrPath | None = None, checksum: bool = True, max_objects: int | None = None
     ) -> Sequence[str]:
         # Mock implementation: just return the URI for testing
-        self._files.append(MockArtifactFile(uri))
+        self.files_.append(MockArtifactFile(uri))
         return [uri]
 
 

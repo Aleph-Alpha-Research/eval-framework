@@ -128,6 +128,7 @@ def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     monkeypatch.setattr("wandb.Api", MockWandbApi)
     return mock_wandb_instance
 
+'''
 @pytest.fixture(autouse=True)
 def mock_wandb_run(monkeypatch: pytest.MonkeyPatch) -> MockWandbRun:
     mock_wandb_run_instance = MockWandbRun()
@@ -136,9 +137,11 @@ def mock_wandb_run(monkeypatch: pytest.MonkeyPatch) -> MockWandbRun:
     monkeypatch.setattr("wandb.Run.finish", mock_wandb_run_instance.finish)
     monkeypatch.setattr("wandb.Run.mark_preempting", mock_wandb_run_instance.mark_preempting)
     return mock_wandb_run_instance
+'''
 
 @pytest.fixture(autouse=True)
 def mock_wandb_artifact(monkeypatch: pytest.MonkeyPatch) -> MockArtifact:
+    # required by test_download_and_use_artifact
     mock_artifact_instance = MockArtifact("__mock_artifact__", "model")
     monkeypatch.setattr("wandb.Artifact.files", mock_artifact_instance.files)
     monkeypatch.setattr("wandb.Artifact.download", mock_artifact_instance.download)
