@@ -19,6 +19,7 @@ from eval_framework.tasks.benchmarks.chembench import ChemBenchMultipleChoice
 from eval_framework.tasks.benchmarks.copa import COPA
 from eval_framework.tasks.benchmarks.duc import DUC_ABSTRACTIVE, DUC_EXTRACTIVE
 from eval_framework.tasks.benchmarks.flores200 import Flores200
+
 # from eval_framework.tasks.benchmarks.flores_plus import FloresPlus
 from eval_framework.tasks.benchmarks.gpqa import GPQA, GPQA_COT
 from eval_framework.tasks.benchmarks.gsm8k import GSM8K, GSM8KLlamaVersion
@@ -87,6 +88,7 @@ from eval_framework.tasks.benchmarks.zero_scrolls import (
     ZERO_SCROLLS_MUSIQUE,
     ZERO_SCROLLS_NARRATIVEQA,
     ZERO_SCROLLS_QASPER,
+    ZERO_SCROLLS_QMSUM,
     ZERO_SCROLLS_QUALITY,
     ZERO_SCROLLS_SPACE_DIGEST,
     ZERO_SCROLLS_SQUALITY,
@@ -186,6 +188,7 @@ class TaskName(TaskNameEnum):
     WMT20_INSTRUCT = WMT20_INSTRUCT
     ZERO_SCROLLS_QUALITY = ZERO_SCROLLS_QUALITY
     ZERO_SCROLLS_SQUALITY = ZERO_SCROLLS_SQUALITY
+    ZERO_SCROLLS_QMSUM = ZERO_SCROLLS_QMSUM
     ZERO_SCROLLS_QASPER = ZERO_SCROLLS_QASPER
     ZERO_SCROLLS_GOV_REPORT = ZERO_SCROLLS_GOV_REPORT
     ZERO_SCROLLS_NARRATIVEQA = ZERO_SCROLLS_NARRATIVEQA
