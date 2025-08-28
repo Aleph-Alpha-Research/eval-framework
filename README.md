@@ -71,25 +71,24 @@ For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmark
 
 The codebase is tested and compatible with Python 3.12 and PyTorch 2.5
 You will also need the appropriate CUDA dependencies and version installed on your system for GPU support.
-Clone this repository and install via [poetry](https://python-poetry.org/docs/):
+As a first step, please install [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
-**Option 1: Using conda environment (recommended)**
+To install the project with all optional extras use
 ```bash
-conda create -n eval-framework python=3.12
-conda activate eval-framework
-conda install conda-forge::poetry
-poetry install --all-extras
-poetry run pip install --no-build-isolation flash-attn==2.7.2.post1
+uv sync --all-extras
 ```
 
-**Option 2: Using system-wide poetry**
+We provide custom groups to control optional extras.
+- `cpu`: Use the CPU backend for torch
+- `cu124`: Use the CUDA 12.4 backend
+- `flash_attn`: Install `flash_attn` with correct handling of build isolation
+
+Thus, the following will setup the project with `flash_attn` and CUDA 12.4
 ```bash
-curl -sSL https://install.python-poetry.org | python3 -
-poetry install --all-extras
-poetry run pip install --no-build-isolation flash-attn==2.7.2.post1
+uv sync --all-extras --group flash_attn --group cu124
 ```
 
-After installation, task documentation can be generated with `poetry run python utils/generate-task-docs.py` (see [docs/installation.md(docs/installation.md)) for more details.
+After installation, task documentation can be generated with `uv run python utils/generate-task-docs.py` (see [docs/installation.md(docs/installation.md)) for more details.
 
 ## Getting Started
 
@@ -162,7 +161,7 @@ Eval-Framework provides a unified interface for evaluating language models acros
 To evaluate a single benchmark locally, you can use the following command:
 
 ```bash
-poetry run eval_framework \
+uv run -m eval_framework.run \
     --models src/eval_framework/llm/models.py \
     --llm-name Llama31_8B_Instruct_HF \
     --task-name "GSM8K" \

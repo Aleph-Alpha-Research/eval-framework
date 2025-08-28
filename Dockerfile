@@ -67,7 +67,7 @@ ENV WORKDIR=/eval_framework
 RUN uv tool install --no-cache pre-commit
 
 # Copy over files for env installation
-COPY pyproject.toml uv.lock README.md LICENSE ./
+COPY pyproject.toml uv.lock README.md LICENSE .python-version ./
 
 RUN --mount=target=$UV_CACHE_DIR,type=cache,sharing=locked,id=uv-cache \
   uv sync --frozen --link-mode="copy" --all-extras --group cu124 --group flash-attn --no-install-project
