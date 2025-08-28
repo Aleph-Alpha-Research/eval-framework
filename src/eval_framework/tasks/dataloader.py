@@ -11,14 +11,24 @@ from huggingface_hub.errors import RevisionNotFoundError
 class Dataloader(ABC):
     @abstractmethod
     def load(
-        self, path: str, name: str | None = None, revision: str | None = None, features: Features | None = None
+        self,
+        path: str,
+        name: str | None = None,
+        revision: str | None = None,
+        features: Features | None = None,
+        streaming: bool = False,
     ) -> Union[DatasetDict, Dataset, IterableDatasetDict, IterableDataset]:
         pass
 
 
 class HFDataloader(Dataloader):
     def load(
-        self, path: str, name: str | None = None, revision: str | None = None, features: Features | None = None
+        self,
+        path: str,
+        name: str | None = None,
+        revision: str | None = None,
+        features: Features | None = None,
+        streaming: bool = False,
     ) -> Union[DatasetDict, Dataset, IterableDatasetDict, IterableDataset]:
         # Check if the HF_REVISION is valid before loading the dataset
         if revision:
@@ -39,6 +49,7 @@ class HFDataloader(Dataloader):
                 cache_dir=cache_dir,
                 download_config=download_config,
                 features=features,
+                streaming=streaming,
             )
         except Exception:
             return load_dataset(
@@ -48,4 +59,5 @@ class HFDataloader(Dataloader):
                 trust_remote_code=True,
                 cache_dir=f"{Path.home()}/.cache/eval-framework",
                 features=features,
+                streaming=streaming,
             )
