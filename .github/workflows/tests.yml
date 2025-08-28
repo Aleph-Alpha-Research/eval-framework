@@ -106,13 +106,8 @@ jobs:
         with:
           version: "~=0.8.10"
 
-      - name: Run Pre-Commit
-        run: |
-          uvx tool install pre-commit
-          pre-commit run --all
-
       - name: Run MyPy
-        run: uv run --all-extras mypy src tests utils
+        run: uvx pre-commit run --all-extras mypy src tests utils
 
   changes:
     runs-on: ubuntu-latest

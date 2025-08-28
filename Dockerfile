@@ -63,6 +63,9 @@ ENV PATH="${UV_PROJECT_ENVIRONMENT}/bin:${PATH}:${UV_PYTHON_BIN_DIR}"
 WORKDIR /eval_framework
 ENV WORKDIR=/eval_framework
 
+# Install pre-commit
+RUN uv tool install --no-cache pre-commit
+
 # Copy over files for env installation
 COPY pyproject.toml uv.lock README.md LICENSE ./
 
