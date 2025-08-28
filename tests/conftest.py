@@ -2,6 +2,7 @@ from typing import Callable, Generator, List, Sequence
 
 import pytest
 from _pytest.fixtures import FixtureRequest
+import wandb
 
 from eval_framework.llm.base import BaseLLM, Sample
 from eval_framework.llm.models import (
@@ -115,69 +116,39 @@ def _resolve_dotted(dotted: str) -> object:
         obj = getattr(obj, part)
     return obj
 
-
-def _auto_monkeypatch(monkeypatch: pytest.MonkeyPatch, target_dotted: str, mock_source: object) -> None:
-    """Programmatically monkeypatch public attributes from `mock_source` onto
-    the resolved `target_dotted` object.
-    Copies all public attributes (no leading underscore) from the mock 
-    instance or class to the target object.
-
-    Additional attributes can still be added
-
-    :params monkeypatch: The monkeypatch fixture instance.
-    :params target_dotted: The dotted path to the target object.
-    :params mock_source: The mock object to copy attributes from.
-    :returns: None
-    """
-    target = _resolve_dotted(target_dotted)
-
-    # Collect names from the instance and its class so we pick up methods and
-    # assigned class attributes.
-    names: set[str] = set()
-    if hasattr(mock_source, "__dict__"):
-        names.update(k for k in vars(mock_source).keys() if not k.startswith("_"))
-    names.update(k for k in vars(type(mock_source)).keys() if not k.startswith("_"))
-
-    for name in names:
-        try:
-            value = getattr(mock_source, name)
-        except AttributeError:
-            continue
-
-        # If we're patching a class (like wandb.Artifact or wandb.Api) and the
-        # mock value is callable, create a wrapper that drops the `self`
-        # parameter and delegates to the mock. This preserves the method call
-        if inspect.isclass(target) and callable(value):
-            def _make_wrapper(fn):
-                def _wrapped(_self, *a, **kw):
-                    return fn(*a, **kw)
-
-                return _wrapped
-
-            patched = _make_wrapper(value)
-            monkeypatch.setattr(target, name, patched, raising=False)
-        else:
-            monkeypatch.setattr(target, name, value, raising=False)
-
-
 @pytest.fixture(autouse=True)
 def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
-    """Automatically mock wandb for all tests."""
     mock_wandb_instance = MockWandb()
-    _auto_monkeypatch(monkeypatch, "wandb", mock_wandb_instance)
+    monkeypatch.setattr("wandb.init", mock_wandb_instance.init)
+    monkeypatch.setattr("wandb.log", mock_wandb_instance.log)
+    monkeypatch.setattr("wandb.login", mock_wandb_instance.login)
+    monkeypatch.setattr("wandb.finish", mock_wandb_instance.finish)
+    monkeypatch.setattr("wandb.use_artifact", mock_wandb_instance.use_artifact)
+    monkeypatch.setattr("wandb.Artifact", MockArtifact)
+    monkeypatch.setattr("wandb.Api", MockWandbApi)
     return mock_wandb_instance
 
 @pytest.fixture(autouse=True)
-def mock_wandb_artifact(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
-    """Automatically mock wandb Artifact class methods."""
-    mock_artifact_instance = MockArtifact("__mock_artifact__")
-    _auto_monkeypatch(monkeypatch, "wandb.Artifact", mock_artifact_instance)
-    return mock_artifact_instance
-
+def mock_wandb_run(monkeypatch: pytest.MonkeyPatch) -> MockWandbRun:
+    mock_wandb_run_instance = MockWandbRun()
+    monkeypatch.setattr("wandb.Run.log", mock_wandb_run_instance.log)
+    monkeypatch.setattr("wandb.Run.log_artifact", mock_wandb_run_instance.log_artifact)
+    monkeypatch.setattr("wandb.Run.finish", mock_wandb_run_instance.finish)
+    monkeypatch.setattr("wandb.Run.mark_preempting", mock_wandb_run_instance.mark_preempting)
+    return mock_wandb_run_instance
 
 @pytest.fixture(autouse=True)
-def mock_wandb_api(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
+def mock_wandb_artifact(monkeypatch: pytest.MonkeyPatch) -> MockArtifact:
+    mock_artifact_instance = MockArtifact("__mock_artifact__", "model")
+    monkeypatch.setattr("wandb.Artifact.files", mock_artifact_instance.files)
+    monkeypatch.setattr("wandb.Artifact.download", mock_artifact_instance.download)
+    monkeypatch.setattr("wandb.Artifact.add_reference", mock_artifact_instance.add_reference)
+    return mock_artifact_instance
+
+@pytest.fixture(autouse=True)
+def mock_wandb_api(monkeypatch: pytest.MonkeyPatch) -> MockWandbApi:
     """Automatically mock wandb api for tests."""
     mock_api_instance = MockWandbApi()
-    _auto_monkeypatch(monkeypatch, "wandb.Api", mock_api_instance)
+    monkeypatch.setattr("wandb.Api", MockWandbApi)
+    monkeypatch.setattr("wandb.Api.artifact", MockWandbApi.artifact)
     return mock_api_instance

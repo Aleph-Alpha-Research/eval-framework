@@ -4,7 +4,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Any, Dict, Literal, Optional, Sequence, TypedDict, Unpack
 
-from wandb import Settings
+from wandb import Artifact, Settings
 from wandb.apis.public import RetryingClient
 from wandb.sdk.lib.paths import StrPath
 
@@ -56,6 +56,7 @@ class MockWandbRun:
         self.logged_data: list[dict] = []  # Store all logged data for testing
         self._finished: bool = False
         self.id: str = str(kwargs.get("id") or "mock_run_id")
+        self.logged_artifacts = []
 
     def __enter__(self) -> "MockWandbRun":
         return self
@@ -77,6 +78,21 @@ class MockWandbRun:
         if not self._finished:
             log_entry = {"data": data, "step": step, "commit": commit}
             self.logged_data.append(log_entry)
+
+    def log_artifact(
+        self,
+        artifact_or_path: Artifact | StrPath,
+        name: str | None = None,
+        type: str | None = None,
+        aliases: list[str] | None = None,
+        tags: list[str] | None = None,
+    ) -> "MockArtifact":
+        if isinstance(artifact_or_path, str):
+            artifact = MockArtifact(artifact_or_path, "mock_artifact")
+        else:
+            artifact = artifact_or_path
+        self.logged_artifacts.append(artifact)
+        return artifact
 
     def finish(self, exit_code: int = 0) -> None:
         self.exit_code = exit_code
@@ -131,14 +147,26 @@ class MockArtifactFile:
 
 
 class MockArtifact:
-    def __init__(self, artifact_id: str, file_list: list[str] | None = None):
-        self.id = artifact_id
-        self.name = artifact_id
-        self._file_list = file_list or []
-        self._files = [MockArtifactFile(path) for path in self._file_list]
+    def __init__(
+        self,
+        name: str,
+        type: str,
+        description: str | None = None,
+        metadata: dict[str, Any] | None = None,
+        incremental: bool = False,
+        use_as: str | None = None,
+    ) -> None:
+        self.id = name
+        self.name = name
+        self.type = type
+        self.description = description
+        self.metadata = metadata
+        self.incremental = incremental
+        self.use_as = use_as
+        self._files = [] 
 
     def files(self):
-        return iter(self._files)
+        return self._files
 
     def download(
         self,
@@ -153,6 +181,13 @@ class MockArtifact:
         # Return a temporary directory path for testing
         return tempfile.mkdtemp()
 
+    def add_reference(
+        self, uri: str, name: StrPath | None = None, checksum: bool = True, max_objects: int | None = None
+    ) -> Sequence[str]:
+        # Mock implementation: just return the URI for testing
+        self._files.append(MockArtifactFile(uri))
+        return [uri]
+
 
 class MockWandbApi:
     def __init__(self):
@@ -160,24 +195,14 @@ class MockWandbApi:
         self._artifacts = {}
 
     def artifact(self, name: str) -> MockArtifact:
-        if "/" in name:
-            parts = name.split("/")
-            artifact_id = parts[-1].split(":")[0]
-        else:
-            artifact_id = name.split(":")[0]
-        
-        # Return predefined artifacts or create a default one
-        if artifact_id in self._artifacts:
-            return self._artifacts[artifact_id]
-        
-        # Default artifact for testing
-        default_files = [
-            f"s3://test-bucket/models/{artifact_id}/huggingface/config.json",
-            f"s3://test-bucket/models/{artifact_id}/huggingface/tokenizer.json",
-            f"s3://test-bucket/models/{artifact_id}/huggingface/model.safetensors",
-        ]
-        return MockArtifact(artifact_id, default_files)
+        return self.get_artifact(name)
 
     def set_artifact(self, artifact_id: str, file_list: list[str]):
-        """Helper method for tests to set up specific artifacts"""
-        self._artifacts[artifact_id] = MockArtifact(artifact_id, file_list)
+        # used only for testing purposes
+        artifact = MockArtifact(artifact_id, "model")
+        for file in file_list:
+            artifact.add_reference(file)
+        self._artifacts[f"wandb-registry-model/{artifact_id}:latest"] = artifact
+
+    def get_artifact(self, artifact_id: str) -> MockArtifact | None:
+        return self._artifacts.get(artifact_id)

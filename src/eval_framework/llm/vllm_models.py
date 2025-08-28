@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 import tempfile
-from typing import Any, Generic, List, Optional, Protocol, Sequence, TypeVar, cast, override
+from typing import Any, Generic, List, Literal, Optional, Protocol, Sequence, TypeVar, cast, override
 import boto3
 
 import torch

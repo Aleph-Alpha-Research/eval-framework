@@ -165,7 +165,7 @@ def find_hf_checkpoint_root(file_tree: dict, base_path: str = "") -> str | None:
     Example:
         >>> tree = {
         ...     "models": {
-        ...         "qwen-3-32b": {
+        ...         "my-model": {
         ...             "files": ["config.json", "tokenizer.json", "model.safetensors"],
         ...             "subdir": {"files": ["other.txt"]}
         ...         }
@@ -173,7 +173,7 @@ def find_hf_checkpoint_root(file_tree: dict, base_path: str = "") -> str | None:
         ...     "files": ["readme.txt"]
         ... }
         >>> find_hf_checkpoint_root(tree)
-        'models/qwen-3-32b'
+        'models/my-model'
     """
     REQUIRED_HF_FILES = {"config.json"}
     COMMON_HF_FILES = {
@@ -220,13 +220,13 @@ def find_hf_checkpoint_root_from_path_list(file_paths: List[str]) -> str | None:
         
     Example:
         >>> paths = [
-        ...     "s3://bucket/models/qwen-3-32b/config.json",
-        ...     "s3://bucket/models/qwen-3-32b/tokenizer.json", 
-        ...     "s3://bucket/models/qwen-3-32b/model.safetensors",
+        ...     "s3://bucket/models/my-model/config.json",
+        ...     "s3://bucket/models/my-model/tokenizer.json", 
+        ...     "s3://bucket/models/my-model/model.safetensors",
         ...     "s3://bucket/other/readme.txt"
         ... ]
         >>> find_hf_checkpoint_root_from_path_list(paths)
-        'models/qwen-3-32b'
+        'models/my-model'
     """
     if not file_paths:
         return None
