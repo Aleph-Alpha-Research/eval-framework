@@ -236,7 +236,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
           HF_DATASET_CACHE_DIR: ${{ env.HF_DATASET_CACHE_DIR }}
-        run: uv run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
+        run: uv run --no-extra flash_attn pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
@@ -261,8 +261,8 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
           HF_DATASET_CACHE_DIR: ${{ env.HF_DATASET_CACHE_DIR }}
         run: |
-          uv run python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
-          uv run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
+          uv run --all-extras --no-extra flash_attn python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
+          uv run --all-extras --no-extra flash_attn pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
   test-gpu:
     runs-on: EvalFrameworkGPURunner
@@ -304,7 +304,7 @@ jobs:
             -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
             -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
             ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
-            bash -c 'uv run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
+            bash -c 'pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
 
   test-gpu-vllm:
     runs-on: EvalFrameworkGPURunner
@@ -353,4 +353,4 @@ jobs:
             -e VLLM_USE_TRITON_FLASH_ATTN=0 \
             -e VLLM_DISABLE_CUSTOM_ALL_REDUCE=1 \
             ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
-            bash -c 'uv --version && uv run pytest --log-cli-level=INFO -v -m "vllm"'
+            bash -c 'pytest --log-cli-level=INFO -v -m "vllm"'
