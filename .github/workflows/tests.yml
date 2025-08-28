@@ -223,7 +223,6 @@ jobs:
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
-        if: github.ref == 'refs/heads/main'
         with:
           version: "~=0.8.10"
 
