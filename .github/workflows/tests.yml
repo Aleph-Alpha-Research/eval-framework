@@ -110,7 +110,7 @@ jobs:
         run: uvx pre-commit run --all-files
 
       - name: Run MyPy
-        run: uv run --all-extras mypy src tests utils
+        run: uv run --all-extras --no-extra flash_attn mypy src tests utils
 
   changes:
     runs-on: ubuntu-latest
