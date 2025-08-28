@@ -100,12 +100,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      
+
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.10"
-      
+
       - name: Run Pre-Commit
         run: uvx pre-commit run --all-files
 
@@ -159,7 +159,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         if: github.ref == 'refs/heads/main'
-    
+
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
         if: github.ref == 'refs/heads/main'
