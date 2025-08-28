@@ -107,7 +107,7 @@ jobs:
           version: "~=0.8.10"
 
       - name: Run MyPy
-        run: uvx pre-commit run --all-extras mypy src tests utils
+        run: uvx pre-commit run --all-files mypy src tests utils
 
   changes:
     runs-on: ubuntu-latest
