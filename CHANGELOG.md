@@ -5,13 +5,13 @@
 ### Added
 
 - 2025-08-27: Adds support for weights and biases + determined pre-emption
-- 2025-08-27: fix loading of extra task modules, add test that no task with same names get registered
 
 ### Changed
 
 ### Fixed
 
-- 2025-08-27: fix NAME attribute check in extra task modules loading
+- 2025-08-27: fix loading of extra task modules (skip non-evaluation BaseTasks with no NAME attribute), add test that no task with same names get registered
+- 2025-08-27: fix ZERO_SCROLLS_QMSUM missing from task_names.py
 
 ## [0.1.0] - 2025-08-18
 
