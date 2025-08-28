@@ -62,7 +62,6 @@ vllm = [
   "vllm>=0.8.5,<0.9",
   "torch"
 ]
-flash_attn = ["flash-attn==2.7.2.post1"]
 # from template-formatting
 optional = [
   "transformers>=4.45.2,<5",

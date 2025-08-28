@@ -871,9 +871,6 @@ determined = [
     { name = "determined" },
     { name = "tensorboard" },
 ]
-flash-attn = [
-    { name = "flash-attn" },
-]
 mistral = [
     { name = "huggingface-hub" },
     { name = "mistral-common" },
@@ -931,7 +928,6 @@ requires-dist = [
     { name = "antlr4-python3-runtime", specifier = "==4.11.1" },
     { name = "datasets", specifier = ">=2.19.1,<4" },
     { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38,<0.39" },
-    { name = "flash-attn", marker = "extra == 'flash-attn'", specifier = "==2.7.2.post1" },
     { name = "google-crc32c", specifier = ">=1.5.0,<2" },
     { name = "huggingface-hub", marker = "extra == 'mistral'", specifier = ">=0.33.2,<0.34" },
     { name = "jinja2", marker = "extra == 'optional'", specifier = ">=3.1.6,<4" },
@@ -974,7 +970,7 @@ requires-dist = [
     { name = "wandb", specifier = ">=0.21.1" },
     { name = "xmltodict", specifier = ">=0.13.0,<0.14" },
 ]
-provides-extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "flash-attn", "optional", "mistral"]
+provides-extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "optional", "mistral"]
 
 [package.metadata.requires-dev]
 cpu = [{ name = "torch", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "eval-framework", group = "cpu" } }]
