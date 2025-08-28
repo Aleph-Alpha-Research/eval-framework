@@ -1,4 +1,6 @@
+import tempfile
 import traceback
+from pathlib import Path
 from types import TracebackType
 from typing import Any, Dict, Literal, Optional, Sequence, TypedDict, Unpack
 
@@ -91,6 +93,7 @@ class MockWandb:
     def __init__(self) -> None:
         self.run: MockWandbRun | None = None
         self._login_called = False
+        self.Api = MockWandbApi  # Make Api class available
 
     def init(self, **kwargs: Unpack[InitKwargs]) -> MockWandbRun:
         # get the intersection between initkwargs and runinitkwargs.
@@ -109,3 +112,72 @@ class MockWandb:
     def finish(self, exit_code: int = 0) -> None:
         if self.run:
             self.run.finish(exit_code)
+
+    def use_artifact(self, artifact: "MockArtifact | str") -> "MockArtifact":
+        """Mock wandb.use_artifact function"""
+        if isinstance(artifact, str):
+            # Create a mock artifact from string
+            return MockArtifact(artifact)
+        return artifact
+
+
+class MockArtifactFile:
+    def __init__(self, path_uri: str):
+        self.path_uri = path_uri
+
+    @property
+    def name(self) -> str:
+        return Path(self.path_uri).name
+
+
+class MockArtifact:
+    def __init__(self, artifact_id: str, file_list: list[str] | None = None):
+        self.id = artifact_id
+        self.name = artifact_id
+        self._file_list = file_list or []
+        self._files = [MockArtifactFile(path) for path in self._file_list]
+
+    def files(self):
+        return iter(self._files)
+
+    def download(
+        self,
+        root: StrPath | None = None,
+        allow_missing_references: bool = False,
+        skip_cache: bool | None = None,
+        path_prefix: StrPath | None = None,
+        multipart: bool | None = None,
+    ) -> str:
+        if root:
+            return str(root)
+        # Return a temporary directory path for testing
+        return tempfile.mkdtemp()
+
+
+class MockWandbApi:
+    def __init__(self):
+        self.entity = "test-entity"
+        self._artifacts = {}
+
+    def artifact(self, name: str) -> MockArtifact:
+        if "/" in name:
+            parts = name.split("/")
+            artifact_id = parts[-1].split(":")[0]
+        else:
+            artifact_id = name.split(":")[0]
+        
+        # Return predefined artifacts or create a default one
+        if artifact_id in self._artifacts:
+            return self._artifacts[artifact_id]
+        
+        # Default artifact for testing
+        default_files = [
+            f"s3://test-bucket/models/{artifact_id}/huggingface/config.json",
+            f"s3://test-bucket/models/{artifact_id}/huggingface/tokenizer.json",
+            f"s3://test-bucket/models/{artifact_id}/huggingface/model.safetensors",
+        ]
+        return MockArtifact(artifact_id, default_files)
+
+    def set_artifact(self, artifact_id: str, file_list: list[str]):
+        """Helper method for tests to set up specific artifacts"""
+        self._artifacts[artifact_id] = MockArtifact(artifact_id, file_list)
