@@ -29,7 +29,6 @@ on:
       - 'changelog/**'
   pull_request:
     types: [opened, reopened, synchronize, labeled]
-    branches: [main]
     paths-ignore:
       - '*.detignore'
       - '**/*.detignore'
@@ -56,7 +55,6 @@ on:
       - 'changelog/**'
   pull_request_target:
     types: [opened, reopened, synchronize, labeled]
-    branches: [main]
     paths-ignore:
       - '*.detignore'
       - '**/*.detignore'
