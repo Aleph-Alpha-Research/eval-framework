@@ -92,7 +92,8 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: eval_framework_public
   HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # <- single source of truth
-  UV_LINK_MODE: copy
+  UV_LINK_MODE: symlink
+  UV_LOCKED: 1
 
 jobs:
 
