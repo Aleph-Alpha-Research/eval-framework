@@ -105,9 +105,12 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.10"
+      
+      - name: Run Pre-Commit
+        run: uvx pre-commit run --all-files
 
       - name: Run MyPy
-        run: uvx pre-commit run --all-files mypy src tests utils
+        run: uv run --all-extras mypy src tests utils
 
   changes:
     runs-on: ubuntu-latest
