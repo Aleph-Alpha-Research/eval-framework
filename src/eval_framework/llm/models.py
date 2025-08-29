@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import Any, Optional
 
 import torch
@@ -7,6 +9,7 @@ from eval_framework.constants import RED, RESET
 from eval_framework.llm.aleph_alpha_api_llm import AlephAlphaAPIModel
 from eval_framework.llm.huggingface_llm import HFLLM
 from eval_framework.llm.vllm_models import MistralVLLM, VLLMModel
+from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import (
     ConcatFormatter,
     HFFormatter,
@@ -256,6 +259,76 @@ class HFLLM_from_name(HFLLM):
             return ConcatFormatter()
         elif formatter == "HFFormatter":
             return HFFormatter(model_name)
+        else:
+            supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
+            raise ValueError(f"Unsupported formatter: {formatter}. Supported formatters: {supported}")
+
+
+class HFLLM_from_wandb_registry(HFLLM):
+    """
+    A class to create HFLLM instances from registered models in Wandb registry.
+    Downloads the model artifacts from Wandb and creates a local HFLLM instance.
+    """
+
+    def __init__(
+        self, 
+        artifact_name: str, 
+        version: str = "latest", 
+        formatter: str = "Llama3Formatter", 
+        **kwargs: Any
+    ) -> None:
+        """
+        Initialize HFLLM from a Wandb registered model artifact.
+        
+        Args:
+            artifact_name: Name of the artifact in the Wandb registry
+            version: Version of the artifact to download (default: "latest")
+            formatter: Type of formatter to use (default: "Llama3Formatter")
+            **kwargs: Additional arguments passed to the parent class
+        """
+        print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
+        
+        # Download the model from Wandb registry and set LLM_NAME
+        with WandbFs() as wandb_fs:
+            artifact = wandb_fs.get_artifact(artifact_name, version)
+            file_list = wandb_fs.ls(artifact)
+            wandb_fs.download_artifacts(artifact)
+            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
+            
+            if file_root is None:
+                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
+            
+            local_artifact_path = os.path.join(Path(wandb_fs.temp_dir.name), Path(file_root))
+            
+            print(f"{RED}[ Model downloaded to: {local_artifact_path} ]{RESET}")
+            
+            # Set the LLM_NAME before calling parent init
+            self.LLM_NAME = local_artifact_path
+            
+            # Store the artifact info for reference
+            self.artifact_name = artifact_name
+            self.artifact_version = version
+            
+            # Get the formatter before calling parent init
+            selected_formatter = self._get_formatter(formatter, self.artifact_name)
+            
+            # Now call the parent HFLLM.__init__() with the formatter
+            super().__init__(formatter=selected_formatter)
+            
+            print(f"{RED}[ Model initialized --------------------- {RESET}")
+            print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
+            print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+
+    def _get_formatter(self, formatter: str, model_path: str) -> Any:
+        """Get formatter instance based on formatter name."""
+        if formatter == "Llama3Formatter":
+            return Llama3Formatter()
+        elif formatter == "MistralFormatter":
+            return MagistralFormatter(model_path)
+        elif formatter == "ConcatFormatter":
+            return ConcatFormatter()
+        elif formatter == "HFFormatter":
+            return HFFormatter(model_path)
         else:
             supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
             raise ValueError(f"Unsupported formatter: {formatter}. Supported formatters: {supported}")

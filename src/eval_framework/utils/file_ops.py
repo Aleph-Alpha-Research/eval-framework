@@ -312,12 +312,18 @@ class WandbFs:
 
 
 if __name__ == "__main__":
+
+    from eval_framework.llm.models import HFLLM_from_wandb_registry
+
+    name = "SmolLM2-135M"
+    version = "v1"
+    '''
+
     with WandbFs() as wandb_fs:
-        name = "SmolLM2-135M"
-        version = "v1"
         artifact = wandb_fs.get_artifact(name, version)
         file_list = wandb_fs.ls(artifact)
         temp_dir = wandb_fs.download_artifacts(artifact)
         file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
         local_artifact_path = os.path.join(Path(wandb_fs.temp_dir.name), Path(file_root))
-        model = VLLMModel(checkpoint_path=local_artifact_path)
+    '''
+    model = HFLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter")
