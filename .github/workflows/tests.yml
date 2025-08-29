@@ -1,10 +1,6 @@
 name: CI
 
 on:
-  # Manually trigger a workflow for a branch
-  workflow_dispatch:
-  # Merge queue trigger
-  merge_group:
   push:
     branches: [main]
     paths-ignore:
@@ -34,57 +30,13 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, labeled]
     branches: [main]
-    paths-ignore:
-      - '*.detignore'
-      - '**/*.detignore'
-      - '*.example'
-      - '**/*.example'
-      - '*.json'
-      - '**/*.json'
-      - '*.md'
-      - '**/*.md'
-      - '*.png'
-      - '**/*.png'
-      - '*.sample'
-      - '**/*.sample'
-      - '*.TAG'
-      - '**/*.TAG'
-      - '*.yaml'
-      - '**/*.yaml'
-      - '*.yml'
-      - '**/*.yml'
-      - '!/.github/workflows/**'
-      - 'docs/**'
-      - 'LICENSE'
-      - '.gitignore'
-      - 'changelog/**'
   pull_request_target:
     types: [opened, reopened, synchronize, labeled]
     branches: [main]
-    paths-ignore:
-      - '*.detignore'
-      - '**/*.detignore'
-      - '*.example'
-      - '**/*.example'
-      - '*.json'
-      - '**/*.json'
-      - '*.md'
-      - '**/*.md'
-      - '*.png'
-      - '**/*.png'
-      - '*.sample'
-      - '**/*.sample'
-      - '*.TAG'
-      - '**/*.TAG'
-      - '*.yaml'
-      - '**/*.yaml'
-      - '*.yml'
-      - '**/*.yml'
-      - '!/.github/workflows/**'
-      - 'docs/**'
-      - 'LICENSE'
-      - '.gitignore'
-      - 'changelog/**'
+  # Manually trigger a workflow for a branch
+  workflow_dispatch:
+  # Merge queue trigger
+  merge_group:
 
 permissions:
   contents: read
@@ -95,8 +47,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: eval_framework_public
+  REGISTRY: registry.gitlab.aleph-alpha.de
+  REPO_OWNER: research/gl-registry
+  IMAGE_NAME: eval_framework
   HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # <- single source of truth
 
 jobs:
@@ -117,47 +70,6 @@ jobs:
       - name: Run MyPy
         run: |
           poetry run mypy src tests utils
-
-  changes:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      poetry_changed: ${{ steps.detect.outputs.poetry_changed }}
-    steps:
-      - name: Checkout PR head (or commit on push)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
-
-      - name: Fetch base ref (only needed for PR)
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
-
-      - name: Detect changes in poetry files
-        id: detect
-        run: |
-          set -euo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-          else
-            if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-              BASE_SHA=$(git rev-parse HEAD^)
-            else
-              BASE_SHA=$(git hash-object -t tree /dev/null)
-            fi
-            HEAD_SHA="${{ github.sha }}"
-          fi
-
-          echo "Comparing $BASE_SHA...$HEAD_SHA"
-          if git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -E '^(pyproject\.toml|poetry\.lock)$' >/dev/null; then
-            echo "poetry_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "poetry_changed=false" >> "$GITHUB_OUTPUT"
-          fi
 
   hf-datasets-cache:
     runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
@@ -187,7 +99,6 @@ jobs:
 
   tag:
     runs-on: ubuntu-latest
-    needs: [lint, changes]
     outputs:
       tag: ${{ steps.set-tag.outputs.tag }}
     steps:
@@ -199,7 +110,8 @@ jobs:
         if [ "${{ github.ref }}" == "refs/heads/main" ]; then
           echo "tag=latest" >> $GITHUB_OUTPUT
         else
-          BRANCH_NAME=${{ github.ref_name }}
+          # head_ref is the correct branch name for PRs
+          BRANCH_NAME=${{ github.head_ref || github.ref_name }}
           echo "tag=${BRANCH_NAME::20}" >> $GITHUB_OUTPUT
         fi
     - name: Output Docker Tag
@@ -207,13 +119,9 @@ jobs:
         echo "Docker Tag: ${{ steps.set-tag.outputs.tag }}"
 
   build:
-    needs: [lint, changes, tag]
+    needs: [lint, tag]
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: eval_framework_public
-      REPO_OWNER_LC: aleph-alpha-research
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -222,8 +130,8 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: gl-token
+          password: ${{ secrets.GL_REGISTRY_READ_WRITE_TOKEN }}
 
       - name: Setup Docker BuildX
         uses: docker/setup-buildx-action@v1
@@ -235,7 +143,7 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
 
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
@@ -289,10 +197,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Normalize repo owner to lowercase
-        run: |
-          echo "REPO_OWNER_LC=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
@@ -303,12 +207,12 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: gl-token
+          password: ${{ secrets.GL_REGISTRY_READ_TOKEN }}
 
       - name: Pull container image
         run: |
-          docker pull "${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}"
+          docker pull "${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}"
 
       - name: Run GPU tests inside container with GPU access
         run: |
@@ -317,7 +221,7 @@ jobs:
             -w /eval_framework \
             -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
             -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }} \
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }} \
             bash -c 'poetry run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
 
   test-gpu-vllm:
@@ -332,10 +236,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Normalize repo owner to lowercase
-        run: |
-          echo "REPO_OWNER_LC=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
@@ -346,12 +246,12 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: "gl-token"
+          password: ${{ secrets.GL_REGISTRY_READ_TOKEN }}
 
       - name: Pull container image
         run: |
-          docker pull "${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}"
+          docker pull "${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}"
 
       - name: Run GPU tests inside container with GPU access
         run: |
@@ -366,5 +266,5 @@ jobs:
             -e VLLM_NCCL_SO_PATH="" \
             -e VLLM_USE_TRITON_FLASH_ATTN=0 \
             -e VLLM_DISABLE_CUSTOM_ALL_REDUCE=1 \
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }} \
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }} \
             bash -c 'curl -sSL https://install.python-poetry.org | python3 - && export PATH="$HOME/.local/bin:$PATH" && poetry --version && poetry run pytest --log-cli-level=INFO -v -m "vllm"'
