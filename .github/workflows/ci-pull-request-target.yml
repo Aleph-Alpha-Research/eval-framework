@@ -1,59 +1,6 @@
-name: CI
+name: CI - Pull Request Target
 
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - '*.detignore'
-      - '**/*.detignore'
-      - '*.example'
-      - '**/*.example'
-      - '*.json'
-      - '**/*.json'
-      - '*.md'
-      - '**/*.md'
-      - '*.png'
-      - '**/*.png'
-      - '*.sample'
-      - '**/*.sample'
-      - '*.TAG'
-      - '**/*.TAG'
-      - '*.yaml'
-      - '**/*.yaml'
-      - '*.yml'
-      - '**/*.yml'
-      - '!/.github/workflows/**'
-      - 'docs/**'
-      - 'LICENSE'
-      - '.gitignore'
-      - 'changelog/**'
-  pull_request:
-    types: [opened, reopened, synchronize, labeled]
-    branches: [main]
-    paths-ignore:
-      - '*.detignore'
-      - '**/*.detignore'
-      - '*.example'
-      - '**/*.example'
-      - '*.json'
-      - '**/*.json'
-      - '*.md'
-      - '**/*.md'
-      - '*.png'
-      - '**/*.png'
-      - '*.sample'
-      - '**/*.sample'
-      - '*.TAG'
-      - '**/*.TAG'
-      - '*.yaml'
-      - '**/*.yaml'
-      - '*.yml'
-      - '**/*.yml'
-      - '!/.github/workflows/**'
-      - 'docs/**'
-      - 'LICENSE'
-      - '.gitignore'
-      - 'changelog/**'
   pull_request_target:
     types: [opened, reopened, synchronize, labeled]
     branches: [main]
@@ -85,23 +32,56 @@ on:
 permissions:
   contents: read
   packages: write
+  pull-requests: read 
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: eval_framework_public
-  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # <- single source of truth
+  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets
 
 jobs:
+  # Security check for pull_request_target
+  authorize-fork-pr:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Check authorization
+        id: check
+        run: |
+          # Check if PR is from a fork
+          if [[ "${{ github.event.pull_request.head.repo.fork }}" == "false" ]]; then
+            echo "PR is from the same repository. Skipping pull_request_target workflow."
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # If from fork, check for trusted_contributor label
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}" == "true" ]]; then
+            echo "PR is from a fork with 'trusted_contributor' label. Authorized!"
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Otherwise, don't run
+          echo "PR is from a fork without 'trusted_contributor' label. Skipping."
+          echo "should_run=false" >> $GITHUB_OUTPUT
+          exit 0
+
 
   lint:
-    runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
+    needs: authorize-fork-pr
+    if: ${{ needs.authorize-fork-pr.outputs.should_run == 'true' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Setup poetry
         uses: ./.github/actions/setup-poetry-on-ubuntu
         with:
@@ -115,20 +95,21 @@ jobs:
           poetry run mypy src tests utils
 
   changes:
+    needs: authorize-fork-pr
+    if: ${{ needs.authorize-fork-pr.outputs.should_run == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
     outputs:
       poetry_changed: ${{ steps.detect.outputs.poetry_changed }}
     steps:
-      - name: Checkout PR head (or commit on push)
+      - name: Checkout PR head
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Fetch base ref (only needed for PR)
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: Fetch base ref
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
 
@@ -136,17 +117,8 @@ jobs:
         id: detect
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-          else
-            if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-              BASE_SHA=$(git rev-parse HEAD^)
-            else
-              BASE_SHA=$(git hash-object -t tree /dev/null)
-            fi
-            HEAD_SHA="${{ github.sha }}"
-          fi
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
 
           echo "Comparing $BASE_SHA...$HEAD_SHA"
           if git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -E '^(pyproject\.toml|poetry\.lock)$' >/dev/null; then
@@ -155,35 +127,10 @@ jobs:
             echo "poetry_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-  hf-datasets-cache:
-    runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
-    container: derskythe/github-runner-base:ubuntu-noble  # has the right python, sudo and curl:)
-    steps:
-      - uses: actions/checkout@v4
-        if: github.ref == 'refs/heads/main'
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
-        if: github.ref == 'refs/heads/main'
-        with:
-          github-repo-token: ${{ secrets.TOKEN_AA_GITHUB_REPO_READER }}
-      - name: Huggingface datasets cache
-        uses: actions/cache@v4
-        if: github.ref == 'refs/heads/main'
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- use shared env
-          key: hf-datasets-${{ github.run_id }}
-          restore-keys: |
-            hf-datasets-
-      - name: Download datasets
-        if: github.ref == 'refs/heads/main'
-        run: |
-          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
-          export PATH=$HOME/.local/bin:$PATH
-          poetry run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
 
   build:
-    needs: [lint, changes]
-    if: ${{ needs.changes.outputs.poetry_changed == 'true' || github.event_name == 'workflow_dispatch' }}
+    needs: [authorize-fork-pr, lint, changes]
+    if: ${{ needs.authorize-fork-pr.outputs.should_run == 'true' && needs.changes.outputs.poetry_changed == 'true' }}
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
     env:
@@ -193,6 +140,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Registry Authentication
         uses: docker/login-action@v2
@@ -214,17 +163,21 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest
 
   test-cpu:
+    needs: [authorize-fork-pr, lint]
+    if: ${{ needs.authorize-fork-pr.outputs.should_run == 'true' }}
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Setup poetry
         uses: ./.github/actions/setup-poetry-on-ubuntu
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
       - name: Run tests
         run: |
@@ -234,36 +187,43 @@ jobs:
           poetry run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
+    needs: [authorize-fork-pr, lint]
+    if: ${{ needs.authorize-fork-pr.outputs.should_run == 'true' }}
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Setup poetry
         uses: ./.github/actions/setup-poetry-on-ubuntu
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
       - name: Run tests
         run: |
           export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
           export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
           export PATH=$HOME/.local/bin:$PATH
-          poetry run python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
+          poetry run python -c "import nltk; nltk.download('punkt_tab')"
           poetry run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
   test-gpu:
+    needs: [authorize-fork-pr, build, test-cpu, test-cpu-slow]
     runs-on: EvalFrameworkGPURunner
-    needs: [build, test-cpu, test-cpu-slow]
     if: ${{ always()
+          && needs.authorize-fork-pr.outputs.should_run == 'true'
           && needs.test-cpu.result == 'success'
           && needs.test-cpu-slow.result == 'success'
           && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Normalize repo owner to lowercase
         run: |
@@ -272,7 +232,7 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
 
       - name: Log in to GitHub Container Registry
@@ -297,16 +257,19 @@ jobs:
             bash -c 'poetry run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
 
   test-gpu-vllm:
+    needs: [authorize-fork-pr, build, test-cpu, test-cpu-slow, test-gpu]
     runs-on: EvalFrameworkGPURunner
-    needs: [build, test-cpu, test-cpu-slow, test-gpu]
     if: ${{ always()
+          && needs.authorize-fork-pr.outputs.should_run == 'true'
           && needs.test-cpu.result == 'success'
           && needs.test-cpu-slow.result == 'success'
           && (needs.build.result == 'success' || needs.build.result == 'skipped')
           && (needs.test-gpu.result == 'success' || needs.test-gpu.result == 'skipped') }}
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Normalize repo owner to lowercase
         run: |
@@ -315,7 +278,7 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-
 
       - name: Log in to GitHub Container Registry
