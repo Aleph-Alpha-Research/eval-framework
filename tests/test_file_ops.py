@@ -8,10 +8,7 @@ import wandb
 from eval_framework.utils.file_ops import (
     FileSystem,
     WandbFs,
-    find_hf_checkpoint_root,
-    find_hf_checkpoint_root_from_path_list,
 )
-from tests.mock_wandb import MockArtifact
 
 
 @pytest.fixture
@@ -21,7 +18,6 @@ def wandb_run(mock_wandb_artifact):
 
 @pytest.fixture
 def aws_env():
-    """Fixture providing standard AWS environment variables."""
     return {
         "AWS_ENDPOINT_URL": "http://localhost:9000",
         "AWS_ACCESS_KEY_ID": "test_key",
@@ -31,7 +27,6 @@ def aws_env():
 
 @pytest.fixture
 def aws_env_no_protocol():
-    """Fixture providing AWS environment variables without protocol."""
     return {
         "AWS_ENDPOINT_URL": "localhost:9000",
         "AWS_ACCESS_KEY_ID": "test_key",
@@ -41,7 +36,6 @@ def aws_env_no_protocol():
 
 @pytest.fixture
 def mock_s3_client():
-    """Fixture providing a mocked S3 client."""
     with patch("boto3.client") as mock_boto_client:
         mock_s3_client = Mock()
         mock_boto_client.return_value = mock_s3_client
@@ -50,10 +44,15 @@ def mock_s3_client():
 
 @pytest.fixture
 def wandb_fs_with_env(aws_env, mock_s3_client):
-    """Fixture providing a WandbFs instance with mocked environment."""
     mock_s3_client_instance, mock_boto_client = mock_s3_client
     with patch.dict(os.environ, aws_env):
         yield WandbFs(), mock_s3_client_instance, mock_boto_client
+
+
+@pytest.fixture
+def wandb_fs(wandb_fs_with_env):
+    wandb_fs_instance, _, _ = wandb_fs_with_env
+    return wandb_fs_instance
 
 
 class TestFileSystem:
@@ -63,15 +62,19 @@ class TestFileSystem:
 
 
 class TestWandbFs:
-    def test_entity_property(self, wandb_fs_with_env):
-        """Test entity property returns api entity"""
-        wandb_fs, _, _ = wandb_fs_with_env
+    """
+    TestWandbFs tests filesystem-like operations from the class
+    
+    - test that the entity is returned correctly
+    - file trees are created correctly from a flat list of artifacts
+    - bucket and prefixes are correctly extracted
+    - artifacts are downloaded to a temporary directory
+    - hf checkpoints are found in a file tree
+    """
+    def test_entity_property(self, wandb_fs):
         assert wandb_fs.entity == "test-entity"
 
-    def test_create_file_tree(self, wandb_fs_with_env):
-        """Test file tree creation from S3 paths"""
-        wandb_fs, _, _ = wandb_fs_with_env
-        
+    def test_create_file_tree(self, wandb_fs):
         files = [
             "s3://bucket/models/model_name/huggingface/config.json",
             "s3://bucket/models/model_name/huggingface/tokenizer.json",
@@ -100,19 +103,13 @@ class TestWandbFs:
         }
         assert tree == expected
 
-    def test_get_bucket_prefix(self, wandb_fs_with_env):
-        """Test extracting bucket and prefix from S3 URI"""
-        wandb_fs, _, _ = wandb_fs_with_env
-        
+    def test_get_bucket_prefix(self, wandb_fs):
         bucket, prefix = wandb_fs.get_bucket_prefix("s3://my-bucket/path/to/file.json")
         
         assert bucket == "my-bucket"
         assert prefix == "/path/to/file.json"
 
-    def test_ls(self, wandb_fs_with_env):
-        """Test listing files in artifact"""
-        wandb_fs, _, _ = wandb_fs_with_env
-        
+    def test_ls(self, wandb_fs):
         # Set up artifact with specific files
         wandb_fs.api.set_artifact("test-model", [
             "s3://bucket/model/config.json",
@@ -127,10 +124,7 @@ class TestWandbFs:
             "s3://bucket/model/tokenizer.json"
         ]
 
-    def test_file_system_detector_s3(self, wandb_fs_with_env):
-        """Test detecting S3 filesystem"""
-        wandb_fs, _, _ = wandb_fs_with_env
-        
+    def test_file_system_detector_s3(self, wandb_fs):
         s3_files = [
             "s3://bucket/file1.json",
             "s3://bucket/file2.json"
@@ -139,10 +133,7 @@ class TestWandbFs:
         result = wandb_fs.file_system_detector(s3_files)
         assert result == FileSystem.S3
 
-    def test_file_system_detector_local(self, wandb_fs_with_env):
-        """Test detecting local filesystem"""
-        wandb_fs, _, _ = wandb_fs_with_env
-        
+    def test_file_system_detector_local(self, wandb_fs):
         local_files = [
             "/path/to/file1.json",
             "./file2.json"
@@ -152,7 +143,6 @@ class TestWandbFs:
         assert result == FileSystem.LOCAL
 
     def test_download_artifacts(self, wandb_fs_with_env):
-        """Test downloading artifacts creates temp directory"""
         wandb_fs, mock_s3_client_instance, _ = wandb_fs_with_env
         
         wandb_fs.api.set_artifact("test-model", [
@@ -171,7 +161,6 @@ class TestWandbFs:
         assert mock_s3_client_instance.download_fileobj.call_count == 4
 
     def test_download_and_use_artifact_s3(self, aws_env, mock_s3_client, wandb_run, mock_wandb, wandb_fs_with_env):
-        """Test download and use artifact for S3 files"""
         with patch.dict(os.environ, aws_env):
             wandb_fs, _, _ = wandb_fs_with_env
             artifact = wandb.Artifact(name="test-model", type="model")
@@ -184,19 +173,15 @@ class TestWandbFs:
             artifact = wandb_fs.get_artifact(logged_artifact.name)
             assert wandb_fs.download_and_use_artifact(artifact)
 
-
-class TestFindHfCheckpointRoot:
-    def test_find_hf_checkpoint_root_simple(self):
-        """Test finding HF checkpoint in simple structure"""
+    def test_find_hf_checkpoint_root_simple(self, wandb_fs):
         tree = {
             "files": ["config.json", "tokenizer.json", "model.safetensors"]
         }
         
-        result = find_hf_checkpoint_root(tree)
+        result = wandb_fs.find_hf_checkpoint_root(tree)
         assert result == "."
 
-    def test_find_hf_checkpoint_root_nested(self):
-        """Test finding HF checkpoint in nested structure"""
+    def test_find_hf_checkpoint_root_nested(self, wandb_fs):
         tree = {
             "models": {
                 "model_name": {
@@ -209,12 +194,10 @@ class TestFindHfCheckpointRoot:
             "files": ["readme.txt"]
         }
         
-        result = find_hf_checkpoint_root(tree)
+        result = wandb_fs.find_hf_checkpoint_root(tree)
         assert result == "models/model_name/huggingface"
 
-class TestFindHfCheckpointRootFromPathList:
-    def test_find_hf_checkpoint_from_s3_paths(self):
-        """Test finding HF checkpoint from S3 paths"""
+    def test_find_hf_checkpoint_from_s3_paths(self, wandb_fs):
         paths = [
             "s3://bucket/models/my-model/config.json",
             "s3://bucket/models/my-model/tokenizer.json",
@@ -222,11 +205,10 @@ class TestFindHfCheckpointRootFromPathList:
             "s3://bucket/other/readme.txt"
         ]
         
-        result = find_hf_checkpoint_root_from_path_list(paths)
+        result = wandb_fs.find_hf_checkpoint_root_from_path_list(paths)
         assert result == "models/my-model"
 
-    def test_find_hf_checkpoint_from_local_paths(self):
-        """Test finding HF checkpoint from local paths"""
+    def test_find_hf_checkpoint_from_local_paths(self, wandb_fs):
         paths = [
             "/home/user/models/my-model/config.json",
             "/home/user/models/my-model/tokenizer.json",
@@ -234,30 +216,27 @@ class TestFindHfCheckpointRootFromPathList:
             "/home/user/other/file.txt"
         ]
         
-        result = find_hf_checkpoint_root_from_path_list(paths)
+        result = wandb_fs.find_hf_checkpoint_root_from_path_list(paths)
         assert result == "home/user/models/my-model"
 
-    def test_find_hf_checkpoint_from_empty_list(self):
-        """Test with empty path list"""
-        result = find_hf_checkpoint_root_from_path_list([])
+    def test_find_hf_checkpoint_from_empty_list(self, wandb_fs):
+        result = wandb_fs.find_hf_checkpoint_root_from_path_list([])
         assert result is None
 
-    def test_find_hf_checkpoint_from_invalid_s3_paths(self):
-        """Test with malformed S3 paths"""
+    def test_find_hf_checkpoint_from_invalid_s3_paths(self, wandb_fs):
         paths = [
             "s3://bucket",  # No path component
             "s3://",        # Empty
         ]
         
-        result = find_hf_checkpoint_root_from_path_list(paths)
+        result = wandb_fs.find_hf_checkpoint_root_from_path_list(paths)
         assert result is None
 
-    def test_find_hf_checkpoint_no_valid_checkpoint(self):
-        """Test with paths that don't form a valid HF checkpoint"""
+    def test_find_hf_checkpoint_no_valid_checkpoint(self, wandb_fs):
         paths = [
             "s3://bucket/models/test/some_file.txt",
             "s3://bucket/models/test/another_file.json",
         ]
         
-        result = find_hf_checkpoint_root_from_path_list(paths)
+        result = wandb_fs.find_hf_checkpoint_root_from_path_list(paths)
         assert result is None
