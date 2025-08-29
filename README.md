@@ -161,7 +161,7 @@ Eval-Framework provides a unified interface for evaluating language models acros
 To evaluate a single benchmark locally, you can use the following command:
 
 ```bash
-uv run -m eval_framework.run \
+uv run --all-extras eval_framework \
     --models src/eval_framework/llm/models.py \
     --llm-name Llama31_8B_Instruct_HF \
     --task-name "GSM8K" \
