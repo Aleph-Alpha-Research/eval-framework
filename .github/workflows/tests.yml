@@ -3,29 +3,6 @@ name: CI
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - '*.detignore'
-      - '**/*.detignore'
-      - '*.example'
-      - '**/*.example'
-      - '*.json'
-      - '**/*.json'
-      - '*.md'
-      - '**/*.md'
-      - '*.png'
-      - '**/*.png'
-      - '*.sample'
-      - '**/*.sample'
-      - '*.TAG'
-      - '**/*.TAG'
-      - '*.yaml'
-      - '**/*.yaml'
-      - '*.yml'
-      - '**/*.yml'
-      - '!/.github/workflows/**'
-      - 'docs/**'
-      - '.gitignore'
-      - 'changelog/**'
   pull_request:
     types: [opened, reopened, synchronize, labeled]
     branches: [main]
