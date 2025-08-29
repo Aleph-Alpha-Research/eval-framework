@@ -45,7 +45,7 @@ WORKDIR /eval_framework
 ENV WORKDIR=/eval_framework
 
 # Copy over files for env installation
-COPY pyproject.toml poetry.lock README.md ./
+COPY pyproject.toml poetry.lock README.md LICENSE ./
 
 # Install poetry into its own venv so that it does not mess up with eval_framework dependencies
 RUN pipx install git+https://github.com/python-poetry/poetry.git@refs/pull/10493/head
