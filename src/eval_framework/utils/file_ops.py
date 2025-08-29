@@ -10,8 +10,10 @@ from typing import List, Tuple
 
 import boto3
 import wandb
+from tqdm import tqdm
 from wandb.sdk.lib.paths import StrPath
 
+from eval_framework.llm.vllm_models import VLLMModel
 
 class FileSystem(Enum):
     LOCAL = "local"
@@ -119,9 +121,21 @@ class WandbFs:
         Returns:
             str | The path to the downloaded artifact.
         """
+        # create tempdir
+        if self.temp_dir is None:
+            self.temp_dir = tempfile.TemporaryDirectory()
+
         file_list = self.ls(artifact)
+        
+        # Use tqdm for progress bar
         with ThreadPoolExecutor() as executor:
-            executor.map(self._download_artifact, file_list[:4])
+            with tqdm(total=len(file_list), desc="Downloading artifacts", unit="file") as pbar:
+                def download_with_progress(file):
+                    result = self._download_artifact(file)
+                    pbar.update(1)
+                    return result
+                
+                list(executor.map(download_with_progress, file_list))
         return self.temp_dir.name
 
     def _download_artifact(self, file: str) -> None:
@@ -135,10 +149,6 @@ class WandbFs:
         """
         local_path = Path(urllib.parse.urlparse(file).path)
         bucket, prefix = self.get_bucket_prefix(file)
-        # create and write to tempdir
-        if self.temp_dir is None:
-            self.temp_dir = tempfile.TemporaryDirectory()
-
         local_temp_path = Path(os.path.join(self.temp_dir.name, str(local_path).strip("/")))
         local_temp_path.parent.mkdir(parents=True, exist_ok=True)
         with open(local_temp_path, "wb") as f:
@@ -303,10 +313,11 @@ class WandbFs:
 
 if __name__ == "__main__":
     with WandbFs() as wandb_fs:
-        name = "qwen-3-32b-dccp"
-        version = "latest"
+        name = "SmolLM2-135M"
+        version = "v1"
         artifact = wandb_fs.get_artifact(name, version)
         file_list = wandb_fs.ls(artifact)
         temp_dir = wandb_fs.download_artifacts(artifact)
         file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
         local_artifact_path = os.path.join(Path(wandb_fs.temp_dir.name), Path(file_root))
+        model = VLLMModel(checkpoint_path=local_artifact_path)
