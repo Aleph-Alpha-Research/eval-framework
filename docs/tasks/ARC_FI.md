@@ -9,4 +9,4 @@ NAME = ARC_FIDATASET_PATH = LumiOpen/arc_challenge_mtSAMPLE_SPLIT = testFEWSHOT_
 
 - Link to dataset: [https://huggingface.co/datasets/LumiOpen/arc_challenge_mt](https://huggingface.co/datasets/LumiOpen/arc_challenge_mt)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ARC_FI"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ARC_FI"`.

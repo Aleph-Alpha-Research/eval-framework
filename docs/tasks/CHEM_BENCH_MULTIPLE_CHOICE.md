@@ -9,4 +9,4 @@ NAME = CHEM_BENCH_MULTIPLE_CHOICEDATASET_PATH = jablonkagroup/ChemBenchSAMPLE_SP
 
 - Link to dataset: [https://huggingface.co/datasets/jablonkagroup/ChemBench](https://huggingface.co/datasets/jablonkagroup/ChemBench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "CHEM_BENCH_MULTIPLE_CHOICE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "CHEM_BENCH_MULTIPLE_CHOICE"`.

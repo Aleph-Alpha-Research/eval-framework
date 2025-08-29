@@ -29,14 +29,11 @@ We welcome several types of contributions:
    git remote add upstream https://github.com/Aleph-Alpha-Research/eval-framework.git
    ```
 
-4. **Install Poetry** if you haven't already:
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
-   ```
+4. **Install uv** if you haven't already following [these instructions](https://docs.astral.sh/uv/getting-started/installation/)
 
 5. **Install the project dependencies**:
    ```bash
-   poetry install --all-extras
+   uv sync --all-extras
    ```
 
 

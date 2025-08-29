@@ -9,4 +9,4 @@ NAME = HUMAN_EVAL_INSTRUCTDATASET_PATH = openai/openai_humanevalSAMPLE_SPLIT = t
 
 - Link to dataset: [https://huggingface.co/datasets/openai/openai_humaneval](https://huggingface.co/datasets/openai/openai_humaneval)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "HUMAN_EVAL_INSTRUCT"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "HUMAN_EVAL_INSTRUCT"`.

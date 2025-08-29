@@ -9,4 +9,4 @@ NAME = SCIQDATASET_PATH = allenai/sciqSAMPLE_SPLIT = validationFEWSHOT_SPLIT = t
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/sciq](https://huggingface.co/datasets/allenai/sciq)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "SCIQ"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "SCIQ"`.

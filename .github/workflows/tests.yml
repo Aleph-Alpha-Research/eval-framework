@@ -119,7 +119,7 @@ jobs:
     permissions:
       contents: read
     outputs:
-      poetry_changed: ${{ steps.detect.outputs.poetry_changed }}
+      lockfile_changed: ${{ steps.detect.outputs.lockfile_changed }}
     steps:
       - name: Checkout PR head (or commit on push)
         uses: actions/checkout@v4
@@ -132,7 +132,7 @@ jobs:
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
 
-      - name: Detect changes in poetry files
+      - name: Detect changes in lock files
         id: detect
         run: |
           set -euo pipefail
@@ -149,10 +149,10 @@ jobs:
           fi
 
           echo "Comparing $BASE_SHA...$HEAD_SHA"
-          if git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -E '^(pyproject\.toml|poetry\.lock)$' >/dev/null; then
-            echo "poetry_changed=true" >> "$GITHUB_OUTPUT"
+          if git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -E '^(pyproject\.toml|uv\.lock)$' >/dev/null; then
+            echo "lockfile_changed=true" >> "$GITHUB_OUTPUT"
           else
-            echo "poetry_changed=false" >> "$GITHUB_OUTPUT"
+            echo "lockfile_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
   hf-datasets-cache:
@@ -186,7 +186,7 @@ jobs:
 
   build:
     needs: [lint, changes]
-    if: ${{ needs.changes.outputs.poetry_changed == 'true' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ needs.changes.outputs.lockfile_changed == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
     env:

@@ -9,4 +9,4 @@ NAME = TRUTHFULQADATASET_PATH = truthful_qaSAMPLE_SPLIT = validationFEWSHOT_SPLI
 
 - Link to dataset: [https://huggingface.co/datasets/truthful_qa](https://huggingface.co/datasets/truthful_qa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "TRUTHFULQA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "TRUTHFULQA"`.

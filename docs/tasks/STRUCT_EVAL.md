@@ -9,4 +9,4 @@ NAME = STRUCT_EVALDATASET_PATH = TIGER-Lab/StructEvalSAMPLE_SPLIT = trainFEWSHOT
 
 - Link to dataset: [https://huggingface.co/datasets/TIGER-Lab/StructEval](https://huggingface.co/datasets/TIGER-Lab/StructEval)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "STRUCT_EVAL"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "STRUCT_EVAL"`.
