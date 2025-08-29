@@ -14,7 +14,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
     export DEBIAN_FRONTEND="noninteractive" && \
     apt-get update && \
-    apt-get install -y --no-install-recommends software-properties-common && \
+    apt-get install -y --no-install-recommends \
+      software-properties-common \
+      curl && \
     # Add Python PPA
     add-apt-repository ppa:deadsnakes/ppa && \
     # docker-cli for ability to login in startup-hook.sh (used for perturbations)
@@ -33,7 +35,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
       python3-pip \
       openssh-client \
       htop \
-      curl \
       ca-certificates \
       ibverbs-providers \
       libibverbs1  \
