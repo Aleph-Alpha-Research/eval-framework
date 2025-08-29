@@ -58,5 +58,10 @@ class LINEWISE_TER(BaseMetric[Completion]):
                 scores.append(ter_score)
 
         return [
-            MetricResult(metric_name=self.NAME, value=float(min(scores)), higher_is_better=False, error=response.error)
+            MetricResult(
+                metric_name=self.NAME,
+                value=float(min(scores, default=100)),
+                higher_is_better=False,
+                error=response.error,
+            )
         ]
