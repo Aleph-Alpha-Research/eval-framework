@@ -306,7 +306,7 @@ jobs:
             -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
             -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
             ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
-            'uv run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
+            bash -c 'uv run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
 
   test-gpu-vllm:
     runs-on: EvalFrameworkGPURunner
@@ -355,4 +355,4 @@ jobs:
             -e VLLM_USE_TRITON_FLASH_ATTN=0 \
             -e VLLM_DISABLE_CUSTOM_ALL_REDUCE=1 \
             ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
-            'uv run pytest --log-cli-level=INFO -v -m "vllm"'
+            bash -c 'uv run pytest --log-cli-level=INFO -v -m "vllm"'
