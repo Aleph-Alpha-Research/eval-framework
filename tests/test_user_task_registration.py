@@ -1,6 +1,7 @@
 import os
 import tempfile
 import textwrap
+from pathlib import Path
 
 import pytest
 
@@ -11,88 +12,85 @@ from eval_framework.tasks.eval_config import EvalConfig
 from tests.conftest import MockLLM
 
 
-def test_user_task_registration(monkeypatch: pytest.MonkeyPatch) -> None:
-    with tempfile.TemporaryDirectory() as tmpdir:
-        task_file = os.path.join(tmpdir, "my_custom_task.py")
-        with open(task_file, "w") as f:
-            f.write(
-                textwrap.dedent("""
-                from eval_framework.tasks.base import BaseTask, Language
-                class MyCustomTask(BaseTask):
-                    NAME = "MyCustomTask"
-                    DATASET_PATH = "dummy"
-                    SAMPLE_SPLIT = "test"
-                    FEWSHOT_SPLIT = "test"
-                    RESPONSE_TYPE = None
-                    METRICS = []
-                    SUBJECTS = []
-                    LANGUAGE = Language.ENG
-            """)
-            )
-        monkeypatch.syspath_prepend(tmpdir)
-        load_extra_tasks([task_file])
-        assert hasattr(TaskName, "MyCustomTask".upper())
-        task_cls = getattr(TaskName, "MyCustomTask".upper()).value
-        assert issubclass(task_cls, BaseTask)
-        assert task_cls.NAME == "MyCustomTask"
-        assert TaskName.from_name("MyCustomTask")
+def test_user_task_registration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    task_file = os.path.join(tmp_path, "my_custom_task.py")
+    with open(task_file, "w") as f:
+        f.write(
+            textwrap.dedent("""
+            from eval_framework.tasks.base import BaseTask, Language
+            class MyCustomTask(BaseTask):
+                NAME = "MyCustomTask"
+                DATASET_PATH = "dummy"
+                SAMPLE_SPLIT = "test"
+                FEWSHOT_SPLIT = "test"
+                RESPONSE_TYPE = None
+                METRICS = []
+                SUBJECTS = []
+                LANGUAGE = Language.ENG
+        """)
+        )
+    monkeypatch.syspath_prepend(tmp_path)
+    load_extra_tasks([task_file])
+    assert hasattr(TaskName, "MyCustomTask".upper())
+    task_cls = getattr(TaskName, "MyCustomTask".upper()).value
+    assert issubclass(task_cls, BaseTask)
+    assert task_cls.NAME == "MyCustomTask"
+    assert TaskName.from_name("MyCustomTask")
 
 
-def test_user_task_registration_plus_builtin_task(monkeypatch: pytest.MonkeyPatch) -> None:
-    with tempfile.TemporaryDirectory() as tmpdir:
-        task_file = os.path.join(tmpdir, "my_second_custom_task.py")
-        with open(task_file, "w") as f:
-            f.write(
-                textwrap.dedent("""
-                from eval_framework.tasks.base import BaseTask, Language
-                class MySecondCustomTask(BaseTask):
-                    NAME = "MySecondCustomTask"
-                    DATASET_PATH = "dummy"
-                    SAMPLE_SPLIT = "test"
-                    FEWSHOT_SPLIT = "test"
-                    RESPONSE_TYPE = None
-                    METRICS = []
-                    SUBJECTS = []
-                    LANGUAGE = Language.ENG
-            """)
-            )
-        monkeypatch.syspath_prepend(tmpdir)
-        load_extra_tasks([task_file])
-        assert TaskName.from_name("MySecondCustomTask")  # Ensure it can be accessed by name
-        assert hasattr(TaskName, "MySecondCustomTask".upper())
-        task_cls = getattr(TaskName, "MySecondCustomTask".upper()).value
-        assert issubclass(task_cls, BaseTask)
-        assert task_cls.NAME == "MySecondCustomTask"
-        assert TaskName.from_name("MySecondCustomTask")
+def test_user_task_registration_plus_builtin_task(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    task_file = os.path.join(tmp_path, "my_second_custom_task.py")
+    with open(task_file, "w") as f:
+        f.write(
+            textwrap.dedent("""
+            from eval_framework.tasks.base import BaseTask, Language
+            class MySecondCustomTask(BaseTask):
+                NAME = "MySecondCustomTask"
+                DATASET_PATH = "dummy"
+                SAMPLE_SPLIT = "test"
+                FEWSHOT_SPLIT = "test"
+                RESPONSE_TYPE = None
+                METRICS = []
+                SUBJECTS = []
+                LANGUAGE = Language.ENG
+        """)
+        )
+    monkeypatch.syspath_prepend(tmp_path)
+    load_extra_tasks([task_file])
+    assert TaskName.from_name("MySecondCustomTask")  # Ensure it can be accessed by name
+    assert hasattr(TaskName, "MySecondCustomTask".upper())
+    task_cls = getattr(TaskName, "MySecondCustomTask".upper()).value
+    assert issubclass(task_cls, BaseTask)
+    assert task_cls.NAME == "MySecondCustomTask"
+    assert TaskName.from_name("MySecondCustomTask")
 
 
-def test_user_task_registration_with_EvalConfig(monkeypatch: pytest.MonkeyPatch) -> None:
-    with tempfile.TemporaryDirectory() as tmpdir:
-        task_file = os.path.join(tmpdir, "my_second_custom_task.py")
-        with open(task_file, "w") as f:
-            f.write(
-                textwrap.dedent("""
-                from eval_framework.tasks.base import BaseTask, Language
-                class MyThirdCustomTask(BaseTask):
-                    NAME = "MyThirdCustomTask"
-                    DATASET_PATH = "dummy"
-                    SAMPLE_SPLIT = "test"
-                    FEWSHOT_SPLIT = "test"
-                    RESPONSE_TYPE = None
-                    METRICS = []
-                    SUBJECTS = []
-                    LANGUAGE = Language.ENG
-            """)
-            )
-        monkeypatch.syspath_prepend(tmpdir)
-        monkeypatch.syspath_prepend(tmpdir)
-        load_extra_tasks([task_file])
-        config = EvalConfig(task_name="MyThirdCustomTask", llm_class=MockLLM)
-        assert config.task_name.value.NAME == "MyThirdCustomTask"
-        assert TaskName.from_name("MyThirdCustomTask")
+def test_user_task_registration_with_EvalConfig(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    task_file = os.path.join(tmp_path, "my_second_custom_task.py")
+    with open(task_file, "w") as f:
+        f.write(
+            textwrap.dedent("""
+            from eval_framework.tasks.base import BaseTask, Language
+            class MyThirdCustomTask(BaseTask):
+                NAME = "MyThirdCustomTask"
+                DATASET_PATH = "dummy"
+                SAMPLE_SPLIT = "test"
+                FEWSHOT_SPLIT = "test"
+                RESPONSE_TYPE = None
+                METRICS = []
+                SUBJECTS = []
+                LANGUAGE = Language.ENG
+        """)
+        )
+    monkeypatch.syspath_prepend(tmp_path)
+    monkeypatch.syspath_prepend(tmp_path)
+    load_extra_tasks([task_file])
+    config = EvalConfig(task_name="MyThirdCustomTask", llm_class=MockLLM)
+    assert config.task_name.value.NAME == "MyThirdCustomTask"
+    assert TaskName.from_name("MyThirdCustomTask")
 
 
-def test_derived_user_task_registration(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_derived_user_task_registration(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     with tempfile.TemporaryDirectory() as tmpdir:
         task_file = os.path.join(tmpdir, "my_derived_task.py")
         with open(task_file, "w") as f:
@@ -108,42 +106,35 @@ def test_derived_user_task_registration(monkeypatch: pytest.MonkeyPatch) -> None
         assert TaskName.from_name("MyCOPA")
 
 
-def test_user_task_registration_with_repeated_names(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_user_task_registration_with_repeated_names(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test that loading user tasks with duplicate names raises an error."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        task_file = os.path.join(tmpdir, "my_custom_task.py")
-        with open(task_file, "w") as f:
-            f.write(
-                textwrap.dedent("""
-                from eval_framework.tasks.base import BaseTask, Language
-                class MyCustomTask(BaseTask):
-                    NAME = "MyCustomTask"
-                    DATASET_PATH = "dummy"
-                    SAMPLE_SPLIT = "test"
-                    FEWSHOT_SPLIT = "test"
-                    RESPONSE_TYPE = None
-                    METRICS = []
-                    SUBJECTS = []
-                    LANGUAGE = Language.ENG
+    task_file = os.path.join(tmp_path, "my_custom_task.py")
+    with open(task_file, "w") as f:
+        f.write(
+            textwrap.dedent("""
+            from eval_framework.tasks.base import BaseTask, Language
+            class MyCustomTask(BaseTask):
+                NAME = "MyCustomTask"
+                DATASET_PATH = "dummy"
+                SAMPLE_SPLIT = "test"
+                FEWSHOT_SPLIT = "test"
+                RESPONSE_TYPE = None
+                METRICS = []
+                SUBJECTS = []
+                LANGUAGE = Language.ENG
 
-                class MyCustomTask2(BaseTask):
-                    NAME = "MyCustomTask" # repeated name
-                    DATASET_PATH = "dummy"
-                    SAMPLE_SPLIT = "test"
-                    FEWSHOT_SPLIT = "test"
-                    RESPONSE_TYPE = None
-                    METRICS = []
-                    SUBJECTS = []
-                    LANGUAGE = Language.ENG
-            """)
-            )
-        monkeypatch.syspath_prepend(tmpdir)
-        try:
-            load_extra_tasks([task_file])
-            raise AssertionError("the test should have raised an error due to duplicate task names")
-        except ValueError as e:
-            if str(e) == "Duplicate user task name found (case-insensitive): MyCustomTask":
-                # this was the expected we tested against, all is fine
-                pass
-            else:
-                raise AssertionError(f"another error was encountered than the one expected: {e}")
+            class MyCustomTask2(BaseTask):
+                NAME = "MyCustomTask" # repeated name
+                DATASET_PATH = "dummy"
+                SAMPLE_SPLIT = "test"
+                FEWSHOT_SPLIT = "test"
+                RESPONSE_TYPE = None
+                METRICS = []
+                SUBJECTS = []
+                LANGUAGE = Language.ENG
+        """)
+        )
+    monkeypatch.syspath_prepend(tmp_path)
+
+    with pytest.raises(ValueError, match="Duplicate user task"):
+        load_extra_tasks([task_file])
