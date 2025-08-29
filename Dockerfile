@@ -9,18 +9,28 @@ ENV CUDA_HOME="/usr/local/cuda"
 # Remove automatic cleanup of apt cache
 RUN rm -f /etc/apt/apt.conf.d/docker-clean
 
-# Install Python 3.12 and pip (zstd is needed for github caching)
+# Install system dependencies  pip (zstd is needed for github caching)
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists \
     export DEBIAN_FRONTEND="noninteractive" && \
     apt-get update && \
     apt-get install -y --no-install-recommends software-properties-common && \
+    # Add Python PPA
     add-apt-repository ppa:deadsnakes/ppa && \
+    # docker-cli for ability to login in startup-hook.sh (used for perturbations)
+    install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
+    chmod a+r /etc/apt/keyrings/docker.asc && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+      tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    # Installation
     apt-get update && \
     apt-get install -y --no-install-recommends \
       python3.12 \
       python3.12-venv \
       python3.12-dev \
+      python3-pip \
       openssh-client \
       htop \
       curl \
@@ -29,20 +39,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
       libibverbs1  \
       librdmacm1 \
       git \
-      zstd \
       jq \
-      python3-pip \
+      docker-ce-cli \
+      # Needed for Github caching
+      zstd \
       # Correct language support
       locales && \
-    # docker-cli for ability to login in startup-hook.sh (used for perturbations)
-    install -m 0755 -d /etc/apt/keyrings && \
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
-    chmod a+r /etc/apt/keyrings/docker.asc && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-      $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-      tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-    apt-get update &&  \
-    apt-get install -y jq docker-ce-cli && \
     # Needed for determined
     mkdir -p /var/run/sshd && \
     # Configure locales for UTF-8 support
