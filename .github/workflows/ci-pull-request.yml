@@ -1,6 +1,8 @@
 name: CI - Pull Request
 
 on:
+  push:  # TEMPORARY: Remove before merging
+    branches: [ci/split-workflows]  # TEMPORARY: Remove before merging
   pull_request:
     types: [opened, reopened, synchronize, labeled]
     branches: [main]
