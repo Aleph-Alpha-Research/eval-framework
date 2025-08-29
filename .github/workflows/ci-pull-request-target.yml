@@ -94,43 +94,10 @@ jobs:
         run: |
           poetry run mypy src tests utils
 
-  changes:
-    needs: authorize-fork-pr
-    if: ${{ needs.authorize-fork-pr.outputs.should_run == 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      poetry_changed: ${{ steps.detect.outputs.poetry_changed }}
-    steps:
-      - name: Checkout PR head
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Fetch base ref
-        run: |
-          git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
-
-      - name: Detect changes in poetry files
-        id: detect
-        run: |
-          set -euo pipefail
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-
-          echo "Comparing $BASE_SHA...$HEAD_SHA"
-          if git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -E '^(pyproject\.toml|poetry\.lock)$' >/dev/null; then
-            echo "poetry_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "poetry_changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
 
   build:
-    needs: [authorize-fork-pr, lint, changes]
-    if: ${{ needs.authorize-fork-pr.outputs.should_run == 'true' && needs.changes.outputs.poetry_changed == 'true' }}
+    needs: [authorize-fork-pr, lint]
+    if: ${{ needs.authorize-fork-pr.outputs.should_run == 'true'}}
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
     env:
