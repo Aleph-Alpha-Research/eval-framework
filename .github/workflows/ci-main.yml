@@ -87,7 +87,7 @@ jobs:
     container: docker:dind
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: eval_framework_public      
+      IMAGE_NAME: eval_framework_public
       REPO_OWNER_LC: aleph-alpha-research
     steps:
       - name: Checkout Repository
