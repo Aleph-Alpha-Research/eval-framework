@@ -163,7 +163,7 @@ class MockArtifact:
         self.metadata = metadata
         self.incremental = incremental
         self.use_as = use_as
-        self.files_ = [] 
+        self.files_ = []
 
     def files(self):
         return self.files_

@@ -1,8 +1,8 @@
-from typing import Callable, Generator, List, Sequence
+import importlib
+from typing import Callable, List, Sequence
 
 import pytest
 from _pytest.fixtures import FixtureRequest
-import wandb
 
 from eval_framework.llm.base import BaseLLM, Sample
 from eval_framework.llm.models import (
@@ -23,9 +23,7 @@ from eval_framework.llm.models import (
 )
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
-from tests.mock_wandb import MockWandb, MockWandbRun, MockArtifact, MockArtifactFile, MockWandbApi
-import importlib
-import inspect
+from tests.mock_wandb import MockArtifact, MockWandb, MockWandbApi
 
 
 class MockLLM(BaseLLM):
@@ -116,6 +114,7 @@ def _resolve_dotted(dotted: str) -> object:
         obj = getattr(obj, part)
     return obj
 
+
 @pytest.fixture(autouse=True)
 def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     mock_wandb_instance = MockWandb()
@@ -128,7 +127,8 @@ def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     monkeypatch.setattr("wandb.Api", MockWandbApi)
     return mock_wandb_instance
 
-'''
+
+"""
 @pytest.fixture(autouse=True)
 def mock_wandb_run(monkeypatch: pytest.MonkeyPatch) -> MockWandbRun:
     mock_wandb_run_instance = MockWandbRun()
@@ -137,7 +137,8 @@ def mock_wandb_run(monkeypatch: pytest.MonkeyPatch) -> MockWandbRun:
     monkeypatch.setattr("wandb.Run.finish", mock_wandb_run_instance.finish)
     monkeypatch.setattr("wandb.Run.mark_preempting", mock_wandb_run_instance.mark_preempting)
     return mock_wandb_run_instance
-'''
+"""
+
 
 @pytest.fixture(autouse=True)
 def mock_wandb_artifact(monkeypatch: pytest.MonkeyPatch) -> MockArtifact:
@@ -147,6 +148,7 @@ def mock_wandb_artifact(monkeypatch: pytest.MonkeyPatch) -> MockArtifact:
     monkeypatch.setattr("wandb.Artifact.download", mock_artifact_instance.download)
     monkeypatch.setattr("wandb.Artifact.add_reference", mock_artifact_instance.add_reference)
     return mock_artifact_instance
+
 
 @pytest.fixture(autouse=True)
 def mock_wandb_api(monkeypatch: pytest.MonkeyPatch) -> MockWandbApi:

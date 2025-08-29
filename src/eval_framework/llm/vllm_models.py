@@ -1,11 +1,9 @@
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from pathlib import Path
-import tempfile
-from typing import Any, Generic, List, Literal, Optional, Protocol, Sequence, TypeVar, cast, override
-import boto3
+from typing import Any, Generic, Literal, Protocol, Sequence, TypeVar, cast, override
 
+import boto3
 import torch
 from vllm import LLM, SamplingParams
 from vllm.inputs.data import TokensPrompt
@@ -474,16 +472,18 @@ class MistralVLLM(VLLMModel):
             self._tokenizer = MistralAdapter(target_mdl=self.LLM_NAME)
         return self._tokenizer
 
+
 # initial registered checkpoint loading class
 # does the following
 # from the model_path, loads checkpoint from s3 in a tmpdir
 # handles verl checkpoints
 
+
 class RegisteredCheckpointLoader(VLLMModel):
-    def __init__(self, registered_model_name: str, version: str="latest") -> None:
+    def __init__(self, registered_model_name: str, version: str = "latest") -> None:
         self.registered_model_name = registered_model_name
         self.version = version
-    
+
     def download_from_s3(self, bucket, object, file):
         # get bucket structure in s3
         s3_client = boto3.client("s3")
@@ -492,12 +492,8 @@ class RegisteredCheckpointLoader(VLLMModel):
             print(f"No objects found for {object} in bucket {bucket}")
             return
 
-        
-       
-
     def load_checkpoint(self) -> None:
         pass
 
     def retrieve_reference(self) -> None:
         pass
-    

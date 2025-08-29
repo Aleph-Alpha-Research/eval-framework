@@ -1,6 +1,6 @@
-import wandb
-from tests.mock_wandb import MockWandb, MockWandbRun
 import pytest
+import wandb
+
 
 @pytest.fixture
 def wandb_run():
