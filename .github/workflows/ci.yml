@@ -29,7 +29,7 @@ on:
       - 'changelog/**'
   pull_request:
     types: [opened, reopened, synchronize, labeled]
-    branches: [main]
+    branches: [main, ci/split-workflows]  # TEMPORARY: Remove ci/split-workflows before merging
     paths-ignore:
       - '*.detignore'
       - '**/*.detignore'
@@ -56,7 +56,7 @@ on:
       - 'changelog/**'
   pull_request_target:
     types: [opened, reopened, synchronize, labeled]
-    branches: [main]
+    branches: [main, ci/split-workflows]  # TEMPORARY: Remove ci/split-workflows before merging
     paths-ignore:
       - '*.detignore'
       - '**/*.detignore'
