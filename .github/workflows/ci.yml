@@ -98,42 +98,57 @@ env:
 
 jobs:
   # Security check for pull_request_target
-  authorize-fork-pr:
-    runs-on: ubuntu-latest
-    outputs:
-      should_run: ${{ steps.check.outputs.should_run }}
-    steps:
-      - name: Check authorization
-        id: check
-        run: |
-          # For push and pull_request events, always run
-          if [[ "${{ github.event_name }}" == "push" ]] || ([[ "${{ github.event_name }}" == "pull_request" ]] && [[ "${{ github.event.pull_request.head.repo.fork }}" == "false" ]]); then
-            echo "Event is push or pull_request from same repo. Running workflow."
-            echo "should_run=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
+    authorize-fork-pr:
+        runs-on: ubuntu-latest
+        outputs:
+            should_run: ${{ steps.check.outputs.should_run }}
+        steps:
+            - name: Check authorization
+            id: check
+            run: |
+                # For push events, always run
+                if [[ "${{ github.event_name }}" == "push" ]]; then
+                echo "Event is push. Running workflow."
+                echo "should_run=true" >> $GITHUB_OUTPUT
+                exit 0
+                fi
 
-          # For pull_request_target, check if it's from a fork
-          if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
-            # Check if PR is from a fork
-            if [[ "${{ github.event.pull_request.head.repo.fork }}" == "false" ]]; then
-              echo "PR is from the same repository. Skipping pull_request_target workflow."
-              echo "should_run=false" >> $GITHUB_OUTPUT
-              exit 0
-            fi
+                # For pull_request events, check if it's from a fork
+                if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                # GitHub doesn't always populate fork info for pull_request events
+                # So we'll check if the head repo name differs from the base repo name
+                if [[ "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.event.pull_request.base.repo.full_name }}" ]]; then
+                    echo "PR is from the same repository. Running workflow."
+                    echo "should_run=true" >> $GITHUB_OUTPUT
+                    exit 0
+                else
+                    echo "PR is from a fork. Skipping pull_request workflow."
+                    echo "should_run=false" >> $GITHUB_OUTPUT
+                    exit 0
+                fi
+                fi
 
-            # If from fork, check for trusted_contributor label
-            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}" == "true" ]]; then
-              echo "PR is from a fork with 'trusted_contributor' label. Authorized!"
-              echo "should_run=true" >> $GITHUB_OUTPUT
-              exit 0
-            fi
+                # For pull_request_target, check if it's from a fork
+                if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
+                # Check if PR is from a fork
+                if [[ "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.event.pull_request.base.repo.full_name }}" ]]; then
+                    echo "PR is from the same repository. Skipping pull_request_target workflow."
+                    echo "should_run=false" >> $GITHUB_OUTPUT
+                    exit 0
+                fi
 
-            # Otherwise, don't run
-            echo "PR is from a fork without 'trusted_contributor' label. Skipping."
-            echo "should_run=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
+                # If from fork, check for trusted_contributor label
+                if [[ "${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}" == "true" ]]; then
+                    echo "PR is from a fork with 'trusted_contributor' label. Authorized!"
+                    echo "should_run=true" >> $GITHUB_OUTPUT
+                    exit 0
+                fi
+
+                # Otherwise, don't run
+                echo "PR is from a fork without 'trusted_contributor' label. Skipping."
+                echo "should_run=false" >> $GITHUB_OUTPUT
+                exit 0
+                fi
 
   lint:
     runs-on: ubuntu-latest
