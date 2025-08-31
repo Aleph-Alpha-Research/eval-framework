@@ -112,7 +112,7 @@ jobs:
             echo "should_run=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           # For pull_request_target, check if it's from a fork
           if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
             # Check if PR is from a fork
@@ -218,8 +218,8 @@ jobs:
     container: derskythe/github-runner-base:ubuntu-noble
     needs: [authorize-fork-pr, lint, hf-datasets-cache]
     if: |
-      always() && 
-      needs.authorize-fork-pr.outputs.should_run == 'true' && 
+      always() &&
+      needs.authorize-fork-pr.outputs.should_run == 'true' &&
       needs.lint.result == 'success' &&
       (needs.hf-datasets-cache.result == 'success' || needs.hf-datasets-cache.result == 'skipped')
     steps:
@@ -246,8 +246,8 @@ jobs:
     container: derskythe/github-runner-base:ubuntu-noble
     needs: [authorize-fork-pr, lint, hf-datasets-cache]
     if: |
-      always() && 
-      needs.authorize-fork-pr.outputs.should_run == 'true' && 
+      always() &&
+      needs.authorize-fork-pr.outputs.should_run == 'true' &&
       needs.lint.result == 'success' &&
       (needs.hf-datasets-cache.result == 'success' || needs.hf-datasets-cache.result == 'skipped')
     steps:
@@ -274,10 +274,10 @@ jobs:
     needs: [authorize-fork-pr, build, test-cpu, test-cpu-slow]
     runs-on: EvalFrameworkGPURunner
     if: |
-      always() && 
-      needs.authorize-fork-pr.outputs.should_run == 'true' && 
-      needs.test-cpu.result == 'success' && 
-      needs.test-cpu-slow.result == 'success' && 
+      always() &&
+      needs.authorize-fork-pr.outputs.should_run == 'true' &&
+      needs.test-cpu.result == 'success' &&
+      needs.test-cpu-slow.result == 'success' &&
       (needs.build.result == 'success' || (github.event_name != 'push' && needs.build.result == 'skipped'))
     steps:
       - name: Checkout repository
@@ -320,11 +320,11 @@ jobs:
     needs: [authorize-fork-pr, build, test-cpu, test-cpu-slow, test-gpu]
     runs-on: EvalFrameworkGPURunner
     if: |
-      always() && 
-      needs.authorize-fork-pr.outputs.should_run == 'true' && 
-      needs.test-cpu.result == 'success' && 
-      needs.test-cpu-slow.result == 'success' && 
-      (needs.build.result == 'success' || (github.event_name != 'push' && needs.build.result == 'skipped')) && 
+      always() &&
+      needs.authorize-fork-pr.outputs.should_run == 'true' &&
+      needs.test-cpu.result == 'success' &&
+      needs.test-cpu-slow.result == 'success' &&
+      (needs.build.result == 'success' || (github.event_name != 'push' && needs.build.result == 'skipped')) &&
       (needs.test-gpu.result == 'success' || needs.test-gpu.result == 'skipped')
     steps:
       - name: Checkout repository
