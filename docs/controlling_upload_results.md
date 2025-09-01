@@ -13,7 +13,7 @@ The upload of evaluation results obtained with `eval-framework` is completely op
 Add the `--hf-upload-repo` and `--hf-upload-dir` arguments to your CLI command:
 
 ```bash
-poetry run eval_framework \
+uv run eval_framework \
     --context local \
     --models tests/conftest.py \
     --llm-name Llama31_8B_Instruct_HF \

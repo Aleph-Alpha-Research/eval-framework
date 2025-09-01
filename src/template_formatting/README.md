@@ -3,28 +3,17 @@
 
 Single source of truth for internal template formatting. Ensures compatibility between `scaling-internal` and `eval-framework`
 
-### Install Poetry
+### Install uv
 
-Poetry is used for dependency management and packaging in Python projects. To install Poetry, use the official installer:
+`uv` is used for dependency management and packaging in Python projects. To install uv, follow the [official instructions](https://docs.astral.sh/uv/getting-started/installation/).
 
-```bash
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-After installation, ensure that Poetry's bin directory is in your PATH environment variable. Add the following line to your shell configuration file (e.g., ~/.bashrc):
-
-```bash
-export PATH="/home/<USER_NAME>/.local/bin:$PATH"```
-```
-
-Replace <USER_NAME> with your actual username.
 
 ## Project Structure
 - src/: Contains the template formatting code
 - tests/: Contains pytest test cases.
     - test_formatter_eval.py: Basic unit tests for the template formatter derived from `eval-framework`
     - test_formatter_scaling.py: Basic unit tests for the template formatter derived from `scaling-internal`
-- pyproject.toml: Configuration file for Poetry and other tools like MyPy, ruff and pytest.
+- pyproject.toml: Configuration file for uv and other tools like MyPy, ruff and pytest.
 
 
 ## Adding dependencies
@@ -32,41 +21,42 @@ Replace <USER_NAME> with your actual username.
 - **Adding Production Dependencies**: These are dependencies necessary for your project to run. For example, if your project uses Pydantic for data validation, you would add it as a production dependency:
 
 ```bash
-poetry add pydantic
+uv add pydantic
 ```
 - **Adding Development Dependencies**: These are dependencies that are only needed during development, such as testing libraries or linters. For instance, to add pytest for writing and running tests, you would specify it as a development dependency:
 
 ```bash
-poetry add --group dev pytest
+uv add --group dev pytest
 ```
 
 After adding any new dependencies, you need to install them to update your project's virtual environment:
 ```bash
-poetry install
+uv sync
 ```
 This command ensures that all dependencies listed in your pyproject.toml file are correctly installed and available for use in your project.
 
 To install all dependencies (including optional ones), run
 ```bash
-poetry install --extras optional
+uv install --extras optional
 ```
 
 ## Usage
-**Running Commands with Poetry**
+**Running Commands with uv**
 
-Poetry creates a virtual environment for your project, which isolates your dependencies from the global Python environment. This isolation helps prevent version conflicts and ensures reproducibility. Here's how to use Poetry to run commands:
+`uv`` creates a virtual environment for your project, which isolates your dependencies from the global Python environment. This isolation helps prevent version conflicts and ensures reproducibility. Here's how to use `uv`` to run commands:
 
-  - **Installation**: To set up pre-commit hooks, you first need to install the pre-commit package and then install the hooks:
+  - **Installation**: To set up pre-commit hooks, you first need to install the pre-commit package and then install the hooks.
+
+    You can either follow the [install instructions](https://pre-commit.com/#install) or install it globally through `uv tool install pre-commit`
 
     ```bash
-    poetry add --group dev pre-commit
-    poetry run pre-commit install
+    pre-commit install
     ```
 
   - **Running Hooks Manually**: Although pre-commit hooks are triggered automatically before each commit, you can also run them manually to check your files at any time:
 
     ```bash
-    poetry run pre-commit run -a
+    pre-commit run -a
     ```
     This command runs all hooks against all files, which is useful for initial setup or periodic checks.
 
@@ -81,13 +71,13 @@ Poetry creates a virtual environment for your project, which isolates your depen
 
 - **Static Type Checking with MyPy**: To ensure your code is type-safe, run MyPy to check for type errors. This should be done frequently during development to catch type-related issues early:
     ```bash
-    poetry run mypy ./src
-    poetry run mypy ./tests
+    uv run --all-extras mypy ./src
+    uv run --all-extras mypy ./tests
     ```
   Run these commands after making changes to your source or test files to verify that your changes haven't introduced type errors.
 
 - **Running Tests with pytest**: To ensure your code works as expected and hasn't broken existing functionality, run your tests:
     ```bash
-    poetry run pytest
+    uv run --all-extras pytest
     ```
   Run this command frequently during development, especially before committing changes, to ensure all tests pass.

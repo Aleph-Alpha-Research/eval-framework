@@ -7,10 +7,10 @@ This script reads JSON files containing evaluation results, filters them based o
 plot using Matplotlib. This script can be adjusted to your plotting need and will produce a basic plot if run with:
 ```bash
 # loop over all tasks and models under a given parent folder
-poetry run python utils/plot-results.py --folder PARENT_RESULTS_FOLDER
+uv run python utils/plot-results.py --folder PARENT_RESULTS_FOLDER
 ```
 
-More CLI arguments are available and can be listed with `poetry run python utils/plot-results.py --help`.
+More CLI arguments are available and can be listed with `uv run python utils/plot-results.py --help`.
 
 ## Inspect JSON results
 
@@ -19,10 +19,10 @@ script is provided that print the content of the file, split the line in a reada
 
 For example:
 ```bash
-poetry run python utils/inspect-jsonl.py output.jsonl --highlight prompt,completion --strip messages,eval_kwargs,raw_completion
+uv run python utils/inspect-jsonl.py output.jsonl --highlight prompt,completion --strip messages,eval_kwargs,raw_completion
 ```
 
-Use `poetry run python utils/inspect-jsonl.py --help` to get all CLI arguments.
+Use `uv run python utils/inspect-jsonl.py --help` to get all CLI arguments.
 
 ## Document benchmark tasks
 

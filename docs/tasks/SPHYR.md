@@ -9,4 +9,4 @@ NAME = SPHYRDATASET_PATH = philippds/SPhyRSAMPLE_SPLIT = testFEWSHOT_SPLIT =RESP
 
 - Link to dataset: [https://huggingface.co/datasets/philippds/SPhyR](https://huggingface.co/datasets/philippds/SPhyR)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "SPHYR"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "SPHYR"`.

@@ -9,4 +9,4 @@ NAME = INFINITE_BENCH_EN_MCDATASET_PATH = xinrongzhang2022/InfiniteBenchSAMPLE_S
 
 - Link to dataset: [https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench](https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "INFINITE_BENCH_EN_MC"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "INFINITE_BENCH_EN_MC"`.

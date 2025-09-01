@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all tasks available in `eval-framework`.
 
-The documentation can be generated or updated with `poetry run python utils/generate-task-docs.py`.
+The documentation can be generated or updated with `uv run python utils/generate-task-docs.py`.
 
 NOTE: This is an automatically generated file. Any manual modifications will not be preserved whenthe file is next updated.
 

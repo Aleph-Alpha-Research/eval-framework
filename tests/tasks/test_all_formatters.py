@@ -11,6 +11,7 @@ SKIP_TASKS = {
     "SQUAD",  # Feature type 'List' not found - datasets library compatibility issue
     "SQUAD2",  # Feature type 'List' not found - datasets library compatibility issue
     "Flores200",  # Could not instantiate: 'utf-8' codec can't decode byte 0x80 in position 108: invalid start byte
+    "SPHYR",  # Could not instantiate SPHYR: JSON parse error: Column() changed from object to array in row 0
 }
 
 # Special initialization arguments for specific tasks (can be extended).
@@ -67,7 +68,6 @@ SPECIAL_ARGS = {
     "MMLU_COT": {"num_fewshot": 1},
     "MMMLU": {"num_fewshot": 1},
     "MMMLU_GERMAN_COT": {"num_fewshot": 1},
-    "MUSR": {"num_fewshot": 0},  ## Trial fix
     "OPENBOOKQA": {"num_fewshot": 1},
     "PAWSX": {"num_fewshot": 2},
     "RenderableStructEval": {"num_fewshot": 0},

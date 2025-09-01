@@ -9,4 +9,4 @@ NAME = MMLU_PRODATASET_PATH = TIGER-Lab/MMLU-ProSAMPLE_SPLIT = testFEWSHOT_SPLIT
 
 - Link to dataset: [https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro](https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MMLU_PRO"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MMLU_PRO"`.

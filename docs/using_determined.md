@@ -51,7 +51,7 @@ hyperparameters:
   output_dir: <OUTPUT_DIR>
   llm_name: <LLM_NAME>
   model_path: <MODEL_PATH>
-entrypoint: poetry run eval_framework --context determined --models <YOUR_MODEL_DEFINITIONS>.py
+entrypoint: uv run eval_framework --context determined --models <YOUR_MODEL_DEFINITIONS>.py
 ```
 
 - `<YOUR_MODEL_DEFINITIONS>.py` should define your model configuration.

@@ -1,1 +1,6 @@
-__version__ = "0.1.13"
+from importlib.metadata import version
+
+__version__ = version("eval-framework")
+del version
+
+__all__ = ["__version__"]

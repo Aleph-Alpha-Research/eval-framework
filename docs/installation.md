@@ -3,17 +3,9 @@
 This guide provides detailed installation instructions and dependency information for the eval-framework.
 
 ## Installation Method
-#### Install Poetry
+#### Install uv
 
-**Option A: User-level installation**
-```bash
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-**Option B: Conda environment**
-```bash
-conda install conda-forge::poetry
-```
+Follow the official [installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
 
 #### Install Eval Framework
 
@@ -23,10 +15,10 @@ git clone https://github.com/Aleph-Alpha-Research/eval-framework/tree/main
 cd eval-framework
 
 # Install all dependencies including optional extras
-poetry install --all-extras
+uv sync --all-extras
 
-# Install flash-attention (requires compilation)
-poetry run pip install --no-build-isolation flash-attn==2.7.2.post1
+# Install flash-attention with CUDA 12.4 (requires compilation)
+uv sync --all-extras --group cu124 --group flash-attn
 ```
 
 #### Generate task documentation
@@ -49,12 +41,12 @@ linking to their documentation.
 
 Run with:
 ```
-poetry run python utils/generate-task-docs.py
+uv run python utils/generate-task-docs.py
 ```
 
 By default, formatted prompt examples are not included to this documentation file. Those can be added is you run instead:
 ```
-poetry run python utils/generate-task-docs.py --add-prompt-examples
+uv run python utils/generate-task-docs.py --add-prompt-examples
 ```
 
 ## Environment Configuration
@@ -94,7 +86,7 @@ The repository contains multiple Dockerfiles for different use cases:
 
 ```bash
 # Build main image (uses Dockerfile)
-# This creates a CUDA-enabled container with Python 3.12, poetry, and all framework dependencies
+# This creates a CUDA-enabled container with Python 3.12, uv, and all framework dependencies
 docker build -t eval-framework .
 
 # Run with GPU support

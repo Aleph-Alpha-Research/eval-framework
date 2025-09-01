@@ -9,4 +9,4 @@ NAME = FLORES_PLUSDATASET_PATH = openlanguagedata/flores_plusSAMPLE_SPLIT = devF
 
 - Link to dataset: [https://huggingface.co/datasets/openlanguagedata/flores_plus](https://huggingface.co/datasets/openlanguagedata/flores_plus)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "FLORES_PLUS"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "FLORES_PLUS"`.

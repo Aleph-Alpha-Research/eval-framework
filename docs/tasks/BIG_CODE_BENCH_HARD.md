@@ -9,4 +9,4 @@ NAME = BIG_CODE_BENCH_HARDDATASET_PATH = bigcode/bigcodebench-hardSAMPLE_SPLIT =
 
 - Link to dataset: [https://huggingface.co/datasets/bigcode/bigcodebench-hard](https://huggingface.co/datasets/bigcode/bigcodebench-hard)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "BIG_CODE_BENCH_HARD"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "BIG_CODE_BENCH_HARD"`.

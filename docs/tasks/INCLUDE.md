@@ -9,4 +9,4 @@ NAME = INCLUDEDATASET_PATH = CohereLabs/include-base-44SAMPLE_SPLIT = testFEWSHO
 
 - Link to dataset: [https://huggingface.co/datasets/CohereLabs/include-base-44](https://huggingface.co/datasets/CohereLabs/include-base-44)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "INCLUDE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "INCLUDE"`.

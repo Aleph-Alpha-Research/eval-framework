@@ -113,7 +113,7 @@ def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_
         if not add_prompt_examples:
             f.write(
                 f"More detailed documentation, with prompt examples and ground truth completions, can be generated "
-                f"with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "
+                f"with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "
                 f'"{task_name}"`.\n'
             )
 
@@ -157,7 +157,7 @@ def generate_readme_list() -> None:
         f.write(
             "# Task documentation\n\n"
             "This directory contains the generated documentation for all tasks available in `eval-framework`.\n\n"
-            "The documentation can be generated or updated with `poetry run python utils/generate-task-docs.py`.\n\n"
+            "The documentation can be generated or updated with `uv run python utils/generate-task-docs.py`.\n\n"
             "NOTE: This is an automatically generated file. Any manual modifications will not be preserved when"
             "the file is next updated.\n\n"
         )
