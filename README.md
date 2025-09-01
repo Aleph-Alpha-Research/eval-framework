@@ -166,7 +166,7 @@ For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmark
 
 ## Understanding the Evaluation Framework
 
-![eval-framework-steps](docs/prompt_preparation.png "eval-framework-steps")
+![eval-framework-steps](docs/eval_framework_process.png "eval-framework-steps")
 
 Eval-Framework provides a unified interface for evaluating language models across diverse benchmarks. The framework follows this interaction model:
 
