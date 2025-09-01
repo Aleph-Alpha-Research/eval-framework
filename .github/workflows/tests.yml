@@ -6,9 +6,6 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, labeled]
     branches: [main]
-  pull_request_target:
-    types: [opened, reopened, synchronize, labeled]
-    branches: [main]
   # Manually trigger a workflow for a branch
   workflow_dispatch:
   # Merge queue trigger
