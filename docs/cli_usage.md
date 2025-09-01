@@ -80,7 +80,7 @@ options:
 Execute a single evaluation locally by running:
 
 ```bash
-poetry run eval_framework \
+uv run eval_framework \
     --models src/eval_framework/llm/models.py \
     --llm-name Llama31_8B_Instruct_HF \
     --task-name "GSM8K" \
@@ -94,7 +94,7 @@ poetry run eval_framework \
 You can also run models directly from Hugging Face Hub using the `HFLLM_from_name` class:
 
 ```bash
-poetry run eval_framework \
+uv run eval_framework \
     --models src/eval_framework/llm/models.py \
     --llm-name HFLLM_from_name \
     --llm-args model_name="microsoft/DialoGPT-medium" formatter="Llama3Formatter" \
@@ -111,7 +111,7 @@ This approach allows you to evaluate any model available on Hugging Face by spec
 vLLM models now support configurable sampling parameters through the `--llm-args` parameter. You can specify individual sampling parameters using dot notation:
 
 ```bash
-poetry run eval_framework \
+uv run eval_framework \
     --models src/eval_framework/llm/models.py \
     --llm-name Qwen3_0_6B_VLLM \
     --llm-args sampling_params.temperature=0.7 sampling_params.top_p=0.95 sampling_params.max_tokens=150 \
@@ -124,7 +124,7 @@ poetry run eval_framework \
 You can also combine sampling parameters with other model arguments:
 
 ```bash
-poetry run eval_framework \
+uv run eval_framework \
     --models src/eval_framework/llm/models.py \
     --llm-name Qwen3_0_6B_VLLM \
     --llm-args max_model_len=2048 sampling_params.temperature=0.8 sampling_params.top_p=0.9 \

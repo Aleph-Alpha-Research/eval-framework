@@ -9,4 +9,4 @@ NAME = ZERO_SCROLLS_GOV_REPORTDATASET_PATH = tau/zero_scrollsSAMPLE_SPLIT = vali
 
 - Link to dataset: [https://huggingface.co/datasets/tau/zero_scrolls](https://huggingface.co/datasets/tau/zero_scrolls)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ZERO_SCROLLS_GOV_REPORT"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ZERO_SCROLLS_GOV_REPORT"`.

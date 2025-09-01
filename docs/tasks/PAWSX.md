@@ -9,4 +9,4 @@ NAME = PAWSXDATASET_PATH = google-research-datasets/paws-xSAMPLE_SPLIT = testFEW
 
 - Link to dataset: [https://huggingface.co/datasets/google-research-datasets/paws-x](https://huggingface.co/datasets/google-research-datasets/paws-x)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "PAWSX"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "PAWSX"`.

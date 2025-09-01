@@ -9,4 +9,4 @@ NAME = MMLUDATASET_PATH = cais/mmluSAMPLE_SPLIT = testFEWSHOT_SPLIT = devRESPONS
 
 - Link to dataset: [https://huggingface.co/datasets/cais/mmlu](https://huggingface.co/datasets/cais/mmlu)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MMLU"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MMLU"`.

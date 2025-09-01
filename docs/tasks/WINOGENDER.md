@@ -9,4 +9,4 @@ NAME = WINOGENDERDATASET_PATH = oskarvanderwal/winogenderSAMPLE_SPLIT = testFEWS
 
 - Link to dataset: [https://huggingface.co/datasets/oskarvanderwal/winogender](https://huggingface.co/datasets/oskarvanderwal/winogender)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "WINOGENDER"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "WINOGENDER"`.
