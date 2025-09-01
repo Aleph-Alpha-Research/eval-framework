@@ -101,20 +101,6 @@ def test_llms(request: FixtureRequest) -> BaseLLM:
 def should_preempt_callable() -> Callable[[], bool]:
     return lambda: False
 
-
-def _resolve_dotted(dotted: str) -> object:
-    """Resolve a dotted path like 'wandb.Artifact' to the actual object.
-
-    :params dotted: The dotted path to resolve.
-    :returns: The resolved object.
-    """
-    parts = dotted.split(".")
-    obj = importlib.import_module(parts[0])
-    for part in parts[1:]:
-        obj = getattr(obj, part)
-    return obj
-
-
 @pytest.fixture(autouse=True)
 def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     mock_wandb_instance = MockWandb()
@@ -126,19 +112,6 @@ def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     monkeypatch.setattr("wandb.Artifact", MockArtifact)
     monkeypatch.setattr("wandb.Api", MockWandbApi)
     return mock_wandb_instance
-
-
-"""
-@pytest.fixture(autouse=True)
-def mock_wandb_run(monkeypatch: pytest.MonkeyPatch) -> MockWandbRun:
-    mock_wandb_run_instance = MockWandbRun()
-    monkeypatch.setattr("wandb.Run.log", mock_wandb_run_instance.log)
-    monkeypatch.setattr("wandb.Run.log_artifact", mock_wandb_run_instance.log_artifact)
-    monkeypatch.setattr("wandb.Run.finish", mock_wandb_run_instance.finish)
-    monkeypatch.setattr("wandb.Run.mark_preempting", mock_wandb_run_instance.mark_preempting)
-    return mock_wandb_run_instance
-"""
-
 
 @pytest.fixture(autouse=True)
 def mock_wandb_artifact(monkeypatch: pytest.MonkeyPatch) -> MockArtifact:
