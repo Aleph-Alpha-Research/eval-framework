@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Generic, Literal, Protocol, Sequence, TypeVar, cast, override
 
-import boto3
 import torch
 from vllm import LLM, SamplingParams
 from vllm.inputs.data import TokensPrompt

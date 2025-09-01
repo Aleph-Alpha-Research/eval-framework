@@ -1,4 +1,3 @@
-import importlib
 from typing import Callable, List, Sequence
 
 import pytest
@@ -101,6 +100,7 @@ def test_llms(request: FixtureRequest) -> BaseLLM:
 def should_preempt_callable() -> Callable[[], bool]:
     return lambda: False
 
+
 @pytest.fixture(autouse=True)
 def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     mock_wandb_instance = MockWandb()
@@ -112,6 +112,7 @@ def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     monkeypatch.setattr("wandb.Artifact", MockArtifact)
     monkeypatch.setattr("wandb.Api", MockWandbApi)
     return mock_wandb_instance
+
 
 @pytest.fixture(autouse=True)
 def mock_wandb_artifact(monkeypatch: pytest.MonkeyPatch) -> MockArtifact:

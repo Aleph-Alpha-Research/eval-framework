@@ -230,16 +230,15 @@ class Llama31_8B_Tulu_3_8B(AlephAlphaAPIModel):
 
 
 class FormatterFactory:
-    
     @staticmethod
     def create_formatter(formatter_name: str, model_identifier: str = "") -> Any:
         """
         Create formatter instance based on formatter name.
-        
+
         Args:
             formatter_name: Name of the formatter to create
             model_identifier: Model name/identifier for formatters that need it
-            
+
         Returns:
             Formatter instance
         """
@@ -277,6 +276,7 @@ class HFLLM_from_name(HFLLM):
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
         self._set_formatter(selected_formatter)
 
+
 class HFLLM_from_wandb_registry(HFLLM):
     """
     A class to create HFLLM instances from registered models in Wandb registry.
@@ -284,16 +284,16 @@ class HFLLM_from_wandb_registry(HFLLM):
     """
 
     def __init__(
-        self, 
-        artifact_name: str, 
-        version: str = "latest", 
-        formatter: str = "", 
+        self,
+        artifact_name: str,
+        version: str = "latest",
+        formatter: str = "",
         formatter_identifier: str = "",
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Initialize HFLLM from a Wandb registered model artifact.
-        
+
         Args:
             artifact_name: Name of the artifact in the Wandb registry
             version: Version of the artifact to download (default: "latest")
@@ -301,50 +301,51 @@ class HFLLM_from_wandb_registry(HFLLM):
             **kwargs: Additional arguments passed to the parent class
         """
         print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
-        
+
         with WandbFs() as wandb_fs:
             artifact = wandb_fs.get_artifact(artifact_name, version)
             file_list = wandb_fs.ls(artifact)
             wandb_fs.download_artifacts(artifact)
             file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
-            
+
             if file_root is None:
                 raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
-            
+
             local_artifact_path = os.path.join(Path(wandb_fs.temp_dir.name), Path(file_root))
-            
+
             print(f"{RED}[ Model downloaded to: {local_artifact_path} ]{RESET}")
-            
+
             self.LLM_NAME = local_artifact_path
             self.artifact_name = artifact_name
             self.artifact_version = version
             selected_formatter = FormatterFactory.create_formatter(formatter, formatter_identifier)
 
             super().__init__(formatter=selected_formatter)
-            
+
             print(f"{RED}[ Model initialized --------------------- {RESET}")
             print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
             print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+
 
 class VLLM_from_wandb_registry(VLLMModel):
     """
     A class to create VLLM instances from registered models in Wandb registry.
     Downloads the model artifacts from Wandb and creates a local VLLM instance.
     """
-    
+
     LLM_NAME = ""
 
     def __init__(
-        self, 
-        artifact_name: str, 
-        version: str = "latest", 
+        self,
+        artifact_name: str,
+        version: str = "latest",
         formatter: str = "",
         formatter_identifier: str = "",
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Initialize VLLM from a Wandb registered model artifact.
-        
+
         Args:
             artifact_name: Name of the artifact in the Wandb registry
             version: Version of the artifact to download (default: "latest")
@@ -352,43 +353,40 @@ class VLLM_from_wandb_registry(VLLMModel):
             **kwargs: Additional arguments passed to VLLMModel
         """
         print(f"{RED}[ Loading registered model from Wandb for VLLM: {artifact_name}:{version} ]{RESET}")
-        
+
         with WandbFs() as wandb_fs:
             artifact = wandb_fs.get_artifact(artifact_name, version)
             file_list = wandb_fs.ls(artifact)
             wandb_fs.download_artifacts(artifact)
             file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
-            
+
             if file_root is None:
                 raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
-            
+
             local_artifact_path = os.path.join(Path(wandb_fs.temp_dir.name), Path(file_root))
-            
+
             print(f"{RED}[ Model downloaded to: {local_artifact_path} ]{RESET}")
-            
+
             self.LLM_NAME = local_artifact_path
             self.artifact_name = artifact_name
             self.artifact_version = version
-            
+
             selected_formatter = FormatterFactory.create_formatter(formatter, formatter_identifier)
 
-            super().__init__(
-                formatter=selected_formatter,
-                checkpoint_path=local_artifact_path,
-                **kwargs
-            )
-            
+            super().__init__(formatter=selected_formatter, checkpoint_path=local_artifact_path, **kwargs)
+
             print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
             print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
             print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+
 
 class RegistryModel(BaseLLM):
     """
     This class pulls a model from the registry and uses one of two user-defined backends.
     Supports both HFLLM and VLLM inference backends.
-    
+
     This class allows any registered model to be defined in config files with:
-    
+
     llm_class: RegistryModel
     llm_args:
       artifact_name: "my-model-artifact"
@@ -400,18 +398,13 @@ class RegistryModel(BaseLLM):
       gpu_memory_utilization: 0.9
       batch_size: 1
     """
-    
+
     def __init__(
-        self,
-        artifact_name: str,
-        version: str = "latest",
-        formatter: str = "", 
-        backend: str = "hfllm",
-        **kwargs: Any
+        self, artifact_name: str, version: str = "latest", formatter: str = "", backend: str = "hfllm", **kwargs: Any
     ) -> None:
         """
-        Initialize registry model 
-        
+        Initialize registry model
+
         Args:
             artifact_name: Name of the artifact in the Wandb registry
             version: Version of the artifact to download (default: "latest")
@@ -420,34 +413,25 @@ class RegistryModel(BaseLLM):
             **kwargs: Additional arguments passed to the underlying model class
         """
         backend = backend.lower()
-        
+
         if backend == "vllm":
             print(f"{RED}[ Creating VLLM backend for registry model ]{RESET}")
             self._model = VLLM_from_wandb_registry(
-                artifact_name=artifact_name,
-                version=version,
-                formatter=formatter,
-                **kwargs
+                artifact_name=artifact_name, version=version, formatter=formatter, **kwargs
             )
-            
+
         elif backend == "hfllm":
             print(f"{RED}[ Creating HFLLM backend for registry model ]{RESET}")
             self._model = HFLLM_from_wandb_registry(
-                artifact_name=artifact_name,
-                version=version,
-                formatter=formatter,
-                **kwargs
+                artifact_name=artifact_name, version=version, formatter=formatter, **kwargs
             )
-            
+
         else:
             raise ValueError(f"Unsupported backend: {backend}. Supported backends: 'hfllm', 'vllm'")
 
     def generate_from_messages(self, messages, stop_sequences=None, max_tokens=None, temperature=None):
         return self._model.generate_from_messages(
-            messages=messages,
-            stop_sequences=stop_sequences,
-            max_tokens=max_tokens,
-            temperature=temperature
+            messages=messages, stop_sequences=stop_sequences, max_tokens=max_tokens, temperature=temperature
         )
 
     def logprobs(self, samples):

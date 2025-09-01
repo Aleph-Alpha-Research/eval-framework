@@ -13,7 +13,7 @@ import wandb
 from tqdm import tqdm
 from wandb.sdk.lib.paths import StrPath
 
-from eval_framework.llm.vllm_models import VLLMModel
+
 class FileSystem(Enum):
     LOCAL = "local"
     S3 = "s3"
@@ -125,15 +125,16 @@ class WandbFs:
             self.temp_dir = tempfile.TemporaryDirectory()
 
         file_list = self.ls(artifact)
-        
+
         # Use tqdm for progress bar
         with ThreadPoolExecutor() as executor:
             with tqdm(total=len(file_list), desc="Downloading artifacts", unit="file") as pbar:
+
                 def download_with_progress(file):
                     result = self._download_artifact(file)
                     pbar.update(1)
                     return result
-                
+
                 list(executor.map(download_with_progress, file_list))
         return self.temp_dir.name
 
