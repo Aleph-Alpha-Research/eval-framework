@@ -68,7 +68,6 @@ SPECIAL_ARGS = {
     "MMLU_COT": {"num_fewshot": 1},
     "MMMLU": {"num_fewshot": 1},
     "MMMLU_GERMAN_COT": {"num_fewshot": 1},
-    "MUSR": {"num_fewshot": 0},  ## Trial fix
     "OPENBOOKQA": {"num_fewshot": 1},
     "PAWSX": {"num_fewshot": 2},
     "RenderableStructEval": {"num_fewshot": 0},
