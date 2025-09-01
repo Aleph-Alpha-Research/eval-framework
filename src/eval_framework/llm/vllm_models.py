@@ -471,29 +471,3 @@ class MistralVLLM(VLLMModel):
         if self._tokenizer is None:
             self._tokenizer = MistralAdapter(target_mdl=self.LLM_NAME)
         return self._tokenizer
-
-
-# initial registered checkpoint loading class
-# does the following
-# from the model_path, loads checkpoint from s3 in a tmpdir
-# handles verl checkpoints
-
-
-class RegisteredCheckpointLoader(VLLMModel):
-    def __init__(self, registered_model_name: str, version: str = "latest") -> None:
-        self.registered_model_name = registered_model_name
-        self.version = version
-
-    def download_from_s3(self, bucket, object, file):
-        # get bucket structure in s3
-        s3_client = boto3.client("s3")
-        response = s3_client.list_objects_v2(Bucket=bucket, Prefix=object)
-        if "Contents" not in response:
-            print(f"No objects found for {object} in bucket {bucket}")
-            return
-
-    def load_checkpoint(self) -> None:
-        pass
-
-    def retrieve_reference(self) -> None:
-        pass

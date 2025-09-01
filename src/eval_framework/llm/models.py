@@ -7,6 +7,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from eval_framework.constants import RED, RESET
 from eval_framework.llm.aleph_alpha_api_llm import AlephAlphaAPIModel
+from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.huggingface_llm import HFLLM
 from eval_framework.llm.vllm_models import MistralVLLM, VLLMModel
 from eval_framework.utils.file_ops import WandbFs
@@ -228,6 +229,33 @@ class Llama31_8B_Tulu_3_8B(AlephAlphaAPIModel):
     DEFAULT_FORMATTER = HFFormatter("allenai/Llama-3.1-Tulu-3-8B")
 
 
+class FormatterFactory:
+    
+    @staticmethod
+    def create_formatter(formatter_name: str, model_identifier: str = "") -> Any:
+        """
+        Create formatter instance based on formatter name.
+        
+        Args:
+            formatter_name: Name of the formatter to create
+            model_identifier: Model name/identifier for formatters that need it
+            
+        Returns:
+            Formatter instance
+        """
+        if formatter_name == "Llama3Formatter":
+            return Llama3Formatter()
+        elif formatter_name == "MistralFormatter":
+            return MagistralFormatter(model_identifier)
+        elif formatter_name == "ConcatFormatter":
+            return ConcatFormatter()
+        elif formatter_name == "HFFormatter":
+            return HFFormatter(model_identifier)
+        else:
+            supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
+            raise ValueError(f"Unsupported formatter: {formatter_name}. Supported formatters: {supported}")
+
+
 class HFLLM_from_name(HFLLM):
     """
     A generic class to create HFLLM instances from a given model name.
@@ -243,26 +271,11 @@ class HFLLM_from_name(HFLLM):
         self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
 
         # Lazy formatter initialization - only create the one we need
-        selected_formatter = self._get_formatter(formatter, model_name)
+        selected_formatter = FormatterFactory.create_formatter(formatter, model_name)
 
         print(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
         self._set_formatter(selected_formatter)
-
-    def _get_formatter(self, formatter: str, model_name: str) -> Any:
-        """Get formatter instance based on formatter name."""
-        if formatter == "Llama3Formatter":
-            return Llama3Formatter()
-        elif formatter == "MistralFormatter":
-            return MagistralFormatter(model_name)
-        elif formatter == "ConcatFormatter":
-            return ConcatFormatter()
-        elif formatter == "HFFormatter":
-            return HFFormatter(model_name)
-        else:
-            supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
-            raise ValueError(f"Unsupported formatter: {formatter}. Supported formatters: {supported}")
-
 
 class HFLLM_from_wandb_registry(HFLLM):
     """
@@ -274,7 +287,8 @@ class HFLLM_from_wandb_registry(HFLLM):
         self, 
         artifact_name: str, 
         version: str = "latest", 
-        formatter: str = "Llama3Formatter", 
+        formatter: str = "", 
+        formatter_identifier: str = "",
         **kwargs: Any
     ) -> None:
         """
@@ -283,12 +297,11 @@ class HFLLM_from_wandb_registry(HFLLM):
         Args:
             artifact_name: Name of the artifact in the Wandb registry
             version: Version of the artifact to download (default: "latest")
-            formatter: Type of formatter to use (default: "Llama3Formatter")
+            formatter: Type of formatter to use (default: "")
             **kwargs: Additional arguments passed to the parent class
         """
         print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
         
-        # Download the model from Wandb registry and set LLM_NAME
         with WandbFs() as wandb_fs:
             artifact = wandb_fs.get_artifact(artifact_name, version)
             file_list = wandb_fs.ls(artifact)
@@ -302,33 +315,144 @@ class HFLLM_from_wandb_registry(HFLLM):
             
             print(f"{RED}[ Model downloaded to: {local_artifact_path} ]{RESET}")
             
-            # Set the LLM_NAME before calling parent init
             self.LLM_NAME = local_artifact_path
-            
-            # Store the artifact info for reference
             self.artifact_name = artifact_name
             self.artifact_version = version
-            
-            # Get the formatter before calling parent init
-            selected_formatter = self._get_formatter(formatter, self.artifact_name)
-            
-            # Now call the parent HFLLM.__init__() with the formatter
+            selected_formatter = FormatterFactory.create_formatter(formatter, formatter_identifier)
+
             super().__init__(formatter=selected_formatter)
             
             print(f"{RED}[ Model initialized --------------------- {RESET}")
             print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
             print(f"{RED}[ Formatter: {formatter} ]{RESET}")
 
-    def _get_formatter(self, formatter: str, model_path: str) -> Any:
-        """Get formatter instance based on formatter name."""
-        if formatter == "Llama3Formatter":
-            return Llama3Formatter()
-        elif formatter == "MistralFormatter":
-            return MagistralFormatter(model_path)
-        elif formatter == "ConcatFormatter":
-            return ConcatFormatter()
-        elif formatter == "HFFormatter":
-            return HFFormatter(model_path)
+class VLLM_from_wandb_registry(VLLMModel):
+    """
+    A class to create VLLM instances from registered models in Wandb registry.
+    Downloads the model artifacts from Wandb and creates a local VLLM instance.
+    """
+    
+    LLM_NAME = ""
+
+    def __init__(
+        self, 
+        artifact_name: str, 
+        version: str = "latest", 
+        formatter: str = "",
+        formatter_identifier: str = "",
+        **kwargs: Any
+    ) -> None:
+        """
+        Initialize VLLM from a Wandb registered model artifact.
+        
+        Args:
+            artifact_name: Name of the artifact in the Wandb registry
+            version: Version of the artifact to download (default: "latest")
+            formatter: Type of formatter to use (default: "")
+            **kwargs: Additional arguments passed to VLLMModel
+        """
+        print(f"{RED}[ Loading registered model from Wandb for VLLM: {artifact_name}:{version} ]{RESET}")
+        
+        with WandbFs() as wandb_fs:
+            artifact = wandb_fs.get_artifact(artifact_name, version)
+            file_list = wandb_fs.ls(artifact)
+            wandb_fs.download_artifacts(artifact)
+            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
+            
+            if file_root is None:
+                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
+            
+            local_artifact_path = os.path.join(Path(wandb_fs.temp_dir.name), Path(file_root))
+            
+            print(f"{RED}[ Model downloaded to: {local_artifact_path} ]{RESET}")
+            
+            self.LLM_NAME = local_artifact_path
+            self.artifact_name = artifact_name
+            self.artifact_version = version
+            
+            selected_formatter = FormatterFactory.create_formatter(formatter, formatter_identifier)
+
+            super().__init__(
+                formatter=selected_formatter,
+                checkpoint_path=local_artifact_path,
+                **kwargs
+            )
+            
+            print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
+            print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
+            print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+
+class RegistryModel(BaseLLM):
+    """
+    This class pulls a model from the registry and uses one of two user-defined backends.
+    Supports both HFLLM and VLLM inference backends.
+    
+    This class allows any registered model to be defined in config files with:
+    
+    llm_class: RegistryModel
+    llm_args:
+      artifact_name: "my-model-artifact"
+      version: "v1.2.0"
+      formatter: "ConcatFormatter"
+      backend: "hfllm"  # or "vllm" (default: "hfllm")
+      # Additional VLLM-specific args when backend="vllm":
+      tensor_parallel_size: 1
+      gpu_memory_utilization: 0.9
+      batch_size: 1
+    """
+    
+    def __init__(
+        self,
+        artifact_name: str,
+        version: str = "latest",
+        formatter: str = "", 
+        backend: str = "hfllm",
+        **kwargs: Any
+    ) -> None:
+        """
+        Initialize registry model 
+        
+        Args:
+            artifact_name: Name of the artifact in the Wandb registry
+            version: Version of the artifact to download (default: "latest")
+            formatter: Type of formatter to use (default: "")
+            backend: Inference backend to use - "hfllm" or "vllm" (default: "hfllm")
+            **kwargs: Additional arguments passed to the underlying model class
+        """
+        backend = backend.lower()
+        
+        if backend == "vllm":
+            print(f"{RED}[ Creating VLLM backend for registry model ]{RESET}")
+            self._model = VLLM_from_wandb_registry(
+                artifact_name=artifact_name,
+                version=version,
+                formatter=formatter,
+                **kwargs
+            )
+            
+        elif backend == "hfllm":
+            print(f"{RED}[ Creating HFLLM backend for registry model ]{RESET}")
+            self._model = HFLLM_from_wandb_registry(
+                artifact_name=artifact_name,
+                version=version,
+                formatter=formatter,
+                **kwargs
+            )
+            
         else:
-            supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
-            raise ValueError(f"Unsupported formatter: {formatter}. Supported formatters: {supported}")
+            raise ValueError(f"Unsupported backend: {backend}. Supported backends: 'hfllm', 'vllm'")
+
+    def generate_from_messages(self, messages, stop_sequences=None, max_tokens=None, temperature=None):
+        return self._model.generate_from_messages(
+            messages=messages,
+            stop_sequences=stop_sequences,
+            max_tokens=max_tokens,
+            temperature=temperature
+        )
+
+    def logprobs(self, samples):
+        return self._model.logprobs(samples)
+
+    @property
+    def name(self) -> str:
+        return self._model.name

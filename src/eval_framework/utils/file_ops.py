@@ -14,7 +14,6 @@ from tqdm import tqdm
 from wandb.sdk.lib.paths import StrPath
 
 from eval_framework.llm.vllm_models import VLLMModel
-
 class FileSystem(Enum):
     LOCAL = "local"
     S3 = "s3"
@@ -309,21 +308,3 @@ class WandbFs:
 
     def __del__(self):
         self._cleanup_temp_dir()
-
-
-if __name__ == "__main__":
-
-    from eval_framework.llm.models import HFLLM_from_wandb_registry
-
-    name = "SmolLM2-135M"
-    version = "v1"
-    '''
-
-    with WandbFs() as wandb_fs:
-        artifact = wandb_fs.get_artifact(name, version)
-        file_list = wandb_fs.ls(artifact)
-        temp_dir = wandb_fs.download_artifacts(artifact)
-        file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
-        local_artifact_path = os.path.join(Path(wandb_fs.temp_dir.name), Path(file_root))
-    '''
-    model = HFLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter")
