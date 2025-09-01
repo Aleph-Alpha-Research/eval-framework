@@ -164,7 +164,6 @@ Evaluation metrics include:
 
 For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmarks_and_metrics.md).
 
-## Understanding the Evaluation Framework
 
 ![eval-framework-steps](docs/eval_framework_process.png "eval-framework-steps")
 
