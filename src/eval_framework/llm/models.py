@@ -390,7 +390,7 @@ class RegistryModel(BaseLLM):
     llm_class: RegistryModel
     llm_args:
       artifact_name: "my-model-artifact"
-      version: "v1.2.0"
+      version: "v1"
       formatter: "ConcatFormatter"
       backend: "hfllm"  # or "vllm" (default: "hfllm")
       # Additional VLLM-specific args when backend="vllm":
