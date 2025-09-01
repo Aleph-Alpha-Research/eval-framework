@@ -96,7 +96,26 @@ When requesting features:
 - **Additional context**: Any other relevant information
 
 
+## Releasing a New Version
 
+The `eval_framework` package follows [semantic versioning specification](https://semver.org/). That is, starting with the first `1.0.0` release we
+aim for backwards-compatible changes within minor version changes and compatibility-breaking changes only within major version.
+
+To launch a new release, please follow these steps:
+
+- Increase the `project.version` number in the `pyproject.toml` either manually, or through `uv version --bump={major,minor,patch}`
+- Adapt the `CHANGELOG.md` file to include the new version information
+- Merge these changes to the `main` branch
+- Create a new release [through Github](https://github.com/Aleph-Alpha-Research/eval-framework/releases)
+   - Click on "Create a new release"
+   - Create the appropriate tag on the `main` branch. That is, if the package version is `X.Y.Z` the tag must be `vX.Y.Z` or the release workflow will fail.
+   - Set the title of the release equivalent to the version number (`X.Y.Z`)
+   - Click on `Generate release notes`
+   - Manually copy the highlights from the changelog on top of the auto-generated notes
+   - Click on Publish Release
+
+This will create a new version tag and run the release workflow. For now, the release workflow only checks for a correct tag, but in the future
+will publish packages to the Python packaging index.
 
 ## License
 
