@@ -3,6 +3,7 @@ from typing import Any
 from eval_framework.metrics.completion_metrics.code_assertion import CodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 CODE_TO_EXECUTE = """
 {start_of_code}
@@ -35,8 +36,8 @@ class HumanEval(BaseTask[str]):
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["```"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -82,9 +83,9 @@ class HumanEvalInstruct(HumanEval):
     NAME = "Human Eval Instruct"
     CUE_PREFIX = "Here is the completed function:\n```python\n"
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for Human Eval Instruct"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         instruction_text = (

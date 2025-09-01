@@ -3,7 +3,8 @@ from typing import Any
 
 from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion_metrics.f1 import F1
-from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
+from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataloader import Dataloader
 
 
 class SQUAD2(BaseTask[str]):
@@ -20,16 +21,16 @@ class SQUAD2(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer", "Context", "unanswerable"]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences = [".\n"]
         self.max_tokens = 300  # the max length of the ground truth is 160 characters while the average is ~19
         self.rnd_choice_shuffle = random.Random()
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: str) -> None:
         name = subject if subject != NO_SUBJECT else None
 
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)

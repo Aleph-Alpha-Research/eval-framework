@@ -9,13 +9,14 @@ from eval_framework.tasks.benchmarks.infinitebench import (
     InfiniteBench_RetrieveNumber,
     InfiniteBench_RetrievePassKey1,
 )
+from eval_framework.tasks.dataloader import HFDataloader
 from tests.utils import DatasetPatcher
 
 
 class Test_InfiniteBench_CodeRun:
     @pytest.fixture
     def task(self) -> InfiniteBench_CodeRun:
-        return InfiniteBench_CodeRun(0)
+        return InfiniteBench_CodeRun(num_fewshot=0, dataloader=HFDataloader())
 
     def test_InfiniteBench_CodeRun_postprocessing(self, task: InfiniteBench_CodeRun) -> None:
         assert (

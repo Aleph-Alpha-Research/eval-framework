@@ -140,7 +140,7 @@ class TRUTHFULQA_EU20_DE(TRUTHFULQA):
         subject names to huggingface."""
 
         self.target_identifier = f"{str(subject)}_targets"
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name="mc_DE")
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name="mc_DE")
         self.dataset = {}
         self.rnd = random.Random(RANDOM_SEED)
 
@@ -186,7 +186,7 @@ class TRUTHFULQA_EU20_FR(TRUTHFULQA):
 
     def _load_dataset(self, subject: SubjectType) -> None:
         self.target_identifier = f"{str(subject)}_targets"
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name="mc_FR")
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name="mc_FR")
         self.dataset = {}
         self.rnd = random.Random(RANDOM_SEED)
 
@@ -220,10 +220,10 @@ class MMLU_EU20_DE(MMLU):
     PERTURBATION_UNMODIFIABLE_WORDS = MMLU.PERTURBATION_UNMODIFIABLE_WORDS + ["Frage"]
     LANGUAGE = Language.DEU
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: str) -> None:
         name = subject if subject != NO_SUBJECT else None
 
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)
@@ -326,10 +326,10 @@ class MMLU_EU20_FR(MMLU):
     SUBJECTS = [i + "_FR" for i in MMLU_SUBJECTS]
     LANGUAGE = Language.FRA
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: str) -> None:
         name = subject if subject != NO_SUBJECT else None
 
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)

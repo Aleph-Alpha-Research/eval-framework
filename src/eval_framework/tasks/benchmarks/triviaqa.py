@@ -4,6 +4,7 @@ from typing import Any
 from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion_metrics.f1 import F1
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 
 class TRIVIAQA(BaseTask[str]):
@@ -19,8 +20,8 @@ class TRIVIAQA(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences = ["\n"]
         self.max_tokens = 400  # the max length of the ground truth is 282 characters while the average is ~16
         self.rnd_choice_shuffle = random.Random()

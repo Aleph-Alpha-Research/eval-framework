@@ -2,6 +2,7 @@ from typing import Any
 
 from eval_framework.metrics.completion_metrics.grid_difference import GridDifference
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
+from eval_framework.tasks.dataloader import Dataloader
 
 SUBJECTS = [
     "1_random_cell_easy",
@@ -59,9 +60,9 @@ class SPHYR(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = None
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for SPHYR"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
         FILL_INSTRUCTION = EASY_FILL_INSTRUCTION if "easy" in item["subject"] else HARD_FILL_INSTRUCTION

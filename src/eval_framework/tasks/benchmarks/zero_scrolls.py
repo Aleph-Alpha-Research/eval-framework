@@ -8,6 +8,7 @@ from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import 
     AccuracyLoglikelihood,
 )
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 from eval_framework.tasks.utils import get_n_letters
 
 
@@ -25,9 +26,9 @@ class ZERO_SCROLLS_QUALITY(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Answer"]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "ZeroSCROLLS QuALITY only supports zero fewshot examples"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.keys = get_n_letters(4)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -62,9 +63,9 @@ class ZERO_SCROLLS_GOV_REPORT(ZERO_SCROLLS_COMPLETION):
     SUBJECTS = ["gov_report"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Summary"]
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "ZeroSCROLLS GovReport only supports zero fewshot examples"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query_end_index = item["query_end_index"]
@@ -77,9 +78,9 @@ class ZERO_SCROLLS_QMSUM(ZERO_SCROLLS_COMPLETION):
     SUBJECTS = ["qmsum"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Answer"]
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "ZeroSCROLLS QMSum only supports zero fewshot examples"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query_end_index = item["query_end_index"]
@@ -92,9 +93,9 @@ class ZERO_SCROLLS_SQUALITY(ZERO_SCROLLS_COMPLETION):
     SUBJECTS = ["squality"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Answer"]
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "ZeroSCROLLS SQuALITY only supports zero fewshot examples"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query_end_index = item["query_end_index"]
@@ -107,9 +108,9 @@ class ZERO_SCROLLS_QASPER(ZERO_SCROLLS_COMPLETION):
     SUBJECTS = ["qasper"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Answer"]
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "ZeroSCROLLS Qasper only supports zero fewshot examples"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query_end_index = item["query_end_index"]
@@ -122,9 +123,9 @@ class ZERO_SCROLLS_NARRATIVEQA(ZERO_SCROLLS_COMPLETION):
     SUBJECTS = ["narrative_qa"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Answer"]
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "ZeroSCROLLS NarrativeQA only supports zero fewshot examples"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query_end_index = item["query_end_index"]
@@ -137,9 +138,9 @@ class ZERO_SCROLLS_MUSIQUE(ZERO_SCROLLS_COMPLETION):
     SUBJECTS = ["musique"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Answer"]
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "ZeroSCROLLS MuSiQue only supports zero fewshot examples"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query_end_index = item["query_end_index"]
@@ -152,9 +153,9 @@ class ZERO_SCROLLS_SPACE_DIGEST(ZERO_SCROLLS_COMPLETION):
     SUBJECTS = ["space_digest"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Answer"]
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "ZeroSCROLLS SpaceDigest only supports zero fewshot examples"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         # First, try to find patterns like "X%" or "X percent" or "X percentage"

@@ -7,6 +7,7 @@ from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import 
     AccuracyNormLoglikelihood,
 )
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 from eval_framework.tasks.utils import get_n_letters
 
 MMLU_SUBJECTS = [
@@ -83,9 +84,8 @@ class MMLU(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"] + get_n_letters(4)
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
-
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.keys = get_n_letters(4)
 
     def _get_subject_name(self, item: dict[str, Any]) -> str:
@@ -152,9 +152,9 @@ class MMLU_COT(MMLU):
 
     ANS_RE = re.compile(r"Therefore, the answer is: ([ABCD])")
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for MMLU_COT"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["Question:"]
 
     def _extract_answer(self, completion: str) -> str:

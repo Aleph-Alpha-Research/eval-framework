@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 from functools import partial
 from typing import Any, Callable, List
 
+from eval_framework.tasks.dataloader import HFDataloader
+
 try:
     from determined import get_cluster_info
 except ImportError:
@@ -52,6 +54,7 @@ class ResponseGenerator:
         self.result_processor = result_processor
         self.num_samples = config.num_samples
         self.save_intermediate_results = config.save_intermediate_results
+        self.dataloader = HFDataloader()
 
         task_class = config.task_name.value
         task_class.SUBJECTS = self._filter_task_subjects()
@@ -59,9 +62,9 @@ class ResponseGenerator:
 
         if config.perturbation_config is not None:
             perturbation_task_class = create_perturbation_class(task_class, config.perturbation_config)
-            self.task = perturbation_task_class(self.few_shot)
+            self.task = perturbation_task_class(num_fewshot=self.few_shot, dataloader=self.dataloader)
         else:
-            self.task = task_class(self.few_shot)
+            self.task = task_class(num_fewshot=self.few_shot, dataloader=self.dataloader)
 
         self.response_type = task_class.RESPONSE_TYPE
 

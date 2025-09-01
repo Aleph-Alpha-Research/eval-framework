@@ -7,6 +7,7 @@ from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import 
 )
 from eval_framework.metrics.loglikelihood_metrics.probability_mass import ProbabilityMass, ProbabilityMassNorm
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
+from eval_framework.tasks.dataloader import Dataloader
 
 # fewshot examples from Appendix E in https://arxiv.org/pdf/2109.07958
 FEWSHOT_ITEMS = [
@@ -45,9 +46,9 @@ class TRUTHFULQA(BaseTask[str]):
     FEWSHOT_ITEMS = FEWSHOT_ITEMS
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot <= 6, f"Fewshot larger than 6 is not supported for {self.NAME}"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _load_dataset(self, subject: SubjectType) -> None:
         """The original dataset only provides one subject 'multiple_choice', but with multiple target columns
@@ -56,7 +57,7 @@ class TRUTHFULQA(BaseTask[str]):
         subject names to huggingface."""
 
         self.target_identifier = f"{subject}_targets"
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name="multiple_choice")
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name="multiple_choice")
         self.dataset = {}
         self.rnd = random.Random(RANDOM_SEED)
 

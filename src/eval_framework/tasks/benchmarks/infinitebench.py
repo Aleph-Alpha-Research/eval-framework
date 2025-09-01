@@ -1,14 +1,13 @@
-import os
 import re
 from abc import ABC
-from pathlib import Path
 from typing import Any
 
-from datasets import DownloadConfig, Features, Sequence, Value, load_dataset
+from datasets import Features, Sequence, Value
 
 from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import AccuracyLoglikelihood
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 
 class InfiniteBench(BaseTask[str], ABC):
@@ -21,34 +20,19 @@ class InfiniteBench(BaseTask[str], ABC):
     SUBJECTS = ["default"]
     LANGUAGE = Language.ENG
     PERTURBATION_UNMODIFIABLE_WORDS = None
+    FEATURES = Features(
+        {
+            "id": Value("int64"),
+            "context": Value("string"),
+            "input": Value("string"),
+            "answer": Sequence(Value("string")),
+            "options": Sequence(Value("string")),
+        }
+    )
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Few-shots are not supported for long-context InfiniteBench tasks"
-        super().__init__(num_fewshot)
-
-    def _load_hf_dataset(self, **kwargs: Any) -> Any:
-        cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
-        download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
-        ft = Features(
-            {
-                "id": Value("int64"),
-                "context": Value("string"),
-                "input": Value("string"),
-                "answer": Sequence(Value("string")),
-                "options": Sequence(Value("string")),
-            }
-        )
-        try:
-            return load_dataset(
-                **kwargs, trust_remote_code=True, cache_dir=cache_dir, download_config=download_config, features=ft
-            )
-        except Exception:
-            return load_dataset(
-                **kwargs,
-                trust_remote_code=True,
-                cache_dir=f"{Path.home()}/.cache/eval-framework",
-                features=ft,
-            )
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
 
 class InfiniteBenchLoglikelihood(InfiniteBench, ABC):
@@ -104,8 +88,8 @@ class InfiniteBench_CodeRun(InfiniteBenchCompletion):
     SAMPLE_SPLIT = "code_run"
     FEWSHOT_SPLIT = SAMPLE_SPLIT
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 30  # Avg Output Tokens: 1.3
 
@@ -130,8 +114,8 @@ class InfiniteBench_EnDia(InfiniteBenchCompletion):
     SAMPLE_SPLIT = "longdialogue_qa_eng"
     FEWSHOT_SPLIT = SAMPLE_SPLIT
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 30  # Avg Output Tokens: 3.4
 
@@ -159,8 +143,8 @@ class InfiniteBench_EnQA(InfiniteBenchCompletion):
     SAMPLE_SPLIT = "longbook_qa_eng"
     FEWSHOT_SPLIT = SAMPLE_SPLIT
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 30  # Avg Output Tokens: 4.8
 
@@ -185,8 +169,8 @@ class InfiniteBench_MathFind(InfiniteBenchCompletion):
     SAMPLE_SPLIT = "math_find"
     FEWSHOT_SPLIT = SAMPLE_SPLIT
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 30  # Avg Output Tokens: 1.3
 
@@ -211,8 +195,8 @@ class InfiniteBench_RetrieveKV2(InfiniteBenchCompletion):
     SAMPLE_SPLIT = "kv_retrieval"
     FEWSHOT_SPLIT = SAMPLE_SPLIT
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 40  # Avg Output Tokens: 22.7 (all answers are 36 chars)
 
@@ -240,8 +224,8 @@ class InfiniteBench_RetrieveNumber(InfiniteBenchCompletion):
     SAMPLE_SPLIT = "number_string"
     FEWSHOT_SPLIT = SAMPLE_SPLIT
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 12  # Avg Output Tokens: 4.0 (all answers are 10 digits integers)
 
@@ -272,8 +256,8 @@ class InfiniteBench_RetrievePassKey1(InfiniteBenchCompletion):
     SAMPLE_SPLIT = "passkey"
     FEWSHOT_SPLIT = SAMPLE_SPLIT
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 8  # Avg Output Tokens: 2.0 (all answers are 5 digits integers)
 

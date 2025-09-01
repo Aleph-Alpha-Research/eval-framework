@@ -6,6 +6,7 @@ from eval_framework.metrics.completion_metrics.accuracy_completion import Accura
 from eval_framework.metrics.completion_metrics.language_checker import LanguageRawConsistencyChecker
 from eval_framework.metrics.completion_metrics.math_reasoning_completion import MathReasoningCompletion
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 SubjectType = TypeVar("SubjectType")
 
@@ -26,8 +27,8 @@ class MATHReasoning(BaseTask[str]):
     ANSWER_PATTERN = r"(?i)Answer\s*:\s*(.*)"
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         # Max tokens are going to be determined by the model.
         # however GPT paper and results used 1024 tokens, s1 used 2048
 
@@ -346,9 +347,9 @@ class AIME2024(MATHReasoning):
     Problem: {Question}"""  # noqa: E501
     ANSWER_PATTERN = r"Therefore, the final answer is:(.*?). I hope it is correct."
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "AIME evaluation does not include few shot"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return self.QUERY_TEMPLATE.format(Question=item["problem"])
@@ -388,9 +389,9 @@ class MATH500(MATHReasoning):
     where [answer] is just the final number or expression that solves the problem.
     """.strip()  # noqa: E501
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "MATH-500 evaluation does not include few shot"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         extracted_answer_boxed = self._extract_answer(completion_text)
@@ -432,8 +433,8 @@ class MATH(MATHReasoning):
     ]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences = ["\nProblem:", "\nProblem", "\n\nProblem:", "\n\nProblem"]
 
     def extract_last_two_dollar_text(self, s: str) -> str:
@@ -483,10 +484,10 @@ class MATH(MATHReasoning):
 class MATHLvl5(MATH):
     NAME = "Math Lvl 5"
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: str) -> None:
         name = subject if subject != NO_SUBJECT else None
 
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)
@@ -530,9 +531,9 @@ Question: {question}
 
 Answer:"""
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "GSM8K Reasoning is designed for zero-shot evaluation only"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = []
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:

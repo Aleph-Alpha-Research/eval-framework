@@ -13,6 +13,7 @@ from datasets import Dataset, DatasetDict
 from eval_framework.constants import RED, RESET
 from eval_framework.result_processors.base import Result
 from eval_framework.tasks.base import BaseTask, SubjectType
+from eval_framework.tasks.dataloader import HFDataloader
 
 T = TypeVar("T", bound=BaseTask)
 
@@ -101,22 +102,21 @@ class DatasetPatcher(Generic[T]):
         self.patch_obj = None
 
     def __enter__(self) -> T:
-        task = self.task_class(num_fewshot=self.num_fewshot)
+        dataloader = HFDataloader()
+        task = self.task_class(num_fewshot=self.num_fewshot, dataloader=dataloader)
 
-        # First, we record what arguments are passed to _load_hf_dataset for each subject
-        # We do this by patching the _load_hf_dataset method and recording the keyword arguments
-        # (_load_hf_dataset is used only with kwargs)
+        # First, we record what arguments are passed to load_hf_dataset for each subject
         captured_kwargs = []
 
         def mock_get_arguments(**kwargs: Any) -> None:
             captured_kwargs.append(kwargs)
 
-        with patch.object(task, "_load_hf_dataset", side_effect=mock_get_arguments):
+        with patch.object(dataloader, "load", side_effect=mock_get_arguments):
             for subject in task.SUBJECTS:
                 # We expect it to error out because mock_get_arguments returns None
                 try:
                     task._load_dataset(subject)
-                    raise Exception("_load_hf_dataset should have errored out")
+                    raise Exception("dataloader.load should have errored out")
                 except Exception:
                     pass
 
@@ -133,7 +133,7 @@ class DatasetPatcher(Generic[T]):
 
             # Patch HF_DATASET_CACHE_DIR environment variable when loading the dataset
             with patch.dict("os.environ", {"HF_DATASET_CACHE_DIR": str(self.tmp_cache_dir)}):
-                hf_dataset = task._load_hf_dataset(**kwargs_copy)
+                hf_dataset = dataloader.load(**kwargs_copy)
 
             extracted_items = {}
 
@@ -156,9 +156,9 @@ class DatasetPatcher(Generic[T]):
         if self.tmp_cache_dir.exists():
             shutil.rmtree(self.tmp_cache_dir)
 
-        # Then, we patch the _load_hf_dataset method to the data subsets we extracted
+        # Patch the dataloader's load method to return the data subsets we extracted
         mock_load_hf_dataset = create_mock_load_hf_dataset(task.SUBJECTS, captured_kwargs)
-        self.patch_obj = patch("eval_framework.tasks.base.BaseTask._load_hf_dataset", mock_load_hf_dataset)  # type: ignore[assignment]
+        self.patch_obj = patch.object(dataloader, "load", mock_load_hf_dataset)  # type: ignore[assignment]
         assert self.patch_obj is not None
         self.patch_obj.__enter__()
 

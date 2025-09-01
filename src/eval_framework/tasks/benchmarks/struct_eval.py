@@ -7,6 +7,7 @@ from datasets import DatasetDict
 
 from eval_framework.metrics.completion_metrics.struct_eval_metrics import RenderableStructMetric, StructMetric
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 StructEvalSubjects = [
     "CSV to YAML",
@@ -43,13 +44,13 @@ class StructEval(BaseTask[str]):
     SUBJECTS = StructEvalSubjects
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         if num_fewshot > 0:
             raise ValueError("StructEval only supports zero-shot evaluation.")
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
 
     def _load_dataset(self, subject: str) -> None:
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, revision=self.HF_REVISION)
         assert isinstance(hf_dataset, DatasetDict), "Expected a Hugging Face Dataset object."
         hf_dataset = hf_dataset.filter(lambda item: item["task_name"] == subject, num_proc=os.cpu_count())
         self.dataset = {}

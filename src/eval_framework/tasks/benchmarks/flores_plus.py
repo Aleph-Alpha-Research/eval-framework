@@ -7,6 +7,7 @@ from eval_framework.metrics.completion_metrics.chrf import CHRF
 from eval_framework.metrics.completion_metrics.COMET import COMET
 from eval_framework.shared.types import BaseMetricContext, UntemplatedPrompt
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 LANG_MAP = {
     "deu_Latn": "German",
@@ -44,16 +45,15 @@ class FloresPlus(BaseTask[str]):
         "ukr_Cyrl": Language.UKR,
     }
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences = ["\n"]
 
     def _load_dataset(self, subject: str) -> None:
-        hf_dataset_src = self._load_hf_dataset(path=self.DATASET_PATH, name=subject.split("-")[0])
-        hf_dataset_tgt = self._load_hf_dataset(path=self.DATASET_PATH, name=subject.split("-")[1])
+        hf_dataset_src = self.dataloader.load(path=self.DATASET_PATH, name=subject.split("-")[0])
+        hf_dataset_tgt = self.dataloader.load(path=self.DATASET_PATH, name=subject.split("-")[1])
         self.dataset = {}
         self.rnd = random.Random(42)
-
         for split in [self.SAMPLE_SPLIT, self.FEWSHOT_SPLIT]:
             data_src = hf_dataset_src[split]
             data_tgt = hf_dataset_tgt[split]

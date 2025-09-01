@@ -9,6 +9,7 @@ from eval_framework.metrics.completion_metrics.bleu import LINEWISE_BLEU
 from eval_framework.metrics.completion_metrics.chrf import LINEWISE_CHRF
 from eval_framework.metrics.completion_metrics.ter import LINEWISE_TER
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 
 
 class WMT(BaseTask[str], ABC):
@@ -22,8 +23,8 @@ class WMT(BaseTask[str], ABC):
     METRICS = [LINEWISE_BLEU, LINEWISE_CHRF, LINEWISE_TER]
     PERTURBATION_UNMODIFIABLE_WORDS = ["phrase"]
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = [".\n", " phrase: ", "phrase:", "phrase: ", " phrase:", "\n\n"]
 
     def _load_dataset(self, subject: str | None) -> None:
@@ -103,8 +104,8 @@ class WMT_INSTRUCT(WMT):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Please", "translate"]
     COMPLETION_PREFIX = "This is the translation:"
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["Please translate"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

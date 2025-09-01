@@ -9,7 +9,8 @@ from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import 
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
-from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
+from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataloader import Dataloader
 from eval_framework.tasks.utils import get_n_letters
 
 logger = logging.getLogger(__name__)
@@ -28,17 +29,17 @@ class GPQA(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"] + get_n_letters(4)
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences = ["Question:"]
         self.keys = get_n_letters(4)
         self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}
         self.rnd_choice_shuffle = random.Random(RANDOM_SEED)
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: str) -> None:
         name = subject if subject != NO_SUBJECT else None
 
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        hf_dataset = self.dataloader.load(path=self.DATASET_PATH, name=name)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)
@@ -126,9 +127,9 @@ class GPQA_COT(GPQA):
     )
     ANS_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, dataloader: Dataloader, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for GPQA_COT"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot=num_fewshot, dataloader=dataloader)
         self.stop_sequences: list[str] = ["Question:"]
         self.keys = get_n_letters(4)
         self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}

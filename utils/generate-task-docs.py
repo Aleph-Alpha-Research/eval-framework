@@ -7,6 +7,7 @@ import tqdm
 
 from eval_framework.task_loader import load_extra_tasks
 from eval_framework.task_names import TaskName
+from eval_framework.tasks.dataloader import HFDataloader
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 
 OUTPUT_DOCS_DIRECTORY = "docs/tasks"
@@ -71,11 +72,11 @@ def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_
 
     try:
         num_fewshot = 1
-        task = task_class(num_fewshot)
+        task = task_class(num_fewshot=num_fewshot, dataloader=HFDataloader())
     except Exception:
         try:
             num_fewshot = 0
-            task = task_class(num_fewshot)
+            task = task_class(num_fewshot=num_fewshot, dataloader=HFDataloader())
         except Exception as e:
             print(f"Failed to instantiate task {t}: {e}")
             return

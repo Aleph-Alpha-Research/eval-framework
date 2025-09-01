@@ -11,6 +11,7 @@ from eval_framework.result_processors.result_processor import ResultsFileProcess
 from eval_framework.shared.types import Completion, RawCompletion
 from eval_framework.task_names import TaskName
 from eval_framework.tasks.base import Sample
+from eval_framework.tasks.dataloader import HFDataloader
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig, PerturbationType
 from template_formatting.formatter import Message, Role
@@ -433,7 +434,7 @@ def test_perturbed_response_differs(tmp_path: Path, perturbation_type: Perturbat
         save_intermediate_results=False,
     )
 
-    task = perturbed_eval_config.task_name.value()
+    task = perturbed_eval_config.task_name.value(HFDataloader())
     perturbed_response_generator = ResponseGenerator(MockLLM(), perturbed_eval_config, Mock(spec=ResultsFileProcessor))
 
     task._load_dataset(task.SUBJECTS[0])
