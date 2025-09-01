@@ -9,4 +9,4 @@ NAME = MMLU_EU20_DEDATASET_PATH = openGPT-X/mmluxSAMPLE_SPLIT = testFEWSHOT_SPLI
 
 - Link to dataset: [https://huggingface.co/datasets/openGPT-X/mmlux](https://huggingface.co/datasets/openGPT-X/mmlux)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MMLU_EU20_DE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MMLU_EU20_DE"`.

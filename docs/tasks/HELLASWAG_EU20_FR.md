@@ -9,4 +9,4 @@ NAME = HELLASWAG_EU20_FRDATASET_PATH = openGPT-X/hellaswagxSAMPLE_SPLIT = trainF
 
 - Link to dataset: [https://huggingface.co/datasets/openGPT-X/hellaswagx](https://huggingface.co/datasets/openGPT-X/hellaswagx)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "HELLASWAG_EU20_FR"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "HELLASWAG_EU20_FR"`.

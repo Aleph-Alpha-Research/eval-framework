@@ -9,4 +9,4 @@ NAME = GPQADATASET_PATH = Idavidrein/gpqaSAMPLE_SPLIT = trainFEWSHOT_SPLIT = tra
 
 - Link to dataset: [https://huggingface.co/datasets/Idavidrein/gpqa](https://huggingface.co/datasets/Idavidrein/gpqa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "GPQA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "GPQA"`.

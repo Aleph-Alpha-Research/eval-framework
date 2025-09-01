@@ -9,4 +9,4 @@ NAME = FLORES200DATASET_PATH = facebook/floresSAMPLE_SPLIT = devtestFEWSHOT_SPLI
 
 - Link to dataset: [https://huggingface.co/datasets/facebook/flores](https://huggingface.co/datasets/facebook/flores)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "FLORES200"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "FLORES200"`.
