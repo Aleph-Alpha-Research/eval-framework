@@ -9,4 +9,4 @@ NAME = QUALITYDATASET_PATH = emozilla/qualitySAMPLE_SPLIT = validationFEWSHOT_SP
 
 - Link to dataset: [https://huggingface.co/datasets/emozilla/quality](https://huggingface.co/datasets/emozilla/quality)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "QUALITY"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "QUALITY"`.

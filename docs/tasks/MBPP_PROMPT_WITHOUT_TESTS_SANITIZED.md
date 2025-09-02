@@ -9,4 +9,4 @@ NAME = MBPP_PROMPT_WITHOUT_TESTS_SANITIZEDDATASET_PATH = google-research-dataset
 
 - Link to dataset: [https://huggingface.co/datasets/google-research-datasets/mbpp](https://huggingface.co/datasets/google-research-datasets/mbpp)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MBPP_PROMPT_WITHOUT_TESTS_SANITIZED"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MBPP_PROMPT_WITHOUT_TESTS_SANITIZED"`.

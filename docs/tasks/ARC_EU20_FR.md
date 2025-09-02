@@ -9,4 +9,4 @@ NAME = ARC_EU20_FRDATASET_PATH = openGPT-X/arcxSAMPLE_SPLIT = testFEWSHOT_SPLIT 
 
 - Link to dataset: [https://huggingface.co/datasets/openGPT-X/arcx](https://huggingface.co/datasets/openGPT-X/arcx)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ARC_EU20_FR"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ARC_EU20_FR"`.

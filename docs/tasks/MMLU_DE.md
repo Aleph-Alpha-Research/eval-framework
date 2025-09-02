@@ -9,4 +9,4 @@ NAME = MMLU_DEDATASET_PATH = LeoLM/MMLU_deSAMPLE_SPLIT = testFEWSHOT_SPLIT = val
 
 - Link to dataset: [https://huggingface.co/datasets/LeoLM/MMLU_de](https://huggingface.co/datasets/LeoLM/MMLU_de)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MMLU_DE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "MMLU_DE"`.

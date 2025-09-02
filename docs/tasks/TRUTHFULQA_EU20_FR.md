@@ -9,4 +9,4 @@ NAME = TRUTHFULQA_EU20_FRDATASET_PATH = openGPT-X/truthfulqaxSAMPLE_SPLIT = vali
 
 - Link to dataset: [https://huggingface.co/datasets/openGPT-X/truthfulqax](https://huggingface.co/datasets/openGPT-X/truthfulqax)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "TRUTHFULQA_EU20_FR"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "TRUTHFULQA_EU20_FR"`.

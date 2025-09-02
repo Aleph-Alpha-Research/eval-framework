@@ -9,4 +9,4 @@ NAME = COPADATASET_PATH = aps/super_glueSAMPLE_SPLIT = validationFEWSHOT_SPLIT =
 
 - Link to dataset: [https://huggingface.co/datasets/aps/super_glue](https://huggingface.co/datasets/aps/super_glue)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "COPA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "COPA"`.

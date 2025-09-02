@@ -9,4 +9,4 @@ NAME = ARC_DEDATASET_PATH = LeoLM/ArcChallenge_deSAMPLE_SPLIT = testFEWSHOT_SPLI
 
 - Link to dataset: [https://huggingface.co/datasets/LeoLM/ArcChallenge_de](https://huggingface.co/datasets/LeoLM/ArcChallenge_de)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ARC_DE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ARC_DE"`.

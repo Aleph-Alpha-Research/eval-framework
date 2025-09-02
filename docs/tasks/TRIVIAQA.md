@@ -9,4 +9,4 @@ NAME = TRIVIAQADATASET_PATH = mandarjoshi/trivia_qaSAMPLE_SPLIT = validationFEWS
 
 - Link to dataset: [https://huggingface.co/datasets/mandarjoshi/trivia_qa](https://huggingface.co/datasets/mandarjoshi/trivia_qa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "TRIVIAQA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "TRIVIAQA"`.

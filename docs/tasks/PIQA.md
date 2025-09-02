@@ -9,4 +9,4 @@ NAME = PIQADATASET_PATH = ybisk/piqaSAMPLE_SPLIT = validationFEWSHOT_SPLIT = tes
 
 - Link to dataset: [https://huggingface.co/datasets/ybisk/piqa](https://huggingface.co/datasets/ybisk/piqa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "PIQA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "PIQA"`.

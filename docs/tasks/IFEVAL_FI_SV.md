@@ -9,4 +9,4 @@ NAME = IFEVAL_FI_SVDATASET_PATH = LumiOpen/ifeval_mtSAMPLE_SPLIT = trainFEWSHOT_
 
 - Link to dataset: [https://huggingface.co/datasets/LumiOpen/ifeval_mt](https://huggingface.co/datasets/LumiOpen/ifeval_mt)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "IFEVAL_FI_SV"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "IFEVAL_FI_SV"`.

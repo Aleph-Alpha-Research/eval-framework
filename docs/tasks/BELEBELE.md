@@ -9,4 +9,4 @@ NAME = BELEBELEDATASET_PATH = facebook/belebeleSAMPLE_SPLIT = testFEWSHOT_SPLIT 
 
 - Link to dataset: [https://huggingface.co/datasets/facebook/belebele](https://huggingface.co/datasets/facebook/belebele)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `poetry run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "BELEBELE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "BELEBELE"`.
