@@ -2,7 +2,6 @@ import importlib.util
 import inspect
 import logging
 import os
-from collections.abc import Iterator
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Sequence
@@ -13,21 +12,23 @@ from eval_framework.tasks.registry import is_registered, register_task
 logger = logging.getLogger(__name__)
 
 
-def iter_python_files(*module_paths: str | os.PathLike) -> Iterator[Path]:
-    """Recursively walk through all paths and yield Python files."""
+def find_all_python_files(*module_paths: str | os.PathLike) -> set[Path]:
+    """Recursively walk through all paths and return all Python files."""
+    all_files = set()
     for path in module_paths:
         path = Path(path).resolve()
 
         if not path.exists():
             raise FileNotFoundError(f"[User Task Loader] Path does not exist: {path}")
         if path.is_dir():
-            yield from path.glob("**/*.py")
+            all_files.update(path.glob("**/*.py"))
         elif path.is_file():
             if path.suffix != ".py":
                 raise ValueError(f"The provided path {path} is not a Python file.")
-            yield path
+            all_files.add(path)
         else:
             raise ValueError(f"Path is not a .py file or directory: {path}")
+    return all_files
 
 
 def import_file(f: str | os.PathLike, /) -> Any:
@@ -51,7 +52,7 @@ def load_extra_tasks(module_paths: Sequence[str | os.PathLike]) -> None:
     in the TaskName enum for use by name.
     Provides clear error messages for missing/invalid files or import errors.
     """
-    for file_path in iter_python_files(*module_paths):
+    for file_path in find_all_python_files(*module_paths):
         user_module = import_file(file_path)
 
         for name, obj in inspect.getmembers(user_module):
