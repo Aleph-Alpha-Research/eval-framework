@@ -15,6 +15,7 @@
 
 - 2025-08-27: fix loading of extra task modules (skip non-evaluation BaseTasks with no NAME attribute), add test that no task with same names get registered
 - 2025-08-27: fix ZERO_SCROLLS_QMSUM missing from task_names.py
+- 2025-08-29: fix BLEU/CHRF/TER min/max scoring when all completions are empty
 
 ## [0.1.0] - 2025-08-18
 
