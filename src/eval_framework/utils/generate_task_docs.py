@@ -114,7 +114,7 @@ def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_
             f.write(
                 f"More detailed documentation, with prompt examples and ground truth completions, can be generated "
                 f"with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples "
-                f'"--only-tasks {task_name}"`.\n'
+                f'--only-tasks "{task_name}"`.\n'
             )
 
         else:
