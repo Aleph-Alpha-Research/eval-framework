@@ -12,7 +12,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -27,7 +26,6 @@ env:
   UV_LOCKED: 1
 
 jobs:
-
   lint:
     runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
     steps:
@@ -47,7 +45,6 @@ jobs:
 
   hf-datasets-cache:
     runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
-    container: derskythe/github-runner-base:ubuntu-noble  # has the right python, sudo and curl:)
     steps:
       - uses: actions/checkout@v4
         if: github.ref == 'refs/heads/main'
@@ -71,13 +68,13 @@ jobs:
         if: github.ref == 'refs/heads/main'
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: |
-          uv run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
+        run: uv run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
 
   tag:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.set-tag.outputs.tag }}
+      image: ${{ steps.set-tag.outputs.image }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -85,15 +82,19 @@ jobs:
       id: set-tag
       run: |
         if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          echo "tag=latest" >> $GITHUB_OUTPUT
+          TAG='latest'
         else
           # head_ref is the correct branch name for PRs
           BRANCH_NAME=${{ github.head_ref || github.ref_name }}
-          echo "tag=${BRANCH_NAME::20}" >> $GITHUB_OUTPUT
+          TAG="${BRANCH_NAME::20}"
         fi
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "image=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
+
     - name: Output Docker Tag
       run: |
         echo "Docker Tag: ${{ steps.set-tag.outputs.tag }}"
+        echo "Docker image: ${{ steps.set-tag.outputs.image }}"
 
   build:
     needs: [lint, tag]
@@ -119,8 +120,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
+          tags: ${{ needs.tag.outputs.image }}
 
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
@@ -143,7 +143,6 @@ jobs:
       - name: Run tests
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-          HF_DATASET_CACHE_DIR: ${{ env.HF_DATASET_CACHE_DIR }}
         run: uv run --all-extras --group cu124 pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
@@ -167,90 +166,43 @@ jobs:
       - name: Run tests
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-          HF_DATASET_CACHE_DIR: ${{ env.HF_DATASET_CACHE_DIR }}
         run: |
           uv run --all-extras --group cu124 python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
           uv run --all-extras --group cu124 pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
-  test-gpu:
+  test-docker-gpu:
     runs-on: EvalFrameworkGPURunner
     needs: [tag, build, test-cpu, test-cpu-slow]
-    if: ${{ always()
-          && needs.test-cpu.result == 'success'
-          && needs.test-cpu-slow.result == 'success'
-          && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    container:
+      image: "${{ needs.tag.outputs.image }}"
+      credentials:
+        username: token
+        password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
+      options: --gpus all
+    defaults:
+      run:
+        working-directory: /eval_framework
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
           key: hf-datasets-
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: token
-          password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
+      - name: Test GPU
+        timeout-minutes: 20
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
 
-      - name: Pull container image
-        run: |
-          docker pull "${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}"
-
-      - name: Run GPU tests inside container with GPU access
-        run: |
-          timeout 20m docker run --rm --gpus all \
-            -v ${{ github.workspace }}:/eval_framework \
-            -w /eval_framework \
-            -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
-            -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }} \
-            bash -c 'uv run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
-
-  test-gpu-vllm:
-    runs-on: EvalFrameworkGPURunner
-    needs: [tag, build, test-cpu, test-cpu-slow, test-gpu]
-    if: ${{ always()
-          && needs.test-cpu.result == 'success'
-          && needs.test-cpu-slow.result == 'success'
-          && (needs.build.result == 'success' || needs.build.result == 'skipped')
-          && (needs.test-gpu.result == 'success' || needs.test-gpu.result == 'skipped') }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: "token"
-          password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
-
-      - name: Pull container image
-        run: |
-          docker pull "${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}"
-
-      - name: Run GPU tests inside container with GPU access
-        run: |
-          timeout 20m docker run --rm --gpus all \
-            -v ${{ github.workspace }}:/eval_framework \
-            -w /eval_framework \
-            -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
-            -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
-            -e VLLM_LOGGING_LEVEL=DEBUG \
-            -e VLLM_WORKER_MULTIPROC_METHOD=spawn \
-            -e VLLM_USE_MODELSCOPE=False \
-            -e VLLM_NCCL_SO_PATH="" \
-            -e VLLM_USE_TRITON_FLASH_ATTN=0 \
-            -e VLLM_DISABLE_CUSTOM_ALL_REDUCE=1 \
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }} \
-            bash -c 'uv run pytest --log-cli-level=INFO -v -m "vllm"'
+      - name: Test VLLM
+        timeout-minutes: 20
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+          VLLM_LOGGING_LEVEL: DEBUG
+          VLLM_WORKER_MULTIPROC_METHOD: spawn
+          VLLM_USE_MODELSCOPE: False
+          VLLM_NCCL_SO_PATH: ""
+          VLLM_USE_TRITON_FLASH_ATTN: 0
+          VLLM_DISABLE_CUSTOM_ALL_REDUCE: 1
+        run: pytest --log-cli-level=INFO -v -m "vllm"
