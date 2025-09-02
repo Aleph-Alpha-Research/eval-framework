@@ -128,7 +128,7 @@ def test_user_task_registration_with_repeated_names(tmp_path: Path) -> None:
         load_extra_tasks([task_file])
 
 
-def test_find_all_python_files(tmp_path):
+def test_find_all_python_files(tmp_path: Path) -> None:
     subdir = tmp_path / "dir1" / "dir2"
     subdir.mkdir(parents=True)
 
@@ -141,6 +141,7 @@ def test_find_all_python_files(tmp_path):
     assert find_all_python_files(file1) == {file1}
     assert find_all_python_files(subdir) == {file2}
     assert find_all_python_files(tmp_path) == {file1, file2}
+    # Overlapping paths (duplicates)
     assert find_all_python_files(tmp_path, subdir) == {file1, file2}
-    assert find_all_python_files(tmp_path, subdir) == {file1, file2}
+    # File / directory mixture
     assert find_all_python_files(file1, subdir) == {file1, file2}

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def find_all_python_files(*module_paths: str | os.PathLike) -> set[Path]:
     """Recursively walk through all paths and return all Python files."""
-    all_files = set()
+    all_files: set[Path] = set()
     for path in module_paths:
         path = Path(path).resolve()
 
