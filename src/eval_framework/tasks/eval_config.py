@@ -14,7 +14,7 @@ from eval_framework.tasks.registry import get_task, validate_task_name
 
 
 class EvalConfig(BaseConfig):
-    output_dir: Path = Field(ROOT_DIR)
+    output_dir: Path = Field(default=ROOT_DIR)
     wandb_project: str | None = None
     wandb_entity: str | None = None
     wandb_run_id: str | None = None
@@ -27,11 +27,11 @@ class EvalConfig(BaseConfig):
     task_name: Annotated[str, AfterValidator(validate_task_name)]
     task_subjects: list[str] | None = None
     hf_revision: str | None = None
-    llm_class: type[BaseLLM] = Field()
+    llm_class: type[BaseLLM]
     llm_args: dict[str, Any] = Field(default_factory=dict)
     llm_judge_class: type[BaseLLM] | None = None
     judge_model_args: dict[str, Any] = Field(default_factory=dict)
-    batch_size: int = Field(1, ge=1)
+    batch_size: int = Field(default=1, ge=1)
     description: str | None = None
     save_intermediate_results: bool = True
     save_logs: bool = True
