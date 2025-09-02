@@ -1,6 +1,6 @@
 # Unlike scaling, a slim cuda container (without pre-packaged pytorch, etc.) is sufficient and gives us flexibility
 # But note: CUDA version matches the one in scaling and dev-nodes for good compatibility
-FROM nvidia/cuda:12.2.2-devel-ubuntu22.04
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
 
 ENV LC_ALL="en_US.UTF-8"
 ENV LANG="en_US.UTF-8"
@@ -16,9 +16,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     apt-get update && \
     apt-get install -y --no-install-recommends \
       software-properties-common \
+      ca-certificates \
       curl && \
-    # Add Python PPA
-    add-apt-repository ppa:deadsnakes/ppa && \
     # docker-cli for ability to login in startup-hook.sh (used for perturbations)
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
@@ -29,13 +28,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     # Installation
     apt-get update && \
     apt-get install -y --no-install-recommends \
-      python3.12 \
-      python3.12-venv \
-      python3.12-dev \
-      python3-pip \
       openssh-client \
       htop \
-      ca-certificates \
       ibverbs-providers \
       libibverbs1  \
       librdmacm1 \
