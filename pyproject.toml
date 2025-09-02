@@ -40,7 +40,6 @@ dependencies = [
   "aenum>=3.1.16,<4",
   "python-iso639>=2025.2.18",
   "typing-extensions>=4.14,<5",
-  "unbabel-comet>=2.2.6,<3",
   "wandb>=0.21.1",
 ]
 
@@ -53,6 +52,9 @@ api = ["aleph-alpha-client>=10,<11"]
 openai = [
   "openai>=1.62,<2",
   "tiktoken>=0.9,<0.10"
+]
+comet = [
+  "unbabel-comet>=2.2.6,<3",
 ]
 transformers = ["transformers>=4.45.2,<5", "torch>=2.5,<3"]
 accelerate = ["accelerate"]
