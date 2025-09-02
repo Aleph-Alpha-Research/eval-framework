@@ -1,6 +1,6 @@
 import json
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import Completion
@@ -9,10 +9,10 @@ SEPARATOR_MAP = {"comma": ",", "semicolon": ";", "space": " ", "tab": "\t"}
 
 
 class CSVFormatEvaluation(BaseModel):
-    implicit: bool = Field(default=False)
-    has_csv: bool = Field(default=False)
-    is_separator_respected: bool = Field(default=False)
-    is_column_count_respected: bool = Field(default=False)
+    implicit: bool = False
+    has_csv: bool = False
+    is_separator_respected: bool = False
+    is_column_count_respected: bool = False
 
 
 class CSVFormat(BaseMetric[Completion]):

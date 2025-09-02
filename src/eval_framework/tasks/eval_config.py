@@ -1,7 +1,7 @@
 import ast
 import json
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
 from pydantic import Field, field_serializer, field_validator, model_validator
 
@@ -15,27 +15,27 @@ from eval_framework.tasks.perturbation import PerturbationConfig
 
 
 class EvalConfig(BaseConfig):
-    output_dir: Path = Field(ROOT_DIR)
-    wandb_project: str | None = Field(None)
-    wandb_entity: str | None = Field(None)
-    wandb_run_id: str | None = Field(None)
-    hf_upload_dir: str | None = Field(None)
-    hf_upload_repo: str | None = Field(None)
-    num_fewshot: int = Field(0, ge=0)
-    num_samples: int | None = Field(10, ge=1)  # Allows None or int
-    max_tokens: int | None = Field(None)
-    perturbation_config: PerturbationConfig | None = Field(None)
-    task_name: TaskName = Field()
-    task_subjects: list[str] | None = Field(None)
-    hf_revision: str | None = Field(None)
-    llm_class: type[BaseLLM] = Field()
+    output_dir: Path = ROOT_DIR
+    wandb_project: str | None = None
+    wandb_entity: str | None = None
+    wandb_run_id: str | None = None
+    hf_upload_dir: str | None = None
+    hf_upload_repo: str | None = None
+    num_fewshot: Annotated[int, Field(ge=0)] = 0
+    num_samples: Annotated[int | None, Field(ge=1)] = 10  # Allows None or int
+    max_tokens: int | None = None
+    perturbation_config: PerturbationConfig | None = None
+    task_name: TaskName
+    task_subjects: list[str] | None = None
+    hf_revision: str | None = None
+    llm_class: type[BaseLLM]
     llm_args: dict[str, Any] = Field(default_factory=dict)
-    llm_judge_class: type[BaseLLM] | None = Field(None)
+    llm_judge_class: type[BaseLLM] | None = None
     judge_model_args: dict[str, Any] = Field(default_factory=dict)
-    batch_size: int = Field(1, ge=1)
-    description: str | None = Field(None)
-    save_intermediate_results: bool = Field(True)
-    save_logs: bool = Field(True)
+    batch_size: Annotated[int, Field(ge=1)] = 1
+    description: str | None = None
+    save_intermediate_results: bool = True
+    save_logs: bool = True
 
     @field_serializer("output_dir")
     def serialize_output_dir(self, value: Path) -> str:
