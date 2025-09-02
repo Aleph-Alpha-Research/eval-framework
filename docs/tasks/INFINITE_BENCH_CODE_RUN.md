@@ -1,7 +1,15 @@
 # INFINITE_BENCH_CODE_RUN
 
 ````
-NAME = INFINITE_BENCH_CODE_RUNDATASET_PATH = xinrongzhang2022/InfiniteBenchSAMPLE_SPLIT = code_runFEWSHOT_SPLIT = code_runRESPONSE_TYPE = COMPLETIONMETRICS = [AccuracyCompletion]SUBJECTS = ['default']LANGUAGE = <Language.ENG: 'English'>````
+NAME = INFINITE_BENCH_CODE_RUN
+DATASET_PATH = xinrongzhang2022/InfiniteBench
+SAMPLE_SPLIT = code_run
+FEWSHOT_SPLIT = code_run
+RESPONSE_TYPE = COMPLETION
+METRICS = [AccuracyCompletion]
+SUBJECTS = ['default']
+LANGUAGE = <Language.ENG: 'English'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.infinitebench](eval_framework.tasks.benchmarks.infinitebench)
 
@@ -9,4 +17,4 @@ NAME = INFINITE_BENCH_CODE_RUNDATASET_PATH = xinrongzhang2022/InfiniteBenchSAMPL
 
 - Link to dataset: [https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench](https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "INFINITE_BENCH_CODE_RUN"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "INFINITE_BENCH_CODE_RUN"`.

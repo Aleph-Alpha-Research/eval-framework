@@ -1,7 +1,15 @@
 # HUMAN_EVAL_INSTRUCT
 
 ````
-NAME = HUMAN_EVAL_INSTRUCTDATASET_PATH = openai/openai_humanevalSAMPLE_SPLIT = testFEWSHOT_SPLIT = testRESPONSE_TYPE = COMPLETIONMETRICS = [CodeCompletionAssertion]SUBJECTS = ['no_subject']LANGUAGE = <Language.ENG: 'English'>````
+NAME = HUMAN_EVAL_INSTRUCT
+DATASET_PATH = openai/openai_humaneval
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = test
+RESPONSE_TYPE = COMPLETION
+METRICS = [CodeCompletionAssertion]
+SUBJECTS = ['no_subject']
+LANGUAGE = <Language.ENG: 'English'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.humaneval](eval_framework.tasks.benchmarks.humaneval)
 
@@ -9,4 +17,4 @@ NAME = HUMAN_EVAL_INSTRUCTDATASET_PATH = openai/openai_humanevalSAMPLE_SPLIT = t
 
 - Link to dataset: [https://huggingface.co/datasets/openai/openai_humaneval](https://huggingface.co/datasets/openai/openai_humaneval)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "HUMAN_EVAL_INSTRUCT"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "HUMAN_EVAL_INSTRUCT"`.

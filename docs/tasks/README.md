@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all tasks available in `eval-framework`.
 
-The documentation can be generated or updated with `uv run python utils/generate-task-docs.py`.
+The documentation can be generated or updated with `uv run python src/eval_framework/utils/generate_task_docs.py`.
 
 NOTE: This is an automatically generated file. Any manual modifications will not be preserved whenthe file is next updated.
 
@@ -96,6 +96,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [ZERO_SCROLLS_MUSIQUE](ZERO_SCROLLS_MUSIQUE.md)
 - [ZERO_SCROLLS_NARRATIVEQA](ZERO_SCROLLS_NARRATIVEQA.md)
 - [ZERO_SCROLLS_QASPER](ZERO_SCROLLS_QASPER.md)
+- [ZERO_SCROLLS_QMSUM](ZERO_SCROLLS_QMSUM.md)
 - [ZERO_SCROLLS_QUALITY](ZERO_SCROLLS_QUALITY.md)
 - [ZERO_SCROLLS_SPACE_DIGEST](ZERO_SCROLLS_SPACE_DIGEST.md)
 - [ZERO_SCROLLS_SQUALITY](ZERO_SCROLLS_SQUALITY.md)
