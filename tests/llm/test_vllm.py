@@ -9,12 +9,13 @@ import torch
 from vllm import SamplingParams
 from vllm.distributed.parallel_state import destroy_distributed_environment, destroy_model_parallel
 
+from eval_framework.llm.mistral import MistralAdapter, MistralVLLM
 from eval_framework.llm.models import (
     Qwen3_0_6B,
     Qwen3_0_6B_VLLM,
     Qwen3_0_6B_VLLM_No_Thinking,
 )
-from eval_framework.llm.vllm_models import MistralAdapter, MistralVLLM, VLLMModel, VLLMTokenizer
+from eval_framework.llm.vllm_models import VLLMModel, VLLMTokenizer
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import ConcatFormatter, Message, Role

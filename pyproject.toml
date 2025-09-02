@@ -68,6 +68,7 @@ optional = [
 mistral = [
   "mistral-common>=1.7,<2",
   "huggingface-hub>=0.33.2,<0.34",
+  "eval_framework[vllm]",
 ]
 all = [
   "eval_framework[determined,api,openai,transformers,accelerate,vllm,optional,mistral]"

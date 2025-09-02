@@ -12,9 +12,9 @@ from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.hf_processor import HFProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor, generate_output_dir
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.utils.logging_config import get_logger, setup_logging
+from eval_framework.utils import setup_logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def main(

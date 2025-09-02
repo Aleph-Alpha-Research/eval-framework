@@ -27,7 +27,7 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors, redis_cache
-from template_formatting.formatter import BaseFormatter, Message
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Llama3Formatter, Message
 
 load_dotenv()
 
@@ -319,3 +319,58 @@ class AlephAlphaAPIModel(BaseLLM):
             )
 
         return results
+
+
+class Llama31_8B_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-8b"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class Pharia1_7B_Control_API(AlephAlphaAPIModel):
+    LLM_NAME = "pharia-1-llm-7b-control"
+    DEFAULT_FORMATTER = Llama3Formatter()
+
+
+class Llama31_8B_Instruct_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-8b-instruct"
+    DEFAULT_FORMATTER = Llama3Formatter()
+
+
+class Llama31_70B_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-70b"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class Llama31_70B_Instruct_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-70b-instruct"
+    DEFAULT_FORMATTER = Llama3Formatter()
+
+
+class Llama33_70B_Instruct_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.3-70b-instruct"
+    DEFAULT_FORMATTER = Llama3Formatter()
+
+
+class Llama31_405B_Instruct_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-405b-instruct-fp8"
+    DEFAULT_FORMATTER = Llama3Formatter()
+
+
+class Llama31_8B_Tulu_3_8B_SFT(AlephAlphaAPIModel):
+    LLM_NAME = "tulu-3-8b-sft"
+    DEFAULT_FORMATTER = HFFormatter("allenai/Llama-3.1-Tulu-3-8B-SFT")
+
+
+class Llama31_8B_Tulu_3_8B(AlephAlphaAPIModel):
+    LLM_NAME = "tulu-3-8b"
+    DEFAULT_FORMATTER = HFFormatter("allenai/Llama-3.1-Tulu-3-8B")
+
+
+class Viking_7b_API(AlephAlphaAPIModel):
+    LLM_NAME = "viking-7b"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class Poro_34bChat_API(AlephAlphaAPIModel):
+    LLM_NAME = "poro-34b-chat"
+    DEFAULT_FORMATTER = HFFormatter("LumiOpen/Poro-34B-chat")

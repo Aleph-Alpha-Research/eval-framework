@@ -15,7 +15,6 @@ from eval_framework.shared.types import Error, PromptTooLongException, RawComple
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors, redis_cache
 from template_formatting.formatter import BaseFormatter, HFFormatter, Message
-from template_formatting.mistral_formatter import MistralSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -66,22 +65,6 @@ class HFTokenizerProtocol(Protocol):
     def chat_template(self) -> str | None:
         """Chat template for the tokenizer."""
         ...
-
-
-class MistralAdapter(VLLMTokenizerAPI[list[Message]]):
-    def __init__(self, target_mdl: str) -> None:
-        self.serializer = MistralSerializer(llm_target=target_mdl)
-        self.tokenizer = self.serializer.get_tokenizer()
-
-    def encode_formatted_struct(self, struct: list[Message]) -> TokenizedContainer:
-        mistral_msg_lst = self.serializer.convert_from_aa(msg_lst=struct)
-        mistral_request = self.serializer.build_mistral_request(mistral_msg_lst=mistral_msg_lst)
-        mistral_tokenized_obj = self.tokenizer.encode_instruct(mistral_request)
-        return TokenizedContainer(tokens=mistral_tokenized_obj.tokens, text=mistral_tokenized_obj.text)
-
-    def encode_plain_text(self, text: str) -> TokenizedContainer:
-        choice_tokens = self.tokenizer.tokenizer.encode(text, False, False)
-        return TokenizedContainer(tokens=choice_tokens, text=text)
 
 
 class VLLMTokenizer(VLLMTokenizerAPI[str]):
@@ -182,10 +165,8 @@ class VLLMModel(BaseLLM):
             self._tokenizer = VLLMTokenizer(target_mdl=self.LLM_NAME)
         return self._tokenizer
 
-    def _get_formatter_output_mode(self) -> Literal["string", "list"]:
-        """Determine the correct output mode for the formatter based on tokenizer type."""
-        if isinstance(self.tokenizer, MistralAdapter):
-            return "list"
+    @property
+    def formatter_output_mode(self) -> Literal["string", "list"]:
         return "string"
 
     @property
@@ -217,7 +198,7 @@ class VLLMModel(BaseLLM):
         sampling_params = self._resolve_sampling_params(self.sampling_params, max_tokens, stop_sequences, temperature)
 
         for i, single_messages in enumerate(messages):
-            output_mode = self._get_formatter_output_mode()
+            output_mode = self.formatter_output_mode
             prompt: str | list[Message] = self._formatter.format(single_messages, output_mode=output_mode)
             prompt_obj: TokenizedContainer = self.tokenizer.encode_formatted_struct(prompt)
             prompt_token_count = len(prompt_obj.tokens)
@@ -308,7 +289,7 @@ class VLLMModel(BaseLLM):
         sample_choice_indices = []  # Maps batch index back to (sample_index, choice)
 
         for sample_idx, sample in enumerate(samples):
-            output_mode = self._get_formatter_output_mode()
+            output_mode = self.formatter_output_mode
             prompt: str | list[Message] = self._formatter.format(sample.messages, output_mode=output_mode)
             prompt_obj: TokenizedContainer = self.tokenizer.encode_formatted_struct(prompt)
 
@@ -438,35 +419,71 @@ class VLLMModel(BaseLLM):
         return self.max_seq_length
 
 
-class MistralVLLM(VLLMModel):
-    def __init__(
-        self,
-        formatter: BaseFormatter | None = None,
-        max_model_len: int | None = None,
-        tensor_parallel_size: int = 1,
-        gpu_memory_utilization: float = 0.9,
-        batch_size: int = 1,
-        checkpoint_path: str | None = None,
-        checkpoint_name: str | None = None,
-        sampling_params: SamplingParams | dict[str, Any] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        model_args = {"tokenizer_mode": "mistral", "config_format": "mistral", "load_format": "mistral"}
-        super().__init__(
-            formatter,
-            max_model_len,
-            tensor_parallel_size,
-            gpu_memory_utilization,
-            batch_size,
-            checkpoint_path,
-            checkpoint_name,
-            sampling_params,
-            **{**model_args, **kwargs},
-        )
+class Qwen3_0_6B_VLLM(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-0.6B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
 
-    @override
-    @property
-    def tokenizer(self) -> VLLMTokenizerAPI:
-        if self._tokenizer is None:
-            self._tokenizer = MistralAdapter(target_mdl=self.LLM_NAME)
-        return self._tokenizer
+
+class Qwen3_0_6B_VLLM_No_Thinking(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-0.6B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_1_7B_VLLM_No_Thinking(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-1.7B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_8B_VLLM_No_Thinking(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-8B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_4B_VLLM_No_Thinking(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-4B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_14B_VLLM_No_Thinking(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-14B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_32B_VLLM_No_Thinking(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-32B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_30B_A3B_VLLM_No_Thinking(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-30B-A3B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_235B_A22B_VLLM_No_Thinking(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-235B-A22B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_4B_VLLM_Reasoning(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-4B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+
+
+class Qwen3_8B_VLLM_Reasoning(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-8B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+
+
+class Qwen3_14B_VLLM_Reasoning(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-14B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+
+
+class Qwen3_32B_VLLM_Reasoning(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-32B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+
+
+class Qwen3_30B_A3B_VLLM_Reasoning(VLLMModel):
+    LLM_NAME = "Qwen/Qwen3-30B-A3B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})

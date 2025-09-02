@@ -1,3 +1,4 @@
+import logging
 import math
 
 import numpy as np
@@ -18,9 +19,8 @@ from eval_framework.result_processors.base import Result, ResultProcessor
 from eval_framework.shared.types import Completion, Loglikelihood
 from eval_framework.tasks.base import ResponseType
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.utils.logging_config import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class EvaluationGenerator:

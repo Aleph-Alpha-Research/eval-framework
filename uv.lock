@@ -891,6 +891,11 @@ determined = [
 mistral = [
     { name = "huggingface-hub" },
     { name = "mistral-common" },
+    { name = "torch", version = "2.6.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'group-14-eval-framework-cpu') or (extra == 'group-14-eval-framework-cpu' and extra == 'group-14-eval-framework-cu124')" },
+    { name = "torch", version = "2.6.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'group-14-eval-framework-cpu' and extra == 'group-14-eval-framework-cu124') or (extra != 'group-14-eval-framework-cpu' and extra != 'group-14-eval-framework-cu124')" },
+    { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'group-14-eval-framework-cpu') or (extra == 'group-14-eval-framework-cpu' and extra == 'group-14-eval-framework-cu124')" },
+    { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'group-14-eval-framework-cu124'" },
+    { name = "vllm" },
 ]
 openai = [
     { name = "openai" },
@@ -947,6 +952,7 @@ requires-dist = [
     { name = "datasets", specifier = ">=2.19.1,<4" },
     { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38,<0.39" },
     { name = "eval-framework", extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "optional", "mistral"], marker = "extra == 'all'" },
+    { name = "eval-framework", extras = ["vllm"], marker = "extra == 'mistral'" },
     { name = "google-crc32c", specifier = ">=1.5.0,<2" },
     { name = "huggingface-hub", marker = "extra == 'mistral'", specifier = ">=0.33.2,<0.34" },
     { name = "jinja2", marker = "extra == 'optional'", specifier = ">=3.1.6,<4" },

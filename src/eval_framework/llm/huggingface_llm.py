@@ -10,7 +10,7 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors, redis_cache
-from template_formatting.formatter import BaseFormatter, HFFormatter, Message
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Llama3Formatter, Message
 
 logger = logging.getLogger(__name__)
 
@@ -279,3 +279,121 @@ class HFLLM(BaseLLM):
 
 class TruncatedLLM(HFLLM):
     SEQ_LENGTH = 2048
+
+
+class Bert(HFLLM):
+    LLM_NAME = "google-bert/bert-base-uncased"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class Pythia410m(HFLLM):
+    LLM_NAME = "EleutherAI/pythia-410m"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class SmolLM135M(HFLLM):
+    LLM_NAME = "HuggingFaceTB/SmolLM-135M"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class Smollm135MInstruct(HFLLM):
+    LLM_NAME = "HuggingFaceTB/SmolLM-135M-Instruct"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class SmolLM_1_7B_Instruct(HFLLM):
+    LLM_NAME = "HuggingFaceTB/SmolLM-1.7B-Instruct"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class Qwen3_0_6B(HFLLM):
+    LLM_NAME = "Qwen/Qwen3-0.6B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+
+
+class Qwen3_0_6B_No_Thinking(HFLLM):
+    LLM_NAME = "Qwen/Qwen3-0.6B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_1_7B_No_Thinking(HFLLM):
+    LLM_NAME = "Qwen/Qwen3-1.7B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_8B_No_Thinking(HFLLM):
+    LLM_NAME = "Qwen/Qwen3-8B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_4B_No_Thinking(HFLLM):
+    LLM_NAME = "Qwen/Qwen3-4B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_14B_No_Thinking(HFLLM):
+    LLM_NAME = "Qwen/Qwen3-14B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_32B_No_Thinking(HFLLM):
+    LLM_NAME = "Qwen/Qwen3-32B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Qwen3_30B_A3B_No_Thinking(HFLLM):
+    LLM_NAME = "Qwen/Qwen3-30B-A3B"
+    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+
+
+class Phi3Mini4kInstruct(HFLLM):
+    LLM_NAME = "microsoft/Phi-3-mini-4k-instruct"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class Qwen1_5B(HFLLM):
+    LLM_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class Llama31_8B_HF(HFLLM):
+    LLM_NAME = "meta-llama/Meta-Llama-3.1-8B"
+    DEFAULT_FORMATTER = ConcatFormatter()
+
+
+class HFLLM_from_name(HFLLM):
+    """
+    A generic class to create HFLLM instances from a given model name.
+    """
+
+    def __init__(self, model_name: str | None = None, formatter: str = "Llama3Formatter", **kwargs: Any) -> None:
+        if model_name is None:
+            raise ValueError("model_name is required")
+
+        self.LLM_NAME = model_name
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.tokenizer = AutoTokenizer.from_pretrained(self.LLM_NAME)
+        self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
+
+        # Lazy formatter initialization - only create the one we need
+        selected_formatter = self._get_formatter(formatter, model_name)
+
+        print(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
+        print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+        self._set_formatter(selected_formatter)
+
+    def _get_formatter(self, formatter: str, model_name: str) -> Any:
+        """Get formatter instance based on formatter name."""
+        if formatter == "Llama3Formatter":
+            return Llama3Formatter()
+        elif formatter == "MistralFormatter":
+            from eval_framework.llm.mistral import MagistralFormatter
+
+            return MagistralFormatter(model_name)
+        elif formatter == "ConcatFormatter":
+            return ConcatFormatter()
+        elif formatter == "HFFormatter":
+            return HFFormatter(model_name)
+        else:
+            supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
+            raise ValueError(f"Unsupported formatter: {formatter}. Supported formatters: {supported}")

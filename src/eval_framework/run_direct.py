@@ -1,10 +1,10 @@
 import datetime
+import logging
 from pathlib import Path
 
 from eval_framework.run import run_with_kwargs
-from eval_framework.utils.logging_config import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     logger.info(Path("models.py"))
