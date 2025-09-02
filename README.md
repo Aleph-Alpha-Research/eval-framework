@@ -93,7 +93,7 @@ There is also a pre-commit hook to help with development:
 uv run pre-commit install
 ```
 
-After installation, task documentation can be generated with `uv run python utils/generate-task-docs.py` (see [docs/installation.md(docs/installation.md)) for more details.
+After installation, task documentation can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py` (see [docs/installation.md(docs/installation.md)) for more details.
 
 ## Getting Started
 

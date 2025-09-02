@@ -85,22 +85,22 @@ def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_
         http_path = f"https://huggingface.co/datasets/{task.DATASET_PATH}" if task.DATASET_PATH else None
 
         f.write("````\n")  # fence with 4 thicks because some prompts have code blocks with 3 thicks
-        f.write(f"NAME = {task_name}\n".strip())
+        f.write(f"NAME = {task_name}".strip() + "\n")
         if hasattr(task, "DATASET_PATH"):
-            f.write(f"DATASET_PATH = {task.DATASET_PATH}\n".strip())
+            f.write(f"DATASET_PATH = {task.DATASET_PATH}".strip() + "\n")
         if hasattr(task, "SAMPLE_SPLIT"):
-            f.write(f"SAMPLE_SPLIT = {task.SAMPLE_SPLIT}\n".strip())
+            f.write(f"SAMPLE_SPLIT = {task.SAMPLE_SPLIT}".strip() + "\n")
         if hasattr(task, "FEWSHOT_SPLIT"):
-            f.write(f"FEWSHOT_SPLIT = {task.FEWSHOT_SPLIT}\n".strip())
+            f.write(f"FEWSHOT_SPLIT = {task.FEWSHOT_SPLIT}".strip() + "\n")
         if hasattr(task, "RESPONSE_TYPE"):
-            f.write(f"RESPONSE_TYPE = {task.RESPONSE_TYPE.name}\n".strip())
+            f.write(f"RESPONSE_TYPE = {task.RESPONSE_TYPE.name}".strip() + "\n")
         if hasattr(task, "METRICS"):
             metrics_list = [f"{m.__name__}" for m in task.METRICS]
-            f.write(f"METRICS = [{', '.join(metrics_list)}]\n".strip())
+            f.write(f"METRICS = [{', '.join(metrics_list)}]".strip() + "\n")
         if hasattr(task, "SUBJECTS"):
-            f.write(f"SUBJECTS = {repr(task.SUBJECTS)}\n".strip())
+            f.write(f"SUBJECTS = {repr(task.SUBJECTS)}".strip() + "\n")
         if hasattr(task, "LANGUAGE"):
-            f.write(f"LANGUAGE = {repr(task.LANGUAGE)}\n".strip())
+            f.write(f"LANGUAGE = {repr(task.LANGUAGE)}".strip() + "\n")
         f.write("````\n\n")
 
         f.write(f"- Module: [{task_class.__module__}]({task_class.__module__})\n\n")
@@ -113,8 +113,8 @@ def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_
         if not add_prompt_examples:
             f.write(
                 f"More detailed documentation, with prompt examples and ground truth completions, can be generated "
-                f"with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "
-                f'"{task_name}"`.\n'
+                f"with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples "
+                f'"--only-tasks {task_name}"`.\n'
             )
 
         else:
@@ -157,7 +157,8 @@ def generate_readme_list() -> None:
         f.write(
             "# Task documentation\n\n"
             "This directory contains the generated documentation for all tasks available in `eval-framework`.\n\n"
-            "The documentation can be generated or updated with `uv run python utils/generate-task-docs.py`.\n\n"
+            "The documentation can be generated or updated with "
+            "`uv run python src/eval_framework/utils/generate_task_docs.py`.\n\n"
             "NOTE: This is an automatically generated file. Any manual modifications will not be preserved when"
             "the file is next updated.\n\n"
         )
