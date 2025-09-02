@@ -2,6 +2,7 @@ import argparse
 import inspect
 import os
 import re
+from pathlib import Path
 
 import tqdm
 
@@ -9,7 +10,7 @@ from eval_framework.task_loader import load_extra_tasks
 from eval_framework.task_names import TaskName
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 
-OUTPUT_DOCS_DIRECTORY = "docs/tasks"
+DEFAULT_OUTPUT_DOCS_DIRECTORY = Path("docs/tasks")
 
 EXCLUDED_TASKS = [
     "SQUAD",  # failing loading the dataset: Feature type 'List' not found
@@ -17,7 +18,7 @@ EXCLUDED_TASKS = [
 ]
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(cli_args: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments for the script."""
 
     parser = argparse.ArgumentParser()
@@ -61,10 +62,12 @@ def parse_args() -> argparse.Namespace:
         required=False,
         help="List of task names to generate documentation for. If empty, all tasks will be processed.",
     )
-    return parser.parse_args()
+    return parser.parse_args(args=cli_args)
 
 
-def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_prompt_examples: bool) -> None:
+def generate_docs_for_task(
+    output_docs_directory: Path, task_name: str, formatters: list[BaseFormatter], add_prompt_examples: bool
+) -> None:
     """Generate documentation for a specific task."""
 
     task_class = TaskName[task_name].value
@@ -77,10 +80,10 @@ def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_
             num_fewshot = 0
             task = task_class(num_fewshot)
         except Exception as e:
-            print(f"Failed to instantiate task {t}: {e}")
+            print(f"Failed to instantiate task {task_name}: {e}")
             return
 
-    with open(f"{OUTPUT_DOCS_DIRECTORY}/{task_name}.md", "w") as f:
+    with open(f"{output_docs_directory}/{task_name}.md", "w") as f:
         f.write(f"# {task_name}\n\n")
         http_path = f"https://huggingface.co/datasets/{task.DATASET_PATH}" if task.DATASET_PATH else None
 
@@ -150,10 +153,10 @@ def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_
             f.write("````\n")
 
 
-def generate_readme_list() -> None:
+def generate_readme_list(output_docs_directory: Path) -> None:
     """Generate a README file listing all tasks based on the list of files present in the target directory."""
 
-    with open(f"{OUTPUT_DOCS_DIRECTORY}/README.md", "w") as f:
+    with open(f"{output_docs_directory}/README.md", "w") as f:
         f.write(
             "# Task documentation\n\n"
             "This directory contains the generated documentation for all tasks available in `eval-framework`.\n\n"
@@ -164,16 +167,14 @@ def generate_readme_list() -> None:
         )
 
         f.write("## List of tasks\n\n")
-        for file in os.listdir(OUTPUT_DOCS_DIRECTORY):
+        # sort files alphabetically and ignore README.md
+        for file in sorted(os.listdir(output_docs_directory)):
             if file.endswith(".md") and file != "README.md":
                 task_name = file[:-3]
                 f.write(f"- [{task_name}]({task_name}.md)\n")
 
 
-if __name__ == "__main__":
-    print("Generating task documentation...")
-    args = parse_args()
-
+def generate_all_docs(args: argparse.Namespace, output_docs_directory: Path) -> None:
     # Load extra tasks if specified
     if args.extra_task_modules:
         print(f"Loading extra tasks from: {args.extra_task_modules}")
@@ -201,18 +202,29 @@ if __name__ == "__main__":
             raise ValueError(f"Unsupported formatter: {f}")
 
     # Create the output directory if it does not exist
-    os.makedirs(OUTPUT_DOCS_DIRECTORY, exist_ok=True)
+    os.makedirs(output_docs_directory, exist_ok=True)
 
     for task_name in tqdm.tqdm(filtered_tasks, desc="Generating documentation for tasks"):
         try:
-            generate_docs_for_task(task_name, formatters=formatters, add_prompt_examples=args.add_prompt_examples)
+            generate_docs_for_task(
+                output_docs_directory=output_docs_directory,
+                task_name=task_name,
+                formatters=formatters,
+                add_prompt_examples=args.add_prompt_examples,
+            )
 
         except Exception as e:
             print("---")
             print(f"failed generating documentation for task {task_name}: {e}")
-            file_path = f"{OUTPUT_DOCS_DIRECTORY}/{task_name}.md"
+            file_path = f"{output_docs_directory}/{task_name}.md"
             if os.path.exists(file_path):
                 os.remove(file_path)
             print("---")
 
-    generate_readme_list()
+    generate_readme_list(output_docs_directory=output_docs_directory)
+
+
+if __name__ == "__main__":
+    print("Generating task documentation...")
+    args = parse_args()
+    generate_all_docs(args, output_docs_directory=DEFAULT_OUTPUT_DOCS_DIRECTORY)
