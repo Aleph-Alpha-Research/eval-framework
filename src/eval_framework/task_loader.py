@@ -46,15 +46,30 @@ def load_extra_tasks(module_paths: Sequence[str]) -> None:
 
         for name, obj in inspect.getmembers(user_module):
             if inspect.isclass(obj) and issubclass(obj, BaseTask) and obj is not BaseTask:
-                name_upper = obj.NAME.upper()
-                if hasattr(TaskName, obj.NAME) or hasattr(TaskName, name_upper):
-                    logger.info(obj.__module__)
-
-                    if "eval_framework.tasks.benchmarks" not in obj.__module__:
-                        # skip if import comes from eval_framework's built-in tasks
-                        raise ValueError(f"Duplicate user task name found (case-insensitive): {obj.NAME}")
+                # check unique name of BaseTask subclasses (when they have a NAME attribute)
+                if not hasattr(obj, "NAME"):
+                    logger.info(f"[User Task Loader] Skipping {obj.__module__} - no NAME attribute present.")
                 else:
-                    # setattr(TaskName, name_upper, obj)
-                    class_obj = getattr(user_module, name)
-                    extend_enum(TaskName, name_upper, class_obj)
-                    logger.info(f"[User Task Loader] Registered task: {name_upper}")
+                    # list the current registered task names to check for duplicates
+                    list_task_names_upper = [
+                        getattr(t.value, "NAME").upper() for t in TaskName if hasattr(t.value, "NAME")
+                    ]
+
+                    # check if task name already exists (case-insensitive)
+                    name_upper = obj.NAME.upper()
+                    if name_upper in list_task_names_upper:
+                        # two classes with the same NAME attribute
+                        logger.info(obj.__module__)
+
+                        # if it comes from eval_framework's built-in tasks then will just skip (no need to register
+                        # again; this can happen if a class is imported so that a new task can be derived from it)
+                        # but if it is one of the user defined task then raise a duplicated name error
+                        if "eval_framework.tasks.benchmarks" not in obj.__module__:
+                            # skip if import comes from eval_framework's built-in tasks
+                            raise ValueError(f"Duplicate user task name found (case-insensitive): {obj.NAME}")
+
+                    else:
+                        # if there is no duplicate name conflict then register the new task
+                        class_obj = getattr(user_module, name)
+                        extend_enum(TaskName, name_upper, class_obj)
+                        logger.info(f"[User Task Loader] Registered task: {name_upper}")
