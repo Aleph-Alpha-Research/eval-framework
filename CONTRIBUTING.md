@@ -2,8 +2,6 @@
 
 Thank you for your interest in contributing to the Eval Framework! We welcome contributions from the community and are grateful for your support.
 
-
-
 ## How to Contribute
 
 We welcome several types of contributions:
@@ -36,7 +34,11 @@ We welcome several types of contributions:
    uv sync --all-extras
    ```
 
-
+6. **Install pre-commit**:
+   ```bash
+   uv tool install pre-commit
+   uv run pre-commit install
+   ```
 
 ## Submitting Changes
 
