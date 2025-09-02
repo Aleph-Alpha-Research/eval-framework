@@ -41,6 +41,7 @@ class Language(Enum):
     POL = "Polish"
     RUS = "Russian"
     UKR = "Ukrainian"
+    HRV = "Croatian"
 
     @classmethod
     def add_members(cls, new_members: dict[str, Any]) -> type["Language"]:

@@ -64,6 +64,8 @@ def subject_to_language(subject: str) -> Language:
         return Language.NEP  # type: ignore[attr-defined]
     elif subject == "North Macedonian":
         return Language.MKD  # type: ignore[attr-defined]
+    elif subject == "Croatian":
+        return Language.HRV  # type: ignore[attr-defined]
     else:
         return Language(subject)
 
