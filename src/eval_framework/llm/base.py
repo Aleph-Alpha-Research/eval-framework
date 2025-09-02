@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Sequence
+from collections.abc import Sequence
 
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
@@ -17,11 +17,11 @@ class BaseLLM(ABC):
     @abstractmethod
     def generate_from_messages(
         self,
-        messages: List[Sequence[Message]],
+        messages: list[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
-    ) -> List[RawCompletion]:
+    ) -> list[RawCompletion]:
         """
         stop_sequences and max_tokens are injected by the task if exist. They should be overwritten or
         extended with the properties of the model. This includes but is not limited to the stop tokens
@@ -39,7 +39,7 @@ class BaseLLM(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def logprobs(self, samples: List[Sample]) -> List[RawLoglikelihood]:
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         """
         This function is expected to raise errors which are caught and reported when running the eval.
         Please also make sure to raise an error in case of sequence length issues. We expect to always
@@ -49,10 +49,10 @@ class BaseLLM(ABC):
 
     def generate(
         self,
-        samples: List[Sample],
+        samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
-    ) -> List[RawCompletion]:
-        messages: List[Sequence[Message]] = [sample.messages for sample in samples]
+    ) -> list[RawCompletion]:
+        messages: list[Sequence[Message]] = [sample.messages for sample in samples]
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)

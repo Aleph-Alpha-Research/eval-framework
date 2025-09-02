@@ -136,7 +136,12 @@ flash-attn = [{ requirement = "torch", match-runtime = true }]
 line-length = 120
 
 [tool.ruff.lint]
-select = ["I", "E", "F"]
+select = [
+    "E", # Pycodestyle Errors
+    "F", # Pyflakes
+    "UP", # Auto-upgrading of new Python features
+    "I", # Sort imports
+]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "__init__.py" = ["F401"]

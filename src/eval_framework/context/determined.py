@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Any, Type
+from typing import Any
 
 from determined import get_cluster_info
 from determined.core import Context, DummyDistributedContext
@@ -126,7 +126,7 @@ class DeterminedContext(EvalContext):
             raise ValueError(f"LLM '{self.hparams.llm_name}' not found.")
         llm_class = models[self.hparams.llm_name]
 
-        llm_judge_class: Type[BaseLLM] | None = None
+        llm_judge_class: type[BaseLLM] | None = None
         judge_model_name = self.hparams.task_args.judge_model_name or self.judge_model_name
         if self.judge_models_path is not None and judge_model_name is not None:
             judge_models = import_models(self.judge_models_path)
