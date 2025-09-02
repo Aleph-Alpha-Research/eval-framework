@@ -4,6 +4,8 @@ from datetime import UTC, datetime
 from functools import partial
 from typing import Any, Callable, List
 
+from eval_framework.tasks.registry import get_task
+
 try:
     from determined import get_cluster_info
 except ImportError:
@@ -53,7 +55,8 @@ class ResponseGenerator:
         self.num_samples = config.num_samples
         self.save_intermediate_results = config.save_intermediate_results
 
-        task_class = config.task_name.value
+        task_class = get_task(config.task_name)
+        # TODO: This globally modified the task_class, not a great idea
         task_class.SUBJECTS = self._filter_task_subjects()
         task_class.HF_REVISION = self._set_hf_revision()
 
@@ -67,18 +70,19 @@ class ResponseGenerator:
 
     def _set_hf_revision(self) -> str | None:
         """Sets a tag name, a branch name, or commit hash for the HF dataset"""
-        if self.task_name.value.HF_REVISION is None:  # Do not override an HF_REVISION hard-coded in the task
+        task_class = get_task(self.config.task_name)
+        if task_class.HF_REVISION is None:  # Do not override an HF_REVISION hard-coded in the task
             if self.config.hf_revision is None:
                 return None
-            logger.info(f"Setting HF revision to `{self.config.hf_revision}` for the task {self.task_name.name}")
+            logger.info(f"Setting HF revision to `{self.config.hf_revision}` for the task {self.task_name}")
             return self.config.hf_revision
         else:
-            logger.info(f"HF revision set to `{self.task_name.value.HF_REVISION}` for the task {self.task_name.name}")
-            return self.task_name.value.HF_REVISION
+            logger.info(f"HF revision set to `{task_class.HF_REVISION}` for the task {self.task_name}")
+            return task_class.HF_REVISION
 
     def _filter_task_subjects(self) -> list[str] | list[tuple]:
         """Restrict task subjects if specified in the config."""
-        task_class = self.config.task_name.value
+        task_class = get_task(self.config.task_name)
 
         if not self.config.task_subjects:
             return task_class.SUBJECTS
@@ -389,7 +393,7 @@ class ResponseGenerator:
         all_metrics = getattr(self.task, "METRICS", None)
         metadata = self.config.model_dump()
         metadata["llm_name"] = self.llm.name
-        metadata["task_name"] = self.task_name.value.NAME
+        metadata["task_name"] = self.task_name
         language = getattr(self.task, "LANGUAGE", None)
         metadata["language"] = map_language_to_value(language)
         metadata["metrics"] = [m.NAME for m in all_metrics] if all_metrics is not None else []

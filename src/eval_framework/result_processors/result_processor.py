@@ -125,6 +125,6 @@ def generate_output_dir(llm_name: str, config: EvalConfig) -> Path:
         dir_name += f"_{timestamp}"
 
     # Combine all components to form the full output directory path
-    output_dir = config.output_dir / llm_name / f"{version_str}_{config.task_name.value.NAME}" / dir_name
+    output_dir = config.output_dir / llm_name / f"{version_str}_{config.task_name}" / dir_name
 
     return output_dir

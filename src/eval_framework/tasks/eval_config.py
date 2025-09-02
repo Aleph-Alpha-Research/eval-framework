@@ -1,62 +1,50 @@
 import ast
 import json
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
-from pydantic import Field, field_serializer, field_validator, model_validator
+from pydantic import AfterValidator, Field, field_serializer, field_validator, model_validator
 
 from eval_framework.base_config import BaseConfig
 from eval_framework.constants import ROOT_DIR
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.llm_metrics.base import BaseLLMJudgeMetric
-from eval_framework.task_names import TaskName
-from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.perturbation import PerturbationConfig
+from eval_framework.tasks.registry import get_task, validate_task_name
 
 
 class EvalConfig(BaseConfig):
     output_dir: Path = Field(ROOT_DIR)
-    wandb_project: str | None = Field(None)
-    wandb_entity: str | None = Field(None)
-    wandb_run_id: str | None = Field(None)
-    hf_upload_dir: str | None = Field(None)
-    hf_upload_repo: str | None = Field(None)
+    wandb_project: str | None = None
+    wandb_entity: str | None = None
+    wandb_run_id: str | None = None
+    hf_upload_dir: str | None = None
+    hf_upload_repo: str | None = None
     num_fewshot: int = Field(0, ge=0)
     num_samples: int | None = Field(10, ge=1)  # Allows None or int
-    max_tokens: int | None = Field(None)
-    perturbation_config: PerturbationConfig | None = Field(None)
-    task_name: TaskName = Field()
-    task_subjects: list[str] | None = Field(None)
-    hf_revision: str | None = Field(None)
+    max_tokens: int | None = None
+    perturbation_config: PerturbationConfig | None = None
+    task_name: Annotated[str, AfterValidator(validate_task_name)]
+    task_subjects: list[str] | None = None
+    hf_revision: str | None = None
     llm_class: type[BaseLLM] = Field()
     llm_args: dict[str, Any] = Field(default_factory=dict)
-    llm_judge_class: type[BaseLLM] | None = Field(None)
+    llm_judge_class: type[BaseLLM] | None = None
     judge_model_args: dict[str, Any] = Field(default_factory=dict)
     batch_size: int = Field(1, ge=1)
-    description: str | None = Field(None)
-    save_intermediate_results: bool = Field(True)
-    save_logs: bool = Field(True)
+    description: str | None = None
+    save_intermediate_results: bool = True
+    save_logs: bool = True
 
     @field_serializer("output_dir")
     def serialize_output_dir(self, value: Path) -> str:
         return str(value)
-
-    @field_serializer("task_name")
-    def serialize_task_name(self, value: TaskName) -> type[BaseTask]:
-        return value.value
 
     @field_validator("output_dir", mode="before")
     @classmethod
     def validate_output_dir(cls, value: str | Path) -> Path:
         if isinstance(value, str):
             return Path(value)
-        return value
-
-    @field_validator("task_name", mode="before")
-    @classmethod
-    def validate_task_name(cls, value: str | TaskName) -> TaskName:
-        if isinstance(value, str):
-            return TaskName.from_name(value)
         return value
 
     @field_validator("llm_args", mode="before")
@@ -94,7 +82,8 @@ class EvalConfig(BaseConfig):
 
     @model_validator(mode="after")
     def validate_llm_judge_defined(self) -> "EvalConfig":
-        for metric_class in self.task_name.value.METRICS:
+        task = get_task(self.task_name)
+        for metric_class in task.METRICS:
             if issubclass(metric_class, BaseLLMJudgeMetric):
                 assert self.llm_judge_class is not None, "The LLM Judge must be defined for this evaluation task."
         return self
@@ -114,6 +103,5 @@ class EvalConfig(BaseConfig):
         return None
 
     def model_json_dump(self) -> str:
-        model_dump = super().model_dump()
-        model_dump["task_name"] = model_dump["task_name"].NAME
+        model_dump = self.model_dump()
         return json.dumps(model_dump, sort_keys=True)

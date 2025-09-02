@@ -6,7 +6,7 @@ from pytest import MonkeyPatch
 
 from eval_framework.llm.models import Llama31_8B_HF
 from eval_framework.result_processors.hf_processor import HFProcessor
-from eval_framework.task_names import TaskName
+from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
 
 
@@ -21,7 +21,7 @@ class MockHFAPI:
 
 
 def test_hf_processor_with_mocked_hf_api(monkeypatch: MonkeyPatch) -> None:
-    task_name = TaskName.ARC
+    task_name = ARC.NAME
     config = EvalConfig(
         output_dir=Path(__file__).parent / "eval_framework_results",
         hf_upload_dir="",
@@ -61,7 +61,7 @@ def test_hf_processor_with_mocked_hf_api(monkeypatch: MonkeyPatch) -> None:
 
 
 def test_hf_processor_with_mocked_hf_api_2(monkeypatch: MonkeyPatch) -> None:
-    task_name = TaskName.ARC
+    task_name = ARC.NAME
     config = EvalConfig(
         output_dir=Path(__file__).parent / "eval_framework_results",
         hf_upload_dir="dummy22",

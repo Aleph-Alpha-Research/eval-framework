@@ -10,7 +10,7 @@ from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.base import Result
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, Error, Loglikelihood
-from eval_framework.task_names import TaskName
+from eval_framework.tasks.benchmarks.gpqa import GPQA
 from eval_framework.tasks.eval_config import EvalConfig
 from tests.conftest import MockLLM
 
@@ -29,7 +29,7 @@ def test_evaluator_run_completions(tmp_path: Path, should_preempt_callable: Call
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=TaskName.GPQA,
+        task_name=GPQA.NAME,
         llm_class=llm.__class__,
     )
 
@@ -52,7 +52,7 @@ def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable) -
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=TaskName.GPQA,
+        task_name=GPQA.NAME,
         llm_class=llm.__class__,
     )
 
@@ -81,7 +81,7 @@ def test_evaluator_run_eval_no_completions(tmp_path: Path) -> None:
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=TaskName.GPQA,
+        task_name=GPQA.NAME,
         llm_class=llm.__class__,
     )
 
@@ -102,7 +102,7 @@ def test_evaluator_run_all(tmp_path: Path, should_preempt_callable: Callable) ->
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=TaskName.GPQA,
+        task_name=GPQA.NAME,
         llm_class=llm.__class__,
     )
 
@@ -129,7 +129,7 @@ def test_aggregate_results(tmp_path: Path) -> None:
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=TaskName.GPQA,
+        task_name=GPQA.NAME,
         llm_class=llm.__class__,
     )
     evaluator = EvaluationGenerator(config, ResultsFileProcessor(tmp_path))

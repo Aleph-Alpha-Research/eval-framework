@@ -7,7 +7,7 @@ from eval_framework.llm.models import Llama31_8B_HF
 from eval_framework.result_processors.base import Result
 from eval_framework.result_processors.result_processor import ResultsFileProcessor, generate_output_dir
 from eval_framework.shared.types import BaseMetricContext, Completion, Loglikelihood
-from eval_framework.task_names import TaskName
+from eval_framework.tasks.benchmarks.mmlu import MMLU
 from eval_framework.tasks.eval_config import EvalConfig
 from template_formatting.formatter import Message, Role
 
@@ -16,7 +16,7 @@ from template_formatting.formatter import Message, Role
 
 def test_generate_output_dir_with_valid_values() -> None:
     llm_name = "llama-3.1"
-    task_name = TaskName.MMLU
+    task_name = MMLU.NAME
     config = EvalConfig(
         output_dir=Path(__file__).parent / "eval_framework_results",
         num_fewshot=5,
@@ -40,13 +40,13 @@ def test_generate_output_dir_with_valid_values() -> None:
 
     dir_name = f"{params_str}_{config_hash}"
 
-    expected_path = Path(config.output_dir) / llm_name / f"{version_str}_{task_name.value.NAME}" / dir_name
+    expected_path = Path(config.output_dir) / llm_name / f"{version_str}_{task_name}" / dir_name
     assert output_dir == expected_path
 
 
 def test_generate_output_dir_with_none_values() -> None:
     llm_name = "llama-3.1"
-    task_name = TaskName.MMLU
+    task_name = MMLU.NAME
     config = EvalConfig(
         output_dir=Path("/eval_framework_results"),
         num_fewshot=0,
@@ -69,7 +69,7 @@ def test_generate_output_dir_with_none_values() -> None:
     config_hash = hashlib.sha256(config_json.encode("utf-8")).hexdigest()[:5]
     dir_name = f"{params_str}_{config_hash}"
 
-    expected_path = Path(config.output_dir) / llm_name / f"{version_str}_{task_name.value.NAME}" / dir_name
+    expected_path = Path(config.output_dir) / llm_name / f"{version_str}_{task_name}" / dir_name
     assert output_dir == expected_path
 
 

@@ -4,7 +4,7 @@ from eval_framework.llm.models import Llama31_8B_Instruct_API
 from eval_framework.main import main
 from eval_framework.tasks.eval_config import EvalConfig
 
-# from eval_framework.task_loader import load_extra_tasks
+# from eval_framework.tasks.task_loader import load_extra_tasks
 
 if __name__ == "__main__":
     # Using Llama 3.1 8B Instruct hosted on Aleph Alpha Research API

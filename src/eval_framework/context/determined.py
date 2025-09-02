@@ -1,45 +1,34 @@
 import logging
 from pathlib import Path
-from typing import Any, Type
+from typing import Annotated, Any, Type
 
 from determined import get_cluster_info
 from determined.core import Context, DummyDistributedContext
 from determined.core import init as determined_core_init
-from pydantic import BaseModel, ConfigDict, field_serializer, field_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from eval_framework.context.eval import EvalContext, import_models
 from eval_framework.llm.base import BaseLLM
-from eval_framework.task_loader import load_extra_tasks
-from eval_framework.task_names import TaskName
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig
+from eval_framework.tasks.registry import validate_task_name
+from eval_framework.tasks.task_loader import load_extra_tasks
 
 logger = logging.getLogger(__name__)
 
 
 class TaskArgs(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    task_name: Annotated[str, AfterValidator(validate_task_name)]
     num_fewshot: int
     num_samples: int | None = None
     max_tokens: int | None = None
     batch_size: int | None = None
-    task_name: TaskName
     judge_model_name: str | None = None
     judge_model_args: dict[str, Any] = {}
     task_subjects: list[str] | None = None
     hf_revision: str | None = None
     perturbation_config: PerturbationConfig | None = None
-
-    @field_serializer("task_name")
-    def serialize_task_name(self, value: TaskName) -> str:
-        return value.value.NAME
-
-    @field_validator("task_name", mode="before")
-    @classmethod
-    def validate_task_name(cls, value: str | TaskName) -> TaskName:
-        if isinstance(value, str):
-            return TaskName.from_name(value)
-        return value
 
 
 class Hyperparameters(BaseModel):

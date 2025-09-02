@@ -68,7 +68,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: uv run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
+        run: uv run python -c "from eval_framework.tasks.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
 
   tag:
     runs-on: ubuntu-latest
