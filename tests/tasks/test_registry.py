@@ -1,6 +1,8 @@
 import functools
 from collections.abc import Callable
 
+import pytest
+
 from eval_framework.tasks.benchmarks.math_reasoning import MATH, MATHLvl5
 from eval_framework.tasks.registry import (
     Registry,
@@ -35,11 +37,20 @@ def test_case_insensitive_lookup() -> None:
     assert get_task("Math") is MATH
     assert get_task("math") is MATH
 
+    # Special punctuation not allowed
+    with pytest.raises(ValueError):
+        register_task("MATH.Lvl.5", MATHLvl5)
+
     register_task("MATH Lvl 5", MATHLvl5)
     assert set(registered_task_names()) == {"MATH", "MATH Lvl 5"}
     assert get_task("math lvl 5") is MATHLvl5
     assert get_task("MATH LVL 5") is MATHLvl5
     assert get_task("Math Lvl 5") is MATHLvl5
+    assert get_task("Math Lvl     5") is MATHLvl5
+    assert get_task("Math-Lvl_5") is MATHLvl5
+
+    with pytest.raises(ValueError):
+        get_task("Math.Lvl.5")
 
 
 @temporary_registry
