@@ -3,6 +3,7 @@ name: Release Workflow
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -15,9 +16,11 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
         with:
-          version: "~=0.8.0"
+          version: "~=0.8.10"
 
       - name: Check tag
+        # For test releases, we allow any version
+        if: github.event_name == 'release'
         shell: bash
         run: |
             PACKAGE_VERSION=$(uv version --short)
@@ -28,3 +31,64 @@ jobs:
               echo "Tag '${RELEASE_VERSION}' does not match the package version '${PACKAGE_VERSION}'!";
               exit 1;
             fi
+
+      - name: Build Wheel
+        run: uv build --out-dir ./dist .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 'pypi-dist'
+          path: './dist'
+          if-no-files-found: 'error'
+
+  # Deploy to our pypi main instance
+  deploy-pypi:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    environment: pypi
+    permissions:
+      # This permission is mandatory for Trusted Publishing
+      # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+      id-token: write
+
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v5
+        with:
+          name: 'pypi-dist'
+          path: './dist'
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          skip-existing: true
+          print-hash: true
+
+  # Deploy to our pypi test instance
+  deploy-pypi-test:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    needs: ["build"]
+    environment: testpypi
+    permissions:
+      # This permission is mandatory for Trusted Publishing
+      # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+      id-token: write
+
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v5
+        with:
+          name: 'pypi-dist'
+          path: './dist'
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          # Test release platform for now
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: false
+          print-hash: true

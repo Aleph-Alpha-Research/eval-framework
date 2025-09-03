@@ -4,12 +4,14 @@
 
 ### Added
 
+- 2025-09-02: Add `DOCKER_CODE_EXECUTION` variable to `.env.example`
 - 2025-08-27: Adds support for weights and biases + determined pre-emption
 - 2025-09-02: move the generate_task_docs utility to inside the package and add tests that documentation is up-to-date
 
 ### Changed
 
 - 2025-08-29: commented out the flacky SPHYR test
+- 2025-09-03: Packages are now released to PyPI
 
 ### Fixed
 

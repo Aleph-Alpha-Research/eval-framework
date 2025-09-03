@@ -1,9 +1,10 @@
 import os
 import random
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generic, Iterable, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import iso639
 from datasets import DownloadConfig, load_dataset
@@ -76,7 +77,7 @@ class Sample(BaseModel):
 SubjectType = TypeVar("SubjectType")
 
 
-class BaseTask(ABC, Generic[SubjectType]):
+class BaseTask[SubjectType](ABC):
     NAME: str
     DATASET_PATH: str
     SAMPLE_SPLIT: str

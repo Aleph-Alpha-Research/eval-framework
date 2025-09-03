@@ -116,8 +116,14 @@ To launch a new release, please follow these steps:
    - Manually copy the highlights from the changelog on top of the auto-generated notes
    - Click on Publish Release
 
-This will create a new version tag and run the release workflow. For now, the release workflow only checks for a correct tag, but in the future
-will publish packages to the Python packaging index.
+This will create a new version tag and run the release workflow. Open the [Github Actions](https://github.com/Aleph-Alpha-Research/eval-framework/actions)
+panel and look for the release workflow. Once things are ready, you will have to approve publishing to PyPi.
+
+### If things go wrong...
+
+When a release workflow fails, the best way is to go to the [Release page](https://github.com/Aleph-Alpha-Research/eval-framework/releases) and delete the release
+and also delete the corresponding tag on the [tag page](https://github.com/Aleph-Alpha-Research/eval-framework/tags). Then fix the workflow and re-release the package.
+
 
 ## License
 

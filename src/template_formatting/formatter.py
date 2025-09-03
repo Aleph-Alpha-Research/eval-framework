@@ -3,10 +3,9 @@ import re
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Literal, overload
+from typing import Any, Literal, overload, override
 
-from pydantic import BaseModel, Field, field_serializer, field_validator
-from typing_extensions import override
+from pydantic import BaseModel, field_serializer, field_validator
 
 try:
     from transformers import AutoTokenizer
@@ -27,11 +26,11 @@ class Property(Enum):
 
 
 class Message(BaseModel):
-    role: Role | None = Field(default=None)  # Optional due to compatibility with legacy finetuning format.
-    property: Property | None = Field(default=None)
+    role: Role | None = None  # Optional due to compatibility with legacy finetuning format.
+    property: Property | None = None
     content: str
-    has_loss: bool | None = Field(default=None)
-    type: str | None = Field(default=None)
+    has_loss: bool | None = None
+    type: str | None = None
 
     @field_serializer("role")
     def serialize_task_name(self, value: Role | None) -> str | None:
