@@ -35,7 +35,7 @@ def test_task_docs_are_up_to_date(tmp_path: Path) -> None:
         if not filecmp.cmp(gen_file, repo_file, shallow=False):
             diffs.append(name)
             # print the content of gen_file and repo_file for debugging
-            with open(gen_file, "r") as gf, open(repo_file, "r") as rf:
+            with open(gen_file) as gf, open(repo_file) as rf:
                 gen_content = gf.read()
                 repo_content = rf.read()
                 print(f"--- Difference in file: {name} ---")
