@@ -1,5 +1,5 @@
 import logging
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import Any
 
 import torch
@@ -64,7 +64,7 @@ class RepeatedTokenSequenceCriteria(StoppingCriteria):
 
 class HFLLM(BaseLLM):
     LLM_NAME: str
-    DEFAULT_FORMATTER: BaseFormatter | None = None
+    DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
 
     def __init__(self, formatter: BaseFormatter | None = None) -> None:
@@ -80,7 +80,7 @@ class HFLLM(BaseLLM):
             self._formatter = formatter
         # if formatter is not being set at initialization time, but DEFAULT_FORMATTER was specified, use it
         elif self.DEFAULT_FORMATTER is not None:
-            self._formatter = self.DEFAULT_FORMATTER
+            self._formatter = self.DEFAULT_FORMATTER()
         # if formatter is not being set at initialization time and there is no default formatter,
         # using HF chat formatter if exists
         elif self.tokenizer.chat_template is not None:
@@ -267,7 +267,7 @@ class HFLLM(BaseLLM):
 #     """
 #     A generic class to create HFLLM instances from a given model name.
 #     """
-#     DEFAULT_FORMATTER = Llama3Formatter()
+#     DEFAULT_FORMATTER = Llama3Formatter
 
 #     def __init__(self, model_name: str):
 #         self.LLM_NAME = model_name
