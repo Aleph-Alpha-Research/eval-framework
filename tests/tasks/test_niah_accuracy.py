@@ -1,7 +1,7 @@
 import pytest
 
 from eval_framework.metrics.base import MetricResult
-from eval_framework.metrics.completion_metrics.niah_accuracy import NIAHAccuracy
+from eval_framework.metrics.completion.niah_accuracy import NIAHAccuracy
 from eval_framework.shared.types import Completion, Error, LanguageMetricContext
 from template_formatting.formatter import Message, Role
 

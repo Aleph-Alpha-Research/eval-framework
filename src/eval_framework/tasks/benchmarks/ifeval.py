@@ -1,6 +1,6 @@
 from typing import Any
 
-from eval_framework.metrics.completion_metrics.ifeval import IFEvalMetric, IFEvalMetricContext
+from eval_framework.metrics.completion.ifeval import IFEvalMetric, IFEvalMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
 
 

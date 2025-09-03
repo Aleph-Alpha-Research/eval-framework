@@ -18,9 +18,9 @@ from pydantic import BaseModel
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.base import MetricResult
-from eval_framework.metrics.llm_metrics.base import BaseLLMJudgeMetric
-from eval_framework.metrics.llm_metrics.graders.language import Language
-from eval_framework.metrics.llm_metrics.graders.sql_quality_grader import SqlQualityGrader
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
+from eval_framework.metrics.llm.graders.language import Language
+from eval_framework.metrics.llm.graders.sql_quality_grader import SqlQualityGrader
 from eval_framework.shared.types import Completion, LanguageMetricContext, extract_context_metric
 from eval_framework.tasks.utils import get_docker_address
 

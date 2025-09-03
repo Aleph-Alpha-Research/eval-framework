@@ -2,7 +2,7 @@ from collections.abc import Sequence
 
 import pytest
 
-from eval_framework.metrics.completion_metrics.csv_format import CSVFormat, extract_csv_from_text
+from eval_framework.metrics.completion.csv_format import CSVFormat, extract_csv_from_text
 from eval_framework.shared.types import Completion
 
 REQ_NUM = 3

@@ -1,8 +1,8 @@
 from collections.abc import Mapping
 
 from eval_framework.llm.base import BaseLLM as StructuredOutputChatModel
-from eval_framework.metrics.llm_metrics.graders.language import Language
-from eval_framework.metrics.llm_metrics.graders.models import GradingOutput, PromptTemplate, parse_json_output
+from eval_framework.metrics.llm.graders.language import Language
+from eval_framework.metrics.llm.graders.models import GradingOutput, PromptTemplate, parse_json_output
 
 
 class LongContextGradingOutput(GradingOutput):

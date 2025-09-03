@@ -8,7 +8,7 @@ This guide shows you how to create **completion tasks**, benchmarks where the mo
 from typing import Any
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 
 
 class YourCompletionTask(BaseTask[str]):
@@ -39,7 +39,7 @@ Start with the minimal structure:
 ```python
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 
 class MathQATask(BaseTask[str]):
     NAME = "MathQA"
@@ -137,7 +137,7 @@ class MathTask(BaseTask[str]):
 
 #### Pattern 3: Code Generation
 ```python
-from eval_framework.metrics.completion_metrics.code_execution_pass_at_one import CodeExecutionPassAtOne
+from eval_framework.metrics.completion.code_execution_pass_at_one import CodeExecutionPassAtOne
 
 class CodeTask(BaseTask[str]):
     NAME = "Code Generation"
@@ -205,26 +205,26 @@ Choose appropriate metrics based on your task type:
 
 ```python
 # Exact match accuracy
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 
 # Text similarity metrics
-from eval_framework.metrics.completion_metrics.rouge_1 import Rouge1
-from eval_framework.metrics.completion_metrics.rouge_2 import Rouge2
-from eval_framework.metrics.completion_metrics.rouge_l import RougeL
-from eval_framework.metrics.completion_metrics.bleu import Bleu
+from eval_framework.metrics.completion.rouge_1 import Rouge1
+from eval_framework.metrics.completion.rouge_2 import Rouge2
+from eval_framework.metrics.completion.rouge_l import RougeL
+from eval_framework.metrics.completion.bleu import Bleu
 
 # Math-specific metrics
-from eval_framework.metrics.completion_metrics.math_reasoning_completion import MathReasoningCompletion
+from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
 
 # Code execution metrics
-from eval_framework.metrics.completion_metrics.code_execution_pass_at_one import CodeExecutionPassAtOne
+from eval_framework.metrics.completion.code_execution_pass_at_one import CodeExecutionPassAtOne
 
 # Format validation
-from eval_framework.metrics.completion_metrics.json_format import JSONFormat
-from eval_framework.metrics.completion_metrics.csv_format import CSVFormat
+from eval_framework.metrics.completion.json_format import JSONFormat
+from eval_framework.metrics.completion.csv_format import CSVFormat
 
 # Custom metrics using LLM judges
-from eval_framework.metrics.llm_metrics.llm_judge_score import LLMJudgeScore
+from eval_framework.metrics.llm.llm_judge_score import LLMJudgeScore
 
 class YourTask(BaseTask[str]):
     # Choose metrics appropriate for your task
@@ -237,7 +237,7 @@ class YourTask(BaseTask[str]):
 from typing import Any
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 
 class GeographyQuizTask(BaseTask[str]):
     NAME = "Geography Quiz"

@@ -1,6 +1,6 @@
 from eval_framework.exceptions import LogicError
 from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.metrics.completion_metrics.f1 import calculate_f1
+from eval_framework.metrics.completion.f1 import calculate_f1
 from eval_framework.shared.types import Completion
 
 

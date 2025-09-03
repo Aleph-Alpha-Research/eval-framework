@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.shared.types import Completion
 
 

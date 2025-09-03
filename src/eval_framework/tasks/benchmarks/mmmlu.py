@@ -3,9 +3,9 @@ import re
 from itertools import product
 from typing import Any
 
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
-from eval_framework.metrics.completion_metrics.language_checker import GermanCompletionChecker
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import (
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.language_checker import GermanCompletionChecker
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )

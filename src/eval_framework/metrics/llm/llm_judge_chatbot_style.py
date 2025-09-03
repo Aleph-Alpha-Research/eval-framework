@@ -1,17 +1,17 @@
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.base import MetricResult
-from eval_framework.metrics.llm_metrics.base import BaseLLMJudgeMetric
-from eval_framework.metrics.llm_metrics.graders.conciseness_grader import ConcisenessGrader
-from eval_framework.metrics.llm_metrics.graders.language import Language
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
+from eval_framework.metrics.llm.graders.chatbot_style_grader import ChatbotStyleGrader
+from eval_framework.metrics.llm.graders.language import Language
 from eval_framework.shared.types import Completion
 
 
-class LLMJudgeConciseness(BaseLLMJudgeMetric):
-    NAME = "Conciseness"
+class LLMJudgeChatbotStyle(BaseLLMJudgeMetric):
+    NAME = "Chatbot Style"
 
     def __init__(self, llm_judge: BaseLLM):
         super().__init__(llm_judge)
-        self._grader = ConcisenessGrader(llm_judge)
+        self._grader = ChatbotStyleGrader(llm_judge)
 
     def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error is not None:
@@ -20,7 +20,6 @@ class LLMJudgeConciseness(BaseLLMJudgeMetric):
         language = Language(response.get_instruction_language())
 
         grading = self._grader.grade(
-            instruction=response.system_user_instruction,
             completion=response.sanitized_completion,
             language=language,
         )
@@ -28,7 +27,7 @@ class LLMJudgeConciseness(BaseLLMJudgeMetric):
         return [
             MetricResult(
                 metric_name=self.NAME,
-                value=float(grading.is_concise) if grading.is_concise is not None else None,
+                value=float(grading.is_chatbot_style) if grading.is_chatbot_style is not None else None,
                 higher_is_better=True,
                 llm_judge_prompt=grading.judge_prompt,
                 llm_judge_response=grading.judge_response,

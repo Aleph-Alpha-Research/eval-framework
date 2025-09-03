@@ -1,8 +1,8 @@
 from eval_framework.exceptions import LogicError
 from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.metrics.completion_metrics.rouge_1 import ROUGE_1
-from eval_framework.metrics.completion_metrics.rouge_2 import ROUGE_2
-from eval_framework.metrics.completion_metrics.rouge_l import ROUGE_L
+from eval_framework.metrics.completion.rouge_1 import ROUGE_1
+from eval_framework.metrics.completion.rouge_2 import ROUGE_2
+from eval_framework.metrics.completion.rouge_l import ROUGE_L
 from eval_framework.shared.types import Completion
 
 

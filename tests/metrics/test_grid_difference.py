@@ -1,7 +1,7 @@
 import pytest
 
 import eval_framework.tasks.benchmarks.sphyr as sphyr
-from eval_framework.metrics.completion_metrics.grid_difference import GridDifference
+from eval_framework.metrics.completion.grid_difference import GridDifference
 from eval_framework.shared.types import Completion
 from template_formatting.formatter import Message, Role
 from tests.utils import assert_hash_string

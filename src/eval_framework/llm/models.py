@@ -4,9 +4,9 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from eval_framework.constants import RED, RESET
-from eval_framework.llm.aleph_alpha_api_llm import AlephAlphaAPIModel
-from eval_framework.llm.huggingface_llm import HFLLM
-from eval_framework.llm.vllm_models import MistralVLLM, VLLMModel
+from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel
+from eval_framework.llm.huggingface import HFLLM
+from eval_framework.llm.vllm import MistralVLLM, VLLMModel
 from template_formatting.formatter import (
     ConcatFormatter,
     HFFormatter,

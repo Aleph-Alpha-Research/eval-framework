@@ -2,9 +2,9 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.base import (
     MetricResult,
 )
-from eval_framework.metrics.llm_metrics.base import BaseLLMJudgeMetric
-from eval_framework.metrics.llm_metrics.graders.format_correctness_grader import FormatCorrectnessGrader
-from eval_framework.metrics.llm_metrics.graders.language import Language
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
+from eval_framework.metrics.llm.graders.format_correctness_grader import FormatCorrectnessGrader
+from eval_framework.metrics.llm.graders.language import Language
 from eval_framework.shared.types import BaseMetricContext, Completion, LanguageMetricContext, extract_context_metric
 
 

@@ -1,6 +1,6 @@
 from eval_framework.exceptions import LogicError
 from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.metrics.llm_metrics.graders.language import AVAILABLE_LANGUAGES
+from eval_framework.metrics.llm.graders.language import AVAILABLE_LANGUAGES
 from eval_framework.shared.types import Completion
 
 
