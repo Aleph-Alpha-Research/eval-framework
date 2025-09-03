@@ -1,7 +1,7 @@
 import filecmp
 from pathlib import Path
 
-from eval_framework.generate_task_docs import generate_all_docs, parse_args
+from eval_framework.utils.generate_task_docs import generate_all_docs, parse_args
 
 
 def test_task_docs_are_up_to_date(tmp_path: Path) -> None:

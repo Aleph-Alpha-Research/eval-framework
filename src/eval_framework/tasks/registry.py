@@ -8,7 +8,7 @@ import pydantic
 from pydantic import AfterValidator
 
 from eval_framework.tasks.base import BaseTask
-from eval_framework.utils import is_extra_installed, validate_package_extras
+from eval_framework.utils.utils import is_extra_installed, validate_package_extras
 
 __all__ = [
     "register_task",

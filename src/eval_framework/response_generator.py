@@ -17,7 +17,6 @@ import logging
 from tqdm import tqdm
 
 from eval_framework import __version__ as eval_framework_version
-from eval_framework.constants import RED, RESET
 from eval_framework.llm.base import BaseLLM
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, Error, Loglikelihood, RawCompletion, RawLoglikelihood
@@ -25,6 +24,7 @@ from eval_framework.tasks.base import Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import create_perturbation_class
 from eval_framework.tasks.utils import raise_errors
+from eval_framework.utils.constants import RED, RESET
 from template_formatting.formatter import Message, Role
 
 logger = logging.getLogger(__name__)

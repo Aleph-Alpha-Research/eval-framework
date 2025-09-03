@@ -10,11 +10,11 @@ from vllm.inputs.data import TokensPrompt
 from vllm.outputs import RequestOutput
 from vllm.transformers_utils.tokenizer import get_tokenizer
 
-from eval_framework.constants import RED, RESET
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors, redis_cache
+from eval_framework.utils.constants import RED, RESET
 from template_formatting.formatter import BaseFormatter, HFFormatter, Message
 from template_formatting.mistral_formatter import MistralSerializer
 

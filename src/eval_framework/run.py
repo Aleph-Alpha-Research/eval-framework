@@ -13,7 +13,7 @@ import logging
 from eval_framework.context.local import LocalContext
 from eval_framework.main import main
 from eval_framework.tasks.task_loader import load_extra_tasks
-from eval_framework.utils import setup_logging
+from eval_framework.utils.utils import setup_logging
 
 logger = logging.getLogger(__name__)
 
