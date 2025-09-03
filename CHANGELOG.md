@@ -10,6 +10,7 @@
 ### Changed
 
 - 2025-09-03: Packages are now released to PyPI
+- 2025-09-03: Import paths in `llm` and `metrics` no longer have a `_llm` and `_metrics` suffix. E.g., `llm/huggingface.py` instead of `llm/huggingface_llm.py`
 - 2025-08-29: commented out the flacky SPHYR test
 - 2025-09-03: Our benchmarks tasks are now registered lazily, which reduces the amount of code that is imported
               at startup time.
