@@ -41,6 +41,8 @@ dependencies = [
   "python-iso639>=2025.2.18",
   "typing-extensions>=4.14,<5",
   "wandb>=0.21.1",
+  # Needed for uv bug: https://github.com/astral-sh/uv/issues/15661
+  "torch",
 ]
 
 [project.optional-dependencies]
