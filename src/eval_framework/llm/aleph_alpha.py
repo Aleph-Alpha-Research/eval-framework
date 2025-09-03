@@ -6,7 +6,7 @@ import random
 import re
 import time
 import traceback
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import asdict
 
 import aiohttp
@@ -43,7 +43,7 @@ def safe_json_loads(s: str) -> dict:
 
 class AlephAlphaAPIModel(BaseLLM):
     LLM_NAME: str
-    DEFAULT_FORMATTER: BaseFormatter | None = None
+    DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
 
     def __init__(
         self,
@@ -55,7 +55,13 @@ class AlephAlphaAPIModel(BaseLLM):
         request_timeout_seconds: int = 30 * 60 + 5,
         queue_full_timeout_seconds: int = 30 * 60 + 5,
     ) -> None:
-        self._formatter = formatter or self.DEFAULT_FORMATTER
+        self._formatter: BaseFormatter
+        if formatter is None:
+            if self.DEFAULT_FORMATTER is None:
+                raise ValueError("Either formatter or default formatter must be specified")
+            self._formatter = self.DEFAULT_FORMATTER()
+        else:
+            self._formatter = formatter
         self._llm_name = checkpoint_name or self.LLM_NAME
         self.max_async_concurrent_requests = max_async_concurrent_requests
         self.max_retries = max_retries
@@ -250,7 +256,6 @@ class AlephAlphaAPIModel(BaseLLM):
             effective_temperature = temperature
 
         requests = []
-        assert self._formatter, "We need a formatter to generate from messages"
 
         for single_messages in messages:
             requests.append(
@@ -269,7 +274,6 @@ class AlephAlphaAPIModel(BaseLLM):
         samples_prompt: list[str] = []
         evaluation_requests: list[EvaluationRequest] = []
         results: list[RawLoglikelihood] = []
-        assert self._formatter, "We need a formatter to generate from messages"
 
         # evaluate all choices independently in flattened list
         for sample in samples:

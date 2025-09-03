@@ -9,6 +9,7 @@
 
 ### Changed
 
+- 2025-09-03: `DEFAULT_FORMATTER` in our models is now a callable, to avoid instantiating formatters at import time
 - 2025-09-03: Packages are now released to PyPI
 - 2025-09-03: Task look-ups are now insensitive to case, hyphens, underscores and whitespace
 - 2025-09-03: Import paths in `llm` and `metrics` no longer have a `_llm` and `_metrics` suffix. E.g., `llm/huggingface.py` instead of `llm/huggingface_llm.py`

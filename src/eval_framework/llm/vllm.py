@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal, Protocol, cast, override
 
@@ -107,7 +107,7 @@ class VLLMTokenizer(VLLMTokenizerAPI[str]):
 
 class VLLMModel(BaseLLM):
     LLM_NAME: str
-    DEFAULT_FORMATTER: BaseFormatter | None = None
+    DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
 
     def __init__(
@@ -164,7 +164,7 @@ class VLLMModel(BaseLLM):
         if formatter is not None:
             self._formatter = formatter
         elif self.DEFAULT_FORMATTER is not None:
-            self._formatter = self.DEFAULT_FORMATTER
+            self._formatter = self.DEFAULT_FORMATTER()
         elif self.tokenizer.chat_template is not None:
             self._formatter = HFFormatter(self.LLM_NAME)
         else:
