@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all tasks available in `eval-framework`.
 
-The documentation can be generated or updated with `uv run python src/eval_framework/generate_task_docs.py`.
+The documentation can be generated or updated with `uv run python src/eval_framework/utils/generate_task_docs.py`.
 
 NOTE: This is an automatically generated file. Any manual modifications will not be preserved whenthe file is next updated.
 

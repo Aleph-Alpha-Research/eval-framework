@@ -17,4 +17,4 @@ LANGUAGE = {'deu_Latn': <Language.DEU: 'German'>, 'eng_Latn': <Language.ENG: 'En
 
 - Link to dataset: [https://huggingface.co/datasets/facebook/flores](https://huggingface.co/datasets/facebook/flores)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/generate_task_docs.py --add-prompt-examples --only-tasks "FLORES200"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "FLORES200"`.

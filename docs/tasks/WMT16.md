@@ -17,4 +17,4 @@ LANGUAGE = {'de-en': (<Language.DEU: 'German'>, <Language.ENG: 'English'>), 'en-
 
 - Link to dataset: [https://huggingface.co/datasets/wmt16](https://huggingface.co/datasets/wmt16)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/generate_task_docs.py --add-prompt-examples --only-tasks "WMT16"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "WMT16"`.
