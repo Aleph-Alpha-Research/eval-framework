@@ -143,8 +143,7 @@ jobs:
       - name: Run tests
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: uv run --all-extras --group cu124 pytest tests/aaa/test_arc.py --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
-        #run: uv run --all-extras --group cu124 pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
+        run: uv run --all-extras --group cu124 pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
