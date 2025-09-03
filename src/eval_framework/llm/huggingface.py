@@ -264,105 +264,6 @@ class HFLLM(BaseLLM):
         return config.max_position_embeddings if hasattr(config, "max_position_embeddings") else None
 
 
-# class HFLLM_with_Llama3Formatter_from_name(HFLLM):
-#     """
-#     A generic class to create HFLLM instances from a given model name.
-#     """
-#     DEFAULT_FORMATTER = Llama3Formatter
-
-#     def __init__(self, model_name: str):
-#         self.LLM_NAME = model_name
-#         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#         self.tokenizer = AutoTokenizer.from_pretrained(self.LLM_NAME)
-#         self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
-#         print(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
-#         self._set_formatter(self.DEFAULT_FORMATTER)
-
-
-class TruncatedLLM(HFLLM):
-    SEQ_LENGTH = 2048
-
-
-class Bert(HFLLM):
-    LLM_NAME = "google-bert/bert-base-uncased"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
-class Pythia410m(HFLLM):
-    LLM_NAME = "EleutherAI/pythia-410m"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
-class SmolLM135M(HFLLM):
-    LLM_NAME = "HuggingFaceTB/SmolLM-135M"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
-class Smollm135MInstruct(HFLLM):
-    LLM_NAME = "HuggingFaceTB/SmolLM-135M-Instruct"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
-class SmolLM_1_7B_Instruct(HFLLM):
-    LLM_NAME = "HuggingFaceTB/SmolLM-1.7B-Instruct"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
-class Qwen3_0_6B(HFLLM):
-    LLM_NAME = "Qwen/Qwen3-0.6B"
-    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})
-
-
-class Qwen3_0_6B_No_Thinking(HFLLM):
-    LLM_NAME = "Qwen/Qwen3-0.6B"
-    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
-
-
-class Qwen3_1_7B_No_Thinking(HFLLM):
-    LLM_NAME = "Qwen/Qwen3-1.7B"
-    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
-
-
-class Qwen3_8B_No_Thinking(HFLLM):
-    LLM_NAME = "Qwen/Qwen3-8B"
-    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
-
-
-class Qwen3_4B_No_Thinking(HFLLM):
-    LLM_NAME = "Qwen/Qwen3-4B"
-    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
-
-
-class Qwen3_14B_No_Thinking(HFLLM):
-    LLM_NAME = "Qwen/Qwen3-14B"
-    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
-
-
-class Qwen3_32B_No_Thinking(HFLLM):
-    LLM_NAME = "Qwen/Qwen3-32B"
-    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
-
-
-class Qwen3_30B_A3B_No_Thinking(HFLLM):
-    LLM_NAME = "Qwen/Qwen3-30B-A3B"
-    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
-
-
-class Phi3Mini4kInstruct(HFLLM):
-    LLM_NAME = "microsoft/Phi-3-mini-4k-instruct"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
-class Qwen1_5B(HFLLM):
-    LLM_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
-class Llama31_8B_HF(HFLLM):
-    LLM_NAME = "meta-llama/Meta-Llama-3.1-8B"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
 class HFLLM_from_name(HFLLM):
     """
     A generic class to create HFLLM instances from a given model name.
@@ -399,3 +300,18 @@ class HFLLM_from_name(HFLLM):
         else:
             supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
             raise ValueError(f"Unsupported formatter: {formatter}. Supported formatters: {supported}")
+
+
+class Pythia410m(HFLLM):
+    LLM_NAME = "EleutherAI/pythia-410m"
+    DEFAULT_FORMATTER = ConcatFormatter
+
+
+class SmolLM135M(HFLLM):
+    LLM_NAME = "HuggingFaceTB/SmolLM-135M"
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME)
+
+
+class Smollm135MInstruct(HFLLM):
+    LLM_NAME = "HuggingFaceTB/SmolLM-135M-Instruct"
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME)
