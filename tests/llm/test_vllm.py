@@ -2,7 +2,7 @@ import gc
 import logging
 import time
 from collections.abc import Sequence
-from typing import Any, TypeVar
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -10,18 +10,12 @@ import torch
 from vllm import SamplingParams
 from vllm.distributed.parallel_state import destroy_distributed_environment, destroy_model_parallel
 
+from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.llm.mistral import MistralAdapter, MistralVLLM
-from eval_framework.llm.models import (
-    Qwen3_0_6B,
-    Qwen3_0_6B_VLLM,
-    Qwen3_0_6B_VLLM_No_Thinking,
-)
-from eval_framework.llm.vllm import VLLMModel, VLLMTokenizer
+from eval_framework.llm.vllm import Qwen3_0_6B_VLLM, Qwen3_0_6B_VLLM_No_Thinking, VLLMModel, VLLMTokenizer
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import ConcatFormatter, Message, Role
-
-T = TypeVar("T", bound=VLLMModel)
 
 
 def clean_up() -> None:

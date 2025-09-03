@@ -315,3 +315,8 @@ class SmolLM135M(HFLLM):
 class Smollm135MInstruct(HFLLM):
     LLM_NAME = "HuggingFaceTB/SmolLM-135M-Instruct"
     DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME)
+
+
+class Qwen3_0_6B(HFLLM):
+    LLM_NAME = "Qwen/Qwen3-0.6B"
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})

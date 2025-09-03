@@ -7,7 +7,7 @@ to use it.
 from eval_framework.utils import is_extra_installed
 
 if is_extra_installed(extra="transformers"):
-    from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MInstruct  # noqa F401
+    from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MInstruct, Qwen3_0_6B  # noqa F401
 
 if is_extra_installed("mistral"):
     from eval_framework.llm.mistral import MagistralVLLM  # noqa F401
