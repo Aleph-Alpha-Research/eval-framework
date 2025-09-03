@@ -567,9 +567,5 @@ Answer:"""
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return self.QUERY_TEMPLATE.format(question=item["question"])
 
-    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        # This should not be called since we're zero-shot only
-        raise NotImplementedError("GSM8K Reasoning is zero-shot only")
-
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return self._extract_answer_fallback(item["answer"])
