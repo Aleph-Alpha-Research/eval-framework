@@ -40,11 +40,13 @@ dependencies = [
   "aenum>=3.1.16,<4",
   "python-iso639>=2025.2.18",
   "typing-extensions>=4.14,<5",
-  "unbabel-comet>=2.2.6,<3",
   "wandb>=0.21.1",
+  # Needed for uv bug: https://github.com/astral-sh/uv/issues/15661
+  "torch",
 ]
 
 [project.optional-dependencies]
+# Model-specific extras
 determined = [
   "determined>=0.38,<0.39",
   "tensorboard==2.19.0"
@@ -60,6 +62,10 @@ vllm = [
   "vllm>=0.8.5,<0.9",
   "torch>=2.5,<3"
 ]
+# Benchmark/metric specific extras
+comet = [
+  "unbabel-comet>=2.2.6,<3",
+]
 # from template-formatting
 optional = [
   "transformers>=4.45.2,<5",
@@ -70,7 +76,7 @@ mistral = [
   "huggingface-hub>=0.33.2,<0.34",
 ]
 all = [
-  "eval_framework[determined,api,openai,transformers,accelerate,vllm,optional,mistral]"
+  "eval_framework[determined,api,openai,transformers,accelerate,vllm,comet,optional,mistral]"
 ]
 
 [project.urls]
@@ -91,7 +97,7 @@ dev = [
   "types-redis>=4.6.0.20241004,<5",
   "ruff>=0.12.8",
 ]
-flash-attn = ["flash-attn>=2.7.2.post1,<3"]
+flash-attn = ["flash-attn>=2.7.2.post1,<2.8"]
 cu124 = ["torch"]
 cpu = ["torch"]
 
