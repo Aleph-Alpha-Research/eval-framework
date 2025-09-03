@@ -4,6 +4,7 @@
 
 ### Added
 
+- 2025-09-02: Add `DOCKER_CODE_EXECUTION` variable to `.env.example`
 - 2025-08-27: Adds support for weights and biases + determined pre-emption
 
 ### Changed
