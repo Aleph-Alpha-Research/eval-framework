@@ -1,6 +1,7 @@
 import re
 from collections import Counter
-from typing import Final, Sequence
+from collections.abc import Sequence
+from typing import Final
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import Completion

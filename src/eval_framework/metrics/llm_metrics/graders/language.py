@@ -1,6 +1,7 @@
+from collections.abc import Mapping
 from dataclasses import dataclass
-from functools import lru_cache
-from typing import Mapping, TypeVar
+from functools import cache
+from typing import TypeVar
 
 import lingua
 from pycountry import languages
@@ -26,7 +27,7 @@ _language_detector = lingua.LanguageDetectorBuilder.from_languages(
 AVAILABLE_LANGUAGES = ["en", "de", "es", "it", "fr", "nl", "pt", "fi"]
 
 
-@lru_cache(maxsize=None)
+@cache
 def detect_language_of(string: str) -> lingua.Language | None:
     return _language_detector.detect_language_of(string)
 

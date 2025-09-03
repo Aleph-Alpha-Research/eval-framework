@@ -1,19 +1,20 @@
 import json
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 import jsonschema  # type: ignore
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import Completion
 
 
 class JsonFormatEvaluation(BaseModel):
-    is_just_json: bool = Field(default=False)
-    is_valid_json: bool = Field(default=False)
-    fulfills_schema: bool | None = Field(default=None)
-    json_parsing_error: str | None = Field(default=None)
-    schema_validation_error: str | None = Field(default=None)
+    is_just_json: bool = False
+    is_valid_json: bool = False
+    fulfills_schema: bool | None = None
+    json_parsing_error: str | None = None
+    schema_validation_error: str | None = None
 
 
 class JsonFormat(BaseMetric[Completion]):

@@ -1,7 +1,8 @@
 import json
 import logging
 import os
-from typing import Any, List, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import tiktoken  # OpenAI's official tokenizer library
 from openai import OpenAI
@@ -55,11 +56,11 @@ class OpenAIModel(BaseLLM):
 
     def generate_from_messages(
         self,
-        messages: List[Sequence[Message]],
+        messages: list[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
-    ) -> List[RawCompletion]:
+    ) -> list[RawCompletion]:
         if temperature is None:
             effective_temperature = 0.0  # Current default, TODO: refactor to use model's default
             logger.info(
@@ -142,7 +143,7 @@ class OpenAIModel(BaseLLM):
                 )
         return results
 
-    def logprobs(self, samples: List[Sample]) -> List[RawLoglikelihood]:
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         """Get log probabilities for possible completions.
         Args:
             samples: list of Sample containing possible completions
@@ -155,7 +156,7 @@ class OpenAIModel(BaseLLM):
 
     def generate_structured_output(
         self,
-        messages: List[Sequence[Message]],
+        messages: list[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float = 0.0,
@@ -170,7 +171,7 @@ class OpenAIModel(BaseLLM):
             Parsed JSON response
         """
         completions = []
-        list_json_messages: List[Sequence[Message]] = []
+        list_json_messages: list[Sequence[Message]] = []
         for single_messages in messages:
             # Add system message to encourage JSON output
             json_messages = list(single_messages)

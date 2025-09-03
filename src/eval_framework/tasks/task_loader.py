@@ -2,9 +2,10 @@ import importlib.util
 import inspect
 import logging
 import os
+from collections.abc import Sequence
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Sequence
+from typing import Any
 
 from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import is_registered, register_task

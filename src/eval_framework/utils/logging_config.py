@@ -1,11 +1,10 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
 
 
 def setup_logging(
-    output_dir: Optional[Path] = None, log_level: int = logging.INFO, log_filename: str = "evaluation.log"
+    output_dir: Path | None = None, log_level: int = logging.INFO, log_filename: str = "evaluation.log"
 ) -> logging.Logger:
     """
     Set up centralized logging configuration for the entire framework.

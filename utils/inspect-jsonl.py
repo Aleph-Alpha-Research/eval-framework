@@ -47,7 +47,7 @@ def jsonl_to_colored_json(filepath: str, highlights: list, strip_keys: list) -> 
     Converts JSONL file to pretty printed and colorized JSON.
     """
     try:
-        with open(filepath, "r") as file:
+        with open(filepath) as file:
             for line in file:
                 data = json.loads(line)
                 colored_output = colorize_json(data, 4, highlights, strip_keys)

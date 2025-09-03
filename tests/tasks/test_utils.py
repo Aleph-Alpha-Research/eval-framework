@@ -3,7 +3,6 @@ import tempfile
 import time
 import uuid
 from collections.abc import Sequence
-from typing import List
 
 import pytest
 
@@ -646,11 +645,11 @@ def test_redis_cache() -> None:
 
         def generate_from_messages(
             self,
-            messages: List[Sequence[Message]],
+            messages: list[Sequence[Message]],
             stop_sequences: list[str] | None = None,
             max_tokens: int | None = None,
             temperature: float | None = None,
-        ) -> List[RawCompletion]:
+        ) -> list[RawCompletion]:
             return [self.do_one(single_messages) for single_messages in messages]
 
         @redis_cache(
@@ -669,7 +668,7 @@ def test_redis_cache() -> None:
                 raw_completion_error=error,
             )
 
-        def logprobs(self, sample: List[Sample]) -> List[RawLoglikelihood]:
+        def logprobs(self, sample: list[Sample]) -> list[RawLoglikelihood]:
             raise NotImplementedError
 
     class BarLLM(FooLLM):
@@ -727,11 +726,11 @@ def test_redis_cache() -> None:
 
         def generate_from_messages(
             self,
-            messages: List[Sequence[Message]],
+            messages: list[Sequence[Message]],
             stop_sequences: list[str] | None = None,
             max_tokens: int | None = None,
             temperature: float | None = None,
-        ) -> List[RawCompletion]:
+        ) -> list[RawCompletion]:
             return [self.do_one(single_messages) for single_messages in messages]
 
         @redis_cache(
@@ -749,7 +748,7 @@ def test_redis_cache() -> None:
                 completion_sequence_positions=None,
             )
 
-        def logprobs(self, sample: List[Sample]) -> List[RawLoglikelihood]:
+        def logprobs(self, sample: list[Sample]) -> list[RawLoglikelihood]:
             raise NotImplementedError
 
     dummy_completion_1 = [

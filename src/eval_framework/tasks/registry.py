@@ -1,8 +1,8 @@
 import contextlib
 import importlib.metadata
 import importlib.util
-from collections.abc import Generator, Sequence
-from typing import Annotated, Any, Iterator
+from collections.abc import Generator, Iterator, Sequence
+from typing import Annotated, Any
 
 import pydantic
 from packaging.requirements import Requirement

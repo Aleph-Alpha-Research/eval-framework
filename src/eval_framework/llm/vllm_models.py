@@ -1,7 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, Generic, Literal, Protocol, Sequence, TypeVar, cast, override
+from typing import Any, Literal, Protocol, cast, override
 
 import torch
 from vllm import LLM, SamplingParams
@@ -30,10 +31,7 @@ class TokenizedContainer:
     text: str
 
 
-prompt_type = TypeVar("prompt_type", list[Message], str)
-
-
-class VLLMTokenizerAPI(ABC, Generic[prompt_type]):
+class VLLMTokenizerAPI[prompt_type: (list[Message], str)](ABC):
     """
     Protocol for tokenizer interface that defines required methods.
     Needed for type checking because of the vllm tokenizer.

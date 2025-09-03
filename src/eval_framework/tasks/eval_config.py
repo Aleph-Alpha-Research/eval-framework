@@ -14,14 +14,14 @@ from eval_framework.tasks.registry import get_task, validate_task_name
 
 
 class EvalConfig(BaseConfig):
-    output_dir: Path = Field(default=ROOT_DIR)
+    output_dir: Path = ROOT_DIR
     wandb_project: str | None = None
     wandb_entity: str | None = None
     wandb_run_id: str | None = None
     hf_upload_dir: str | None = None
     hf_upload_repo: str | None = None
-    num_fewshot: int = Field(0, ge=0)
-    num_samples: int | None = Field(10, ge=1)  # Allows None or int
+    num_fewshot: Annotated[int, Field(ge=0)] = 0
+    num_samples: Annotated[int | None, Field(ge=1)] = 10  # Allows None or int
     max_tokens: int | None = None
     perturbation_config: PerturbationConfig | None = None
     task_name: Annotated[str, AfterValidator(validate_task_name)]
@@ -31,7 +31,7 @@ class EvalConfig(BaseConfig):
     llm_args: dict[str, Any] = Field(default_factory=dict)
     llm_judge_class: type[BaseLLM] | None = None
     judge_model_args: dict[str, Any] = Field(default_factory=dict)
-    batch_size: int = Field(default=1, ge=1)
+    batch_size: Annotated[int, Field(ge=1)] = 1
     description: str | None = None
     save_intermediate_results: bool = True
     save_logs: bool = True

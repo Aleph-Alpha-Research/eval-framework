@@ -1,8 +1,9 @@
 import time
 import traceback
+from collections.abc import Callable
 from datetime import UTC, datetime
 from functools import partial
-from typing import Any, Callable, List
+from typing import Any
 
 from eval_framework.tasks.registry import get_task
 
@@ -134,10 +135,10 @@ class ResponseGenerator:
 
     def _generate_completions(
         self,
-        samples: List[Sample],
+        samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-    ) -> List[Completion]:
+    ) -> list[Completion]:
         """
         Generates completions for the sample.
         :param sample: sample to generate completions for
@@ -148,7 +149,7 @@ class ResponseGenerator:
         if stop_sequences is None:
             stop_sequences = []
 
-        raw_completions: List[RawCompletion]
+        raw_completions: list[RawCompletion]
         try:
             raw_completions = self.llm.generate(samples=samples, stop_sequences=stop_sequences, max_tokens=max_tokens)
         except Exception as e:
@@ -205,13 +206,13 @@ class ResponseGenerator:
 
         return completion_list
 
-    def _generate_loglikelihoods(self, samples: List[Sample]) -> List[Loglikelihood]:
+    def _generate_loglikelihoods(self, samples: list[Sample]) -> list[Loglikelihood]:
         """
         Generate log likelihoods when a sample is run against the model.
         :param sample: sample to run the task against
         :return: loglikelihoods
         """
-        raw_loglikelihoods: List[RawLoglikelihood]
+        raw_loglikelihoods: list[RawLoglikelihood]
         try:
             raw_loglikelihoods = self.llm.logprobs(samples)
         except Exception as e:
@@ -250,7 +251,7 @@ class ResponseGenerator:
             )
         return loglikelihood_list
 
-    def _generative_output_type_selector(self) -> Callable[[List[Sample]], List[Completion] | List[Loglikelihood]]:
+    def _generative_output_type_selector(self) -> Callable[[list[Sample]], list[Completion] | list[Loglikelihood]]:
         """
         Selects the generative output type based on the response type.
         :return: function to generate responses
@@ -266,7 +267,7 @@ class ResponseGenerator:
 
     def _run_task_against_model(
         self, should_preempt_callable: Callable[[], bool]
-    ) -> tuple[List[Completion | Loglikelihood], bool]:
+    ) -> tuple[list[Completion | Loglikelihood], bool]:
         """
         Runs the task against the model and generates responses.
         :param should_preempt_callable: function to check if preempt is called
@@ -321,7 +322,7 @@ class ResponseGenerator:
         :return: None
         """
 
-        def _process_batch(samples_batch: List[Sample]) -> None:
+        def _process_batch(samples_batch: list[Sample]) -> None:
             if not samples_batch:
                 return
             if len(samples_batch) > 1:
@@ -347,7 +348,7 @@ class ResponseGenerator:
             # Count samples by iterating (this might be expensive for large datasets)
             total_num_samples = sum(1 for _ in self.task.iterate_samples(None))
 
-        samples_batch: List[Sample] = []
+        samples_batch: list[Sample] = []
         with tqdm(total=total_num_samples, desc=f"Processing {self.response_type.value}") as pbar:
             for i, sample in enumerate(self.task.iterate_samples(self.num_samples)):
                 subject = f" - Subject: {sample.subject}"
