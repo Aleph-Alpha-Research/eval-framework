@@ -9,6 +9,7 @@ from eval_framework.base_config import BaseConfig
 from eval_framework.constants import ROOT_DIR
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.llm_metrics.base import BaseLLMJudgeMetric
+from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.perturbation import PerturbationConfig
 from eval_framework.tasks.registry import get_task, validate_task_name
 
@@ -35,6 +36,10 @@ class EvalConfig(BaseConfig):
     description: str | None = None
     save_intermediate_results: bool = True
     save_logs: bool = True
+
+    @property
+    def task_class(self) -> type[BaseTask]:
+        return get_task(self.task_name)
 
     @field_serializer("output_dir")
     def serialize_output_dir(self, value: Path) -> str:

@@ -10,6 +10,8 @@
 ### Changed
 
 - 2025-08-29: commented out the flacky SPHYR test
+- 2025-09-03: Our benchmarks tasks are now registered lazily, which reduces the amount of code that is imported
+              at startup time.
 
 ### Fixed
 
