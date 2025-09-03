@@ -58,7 +58,9 @@ class LINEWISE_BLEU(BaseMetric[Completion]):
                 scores.append(sacrebleu.corpus_bleu(sacre_formatted_completion, sacre_formatted_ground_truth).score)
 
         return [
-            MetricResult(metric_name=self.NAME, value=float(max(scores)), higher_is_better=True, error=response.error)
+            MetricResult(
+                metric_name=self.NAME, value=float(max(scores, default=0)), higher_is_better=True, error=response.error
+            )
         ]
 
 
