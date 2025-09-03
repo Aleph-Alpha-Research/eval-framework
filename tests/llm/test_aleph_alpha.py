@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-import eval_framework.llm.aleph_alpha_api_llm as aleph_alpha_api_llm
+import eval_framework.llm.aleph_alpha as aleph_alpha
 from eval_framework.llm.models import Llama31_8B_Instruct_API
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
@@ -11,7 +11,7 @@ from template_formatting.formatter import Message, Role
 
 
 @pytest.mark.external_api
-def test_aleph_alpha_api_llm() -> None:
+def test_aleph_alpha() -> None:
     model = Llama31_8B_Instruct_API(max_retries=0)
 
     messages: list[Message] = [
@@ -58,8 +58,8 @@ def test_aleph_alpha_api_llm() -> None:
 
 
 @pytest.mark.external_api
-@mock.patch.object(aleph_alpha_api_llm.AsyncClient, "complete", new_callable=mock.AsyncMock)
-@mock.patch.object(aleph_alpha_api_llm.AsyncClient, "evaluate", new_callable=mock.AsyncMock)
+@mock.patch.object(aleph_alpha.AsyncClient, "complete", new_callable=mock.AsyncMock)
+@mock.patch.object(aleph_alpha.AsyncClient, "evaluate", new_callable=mock.AsyncMock)
 def test_error_on_overly_long_prompt(mock_complete: mock.AsyncMock, mock_evaluate: mock.AsyncMock) -> None:
     # Let's mock the API since redis wrapper doesn't cache errors and inference scheduler can return busy state.
     mock_error = RuntimeError(400, json.dumps({"error": "xyz", "code": "PROMPT_TOO_LONG"}))

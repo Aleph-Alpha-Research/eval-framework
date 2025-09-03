@@ -185,7 +185,7 @@ def test_local_context() -> None:
 
 def test_import_models() -> None:
     models = import_models(Path("src/eval_framework/llm/models.py"))
-    huggingface_llm = import_models(Path("src/eval_framework/llm/huggingface_llm.py"))
+    huggingface_llm = import_models(Path("src/eval_framework/llm/huggingface.py"))
 
     assert "SmolLM135M" in models
     assert "Pythia410m" in models
