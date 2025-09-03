@@ -1,23 +1,14 @@
 # Changelog
 
-## [Unreleased]
+## 0.2.0 (unreleased)
 
-### Added
+- Packages are now released to PyPI
+- Added missing `DOCKER_CODE_EXECUTION` variable to `.env.example`
+- Added support for weights and biases + determined pre-emption
+- Fixed loading of extra task modules (skip non-evaluation BaseTasks with no NAME attribute), add test that no task with same names get registered
+- Fixed `ZERO_SCROLLS_QMSUM` missing from task_names.py
+- Fixed BLEU/CHRF/TER min/max scoring when all completions are empty
 
-- 2025-09-02: Add `DOCKER_CODE_EXECUTION` variable to `.env.example`
-- 2025-08-27: Adds support for weights and biases + determined pre-emption
+## 0.1.0
 
-### Changed
-
-- 2025-08-29: commented out the flacky SPHYR test
-- 2025-09-03: Packages are now released to PyPI
-
-### Fixed
-
-- 2025-08-27: fix loading of extra task modules (skip non-evaluation BaseTasks with no NAME attribute), add test that no task with same names get registered
-- 2025-08-27: fix ZERO_SCROLLS_QMSUM missing from task_names.py
-- 2025-08-29: fix BLEU/CHRF/TER min/max scoring when all completions are empty
-
-## [0.1.0] - 2025-08-18
-
-Initial release of `eval-framework`.
+- Initial release of `eval-framework`.
