@@ -1,5 +1,6 @@
 import logging
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
+from functools import partial
 from typing import Any
 
 import torch
@@ -64,7 +65,7 @@ class RepeatedTokenSequenceCriteria(StoppingCriteria):
 
 class HFLLM(BaseLLM):
     LLM_NAME: str
-    DEFAULT_FORMATTER: BaseFormatter | None = None
+    DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
 
     def __init__(self, formatter: BaseFormatter | None = None) -> None:
@@ -80,7 +81,7 @@ class HFLLM(BaseLLM):
             self._formatter = formatter
         # if formatter is not being set at initialization time, but DEFAULT_FORMATTER was specified, use it
         elif self.DEFAULT_FORMATTER is not None:
-            self._formatter = self.DEFAULT_FORMATTER
+            self._formatter = self.DEFAULT_FORMATTER()
         # if formatter is not being set at initialization time and there is no default formatter,
         # using HF chat formatter if exists
         elif self.tokenizer.chat_template is not None:
@@ -267,7 +268,7 @@ class HFLLM(BaseLLM):
 #     """
 #     A generic class to create HFLLM instances from a given model name.
 #     """
-#     DEFAULT_FORMATTER = Llama3Formatter()
+#     DEFAULT_FORMATTER = Llama3Formatter
 
 #     def __init__(self, model_name: str):
 #         self.LLM_NAME = model_name
@@ -284,82 +285,82 @@ class TruncatedLLM(HFLLM):
 
 class Bert(HFLLM):
     LLM_NAME = "google-bert/bert-base-uncased"
-    DEFAULT_FORMATTER = ConcatFormatter()
+    DEFAULT_FORMATTER = ConcatFormatter
 
 
 class Pythia410m(HFLLM):
     LLM_NAME = "EleutherAI/pythia-410m"
-    DEFAULT_FORMATTER = ConcatFormatter()
+    DEFAULT_FORMATTER = ConcatFormatter
 
 
 class SmolLM135M(HFLLM):
     LLM_NAME = "HuggingFaceTB/SmolLM-135M"
-    DEFAULT_FORMATTER = ConcatFormatter()
+    DEFAULT_FORMATTER = ConcatFormatter
 
 
 class Smollm135MInstruct(HFLLM):
     LLM_NAME = "HuggingFaceTB/SmolLM-135M-Instruct"
-    DEFAULT_FORMATTER = ConcatFormatter()
+    DEFAULT_FORMATTER = ConcatFormatter
 
 
 class SmolLM_1_7B_Instruct(HFLLM):
     LLM_NAME = "HuggingFaceTB/SmolLM-1.7B-Instruct"
-    DEFAULT_FORMATTER = ConcatFormatter()
+    DEFAULT_FORMATTER = ConcatFormatter
 
 
 class Qwen3_0_6B(HFLLM):
     LLM_NAME = "Qwen/Qwen3-0.6B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})
 
 
 class Qwen3_0_6B_No_Thinking(HFLLM):
     LLM_NAME = "Qwen/Qwen3-0.6B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_1_7B_No_Thinking(HFLLM):
     LLM_NAME = "Qwen/Qwen3-1.7B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_8B_No_Thinking(HFLLM):
     LLM_NAME = "Qwen/Qwen3-8B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_4B_No_Thinking(HFLLM):
     LLM_NAME = "Qwen/Qwen3-4B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_14B_No_Thinking(HFLLM):
     LLM_NAME = "Qwen/Qwen3-14B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_32B_No_Thinking(HFLLM):
     LLM_NAME = "Qwen/Qwen3-32B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_30B_A3B_No_Thinking(HFLLM):
     LLM_NAME = "Qwen/Qwen3-30B-A3B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Phi3Mini4kInstruct(HFLLM):
     LLM_NAME = "microsoft/Phi-3-mini-4k-instruct"
-    DEFAULT_FORMATTER = ConcatFormatter()
+    DEFAULT_FORMATTER = ConcatFormatter
 
 
 class Qwen1_5B(HFLLM):
     LLM_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
-    DEFAULT_FORMATTER = ConcatFormatter()
+    DEFAULT_FORMATTER = ConcatFormatter
 
 
 class Llama31_8B_HF(HFLLM):
     LLM_NAME = "meta-llama/Meta-Llama-3.1-8B"
-    DEFAULT_FORMATTER = ConcatFormatter()
+    DEFAULT_FORMATTER = ConcatFormatter
 
 
 class HFLLM_from_name(HFLLM):

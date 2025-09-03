@@ -6,7 +6,7 @@ import random
 import re
 import time
 import traceback
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import asdict
 
 import aiohttp
@@ -22,6 +22,7 @@ from aleph_alpha_client import (
 )
 from aleph_alpha_client.prompt import Text
 from dotenv import load_dotenv
+from uritemplate import partial
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
@@ -43,7 +44,7 @@ def safe_json_loads(s: str) -> dict:
 
 class AlephAlphaAPIModel(BaseLLM):
     LLM_NAME: str
-    DEFAULT_FORMATTER: BaseFormatter | None = None
+    DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
 
     def __init__(
         self,
@@ -55,7 +56,13 @@ class AlephAlphaAPIModel(BaseLLM):
         request_timeout_seconds: int = 30 * 60 + 5,
         queue_full_timeout_seconds: int = 30 * 60 + 5,
     ) -> None:
-        self._formatter = formatter or self.DEFAULT_FORMATTER
+        self._formatter: BaseFormatter
+        if formatter is None:
+            if self.DEFAULT_FORMATTER is None:
+                raise ValueError("Either formatter or default formatter must be specified")
+            self._formatter = self.DEFAULT_FORMATTER()
+        else:
+            self._formatter = formatter
         self._llm_name = checkpoint_name or self.LLM_NAME
         self.max_async_concurrent_requests = max_async_concurrent_requests
         self.max_retries = max_retries
@@ -250,7 +257,6 @@ class AlephAlphaAPIModel(BaseLLM):
             effective_temperature = temperature
 
         requests = []
-        assert self._formatter, "We need a formatter to generate from messages"
 
         for single_messages in messages:
             requests.append(
@@ -269,7 +275,6 @@ class AlephAlphaAPIModel(BaseLLM):
         samples_prompt: list[str] = []
         evaluation_requests: list[EvaluationRequest] = []
         results: list[RawLoglikelihood] = []
-        assert self._formatter, "We need a formatter to generate from messages"
 
         # evaluate all choices independently in flattened list
         for sample in samples:
@@ -321,56 +326,56 @@ class AlephAlphaAPIModel(BaseLLM):
         return results
 
 
-class Llama31_8B_API(AlephAlphaAPIModel):
-    LLM_NAME = "llama-3.1-8b"
-    DEFAULT_FORMATTER = ConcatFormatter()
-
-
-class Pharia1_7B_Control_API(AlephAlphaAPIModel):
-    LLM_NAME = "pharia-1-llm-7b-control"
-    DEFAULT_FORMATTER = Llama3Formatter()
-
-
-class Llama31_8B_Instruct_API(AlephAlphaAPIModel):
-    LLM_NAME = "llama-3.1-8b-instruct"
-    DEFAULT_FORMATTER = Llama3Formatter()
-
-
-class Llama31_70B_API(AlephAlphaAPIModel):
-    LLM_NAME = "llama-3.1-70b"
-    DEFAULT_FORMATTER = ConcatFormatter()
-
-
-class Llama31_70B_Instruct_API(AlephAlphaAPIModel):
-    LLM_NAME = "llama-3.1-70b-instruct"
-    DEFAULT_FORMATTER = Llama3Formatter()
-
-
-class Llama33_70B_Instruct_API(AlephAlphaAPIModel):
-    LLM_NAME = "llama-3.3-70b-instruct"
-    DEFAULT_FORMATTER = Llama3Formatter()
-
-
-class Llama31_405B_Instruct_API(AlephAlphaAPIModel):
-    LLM_NAME = "llama-3.1-405b-instruct-fp8"
-    DEFAULT_FORMATTER = Llama3Formatter()
-
-
-class Llama31_8B_Tulu_3_8B_SFT(AlephAlphaAPIModel):
-    LLM_NAME = "tulu-3-8b-sft"
-    DEFAULT_FORMATTER = HFFormatter("allenai/Llama-3.1-Tulu-3-8B-SFT")
-
-
-class Llama31_8B_Tulu_3_8B(AlephAlphaAPIModel):
-    LLM_NAME = "tulu-3-8b"
-    DEFAULT_FORMATTER = HFFormatter("allenai/Llama-3.1-Tulu-3-8B")
-
-
 class Viking_7b_API(AlephAlphaAPIModel):
     LLM_NAME = "viking-7b"
-    DEFAULT_FORMATTER = ConcatFormatter()
+    DEFAULT_FORMATTER = ConcatFormatter
 
 
 class Poro_34bChat_API(AlephAlphaAPIModel):
     LLM_NAME = "poro-34b-chat"
-    DEFAULT_FORMATTER = HFFormatter("LumiOpen/Poro-34B-chat")
+    DEFAULT_FORMATTER = partial(HFFormatter, "LumiOpen/Poro-34B-chat")
+
+
+class Pharia1_7B_Control_API(AlephAlphaAPIModel):
+    LLM_NAME = "pharia-1-llm-7b-control"
+    DEFAULT_FORMATTER = Llama3Formatter
+
+
+class Llama31_8B_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-8b"
+    DEFAULT_FORMATTER = ConcatFormatter
+
+
+class Llama31_8B_Instruct_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-8b-instruct"
+    DEFAULT_FORMATTER = Llama3Formatter
+
+
+class Llama31_70B_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-70b"
+    DEFAULT_FORMATTER = ConcatFormatter
+
+
+class Llama31_70B_Instruct_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-70b-instruct"
+    DEFAULT_FORMATTER = Llama3Formatter
+
+
+class Llama33_70B_Instruct_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.3-70b-instruct"
+    DEFAULT_FORMATTER = Llama3Formatter
+
+
+class Llama31_405B_Instruct_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-405b-instruct-fp8"
+    DEFAULT_FORMATTER = Llama3Formatter
+
+
+class Llama31_8B_Tulu_3_8B_SFT(AlephAlphaAPIModel):
+    LLM_NAME = "tulu-3-8b-sft"
+    DEFAULT_FORMATTER = partial(HFFormatter, "allenai/Llama-3.1-Tulu-3-8B-SFT")
+
+
+class Llama31_8B_Tulu_3_8B(AlephAlphaAPIModel):
+    LLM_NAME = "tulu-3-8b"
+    DEFAULT_FORMATTER = partial(HFFormatter, "allenai/Llama-3.1-Tulu-3-8B")

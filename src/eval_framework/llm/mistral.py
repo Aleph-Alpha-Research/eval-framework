@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Any, Literal, override
 
 from vllm import SamplingParams
@@ -69,4 +70,4 @@ class MistralVLLM(VLLMModel):
 
 class MagistralVLLM(MistralVLLM):
     LLM_NAME = "mistralai/Magistral-Small-2506"
-    DEFAULT_FORMATTER = MagistralFormatter("mistralai/Magistral-Small-2506")
+    DEFAULT_FORMATTER = partial(MagistralFormatter, "mistralai/Magistral-Small-2506")

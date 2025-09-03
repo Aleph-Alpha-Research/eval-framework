@@ -1,7 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from functools import partial
 from typing import Any, Literal, Protocol, cast, override
 
 import torch
@@ -90,7 +91,7 @@ class VLLMTokenizer(VLLMTokenizerAPI[str]):
 
 class VLLMModel(BaseLLM):
     LLM_NAME: str
-    DEFAULT_FORMATTER: BaseFormatter | None = None
+    DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
 
     def __init__(
@@ -147,7 +148,7 @@ class VLLMModel(BaseLLM):
         if formatter is not None:
             self._formatter = formatter
         elif self.DEFAULT_FORMATTER is not None:
-            self._formatter = self.DEFAULT_FORMATTER
+            self._formatter = self.DEFAULT_FORMATTER()
         elif self.tokenizer.chat_template is not None:
             self._formatter = HFFormatter(self.LLM_NAME)
         else:
@@ -419,69 +420,69 @@ class VLLMModel(BaseLLM):
 
 class Qwen3_0_6B_VLLM(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-0.6B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})
 
 
 class Qwen3_0_6B_VLLM_No_Thinking(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-0.6B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_1_7B_VLLM_No_Thinking(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-1.7B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_8B_VLLM_No_Thinking(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-8B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_4B_VLLM_No_Thinking(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-4B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_14B_VLLM_No_Thinking(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-14B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_32B_VLLM_No_Thinking(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-32B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_30B_A3B_VLLM_No_Thinking(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-30B-A3B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_235B_A22B_VLLM_No_Thinking(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-235B-A22B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": False})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": False})
 
 
 class Qwen3_4B_VLLM_Reasoning(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-4B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})
 
 
 class Qwen3_8B_VLLM_Reasoning(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-8B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})
 
 
 class Qwen3_14B_VLLM_Reasoning(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-14B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})
 
 
 class Qwen3_32B_VLLM_Reasoning(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-32B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})
 
 
 class Qwen3_30B_A3B_VLLM_Reasoning(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-30B-A3B"
-    DEFAULT_FORMATTER = HFFormatter(LLM_NAME, chat_template_kwargs={"enable_thinking": True})
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})

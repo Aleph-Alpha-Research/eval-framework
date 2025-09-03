@@ -266,7 +266,7 @@ def test_seq_length_priority_order() -> None:
     # Test 2: SEQ_LENGTH class attribute is used when max_model_len is None
     class Dummy_Qwen3_0_6B_VLLM(VLLMModel):
         LLM_NAME = "Qwen/Qwen3-0.6B"
-        DEFAULT_FORMATTER = ConcatFormatter()
+        DEFAULT_FORMATTER = ConcatFormatter
         SEQ_LENGTH = 128
 
     if torch.cuda.is_available():
@@ -701,7 +701,7 @@ def test_vllm_generate_with_llama_tokenizer_avoids_double_bos() -> None:
     # Create a custom model class that uses Llama tokenizer with Llama3Formatter
     class TestLlamaVLLMModel(VLLMModel):
         LLM_NAME = "meta-llama/Llama-3.1-8B-Instruct"
-        DEFAULT_FORMATTER = Llama3Formatter()
+        DEFAULT_FORMATTER = Llama3Formatter
 
     # Mock the VLLM engine to avoid actual model loading
     with patch("eval_framework.llm.vllm.LLM") as mock_llm:
@@ -775,7 +775,7 @@ def test_vllm_logprobs_with_llama_tokenizer_avoids_double_bos() -> None:
     # Create a custom model class that uses Llama tokenizer with Llama3Formatter
     class TestLlamaVLLMModel(VLLMModel):
         LLM_NAME = "meta-llama/Llama-3.1-8B-Instruct"
-        DEFAULT_FORMATTER = Llama3Formatter()
+        DEFAULT_FORMATTER = Llama3Formatter
 
     # Mock the VLLM engine to avoid actual model loading
     with patch("eval_framework.llm.vllm.LLM"):
@@ -835,7 +835,7 @@ def test_tokenizer_single_initialization(
     # Create a simple subclass of VLLMModel for testing
     class TestVLLMModel(model_cls):  # type: ignore
         LLM_NAME = "test-model"
-        DEFAULT_FORMATTER = ConcatFormatter()
+        DEFAULT_FORMATTER = ConcatFormatter
 
     with patch(f"{tokenizer_cls.__module__}.{tokenizer_cls.__name__}") as mock_tokenizer_cls:
         # Create a mock tokenizer instance that will be returned by the constructor
@@ -878,7 +878,7 @@ def test_tokenizer_initialization_performance(
 
     class TestVLLMModel(base_model_cls):  # type: ignore
         LLM_NAME = base_model_name
-        DEFAULT_FORMATTER = ConcatFormatter()
+        DEFAULT_FORMATTER = ConcatFormatter
 
     # Only mock the LLM to avoid loading the actual model weights
     with patch("eval_framework.llm.vllm.LLM"):
