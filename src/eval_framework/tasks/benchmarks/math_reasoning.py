@@ -2,9 +2,9 @@ import random
 import re
 from typing import Any, TypeVar
 
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
-from eval_framework.metrics.completion_metrics.language_checker import LanguageRawConsistencyChecker
-from eval_framework.metrics.completion_metrics.math_reasoning_completion import MathReasoningCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
+from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample
 
 SubjectType = TypeVar("SubjectType")

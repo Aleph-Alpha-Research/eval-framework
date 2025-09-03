@@ -8,13 +8,13 @@ from tqdm import tqdm
 
 from eval_framework.constants import RED, RESET
 from eval_framework.metrics.base import BaseMetric
-from eval_framework.metrics.efficiency_metrics.bytes_per_sequence_position import (
+from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesCompletion,
     BytesLoglikelihood,
     SequencePositionsCompletion,
     SequencePositionsLoglikelihood,
 )
-from eval_framework.metrics.llm_metrics.base import BaseLLMJudgeMetric
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.result_processors.base import Result, ResultProcessor
 from eval_framework.shared.types import Completion, Loglikelihood
 from eval_framework.tasks.base import ResponseType

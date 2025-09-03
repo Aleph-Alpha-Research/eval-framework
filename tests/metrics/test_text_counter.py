@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.metrics.completion_metrics.text_counter import (
+from eval_framework.metrics.completion.text_counter import (
     ParagraphCounter,
     ParagraphCounterMetricContext,
     ResponseToOriginalLengthRatio,

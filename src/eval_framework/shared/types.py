@@ -3,7 +3,7 @@ from typing import Annotated, TypeVar, cast
 
 from pydantic import BaseModel, ConfigDict
 
-from eval_framework.metrics.llm_metrics.graders.language import detect_language_of
+from eval_framework.metrics.llm.graders.language import detect_language_of
 from template_formatting.formatter import Message, Role
 
 

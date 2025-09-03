@@ -1,6 +1,6 @@
 from pytest import fixture
 
-from eval_framework.metrics.completion_metrics.struct_eval_metrics import (
+from eval_framework.metrics.completion.struct_eval_metrics import (
     RenderableStructMetric,
     RenderableStructMetricContext,
     StructMetric,

@@ -1,6 +1,6 @@
 from typing import Any
 
-from eval_framework.metrics.completion_metrics.code_assertion import CodeCompletionAssertion
+from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
 

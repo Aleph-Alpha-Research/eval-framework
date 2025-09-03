@@ -124,7 +124,7 @@ Eval-Framework provides a unified interface for evaluating language models acros
    ```python
     from pathlib import Path
 
-    from eval_framework.llm.huggingface_llm import HFLLM
+    from eval_framework.llm.huggingface import HFLLM
     from eval_framework.main import main
     from eval_framework.tasks.eval_config import EvalConfig
     from template_formatting.formatter import HFFormatter
@@ -132,7 +132,7 @@ Eval-Framework provides a unified interface for evaluating language models acros
     # Define your model
     class MyHuggingFaceModel(HFLLM):
         LLM_NAME = "microsoft/DialoGPT-medium"
-        DEFAULT_FORMATTER = HFFormatter("microsoft/DialoGPT-medium")
+        DEFAULT_FORMATTER = partial(HFFormatter, "microsoft/DialoGPT-medium")
 
     if __name__ == "__main__":
         # Initialize your model

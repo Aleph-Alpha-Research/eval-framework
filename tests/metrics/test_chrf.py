@@ -1,7 +1,7 @@
 import pytest
 
 from eval_framework.exceptions import LogicError
-from eval_framework.metrics.completion_metrics.chrf import CHRF
+from eval_framework.metrics.completion.chrf import CHRF
 from eval_framework.shared.types import Completion
 
 

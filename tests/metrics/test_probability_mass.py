@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from eval_framework.metrics.loglikelihood_metrics.probability_mass import ProbabilityMass, ProbabilityMassNorm
+from eval_framework.metrics.loglikelihood.probability_mass import ProbabilityMass, ProbabilityMassNorm
 from eval_framework.shared.types import Loglikelihood
 
 

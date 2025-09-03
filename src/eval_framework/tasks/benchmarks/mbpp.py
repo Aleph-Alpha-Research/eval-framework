@@ -3,7 +3,7 @@ import logging
 import re
 from typing import Any
 
-from eval_framework.metrics.completion_metrics.code_assertion import (
+from eval_framework.metrics.completion.code_assertion import (
     CodeCompletionAssertion,
 )
 from eval_framework.shared.types import BaseMetricContext
