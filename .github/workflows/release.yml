@@ -19,6 +19,8 @@ jobs:
           version: "~=0.8.10"
 
       - name: Check tag
+        # For test releases, we allow any version
+        if: github.event_name == 'release'
         shell: bash
         run: |
             PACKAGE_VERSION=$(uv version --short)
@@ -88,5 +90,5 @@ jobs:
           packages-dir: dist/
           # Test release platform for now
           repository-url: https://test.pypi.org/legacy/
-          skip-existing: true
+          skip-existing: false
           print-hash: true
