@@ -1,9 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import List, Sequence
+from collections.abc import Sequence
+from contextlib import contextmanager
+from pathlib import Path
 
+from eval_framework.constants import RED, RESET
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import Message
+from eval_framework.utils.file_ops import WandbFs
+from template_formatting.formatter import ConcatFormatter, HFFormatter, Llama3Formatter, Message
+from template_formatting.mistral_formatter import MagistralFormatter
 
 
 class BaseLLM(ABC):
@@ -17,11 +22,11 @@ class BaseLLM(ABC):
     @abstractmethod
     def generate_from_messages(
         self,
-        messages: List[Sequence[Message]],
+        messages: list[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
-    ) -> List[RawCompletion]:
+    ) -> list[RawCompletion]:
         """
         stop_sequences and max_tokens are injected by the task if exist. They should be overwritten or
         extended with the properties of the model. This includes but is not limited to the stop tokens
@@ -39,7 +44,7 @@ class BaseLLM(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def logprobs(self, samples: List[Sample]) -> List[RawLoglikelihood]:
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         """
         This function is expected to raise errors which are caught and reported when running the eval.
         Please also make sure to raise an error in case of sequence length issues. We expect to always
@@ -49,10 +54,53 @@ class BaseLLM(ABC):
 
     def generate(
         self,
-        samples: List[Sample],
+        samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
-    ) -> List[RawCompletion]:
-        messages: List[Sequence[Message]] = [sample.messages for sample in samples]
+    ) -> list[RawCompletion]:
+        messages: list[Sequence[Message]] = [sample.messages for sample in samples]
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
+
+    @contextmanager
+    def download_wandb_artifact(self, artifact_name, version):
+        wandb_fs = WandbFs()
+        try:
+            artifact = wandb_fs.get_artifact(artifact_name, version)
+            file_list = wandb_fs.ls(artifact)
+            wandb_fs.download_artifacts(artifact)
+            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
+            if file_root is None:
+                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
+
+            local_artifact_path = Path(wandb_fs.temp_dir.name) / file_root
+
+            print(f"{RED}[ Model downloaded to: {local_artifact_path} ]{RESET}")
+            yield local_artifact_path
+        finally:
+            wandb_fs.cleanup()
+
+    def get_formatter(
+        formatter_name: str, model_identifier: str = ""
+    ) -> Llama3Formatter | MagistralFormatter | ConcatFormatter | HFFormatter:
+        """
+        Create formatter instance based on formatter name.
+
+        Args:
+            formatter_name: Name of the formatter to create
+            model_identifier: Model name/identifier for formatters that need it
+
+        Returns:
+            Formatter instance
+        """
+        if formatter_name == "Llama3Formatter":
+            return Llama3Formatter()
+        elif formatter_name == "MistralFormatter":
+            return MagistralFormatter(model_identifier)
+        elif formatter_name == "ConcatFormatter":
+            return ConcatFormatter()
+        elif formatter_name == "HFFormatter":
+            return HFFormatter(model_identifier)
+        else:
+            supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
+            raise ValueError(f"Unsupported formatter: {formatter_name}. Supported formatters: {supported}")

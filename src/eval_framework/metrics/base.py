@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -25,10 +25,7 @@ class classproperty:
         return self.method(cls)
 
 
-Response = TypeVar("Response")
-
-
-class BaseMetric(ABC, Generic[Response]):
+class BaseMetric[Response](ABC):
     NAME: str
     KEYS: list[str] | None = None
 

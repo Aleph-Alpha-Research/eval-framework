@@ -55,13 +55,11 @@ openai = [
   "openai>=1.62,<2",
   "tiktoken>=0.9,<0.10"
 ]
-# Transformers must be an optional dependency because these need the latest flash attention, which is not compatible
-# with the nvidia base image with torch=2.4 used in scaling.
-transformers = ["transformers>=4.45.2,<5", "torch"]
+transformers = ["transformers>=4.45.2,<5", "torch>=2.5,<3"]
 accelerate = ["accelerate"]
 vllm = [
   "vllm>=0.8.5,<0.9",
-  "torch"
+  "torch>=2.5,<3"
 ]
 # from template-formatting
 optional = [
@@ -71,6 +69,9 @@ optional = [
 mistral = [
   "mistral-common>=1.7,<2",
   "huggingface-hub>=0.33.2,<0.34",
+]
+all = [
+  "eval_framework[determined,api,openai,transformers,accelerate,vllm,optional,mistral]"
 ]
 
 [project.urls]
@@ -84,13 +85,14 @@ dev = [
   "mypy>=1.10,<2",
   "pytest>=8.3.3,<9",
   "pytest-xdist>=3.6.1,<4",
+  "pytest-sugar>1.1,<2",
   "types-pyyaml>=6.0.12.20240917,<7",
   "types-toml>=0.10.8.20240310,<0.11",
   "plotly>=5.24.1,<6",
   "types-redis>=4.6.0.20241004,<5",
   "ruff>=0.12.8",
 ]
-flash-attn = ["flash-attn==2.7.2.post1"]
+flash-attn = ["flash-attn>=2.7.2.post1,<3"]
 cu124 = ["torch"]
 cpu = ["torch"]
 
@@ -137,7 +139,12 @@ flash-attn = [{ requirement = "torch", match-runtime = true }]
 line-length = 120
 
 [tool.ruff.lint]
-select = ["I", "E", "F"]
+select = [
+    "E", # Pycodestyle Errors
+    "F", # Pyflakes
+    "UP", # Auto-upgrading of new Python features
+    "I", # Sort imports
+]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "__init__.py" = ["F401"]

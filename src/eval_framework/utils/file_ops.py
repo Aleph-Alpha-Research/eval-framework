@@ -6,7 +6,6 @@ import urllib
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
 from pathlib import Path
-from typing import List, Tuple
 
 import boto3
 import wandb
@@ -64,7 +63,7 @@ class WandbFs:
     def entity(self):
         return self.api.entity
 
-    def create_file_tree(self, artifact_reference_list: List[str]) -> dict:
+    def create_file_tree(self, artifact_reference_list: list[str]) -> dict:
         """
         creates a file tree from a list of artifact references
 
@@ -89,7 +88,7 @@ class WandbFs:
     def get_artifact(self, artifact_id: str, version: str = "latest"):
         return self.api.artifact(f"wandb-registry-model/{artifact_id}:{version}")
 
-    def get_bucket_prefix(self, artifact: str) -> Tuple[str, str]:
+    def get_bucket_prefix(self, artifact: str) -> tuple[str, str]:
         _, bucket, prefix, *_ = urllib.parse.urlparse(artifact)
         return bucket, prefix
 
@@ -105,7 +104,7 @@ class WandbFs:
         file_list = list(map(lambda x: x.path_uri, [x for x in artifact.files()]))
         return file_list
 
-    def file_system_detector(self, file_list: List[str]):
+    def file_system_detector(self, file_list: list[str]):
         if all(file.startswith("s3://") for file in file_list):
             return FileSystem.S3
         return FileSystem.LOCAL
@@ -170,7 +169,7 @@ class WandbFs:
 
         2. if the file system is local, then we just call wandb.use_artifact
         """
-
+        # TODO get the artifact without using first, download, and then upon success, use artifact
         artifact = wandb.use_artifact(artifact)
 
         file_system = self.file_system_detector(self.ls(artifact))
@@ -197,7 +196,7 @@ class WandbFs:
 
         return artifact_path
 
-    def _has_hf_checkpoint(self, files: List[str]) -> bool:
+    def _has_hf_checkpoint(self, files: list[str]) -> bool:
         """Check if the current directory contains a HuggingFace checkpoint.
 
         Args:
@@ -254,7 +253,7 @@ class WandbFs:
 
         return None
 
-    def find_hf_checkpoint_root_from_path_list(self, file_paths: List[str]) -> str | None:
+    def find_hf_checkpoint_root_from_path_list(self, file_paths: list[str]) -> str | None:
         """Find HuggingFace checkpoint root from a list of file paths.
 
         Args:
@@ -290,6 +289,9 @@ class WandbFs:
             current["files"].append(filename)
 
         return self.find_hf_checkpoint_root(tree)
+
+    def cleanup(self):
+        self._cleanup_temp_dir()
 
     def __enter__(self):
         return self

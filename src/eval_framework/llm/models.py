@@ -1,6 +1,4 @@
-import os
-from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -10,7 +8,6 @@ from eval_framework.llm.aleph_alpha_api_llm import AlephAlphaAPIModel
 from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.huggingface_llm import HFLLM
 from eval_framework.llm.vllm_models import MistralVLLM, VLLMModel
-from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import (
     ConcatFormatter,
     HFFormatter,
@@ -229,38 +226,12 @@ class Llama31_8B_Tulu_3_8B(AlephAlphaAPIModel):
     DEFAULT_FORMATTER = HFFormatter("allenai/Llama-3.1-Tulu-3-8B")
 
 
-class FormatterFactory:
-    @staticmethod
-    def create_formatter(formatter_name: str, model_identifier: str = "") -> Any:
-        """
-        Create formatter instance based on formatter name.
-
-        Args:
-            formatter_name: Name of the formatter to create
-            model_identifier: Model name/identifier for formatters that need it
-
-        Returns:
-            Formatter instance
-        """
-        if formatter_name == "Llama3Formatter":
-            return Llama3Formatter()
-        elif formatter_name == "MistralFormatter":
-            return MagistralFormatter(model_identifier)
-        elif formatter_name == "ConcatFormatter":
-            return ConcatFormatter()
-        elif formatter_name == "HFFormatter":
-            return HFFormatter(model_identifier)
-        else:
-            supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
-            raise ValueError(f"Unsupported formatter: {formatter_name}. Supported formatters: {supported}")
-
-
 class HFLLM_from_name(HFLLM):
     """
     A generic class to create HFLLM instances from a given model name.
     """
 
-    def __init__(self, model_name: Optional[str] = None, formatter: str = "Llama3Formatter", **kwargs: Any) -> None:
+    def __init__(self, model_name: str | None = None, formatter: str = "Llama3Formatter", **kwargs: Any) -> None:
         if model_name is None:
             raise ValueError("model_name is required")
 
@@ -270,7 +241,7 @@ class HFLLM_from_name(HFLLM):
         self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
 
         # Lazy formatter initialization - only create the one we need
-        selected_formatter = FormatterFactory.create_formatter(formatter, model_name)
+        selected_formatter = self.get_formatter(formatter, model_name)
 
         print(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
@@ -302,29 +273,16 @@ class HFLLM_from_wandb_registry(HFLLM):
         """
         print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
 
-        with WandbFs() as wandb_fs:
-            artifact = wandb_fs.get_artifact(artifact_name, version)
-            file_list = wandb_fs.ls(artifact)
-            wandb_fs.download_artifacts(artifact)
-            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
-
-            if file_root is None:
-                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
-
-            local_artifact_path = os.path.join(Path(wandb_fs.temp_dir.name), Path(file_root))
-
-            print(f"{RED}[ Model downloaded to: {local_artifact_path} ]{RESET}")
-
+        with self.download_wandb_artifact(artifact_name, version) as local_artifact_path:
             self.LLM_NAME = local_artifact_path
             self.artifact_name = artifact_name
             self.artifact_version = version
-            selected_formatter = FormatterFactory.create_formatter(formatter, formatter_identifier)
-
+            selected_formatter = self.get_formatter(formatter, formatter_identifier)
             super().__init__(formatter=selected_formatter)
 
-            print(f"{RED}[ Model initialized --------------------- {RESET}")
-            print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
-            print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+        print(f"{RED}[ Model initialized --------------------- {RESET}")
+        print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
+        print(f"{RED}[ Formatter: {formatter} ]{RESET}")
 
 
 class VLLM_from_wandb_registry(VLLMModel):
@@ -354,30 +312,18 @@ class VLLM_from_wandb_registry(VLLMModel):
         """
         print(f"{RED}[ Loading registered model from Wandb for VLLM: {artifact_name}:{version} ]{RESET}")
 
-        with WandbFs() as wandb_fs:
-            artifact = wandb_fs.get_artifact(artifact_name, version)
-            file_list = wandb_fs.ls(artifact)
-            wandb_fs.download_artifacts(artifact)
-            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
+        self.artifact_name = artifact_name
+        self.artifact_version = version
+        selected_formatter = self.get_formatter(formatter, formatter_identifier)
 
-            if file_root is None:
-                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
-
-            local_artifact_path = os.path.join(Path(wandb_fs.temp_dir.name), Path(file_root))
-
-            print(f"{RED}[ Model downloaded to: {local_artifact_path} ]{RESET}")
-
+        with self.download_wandb_artifact(artifact_name, version) as local_artifact_path:
             self.LLM_NAME = local_artifact_path
-            self.artifact_name = artifact_name
-            self.artifact_version = version
-
-            selected_formatter = FormatterFactory.create_formatter(formatter, formatter_identifier)
 
             super().__init__(formatter=selected_formatter, checkpoint_path=local_artifact_path, **kwargs)
 
-            print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
-            print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
-            print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+        print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
+        print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
+        print(f"{RED}[ Formatter: {formatter} ]{RESET}")
 
 
 class RegistryModel(BaseLLM):
