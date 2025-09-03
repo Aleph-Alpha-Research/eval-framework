@@ -12,6 +12,8 @@ try:
 except ImportError:
     get_cluster_info = None  # type: ignore[assignment]
 
+import logging
+
 from tqdm import tqdm
 
 from eval_framework import __version__ as eval_framework_version
@@ -23,8 +25,9 @@ from eval_framework.tasks.base import Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import create_perturbation_class
 from eval_framework.tasks.utils import raise_errors
-from eval_framework.utils.logging_config import get_logger
 from template_formatting.formatter import Message, Role
+
+logger = logging.getLogger(__name__)
 
 
 def map_language_to_value(
@@ -41,9 +44,6 @@ def map_language_to_value(
             return {k: (v[0].value, v[1].value) for k, v in language.items()}  # type: ignore[index]
     else:
         raise ValueError(f"Invalid language: {language}")
-
-
-logger = get_logger(__name__)
 
 
 class ResponseGenerator:
