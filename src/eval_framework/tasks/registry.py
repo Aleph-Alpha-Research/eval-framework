@@ -1,5 +1,4 @@
 import contextlib
-import importlib.metadata
 import importlib.util
 import re
 from collections.abc import Generator, Iterator, Sequence
