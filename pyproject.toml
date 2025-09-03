@@ -44,6 +44,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Model-specific extras
 determined = [
   "determined>=0.38,<0.39",
   "tensorboard==2.19.0"
@@ -53,14 +54,15 @@ openai = [
   "openai>=1.62,<2",
   "tiktoken>=0.9,<0.10"
 ]
-comet = [
-  "unbabel-comet>=2.2.6,<3",
-]
 transformers = ["transformers>=4.45.2,<5", "torch>=2.5,<3"]
 accelerate = ["accelerate"]
 vllm = [
   "vllm>=0.8.5,<0.9",
   "torch>=2.5,<3"
+]
+# Benchmark/metric specific extras
+comet = [
+  "unbabel-comet>=2.2.6,<3",
 ]
 # from template-formatting
 optional = [
@@ -72,7 +74,7 @@ mistral = [
   "huggingface-hub>=0.33.2,<0.34",
 ]
 all = [
-  "eval_framework[determined,api,openai,transformers,accelerate,vllm,optional,mistral]"
+  "eval_framework[determined,api,openai,transformers,accelerate,vllm,comet,optional,mistral]"
 ]
 
 [project.urls]
