@@ -10,6 +10,7 @@
 ### Changed
 
 - 2025-08-29: commented out the flacky SPHYR test
+- 2025-09-03: Packages are now released to PyPI
 
 ### Fixed
 
