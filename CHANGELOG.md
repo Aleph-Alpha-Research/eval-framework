@@ -8,7 +8,6 @@
 
 ### Changed
 
-- 2025-08-02: remove _get_fewshot_target_text from GSM8KReasoning to make it consistent with other benchmarks that inherit from MATHReasoning and have no few-shot capability such as AIME2024 or MATH500
 - 2025-08-29: commented out the flacky SPHYR test
 
 ### Fixed
