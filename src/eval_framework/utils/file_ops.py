@@ -1,5 +1,6 @@
 import atexit
 import os
+import re
 import signal
 import tempfile
 import urllib
@@ -13,9 +14,9 @@ from wandb.sdk.lib.paths import StrPath
 
 
 class WandbFs:
-    def __init__(self):
+    def __init__(self, download_path: str | None = None):
         self.api = wandb.Api()
-        self.temp_dir = None
+        self.download_path = Path(download_path) if download_path else None
         self._setup_s3_client()
         self._setup_cleanup_handlers()
 
@@ -86,9 +87,6 @@ class WandbFs:
         Returns:
             str | The path to the downloaded artifact.
         """
-        # create tempdir
-        if self.temp_dir is None:
-            self.temp_dir = tempfile.TemporaryDirectory()
 
         file_list = self.ls(artifact)
 
@@ -97,14 +95,14 @@ class WandbFs:
             with tqdm(total=len(file_list), desc="Downloading artifacts", unit="file") as pbar:
 
                 def download_with_progress(file):
-                    result = self._download_artifact(file)
+                    result = self._download_artifact(file, artifact.version)
                     pbar.update(1)
                     return result
 
                 list(executor.map(download_with_progress, file_list))
-        return self.temp_dir.name
+        return self.download_path.name
 
-    def _download_artifact(self, file: str) -> None:
+    def _download_artifact(self, file: str, version: str) -> None:
         """
         downloads the provided file from a wandb artifact
 
@@ -113,11 +111,17 @@ class WandbFs:
         Returns:
             None
         """
+        # corner case:
+        # if an artifact has been registered more than once and is a duplicate, the version in the s3 path will point
+        # to the original.
+        # e.g. artifact, A, is registered twice and has versions v0 and v1.
+        # both versions point to an s3 artifact with a v0 atom
+        # this is why the regex expression exists
         local_path = Path(urllib.parse.urlparse(file).path)
         bucket, prefix = self.get_bucket_prefix(file)
-        local_temp_path = Path(os.path.join(self.temp_dir.name, str(local_path).strip("/")))
-        local_temp_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(local_temp_path, "wb") as f:
+        local_path = Path(os.path.join(self.download_path, re.sub(r"v\d+", version, str(local_path)).strip("/")))
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(local_path, "wb") as f:
             self.s3_client.download_fileobj(Bucket=bucket, Key=prefix.lstrip("/"), Fileobj=f)
 
     def download_and_use_artifact(
@@ -135,11 +139,17 @@ class WandbFs:
            we then call wandb.use_artifact on the artifact that we downloaded.
         2. if this download fails, we try to use boto3 to retrieve the artifact.
         """
-        # TODO get the artifact without using first, download, and then upon success, use artifact
+        # create tempdir
+        if self.download_path is None:
+            self.download_path = tempfile.TemporaryDirectory()
 
+        # check to see if artifact is already in the download_path
+        if artifact_path := [x for x in self.download_path.glob(f"**/{'/'.join(artifact.name.split(':'))}")][0]:
+            print(f"Artifact {artifact.name} is already downloaded.")
+            return artifact_path.parent
         try:
             artifact_path = artifact.download(
-                root=root,
+                root=self.download_path,
                 allow_missing_references=allow_missing_references,
                 skip_cache=skip_cache,
                 path_prefix=path_prefix,
@@ -166,10 +176,10 @@ class WandbFs:
         Returns:
             str | None: Path to the HuggingFace checkpoint root folder, or None if not found
         """
-        if not self.temp_dir:
+        if not self.download_path:
             return None
 
-        checkpoint_roots = [x for x in Path(self.temp_dir.name).glob("**/config.json")]
+        checkpoint_roots = [x for x in Path(self.download_path).glob("**/config.json")]
         if checkpoint_roots:
             assert len(checkpoint_roots) == 1, (
                 "Multiple checkpoints found"
@@ -188,14 +198,14 @@ class WandbFs:
         self._cleanup_temp_dir()
 
     def _cleanup_temp_dir(self):
-        if self.temp_dir:
+        if isinstance(self.download_path, tempfile.TemporaryDirectory):
             try:
-                self.temp_dir.cleanup()
+                self.download_path.cleanup()
             except (OSError, FileNotFoundError):
                 # Directory might already be cleaned up or removed
                 pass
             finally:
-                self.temp_dir = None
+                self.download_path = None
 
     def __del__(self):
         self._cleanup_temp_dir()
@@ -204,6 +214,8 @@ class WandbFs:
 if __name__ == "__main__":
     from eval_framework.llm.models import HFLLM_from_wandb_registry
 
+    wandb.init(project="test-project")
     name = "SmolLM2-135M"
     version = "v1"
-    model = HFLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter")
+    cache_dir = "/nfs/scratch_2/dylan_rodriquez/registry_cache"
+    model = HFLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter", download_path=cache_dir)

@@ -101,8 +101,8 @@ class TestWandbFs:
 
         result = wandb_fs.download_artifacts(artifact)
 
-        assert wandb_fs.temp_dir is not None
-        assert result == wandb_fs.temp_dir.name
+        assert wandb_fs.download_path is not None
+        assert result == wandb_fs.download_path.name
         # Should only download first 4 files
         assert mock_s3_client_instance.download_fileobj.call_count == 4
 
@@ -121,8 +121,8 @@ class TestWandbFs:
 
     def test_find_hf_checkpoint_from_s3_paths(self, wandb_fs):
         # Create temporary files to simulate the directory structure
-        wandb_fs.temp_dir = tempfile.TemporaryDirectory()
-        tempdir = Path(wandb_fs.temp_dir.name)
+        wandb_fs.download_path = tempfile.TemporaryDirectory()
+        tempdir = Path(wandb_fs.download_path.name)
         model_dir = tempdir / "models" / "my-model"
         model_dir.mkdir(parents=True)
 
@@ -138,8 +138,8 @@ class TestWandbFs:
         assert result == tempdir / "models/my-model"
 
     def test_find_hf_checkpoint_from_empty_dir(self, wandb_fs):
-        wandb_fs.temp_dir = tempfile.TemporaryDirectory()
-        tempdir = Path(wandb_fs.temp_dir.name)
+        wandb_fs.download_path = tempfile.TemporaryDirectory()
+        tempdir = Path(wandb_fs.download_path.name)
         model_dir = tempdir / "models" / "my-model"
         model_dir.mkdir(parents=True)
 
