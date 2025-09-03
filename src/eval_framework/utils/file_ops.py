@@ -145,13 +145,13 @@ class WandbFs:
                 path_prefix=path_prefix,
                 multipart=multipart,
             )
-            artifact = wandb.use_artifact(artifact)
+            wandb.use_artifact(artifact)
 
         except Exception as e:
             print(f"failed to download artifact {e}, trying boto")
             try:
                 artifact_path = self.download_artifacts(artifact)
-                artifact = wandb.use_artifact(artifact)
+                wandb.use_artifact(artifact)
             except Exception as e:
                 print(f"failed to download artifacts using boto: {e}")
 
