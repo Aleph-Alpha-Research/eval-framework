@@ -168,7 +168,7 @@ def register_all_tasks() -> None:
     )
     register_lazy_task("QUALITY", class_path="eval_framework.tasks.benchmarks.quality.QUALITY")
     register_lazy_task("SPHYR", class_path="eval_framework.tasks.benchmarks.sphyr.SPHYR")
-    register_lazy_task(name="STRUCT_EVAL", class_path="eval_framework.tasks.benchmarks.struct_eval.StructEval")
+    register_lazy_task("STRUCT_EVAL", class_path="eval_framework.tasks.benchmarks.struct_eval.StructEval")
     register_lazy_task(
         "RENDERABLE_STRUCT_EVAL", class_path="eval_framework.tasks.benchmarks.struct_eval.RenderableStructEval"
     )
