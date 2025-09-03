@@ -6,8 +6,8 @@ from pathlib import Path
 
 import tqdm
 
-from eval_framework.task_loader import load_extra_tasks
-from eval_framework.task_names import TaskName
+from eval_framework.tasks.registry import get_task, registered_task_names
+from eval_framework.tasks.task_loader import load_extra_tasks
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 
 DEFAULT_OUTPUT_DOCS_DIRECTORY = Path("docs/tasks")
@@ -69,8 +69,7 @@ def generate_docs_for_task(
     output_docs_directory: Path, task_name: str, formatters: list[BaseFormatter], add_prompt_examples: bool
 ) -> None:
     """Generate documentation for a specific task."""
-
-    task_class = TaskName[task_name].value
+    task_class = get_task(task_name)
 
     try:
         num_fewshot = 1
@@ -182,12 +181,12 @@ def generate_all_docs(args: argparse.Namespace, output_docs_directory: Path) -> 
 
     # List the tasks to process
     filtered_tasks = []
-    for t in TaskName:
-        if args.only_tasks and t.name not in args.only_tasks:
+    for task_name in registered_task_names():
+        if args.only_tasks and task_name not in args.only_tasks:
             continue
-        if t.name in args.exclude_tasks or t.name in EXCLUDED_TASKS:
+        if task_name in args.exclude_tasks or task_name in EXCLUDED_TASKS:
             continue
-        filtered_tasks.append(t.name)
+        filtered_tasks.append(task_name)
     filtered_tasks.sort()
 
     print(f"Found {len(filtered_tasks)} tasks to process: {', '.join([task_name for task_name in filtered_tasks])}")

@@ -13,9 +13,9 @@ from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.hf_processor import HFProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor, generate_output_dir
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.utils.logging_config import get_logger, setup_logging
+from eval_framework.utils import setup_logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def main(
@@ -31,7 +31,7 @@ def main(
     setup_logging(output_dir=output_dir, log_level=logging.INFO, log_filename="evaluation.log")
 
     logger.info(f"{RED}[ Running full evaluation process ------- ]{RESET}")
-    logger.info(f"Evaluating {llm.name} on {config.task_name.name}")
+    logger.info(f"Evaluating {llm.name} on {config.task_name}")
     logger.info(f"Configuration: num_fewshot={config.num_fewshot}, num_samples={config.num_samples}")
     logger.info(f"Output directory: {output_dir}")
 
@@ -62,7 +62,7 @@ def main(
         entity=config.wandb_entity,
         project=config.wandb_project,
         group=llm.name,
-        job_type=config.task_name.name,
+        job_type=config.task_name,
         id=wandb_run_id,
         config=response_generator._get_metadata(),
         resume="allow",

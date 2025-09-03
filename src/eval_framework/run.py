@@ -8,12 +8,14 @@ try:
 except ImportError:
     DeterminedContext = None  # type: ignore
 
+import logging
+
 from eval_framework.context.local import LocalContext
 from eval_framework.main import main
-from eval_framework.task_loader import load_extra_tasks
-from eval_framework.utils.logging_config import get_logger, setup_logging
+from eval_framework.tasks.task_loader import load_extra_tasks
+from eval_framework.utils import setup_logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 CONTEXT = {
     "local": LocalContext,

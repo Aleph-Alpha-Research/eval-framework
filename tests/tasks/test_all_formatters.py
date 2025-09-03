@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.task_names import TaskName
+from eval_framework.tasks.registry import get_task, registered_task_names
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.utils import DatasetPatcher, assert_hash_string
 
@@ -95,19 +95,19 @@ SPECIAL_ARGS = {
 
 
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-@pytest.mark.parametrize("task_name", list(TaskName))
-def test_all_tasks_formatter(task_name: TaskName, formatter_cls: type["BaseFormatter"]) -> None:
+@pytest.mark.parametrize("task_name", registered_task_names())
+def test_all_tasks_formatter(task_name: str, formatter_cls: type["BaseFormatter"]) -> None:
     """
     Test that the formatted sample for each (Task, Formatter) pair is consistent by hashing the output.
 
     Args:
-        task_name (TaskName): The task enum value, to be tested.
-        formatter_cls (Type[BaseFormatter]): The formatter class to be tested.
+        task_name: The task enum value, to be tested.
+        formatter_cls: The formatter class to be tested.
 
     Raises:
         AssertionError: If the hash of the formatter output does not match expectation.
     """
-    task_class = task_name.value
+    task_class = get_task(task_name)
     if task_class.__name__ in SKIP_TASKS:
         pytest.skip(f"Skipping {task_class.__name__} appearing in the SKIP_TASKS list.")
 

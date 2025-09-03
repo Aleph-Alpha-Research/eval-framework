@@ -9,10 +9,11 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, RawCompletion
-from eval_framework.task_names import TaskName
 from eval_framework.tasks.base import Sample
+from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig, PerturbationType
+from eval_framework.tasks.registry import get_task
 from template_formatting.formatter import Message, Role
 from tests.conftest import MockLLM
 
@@ -418,7 +419,7 @@ def test_perturbed_response_differs(tmp_path: Path, perturbation_type: Perturbat
     """Test that perturbed responses differ from original samples for each perturbation type."""
     output_dir = tmp_path / "eval"
     perturbed_eval_config = EvalConfig(
-        task_name=TaskName.ARC,  # Use a simple task for testing
+        task_name=ARC.NAME,  # Use a simple task for testing
         num_fewshot=0,
         num_samples=1,
         output_dir=output_dir,
@@ -433,7 +434,8 @@ def test_perturbed_response_differs(tmp_path: Path, perturbation_type: Perturbat
         save_intermediate_results=False,
     )
 
-    task = perturbed_eval_config.task_name.value()
+    task_class = get_task(perturbed_eval_config.task_name)
+    task = task_class()
     perturbed_response_generator = ResponseGenerator(MockLLM(), perturbed_eval_config, Mock(spec=ResultsFileProcessor))
 
     task._load_dataset(task.SUBJECTS[0])

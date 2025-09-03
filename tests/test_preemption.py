@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from eval_framework.main import main
-from eval_framework.task_names import TaskName
+from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
 from tests.conftest import MockLLM
 
@@ -24,14 +24,14 @@ def test_preemption(tmp_path: Path, save_intermediate_results: bool) -> None:
         return False
 
     eval_preempt_config = EvalConfig(
-        task_name=TaskName.ARC,
+        task_name=ARC.NAME,
         num_fewshot=0,
         num_samples=10,
         output_dir=output_dir_preempt,
         llm_class=mock_llm.__class__,
     )
     eval_config = EvalConfig(
-        task_name=TaskName.ARC,
+        task_name=ARC.NAME,
         num_fewshot=0,
         num_samples=10,
         output_dir=output_dir,
