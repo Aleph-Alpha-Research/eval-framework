@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 
 ANS_RE = re.compile(r"#### (\-?[0-9\.\,]+)")

@@ -2,7 +2,7 @@ import random
 import re
 from typing import Any
 
-from eval_framework.metrics.completion_metrics.code_execution_pass_at_one import (
+from eval_framework.metrics.completion.code_execution_pass_at_one import (
     CodeExecutionPassAtOne,
     CodeExecutionPassAtOneContext,
 )

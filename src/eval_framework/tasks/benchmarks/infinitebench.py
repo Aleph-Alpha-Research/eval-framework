@@ -6,8 +6,8 @@ from typing import Any
 
 from datasets import DownloadConfig, Features, Sequence, Value, load_dataset
 
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import AccuracyLoglikelihood
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 
 

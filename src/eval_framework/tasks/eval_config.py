@@ -8,7 +8,7 @@ from pydantic import AfterValidator, Field, field_serializer, field_validator, m
 from eval_framework.base_config import BaseConfig
 from eval_framework.constants import ROOT_DIR
 from eval_framework.llm.base import BaseLLM
-from eval_framework.metrics.llm_metrics.base import BaseLLMJudgeMetric
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.perturbation import PerturbationConfig
 from eval_framework.tasks.registry import get_task, validate_task_name

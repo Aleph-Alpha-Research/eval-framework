@@ -4,7 +4,7 @@ from abc import ABC
 from typing import Any
 
 from eval_framework.metrics.base import BaseMetric
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
 
 

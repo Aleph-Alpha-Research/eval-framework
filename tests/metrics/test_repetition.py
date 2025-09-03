@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.metrics.completion_metrics.repetition import WordRepetition
+from eval_framework.metrics.completion.repetition import WordRepetition
 from eval_framework.shared.types import Completion
 
 

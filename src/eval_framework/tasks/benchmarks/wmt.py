@@ -5,9 +5,9 @@ from typing import Any
 import pycountry
 import sacrebleu
 
-from eval_framework.metrics.completion_metrics.bleu import LINEWISE_BLEU
-from eval_framework.metrics.completion_metrics.chrf import LINEWISE_CHRF
-from eval_framework.metrics.completion_metrics.ter import LINEWISE_TER
+from eval_framework.metrics.completion.bleu import LINEWISE_BLEU
+from eval_framework.metrics.completion.chrf import LINEWISE_CHRF
+from eval_framework.metrics.completion.ter import LINEWISE_TER
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
 
 

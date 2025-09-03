@@ -1,7 +1,7 @@
 import pytest
 
 from eval_framework.exceptions import LogicError
-from eval_framework.metrics.completion_metrics.bleu import BLEU, ResponseToOriginalBLEU
+from eval_framework.metrics.completion.bleu import BLEU, ResponseToOriginalBLEU
 from eval_framework.shared.types import Completion
 from template_formatting.formatter import Message, Role
 
