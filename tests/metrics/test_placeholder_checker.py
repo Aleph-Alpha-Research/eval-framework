@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.metrics.completion_metrics.placeholder_checker import (
+from eval_framework.metrics.completion.placeholder_checker import (
     PlaceholderChecker,
     PlaceholderCheckerMetricContext,
 )

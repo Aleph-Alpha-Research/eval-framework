@@ -1,11 +1,11 @@
 import random
 from typing import Any
 
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import (
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
-from eval_framework.metrics.loglikelihood_metrics.probability_mass import ProbabilityMass, ProbabilityMassNorm
+from eval_framework.metrics.loglikelihood.probability_mass import ProbabilityMass, ProbabilityMassNorm
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
 
 # fewshot examples from Appendix E in https://arxiv.org/pdf/2109.07958

@@ -5,7 +5,7 @@ from typing import Any
 
 from datasets import DatasetDict
 
-from eval_framework.metrics.completion_metrics.struct_eval_metrics import RenderableStructMetric, StructMetric
+from eval_framework.metrics.completion.struct_eval_metrics import RenderableStructMetric, StructMetric
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
 
 StructEvalSubjects = [

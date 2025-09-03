@@ -11,7 +11,6 @@ from eval_framework.context.eval import import_models
 from eval_framework.context.local import LocalContext
 from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.models import Llama31_8B_API, Pharia1_7B_Control_API
-from eval_framework.task_names import TaskName
 from eval_framework.tasks.perturbation import PerturbationType
 
 
@@ -73,7 +72,7 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         num_samples=10000,
         max_tokens=111,
         num_fewshot=555,  # overriden by hparams
-        task_name=TaskName.GSM8K,  # overriden by hparams
+        task_name="GSM8K",  # overriden by hparams
         task_subjects=None,
         output_dir=Path("dummyXXX"),  # overriden by hparams
         hf_upload_dir="dummy123",
@@ -93,7 +92,7 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         assert ctx.config.num_samples == 10000
         assert ctx.config.max_tokens == 111
         assert ctx.config.num_fewshot == 0
-        assert ctx.config.task_name == TaskName.ARC
+        assert ctx.config.task_name == "ARC"
         assert ctx.config.task_subjects is None
         assert ctx.config.output_dir == Path("dummy")
         assert ctx.config.hf_upload_dir == "dummy123"
@@ -118,7 +117,7 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         num_samples=10000,  # overriden by hparams
         max_tokens=111,  # overriden by hparams
         num_fewshot=555,  # overriden by hparams
-        task_name=TaskName.GSM8K,  # overriden by hparams
+        task_name="GSM8K",  # overriden by hparams
         task_subjects=None,  # overriden by hparams
         output_dir=Path("dummyXXX"),  # overriden by hparams
         hf_upload_dir="dummy123",  # overriden by hparams
@@ -138,7 +137,7 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         assert ctx.config.num_samples == 10
         assert ctx.config.max_tokens == 100
         assert ctx.config.num_fewshot == 0
-        assert ctx.config.task_name == TaskName.ARC
+        assert ctx.config.task_name == "ARC"
         assert ctx.config.task_subjects == ["subject1", "subject2"]
         assert ctx.config.output_dir == Path("dummy")
         assert ctx.config.hf_upload_dir == "hf_dummy"
@@ -175,7 +174,7 @@ def test_local_context() -> None:
         assert ctx.config.llm_class.__name__ == Llama31_8B_API.__name__
         assert ctx.config.num_samples == 10
         assert ctx.config.num_fewshot == 0
-        assert ctx.config.task_name == TaskName.ARC
+        assert ctx.config.task_name == "ARC"
         assert ctx.config.output_dir == Path("dummy")
         assert ctx.config.hf_upload_dir == "dummy22"
         assert ctx.config.llm_args == {"dummy": "dummy"}
@@ -186,7 +185,7 @@ def test_local_context() -> None:
 
 def test_import_models() -> None:
     models = import_models(Path("src/eval_framework/llm/models.py"))
-    huggingface_llm = import_models(Path("src/eval_framework/llm/huggingface_llm.py"))
+    huggingface_llm = import_models(Path("src/eval_framework/llm/huggingface.py"))
 
     assert "SmolLM135M" in models
     assert "Pythia410m" in models

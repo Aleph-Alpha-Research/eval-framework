@@ -1,7 +1,7 @@
 import pytest
 
 from eval_framework.metrics.base import MetricResult
-from eval_framework.metrics.completion_metrics.cwe_accuracy import CWEAccuracy
+from eval_framework.metrics.completion.cwe_accuracy import CWEAccuracy
 from eval_framework.shared.types import Completion, Error
 from template_formatting.formatter import Message, Role
 

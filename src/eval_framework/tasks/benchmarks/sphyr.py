@@ -1,6 +1,6 @@
 from typing import Any
 
-from eval_framework.metrics.completion_metrics.grid_difference import GridDifference
+from eval_framework.metrics.completion.grid_difference import GridDifference
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
 
 SUBJECTS = [

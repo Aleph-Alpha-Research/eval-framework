@@ -13,8 +13,10 @@ from eval_framework.constants import GREEN, RED, RESET
 from eval_framework.llm.base import BaseLLM
 from eval_framework.main import main
 from eval_framework.result_processors.base import Result
-from eval_framework.task_names import TaskName
+from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
+from eval_framework.tasks.benchmarks.wmt import WMT14
 from eval_framework.tasks.eval_config import EvalConfig
+from eval_framework.tasks.registry import get_task
 from tests.conftest import MockLLM
 
 NUM_FEWSHOT = 2
@@ -25,14 +27,14 @@ NUM_SAMPLES = 10
 experiment_setups = [
     (
         "SmolLM135M",
-        TaskName.HELLASWAG,
+        HELLASWAG.NAME,
         {"Accuracy Loglikelihood": 0.4, "Accuracy Normalized Loglikelihood": 0.6},
         NUM_FEWSHOT,
         NUM_SAMPLES,
     ),
     (
         "Pythia410m",
-        TaskName.WMT14,
+        WMT14.NAME,
         {"BLEU": 10.349088304273867, "chrF": 31.319761493950665, "TER": 835.0922904366865},
         NUM_FEWSHOT,
         NUM_SAMPLES,
@@ -64,7 +66,7 @@ def _almost_equal(x: float, y: float) -> bool:
 def test_automatic_tasks(
     tmp_path: Path,
     test_llms: BaseLLM,
-    task_name: TaskName,
+    task_name: str,
     expected_results: dict[str, float],
     num_fewshot: int,
     num_samples: int,
@@ -80,9 +82,10 @@ def test_automatic_tasks(
     )
 
     # limit number of subjects to three
-    subjects_subset = task_name.value.SUBJECTS[:3]
+    task = get_task(task_name)
+    subjects_subset = task.SUBJECTS[:3]
 
-    with patch(f"{task_name.__module__}.{task_name.value.__name__}.SUBJECTS", new=subjects_subset):
+    with patch(f"{task.__module__}.{task.__name__}.SUBJECTS", new=subjects_subset):
         results = main(test_llms, eval_config)
 
     # un-comment for debugging
@@ -116,7 +119,7 @@ def pytest_generate_tests(metafunc: Any) -> None:
     if "full_task_name" in metafunc.fixturenames:
         # for performance reasons, we only test a small subset of tasks
         task_names = [setup[1] for setup in experiment_setups]
-        ids = [setup[1].name for setup in experiment_setups]
+        ids = [setup[1] for setup in experiment_setups]
 
         # if you need to test all tasks, uncomment the following lines
         # task_names = [task.value for task in TaskName]
@@ -156,7 +159,7 @@ def get_disk_usage_info() -> str:
 
 @pytest.mark.cpu_slow
 @patch("eval_framework.tasks.utils.run_python_code")
-def test_with_all_samples(mock_run_python_code: Mock, tmp_path: Path, full_task_name: TaskName) -> None:
+def test_with_all_samples(mock_run_python_code: Mock, tmp_path: Path, full_task_name: str) -> None:
     """Smoke test with disk space cleanup."""
     # Disable HF dataset caching before the test
     disable_caching()

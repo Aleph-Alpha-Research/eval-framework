@@ -2,7 +2,7 @@ import json
 from unittest.mock import Mock
 
 from eval_framework.llm.base import BaseLLM
-from eval_framework.metrics.llm_metrics.llm_judge_conciseness import LLMJudgeConciseness
+from eval_framework.metrics.llm.llm_judge_conciseness import LLMJudgeConciseness
 from eval_framework.shared.types import Completion, RawCompletion
 from template_formatting.formatter import Message, Role
 

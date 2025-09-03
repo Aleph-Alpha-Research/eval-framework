@@ -8,7 +8,7 @@ Usage:
 1. Copy this file to your project
 2. Replace "YourBenchmark" with your actual benchmark name
 3. Fill in all TODO sections
-4. Register your task in task_names.py
+4. Add your task to eval_framework/tasks/task_names.py:register_all_tasks
 5. Add tests in tests/tasks/
 
 Example: Geography Question Answering benchmark that tests knowledge of world capitals.
@@ -16,7 +16,7 @@ Example: Geography Question Answering benchmark that tests knowledge of world ca
 
 from typing import Any
 
-from eval_framework.metrics.completion_metrics import AccuracyCompletion  # Import your metrics
+from eval_framework.metrics.completion import AccuracyCompletion  # Import your metrics
 from eval_framework.tasks.base import BaseTask, ResponseType, Sample
 
 

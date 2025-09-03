@@ -7,8 +7,10 @@ This guide shows you how to evaluate any HuggingFace model using the eval-framew
 Here's a sample of code to evaluate a HuggingFace model:
 
 ```python
+from functools import partial
 from pathlib import Path
-from eval_framework.llm.huggingface_llm import HFLLM
+
+from eval_framework.llm.huggingface import HFLLM
 from eval_framework.main import main
 from eval_framework.tasks.eval_config import EvalConfig
 from template_formatting.formatter import HFFormatter
@@ -16,7 +18,7 @@ from template_formatting.formatter import HFFormatter
 # Define your model
 class MyHuggingFaceModel(HFLLM):
     LLM_NAME = "meta-llama/Llama-3.2-3B-Instruct"
-    DEFAULT_FORMATTER = HFFormatter("meta-llama/Llama-3.2-3B-Instruct")
+    DEFAULT_FORMATTER = partial(HFFormatter, "meta-llama/Llama-3.2-3B-Instruct")
 
 if __name__ == "__main__":
     # Initialize your model
@@ -44,7 +46,7 @@ The `HFLLM` base class provides the foundation for HuggingFace model integration
 ```python
 class MyModel(HFLLM):
     LLM_NAME = "model-name-on-huggingface"
-    DEFAULT_FORMATTER = HFFormatter("model-name-on-huggingface")
+    DEFAULT_FORMATTER = partial(HFFormatter, "model-name-on-huggingface")
 
     def __init__(self, formatter=None):
         # Set custom attributes before calling super().__init__
@@ -65,7 +67,7 @@ from template_formatting.formatter import ConcatFormatter
 
 class BaseModel(HFLLM):
     LLM_NAME = "meta-llama/Llama-3.2-3B"
-    DEFAULT_FORMATTER = ConcatFormatter()
+    DEFAULT_FORMATTER = ConcatFormatter
 ```
 *Simple concatenation formatter for base models without chat templates.*
 
@@ -75,7 +77,7 @@ from template_formatting.formatter import Llama3Formatter
 
 class Llama3Model(HFLLM):
     LLM_NAME = "meta-llama/Meta-Llama-3-8B-Instruct"
-    DEFAULT_FORMATTER = Llama3Formatter()
+    DEFAULT_FORMATTER = Llama3Formatter
 ```
 *Specialized formatter for Llama 3 models with their specific chat template.*
 
@@ -85,7 +87,7 @@ from template_formatting.formatter import QwenFormatter
 
 class QwenModel(HFLLM):
     LLM_NAME = "Qwen/Qwen2-7B-Instruct"
-    DEFAULT_FORMATTER = QwenFormatter()
+    DEFAULT_FORMATTER = QwenFormatter
 ```
 *Specialized formatter for Qwen models with their specific chat template.*
 
@@ -95,16 +97,17 @@ from template_formatting.mistral_formatter import MistralFormatter
 
 class MistralModel(HFLLM):
     LLM_NAME = "mistralai/Mistral-7B-Instruct-v0.1"
-    DEFAULT_FORMATTER = MistralFormatter()
+    DEFAULT_FORMATTER = MistralFormatter
 ```
 
 #### **Automatic HF Formatter:**
 ```python
 from template_formatting.formatter import HFFormatter
+from functools import partial
 
 class ChatModel(HFLLM):
     LLM_NAME = "meta-llama/Llama-3.2-3B-Instruct"
-    DEFAULT_FORMATTER = HFFormatter("meta-llama/Llama-3.2-3B-Instruct")
+    DEFAULT_FORMATTER = partial(HFFormatter, "meta-llama/Llama-3.2-3B-Instruct")
 ```
 *Automatically detects and uses the model's chat template from HuggingFace.*
 
@@ -118,26 +121,26 @@ Pick any HuggingFace model. Here are examples for different model types:
 ```python
 class Llama3_8B(HFLLM):
     LLM_NAME = "meta-llama/Meta-Llama-3-8B-Instruct"
-    DEFAULT_FORMATTER = Llama3Formatter()
+    DEFAULT_FORMATTER = Llama3Formatter
 
 class Mistral7B(HFLLM):
     LLM_NAME = "mistralai/Mistral-7B-Instruct-v0.1"
-    DEFAULT_FORMATTER = MistralFormatter()
+    DEFAULT_FORMATTER = MistralFormatter
 
 class Qwen2_7B(HFLLM):
     LLM_NAME = "Qwen/Qwen2-7B-Instruct"
-    DEFAULT_FORMATTER = HFFormatter("Qwen/Qwen2-7B-Instruct")
+    DEFAULT_FORMATTER = partial(HFFormatter, "Qwen/Qwen2-7B-Instruct")
 ```
 
 #### **Small Models:**
 ```python
 class SmolLM(HFLLM):
     LLM_NAME = "HuggingFaceTB/SmolLM-1.7B-Instruct"
-    DEFAULT_FORMATTER = HFFormatter("HuggingFaceTB/SmolLM-1.7B-Instruct")
+    DEFAULT_FORMATTER = partial(HFFormatter, "HuggingFaceTB/SmolLM-1.7B-Instruct")
 
 class TinyLlama(HFLLM):
     LLM_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-    DEFAULT_FORMATTER = HFFormatter("TinyLlama/TinyLlama-1.1B-Chat-v1.0")
+    DEFAULT_FORMATTER = partial(HFFormatter, "TinyLlama/TinyLlama-1.1B-Chat-v1.0")
 ```
 
 

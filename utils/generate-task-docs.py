@@ -5,8 +5,8 @@ import re
 
 import tqdm
 
-from eval_framework.task_loader import load_extra_tasks
-from eval_framework.task_names import TaskName
+from eval_framework.tasks.registry import get_task, registered_task_names
+from eval_framework.tasks.task_loader import load_extra_tasks
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 
 OUTPUT_DOCS_DIRECTORY = "docs/tasks"
@@ -66,8 +66,7 @@ def parse_args() -> argparse.Namespace:
 
 def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_prompt_examples: bool) -> None:
     """Generate documentation for a specific task."""
-
-    task_class = TaskName[task_name].value
+    task_class = get_task(task_name)
 
     try:
         num_fewshot = 1
@@ -77,7 +76,7 @@ def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_
             num_fewshot = 0
             task = task_class(num_fewshot)
         except Exception as e:
-            print(f"Failed to instantiate task {t}: {e}")
+            print(f"Failed to instantiate task {task_name}: {e}")
             return
 
     with open(f"{OUTPUT_DOCS_DIRECTORY}/{task_name}.md", "w") as f:
@@ -180,12 +179,12 @@ if __name__ == "__main__":
 
     # List the tasks to process
     filtered_tasks = []
-    for t in TaskName:
-        if args.only_tasks and t.name not in args.only_tasks:
+    for task_name in registered_task_names():
+        if args.only_tasks and task_name not in args.only_tasks:
             continue
-        if t.name in args.exclude_tasks or t.name in EXCLUDED_TASKS:
+        if task_name in args.exclude_tasks or task_name in EXCLUDED_TASKS:
             continue
-        filtered_tasks.append(t.name)
+        filtered_tasks.append(task_name)
     filtered_tasks.sort()
 
     print(f"Found {len(filtered_tasks)} tasks to process: {', '.join([task_name for task_name in filtered_tasks])}")
