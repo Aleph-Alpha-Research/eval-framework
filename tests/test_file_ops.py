@@ -1,11 +1,12 @@
 import os
+import tempfile
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 import wandb
 
 from eval_framework.utils.file_ops import (
-    FileSystem,
     WandbFs,
 )
 
@@ -55,12 +56,6 @@ def wandb_fs(wandb_fs_with_env):
     return wandb_fs_instance
 
 
-class TestFileSystem:
-    def test_file_system_enum_values(self):
-        assert FileSystem.LOCAL.value == "local"
-        assert FileSystem.S3.value == "s3"
-
-
 class TestWandbFs:
     """
     TestWandbFs tests filesystem-like operations from the class
@@ -74,28 +69,6 @@ class TestWandbFs:
 
     def test_entity_property(self, wandb_fs):
         assert wandb_fs.entity == "test-entity"
-
-    def test_create_file_tree(self, wandb_fs):
-        files = [
-            "s3://bucket/models/model_name/huggingface/config.json",
-            "s3://bucket/models/model_name/huggingface/tokenizer.json",
-            "s3://bucket/other/readme.txt",
-        ]
-
-        tree = wandb_fs.create_file_tree(files)
-
-        expected = {
-            "files": [],
-            "bucket": {
-                "files": [],
-                "models": {
-                    "files": [],
-                    "model_name": {"files": [], "huggingface": {"files": ["config.json", "tokenizer.json"]}},
-                },
-                "other": {"files": ["readme.txt"]},
-            },
-        }
-        assert tree == expected
 
     def test_get_bucket_prefix(self, wandb_fs):
         bucket, prefix = wandb_fs.get_bucket_prefix("s3://my-bucket/path/to/file.json")
@@ -111,18 +84,6 @@ class TestWandbFs:
         file_list = wandb_fs.ls(artifact)
 
         assert file_list == ["s3://bucket/model/config.json", "s3://bucket/model/tokenizer.json"]
-
-    def test_file_system_detector_s3(self, wandb_fs):
-        s3_files = ["s3://bucket/file1.json", "s3://bucket/file2.json"]
-
-        result = wandb_fs.file_system_detector(s3_files)
-        assert result == FileSystem.S3
-
-    def test_file_system_detector_local(self, wandb_fs):
-        local_files = ["/path/to/file1.json", "./file2.json"]
-
-        result = wandb_fs.file_system_detector(local_files)
-        assert result == FileSystem.LOCAL
 
     def test_download_artifacts(self, wandb_fs_with_env):
         wandb_fs, mock_s3_client_instance, _ = wandb_fs_with_env
@@ -158,66 +119,32 @@ class TestWandbFs:
             artifact = wandb_fs.get_artifact(logged_artifact.name)
             assert wandb_fs.download_and_use_artifact(artifact)
 
-    def test_find_hf_checkpoint_root_simple(self, wandb_fs):
-        tree = {"files": ["config.json", "tokenizer.json", "model.safetensors"]}
-
-        result = wandb_fs.find_hf_checkpoint_root(tree)
-        assert result == "."
-
-    def test_find_hf_checkpoint_root_nested(self, wandb_fs):
-        tree = {
-            "models": {
-                "model_name": {
-                    "files": [],
-                    "huggingface": {"files": ["config.json", "tokenizer.json", "model.safetensors"]},
-                }
-            },
-            "files": ["readme.txt"],
-        }
-
-        result = wandb_fs.find_hf_checkpoint_root(tree)
-        assert result == "models/model_name/huggingface"
-
     def test_find_hf_checkpoint_from_s3_paths(self, wandb_fs):
-        paths = [
-            "s3://bucket/models/my-model/config.json",
-            "s3://bucket/models/my-model/tokenizer.json",
-            "s3://bucket/models/my-model/model.safetensors",
-            "s3://bucket/other/readme.txt",
-        ]
+        # Create temporary files to simulate the directory structure
+        wandb_fs.temp_dir = tempfile.TemporaryDirectory()
+        tempdir = Path(wandb_fs.temp_dir.name)
+        model_dir = tempdir / "models" / "my-model"
+        model_dir.mkdir(parents=True)
 
-        result = wandb_fs.find_hf_checkpoint_root_from_path_list(paths)
-        assert result == "models/my-model"
+        (model_dir / "config.json").touch()
+        (model_dir / "tokenizer.json").touch()
+        (model_dir / "model.safetensors").touch()
 
-    def test_find_hf_checkpoint_from_local_paths(self, wandb_fs):
-        paths = [
-            "/home/user/models/my-model/config.json",
-            "/home/user/models/my-model/tokenizer.json",
-            "/home/user/models/my-model/pytorch_model.bin",
-            "/home/user/other/file.txt",
-        ]
+        other_dir = tempdir / "other"
+        other_dir.mkdir()
+        (other_dir / "readme.txt").touch()
 
-        result = wandb_fs.find_hf_checkpoint_root_from_path_list(paths)
-        assert result == "home/user/models/my-model"
+        result = wandb_fs.find_hf_checkpoint_root_from_path_list()
+        assert result == tempdir / "models/my-model"
 
-    def test_find_hf_checkpoint_from_empty_list(self, wandb_fs):
-        result = wandb_fs.find_hf_checkpoint_root_from_path_list([])
-        assert result is None
+    def test_find_hf_checkpoint_from_empty_dir(self, wandb_fs):
+        wandb_fs.temp_dir = tempfile.TemporaryDirectory()
+        tempdir = Path(wandb_fs.temp_dir.name)
+        model_dir = tempdir / "models" / "my-model"
+        model_dir.mkdir(parents=True)
 
-    def test_find_hf_checkpoint_from_invalid_s3_paths(self, wandb_fs):
-        paths = [
-            "s3://bucket",  # No path component
-            "s3://",  # Empty
-        ]
+        other_dir = tempdir / "other"
+        other_dir.mkdir()
 
-        result = wandb_fs.find_hf_checkpoint_root_from_path_list(paths)
-        assert result is None
-
-    def test_find_hf_checkpoint_no_valid_checkpoint(self, wandb_fs):
-        paths = [
-            "s3://bucket/models/test/some_file.txt",
-            "s3://bucket/models/test/another_file.json",
-        ]
-
-        result = wandb_fs.find_hf_checkpoint_root_from_path_list(paths)
+        result = wandb_fs.find_hf_checkpoint_root_from_path_list()
         assert result is None

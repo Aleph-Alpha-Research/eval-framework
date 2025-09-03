@@ -68,7 +68,7 @@ class BaseLLM(ABC):
         try:
             artifact = wandb_fs.get_artifact(artifact_name, version)
             file_list = wandb_fs.ls(artifact)
-            wandb_fs.download_artifacts(artifact)
+            wandb_fs.download_and_use_artifact(artifact)
             file_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
             if file_root is None:
                 raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")

@@ -4,18 +4,12 @@ import signal
 import tempfile
 import urllib
 from concurrent.futures import ThreadPoolExecutor
-from enum import Enum
 from pathlib import Path
 
 import boto3
 import wandb
 from tqdm import tqdm
 from wandb.sdk.lib.paths import StrPath
-
-
-class FileSystem(Enum):
-    LOCAL = "local"
-    S3 = "s3"
 
 
 class WandbFs:
@@ -82,11 +76,6 @@ class WandbFs:
         file_list = list(map(lambda x: x.path_uri, [x for x in artifact.files()]))
         return file_list
 
-    def file_system_detector(self, file_list: list[str]):
-        if all(file.startswith("s3://") for file in file_list):
-            return FileSystem.S3
-        return FileSystem.LOCAL
-
     def download_artifacts(self, artifact: wandb.Artifact) -> Path:
         """download_artifacts downloads all artifacts associated with a registered artifact
 
@@ -144,26 +133,11 @@ class WandbFs:
         use_artifact determines the filesystem that the artifact is on, and does one of two things:
         1. if the file system is remote (s3 type storage) then it will download the artifact to a temp diectory
            we then call wandb.use_artifact on the artifact that we downloaded.
-
-        2. if the file system is local, then we just call wandb.use_artifact
+        2. if this download fails, we try to use boto3 to retrieve the artifact.
         """
         # TODO get the artifact without using first, download, and then upon success, use artifact
-        artifact = wandb.use_artifact(artifact)
 
-        file_system = self.file_system_detector(self.ls(artifact))
-        if file_system == FileSystem.S3:
-            try:
-                artifact_path = artifact.download(
-                    root=root,
-                    allow_missing_references=allow_missing_references,
-                    skip_cache=skip_cache,
-                    path_prefix=path_prefix,
-                    multipart=multipart,
-                )
-            except Exception as e:
-                raise RuntimeError(f"Failed to download artifact: {e}")
-            artifact_path = self.download_artifacts(artifact)
-        else:
+        try:
             artifact_path = artifact.download(
                 root=root,
                 allow_missing_references=allow_missing_references,
@@ -171,10 +145,19 @@ class WandbFs:
                 path_prefix=path_prefix,
                 multipart=multipart,
             )
+            artifact = wandb.use_artifact(artifact)
+
+        except Exception as e:
+            print(f"failed to download artifact {e}, trying boto")
+            try:
+                artifact_path = self.download_artifacts(artifact)
+                artifact = wandb.use_artifact(artifact)
+            except Exception as e:
+                print(f"failed to download artifacts using boto: {e}")
 
         return artifact_path
 
-    def find_hf_checkpoint_root_from_path_list(self, file_paths: list[str]) -> str | None:
+    def find_hf_checkpoint_root_from_path_list(self) -> str | None:
         """Find HuggingFace checkpoint root from a list of file paths.
 
         Args:
@@ -183,12 +166,17 @@ class WandbFs:
         Returns:
             str | None: Path to the HuggingFace checkpoint root folder, or None if not found
         """
-        if not file_paths:
+        if not self.temp_dir:
             return None
 
         checkpoint_roots = [x for x in Path(self.temp_dir.name).glob("**/config.json")]
-        assert len(checkpoint_roots) == 1, "Multiple checkpoints found"  # if there are more than one, we have a problem
-        return checkpoint_roots[0].parent
+        if checkpoint_roots:
+            assert len(checkpoint_roots) == 1, (
+                "Multiple checkpoints found"
+            )  # if there are more than one, we have a problem
+            return checkpoint_roots[0].parent
+
+        return None
 
     def cleanup(self):
         self._cleanup_temp_dir()
@@ -211,3 +199,11 @@ class WandbFs:
 
     def __del__(self):
         self._cleanup_temp_dir()
+
+
+if __name__ == "__main__":
+    from eval_framework.llm.models import HFLLM_from_wandb_registry
+
+    name = "SmolLM2-135M"
+    version = "v1"
+    model = HFLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter")
