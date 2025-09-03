@@ -63,28 +63,6 @@ class WandbFs:
     def entity(self):
         return self.api.entity
 
-    def create_file_tree(self, artifact_reference_list: list[str]) -> dict:
-        """
-        creates a file tree from a list of artifact references
-
-        Args:
-            artifact_reference_list: A list of artifact references to create a file tree from.
-        Returns:
-            dict | The created file tree.
-        """
-        tree = {"files": []}
-        for file in artifact_reference_list:
-            dirs = file.strip(r"s3://").split(r"/")
-            c = tree
-            for _, d in enumerate(dirs):
-                if "." in d:
-                    c["files"].append(d)
-                else:
-                    if d not in c:
-                        c[d] = {"files": []}
-                    c = c[d]
-        return tree
-
     def get_artifact(self, artifact_id: str, version: str = "latest"):
         return self.api.artifact(f"wandb-registry-model/{artifact_id}:{version}")
 
@@ -196,63 +174,6 @@ class WandbFs:
 
         return artifact_path
 
-    def _has_hf_checkpoint(self, files: list[str]) -> bool:
-        """Check if the current directory contains a HuggingFace checkpoint.
-
-        Args:
-          files: List of filenames in the directory
-
-        Returns:
-          True if directory contains a valid HuggingFace checkpoint
-        """
-        REQUIRED_HF_FILES = {"config.json"}
-        COMMON_HF_FILE_SUFFIXES = {".safetensors", ".bin", ".onnx"}
-        COMMON_HF_FILES = {
-            "tokenizer.json",
-            "tokenizer_config.json",
-            "special_tokens_map.json",
-            "vocab.json",
-            "merges.txt",
-            "tokenizer.model",
-            "generation_config.json",
-            "preprocessor_config.json",
-        }
-
-        file_set = set(files)
-        if not REQUIRED_HF_FILES.issubset(file_set):
-            return False
-        if file_set.intersection(COMMON_HF_FILES):
-            return True
-        return any(file.endswith(suffix) for file in files for suffix in COMMON_HF_FILE_SUFFIXES)
-
-    def find_hf_checkpoint_root(self, file_tree: dict, base_path: str = "") -> str | None:
-        """Find the root folder of a HuggingFace formatted checkpoint within a file tree.
-
-        A HuggingFace checkpoint is identified by the presence of config.json and typically
-        includes tokenizer files and model files.
-
-        Args:
-            file_tree: Dictionary representing file tree structure. Structure should be:
-                      {"files": ["file1.txt", "file2.json"], "subfolder": {"files": [...]}}
-            base_path: Current path being explored (used for recursion)
-
-        Returns:
-            str | None: Path to the HuggingFace checkpoint root folder, or None if not found
-        """
-        current_files = file_tree.get("files", [])
-        if self._has_hf_checkpoint(current_files):
-            return base_path if base_path else "."
-
-        # check subdirectories as well
-        for key, value in file_tree.items():
-            if key != "files" and isinstance(value, dict):
-                subfolder_path = f"{base_path}/{key}" if base_path else key
-                result = self.find_hf_checkpoint_root(value, subfolder_path)
-                if result:
-                    return result
-
-        return None
-
     def find_hf_checkpoint_root_from_path_list(self, file_paths: list[str]) -> str | None:
         """Find HuggingFace checkpoint root from a list of file paths.
 
@@ -265,30 +186,9 @@ class WandbFs:
         if not file_paths:
             return None
 
-        tree = {"files": []}
-
-        for file_path in file_paths:
-            clean_path = file_path
-            if clean_path.startswith("s3://"):
-                parts = clean_path.split("/", 3)
-                if len(parts) > 3:
-                    clean_path = parts[3]
-                else:
-                    continue
-
-            path_parts = clean_path.split("/")
-            filename = path_parts[-1]
-            dirs = path_parts[:-1]
-
-            current = tree
-            for directory in dirs:
-                if directory not in current:
-                    current[directory] = {"files": []}
-                current = current[directory]
-
-            current["files"].append(filename)
-
-        return self.find_hf_checkpoint_root(tree)
+        checkpoint_roots = [x for x in Path(self.temp_dir.name).glob("**/config.json")]
+        assert len(checkpoint_roots) == 1, "Multiple checkpoints found"  # if there are more than one, we have a problem
+        return checkpoint_roots[0].parent
 
     def cleanup(self):
         self._cleanup_temp_dir()

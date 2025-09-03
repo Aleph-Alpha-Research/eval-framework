@@ -81,7 +81,7 @@ class BaseLLM(ABC):
             wandb_fs.cleanup()
 
     def get_formatter(
-        formatter_name: str, model_identifier: str = ""
+        self, formatter_name: str, model_identifier: str = ""
     ) -> Llama3Formatter | MagistralFormatter | ConcatFormatter | HFFormatter:
         """
         Create formatter instance based on formatter name.

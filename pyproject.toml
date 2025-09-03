@@ -21,13 +21,13 @@ dependencies = [
   "python-dotenv>=1.0.1,<2",
   "lingua-language-detector>=2.0.2,<3",
   "google-crc32c>=1.5.0,<2",
-  "kubernetes>=31.0.0,<32",  # required by llm-sandbox though actually not needed
+  "kubernetes>=31.0.0,<32", # required by llm-sandbox though actually not needed
   "seaborn>=0.13.2,<0.14",
-  "langdetect>=1.0.9,<2",  # required by the original ifeval implementation
+  "langdetect>=1.0.9,<2", # required by the original ifeval implementation
   "spacy>=3.8.3,<4",
   "jsonschema>=4.23.0,<5",
-  "mysql-connector-python>=9.0.0,<10",  # required for sql-related tasks
-  "psycopg2-binary>=2.9.9,<3",  # required for sql-related tasks
+  "mysql-connector-python>=9.0.0,<10", # required for sql-related tasks
+  "psycopg2-binary>=2.9.9,<3", # required for sql-related tasks
   "redis>=5.2.1,<6",
   "sympy==1.13.1",
   "antlr4-python3-runtime==4.11.1",
@@ -42,7 +42,7 @@ dependencies = [
   "typing-extensions>=4.14,<5",
   "unbabel-comet>=2.2.6,<3",
   "wandb>=0.21.1",
-  "tqdm (>=4.67.1,<5.0.0)",
+  "tqdm>=4.67.1,<5.0.0",
 ]
 
 [project.optional-dependencies]
