@@ -49,4 +49,4 @@ def test_task_docs_are_up_to_date(tmp_path: Path) -> None:
                 print(f"Repo content:\n{repo_content}\n")
 
     # TEMPORARY COMMENTING TO TEST THE CI
-    # assert not diffs, f"Files differ between generated and repo docs: {diffs}"
+    assert not diffs, f"Files differ between generated and repo docs: {diffs}"
