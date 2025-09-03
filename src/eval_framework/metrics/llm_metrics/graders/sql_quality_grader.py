@@ -1,4 +1,5 @@
-from typing import Any, Literal, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any, Literal
 
 from eval_framework.llm.base import BaseLLM as StructuredOutputChatModel
 from eval_framework.metrics.llm_metrics.graders.language import Language
@@ -115,7 +116,7 @@ Provide your evaluation in the following JSON format:
         self,
         prompt: str,
         completion: str,
-        result: Optional[list[Any]],
+        result: list[Any] | None,
         language: Language,
     ) -> SqlQualityGradingOutput:
         prompt_template = language.language_config(self._prompt_templates)

@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any
 
 from eval_framework.context.eval import EvalContext, import_models
 from eval_framework.llm.base import BaseLLM
@@ -12,7 +12,7 @@ class LocalContext(EvalContext):
             raise ValueError(f"LLM '{self.llm_name}' not found.")
         llm_class = models[self.llm_name]
 
-        self.llm_judge_class: Type[BaseLLM] | None = None
+        self.llm_judge_class: type[BaseLLM] | None = None
         if self.judge_models_path is not None and self.judge_model_name is not None:
             judge_models = import_models(self.judge_models_path)
             if self.judge_model_name not in judge_models:

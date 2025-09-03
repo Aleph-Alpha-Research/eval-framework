@@ -1,5 +1,6 @@
 import logging
-from typing import Any, List, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import torch
 from tokenizers import Tokenizer
@@ -95,11 +96,11 @@ class HFLLM(BaseLLM):
 
     def generate_from_messages(
         self,
-        messages: List[Sequence[Message]],
+        messages: list[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
-    ) -> List[RawCompletion]:
+    ) -> list[RawCompletion]:
         if temperature is None:
             effective_temperature = 0.0  # Current default, TODO: refactor to use model's default
             logger.info(
@@ -193,7 +194,7 @@ class HFLLM(BaseLLM):
                 completion = completion.split(stop_sequence)[0]
         return completion, len(outputs[prompt_token_count:])
 
-    def logprobs(self, samples: List[Sample]) -> List[RawLoglikelihood]:
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         results = []
         for sample in samples:
             # format

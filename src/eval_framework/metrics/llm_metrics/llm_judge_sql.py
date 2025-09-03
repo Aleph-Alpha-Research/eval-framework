@@ -7,7 +7,7 @@ import sqlite3
 import threading
 from enum import Enum
 from time import sleep
-from typing import Any, Optional, Union
+from typing import Any
 from uuid import uuid4
 
 import docker
@@ -42,8 +42,8 @@ class SqlOutputComparison(BaseModel):
 
 class SqlValidationResult(BaseModel):
     success: bool
-    schema_error: Optional[str] = None
-    query_error: Optional[str] = None
+    schema_error: str | None = None
+    query_error: str | None = None
     results: list[Any] = []
 
 
@@ -269,7 +269,7 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
                 cur.execute(statement)
                 con.commit()
         except Exception as e:
-            logger.info("Create statements are not compatible with SQLite. Reason: {}".format(e))
+            logger.info(f"Create statements are not compatible with SQLite. Reason: {e}")
             return SqlValidationResult(success=False, schema_error=str(e))
         try:
             queries = separate_statements(sql_query)
@@ -278,7 +278,7 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
                 con.commit()
             results = cur.fetchall()
         except Exception as e:
-            logger.info("SQL query is not compatible with SQLite. Reason: {}".format(e))
+            logger.info(f"SQL query is not compatible with SQLite. Reason: {e}")
             return SqlValidationResult(success=False, query_error=str(e))
 
         con.close()
@@ -307,7 +307,7 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
                 cur.execute(statement)
             con.commit()
         except Exception as e:
-            logger.info("Create statements are not compatible with PostgreSQL. Reason: {}".format(e))
+            logger.info(f"Create statements are not compatible with PostgreSQL. Reason: {e}")
             return SqlValidationResult(success=False, schema_error=str(e))
         try:
             queries = separate_statements(sql_query)
@@ -316,7 +316,7 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
                 con.commit()
             results = cur.fetchall()
         except Exception as e:
-            logger.info("SQL query is not compatible with PostgreSQL. Reason: {}".format(e))
+            logger.info(f"SQL query is not compatible with PostgreSQL. Reason: {e}")
             return SqlValidationResult(success=False, query_error=str(e))
 
         con.commit()
@@ -326,10 +326,7 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
 
     def connect_to_mysql(
         self,
-    ) -> Union[
-        mysql.connector.pooling.PooledMySQLConnection,
-        mysql.connector.abstracts.MySQLConnectionAbstract,
-    ]:
+    ) -> mysql.connector.pooling.PooledMySQLConnection | mysql.connector.abstracts.MySQLConnectionAbstract:
         conn_params = {
             "database": self.mysql_db_name,
             "user": self.mysql_user,
@@ -351,7 +348,7 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
                 cur.execute(statement)
                 con.commit()
         except Exception as e:
-            logger.info("Create statements are not compatible with MySQL. Reason: {}".format(e))
+            logger.info(f"Create statements are not compatible with MySQL. Reason: {e}")
             con.close()
             return SqlValidationResult(success=False, schema_error=str(e))
         try:
@@ -361,7 +358,7 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
                 con.commit()
             results = cur.fetchall()
         except Exception as e:
-            logger.info("SQL query is not compatible with MySQL. Reason: {}".format(e))
+            logger.info(f"SQL query is not compatible with MySQL. Reason: {e}")
             con.close()
             return SqlValidationResult(success=False, query_error=str(e))
 
@@ -384,7 +381,7 @@ def count_result_columns(result: list[Any]) -> int:
     return len(result[0])
 
 
-def extract_query_from_completions(completion: str) -> Optional[str]:
+def extract_query_from_completions(completion: str) -> str | None:
     # Match SQL blocks starting with SELECT or WITH at line start
     # (allowing punctuation/whitespace), ending at first semicolon
     pattern = re.compile(r"(?:^|\n)[^a-zA-Z0-9_]*((?:select|with)\b.*?;)", re.IGNORECASE | re.DOTALL)

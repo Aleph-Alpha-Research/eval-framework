@@ -3,14 +3,14 @@ import inspect
 import sys
 from contextlib import AbstractContextManager
 from pathlib import Path
-from typing import Any, Type
+from typing import Any
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig
 
 
-def import_models(models_file: Path) -> dict[str, Type[BaseLLM]]:
+def import_models(models_file: Path) -> dict[str, type[BaseLLM]]:
     models_file = models_file.resolve()
 
     module_name = models_file.stem

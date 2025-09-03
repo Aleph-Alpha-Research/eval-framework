@@ -33,9 +33,7 @@ _AUGMENTER_PORT = 0
 SomeBaseTask = TypeVar("SomeBaseTask", bound=BaseTask[Any])
 
 
-def create_perturbation_class(
-    base_class: type[SomeBaseTask], perturbation_config: PerturbationConfig
-) -> type[SomeBaseTask]:
+def create_perturbation_class[T: BaseTask](base_class: type[T], perturbation_config: PerturbationConfig) -> type[T]:
     # mypy seems to have trouble inferring the type
     class EditorPerturbation(base_class):  # type: ignore
         def __init__(self, *args: Any, **kwargs: Any) -> None:

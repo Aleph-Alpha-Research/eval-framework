@@ -3,10 +3,9 @@ import re
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Literal, overload
+from typing import Any, Literal, overload, override
 
 from pydantic import BaseModel, field_serializer, field_validator
-from typing_extensions import override
 
 try:
     from transformers import AutoTokenizer

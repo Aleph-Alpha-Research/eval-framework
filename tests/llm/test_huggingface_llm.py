@@ -1,5 +1,3 @@
-from typing import List
-
 import pytest
 
 from eval_framework.llm.models import SmolLM135M
@@ -14,7 +12,7 @@ def test_hf_llm() -> None:
 
     model = SmolLM135M()
 
-    messages: List[Message] = [
+    messages: list[Message] = [
         Message(role=Role.USER, content="Question: What color is the night sky?\n"),
         Message(role=Role.ASSISTANT, content="Answer:"),
     ]
@@ -39,7 +37,7 @@ def test_hf_llm() -> None:
         ),
     ]
 
-    results: List[RawLoglikelihood] = model.logprobs(list_of_samples)
+    results: list[RawLoglikelihood] = model.logprobs(list_of_samples)
 
     assert len(results) == 2
     assert set(results[0].loglikelihoods.keys()) == {"red", "blue", "black", "white"}
@@ -48,7 +46,7 @@ def test_hf_llm() -> None:
     assert set(results[1].loglikelihoods_sequence_positions.keys()) == {"foo", "bar"}
 
     # -- TEST COMPLETIONS --
-    generation_results: List[RawCompletion] = model.generate_from_messages(
+    generation_results: list[RawCompletion] = model.generate_from_messages(
         messages=[messages, messages], stop_sequences=["\n"], max_tokens=4, temperature=0
     )
 
@@ -76,7 +74,7 @@ def test_error_on_overly_long_prompt() -> None:
         context=None,
     )
 
-    lresults: List[RawLoglikelihood] = model.logprobs([sample])
+    lresults: list[RawLoglikelihood] = model.logprobs([sample])
 
     # ... the loglikelihoods should be empty and the error should be stored
     assert len(lresults) == 1
@@ -89,7 +87,7 @@ def test_error_on_overly_long_prompt() -> None:
 
     # given a too long log-likelihood task ...
     msg = (Message(role=Role.USER, content="text" * 10000),)
-    cresults: List[RawCompletion] = model.generate_from_messages(messages=[msg], max_tokens=4)
+    cresults: list[RawCompletion] = model.generate_from_messages(messages=[msg], max_tokens=4)
 
     # ... the completion should be empty and the error should be stored
     assert len(cresults) == 1
