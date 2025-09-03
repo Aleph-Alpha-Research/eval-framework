@@ -17,4 +17,4 @@ LANGUAGE = <Language.FRA: 'French'>
 
 - Link to dataset: [https://huggingface.co/datasets/openGPT-X/hellaswagx](https://huggingface.co/datasets/openGPT-X/hellaswagx)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "HELLASWAG_EU20_FR"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/generate_task_docs.py --add-prompt-examples --only-tasks "HELLASWAG_EU20_FR"`.

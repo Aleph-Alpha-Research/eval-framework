@@ -17,4 +17,4 @@ LANGUAGE = <Language.FRA: 'French'>
 
 - Link to dataset: [https://huggingface.co/datasets/openGPT-X/truthfulqax](https://huggingface.co/datasets/openGPT-X/truthfulqax)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "TRUTHFULQA_EU20_FR"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/generate_task_docs.py --add-prompt-examples --only-tasks "TRUTHFULQA_EU20_FR"`.
