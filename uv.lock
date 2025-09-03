@@ -864,6 +864,23 @@ dependencies = [
 accelerate = [
     { name = "accelerate" },
 ]
+all = [
+    { name = "accelerate" },
+    { name = "aleph-alpha-client" },
+    { name = "determined" },
+    { name = "huggingface-hub" },
+    { name = "jinja2" },
+    { name = "mistral-common" },
+    { name = "openai" },
+    { name = "tensorboard" },
+    { name = "tiktoken" },
+    { name = "torch", version = "2.6.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'group-14-eval-framework-cpu') or (extra == 'group-14-eval-framework-cpu' and extra == 'group-14-eval-framework-cu124')" },
+    { name = "torch", version = "2.6.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'group-14-eval-framework-cpu' and extra == 'group-14-eval-framework-cu124') or (extra != 'group-14-eval-framework-cpu' and extra != 'group-14-eval-framework-cu124')" },
+    { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'group-14-eval-framework-cpu') or (extra == 'group-14-eval-framework-cpu' and extra == 'group-14-eval-framework-cu124')" },
+    { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'group-14-eval-framework-cu124'" },
+    { name = "transformers" },
+    { name = "vllm" },
+]
 api = [
     { name = "aleph-alpha-client" },
 ]
@@ -910,6 +927,7 @@ dev = [
     { name = "mypy" },
     { name = "plotly" },
     { name = "pytest" },
+    { name = "pytest-sugar" },
     { name = "pytest-xdist" },
     { name = "ruff" },
     { name = "types-pyyaml" },
@@ -928,6 +946,7 @@ requires-dist = [
     { name = "antlr4-python3-runtime", specifier = "==4.11.1" },
     { name = "datasets", specifier = ">=2.19.1,<4" },
     { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38,<0.39" },
+    { name = "eval-framework", extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "optional", "mistral"], marker = "extra == 'all'" },
     { name = "google-crc32c", specifier = ">=1.5.0,<2" },
     { name = "huggingface-hub", marker = "extra == 'mistral'", specifier = ">=0.33.2,<0.34" },
     { name = "jinja2", marker = "extra == 'optional'", specifier = ">=3.1.6,<4" },
@@ -957,8 +976,8 @@ requires-dist = [
     { name = "tensorboard", marker = "extra == 'determined'", specifier = "==2.19.0" },
     { name = "tiktoken", marker = "extra == 'openai'", specifier = ">=0.9,<0.10" },
     { name = "toml", specifier = ">=0.10.2,<0.11" },
-    { name = "torch", marker = "extra == 'transformers'" },
-    { name = "torch", marker = "extra == 'vllm'" },
+    { name = "torch", marker = "extra == 'transformers'", specifier = ">=2.5,<3" },
+    { name = "torch", marker = "extra == 'vllm'", specifier = ">=2.5,<3" },
     { name = "transformers", marker = "extra == 'optional'", specifier = ">=4.45.2,<5" },
     { name = "transformers", marker = "extra == 'transformers'", specifier = ">=4.45.2,<5" },
     { name = "types-python-dateutil", specifier = ">=2.9.0.20241206,<3" },
@@ -970,7 +989,7 @@ requires-dist = [
     { name = "wandb", specifier = ">=0.21.1" },
     { name = "xmltodict", specifier = ">=0.13.0,<0.14" },
 ]
-provides-extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "optional", "mistral"]
+provides-extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "optional", "mistral", "all"]
 
 [package.metadata.requires-dev]
 cpu = [{ name = "torch", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "eval-framework", group = "cpu" } }]
@@ -979,13 +998,14 @@ dev = [
     { name = "mypy", specifier = ">=1.10,<2" },
     { name = "plotly", specifier = ">=5.24.1,<6" },
     { name = "pytest", specifier = ">=8.3.3,<9" },
+    { name = "pytest-sugar", specifier = ">1.1,<2" },
     { name = "pytest-xdist", specifier = ">=3.6.1,<4" },
     { name = "ruff", specifier = ">=0.12.8" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20240917,<7" },
     { name = "types-redis", specifier = ">=4.6.0.20241004,<5" },
     { name = "types-toml", specifier = ">=0.10.8.20240310,<0.11" },
 ]
-flash-attn = [{ name = "flash-attn", specifier = "==2.7.2.post1" }]
+flash-attn = [{ name = "flash-attn", specifier = ">=2.7.2.post1,<3" }]
 
 [[package]]
 name = "execnet"
@@ -1083,7 +1103,7 @@ wheels = [
 
 [[package]]
 name = "flash-attn"
-version = "2.7.2.post1"
+version = "2.7.4.post1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "einops" },
@@ -1092,7 +1112,7 @@ dependencies = [
     { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'group-14-eval-framework-cpu') or (extra == 'group-14-eval-framework-cpu' and extra == 'group-14-eval-framework-cu124')" },
     { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'group-14-eval-framework-cu124'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/83/29/48df18cb51902a7cb7a0ee13327bb2cf50b6ba24bd2e8283d0a9538dde52/flash_attn-2.7.2.post1.tar.gz", hash = "sha256:574897afeb6cbd63e78a612dded95491efe4a46818245cf1a5ace7357d993faa", size = 3136637, upload-time = "2024-12-08T05:58:10.702Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/11/34/9bf60e736ed7bbe15055ac2dab48ec67d9dbd088d2b4ae318fd77190ab4e/flash_attn-2.7.4.post1.tar.gz", hash = "sha256:f03485c9a49a4d68d0733acdcad80ab0e72afa025a777fdc2966ceccf9d51765", size = 5986610, upload-time = "2025-01-30T06:39:51.93Z" }
 
 [[package]]
 name = "fonttools"
@@ -3046,6 +3066,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/08/ba/45911d754e8eba3d5a841a5ce61a65a685ff1798421ac054f85aa8747dfb/pytest-8.4.1.tar.gz", hash = "sha256:7c67fd69174877359ed9371ec3af8a3d2b04741818c51e5e99cc1742251fa93c", size = 1517714, upload-time = "2025-06-18T05:48:06.109Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/29/16/c8a903f4c4dffe7a12843191437d7cd8e32751d5de349d45d3fe69544e87/pytest-8.4.1-py3-none-any.whl", hash = "sha256:539c70ba6fcead8e78eebbf1115e8b589e7565830d7d006a8723f19ac8a0afb7", size = 365474, upload-time = "2025-06-18T05:48:03.955Z" },
+]
+
+[[package]]
+name = "pytest-sugar"
+version = "1.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+    { name = "termcolor" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0b/4e/60fed105549297ba1a700e1ea7b828044842ea27d72c898990510b79b0e2/pytest-sugar-1.1.1.tar.gz", hash = "sha256:73b8b65163ebf10f9f671efab9eed3d56f20d2ca68bda83fa64740a92c08f65d", size = 16533, upload-time = "2025-08-23T12:19:35.737Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/87/d5/81d38a91c1fdafb6711f053f5a9b92ff788013b19821257c2c38c1e132df/pytest_sugar-1.1.1-py3-none-any.whl", hash = "sha256:2f8319b907548d5b9d03a171515c1d43d2e38e32bd8182a1781eb20b43344cc8", size = 11440, upload-time = "2025-08-23T12:19:34.894Z" },
 ]
 
 [[package]]

@@ -1,6 +1,7 @@
 import re
 import signal
-from typing import Any, Callable, Iterable
+from collections.abc import Callable, Iterable
+from typing import Any
 
 from sympy import Basic, S, SympifyError, factor, simplify
 from sympy.parsing.latex import parse_latex
@@ -105,7 +106,7 @@ class MathReasoningCompletion(BaseMetric[Completion]):
             final_answer = re.sub(before, after, final_answer)
         for expr in self.REMOVED_EXPRESSIONS_UNITS:
             # Safely remove units at the end, allowing optional space before the unit
-            final_answer = re.sub(r"(.*?)\s*(%s)$" % re.escape(expr), r"\1", final_answer)
+            final_answer = re.sub(rf"(.*?)\s*({re.escape(expr)})$", r"\1", final_answer)
         for expr in self.REMOVED_EXPRESSIONS_FORMAT:
             # Safely remove formatting expressions
             final_answer = final_answer.replace(expr, "")

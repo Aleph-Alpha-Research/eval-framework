@@ -1,5 +1,3 @@
-from typing import Type
-
 import pytest
 
 from eval_framework.task_names import TaskName
@@ -98,7 +96,7 @@ SPECIAL_ARGS = {
 
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
 @pytest.mark.parametrize("task_name", list(TaskName))
-def test_all_tasks_formatter(task_name: TaskName, formatter_cls: Type["BaseFormatter"]) -> None:
+def test_all_tasks_formatter(task_name: TaskName, formatter_cls: type["BaseFormatter"]) -> None:
     """
     Test that the formatted sample for each (Task, Formatter) pair is consistent by hashing the output.
 

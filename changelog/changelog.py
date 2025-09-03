@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def read_changelog(changelog_path: str) -> str:
-    with open(changelog_path, "r") as file:
+    with open(changelog_path) as file:
         return file.read()
 
 

@@ -1,5 +1,6 @@
 import json
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 import jsonschema  # type: ignore
 from pydantic import BaseModel, Field
