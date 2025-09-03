@@ -8,6 +8,7 @@ import time
 import traceback
 from collections.abc import Callable, Sequence
 from dataclasses import asdict
+from functools import partial
 
 import aiohttp
 from aleph_alpha_client import (
@@ -22,7 +23,6 @@ from aleph_alpha_client import (
 )
 from aleph_alpha_client.prompt import Text
 from dotenv import load_dotenv
-from uritemplate import partial
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
