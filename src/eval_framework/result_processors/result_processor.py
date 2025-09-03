@@ -29,7 +29,7 @@ class ResultsFileProcessor(ResultProcessor):
     def load_metadata(self) -> dict:
         metadata_file = self.output_dir / "metadata.json"
         if os.path.exists(metadata_file):
-            with open(metadata_file, "r") as f:
+            with open(metadata_file) as f:
                 return json.load(f)
         else:
             logger.info("No metadata found.")
@@ -124,6 +124,6 @@ def generate_output_dir(llm_name: str, config: EvalConfig) -> Path:
         dir_name += f"_{timestamp}"
 
     # Combine all components to form the full output directory path
-    output_dir = config.output_dir / llm_name / f"{version_str}_{config.task_name.value.NAME}" / dir_name
+    output_dir = config.output_dir / llm_name / f"{version_str}_{config.task_name}" / dir_name
 
     return output_dir

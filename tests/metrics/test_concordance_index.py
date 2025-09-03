@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.metrics.completion_metrics.concordance_index import ConcordanceIndex
+from eval_framework.metrics.completion.concordance_index import ConcordanceIndex
 from eval_framework.shared.types import Completion
 
 

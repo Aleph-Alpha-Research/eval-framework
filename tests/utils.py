@@ -3,9 +3,10 @@ import json
 import logging
 import os
 import shutil
+from collections.abc import Callable
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any
 from unittest.mock import patch
 
 from datasets import Dataset, DatasetDict
@@ -13,9 +14,6 @@ from datasets import Dataset, DatasetDict
 from eval_framework.constants import RED, RESET
 from eval_framework.result_processors.base import Result
 from eval_framework.tasks.base import BaseTask, SubjectType
-
-T = TypeVar("T", bound=BaseTask)
-
 
 HASHES_FILE = Path(__file__).parent / "tasks" / "task-prompts-hashes.json"
 
@@ -75,7 +73,7 @@ def create_mock_load_hf_dataset(
             if kwargs == captured_kwargs:
                 # return load_dataset('json', data_files=f'{subject}_data.json')
 
-                with open(f"{subject}_data.json", "r") as f:
+                with open(f"{subject}_data.json") as f:
                     data = json.load(f)
 
                 # Convert the JSON data back to the expected dataset format
@@ -89,7 +87,7 @@ def create_mock_load_hf_dataset(
     return mock_load_hf_dataset
 
 
-class DatasetPatcher(Generic[T]):
+class DatasetPatcher[T: BaseTask]:
     def __init__(self, task_class: type[T], num_samples: int = 2, num_fewshot: int = 0):
         self.task_class = task_class
         self.num_fewshot = num_fewshot

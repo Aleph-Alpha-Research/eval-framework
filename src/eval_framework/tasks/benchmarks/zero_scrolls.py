@@ -1,10 +1,10 @@
 import re
 from typing import Any
 
-from eval_framework.metrics.completion_metrics.exponential_similarity import ExponentialSimilarity
-from eval_framework.metrics.completion_metrics.f1 import F1
-from eval_framework.metrics.completion_metrics.rouge_geometric_mean import ROUGE_GEOMETRIC_MEAN
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import (
+from eval_framework.metrics.completion.exponential_similarity import ExponentialSimilarity
+from eval_framework.metrics.completion.f1 import F1
+from eval_framework.metrics.completion.rouge_geometric_mean import ROUGE_GEOMETRIC_MEAN
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
 )
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample

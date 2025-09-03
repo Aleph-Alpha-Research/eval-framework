@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.metrics.completion_metrics.exponential_similarity import ExponentialSimilarity
+from eval_framework.metrics.completion.exponential_similarity import ExponentialSimilarity
 from eval_framework.shared.types import Completion
 
 

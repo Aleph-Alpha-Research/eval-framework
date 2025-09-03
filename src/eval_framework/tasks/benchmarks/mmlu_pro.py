@@ -2,8 +2,8 @@ import random
 import re
 from typing import Any
 
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import (
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )

@@ -4,14 +4,13 @@ import logging
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Optional
 
 from packaging.requirements import Requirement
 from packaging.version import Version
 
 
 def setup_logging(
-    output_dir: Optional[Path] = None, log_level: int = logging.INFO, log_filename: str = "evaluation.log"
+    output_dir: Path | None = None, log_level: int = logging.INFO, log_filename: str = "evaluation.log"
 ) -> logging.Logger:
     """
     Set up centralized logging configuration for the entire framework.
@@ -57,7 +56,7 @@ def setup_logging(
     return root_logger
 
 
-def _validate_package_extras(extras: str | Sequence[str], /, *, package: str = "eval_framework") -> Sequence[str]:
+def validate_package_extras(extras: str | Sequence[str], /, *, package: str = "eval_framework") -> Sequence[str]:
     """Validate that the specified extras are valid for the given package."""
     if isinstance(extras, str):
         extras = [extras]
@@ -73,7 +72,7 @@ def _validate_package_extras(extras: str | Sequence[str], /, *, package: str = "
 
 def extra_requires(extra: str, /, *, package: str = "eval_framework") -> list[str]:
     """Return a list of requirements for the specified extra."""
-    _validate_package_extras(extra, package=package)
+    validate_package_extras(extra, package=package)
     dist = importlib.metadata.distribution(package)
     requires = dist.requires or []
     extra_str = f"extra == '{extra}'"

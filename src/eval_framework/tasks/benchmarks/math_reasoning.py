@@ -2,9 +2,9 @@ import random
 import re
 from typing import Any, TypeVar
 
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
-from eval_framework.metrics.completion_metrics.language_checker import LanguageRawConsistencyChecker
-from eval_framework.metrics.completion_metrics.math_reasoning_completion import MathReasoningCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
+from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample
 
 SubjectType = TypeVar("SubjectType")
@@ -566,10 +566,6 @@ Answer:"""
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return self.QUERY_TEMPLATE.format(question=item["question"])
-
-    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        # This should not be called since we're zero-shot only
-        raise NotImplementedError("GSM8K Reasoning is zero-shot only")
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return self._extract_answer_fallback(item["answer"])

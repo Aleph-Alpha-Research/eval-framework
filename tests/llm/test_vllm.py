@@ -1,7 +1,8 @@
 import gc
 import logging
 import time
-from typing import Any, List, Sequence, Type, TypeVar
+from collections.abc import Sequence
+from typing import Any, TypeVar
 from unittest.mock import Mock, patch
 
 import pytest
@@ -15,7 +16,7 @@ from eval_framework.llm.models import (
     Qwen3_0_6B_VLLM,
     Qwen3_0_6B_VLLM_No_Thinking,
 )
-from eval_framework.llm.vllm_models import VLLMModel, VLLMTokenizer
+from eval_framework.llm.vllm import VLLMModel, VLLMTokenizer
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import ConcatFormatter, Message, Role
@@ -30,7 +31,7 @@ def clean_up() -> None:
     torch.cuda.empty_cache()
 
 
-def safe_vllm_setup(model_fn: Type[T], kwargs: Any) -> T:
+def safe_vllm_setup[T: VLLMModel](model_fn: type[T], kwargs: Any) -> T:
     """Safely initialize VLLM model with enhanced error handling."""
     assert "max_model_len" in kwargs
     kwargs["max_num_seqs"] = 1
@@ -75,10 +76,10 @@ def safe_vllm_setup(model_fn: Type[T], kwargs: Any) -> T:
         ),
     ],
 )
-def test_vllm(model_fn: Type[T], kwargs: Any) -> None:
+def test_vllm[T: VLLMModel](model_fn: type[T], kwargs: Any) -> None:
     model = safe_vllm_setup(model_fn, kwargs)
 
-    messages: List[Message] = [
+    messages: list[Message] = [
         Message(role=Role.USER, content="Question: What color is the night sky?\n"),
         Message(role=Role.ASSISTANT, content="Answer:"),
     ]
@@ -102,7 +103,7 @@ def test_vllm(model_fn: Type[T], kwargs: Any) -> None:
             context=None,
         ),
     ]
-    results: List[RawLoglikelihood] = []
+    results: list[RawLoglikelihood] = []
     for sample in list_of_samples:
         results.extend(model.logprobs([sample]))
 
@@ -146,7 +147,7 @@ def test_vllm(model_fn: Type[T], kwargs: Any) -> None:
         ),
     ],
 )
-def test_vllm_error_on_overly_long_prompt(model_fn: Type[T], kwargs: Any) -> None:
+def test_vllm_error_on_overly_long_prompt[T: VLLMModel](model_fn: type[T], kwargs: Any) -> None:
     model = safe_vllm_setup(model_fn, kwargs)
 
     # given a too long log-likelihood task ...
@@ -162,7 +163,7 @@ def test_vllm_error_on_overly_long_prompt(model_fn: Type[T], kwargs: Any) -> Non
         context=None,
     )
 
-    lresults: List[RawLoglikelihood] = model.logprobs([sample])
+    lresults: list[RawLoglikelihood] = model.logprobs([sample])
     # THEN the loglikelihoods should be empty and the error should be stored
     assert len(lresults) == 1
     assert (
@@ -172,7 +173,7 @@ def test_vllm_error_on_overly_long_prompt(model_fn: Type[T], kwargs: Any) -> Non
 
     # GIVEN a too long completion task
     msg = [Message(role=Role.USER, content="text" * 10000)]
-    cresults: List[RawCompletion] = model.generate_from_messages(messages=[msg], max_tokens=300)
+    cresults: list[RawCompletion] = model.generate_from_messages(messages=[msg], max_tokens=300)
 
     # ... the completion should be empty and the error should be stored
     assert len(cresults) == 1
@@ -413,13 +414,13 @@ def test_invalid_sampling_param_raises() -> None:
     ],
 )
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="Requires >=2 GPUs for tensor_parallel_size=2")
-def test_logprobs_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
+def test_logprobs_batched_vs_single[T: VLLMModel](model_fn: type[T], kwargs: Any) -> None:
     """
     Test that batched logprobs inference produces identical results to single-sample inference.
     """
     model = safe_vllm_setup(model_fn, kwargs)
 
-    base_messages_1: List[Message] = [
+    base_messages_1: list[Message] = [
         Message(
             role=Role.USER,
             content="Small streams often flow into bigger streams or rivers. The small "
@@ -429,7 +430,7 @@ def test_logprobs_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
         Message(role=Role.ASSISTANT, content="Answer:"),
     ]
 
-    base_messages_2: List[Message] = [
+    base_messages_2: list[Message] = [
         Message(
             role=Role.USER,
             content="Photosynthesis is the process by which plants make their own"
@@ -439,7 +440,7 @@ def test_logprobs_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
         Message(role=Role.ASSISTANT, content="Answer:"),
     ]
 
-    base_messages_3: List[Message] = [
+    base_messages_3: list[Message] = [
         Message(
             role=Role.USER,
             content="The Earth's atmosphere is composed of different layers. The"
@@ -473,7 +474,7 @@ def test_logprobs_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
         ),
     ]
 
-    single_results: List[RawLoglikelihood] = []
+    single_results: list[RawLoglikelihood] = []
     for sample in test_samples:
         result = model.logprobs([sample])
         single_results.extend(result)
@@ -485,7 +486,7 @@ def test_logprobs_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
     kwargs["batch_size"] = 12
     model = safe_vllm_setup(model_fn, kwargs)
 
-    batched_results: List[RawLoglikelihood] = model.logprobs(test_samples)
+    batched_results: list[RawLoglikelihood] = model.logprobs(test_samples)
 
     assert len(single_results) == len(batched_results) == 3
 
@@ -576,7 +577,7 @@ def test_logprobs_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
     ],
 )
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="Requires >=2 GPUs for tensor_parallel_size=2")
-def test_completions_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
+def test_completions_batched_vs_single[T: VLLMModel](model_fn: type[T], kwargs: Any) -> None:
     """
     Test that batched completion inference produces identical results to single-message inference.
     """
@@ -609,7 +610,7 @@ def test_completions_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
     temperature = 0.0
     stop_sequences = ["\n"]
 
-    single_results: List[RawCompletion] = []
+    single_results: list[RawCompletion] = []
     for messages in test_message_sequences:
         result = model.generate_from_messages(
             messages=[messages], max_tokens=max_tokens, temperature=temperature, stop_sequences=stop_sequences
@@ -622,7 +623,7 @@ def test_completions_batched_vs_single(model_fn: Type[T], kwargs: Any) -> None:
     kwargs["batch_size"] = 10
     model = safe_vllm_setup(model_fn, kwargs)
 
-    batched_results: List[RawCompletion] = model.generate_from_messages(
+    batched_results: list[RawCompletion] = model.generate_from_messages(
         messages=test_message_sequences,
         max_tokens=max_tokens,
         temperature=temperature,
@@ -703,7 +704,7 @@ def test_vllm_generate_with_llama_tokenizer_avoids_double_bos() -> None:
         DEFAULT_FORMATTER = Llama3Formatter()
 
     # Mock the VLLM engine to avoid actual model loading
-    with patch("eval_framework.llm.vllm_models.LLM") as mock_llm:
+    with patch("eval_framework.llm.vllm.LLM") as mock_llm:
         model = TestLlamaVLLMModel(max_model_len=64, tensor_parallel_size=1)
 
         try:
@@ -777,7 +778,7 @@ def test_vllm_logprobs_with_llama_tokenizer_avoids_double_bos() -> None:
         DEFAULT_FORMATTER = Llama3Formatter()
 
     # Mock the VLLM engine to avoid actual model loading
-    with patch("eval_framework.llm.vllm_models.LLM"):
+    with patch("eval_framework.llm.vllm.LLM"):
         model = TestLlamaVLLMModel(max_model_len=64, tensor_parallel_size=1)
 
         try:
@@ -842,7 +843,7 @@ def test_tokenizer_single_initialization(
         mock_tokenizer_cls.return_value = mock_tokenizer
 
         # Create the model with mocked LLM to avoid actual model loading
-        with patch("eval_framework.llm.vllm_models.LLM"):
+        with patch("eval_framework.llm.vllm.LLM"):
             model = TestVLLMModel(max_model_len=128)
 
             # Get tokenizer references multiple times
@@ -880,7 +881,7 @@ def test_tokenizer_initialization_performance(
         DEFAULT_FORMATTER = ConcatFormatter()
 
     # Only mock the LLM to avoid loading the actual model weights
-    with patch("eval_framework.llm.vllm_models.LLM"):
+    with patch("eval_framework.llm.vllm.LLM"):
         # Create the model with real tokenizer but mocked LLM and measure first access
         # (which should be slow as it is the real tokenizer initialization)
         model = TestVLLMModel(max_model_len=128)

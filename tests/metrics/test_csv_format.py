@@ -1,8 +1,8 @@
-from typing import Optional, Sequence
+from collections.abc import Sequence
 
 import pytest
 
-from eval_framework.metrics.completion_metrics.csv_format import CSVFormat, extract_csv_from_text
+from eval_framework.metrics.completion.csv_format import CSVFormat, extract_csv_from_text
 from eval_framework.shared.types import Completion
 
 REQ_NUM = 3
@@ -36,7 +36,7 @@ NO_CSV_TEXT = """Sure here's your CSV:
 This is not a csv."""
 
 
-def assert_consistent_column_count(csv_lines: Optional[Sequence[str]], delimiter: Optional[str], count: int) -> None:
+def assert_consistent_column_count(csv_lines: Sequence[str] | None, delimiter: str | None, count: int) -> None:
     assert csv_lines
     counts = [len(csv_line.split(delimiter)) for csv_line in csv_lines]
     assert set(counts) == set([count])

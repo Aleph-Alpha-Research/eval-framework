@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -10,9 +11,11 @@ from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.base import Result
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, Error, Loglikelihood
-from eval_framework.task_names import TaskName
+from eval_framework.tasks.benchmarks.gpqa import GPQA
 from eval_framework.tasks.eval_config import EvalConfig
+from eval_framework.tasks.registry import register_task
 from tests.conftest import MockLLM
+from tests.tasks.test_registry import temporary_registry
 
 
 class MockMetric:
@@ -29,7 +32,7 @@ def test_evaluator_run_completions(tmp_path: Path, should_preempt_callable: Call
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=TaskName.GPQA,
+        task_name=GPQA.NAME,
         llm_class=llm.__class__,
     )
 
@@ -52,7 +55,7 @@ def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable) -
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=TaskName.GPQA,
+        task_name=GPQA.NAME,
         llm_class=llm.__class__,
     )
 
@@ -81,7 +84,7 @@ def test_evaluator_run_eval_no_completions(tmp_path: Path) -> None:
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=TaskName.GPQA,
+        task_name=GPQA.NAME,
         llm_class=llm.__class__,
     )
 
@@ -102,7 +105,7 @@ def test_evaluator_run_all(tmp_path: Path, should_preempt_callable: Callable) ->
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=TaskName.GPQA,
+        task_name=GPQA.NAME,
         llm_class=llm.__class__,
     )
 
@@ -129,7 +132,7 @@ def test_aggregate_results(tmp_path: Path) -> None:
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=TaskName.GPQA,
+        task_name=GPQA.NAME,
         llm_class=llm.__class__,
     )
     evaluator = EvaluationGenerator(config, ResultsFileProcessor(tmp_path))
@@ -243,16 +246,19 @@ class TestFilterTaskSubjects:
         mock_generator._filter_task_subjects = ResponseGenerator._filter_task_subjects.__get__(mock_generator)
         return mock_generator
 
+    @temporary_registry
     def test_no_task_subjects_specified(self, response_generator: Any) -> None:
         # Setup
         task_class = MagicMock()
         task_class.SUBJECTS = ["subject1", "subject2"]
+        task_class.NAME = "TestTask"
+
+        register_task(task_class.NAME, task_class)
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = []
         # Create task_name as a MagicMock with a value attribute
-        config.task_name = MagicMock()
-        config.task_name.value = task_class
+        config.task_name = task_class.NAME
 
         response_generator.config = config
 
@@ -262,16 +268,17 @@ class TestFilterTaskSubjects:
         # Assert
         assert result == task_class.SUBJECTS
 
+    @temporary_registry
     def test_filter_string_subjects(self, response_generator: Any) -> None:
         # Setup
         task_class = MagicMock()
         task_class.SUBJECTS = ["subject1", "subject2", "subject3"]
         task_class.NAME = "TestTask"
+        register_task(task_class.NAME, task_class)
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["subject1", "subject3"]
-        config.task_name = MagicMock()
-        config.task_name.value = task_class
+        config.task_name = task_class.NAME
 
         response_generator.config = config
 
@@ -281,16 +288,17 @@ class TestFilterTaskSubjects:
         # Assert
         assert result == ["subject1", "subject3"]
 
+    @temporary_registry
     def test_filter_tuple_subjects(self, response_generator: Any) -> None:
         # Setup
         task_class = MagicMock()
         task_class.SUBJECTS = [("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")]
         task_class.NAME = "TestTask"
+        register_task(task_class.NAME, task_class)
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["EN_US,topic1"]
-        config.task_name = MagicMock()
-        config.task_name.value = task_class
+        config.task_name = task_class.NAME
 
         response_generator.config = config
 
@@ -300,16 +308,18 @@ class TestFilterTaskSubjects:
         # Assert
         assert result == [("EN_US", "topic1")]
 
+    @temporary_registry
     def test_filter_tuple_subjects_with_wildcard(self, response_generator: Any) -> None:
         # Setup
         task_class = MagicMock()
         task_class.SUBJECTS = [("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")]
         task_class.NAME = "TestTask"
+        register_task("TestTask", task_class)
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["EN_US,*"]
         config.task_name = MagicMock()
-        config.task_name.value = task_class
+        config.task_name = task_class.NAME
 
         response_generator.config = config
 
@@ -319,6 +329,7 @@ class TestFilterTaskSubjects:
         # Assert
         assert result == [("EN_US", "topic1"), ("EN_US", "topic2")]
 
+    @temporary_registry
     def test_filter_triple_tuple_subjects_with_wildcard(self, response_generator: Any) -> None:
         # Setup
         task_class = MagicMock()
@@ -329,11 +340,11 @@ class TestFilterTaskSubjects:
             ("DE_DE", "topic1", "subtopic1"),
         ]
         task_class.NAME = "TestTask"
+        register_task(task_class.NAME, task_class)
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["EN_US,topic1,*"]
-        config.task_name = MagicMock()
-        config.task_name.value = task_class
+        config.task_name = task_class.NAME
 
         response_generator.config = config
 
@@ -343,6 +354,7 @@ class TestFilterTaskSubjects:
         # Assert
         assert result == [("EN_US", "topic1", "subtopic1"), ("EN_US", "topic1", "subtopic2")]
 
+    @temporary_registry
     def test_filter_triple_tuple_subjects_with_multiple_wildcards(self, response_generator: Any) -> None:
         # Setup
         task_class = MagicMock()
@@ -353,11 +365,11 @@ class TestFilterTaskSubjects:
             ("DE_DE", "topic1", "subtopic1"),
         ]
         task_class.NAME = "TestTask"
+        register_task(task_class.NAME, task_class)
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["*,topic1,*"]
-        config.task_name = MagicMock()
-        config.task_name.value = task_class
+        config.task_name = task_class.NAME
 
         response_generator.config = config
 
@@ -371,16 +383,17 @@ class TestFilterTaskSubjects:
             ("DE_DE", "topic1", "subtopic1"),
         ]
 
+    @temporary_registry
     def test_filter_tuple_subjects_multiple_filters(self, response_generator: Any) -> None:
         # Setup
         task_class = MagicMock()
         task_class.SUBJECTS = [("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")]
         task_class.NAME = "TestTask"
+        register_task(task_class.NAME, task_class)
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["EN_US,topic1", "DE_DE,topic1"]
-        config.task_name = MagicMock()
-        config.task_name.value = task_class
+        config.task_name = task_class.NAME
 
         response_generator.config = config
 
@@ -390,16 +403,17 @@ class TestFilterTaskSubjects:
         # Assert
         assert result == [("EN_US", "topic1"), ("DE_DE", "topic1")]
 
+    @temporary_registry
     def test_invalid_string_subject(self, response_generator: Any) -> None:
         # Setup
         task_class = MagicMock()
         task_class.SUBJECTS = ["subject1", "subject2"]
         task_class.NAME = "TestTask"
+        register_task(task_class.NAME, task_class)
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["invalid_subject"]
-        config.task_name = MagicMock()
-        config.task_name.value = task_class
+        config.task_name = task_class.NAME
 
         response_generator.config = config
 
@@ -407,16 +421,17 @@ class TestFilterTaskSubjects:
         with pytest.raises(AssertionError):
             response_generator._filter_task_subjects()
 
+    @temporary_registry
     def test_invalid_tuple_subject_part(self, response_generator: Any) -> None:
         # Setup
         task_class = MagicMock()
         task_class.SUBJECTS = [("EN_US", "topic1"), ("EN_US", "topic2")]
         task_class.NAME = "TestTask"
+        register_task(task_class.NAME, task_class)
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["EN_US,invalid_topic"]
-        config.task_name = MagicMock()
-        config.task_name.value = task_class
+        config.task_name = task_class.NAME
 
         response_generator.config = config
 

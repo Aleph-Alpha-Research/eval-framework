@@ -1,14 +1,18 @@
 import logging
 import time
 import traceback
+from collections.abc import Callable
 from datetime import UTC, datetime
 from functools import partial
-from typing import Any, Callable, List
+from typing import Any
+
+from eval_framework.tasks.registry import get_task
 
 try:
     from determined import get_cluster_info
 except ImportError:
     get_cluster_info = None  # type: ignore[assignment]
+
 
 from tqdm import tqdm
 
@@ -52,7 +56,8 @@ class ResponseGenerator:
         self.num_samples = config.num_samples
         self.save_intermediate_results = config.save_intermediate_results
 
-        task_class = config.task_name.value
+        task_class = get_task(config.task_name)
+        # TODO: This globally modified the task_class, not a great idea
         task_class.SUBJECTS = self._filter_task_subjects()
         task_class.HF_REVISION = self._set_hf_revision()
 
@@ -66,18 +71,19 @@ class ResponseGenerator:
 
     def _set_hf_revision(self) -> str | None:
         """Sets a tag name, a branch name, or commit hash for the HF dataset"""
-        if self.task_name.value.HF_REVISION is None:  # Do not override an HF_REVISION hard-coded in the task
+        task_class = get_task(self.config.task_name)
+        if task_class.HF_REVISION is None:  # Do not override an HF_REVISION hard-coded in the task
             if self.config.hf_revision is None:
                 return None
-            logger.info(f"Setting HF revision to `{self.config.hf_revision}` for the task {self.task_name.name}")
+            logger.info(f"Setting HF revision to `{self.config.hf_revision}` for the task {self.task_name}")
             return self.config.hf_revision
         else:
-            logger.info(f"HF revision set to `{self.task_name.value.HF_REVISION}` for the task {self.task_name.name}")
-            return self.task_name.value.HF_REVISION
+            logger.info(f"HF revision set to `{task_class.HF_REVISION}` for the task {self.task_name}")
+            return task_class.HF_REVISION
 
     def _filter_task_subjects(self) -> list[str] | list[tuple]:
         """Restrict task subjects if specified in the config."""
-        task_class = self.config.task_name.value
+        task_class = get_task(self.config.task_name)
 
         if not self.config.task_subjects:
             return task_class.SUBJECTS
@@ -129,10 +135,10 @@ class ResponseGenerator:
 
     def _generate_completions(
         self,
-        samples: List[Sample],
+        samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-    ) -> List[Completion]:
+    ) -> list[Completion]:
         """
         Generates completions for the sample.
         :param sample: sample to generate completions for
@@ -143,7 +149,7 @@ class ResponseGenerator:
         if stop_sequences is None:
             stop_sequences = []
 
-        raw_completions: List[RawCompletion]
+        raw_completions: list[RawCompletion]
         try:
             raw_completions = self.llm.generate(samples=samples, stop_sequences=stop_sequences, max_tokens=max_tokens)
         except Exception as e:
@@ -200,13 +206,13 @@ class ResponseGenerator:
 
         return completion_list
 
-    def _generate_loglikelihoods(self, samples: List[Sample]) -> List[Loglikelihood]:
+    def _generate_loglikelihoods(self, samples: list[Sample]) -> list[Loglikelihood]:
         """
         Generate log likelihoods when a sample is run against the model.
         :param sample: sample to run the task against
         :return: loglikelihoods
         """
-        raw_loglikelihoods: List[RawLoglikelihood]
+        raw_loglikelihoods: list[RawLoglikelihood]
         try:
             raw_loglikelihoods = self.llm.logprobs(samples)
         except Exception as e:
@@ -245,7 +251,7 @@ class ResponseGenerator:
             )
         return loglikelihood_list
 
-    def _generative_output_type_selector(self) -> Callable[[List[Sample]], List[Completion] | List[Loglikelihood]]:
+    def _generative_output_type_selector(self) -> Callable[[list[Sample]], list[Completion] | list[Loglikelihood]]:
         """
         Selects the generative output type based on the response type.
         :return: function to generate responses
@@ -261,7 +267,7 @@ class ResponseGenerator:
 
     def _run_task_against_model(
         self, should_preempt_callable: Callable[[], bool]
-    ) -> tuple[List[Completion | Loglikelihood], bool]:
+    ) -> tuple[list[Completion | Loglikelihood], bool]:
         """
         Runs the task against the model and generates responses.
         :param should_preempt_callable: function to check if preempt is called
@@ -316,7 +322,7 @@ class ResponseGenerator:
         :return: None
         """
 
-        def _process_batch(samples_batch: List[Sample]) -> None:
+        def _process_batch(samples_batch: list[Sample]) -> None:
             if not samples_batch:
                 return
             if len(samples_batch) > 1:
@@ -342,7 +348,7 @@ class ResponseGenerator:
             # Count samples by iterating (this might be expensive for large datasets)
             total_num_samples = sum(1 for _ in self.task.iterate_samples(None))
 
-        samples_batch: List[Sample] = []
+        samples_batch: list[Sample] = []
         with tqdm(total=total_num_samples, desc=f"Processing {self.response_type.value}") as pbar:
             for i, sample in enumerate(self.task.iterate_samples(self.num_samples)):
                 subject = f" - Subject: {sample.subject}"
@@ -388,7 +394,7 @@ class ResponseGenerator:
         all_metrics = getattr(self.task, "METRICS", None)
         metadata = self.config.model_dump()
         metadata["llm_name"] = self.llm.name
-        metadata["task_name"] = self.task_name.value.NAME
+        metadata["task_name"] = self.task_name
         language = getattr(self.task, "LANGUAGE", None)
         metadata["language"] = map_language_to_value(language)
         metadata["metrics"] = [m.NAME for m in all_metrics] if all_metrics is not None else []

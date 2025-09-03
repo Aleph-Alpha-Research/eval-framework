@@ -1,6 +1,6 @@
 import threading
 from enum import Enum
-from typing import Any, TypeVar
+from typing import Annotated, Any, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -21,10 +21,10 @@ class PerturbationType(str, Enum):
 
 class PerturbationConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    type: PerturbationType = Field(default=PerturbationType.EDITOR)
-    probability: float = Field(default=0.1, ge=0.0, le=1.0)
-    seed: int = Field(default=RANDOM_SEED)
-    verbose: bool = Field(default=False)
+    type: PerturbationType = PerturbationType.EDITOR
+    probability: Annotated[float, Field(ge=0.0, le=1.0)] = 0.1
+    seed: int = RANDOM_SEED
+    verbose: bool = False
 
 
 _DOCKER_LAUNCH_LOCK = threading.Lock()
@@ -33,9 +33,7 @@ _AUGMENTER_PORT = 0
 SomeBaseTask = TypeVar("SomeBaseTask", bound=BaseTask[Any])
 
 
-def create_perturbation_class(
-    base_class: type[SomeBaseTask], perturbation_config: PerturbationConfig
-) -> type[SomeBaseTask]:
+def create_perturbation_class[T: BaseTask](base_class: type[T], perturbation_config: PerturbationConfig) -> type[T]:
     # mypy seems to have trouble inferring the type
     class EditorPerturbation(base_class):  # type: ignore
         def __init__(self, *args: Any, **kwargs: Any) -> None:

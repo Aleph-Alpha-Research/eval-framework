@@ -2,14 +2,14 @@ import pytest
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.models import Llama31_8B_Instruct_API
-from eval_framework.metrics.llm_metrics.graders.chatbot_style_grader import ChatbotStyleGrader
-from eval_framework.metrics.llm_metrics.graders.comparison_grader import ComparisonGrader, MatchOutcome
-from eval_framework.metrics.llm_metrics.graders.conciseness_grader import ConcisenessGrader
-from eval_framework.metrics.llm_metrics.graders.contains_names_grader import ContainsNamesGrader
-from eval_framework.metrics.llm_metrics.graders.format_correctness_grader import FormatCorrectnessGrader
-from eval_framework.metrics.llm_metrics.graders.instruction_grader import InstructionGrader
-from eval_framework.metrics.llm_metrics.graders.language import Language
-from eval_framework.metrics.llm_metrics.graders.refusal_grader import RefusalGrader
+from eval_framework.metrics.llm.graders.chatbot_style_grader import ChatbotStyleGrader
+from eval_framework.metrics.llm.graders.comparison_grader import ComparisonGrader, MatchOutcome
+from eval_framework.metrics.llm.graders.conciseness_grader import ConcisenessGrader
+from eval_framework.metrics.llm.graders.contains_names_grader import ContainsNamesGrader
+from eval_framework.metrics.llm.graders.format_correctness_grader import FormatCorrectnessGrader
+from eval_framework.metrics.llm.graders.instruction_grader import InstructionGrader
+from eval_framework.metrics.llm.graders.language import Language
+from eval_framework.metrics.llm.graders.refusal_grader import RefusalGrader
 
 # NOTE: Run this tests to make sure redis has the cache in CI
 

@@ -8,7 +8,7 @@ This guide shows you how to create **loglikelihood tasks**, benchmarks where the
 from typing import Any
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import AccuracyLoglikelihood
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
 
 class YourLoglikelihoodTask(BaseTask[str]):
     # Required attributes
@@ -42,7 +42,7 @@ Start with the minimal structure:
 ```python
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import AccuracyLoglikelihood
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
 
 class MultipleChoiceTask(BaseTask[str]):
     NAME = "Multiple Choice"
@@ -113,7 +113,7 @@ def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
 from typing import Any
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import AccuracyLoglikelihood
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
 
 class StandardMCQTask(BaseTask[str]):
     NAME = "Standard MCQ"
@@ -241,14 +241,14 @@ Choose appropriate metrics:
 
 ```python
 # Standard accuracy
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import AccuracyLoglikelihood
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
 
 # Normalized accuracy (for unbalanced datasets)
-from eval_framework.metrics.loglikelihood_metrics.accuracy_norm_loglikelihood import AccuracyNormLoglikelihood
+from eval_framework.metrics.loglikelihood.accuracy_norm_loglikelihood import AccuracyNormLoglikelihood
 
 # Probability mass analysis
-from eval_framework.metrics.loglikelihood_metrics.probability_mass import ProbabilityMass
-from eval_framework.metrics.loglikelihood_metrics.probability_mass_norm import ProbabilityMassNorm
+from eval_framework.metrics.loglikelihood.probability_mass import ProbabilityMass
+from eval_framework.metrics.loglikelihood.probability_mass_norm import ProbabilityMassNorm
 
 class YourTask(BaseTask[str]):
     # Most common choice
@@ -272,7 +272,7 @@ from typing import Any
 from enum import Enum
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import AccuracyLoglikelihood
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
 
 class ScienceSubject(Enum):
     PHYSICS = "physics"

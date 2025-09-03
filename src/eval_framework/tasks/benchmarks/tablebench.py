@@ -7,7 +7,7 @@ from itertools import product
 from typing import Any
 
 from eval_framework.exceptions import LogicError
-from eval_framework.metrics.completion_metrics.rouge_l import ROUGE_L
+from eval_framework.metrics.completion.rouge_l import ROUGE_L
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.utils import run_python_code
 from template_formatting.formatter import Role
