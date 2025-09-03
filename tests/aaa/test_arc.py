@@ -1,5 +1,102 @@
+import glob
+import importlib
+from argparse import Namespace
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+from eval_framework.run import run
+
+
 def test_arc() -> None:
     with open("src/eval_framework/tasks/benchmarks/arc.py") as f:
         content = f.read()
         print(content)
-    assert True
+    assert False
+
+
+@patch("argparse.ArgumentParser.parse_args")
+@patch("eval_framework.response_generator.create_perturbation_class")
+def test_run_arc_easy(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_path: Path) -> None:
+    version_str = f"v{importlib.metadata.version('eval_framework')}"
+    task_name = "ARC"
+    llm_name = "Bert"
+    mock_parse_args.return_value = Namespace(
+        context="local",
+        models=Path(__file__).parent / "conftest.py",
+        llm_name=llm_name,
+        num_samples=4,
+        max_tokens=None,
+        num_fewshot=0,
+        task_name=task_name,
+        hf_revision=None,
+        wandb_project="test-project",
+        wandb_entity="test-entity",
+        wandb_run_id="test-run",
+        output_dir=tmp_path,
+        hf_upload_dir="",
+        hf_upload_repo="",
+        llm_args=[],
+        judge_models=Path(__file__).parent / "conftest.py",
+        judge_model_name="Smollm135MInstruct",
+        judge_model_args={},
+        batch_size=2,
+        task_subjects=["ARC-Easy"],
+        description="",
+        perturbation_type="editor",
+        perturbation_probability=0.5,
+        perturbation_seed=123,
+        extra_task_modules=None,
+        save_logs=True,
+    )
+
+    mock_create_perturbation_class.side_effect = lambda x, _: x  # don't spin up docker here just for the test
+
+    run()
+
+    results_path = str(tmp_path / llm_name / f"{version_str}_{task_name}" / "*" / "results.jsonl")
+    results_files = glob.glob(results_path)
+    assert len(results_files) == 1
+
+
+@patch("argparse.ArgumentParser.parse_args")
+@patch("eval_framework.response_generator.create_perturbation_class")
+def test_run_arc_challenge(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_path: Path) -> None:
+    version_str = f"v{importlib.metadata.version('eval_framework')}"
+    task_name = "ARC"
+    llm_name = "Bert"
+    mock_parse_args.return_value = Namespace(
+        context="local",
+        models=Path(__file__).parent / "conftest.py",
+        llm_name=llm_name,
+        num_samples=4,
+        max_tokens=None,
+        num_fewshot=0,
+        task_name=task_name,
+        hf_revision=None,
+        wandb_project="test-project",
+        wandb_entity="test-entity",
+        wandb_run_id="test-run",
+        output_dir=tmp_path,
+        hf_upload_dir="",
+        hf_upload_repo="",
+        llm_args=[],
+        judge_models=Path(__file__).parent / "conftest.py",
+        judge_model_name="Smollm135MInstruct",
+        judge_model_args={},
+        batch_size=2,
+        task_subjects=["ARC-Challenge"],
+        description="",
+        perturbation_type="editor",
+        perturbation_probability=0.5,
+        perturbation_seed=123,
+        extra_task_modules=None,
+        save_logs=True,
+    )
+
+    mock_create_perturbation_class.side_effect = lambda x, _: x  # don't spin up docker here just for the test
+
+    run()
+
+    results_path = str(tmp_path / llm_name / f"{version_str}_{task_name}" / "*" / "results.jsonl")
+    results_files = glob.glob(results_path)
+    assert len(results_files) == 1
