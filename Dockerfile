@@ -74,5 +74,3 @@ RUN --mount=target=$UV_CACHE_DIR,type=cache,sharing=locked,id=uv-cache \
 COPY . .
 RUN --mount=target=$UV_CACHE_DIR,type=cache,sharing=locked,id=uv-cache \
   uv sync --link-mode="copy" --all-extras --group cu124 --group flash-attn
-
-RUN cat src/eval_framework/tasks/benchmarks/arc.py
