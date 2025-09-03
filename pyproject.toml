@@ -97,7 +97,7 @@ dev = [
   "types-redis>=4.6.0.20241004,<5",
   "ruff>=0.12.8",
 ]
-flash-attn = ["flash-attn>=2.7.2.post1,<3"]
+flash-attn = ["flash-attn>=2.7.2.post1,<2.8"]
 cu124 = ["torch"]
 cpu = ["torch"]
 
