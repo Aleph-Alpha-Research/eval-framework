@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -230,7 +230,7 @@ class HFLLM_from_name(HFLLM):
     A generic class to create HFLLM instances from a given model name.
     """
 
-    def __init__(self, model_name: Optional[str] = None, formatter: str = "Llama3Formatter", **kwargs: Any) -> None:
+    def __init__(self, model_name: str | None = None, formatter: str = "Llama3Formatter", **kwargs: Any) -> None:
         if model_name is None:
             raise ValueError("model_name is required")
 

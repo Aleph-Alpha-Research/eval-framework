@@ -1,4 +1,5 @@
-from typing import Literal, Mapping
+from collections.abc import Mapping
+from typing import Literal
 
 from eval_framework.llm.base import BaseLLM as StructuredOutputChatModel
 from eval_framework.metrics.llm_metrics.graders.language import Language

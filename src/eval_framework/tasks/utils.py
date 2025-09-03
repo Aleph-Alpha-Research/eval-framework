@@ -7,8 +7,9 @@ import os
 import random
 import re
 import string
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Literal, NamedTuple
+from typing import Any, Literal, NamedTuple
 
 import numpy as np
 from dotenv import load_dotenv

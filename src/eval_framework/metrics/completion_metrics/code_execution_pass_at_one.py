@@ -1,6 +1,5 @@
 import os
 import traceback
-from typing import List
 
 from eval_framework.logger import logger
 from eval_framework.metrics.base import BaseMetric, MetricResult
@@ -27,7 +26,7 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
                 "home directory."
             )
 
-    def calculate(self, response: Completion) -> List[MetricResult]:
+    def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 

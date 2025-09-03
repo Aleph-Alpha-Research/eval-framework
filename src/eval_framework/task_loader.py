@@ -2,8 +2,8 @@ import importlib.util
 import inspect
 import logging
 import os
+from collections.abc import Sequence
 from types import ModuleType
-from typing import Sequence
 
 from aenum import extend_enum
 
