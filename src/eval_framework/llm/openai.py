@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import Any
 
 import tiktoken  # OpenAI's official tokenizer library
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class OpenAIModel(BaseLLM):
-    DEFAULT_FORMATTER: BaseFormatter | None = None
+    DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
 
     def __init__(
         self,
@@ -38,7 +38,7 @@ class OpenAIModel(BaseLLM):
         """
         self._model_name = model_name
         logger.info(f"Using {model_name} as a judge")
-        self._formatter = formatter or self.DEFAULT_FORMATTER
+        self._formatter = formatter or self.DEFAULT_FORMATTER() if self.DEFAULT_FORMATTER is not None else None
         self._temperature = temperature
         # Initialize OpenAI client
         self._client = OpenAI(
