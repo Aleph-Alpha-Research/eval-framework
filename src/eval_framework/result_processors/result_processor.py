@@ -30,7 +30,7 @@ class ResultsFileProcessor(ResultProcessor):
     def load_metadata(self) -> dict:
         metadata_file = self.output_dir / "metadata.json"
         if os.path.exists(metadata_file):
-            with open(metadata_file, "r") as f:
+            with open(metadata_file) as f:
                 return json.load(f)
         else:
             logger.info("No metadata found.")

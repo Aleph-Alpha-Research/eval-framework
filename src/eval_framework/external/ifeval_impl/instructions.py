@@ -22,7 +22,7 @@ import logging
 import random
 import re
 import string
-from typing import Dict, Optional, Sequence, Union
+from collections.abc import Sequence
 
 import langdetect
 
@@ -30,7 +30,7 @@ from eval_framework.external.ifeval_impl import instructions_util
 
 logger = logging.getLogger(__name__)
 
-_InstructionArgsDtype = Optional[Dict[str, Union[int, str, Sequence[str]]]]
+_InstructionArgsDtype = dict[str, int | str | Sequence[str]] | None
 
 _LANGUAGES = instructions_util.LANGUAGE_CODES
 

@@ -1,5 +1,5 @@
 import re
-from typing import Type, TypeVar, cast
+from typing import TypeVar, cast
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -161,7 +161,9 @@ class Loglikelihood(BaseLoglikelihood):
 MetricContext = TypeVar("MetricContext", bound=BaseMetricContext)
 
 
-def extract_context_metric(response: Completion, metric_context_class: Type[MetricContext]) -> MetricContext:
+def extract_context_metric[MetricContext: BaseMetricContext](
+    response: Completion, metric_context_class: type[MetricContext]
+) -> MetricContext:
     assert response.context is not None, "Expected context to be provided in the response"
     if not isinstance(response.context, list):
         assert isinstance(response.context, metric_context_class) or isinstance(response.context, BaseMetricContext), (

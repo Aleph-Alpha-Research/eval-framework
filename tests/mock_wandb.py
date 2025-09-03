@@ -1,6 +1,7 @@
 import traceback
+from collections.abc import Sequence
 from types import TracebackType
-from typing import Any, Dict, Literal, Optional, Sequence, TypedDict, Unpack
+from typing import Any, Literal, TypedDict, Unpack
 
 from wandb import Settings
 from wandb.apis.public import RetryingClient
@@ -39,8 +40,8 @@ class RunInitKwargs(TypedDict, total=False):
     client: RetryingClient | None
     entity: str | None
     project: str | None
-    filters: Optional[Dict[str, Any]]
-    order: Optional[str]
+    filters: dict[str, Any] | None
+    order: str | None
     per_page: int
     include_sweeps: bool
 

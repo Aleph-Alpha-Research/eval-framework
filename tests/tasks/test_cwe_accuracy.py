@@ -1,5 +1,3 @@
-from typing import List
-
 import pytest
 
 from eval_framework.metrics.base import MetricResult
@@ -14,13 +12,13 @@ class TestCWEAccuracy:
         return CWEAccuracy()
 
     @pytest.fixture
-    def default_messages(self) -> List[Message]:
+    def default_messages(self) -> list[Message]:
         return [
             Message(role=Role.SYSTEM, content="You are a helpful assistant."),
             Message(role=Role.USER, content="Please analyze this text and find the most common words."),
         ]
 
-    def test_cwe_all_words_present(self, metric: CWEAccuracy, default_messages: List[Message]) -> None:
+    def test_cwe_all_words_present(self, metric: CWEAccuracy, default_messages: list[Message]) -> None:
         # Test when all words are present in the answer
         completion = Completion(
             id=1,
@@ -36,7 +34,7 @@ class TestCWEAccuracy:
         result: MetricResult = metric.calculate(completion)[0]
         assert result.value == 1.0
 
-    def test_cwe_all_words_different_order(self, metric: CWEAccuracy, default_messages: List[Message]) -> None:
+    def test_cwe_all_words_different_order(self, metric: CWEAccuracy, default_messages: list[Message]) -> None:
         # Test when all words are present but in different order
         completion = Completion(
             id=2,
@@ -52,7 +50,7 @@ class TestCWEAccuracy:
         result: MetricResult = metric.calculate(completion)[0]
         assert result.value == 1.0
 
-    def test_cwe_missing_word(self, metric: CWEAccuracy, default_messages: List[Message]) -> None:
+    def test_cwe_missing_word(self, metric: CWEAccuracy, default_messages: list[Message]) -> None:
         # Test when one word is missing
         completion = Completion(
             id=3,
@@ -68,7 +66,7 @@ class TestCWEAccuracy:
         result: MetricResult = metric.calculate(completion)[0]
         assert result.value == 0.0
 
-    def test_cwe_extra_words(self, metric: CWEAccuracy, default_messages: List[Message]) -> None:
+    def test_cwe_extra_words(self, metric: CWEAccuracy, default_messages: list[Message]) -> None:
         # Test when there are extra words (should still pass if all required words are present)
         completion = Completion(
             id=4,
@@ -85,7 +83,7 @@ class TestCWEAccuracy:
         result: MetricResult = metric.calculate(completion)[0]
         assert result.value == 1.0
 
-    def test_cwe_case_insensitive(self, metric: CWEAccuracy, default_messages: List[Message]) -> None:
+    def test_cwe_case_insensitive(self, metric: CWEAccuracy, default_messages: list[Message]) -> None:
         # Test case insensitivity
         completion = Completion(
             id=5,
@@ -101,7 +99,7 @@ class TestCWEAccuracy:
         result: MetricResult = metric.calculate(completion)[0]
         assert result.value == 1.0
 
-    def test_cwe_with_explanation(self, metric: CWEAccuracy, default_messages: List[Message]) -> None:
+    def test_cwe_with_explanation(self, metric: CWEAccuracy, default_messages: list[Message]) -> None:
         # Test with additional explanation text
         completion = Completion(
             id=6,
@@ -119,7 +117,7 @@ class TestCWEAccuracy:
         result: MetricResult = metric.calculate(completion)[0]
         assert result.value == 1.0
 
-    def test_cwe_with_error(self, metric: CWEAccuracy, default_messages: List[Message]) -> None:
+    def test_cwe_with_error(self, metric: CWEAccuracy, default_messages: list[Message]) -> None:
         # Test with an error in the completion
         completion = Completion(
             id=7,

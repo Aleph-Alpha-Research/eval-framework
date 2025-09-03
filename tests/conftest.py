@@ -1,4 +1,4 @@
-from typing import Callable, List, Sequence
+from collections.abc import Callable, Sequence
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -31,7 +31,7 @@ class MockLLM(BaseLLM):
         self.logprob_counter = 0
         self.logprob_samples: list[Sample] = []
 
-    def logprobs(self, samples: List[Sample]) -> List[RawLoglikelihood]:
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         rawloglikelihoods = []
         for sample in samples:
             self.logprob_counter += 1
@@ -53,11 +53,11 @@ class MockLLM(BaseLLM):
 
     def generate_from_messages(
         self,
-        messages: List[Sequence[Message]],
+        messages: list[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
-    ) -> List[RawCompletion]:
+    ) -> list[RawCompletion]:
         self.generate_counter += 1
         return [
             RawCompletion(

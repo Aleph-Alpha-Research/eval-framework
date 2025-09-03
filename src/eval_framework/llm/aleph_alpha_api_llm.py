@@ -6,8 +6,8 @@ import random
 import re
 import time
 import traceback
+from collections.abc import Sequence
 from dataclasses import asdict
-from typing import List, Sequence
 
 import aiohttp
 from aleph_alpha_client import (
@@ -217,8 +217,8 @@ class AlephAlphaAPIModel(BaseLLM):
             return (request, response)
 
     async def _process_requests(
-        self, requests: List[CompletionRequest] | List[EvaluationRequest]
-    ) -> List[RawCompletion | tuple[EvaluationRequest, EvaluationResponse | Error]]:
+        self, requests: list[CompletionRequest] | list[EvaluationRequest]
+    ) -> list[RawCompletion | tuple[EvaluationRequest, EvaluationResponse | Error]]:
         semaphore = asyncio.Semaphore(self.max_async_concurrent_requests)
         async with AsyncClient(
             host=os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
@@ -236,11 +236,11 @@ class AlephAlphaAPIModel(BaseLLM):
 
     def generate_from_messages(
         self,
-        messages: List[Sequence[Message]],
+        messages: list[Sequence[Message]],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
-    ) -> List[RawCompletion]:
+    ) -> list[RawCompletion]:
         if temperature is None:
             effective_temperature = 0.0  # Current default, TODO: refactor to use model's default
             logger.info(
@@ -265,10 +265,10 @@ class AlephAlphaAPIModel(BaseLLM):
         responses = asyncio.run(self._process_requests(requests))
         return responses  # type: ignore
 
-    def logprobs(self, samples: List[Sample]) -> List[RawLoglikelihood]:
-        samples_prompt: List[str] = []
-        evaluation_requests: List[EvaluationRequest] = []
-        results: List[RawLoglikelihood] = []
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+        samples_prompt: list[str] = []
+        evaluation_requests: list[EvaluationRequest] = []
+        results: list[RawLoglikelihood] = []
         assert self._formatter, "We need a formatter to generate from messages"
 
         # evaluate all choices independently in flattened list
