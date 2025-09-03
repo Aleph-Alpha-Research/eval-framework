@@ -1,8 +1,8 @@
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.base import MetricResult
-from eval_framework.metrics.llm_metrics.base import BaseLLMJudgeMetric
-from eval_framework.metrics.llm_metrics.graders.conciseness_grader import ConcisenessGrader
-from eval_framework.metrics.llm_metrics.graders.language import Language
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
+from eval_framework.metrics.llm.graders.conciseness_grader import ConcisenessGrader
+from eval_framework.metrics.llm.graders.language import Language
 from eval_framework.shared.types import Completion
 
 

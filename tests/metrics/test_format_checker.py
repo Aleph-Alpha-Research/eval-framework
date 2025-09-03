@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.metrics.completion_metrics.format_checker import CheckJsonFormat, CheckPostScriptFormat
+from eval_framework.metrics.completion.format_checker import CheckJsonFormat, CheckPostScriptFormat
 from eval_framework.shared.types import Completion
 
 

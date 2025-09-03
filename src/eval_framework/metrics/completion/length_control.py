@@ -2,7 +2,7 @@ import json
 from enum import Enum
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.metrics.completion_metrics.text_counter import ParagraphCounter, SentenceCounter, WordCounter
+from eval_framework.metrics.completion.text_counter import ParagraphCounter, SentenceCounter, WordCounter
 from eval_framework.shared.types import Completion
 
 

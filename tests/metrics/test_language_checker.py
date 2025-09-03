@@ -1,7 +1,7 @@
 import pytest
 
 from eval_framework.exceptions import LogicError
-from eval_framework.metrics.completion_metrics.language_checker import (
+from eval_framework.metrics.completion.language_checker import (
     LanguageChecker,
     LanguageConsistencyChecker,
     LanguageRawConsistencyChecker,

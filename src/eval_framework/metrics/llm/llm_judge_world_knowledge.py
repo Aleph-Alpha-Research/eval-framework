@@ -1,8 +1,8 @@
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.base import MetricResult
-from eval_framework.metrics.llm_metrics.base import BaseLLMJudgeMetric
-from eval_framework.metrics.llm_metrics.graders.language import Language
-from eval_framework.metrics.llm_metrics.graders.summary_world_knowledge_grader import SummarizationWorldKnowledgeGrader
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
+from eval_framework.metrics.llm.graders.language import Language
+from eval_framework.metrics.llm.graders.summary_world_knowledge_grader import SummarizationWorldKnowledgeGrader
 from eval_framework.shared.types import Completion
 
 

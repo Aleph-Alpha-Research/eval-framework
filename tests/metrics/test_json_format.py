@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from eval_framework.metrics.completion_metrics.json_format import JsonFormat, get_json_object, remove_comments
+from eval_framework.metrics.completion.json_format import JsonFormat, get_json_object, remove_comments
 from eval_framework.shared.types import Completion
 
 CITY_SCHEMA = {
