@@ -12,7 +12,7 @@ from eval_framework.run import run
 def test_run(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_path: Path) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
     task_name = "ARC"
-    llm_name = "Bert"
+    llm_name = "SmolLM135M"
     mock_parse_args.return_value = Namespace(
         context="local",
         models=Path(__file__).parent / "conftest.py",
@@ -55,7 +55,7 @@ def test_run(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_pa
 def test_run_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
     task_name = "ARC"
-    llm_name = "Bert"
+    llm_name = "SmolLM135M"
     mock_parse_args.return_value = Namespace(
         context="local",
         models=Path(__file__).parent / "conftest.py",

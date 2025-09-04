@@ -3,7 +3,7 @@ import importlib
 from pathlib import Path
 from unittest.mock import patch
 
-from eval_framework.llm.models import Llama31_8B_HF
+from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.result_processors.base import Result
 from eval_framework.result_processors.result_processor import ResultsFileProcessor, generate_output_dir
 from eval_framework.shared.types import BaseMetricContext, Completion, Loglikelihood
@@ -22,7 +22,7 @@ def test_generate_output_dir_with_valid_values() -> None:
         num_fewshot=5,
         num_samples=10,
         task_name=task_name,
-        llm_class=Llama31_8B_HF,
+        llm_class=Qwen3_0_6B,
     )
 
     version_str = f"v{importlib.metadata.version('eval_framework')}"
@@ -52,7 +52,7 @@ def test_generate_output_dir_with_none_values() -> None:
         num_fewshot=0,
         num_samples=None,
         task_name=task_name,
-        llm_class=Llama31_8B_HF,
+        llm_class=Qwen3_0_6B,
     )
 
     version_str = f"v{importlib.metadata.version('eval_framework')}"

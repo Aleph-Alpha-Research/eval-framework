@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from eval_framework.llm.models import Llama31_8B_Instruct_API
+from eval_framework.llm.aleph_alpha import Llama31_8B_Instruct_API
 from eval_framework.main import main
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.task_loader import load_extra_tasks

@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 import eval_framework.llm.aleph_alpha as aleph_alpha
-from eval_framework.llm.models import Llama31_8B_Instruct_API
+from eval_framework.llm.aleph_alpha import Llama31_8B_Instruct_API
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import Message, Role

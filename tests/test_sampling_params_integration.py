@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from eval_framework.llm.models import Qwen3_0_6B_VLLM
+from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
 from eval_framework.run import parse_args
 from eval_framework.tasks.eval_config import EvalConfig
 
