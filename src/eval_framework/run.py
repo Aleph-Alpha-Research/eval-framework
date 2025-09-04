@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -8,7 +9,6 @@ try:
 except ImportError:
     DeterminedContext = None  # type: ignore
 
-import logging
 
 from eval_framework.context.local import LocalContext
 from eval_framework.main import main

@@ -27,7 +27,7 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors, redis_cache
-from template_formatting.formatter import BaseFormatter, Message
+from template_formatting.formatter import BaseFormatter, Llama3Formatter, Message
 
 load_dotenv()
 
@@ -323,3 +323,8 @@ class AlephAlphaAPIModel(BaseLLM):
             )
 
         return results
+
+
+class Llama31_8B_Instruct_API(AlephAlphaAPIModel):
+    LLM_NAME = "llama-3.1-8b-instruct"
+    DEFAULT_FORMATTER = Llama3Formatter

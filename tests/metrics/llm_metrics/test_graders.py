@@ -1,7 +1,7 @@
 import pytest
 
 from eval_framework.llm.base import BaseLLM
-from eval_framework.llm.models import Llama31_8B_Instruct_API
+from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.metrics.llm.graders.chatbot_style_grader import ChatbotStyleGrader
 from eval_framework.metrics.llm.graders.comparison_grader import ComparisonGrader, MatchOutcome
 from eval_framework.metrics.llm.graders.conciseness_grader import ConcisenessGrader
@@ -16,7 +16,7 @@ from eval_framework.metrics.llm.graders.refusal_grader import RefusalGrader
 
 @pytest.fixture(scope="module")
 def judge() -> BaseLLM:
-    return Llama31_8B_Instruct_API()
+    return Qwen3_0_6B()
 
 
 @pytest.mark.external_api

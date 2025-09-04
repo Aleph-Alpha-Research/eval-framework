@@ -4,7 +4,7 @@ from typing import Any
 
 from pytest import MonkeyPatch
 
-from eval_framework.llm.models import Llama31_8B_HF
+from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.result_processors.hf_processor import HFProcessor
 from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
@@ -29,7 +29,7 @@ def test_hf_processor_with_mocked_hf_api(monkeypatch: MonkeyPatch) -> None:
         num_fewshot=5,
         num_samples=10,
         task_name=task_name,
-        llm_class=Llama31_8B_HF,
+        llm_class=Qwen3_0_6B,
         description="dummy",
     )
 
@@ -69,7 +69,7 @@ def test_hf_processor_with_mocked_hf_api_2(monkeypatch: MonkeyPatch) -> None:
         num_fewshot=5,
         num_samples=10,
         task_name=task_name,
-        llm_class=Llama31_8B_HF,
+        llm_class=Qwen3_0_6B,
         description="dummy",
     )
 

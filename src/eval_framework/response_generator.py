@@ -1,3 +1,4 @@
+import logging
 import time
 import traceback
 from collections.abc import Callable
@@ -12,7 +13,6 @@ try:
 except ImportError:
     get_cluster_info = None  # type: ignore[assignment]
 
-import logging
 
 from tqdm import tqdm
 

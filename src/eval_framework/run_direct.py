@@ -20,7 +20,7 @@ if __name__ == "__main__":
         "judge_model_name": None,
         "judge_model_args": {},
         # ---
-        "llm_name": "Llama31_8B_API",
+        "llm_name": "Llama31_8B_Instruct_API",
         "llm_args": {},
         "num_samples": 1,
         "max_tokens": None,

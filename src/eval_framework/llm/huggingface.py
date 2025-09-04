@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Callable, Sequence
+from functools import partial
 from typing import Any
 
 import torch
@@ -11,7 +12,7 @@ from eval_framework.shared.types import Error, PromptTooLongException, RawComple
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors, redis_cache
 from eval_framework.utils.constants import RED, RESET
-from template_formatting.formatter import BaseFormatter, HFFormatter, Message
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Llama3Formatter, Message
 
 logger = logging.getLogger(__name__)
 
@@ -263,20 +264,59 @@ class HFLLM(BaseLLM):
         return config.max_position_embeddings if hasattr(config, "max_position_embeddings") else None
 
 
-# class HFLLM_with_Llama3Formatter_from_name(HFLLM):
-#     """
-#     A generic class to create HFLLM instances from a given model name.
-#     """
-#     DEFAULT_FORMATTER = Llama3Formatter
+class HFLLM_from_name(HFLLM):
+    """
+    A generic class to create HFLLM instances from a given model name.
+    """
 
-#     def __init__(self, model_name: str):
-#         self.LLM_NAME = model_name
-#         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#         self.tokenizer = AutoTokenizer.from_pretrained(self.LLM_NAME)
-#         self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
-#         print(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
-#         self._set_formatter(self.DEFAULT_FORMATTER)
+    def __init__(self, model_name: str | None = None, formatter: str = "Llama3Formatter", **kwargs: Any) -> None:
+        if model_name is None:
+            raise ValueError("model_name is required")
+
+        self.LLM_NAME = model_name
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.tokenizer = AutoTokenizer.from_pretrained(self.LLM_NAME)
+        self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
+
+        # Lazy formatter initialization - only create the one we need
+        selected_formatter = self._get_formatter(formatter, model_name)
+
+        print(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
+        print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+        self._set_formatter(selected_formatter)
+
+    def _get_formatter(self, formatter: str, model_name: str) -> Any:
+        """Get formatter instance based on formatter name."""
+        if formatter == "Llama3Formatter":
+            return Llama3Formatter()
+        elif formatter == "MistralFormatter":
+            from eval_framework.llm.mistral import MagistralFormatter
+
+            return MagistralFormatter(model_name)
+        elif formatter == "ConcatFormatter":
+            return ConcatFormatter()
+        elif formatter == "HFFormatter":
+            return HFFormatter(model_name)
+        else:
+            supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
+            raise ValueError(f"Unsupported formatter: {formatter}. Supported formatters: {supported}")
 
 
-class TruncatedLLM(HFLLM):
-    SEQ_LENGTH = 2048
+class Pythia410m(HFLLM):
+    LLM_NAME = "EleutherAI/pythia-410m"
+    DEFAULT_FORMATTER = ConcatFormatter
+
+
+class SmolLM135M(HFLLM):
+    LLM_NAME = "HuggingFaceTB/SmolLM-135M"
+    DEFAULT_FORMATTER = ConcatFormatter
+
+
+class Smollm135MInstruct(HFLLM):
+    LLM_NAME = "HuggingFaceTB/SmolLM-135M-Instruct"
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME)
+
+
+class Qwen3_0_6B(HFLLM):
+    LLM_NAME = "Qwen/Qwen3-0.6B"
+    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})
