@@ -3,7 +3,7 @@ from typing import Any, Literal, override
 
 from vllm import SamplingParams
 
-from eval_framework.llm.vllm_models import TokenizedContainer, VLLMModel, VLLMTokenizerAPI
+from eval_framework.llm.vllm import TokenizedContainer, VLLMModel, VLLMTokenizerAPI
 from template_formatting.formatter import BaseFormatter, Message
 from template_formatting.mistral_formatter import MagistralFormatter, MistralSerializer
 

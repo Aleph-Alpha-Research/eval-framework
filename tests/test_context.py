@@ -10,7 +10,7 @@ from eval_framework.context.determined import DeterminedContext
 from eval_framework.context.eval import import_models
 from eval_framework.context.local import LocalContext
 from eval_framework.llm.base import BaseLLM
-from eval_framework.llm.models import Llama31_8B_API, Pharia1_7B_Control_API
+from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.tasks.perturbation import PerturbationType
 
 
@@ -88,7 +88,7 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         assert ctx.config is not None
         assert ctx.hparams is not None
         assert ctx._core_context is not None
-        assert ctx.config.llm_class.__name__ == Llama31_8B_API.__name__
+        assert ctx.config.llm_class.__name__ == Qwen3_0_6B.__name__
         assert ctx.config.num_samples == 10000
         assert ctx.config.max_tokens == 111
         assert ctx.config.num_fewshot == 0
@@ -98,7 +98,7 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         assert ctx.config.hf_upload_dir == "dummy123"
         assert ctx.config.llm_args == {"run_key": "run_val"}
         assert ctx.config.llm_judge_class is not None
-        assert ctx.config.llm_judge_class.__name__ == Pharia1_7B_Control_API.__name__
+        assert ctx.config.llm_judge_class.__name__ == Qwen3_0_6B.__name__
         assert ctx.config.judge_model_args is not None
         assert ctx.config.batch_size == 1
         assert ctx.config.description == "d"
@@ -133,7 +133,7 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         assert ctx.config is not None
         assert ctx.hparams is not None
         assert ctx._core_context is not None
-        assert ctx.config.llm_class.__name__ == Llama31_8B_API.__name__
+        assert ctx.config.llm_class.__name__ == Qwen3_0_6B.__name__
         assert ctx.config.num_samples == 10
         assert ctx.config.max_tokens == 100
         assert ctx.config.num_fewshot == 0
@@ -143,7 +143,7 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         assert ctx.config.hf_upload_dir == "hf_dummy"
         assert ctx.config.llm_args == {"dummy_key": "dummy_val"}
         assert ctx.config.llm_judge_class is not None
-        assert ctx.config.llm_judge_class.__name__ == Pharia1_7B_Control_API.__name__
+        assert ctx.config.llm_judge_class.__name__ == Qwen3_0_6B.__name__
         assert ctx.config.judge_model_args is not None
         assert ctx.config.batch_size == 16
         assert ctx.config.description == "det_description"
@@ -171,7 +171,7 @@ def test_local_context() -> None:
     ) as ctx:
         assert ctx is not None
         assert ctx.config is not None
-        assert ctx.config.llm_class.__name__ == Llama31_8B_API.__name__
+        assert ctx.config.llm_class.__name__ == Qwen3_0_6B.__name__
         assert ctx.config.num_samples == 10
         assert ctx.config.num_fewshot == 0
         assert ctx.config.task_name == "ARC"
@@ -179,7 +179,7 @@ def test_local_context() -> None:
         assert ctx.config.hf_upload_dir == "dummy22"
         assert ctx.config.llm_args == {"dummy": "dummy"}
         assert ctx.config.llm_judge_class is not None
-        assert ctx.config.llm_judge_class.__name__ == Pharia1_7B_Control_API.__name__
+        assert ctx.config.llm_judge_class.__name__ == Qwen3_0_6B.__name__
         assert ctx.config.judge_model_args is not None
 
 

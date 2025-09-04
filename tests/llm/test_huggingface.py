@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.llm.models import SmolLM135M
+from eval_framework.llm.huggingface import SmolLM135M
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import Message, Role

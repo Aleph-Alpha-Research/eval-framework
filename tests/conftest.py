@@ -4,7 +4,7 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from eval_framework.llm.base import BaseLLM, Sample
-from eval_framework.llm.models import Pythia410m, SmolLM135M, Smollm135MInstruct
+from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MInstruct
 from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
