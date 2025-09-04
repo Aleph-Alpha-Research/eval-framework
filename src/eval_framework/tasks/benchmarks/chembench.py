@@ -21,7 +21,7 @@ CHEMBENCH_SUBJECTS = [
 ]
 
 
-class ChemBenchMultipleChoice(BaseTask[str]):
+class ChemBench(BaseTask[str]):
     """ChemBench dataset: https://huggingface.co/datasets/jablonkagroup/ChemBench"""
 
     NAME = "ChemBench"

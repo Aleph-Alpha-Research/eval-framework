@@ -29,7 +29,7 @@ def temporary_registry[**P, T](fun: Callable[P, T]) -> Callable[P, T]:
 
 @temporary_registry
 def test_case_insensitive_lookup() -> None:
-    register_task("MATH", MATH)
+    register_task(MATH)
 
     assert is_registered("MATH")
     assert set(registered_task_names()) == {"MATH"}
@@ -37,12 +37,8 @@ def test_case_insensitive_lookup() -> None:
     assert get_task("Math") is MATH
     assert get_task("math") is MATH
 
-    # Special punctuation not allowed
-    with pytest.raises(ValueError):
-        register_task("MATH.Lvl.5", MATHLvl5)
-
-    register_task("MATH Lvl 5", MATHLvl5)
-    assert set(registered_task_names()) == {"MATH", "MATH Lvl 5"}
+    register_task(MATHLvl5)
+    assert set(registered_task_names()) == {"MATH", "MATHLvl5"}
     assert get_task("math lvl 5") is MATHLvl5
     assert get_task("MATH LVL 5") is MATHLvl5
     assert get_task("Math Lvl 5") is MATHLvl5
@@ -54,6 +50,18 @@ def test_case_insensitive_lookup() -> None:
 
 
 @temporary_registry
+def test_register_non_task() -> None:
+    with pytest.raises(ValueError):
+        register_task(int)  # type: ignore[arg-type]
+
+    class MyTask:
+        pass
+
+    with pytest.raises(ValueError):
+        register_task(MyTask)  # type: ignore[arg-type]
+
+
+@temporary_registry
 def test_lazy_registration() -> None:
-    register_lazy_task("whatever", class_path=f"{MATH.__module__}.{MATH.__name__}")
-    assert get_task("whatever") is MATH
+    register_lazy_task(f"{MATH.__module__}.{MATH.__name__}")
+    assert get_task("Math") is MATH
