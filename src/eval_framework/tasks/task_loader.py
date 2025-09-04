@@ -76,5 +76,5 @@ def load_extra_tasks(module_paths: Sequence[str | os.PathLike]) -> None:
                     else:
                         # if there is no duplicate name conflict then register the new task
                         class_obj = getattr(user_module, name)
-                        register_task(class_obj.NAME, class_obj)
+                        register_task(class_obj)
                         logger.info(f"[User Task Loader] Registered task: {class_obj.NAME}")

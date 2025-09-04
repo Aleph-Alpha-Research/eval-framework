@@ -24,7 +24,7 @@ SPECIAL_ARGS = {
     "BigCodeBenchHard": {"num_fewshot": 1},
     "BigCodeBenchHardInstruct": {"num_fewshot": 1},
     "CASEHOLD": {"num_fewshot": 1},
-    "ChemBenchMultipleChoice": {"num_fewshot": 1},
+    "ChemBench": {"num_fewshot": 1},
     "COPA": {"num_fewshot": 1},
     "DUC_ABSTRACTIVE": {"num_fewshot": 1},
     "DUC_EXTRACTIVE": {"num_fewshot": 1},

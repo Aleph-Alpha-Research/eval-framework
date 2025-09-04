@@ -155,24 +155,33 @@ def get_task(name: str, /) -> type[BaseTask]:
     return _REGISTRY[name]
 
 
-def register_task(name: str, task: type[BaseTask]) -> None:
+def register_task(task: type[BaseTask]) -> str:
+    """The class name is used as the task name."""
+    if not issubclass(task, BaseTask):
+        raise ValueError(f"Can only register subclasses of BaseTask, got {task}")
+    name = task.__name__
     _REGISTRY[name] = task
+    return name
 
 
-def register_lazy_task(name: str, class_path: str, *, extras: Sequence[str] = ()) -> None:
+def register_lazy_task(class_path: str, /, *, extras: Sequence[str] = ()) -> None:
     """Register a task without importing it.
 
     Lazily register a task without importing the module.
 
     Args:
-        name: The name of the task to register.
         class_path: The full path to the task class. For example,
             `eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA`.
         extras: Any extra dependencies of `eval_framework` that need to be installed for this task.
     """
     if isinstance(extras, str):
         extras = [extras]
+    if "." not in class_path:
+        raise ValueError(
+            f"Invalid class path `{class_path}`. This needs to be a global path like "
+            "`eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA`): "
+        )
 
     base_module, class_name = class_path.rsplit(".", maxsplit=1)
     placeholder = TaskPlaceholder(name=class_name, module=base_module, extras=extras)
-    _REGISTRY[name] = placeholder
+    _REGISTRY[class_name] = placeholder

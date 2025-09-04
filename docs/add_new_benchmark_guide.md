@@ -278,8 +278,10 @@ class GeographyQATask(BaseTask[str]):
 Add a registration call for your new benchmark to `register_all_tasks` in `src/eval_framework/tasks/task_names.py`:
 
 ```python
-register_lazy_task("GeographyQA", class_path="eval_framework.tasks.benchmarks.geographyqa.GeographyQA")
+register_lazy_task("eval_framework.tasks.benchmarks.geographyqa.GeographyQA")
 ```
+
+The task will now be available through `get_task("GeographyQA")`.
 
 ### Testing your benchmark
 
