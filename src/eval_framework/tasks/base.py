@@ -27,7 +27,7 @@ class ResponseType(Enum):
     LOGLIKELIHOODS = "loglikelihoods"
 
 
-class Language(Enum):
+class BaseLanguage(Enum):
     # Default languages
     ENG = "English"
     DEU = "German"
@@ -48,7 +48,7 @@ class Language(Enum):
     SRP = "Serbian"
 
     @classmethod
-    def add_members(cls, new_members: dict[str, Any]) -> type["Language"]:
+    def add_members(cls, new_members: dict[str, Any]) -> type["Enum"]:
         members = {member.name: member.value for member in cls}
         for name, value in new_members.items():
             if name not in members:
@@ -61,7 +61,7 @@ for language in iso639.ALL_LANGUAGES:
     enum_name = language.part3.upper()
     languages[enum_name] = language.name
 
-Language: type[Enum] = Language.add_members(languages)  # type: ignore[no-redef]
+Language = BaseLanguage.add_members(languages)
 
 
 class Sample(BaseModel):
