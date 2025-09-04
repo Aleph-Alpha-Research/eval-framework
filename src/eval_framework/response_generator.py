@@ -8,7 +8,7 @@ from typing import Any
 from eval_framework.tasks.registry import get_task
 
 try:
-    from determined import get_cluster_info
+    from determined._info import get_cluster_info
 except ImportError:
     get_cluster_info = None  # type: ignore[assignment]
 
@@ -407,6 +407,7 @@ class ResponseGenerator:
             metadata["total_time"] = self.total_time
 
         try:
+            assert get_cluster_info is not None, "Determined cluster info not available"
             info = get_cluster_info()
             if info is not None:
                 metadata["determined_agent_id"] = info.agent_id
