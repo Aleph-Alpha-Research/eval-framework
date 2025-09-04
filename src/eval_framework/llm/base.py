@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Generator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -63,7 +63,7 @@ class BaseLLM(ABC):
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
 
     @contextmanager
-    def download_wandb_artifact(self, artifact_name, version, download_path):
+    def download_wandb_artifact(self, artifact_name, version, download_path) -> Generator[str, None, None]:
         wandb_fs = WandbFs(download_path=download_path)
         try:
             artifact = wandb_fs.get_artifact(artifact_name, version)
@@ -75,7 +75,7 @@ class BaseLLM(ABC):
             local_artifact_path = Path(wandb_fs.download_path.name) / file_root
 
             print(f"{RED}[ Model located at: {local_artifact_path} ]{RESET}")
-            yield local_artifact_path
+            yield str(local_artifact_path)
         finally:
             wandb_fs.cleanup()
 

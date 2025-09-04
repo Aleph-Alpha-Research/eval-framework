@@ -272,13 +272,13 @@ class HFLLM_from_wandb_registry(HFLLM):
             **kwargs: Additional arguments passed to the parent class
         """
         print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
-        download_path = kwargs.get("download_path", None)
+        download_path = str(kwargs.pop("download_path", None))  # Remove download_path from kwargs
         with self.download_wandb_artifact(artifact_name, version, download_path=download_path) as local_artifact_path:
             self.LLM_NAME = local_artifact_path
             self.artifact_name = artifact_name
             self.artifact_version = version
             selected_formatter = self.get_formatter(formatter, formatter_identifier)
-            super().__init__(formatter=selected_formatter)
+            super().__init__(formatter=selected_formatter, **kwargs)
 
         print(f"{RED}[ Model initialized --------------------- {RESET}")
         print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
@@ -316,10 +316,9 @@ class VLLM_from_wandb_registry(VLLMModel):
         self.artifact_version = version
         selected_formatter = self.get_formatter(formatter, formatter_identifier)
 
-        download_path = kwargs.get("download_path", None)
+        download_path = str(kwargs.pop("download_path", None))  # Remove download_path from kwargs
         with self.download_wandb_artifact(artifact_name, version, download_path=download_path) as local_artifact_path:
             self.LLM_NAME = local_artifact_path
-
             super().__init__(formatter=selected_formatter, checkpoint_path=local_artifact_path, **kwargs)
 
         print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
