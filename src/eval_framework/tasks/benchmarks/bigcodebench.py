@@ -75,6 +75,8 @@ class BigCodeBench(BaseTask[str]):
 
     def _get_context(self, item: dict[str, Any]) -> CodeExecutionPassAtOneContext:
         def merge_snippets(code: str, test_code: str) -> str:
+            # Add unittest.main() if not present (note that without "if" sometimes it just reports
+            # "Ran 0 tests" errorneously).
             if "unittest.main(" not in test_code:
                 test_code += "\n\nif __name__ == '__main__':\n  unittest.main()"
 
