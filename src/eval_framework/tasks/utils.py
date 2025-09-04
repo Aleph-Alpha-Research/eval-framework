@@ -65,20 +65,40 @@ class ExecutionResult(NamedTuple):
     output: str
 
 
+class SerializationError(Exception):
+    """Base exception for callable serialization errors."""
+
+    pass
+
+
+class EncodingError(SerializationError):
+    """Raised when encoding a callable fails."""
+
+    pass
+
+
+class DecodingError(SerializationError):
+    """Raised when decoding a callable fails."""
+
+    pass
+
+
 class CallableSerializer:
     @staticmethod
     def encode(fn: Callable[..., Any]) -> str:
         try:
-            return base64.b64encode(dill.dumps(fn)).decode("utf-8")
-        except:
-            raise
+            serialized = dill.dumps(fn)
+            return base64.b64encode(serialized).decode("utf-8")
+        except Exception as e:
+            raise EncodingError(f"Failed to encode callable {fn}: {e}") from e
 
     @staticmethod
-    def decode(fn: str) -> Callable[..., Any]:
+    def decode(fn_str: str) -> Callable[..., Any]:
         try:
-            return dill.loads(base64.b64decode(fn.encode("utf-8")))
-        except:
-            raise
+            decoded = base64.b64decode(fn_str.encode("utf-8"))
+            return dill.loads(decoded)
+        except Exception as e:
+            raise DecodingError(f"Failed to decode callable from string: {e}") from e
 
 
 def _parse_unittest_output(output: str) -> ExecutionResult:
