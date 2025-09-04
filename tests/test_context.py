@@ -20,7 +20,7 @@ def mock_get_cluster_info_minimal() -> Generator[mock.Mock, None, None]:
         mock_info = mock.Mock()
         mock_info.trial = mock.Mock()
         mock_info.trial.hparams = {
-            "llm_name": "Llama31_8B_API",
+            "llm_name": "Llama31_8B_Instruct_API",
             "output_dir": "dummy",
             "task_args": {
                 "num_fewshot": 0,
@@ -39,7 +39,7 @@ def mock_get_cluster_info_maximal() -> Generator[mock.Mock, None, None]:
         mock_info = mock.Mock()
         mock_info.trial = mock.Mock()
         mock_info.trial.hparams = {
-            "llm_name": "Llama31_8B_API",
+            "llm_name": "Llama31_8B_Instruct_API",
             "output_dir": "dummy",
             "hf_upload_dir": "hf_dummy",
             "description": "det_description",
@@ -156,7 +156,7 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
 
 def test_local_context() -> None:
     with LocalContext(
-        llm_name="Llama31_8B_API",
+        llm_name="Llama31_8B_Instruct_API",
         models_path=Path("src/eval_framework/llm/models.py"),
         num_samples=10,
         num_fewshot=0,
@@ -199,7 +199,7 @@ def test_import_models() -> None:
 def test_fail_validation_when_required_judge_not_given() -> None:
     with pytest.raises(ValidationError):
         with LocalContext(
-            llm_name="Llama31_8B_API",
+            llm_name="Llama31_8B_Instruct_API",
             models_path=Path("src/eval_framework/llm/models.py"),
             num_samples=10,
             num_fewshot=0,

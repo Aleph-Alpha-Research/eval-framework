@@ -309,7 +309,7 @@ class Pythia410m(HFLLM):
 
 class SmolLM135M(HFLLM):
     LLM_NAME = "HuggingFaceTB/SmolLM-135M"
-    DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME)
+    DEFAULT_FORMATTER = ConcatFormatter
 
 
 class Smollm135MInstruct(HFLLM):
