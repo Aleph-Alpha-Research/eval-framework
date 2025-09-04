@@ -2,7 +2,7 @@
 Tests for EvalConfig validation logic, specifically the ast.literal_eval() functionality.
 """
 
-from eval_framework.llm.models import Qwen3_0_6B_VLLM
+from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
 from eval_framework.tasks.eval_config import EvalConfig
 
 

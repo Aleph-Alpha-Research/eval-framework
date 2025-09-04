@@ -12,6 +12,8 @@
 - Fixed loading of extra task modules (skip non-evaluation BaseTasks with no NAME attribute), add test that no task with same names get registered
 - Fixed `ZERO_SCROLLS_QMSUM` missing from task_names.py
 - Fixed BLEU/CHRF/TER min/max scoring when all completions are empty
+- We've removed all models except those used for testing (they were largely old). The recommended way going forward is to provide
+  your own models implementation to the framework.
 
 ## 0.1.0
 
