@@ -84,12 +84,12 @@ class WandbFs:
         # create tempdir
         artifact_subdir = "/".join(artifact.name.split(":"))
         if self.user_supplied_download_path is None:
-            self.download_path = tempfile.TemporaryDirectory()
-            self.download_path = Path(self.download_path.name) / artifact_subdir
+            temp_dir = tempfile.TemporaryDirectory()
+            self.download_path = Path(temp_dir.name) / artifact_subdir
+            self._temp_dir = temp_dir  # Keep reference to prevent pre-mature cleanup
         else:
             assert isinstance(self.user_supplied_download_path, Path)
             self.download_path = self.user_supplied_download_path / artifact_subdir
-            # check to see if artifact is already in the download_path
             if self.download_path.exists():
                 wandb.use_artifact(artifact)
                 return self.download_path
@@ -157,13 +157,14 @@ class WandbFs:
         self._cleanup_temp_dir()
 
     def _cleanup_temp_dir(self) -> None:
-        if isinstance(self.download_path, tempfile.TemporaryDirectory):
+        if hasattr(self, "_temp_dir") and self._temp_dir:
             try:
-                self.download_path.cleanup()
+                self._temp_dir.cleanup()
             except (OSError, FileNotFoundError):
                 # Directory might already be cleaned up or removed
                 pass
             finally:
+                self._temp_dir = None
                 self.download_path = None
 
     def __del__(self) -> None:
