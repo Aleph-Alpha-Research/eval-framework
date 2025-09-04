@@ -5,7 +5,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Any, Literal, TypedDict, Unpack
 
-from wandb import Artifact, Settings
+from wandb import Settings
 from wandb.apis.public import RetryingClient
 from wandb.sdk.lib.paths import StrPath
 
@@ -57,7 +57,7 @@ class MockWandbRun:
         self.logged_data: list[dict] = []  # Store all logged data for testing
         self._finished: bool = False
         self.id: str = str(kwargs.get("id") or "mock_run_id")
-        self.logged_artifacts = []
+        self.logged_artifacts: list[MockArtifact] = []
 
     def __enter__(self) -> "MockWandbRun":
         return self
@@ -82,7 +82,7 @@ class MockWandbRun:
 
     def log_artifact(
         self,
-        artifact_or_path: Artifact | StrPath,
+        artifact_or_path: "MockArtifact" | StrPath,
         name: str | None = None,
         type: str | None = None,
         aliases: list[str] | None = None,
@@ -90,8 +90,11 @@ class MockWandbRun:
     ) -> "MockArtifact":
         if isinstance(artifact_or_path, str):
             artifact = MockArtifact(artifact_or_path, "mock_artifact")
-        else:
+        elif isinstance(artifact_or_path, MockArtifact):
             artifact = artifact_or_path
+        else:
+            # Handle Path-like objects
+            artifact = MockArtifact(str(artifact_or_path), "mock_artifact")
         self.logged_artifacts.append(artifact)
         return artifact
 
@@ -134,7 +137,7 @@ class MockWandb:
         """Mock wandb.use_artifact function"""
         if isinstance(artifact, str):
             # Create a mock artifact from string
-            return MockArtifact(artifact)
+            return MockArtifact(artifact, "mock_artifact")
         return artifact
 
 
@@ -164,7 +167,7 @@ class MockArtifact:
         self.metadata = metadata
         self.incremental = incremental
         self.use_as = use_as
-        self.files_ = []
+        self.files_: list = []
 
     def files(self):
         return self.files_
@@ -191,14 +194,14 @@ class MockArtifact:
 
 
 class MockWandbApi:
-    def __init__(self):
-        self.entity = "test-entity"
-        self._artifacts = {}
+    def __init__(self) -> None:
+        self.default_entity = "test-entity"
+        self._artifacts: dict[str, MockArtifact] = {}
 
-    def artifact(self, name: str) -> MockArtifact:
+    def artifact(self, name: str) -> MockArtifact | None:
         return self.get_artifact(name)
 
-    def set_artifact(self, artifact_id: str, file_list: list[str]):
+    def set_artifact(self, artifact_id: str, file_list: list[str]) -> None:
         # used only for testing purposes
         artifact = MockArtifact(artifact_id, "model")
         for file in file_list:

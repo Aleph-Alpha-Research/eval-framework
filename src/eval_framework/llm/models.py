@@ -272,7 +272,7 @@ class HFLLM_from_wandb_registry(HFLLM):
             **kwargs: Additional arguments passed to the parent class
         """
         print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
-        download_path = str(kwargs.pop("download_path", None))  # Remove download_path from kwargs
+        download_path = str(kwargs.pop("download_path", None)) if kwargs.get("download_path") else None
         with self.download_wandb_artifact(artifact_name, version, download_path=download_path) as local_artifact_path:
             self.LLM_NAME = local_artifact_path
             self.artifact_name = artifact_name

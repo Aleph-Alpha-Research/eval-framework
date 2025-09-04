@@ -5,6 +5,7 @@ import tempfile
 import urllib
 import warnings
 from pathlib import Path
+from types import FrameType
 from unittest.mock import patch
 
 import boto3
@@ -16,7 +17,7 @@ import wandb
 class WandbFs:
     def __init__(self, download_path: str | None = None):
         self.api = wandb.Api()
-        self.download_path = Path(download_path) if download_path else None
+        self.download_path: Path | tempfile.TemporaryDirectory | None = Path(download_path) if download_path else None
         self._setup_s3_client()
         self._setup_cleanup_handlers()
 
@@ -29,7 +30,7 @@ class WandbFs:
         for sig in [signal.SIGTERM, signal.SIGINT]:
             signal.signal(sig, self._signal_handler)
 
-    def _signal_handler(self, signum, frame) -> None:
+    def _signal_handler(self, signum: int, frame: FrameType) -> None:
         self._cleanup_temp_dir()
         # we need to re-raise the signal to terminate gracefully
         signal.signal(signum, signal.SIG_DFL)
@@ -46,7 +47,7 @@ class WandbFs:
 
     @property
     def entity(self) -> str:
-        return self.api.entity
+        return self.api.default_entity
 
     def get_artifact(self, artifact_id: str, version: str = "latest") -> wandb.Artifact:
         return self.api.artifact(f"wandb-registry-model/{artifact_id}:{version}")
@@ -83,11 +84,11 @@ class WandbFs:
             self.download_path = tempfile.TemporaryDirectory()
         else:
             self.download_path = self.download_path / artifact_subdir
+            # check to see if artifact is already in the download_path
+            if self.download_path.exists():
+                wandb.use_artifact(artifact)
+                return self.download_path
 
-        # check to see if artifact is already in the download_path
-        if self.download_path.exists():
-            wandb.use_artifact(artifact)
-            return self.download_path
         try:
             artifact_path = artifact.download(root=self.download_path)
             wandb.use_artifact(artifact)
@@ -120,10 +121,16 @@ class WandbFs:
         Returns:
             str | None: Path to the HuggingFace checkpoint root folder, or None if not found
         """
-        if not self.download_path:
+        download_path = (
+            self.download_path.name
+            if isinstance(self.download_path, tempfile.TemporaryDirectory)
+            else self.download_path
+        )
+
+        if not download_path:
             return None
 
-        checkpoint_roots = [x for x in Path(self.download_path).glob("**/config.json")]
+        checkpoint_roots = [x for x in Path(download_path).glob("**/config.json")]
         if checkpoint_roots:
             assert len(checkpoint_roots) == 1, (
                 "Multiple checkpoints found"
@@ -156,11 +163,10 @@ class WandbFs:
 
 
 if __name__ == "__main__":
-    from eval_framework.llm.models import HFLLM_from_wandb_registry, VLLM_from_wandb_registry
+    from eval_framework.llm.models import HFLLM_from_wandb_registry
 
     wandb.init(project="test-project")
     name = "SmolLM2-135M"
     version = "v1"
-    cache_dir = "/nfs/scratch_2/dylan_rodriquez/registry_cache"
-    model = HFLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter", download_path=cache_dir)
-    model = VLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter", download_path=cache_dir)
+    model = HFLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter")
+    # model = VLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter")
