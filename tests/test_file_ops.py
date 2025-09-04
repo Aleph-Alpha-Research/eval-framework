@@ -13,7 +13,7 @@ from eval_framework.utils.file_ops import (
 
 
 @pytest.fixture
-def wandb_run(mock_wandb_artifact) -> Generator[wandb.Run, None, None]:
+def wandb_run(mock_wandb_artifact: Mock) -> Generator[wandb.Run, None, None]:
     with wandb.init(project="test-project") as run:
         yield run
 
@@ -37,7 +37,7 @@ def aws_env_no_protocol() -> dict[str, str]:
 
 
 @pytest.fixture
-def mock_s3_client() -> Generator[Mock, Mock, None]:
+def mock_s3_client() -> Generator[tuple[Mock, Mock], None, None]:
     with patch("boto3.client") as mock_boto_client:
         mock_s3_client = Mock()
         mock_boto_client.return_value = mock_s3_client
@@ -45,14 +45,16 @@ def mock_s3_client() -> Generator[Mock, Mock, None]:
 
 
 @pytest.fixture
-def wandb_fs_with_env(aws_env, mock_s3_client) -> Generator[tuple[WandbFs, Mock, Mock], None, None]:
+def wandb_fs_with_env(
+    aws_env: dict[str, str], mock_s3_client: tuple[Mock, Mock]
+) -> Generator[tuple[WandbFs, Mock, Mock], None, None]:
     mock_s3_client_instance, mock_boto_client = mock_s3_client
     with patch.dict(os.environ, aws_env):
         yield WandbFs(), mock_s3_client_instance, mock_boto_client
 
 
 @pytest.fixture
-def wandb_fs(wandb_fs_with_env) -> WandbFs:
+def wandb_fs(wandb_fs_with_env: tuple[WandbFs, Mock, Mock]) -> WandbFs:
     wandb_fs_instance, _, _ = wandb_fs_with_env
     return wandb_fs_instance
 
@@ -68,16 +70,16 @@ class TestWandbFs:
     - hf checkpoints are found in a file tree
     """
 
-    def test_entity_property(self, wandb_fs) -> None:
+    def test_entity_property(self, wandb_fs: WandbFs) -> None:
         assert wandb_fs.entity == "test-entity"
 
-    def test_get_bucket_prefix(self, wandb_fs) -> None:
+    def test_get_bucket_prefix(self, wandb_fs: WandbFs) -> None:
         bucket, prefix = wandb_fs.get_bucket_prefix("s3://my-bucket/path/to/file.json")
 
         assert bucket == "my-bucket"
         assert prefix == "/path/to/file.json"
 
-    def test_ls(self, wandb_fs) -> None:
+    def test_ls(self, wandb_fs: WandbFs) -> None:
         # Set up artifact with specific files
         wandb_fs.api.set_artifact("test-model", ["s3://bucket/model/config.json", "s3://bucket/model/tokenizer.json"])
         artifact = wandb_fs.get_artifact("test-model")
@@ -87,7 +89,12 @@ class TestWandbFs:
         assert file_list == ["s3://bucket/model/config.json", "s3://bucket/model/tokenizer.json"]
 
     def test_download_and_use_artifact_s3(
-        self, aws_env, mock_s3_client, wandb_run, mock_wandb, wandb_fs_with_env
+        self,
+        aws_env: dict[str, str],
+        mock_s3_client: tuple[Mock, Mock],
+        wandb_run: wandb.Run,
+        mock_wandb: Mock,
+        wandb_fs_with_env: tuple[WandbFs, Mock, Mock],
     ) -> None:
         with patch.dict(os.environ, aws_env):
             wandb_fs, _, _ = wandb_fs_with_env
@@ -101,7 +108,7 @@ class TestWandbFs:
             artifact = wandb_fs.get_artifact(logged_artifact.name)
             assert wandb_fs.download_and_use_artifact(artifact)
 
-    def test_find_hf_checkpoint_from_s3_paths(self, wandb_fs) -> None:
+    def test_find_hf_checkpoint_from_s3_paths(self, wandb_fs: WandbFs) -> None:
         # Create temporary files to simulate the directory structure
         wandb_fs.download_path = tempfile.TemporaryDirectory()
         tempdir = Path(wandb_fs.download_path.name)
@@ -119,7 +126,7 @@ class TestWandbFs:
         result = wandb_fs.find_hf_checkpoint_root_from_path_list()
         assert result == str(tempdir / "models/my-model")
 
-    def test_find_hf_checkpoint_from_empty_dir(self, wandb_fs) -> None:
+    def test_find_hf_checkpoint_from_empty_dir(self, wandb_fs: WandbFs) -> None:
         wandb_fs.download_path = tempfile.TemporaryDirectory()
         tempdir = Path(wandb_fs.download_path.name)
         model_dir = tempdir / "models" / "my-model"

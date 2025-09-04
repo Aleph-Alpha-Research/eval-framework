@@ -21,6 +21,8 @@ class WandbFs:
         self.user_supplied_download_path: Path | tempfile.TemporaryDirectory | None = (
             Path(user_supplied_download_path) if user_supplied_download_path else None
         )
+        self._temp_dir: tempfile.TemporaryDirectory | None = None
+        self.download_path: Path | None = None
         self._setup_s3_client()
         self._setup_cleanup_handlers()
 

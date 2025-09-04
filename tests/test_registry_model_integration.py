@@ -8,7 +8,7 @@ from eval_framework.tasks.eval_config import EvalConfig
 
 
 @pytest.mark.xfail()
-def test_registry_model_backend_selection():
+def test_registry_model_backend_selection() -> None:
     RegistryModel(artifact_name="test-model", backend="invalid_backend")
 
 
@@ -24,7 +24,7 @@ def test_registry_model_backend_selection():
         ),
     ],
 )
-def test_registry_model_config_integration(backend, extra_args, expected_backend):
+def test_registry_model_config_integration(backend, extra_args, expected_backend) -> None:
     base_llm_args = {
         "artifact_name": "test-model",
         "version": "v1.0.0",
