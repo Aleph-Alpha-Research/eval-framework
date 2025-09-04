@@ -7,9 +7,9 @@ import os
 import random
 import re
 import string
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import Any, Literal, NamedTuple
+from typing import Any, Literal, NamedTuple, cast
 
 import numpy as np
 from dotenv import load_dotenv
@@ -214,13 +214,7 @@ def _get_redis_client() -> redis.Redis | None:
         return None
 
 
-def redis_cache(
-    version_id: str = "",
-    args_key_func: Callable[..., str] = lambda args, kwargs: str(args) + str(kwargs),
-    dump_func: Callable[[Any], dict[str, Any]] = lambda x: x,
-    load_func: Callable[[dict[str, Any]], Any] = lambda d: d,
-    expiration_sec: int = 60 * 60 * 24 * 30,  # 30 days
-) -> Callable[..., Any]:
+class redis_cache:
     """Decorator to cache LLM inference results in Redis.
 
     The cache key is a combination of the LLM class name, LLM_NAME, `version_id` and stringified call arguments prepared
@@ -237,67 +231,94 @@ def redis_cache(
     Entries expire after `expiration_sec` seconds if not having been read in that time period. This prevents old
     entries from staying in the cache indefinitely.
     """
-    client = _get_redis_client()
-    bad_serialization = re.compile(r"object at 0x[0-9a-fA-F]+>")
 
-    def redis_cache_decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-        def create_key(args: Any, kwargs: Any) -> str:
-            from eval_framework.llm.base import BaseLLM
+    def __init__(
+        self,
+        version_id: str = "",
+        args_key_func: Callable[..., str] = lambda args, kwargs: str(args) + str(kwargs),
+        dump_func: Callable[[Any], dict[str, Any]] = lambda x: x,
+        load_func: Callable[[dict[str, Any]], Any] = lambda d: d,
+        expiration_sec: int = 60 * 60 * 24 * 30,  # 30 days
+    ) -> None:
+        self.version_id = version_id
+        self.args_key_func = args_key_func
+        self.dump_func = dump_func
+        self.load_func = load_func
+        self.expiration_sec = expiration_sec
 
-            if not isinstance(args[0], BaseLLM):  # func must be a method of an LLM class
-                raise NotImplementedError
-            llm_name = getattr(args[0], "_llm_name", "") or getattr(args[0], "LLM_NAME", "")
-            llm_id = args[0].__class__.__name__ + "-" + llm_name
-            args_id = args_key_func(args[1:], kwargs)
-            assert bad_serialization.search(args_id) is None, (
-                f"Some arguments could not be converted to a string and a memory address was used instead: {args_id}"
-            )
-            args_id = hashlib.sha256(args_id.encode("utf-8")).hexdigest()
-            key = f"eval_framework:{llm_id}-{func.__name__}-{version_id}:{args_id}"
-            return key
+    @functools.cached_property
+    def bad_serialization(self) -> re.Pattern:
+        return re.compile(r"object at 0x[0-9a-fA-F]+>")
 
-        @functools.wraps(func)
-        def sync_func_wrapper(*args: Any, **kwargs: Any) -> Any:
-            assert client is not None
-            key = create_key(args, kwargs)
+    @functools.cached_property
+    def client(self) -> redis.Redis | None:
+        return _get_redis_client()
 
-            if (cache := client.get(key)) is not None:
-                logger.info("redis_cache: hit")
-                client.expire(key, time=expiration_sec)  # refresh expiration on access
-                result = json.loads(cache)  # type: ignore
-                return load_func(result)
-            else:
-                logger.info("redis_cache: miss")
-                result = func(*args, **kwargs)
-                value = dump_func(result)
-                client.setex(key, time=expiration_sec, value=json.dumps(value))
-                return result
+    def __call__(self, func: Callable) -> Callable:
+        if asyncio.iscoroutinefunction(func):
+            func = cast(Callable[..., Awaitable], func)
 
-        @functools.wraps(func)
-        async def async_func_wrapper(*args: Any, **kwargs: Any) -> Any:
-            assert client is not None
-            key = create_key(args, kwargs)
+            @functools.wraps(func)
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+                """Call the function asynchronously with caching."""
+                client = self.client
+                if client is None:
+                    return await func(*args, **kwargs)
 
-            if (cache := client.get(key)) is not None:
-                logger.info("redis_cache: hit")
-                client.expire(key, time=expiration_sec)  # refresh expiration on access
-                result = json.loads(cache)  # type: ignore
-                return load_func(result)
-            else:
-                logger.info("redis_cache: miss")
-                result = await func(*args, **kwargs)
-                value = dump_func(result)
-                client.setex(key, time=expiration_sec, value=json.dumps(value))
-                return result
+                key = self.create_key(func, args, kwargs)
 
-        if client is None:
-            return func
-        elif asyncio.iscoroutinefunction(func):
-            return async_func_wrapper
+                if (cache := client.get(key)) is not None:
+                    logger.info("redis_cache: hit")
+                    client.expire(key, time=self.expiration_sec)  # refresh expiration on access
+                    result = json.loads(cache)  # type: ignore
+                    return self.load_func(result)
+                else:
+                    logger.info("redis_cache: miss")
+                    result = await func(*args, **kwargs)
+                    value = self.dump_func(result)
+                    client.setex(key, time=self.expiration_sec, value=json.dumps(value))
+                    return result
+
+            return async_wrapper
         else:
-            return sync_func_wrapper
 
-    return redis_cache_decorator
+            @functools.wraps(func)
+            def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
+                """Call the function synchronously with caching."""
+                client = self.client
+                if client is None:
+                    return func(*args, **kwargs)
+
+                key = self.create_key(func, args, kwargs)
+
+                if (cache := client.get(key)) is not None:
+                    logger.info("redis_cache: hit")
+                    client.expire(key, time=self.expiration_sec)  # refresh expiration on access
+                    result = json.loads(cache)  # type: ignore
+                    return self.load_func(result)
+                else:
+                    logger.info("redis_cache: miss")
+                    result = func(*args, **kwargs)
+                    value = self.dump_func(result)
+                    client.setex(key, time=self.expiration_sec, value=json.dumps(value))
+                    return result
+
+            return sync_wrapper
+
+    def create_key(self, func: Callable, args: Any, kwargs: Any) -> str:
+        from eval_framework.llm.base import BaseLLM
+
+        if not isinstance(args[0], BaseLLM):  # func must be a method of an LLM class
+            raise NotImplementedError
+        llm_name = getattr(args[0], "_llm_name", "") or getattr(args[0], "LLM_NAME", "")
+        llm_id = args[0].__class__.__name__ + "-" + llm_name
+        args_id = self.args_key_func(args[1:], kwargs)
+        assert self.bad_serialization.search(args_id) is None, (
+            f"Some arguments could not be converted to a string and a memory address was used instead: {args_id}"
+        )
+        args_id = hashlib.sha256(args_id.encode("utf-8")).hexdigest()
+        key = f"eval_framework:{llm_id}-{func.__name__}-{self.version_id}:{args_id}"
+        return key
 
 
 def get_docker_address() -> str:
