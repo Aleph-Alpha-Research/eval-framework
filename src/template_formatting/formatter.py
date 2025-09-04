@@ -1,4 +1,3 @@
-# ruff: noqa: E501
 import re
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
@@ -140,7 +139,7 @@ class BaseFormatter:
         return grouped_messages
 
     @overload
-    def format(self, messages: Sequence[Message], output_mode: Literal["string"]) -> str:
+    def format(self, messages: Sequence[Message], output_mode: Literal["string"] = ...) -> str:
         pass
 
     @overload
@@ -196,7 +195,7 @@ class BaseFormatter:
             if self.strip_content:
                 text = text.strip()
             elif output_mode == "string":
-                if is_last or self.template.end_user_id != "" and not self.never_strip:
+                if is_last or (self.template.end_user_id != "" and not self.never_strip):
                     text = text.strip()
             if output_mode == "string" or (output_mode == "list" and not is_last):
                 # start assistant message after user message
@@ -427,7 +426,7 @@ class ReasoningFormatter(BaseFormatter):
         ]
 
         # --- Case A: Duplicate tokens ---
-        for token in [self.template.begin_thought_id] + required_tokens:
+        for token in [self.template.begin_thought_id, *required_tokens]:
             count = output_str.count(token)
             if count > 1:
                 return "error", ValueError(f"Duplicate tokens detected: '{token}' appears {count} times.")
