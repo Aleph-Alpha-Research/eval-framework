@@ -43,7 +43,9 @@ def register_all_tasks() -> None:
     register_lazy_task("DUC_ABSTRACTIVE", class_path="eval_framework.tasks.benchmarks.duc.DUC_ABSTRACTIVE")
     register_lazy_task("DUC_EXTRACTIVE", class_path="eval_framework.tasks.benchmarks.duc.DUC_EXTRACTIVE")
     register_lazy_task("FLORES200", class_path="eval_framework.tasks.benchmarks.flores200.Flores200")
-    register_lazy_task("FLORES_PLUS", class_path="eval_framework.tasks.benchmarks.flores_plus.FloresPlus")
+    register_lazy_task(
+        "FLORES_PLUS", class_path="eval_framework.tasks.benchmarks.flores_plus.FloresPlus", extras=["comet"]
+    )
     register_lazy_task("GPQA", class_path="eval_framework.tasks.benchmarks.gpqa.GPQA")
     register_lazy_task("GPQA_COT", class_path="eval_framework.tasks.benchmarks.gpqa.GPQA_COT")
     register_lazy_task("GSM8K", class_path="eval_framework.tasks.benchmarks.gsm8k.GSM8K")

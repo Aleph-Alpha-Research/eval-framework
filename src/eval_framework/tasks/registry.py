@@ -1,6 +1,7 @@
 import contextlib
 import importlib.metadata
 import importlib.util
+import re
 from collections.abc import Generator, Iterator, Sequence
 from typing import Annotated, Any
 
@@ -68,12 +69,21 @@ class Registry:
         for name, _ in self._registry.values():
             yield name
 
+    @staticmethod
+    def _task_key(name: str, /) -> str:
+        name = re.sub(r"[\s\-_]+", "", name).upper()
+        if not name.isalnum():
+            raise ValueError(
+                f"Task name '{name}' contains invalid characters. Only alphanumeric characters are allowed."
+            )
+        return name
+
     def __contains__(self, name: str) -> bool:
-        task_key = name.upper()
+        task_key = self._task_key(name)
         return task_key in self._registry
 
     def __getitem__(self, name: str, /) -> type[BaseTask]:
-        task_key = name.upper()
+        task_key = self._task_key(name)
         try:
             name, task = self._registry[task_key]
         except KeyError:
@@ -85,11 +95,11 @@ class Registry:
         return task
 
     def add(self, task: type[BaseTask]) -> None:
-        task_key = task.NAME.upper()
+        task_key = self._task_key(task.NAME)
         self._registry[task_key] = (task.NAME, task)
 
     def __setitem__(self, name: str, task: type[BaseTask] | TaskPlaceholder) -> None:
-        task_key = name.upper()
+        task_key = self._task_key(name)
         if task_key in self._registry:
             raise ValueError(f"Cannot register duplicate task with key: {task_key}")
 
