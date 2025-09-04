@@ -253,7 +253,7 @@ class TestFilterTaskSubjects:
             SUBJECTS = ["subject1", "subject2"]
             NAME = "MyTask"
 
-        register_task(MyTask)
+        register_task(MyTask)  # type: ignore[type-abstract]
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = []
@@ -271,7 +271,7 @@ class TestFilterTaskSubjects:
             SUBJECTS = ["subject1", "subject2", "subject3"]
             NAME = "MyTask"
 
-        register_task(MyTask)
+        register_task(MyTask)  # type: ignore[type-abstract]
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["subject1", "subject3"]
@@ -288,7 +288,7 @@ class TestFilterTaskSubjects:
             SUBJECTS = [("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")]
             NAME = "MyTask"
 
-        register_task(MyTask)
+        register_task(MyTask)  # type: ignore[type-abstract]
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["EN_US,topic1"]
@@ -306,7 +306,7 @@ class TestFilterTaskSubjects:
             SUBJECTS = [("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")]
             NAME = "MyTask"
 
-        register_task(MyTask)
+        register_task(MyTask)  # type: ignore[type-abstract]
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["EN_US,*"]
@@ -329,7 +329,7 @@ class TestFilterTaskSubjects:
             ]
             NAME = "TestTask"
 
-        register_task(MyTask)
+        register_task(MyTask)  # type: ignore[type-abstract]
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["EN_US,topic1,*"]
@@ -351,7 +351,7 @@ class TestFilterTaskSubjects:
             ]
             NAME = "TestTask"
 
-        register_task(MyTask)
+        register_task(MyTask)  # type: ignore[type-abstract]
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["*,topic1,*"]
@@ -372,7 +372,7 @@ class TestFilterTaskSubjects:
             SUBJECTS = [("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")]
             NAME = "TestTask"
 
-        register_task(MyTask)
+        register_task(MyTask)  # type: ignore[type-abstract]
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["EN_US,topic1", "DE_DE,topic1"]
@@ -389,7 +389,7 @@ class TestFilterTaskSubjects:
             SUBJECTS = ["subject1", "subject2"]
             NAME = "TestTask"
 
-        register_task(MyTask)
+        register_task(MyTask)  # type: ignore[type-abstract]
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["invalid_subject"]
@@ -406,7 +406,7 @@ class TestFilterTaskSubjects:
             SUBJECTS = [("EN_US", "topic1"), ("EN_US", "topic2")]
             NAME = "TestTask"
 
-        register_task(MyTask)
+        register_task(MyTask)  # type: ignore[type-abstract]
 
         config = MagicMock(spec=EvalConfig)
         config.task_subjects = ["EN_US,invalid_topic"]
