@@ -169,7 +169,7 @@ class MockArtifact:
         self.use_as = use_as
         self.files_: list = []
 
-    def files(self):
+    def files(self) -> Sequence[MockArtifactFile]:
         return self.files_
 
     def download(

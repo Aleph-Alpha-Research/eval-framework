@@ -117,7 +117,7 @@ class TestWandbFs:
         (other_dir / "readme.txt").touch()
 
         result = wandb_fs.find_hf_checkpoint_root_from_path_list()
-        assert result == tempdir / "models/my-model"
+        assert result == str(tempdir / "models/my-model")
 
     def test_find_hf_checkpoint_from_empty_dir(self, wandb_fs) -> None:
         wandb_fs.download_path = tempfile.TemporaryDirectory()

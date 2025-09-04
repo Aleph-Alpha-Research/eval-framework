@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Any
 
 import torch
@@ -8,10 +9,13 @@ from eval_framework.llm.aleph_alpha_api_llm import AlephAlphaAPIModel
 from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.huggingface_llm import HFLLM
 from eval_framework.llm.vllm_models import MistralVLLM, VLLMModel
+from eval_framework.shared.types import RawCompletion, RawLoglikelihood
+from eval_framework.tasks.base import Sample
 from template_formatting.formatter import (
     ConcatFormatter,
     HFFormatter,
     Llama3Formatter,
+    Message,
 )
 from template_formatting.mistral_formatter import MagistralFormatter
 
@@ -273,7 +277,9 @@ class HFLLM_from_wandb_registry(HFLLM):
         """
         print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
         download_path = str(kwargs.pop("download_path", None)) if kwargs.get("download_path") else None
-        with self.download_wandb_artifact(artifact_name, version, download_path=download_path) as local_artifact_path:
+        with self.download_wandb_artifact(
+            artifact_name, version, user_supplied_download_path=download_path
+        ) as local_artifact_path:
             self.LLM_NAME = local_artifact_path
             self.artifact_name = artifact_name
             self.artifact_version = version
@@ -316,8 +322,12 @@ class VLLM_from_wandb_registry(VLLMModel):
         self.artifact_version = version
         selected_formatter = self.get_formatter(formatter, formatter_identifier)
 
-        download_path = str(kwargs.pop("download_path", None))  # Remove download_path from kwargs
-        with self.download_wandb_artifact(artifact_name, version, download_path=download_path) as local_artifact_path:
+        download_path = (
+            str(kwargs.pop("download_path", None)) if kwargs.get("download_path") else None
+        )  # Remove download_path from kwargs
+        with self.download_wandb_artifact(
+            artifact_name, version, user_supplied_download_path=download_path
+        ) as local_artifact_path:
             self.LLM_NAME = local_artifact_path
             super().__init__(formatter=selected_formatter, checkpoint_path=local_artifact_path, **kwargs)
 
@@ -358,6 +368,12 @@ class RegistryModel(BaseLLM):
             backend: Inference backend to use - "hfllm" or "vllm" (default: "hfllm")
             **kwargs: Additional arguments passed to the underlying model class
         """
+        self._model: BaseLLM
+        self.configure_model_backend(artifact_name, version, formatter, backend, kwargs)
+
+    def configure_model_backend(
+        self, artifact_name: str, version: str, formatter: str, backend: str, kwargs: Any
+    ) -> None:
         backend = backend.lower()
 
         if backend == "vllm":
@@ -375,12 +391,18 @@ class RegistryModel(BaseLLM):
         else:
             raise ValueError(f"Unsupported backend: {backend}. Supported backends: 'hfllm', 'vllm'")
 
-    def generate_from_messages(self, messages, stop_sequences=None, max_tokens=None, temperature=None):
+    def generate_from_messages(
+        self,
+        messages: list[Sequence[Message]],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> list[RawCompletion]:
         return self._model.generate_from_messages(
             messages=messages, stop_sequences=stop_sequences, max_tokens=max_tokens, temperature=temperature
         )
 
-    def logprobs(self, samples):
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         return self._model.logprobs(samples)
 
     @property

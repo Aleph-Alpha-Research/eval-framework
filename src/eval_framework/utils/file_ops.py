@@ -6,6 +6,7 @@ import urllib
 import warnings
 from pathlib import Path
 from types import FrameType
+from typing import Any
 from unittest.mock import patch
 
 import boto3
@@ -15,9 +16,11 @@ import wandb
 
 
 class WandbFs:
-    def __init__(self, download_path: str | None = None):
+    def __init__(self, user_supplied_download_path: str | None = None):
         self.api = wandb.Api()
-        self.download_path: Path | tempfile.TemporaryDirectory | None = Path(download_path) if download_path else None
+        self.user_supplied_download_path: Path | tempfile.TemporaryDirectory | None = (
+            Path(user_supplied_download_path) if user_supplied_download_path else None
+        )
         self._setup_s3_client()
         self._setup_cleanup_handlers()
 
@@ -30,7 +33,7 @@ class WandbFs:
         for sig in [signal.SIGTERM, signal.SIGINT]:
             signal.signal(sig, self._signal_handler)
 
-    def _signal_handler(self, signum: int, frame: FrameType) -> None:
+    def _signal_handler(self, signum: int, frame: FrameType | None) -> None:
         self._cleanup_temp_dir()
         # we need to re-raise the signal to terminate gracefully
         signal.signal(signum, signal.SIG_DFL)
@@ -46,7 +49,7 @@ class WandbFs:
             os.environ["AWS_ENDPOINT_URL"] = f"https://{endpoint}"
 
     @property
-    def entity(self) -> str:
+    def entity(self) -> str | None:
         return self.api.default_entity
 
     def get_artifact(self, artifact_id: str, version: str = "latest") -> wandb.Artifact:
@@ -80,17 +83,19 @@ class WandbFs:
         """
         # create tempdir
         artifact_subdir = "/".join(artifact.name.split(":"))
-        if self.download_path is None:
+        if self.user_supplied_download_path is None:
             self.download_path = tempfile.TemporaryDirectory()
+            self.download_path = Path(self.download_path.name) / artifact_subdir
         else:
-            self.download_path = self.download_path / artifact_subdir
+            assert isinstance(self.user_supplied_download_path, Path)
+            self.download_path = self.user_supplied_download_path / artifact_subdir
             # check to see if artifact is already in the download_path
             if self.download_path.exists():
                 wandb.use_artifact(artifact)
                 return self.download_path
 
         try:
-            artifact_path = artifact.download(root=self.download_path)
+            artifact_path = artifact.download(root=str(self.download_path))
             wandb.use_artifact(artifact)
         except Exception as e:
             # patch the wandb boto3 call to disable ssl verification
@@ -101,16 +106,19 @@ class WandbFs:
                     lambda _, *args, **kwargs: boto3.session.Session().resource(*args, **kwargs, verify=False),
                 ):
                     with warnings.catch_warnings():
+                        # this is to suppress the insecure request warning from urllib3
+                        # the attribute exists, but mypy cannot resolve it
                         warnings.simplefilter(
-                            "ignore", category=requests.packages.urllib3.exceptions.InsecureRequestWarning
+                            "ignore",
+                            category=requests.packages.urllib3.exceptions.InsecureRequestWarning,  # type: ignore
                         )
-                        artifact_path = artifact.download(root=self.download_path)
+                        artifact_path = artifact.download(root=str(self.download_path))
                 wandb.use_artifact(artifact)
             except Exception as e:
                 print(f"failed to download artifact {e}, please check your AWS credentials and endpoint")
                 raise e
 
-        return artifact_path
+        return Path(artifact_path)
 
     def find_hf_checkpoint_root_from_path_list(self) -> str | None:
         """Find HuggingFace checkpoint root from a list of file paths.
@@ -135,7 +143,7 @@ class WandbFs:
             assert len(checkpoint_roots) == 1, (
                 "Multiple checkpoints found"
             )  # if there are more than one, we have a problem
-            return checkpoint_roots[0].parent
+            return str(checkpoint_roots[0].parent)
 
         return None
 
@@ -145,7 +153,7 @@ class WandbFs:
     def __enter__(self) -> "WandbFs":
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self._cleanup_temp_dir()
 
     def _cleanup_temp_dir(self) -> None:
@@ -163,10 +171,15 @@ class WandbFs:
 
 
 if __name__ == "__main__":
-    from eval_framework.llm.models import HFLLM_from_wandb_registry
+    from eval_framework.llm.models import HFLLM_from_wandb_registry, VLLM_from_wandb_registry
 
     wandb.init(project="test-project")
     name = "SmolLM2-135M"
     version = "v1"
     model = HFLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter")
-    # model = VLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter")
+    model = HFLLM_from_wandb_registry(
+        name, version=version, formatter="Llama3Formatter", download_path="./registry_cache"
+    )
+    model = VLLM_from_wandb_registry(
+        name, version=version, formatter="Llama3Formatter", download_path="./registry_cache"
+    )

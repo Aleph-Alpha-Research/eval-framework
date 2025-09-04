@@ -63,8 +63,10 @@ class BaseLLM(ABC):
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
 
     @contextmanager
-    def download_wandb_artifact(self, artifact_name, version, download_path) -> Generator[str, None, None]:
-        wandb_fs = WandbFs(download_path=download_path)
+    def download_wandb_artifact(
+        self, artifact_name: str, version: str, user_supplied_download_path: str | None
+    ) -> Generator[str, None, None]:
+        wandb_fs = WandbFs(user_supplied_download_path=user_supplied_download_path)
         try:
             artifact = wandb_fs.get_artifact(artifact_name, version)
             wandb_fs.download_and_use_artifact(artifact)
@@ -72,7 +74,12 @@ class BaseLLM(ABC):
             if file_root is None:
                 raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
 
-            local_artifact_path = Path(wandb_fs.download_path.name) / file_root
+            assert wandb_fs.download_path is not None
+            # if it's a temp directory, we need to append the artifact subdir
+            if isinstance(wandb_fs.download_path, Path):
+                local_artifact_path = file_root
+            else:
+                local_artifact_path = Path(wandb_fs.download_path.name) / file_root
 
             print(f"{RED}[ Model located at: {local_artifact_path} ]{RESET}")
             yield str(local_artifact_path)
