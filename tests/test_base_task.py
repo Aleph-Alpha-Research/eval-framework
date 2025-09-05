@@ -78,7 +78,7 @@ def test_task_custom_subjects(
 
 def test_base_task() -> None:
     class MyTask1(BaseTask):
-        NAME = "MyTask2"
+        NAME = "MyTask1"
 
         def _get_instruction_text(self, item: dict[str, Any]) -> str:
             return ""
