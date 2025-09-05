@@ -9,7 +9,13 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, 
 
 from eval_framework.constants import RED, RESET
 from eval_framework.llm.base import BaseLLM
-from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
+from eval_framework.shared.types import (
+    ConcatCompression,
+    Error,
+    PromptTooLongException,
+    RawCompletion,
+    RawLoglikelihood,
+)
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Llama3Formatter, Message
@@ -95,6 +101,10 @@ class HFLLM(BaseLLM):
             f"{RED}[ Using default formatter --------------------- {RESET}{self._formatter.__class__.__name__} {RED}]{RESET}"  # noqa: E501
         )
 
+    def count_tokens(self, text: str, /) -> int:
+        """Count the number of tokens in a string."""
+        return len(self.tokenizer(text, add_special_tokens=False)["input_ids"])
+
     def generate_from_messages(
         self,
         messages: list[Sequence[Message]],
@@ -175,6 +185,9 @@ class HFLLM(BaseLLM):
                 RawCompletion(
                     prompt=prompt,
                     prompt_sequence_positions=prompt_token_count,
+                    concat_compression=ConcatCompression.calculate(
+                        single_messages, count_tokens=self.count_tokens, completion=completion
+                    ),
                     completion=completion,
                     completion_sequence_positions=completion_token_count,
                 )
@@ -229,6 +242,9 @@ class HFLLM(BaseLLM):
                 RawLoglikelihood(
                     prompt=prompt,
                     prompt_sequence_positions=len(self.tokenizer.encode(prompt, add_special_tokens=False)),
+                    concat_compression=ConcatCompression.calculate(
+                        sample.messages, count_tokens=self.count_tokens, choices=sample.possible_completions
+                    ),
                     loglikelihoods=choices_log_probs,
                     loglikelihoods_sequence_positions=choices_log_probs_sequence_positions,
                     raw_loglikelihood_error=error,
