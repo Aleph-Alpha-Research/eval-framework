@@ -81,16 +81,6 @@ class Llama3Model(HFLLM):
 ```
 *Specialized formatter for Llama 3 models with their specific chat template.*
 
-#### **Qwen Formatter:**
-```python
-from template_formatting.formatter import QwenFormatter
-
-class QwenModel(HFLLM):
-    LLM_NAME = "Qwen/Qwen2-7B-Instruct"
-    DEFAULT_FORMATTER = QwenFormatter
-```
-*Specialized formatter for Qwen models with their specific chat template.*
-
 #### **Mistral Formatter:**
 ```python
 from template_formatting.mistral_formatter import MistralFormatter
