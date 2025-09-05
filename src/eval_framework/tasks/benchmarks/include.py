@@ -86,6 +86,7 @@ class INCLUDE(BaseTask[str]):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
+
         self.keys = get_n_letters(4)
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
