@@ -1,7 +1,15 @@
 # CASEHOLD
 
 ````
-NAME = CASEHOLDDATASET_PATH = lex_glueSAMPLE_SPLIT = testFEWSHOT_SPLIT = trainRESPONSE_TYPE = LOGLIKELIHOODSMETRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]SUBJECTS = ['case_hold']LANGUAGE = <Language.ENG: 'English'>````
+NAME = CASEHOLD
+DATASET_PATH = lex_glue
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = train
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+SUBJECTS = ['case_hold']
+LANGUAGE = <Language.ENG: 'English'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.casehold](eval_framework.tasks.benchmarks.casehold)
 
@@ -9,4 +17,4 @@ NAME = CASEHOLDDATASET_PATH = lex_glueSAMPLE_SPLIT = testFEWSHOT_SPLIT = trainRE
 
 - Link to dataset: [https://huggingface.co/datasets/lex_glue](https://huggingface.co/datasets/lex_glue)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "CASEHOLD"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "CASEHOLD"`.

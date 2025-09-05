@@ -1,7 +1,15 @@
 # WINOGRANDE
 
 ````
-NAME = WINOGRANDEDATASET_PATH = winograndeSAMPLE_SPLIT = validationFEWSHOT_SPLIT = trainRESPONSE_TYPE = LOGLIKELIHOODSMETRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]SUBJECTS = ['winogrande_xl']LANGUAGE = <Language.ENG: 'English'>````
+NAME = WINOGRANDE
+DATASET_PATH = winogrande
+SAMPLE_SPLIT = validation
+FEWSHOT_SPLIT = train
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+SUBJECTS = ['winogrande_xl']
+LANGUAGE = <Language.ENG: 'English'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.winogrande](eval_framework.tasks.benchmarks.winogrande)
 
@@ -9,4 +17,4 @@ NAME = WINOGRANDEDATASET_PATH = winograndeSAMPLE_SPLIT = validationFEWSHOT_SPLIT
 
 - Link to dataset: [https://huggingface.co/datasets/winogrande](https://huggingface.co/datasets/winogrande)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "WINOGRANDE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "WINOGRANDE"`.

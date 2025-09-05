@@ -1,7 +1,14 @@
 # ZERO_SCROLLS_QASPER
 
 ````
-NAME = ZERO_SCROLLS_QASPERDATASET_PATH = tau/zero_scrollsSAMPLE_SPLIT = validationFEWSHOT_SPLIT = validationRESPONSE_TYPE = COMPLETIONMETRICS = [F1]SUBJECTS = ['qasper']````
+NAME = ZERO_SCROLLS_QASPER
+DATASET_PATH = tau/zero_scrolls
+SAMPLE_SPLIT = validation
+FEWSHOT_SPLIT = validation
+RESPONSE_TYPE = COMPLETION
+METRICS = [F1]
+SUBJECTS = ['qasper']
+````
 
 - Module: [eval_framework.tasks.benchmarks.zero_scrolls](eval_framework.tasks.benchmarks.zero_scrolls)
 
@@ -9,4 +16,4 @@ NAME = ZERO_SCROLLS_QASPERDATASET_PATH = tau/zero_scrollsSAMPLE_SPLIT = validati
 
 - Link to dataset: [https://huggingface.co/datasets/tau/zero_scrolls](https://huggingface.co/datasets/tau/zero_scrolls)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ZERO_SCROLLS_QASPER"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "ZERO_SCROLLS_QASPER"`.

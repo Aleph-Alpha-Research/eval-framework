@@ -1,7 +1,15 @@
 # ARC
 
 ````
-NAME = ARCDATASET_PATH = ai2_arcSAMPLE_SPLIT = testFEWSHOT_SPLIT = trainRESPONSE_TYPE = LOGLIKELIHOODSMETRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]SUBJECTS = ['ARC-Easy', 'ARC-Challenge']LANGUAGE = <Language.ENG: 'English'>````
+NAME = ARC
+DATASET_PATH = ai2_arc
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = train
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+SUBJECTS = ['ARC-Easy', 'ARC-Challenge']
+LANGUAGE = <Language.ENG: 'English'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.arc](eval_framework.tasks.benchmarks.arc)
 
@@ -9,4 +17,4 @@ NAME = ARCDATASET_PATH = ai2_arcSAMPLE_SPLIT = testFEWSHOT_SPLIT = trainRESPONSE
 
 - Link to dataset: [https://huggingface.co/datasets/ai2_arc](https://huggingface.co/datasets/ai2_arc)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ARC"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "ARC"`.

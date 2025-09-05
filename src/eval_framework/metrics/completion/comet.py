@@ -1,10 +1,10 @@
 import torch
 from comet import download_model, load_from_checkpoint
 
-from eval_framework.constants import ROOT_DIR
 from eval_framework.exceptions import LogicError
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import Completion, UntemplatedPrompt
+from eval_framework.utils.constants import ROOT_DIR
 
 SAVING_DIR = ROOT_DIR / "comet_model"
 

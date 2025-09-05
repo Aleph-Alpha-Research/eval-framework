@@ -1,7 +1,15 @@
 # WMT20_INSTRUCT
 
 ````
-NAME = WMT20_INSTRUCTDATASET_PATH = wmt20SAMPLE_SPLIT = testFEWSHOT_SPLIT = testRESPONSE_TYPE = COMPLETIONMETRICS = [BLEU, CHRF, TER]SUBJECTS = ['de-en', 'de-fr', 'en-de', 'fr-de']LANGUAGE = {'de-en': (<Language.DEU: 'German'>, <Language.ENG: 'English'>), 'de-fr': (<Language.DEU: 'German'>, <Language.FRA: 'French'>), 'en-de': (<Language.ENG: 'English'>, <Language.DEU: 'German'>), 'fr-de': (<Language.FRA: 'French'>, <Language.DEU: 'German'>)}````
+NAME = WMT20_INSTRUCT
+DATASET_PATH = wmt20
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = test
+RESPONSE_TYPE = COMPLETION
+METRICS = [LINEWISE_BLEU, LINEWISE_CHRF, LINEWISE_TER]
+SUBJECTS = ['de-en', 'de-fr', 'en-de', 'fr-de']
+LANGUAGE = {'de-en': (<Language.DEU: 'German'>, <Language.ENG: 'English'>), 'de-fr': (<Language.DEU: 'German'>, <Language.FRA: 'French'>), 'en-de': (<Language.ENG: 'English'>, <Language.DEU: 'German'>), 'fr-de': (<Language.FRA: 'French'>, <Language.DEU: 'German'>)}
+````
 
 - Module: [eval_framework.tasks.benchmarks.wmt](eval_framework.tasks.benchmarks.wmt)
 
@@ -9,4 +17,4 @@ NAME = WMT20_INSTRUCTDATASET_PATH = wmt20SAMPLE_SPLIT = testFEWSHOT_SPLIT = test
 
 - Link to dataset: [https://huggingface.co/datasets/wmt20](https://huggingface.co/datasets/wmt20)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "WMT20_INSTRUCT"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "WMT20_INSTRUCT"`.

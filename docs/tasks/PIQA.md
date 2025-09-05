@@ -1,7 +1,15 @@
 # PIQA
 
 ````
-NAME = PIQADATASET_PATH = ybisk/piqaSAMPLE_SPLIT = validationFEWSHOT_SPLIT = testRESPONSE_TYPE = LOGLIKELIHOODSMETRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]SUBJECTS = ['no_subject']LANGUAGE = <Language.ENG: 'English'>````
+NAME = PIQA
+DATASET_PATH = ybisk/piqa
+SAMPLE_SPLIT = validation
+FEWSHOT_SPLIT = test
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+SUBJECTS = ['no_subject']
+LANGUAGE = <Language.ENG: 'English'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.piqa](eval_framework.tasks.benchmarks.piqa)
 
@@ -9,4 +17,4 @@ NAME = PIQADATASET_PATH = ybisk/piqaSAMPLE_SPLIT = validationFEWSHOT_SPLIT = tes
 
 - Link to dataset: [https://huggingface.co/datasets/ybisk/piqa](https://huggingface.co/datasets/ybisk/piqa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "PIQA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "PIQA"`.

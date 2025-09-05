@@ -46,7 +46,7 @@ def create_perturbation_class[T: BaseTask](base_class: type[T], perturbation_con
         def _get_instruction_text(self, sample: Sample) -> str:
             text = super()._get_instruction_text(sample)
             if self.perturbation_config.verbose:
-                logger.info(f"Perturbing text: {text}")
+                logger.info(f"Perturbating text: {text}")
             result = self.editor(
                 text, self.perturbation_config.probability, getattr(self, "PERTURBATION_UNMODIFIABLE_WORDS", [])
             )
@@ -63,7 +63,7 @@ def create_perturbation_class[T: BaseTask](base_class: type[T], perturbation_con
         def _get_instruction_text(self, sample: Sample) -> str:
             text = super()._get_instruction_text(sample)
             if self.perturbation_config.verbose:
-                logger.info(f"Perturbing text: {text}")
+                logger.info(f"Perturbating text: {text}")
             words = getattr(self, "PERTURBATION_UNMODIFIABLE_WORDS", [])
             if self.perturbation_config.type == PerturbationType.PERMUTE:
                 result = self.editor.permute_chars_in_string(text, self.perturbation_config.probability, words)

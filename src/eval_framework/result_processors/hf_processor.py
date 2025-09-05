@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 from huggingface_hub import HfApi, login
 from tqdm import tqdm
 
-from eval_framework.constants import RED, RESET
 from eval_framework.tasks.eval_config import EvalConfig
+from eval_framework.utils.constants import RED, RESET
 
 load_dotenv()
 

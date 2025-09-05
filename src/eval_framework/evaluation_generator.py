@@ -6,7 +6,6 @@ import pandas as pd
 import wandb
 from tqdm import tqdm
 
-from eval_framework.constants import RED, RESET
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesCompletion,
@@ -20,6 +19,7 @@ from eval_framework.shared.types import Completion, Loglikelihood
 from eval_framework.tasks.base import ResponseType
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import get_task
+from eval_framework.utils.constants import RED, RESET
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,15 @@
 # ARC_DE
 
 ````
-NAME = ARC_DEDATASET_PATH = LeoLM/ArcChallenge_deSAMPLE_SPLIT = testFEWSHOT_SPLIT = validationRESPONSE_TYPE = LOGLIKELIHOODSMETRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]SUBJECTS = ['no_subject']LANGUAGE = <Language.DEU: 'German'>````
+NAME = ARC_DE
+DATASET_PATH = LeoLM/ArcChallenge_de
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = validation
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+SUBJECTS = ['no_subject']
+LANGUAGE = <Language.DEU: 'German'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.arc_de](eval_framework.tasks.benchmarks.arc_de)
 
@@ -9,4 +17,4 @@ NAME = ARC_DEDATASET_PATH = LeoLM/ArcChallenge_deSAMPLE_SPLIT = testFEWSHOT_SPLI
 
 - Link to dataset: [https://huggingface.co/datasets/LeoLM/ArcChallenge_de](https://huggingface.co/datasets/LeoLM/ArcChallenge_de)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "ARC_DE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "ARC_DE"`.

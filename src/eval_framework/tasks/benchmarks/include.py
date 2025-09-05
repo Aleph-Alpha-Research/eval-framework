@@ -64,6 +64,10 @@ def subject_to_language(subject: str) -> Language:
         return Language.NEP  # type: ignore[attr-defined]
     elif subject == "North Macedonian":
         return Language.MKD  # type: ignore[attr-defined]
+    elif subject == "Croatian":
+        return Language.HRV  # type: ignore[attr-defined]
+    elif subject == "Serbian":
+        return Language.SRP  # type: ignore[attr-defined]
     else:
         return Language(subject)
 
@@ -82,6 +86,7 @@ class INCLUDE(BaseTask[str]):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
+
         self.keys = get_n_letters(4)
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:

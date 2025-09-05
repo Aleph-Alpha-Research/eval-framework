@@ -1,7 +1,15 @@
 # HELLASWAG_EU20_FR
 
 ````
-NAME = HELLASWAG_EU20_FRDATASET_PATH = openGPT-X/hellaswagxSAMPLE_SPLIT = trainFEWSHOT_SPLIT = validationRESPONSE_TYPE = LOGLIKELIHOODSMETRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]SUBJECTS = ['FR']LANGUAGE = <Language.FRA: 'French'>````
+NAME = HELLASWAG_EU20_FR
+DATASET_PATH = openGPT-X/hellaswagx
+SAMPLE_SPLIT = train
+FEWSHOT_SPLIT = validation
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+SUBJECTS = ['FR']
+LANGUAGE = <Language.FRA: 'French'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.opengptx_eu20](eval_framework.tasks.benchmarks.opengptx_eu20)
 
@@ -9,4 +17,4 @@ NAME = HELLASWAG_EU20_FRDATASET_PATH = openGPT-X/hellaswagxSAMPLE_SPLIT = trainF
 
 - Link to dataset: [https://huggingface.co/datasets/openGPT-X/hellaswagx](https://huggingface.co/datasets/openGPT-X/hellaswagx)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "HELLASWAG_EU20_FR"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "HELLASWAG_EU20_FR"`.

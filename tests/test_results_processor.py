@@ -1,5 +1,6 @@
 import hashlib
 import importlib
+import importlib.metadata
 from pathlib import Path
 from unittest.mock import patch
 

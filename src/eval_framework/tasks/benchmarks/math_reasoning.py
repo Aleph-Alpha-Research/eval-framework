@@ -1,13 +1,11 @@
 import random
 import re
-from typing import Any, TypeVar
+from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
-from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample
-
-SubjectType = TypeVar("SubjectType")
+from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 
 
 class MATHReasoning(BaseTask[str]):

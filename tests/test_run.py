@@ -1,5 +1,6 @@
 import glob
 import importlib
+import importlib.metadata
 from argparse import Namespace
 from pathlib import Path
 from unittest.mock import Mock, patch

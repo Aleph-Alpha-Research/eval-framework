@@ -1,7 +1,15 @@
 # PAWSX
 
 ````
-NAME = PAWSXDATASET_PATH = google-research-datasets/paws-xSAMPLE_SPLIT = testFEWSHOT_SPLIT = validationRESPONSE_TYPE = COMPLETIONMETRICS = [AccuracyCompletion]SUBJECTS = ['en', 'de']LANGUAGE = {'en': <Language.ENG: 'English'>, 'de': <Language.DEU: 'German'>}````
+NAME = PAWSX
+DATASET_PATH = google-research-datasets/paws-x
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = validation
+RESPONSE_TYPE = COMPLETION
+METRICS = [AccuracyCompletion]
+SUBJECTS = ['en', 'de']
+LANGUAGE = {'en': <Language.ENG: 'English'>, 'de': <Language.DEU: 'German'>}
+````
 
 - Module: [eval_framework.tasks.benchmarks.pawsx](eval_framework.tasks.benchmarks.pawsx)
 
@@ -9,4 +17,4 @@ NAME = PAWSXDATASET_PATH = google-research-datasets/paws-xSAMPLE_SPLIT = testFEW
 
 - Link to dataset: [https://huggingface.co/datasets/google-research-datasets/paws-x](https://huggingface.co/datasets/google-research-datasets/paws-x)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "PAWSX"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "PAWSX"`.
