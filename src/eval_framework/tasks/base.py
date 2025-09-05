@@ -83,7 +83,7 @@ class BaseTask[SubjectType](ABC):
     FEWSHOT_SPLIT: str
     RESPONSE_TYPE: ResponseType
     METRICS: list[type["BaseMetric"]]
-    SUBJECTS: list[SubjectType] | list[tuple]
+    SUBJECTS: list[SubjectType]
     HF_REVISION: str | None = None  # tag name, or branch name, or commit hash to ensure reproducibility
 
     # Words in _get_instruction_text() not to be perturbed. List of words is case insensitive. No special characters
@@ -101,12 +101,12 @@ class BaseTask[SubjectType](ABC):
         # If custom subjects were provided during initialization, they take precedence over the class-level SUBJECTS.
         filtered_subjects = self._filter_task_subjects(custom_subjects=custom_subjects)
         if filtered_subjects:
-            logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {self.__name__}")
+            logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {self.__class__.__name__}")
             self.SUBJECTS = filtered_subjects  # type: ignore[assignment]
 
         # If a custom revision was provided during initialization, it takes precedence over the class-level HF_REVISION.
         if custom_hf_revision:
-            logger.info(f"Setting HF revision to `{custom_hf_revision}` for the task {self.__name__}")
+            logger.info(f"Setting HF revision to `{custom_hf_revision}` for the task {self.__class__.__name__}")
             self.HF_REVISION = custom_hf_revision
 
     def _filter_task_subjects(self, custom_subjects: list[str] | None) -> list[str] | list[tuple] | None:
@@ -120,23 +120,27 @@ class BaseTask[SubjectType](ABC):
 
             # check if all parts of custom subjects exists (* is a wildcard)
             num_items = len(self.SUBJECTS[0])
-            legal_values = [set([s[i] for s in self.SUBJECTS] + ["*"]) for i in range(num_items)]
+            legal_values = [
+                set([s[i] for s in self.SUBJECTS if isinstance(s, tuple)] + ["*"]) for i in range(num_items)
+            ]
+
             for tpl in filters:
                 for i, v in enumerate(tpl):
-                    assert v in legal_values[i], f"Subject part {v} not found in task {self.__name__}"
+                    assert v in legal_values[i], f"Subject part {v} not found in task {self.__class__.__name__}"
 
             # filter task subjects. * is a supported wildcard for a specific item in a tuple, e.g. "DE_DE, *"
             chosen_subjects = []
             for subject in self.SUBJECTS:
+                subject_tuple = subject if isinstance(subject, tuple) else tuple(str(subject).split(","))
                 for filter in filters:
-                    if all(filter[i] == "*" or filter[i] == subject[i] for i in range(num_items)):
-                        chosen_subjects.append(subject)
+                    if all(filter[i] == "*" or filter[i] == subject_tuple[i] for i in range(num_items)):
+                        chosen_subjects.append(subject_tuple)
                         break
-            return chosen_subjects
+            return chosen_subjects  # type: ignore[return-value]
         else:
-            for subject in custom_subjects:
-                assert subject in self.SUBJECTS, f"Subject {subject} not found in task {self.__name__}"
-            return custom_subjects
+            for cs in custom_subjects:
+                assert cs in self.SUBJECTS, f"Subject {cs} not found in task {self.__class__.__name__}"
+            return custom_subjects  # type: ignore[return-value]
 
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
         # Check if the HF revision is valid before loading the dataset

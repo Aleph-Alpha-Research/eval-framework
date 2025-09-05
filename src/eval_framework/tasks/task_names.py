@@ -115,7 +115,7 @@ def register_all_tasks() -> None:
 
 def make_sure_all_hf_datasets_are_in_cache() -> None:
     for task_name, task_class in registered_tasks_iter():
-        task = task_class()
+        task = task_class(0, None, None)
         for attempt in range(10):
             try:
                 for _ in task.iterate_samples(num_samples=1):

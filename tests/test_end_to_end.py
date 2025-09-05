@@ -72,6 +72,11 @@ def test_automatic_tasks(
     num_samples: int,
 ) -> None:
     output_dir = tmp_path / "eval"
+
+    task = get_task(task_name)
+    task_subjects = getattr(task, "SUBJECTS", None)
+    subjects_subset = task_subjects[:3] if task_subjects else None  # limit number of subjects to three
+
     eval_config = EvalConfig(
         task_name=task_name,
         num_fewshot=num_fewshot,
@@ -79,11 +84,9 @@ def test_automatic_tasks(
         output_dir=output_dir,
         llm_class=test_llms.__class__,
         save_intermediate_results=False,
+        task_subjects=subjects_subset,
     )
 
-    # limit number of subjects to three
-    task = get_task(task_name)
-    eval_config.task_subjects = task.SUBJECTS[:3]
     results = main(test_llms, eval_config)
 
     full_metric_names = [
