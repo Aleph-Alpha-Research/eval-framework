@@ -8,7 +8,7 @@ import tiktoken  # OpenAI's official tokenizer library
 from openai import OpenAI
 
 from eval_framework.llm.base import BaseLLM
-from eval_framework.shared.types import RawCompletion, RawLoglikelihood
+from eval_framework.shared.types import ConcatCompression, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import BaseFormatter, Message, Role
 
@@ -97,6 +97,9 @@ class OpenAIModel(BaseLLM):
                     RawCompletion(
                         prompt=prompt,
                         prompt_sequence_positions=prompt_sequence_positions,
+                        concat_compression=ConcatCompression.calculate(
+                            single_messages, count_tokens=self._count_tokens, completion=completion
+                        ),
                         completion=completion,
                         completion_sequence_positions=completion_sequence_positions,
                     )
@@ -137,6 +140,9 @@ class OpenAIModel(BaseLLM):
                     RawCompletion(
                         prompt=prompt,
                         prompt_sequence_positions=prompt_sequence_positions,
+                        concat_compression=ConcatCompression.calculate(
+                            single_messages, count_tokens=self._count_tokens, completion=completion
+                        ),
                         completion=completion,
                         completion_sequence_positions=completion_sequence_positions,
                     )
