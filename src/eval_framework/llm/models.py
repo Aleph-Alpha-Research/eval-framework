@@ -4,7 +4,7 @@ Please define your own model file externally and pass it to the eval-framework e
 to use it.
 """
 
-from eval_framework.utils.utils import is_extra_installed
+from eval_framework.utils.packaging import is_extra_installed
 
 if is_extra_installed(extra="transformers"):
     from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MInstruct, Qwen3_0_6B  # noqa F401
