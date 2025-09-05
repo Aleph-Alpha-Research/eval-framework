@@ -19,7 +19,7 @@ class TestStructEval:
         )
 
     def test_struct_eval_task_has_eval_kwargs(self, struct_eval_task: StructEval) -> None:
-        assert isinstance(struct_eval_task.SUBJECTS[0], str)
+        assert len(struct_eval_task.SUBJECTS) > 0 and isinstance(struct_eval_task.SUBJECTS[0], str)
         struct_eval_task._load_dataset(struct_eval_task.SUBJECTS[0])
         assert struct_eval_task.dataset is not None, "Dataset should not be None after loading."
         eval_kwargs = struct_eval_task._get_eval_kwargs(struct_eval_task.dataset[struct_eval_task.SAMPLE_SPLIT][0])

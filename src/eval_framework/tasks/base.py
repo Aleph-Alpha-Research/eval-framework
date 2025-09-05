@@ -124,6 +124,7 @@ class BaseTask[SubjectType](ABC):
         if not custom_subjects:
             return None
 
+        assert hasattr(self, "SUBJECTS") and len(self.SUBJECTS) > 0
         if isinstance(self.SUBJECTS[0], tuple):
             # subjects are specified as strings but we need tuples
             filters = [tuple(item.strip() for item in subject.split(",")) for subject in custom_subjects]
@@ -153,7 +154,7 @@ class BaseTask[SubjectType](ABC):
             return custom_subjects  # type: ignore[return-value]
 
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
-        # Check if the HF revision is valid before loading the dataset
+        # Check if the HF_REVISION is valid before loading the dataset
         if self.HF_REVISION:
             try:
                 _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=self.HF_REVISION, timeout=100.0)
