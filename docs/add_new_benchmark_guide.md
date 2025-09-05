@@ -89,11 +89,6 @@ def _create_samples(self, item: dict[str, Any], index: int, subject: str) -> lis
 def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
     """Post-process model completions (e.g., extract final answer)."""
     return completion_text
-
-def _get_subject(self, item: dict[str, Any]) -> str:
-    """Extract subject/category from dataset item."""
-    # Default returns first subject - override for dynamic subject extraction
-    return self.get_subjects()[0]
 ```
 
 ## Response Types, Metrics, and Configuration Attributes Reference
