@@ -74,3 +74,22 @@ def test_task_custom_subjects(
         task = MyTask(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)
         result = task.SUBJECTS
         assert result == expected_value
+
+
+def test_base_task() -> None:
+    class MyTask(BaseTask):
+        NAME = "MyTask"
+
+        def _get_instruction_text(self, item: dict[str, Any]) -> str:
+            return ""
+
+        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+            return []
+
+    register_task(MyTask)  # type: ignore[type-abstract]
+
+    task = MyTask(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
+    # task = MyTask()
+    # task = MyTask.with_overwrite()
+
+    assert task.NAME == "MyTask"

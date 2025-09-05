@@ -93,6 +93,8 @@ class BaseTask[SubjectType](ABC):
     # language by subtopic, or `None` (for tasks not specific to a single language).
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
 
+    # def __init__(self, num_fewshot: int = 0) -> None:
+    # def __init__(self, num_fewshot: int, *, custom_subjects: list[str] | None, custom_hf_revision: str | None)-> None:
     def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
         self.num_fewshot = num_fewshot
         self.stop_sequences: list[str] | None = None
@@ -108,6 +110,24 @@ class BaseTask[SubjectType](ABC):
         if custom_hf_revision:
             logger.info(f"Setting HF revision to `{custom_hf_revision}` for the task {self.__class__.__name__}")
             self.HF_REVISION = custom_hf_revision
+
+    # @classmethod
+    # def with_overwrite(cls, num_fewshot: int, *, custom_subjects: list[str] | None, custom_hf_revision: str | None)
+    # -> Self:
+    #     instance = cls(num_fewshot=num_fewshot)
+
+    #     # If custom subjects were provided during initialization, they take precedence over the class-level SUBJECTS.
+    #     filtered_subjects = instance._filter_task_subjects(custom_subjects=custom_subjects)
+    #     if filtered_subjects:
+    #         logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {instance.__class__.__name__}")
+    #         self.SUBJECTS = filtered_subjects  # type: ignore[assignment]
+
+    ## If a custom revision was provided during initialization, it takes precedence over the class-level HF_REVISION.
+    #     if custom_hf_revision:
+    #         logger.info(f"Setting HF revision to `{custom_hf_revision}` for the task {instance.__class__.__name__}")
+    #         instance.HF_REVISION = custom_hf_revision
+
+    #     return instance
 
     def _filter_task_subjects(self, custom_subjects: list[str] | None) -> list[str] | list[tuple] | None:
         """Process custom subjects passed from EvalConfig. Check and returns restricted task subjects if specified."""
