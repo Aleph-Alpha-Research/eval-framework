@@ -1,24 +1,15 @@
 import os
 import tempfile
 import time
-import uuid
-from collections.abc import Sequence
 
-import pytest
-
-from eval_framework.llm.base import BaseLLM
-from eval_framework.shared.types import Error, RawCompletion, RawLoglikelihood
-from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import (
     BIG_CODE_BENCH_PACKAGE_MAPPING,
     _parse_unittest_output,
     execute_python_code_with_tests,
     extract_imports,
     get_external_dependencies,
-    redis_cache,
     run_python_code,
 )
-from template_formatting.formatter import ConcatFormatter, Message, Role
 
 
 def test_run_python_code() -> None:
@@ -626,142 +617,3 @@ class TestBigCodeBenchDataset:
 
         for pkg in common_packages:
             assert pkg in BIG_CODE_BENCH_PACKAGE_MAPPING, f"Package {pkg} not in mapping"
-
-
-@pytest.mark.gpu  # we need an on premise CI worker for access to StackIt
-@pytest.mark.skip("Skipped: Redis server not configured for public CI.")
-def test_redis_cache() -> None:
-    cache_id = str(uuid.uuid4())
-    error = Error(error_class="x", message="y", traceback="z")
-
-    # GIVEN two LLMs with redis cache
-    class FooLLM(BaseLLM):
-        LLM_NAME = "foo"
-        NUM_CALLS = 0
-
-        def __init__(self) -> None:
-            super().__init__()
-            self._formatter = ConcatFormatter()
-
-        def generate_from_messages(
-            self,
-            messages: list[Sequence[Message]],
-            stop_sequences: list[str] | None = None,
-            max_tokens: int | None = None,
-            temperature: float | None = None,
-        ) -> list[RawCompletion]:
-            return [self.do_one(single_messages) for single_messages in messages]
-
-        @redis_cache(
-            version_id=cache_id,
-            dump_func=lambda x: x.model_dump(mode="json"),
-            load_func=lambda d: RawCompletion(**d),
-            expiration_sec=2,
-        )
-        def do_one(self, messages: Sequence[Message]) -> RawCompletion:
-            self.NUM_CALLS += 1
-            return RawCompletion(
-                prompt=self._formatter.format(messages, output_mode="string") if len(messages) != 0 else "prompt",
-                prompt_sequence_positions=None,
-                completion=self.LLM_NAME,
-                completion_sequence_positions=None,
-                raw_completion_error=error,
-            )
-
-        def logprobs(self, sample: list[Sample]) -> list[RawLoglikelihood]:
-            raise NotImplementedError
-
-    class BarLLM(FooLLM):
-        LLM_NAME = "bar"
-
-    dummy_completion = [
-        RawCompletion(
-            prompt="prompt",
-            completion="foo",
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
-            raw_completion_error=error,
-        )
-    ]
-
-    dummy_completion_hi = [
-        RawCompletion(
-            prompt="Hi",
-            completion="foo",
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
-            raw_completion_error=error,
-        )
-    ]
-
-    # WHEN called twice
-    foo = FooLLM()
-    assert foo.generate_from_messages([[]]) == dummy_completion and foo.NUM_CALLS == 1
-    # THEN only one call is made, the second one is cached
-    assert foo.generate_from_messages([[]]) == dummy_completion and foo.NUM_CALLS == 1
-    # and WHEN called with a different argument, THEN a new call is made
-    assert (
-        foo.generate_from_messages([[Message(role=Role.USER, content="Hi")]]) == dummy_completion_hi
-        and foo.NUM_CALLS == 2
-    )
-
-    # WHEN using a second LLM
-    bar = BarLLM()
-    dummy_completion_bar = [
-        RawCompletion(
-            prompt="prompt",
-            completion="bar",
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
-            raw_completion_error=error,
-        )
-    ]
-    # THEN this LLM has its own cache and the call is made
-    assert bar.generate_from_messages([[]]) == dummy_completion_bar and foo.NUM_CALLS == 2 and bar.NUM_CALLS == 1
-
-    # WHEN using a new implementation version of the same class
-    class FooLLM(BaseLLM):  # type: ignore[no-redef]
-        LLM_NAME = "foo"
-        NUM_CALLS = 0
-
-        def generate_from_messages(
-            self,
-            messages: list[Sequence[Message]],
-            stop_sequences: list[str] | None = None,
-            max_tokens: int | None = None,
-            temperature: float | None = None,
-        ) -> list[RawCompletion]:
-            return [self.do_one(single_messages) for single_messages in messages]
-
-        @redis_cache(
-            version_id=cache_id + "X",
-            dump_func=lambda x: x.model_dump(mode="json"),
-            load_func=lambda d: RawCompletion(**d),
-            expiration_sec=2,
-        )
-        def do_one(self, messages: Sequence[Message]) -> RawCompletion:
-            self.NUM_CALLS += 1
-            return RawCompletion(
-                prompt="prompt1",
-                prompt_sequence_positions=None,
-                completion=self.LLM_NAME,
-                completion_sequence_positions=None,
-            )
-
-        def logprobs(self, sample: list[Sample]) -> list[RawLoglikelihood]:
-            raise NotImplementedError
-
-    dummy_completion_1 = [
-        RawCompletion(
-            prompt="prompt1", completion="foo", prompt_sequence_positions=None, completion_sequence_positions=None
-        )
-    ]
-
-    v1_foo = FooLLM()
-    # THEN the call is made
-    assert v1_foo.generate_from_messages([[]]) == dummy_completion_1 and v1_foo.NUM_CALLS == 1
-
-    # WHEN the cache expires
-    time.sleep(2)
-    # THEN the call is made again
-    assert foo.generate_from_messages([[]]) == dummy_completion and foo.NUM_CALLS == 3

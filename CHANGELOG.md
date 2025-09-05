@@ -17,6 +17,7 @@
 - Renamed `ChemBenchMultipleChoice` to `ChemBench` for consistency.
 - We've removed all models except those used for testing (they were largely old). The recommended way going forward is to provide
   your own models implementation to the framework.
+- Removed and relaxes several main-dependencies
 
 ## 0.1.0
 
