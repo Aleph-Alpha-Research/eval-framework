@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 try:
     import redis
 except ImportError:
-    logger.info("`redis` package is not installed, RedisCacheDecorator will not be available.")
+    logger.debug("`redis` package is not installed, RedisCacheDecorator will not be available.")
 
 RANDOM_SEED = 42  # hacky way to get around circular import
 redis_warning_printed = False
