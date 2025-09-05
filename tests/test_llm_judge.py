@@ -32,6 +32,11 @@ def test_llm_judge_tasks(
     llm_judge_class: type[BaseLLM],
 ) -> None:
     output_dir = tmp_path / "eval"
+
+    task = get_task(task_name)
+    task_subjects = getattr(task, "SUBJECTS", None)
+    subjects_subset = task_subjects[:3] if task_subjects else None  # limit number of subjects to three
+
     eval_config = EvalConfig(
         task_name=task_name,
         num_samples=num_samples,
@@ -39,11 +44,9 @@ def test_llm_judge_tasks(
         llm_class=test_llms.__class__,
         llm_judge_class=llm_judge_class,
         save_intermediate_results=False,
+        task_subjects=subjects_subset,
     )
 
-    # limit number of subjects to three
-    task = get_task(task_name)
-    eval_config.task_subjects = task.SUBJECTS[:3]
     results = main(test_llms, eval_config)
 
     full_metric_names = [
