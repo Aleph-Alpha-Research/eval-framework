@@ -7,6 +7,7 @@
 - Our benchmarks tasks are now registered lazily, which reduces the amount of code that is imported
   at startup time.
 - Task look-ups are now insensitive to case, hyphens, underscores and whitespace
+- Special tokens are now ignored when computing compression ratios
 - Added missing `DOCKER_CODE_EXECUTION` variable to `.env.example`
 - Added support for weights and biases + determined pre-emption
 - Fixed loading of extra task modules (skip non-evaluation BaseTasks with no NAME attribute), add test that no task with same names get registered
