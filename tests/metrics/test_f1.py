@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.metrics.completion_metrics.f1 import F1, calculate_f1
+from eval_framework.metrics.completion.f1 import F1, calculate_f1
 from eval_framework.shared.types import Completion
 
 

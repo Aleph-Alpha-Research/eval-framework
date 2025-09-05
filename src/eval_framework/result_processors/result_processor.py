@@ -1,6 +1,7 @@
 import hashlib
 import importlib.metadata
 import json
+import logging
 import os
 from datetime import datetime
 from pathlib import Path
@@ -11,11 +12,9 @@ from pydantic import RootModel
 from eval_framework.result_processors.base import Result, ResultProcessor
 from eval_framework.shared.types import Completion, Loglikelihood
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.utils.logging_config import get_logger
 
 MAIN = "eval_framework_results"
-
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ResultsFileProcessor(ResultProcessor):
@@ -125,6 +124,6 @@ def generate_output_dir(llm_name: str, config: EvalConfig) -> Path:
         dir_name += f"_{timestamp}"
 
     # Combine all components to form the full output directory path
-    output_dir = config.output_dir / llm_name / f"{version_str}_{config.task_name.value.NAME}" / dir_name
+    output_dir = config.output_dir / llm_name / f"{version_str}_{config.task_name}" / dir_name
 
     return output_dir

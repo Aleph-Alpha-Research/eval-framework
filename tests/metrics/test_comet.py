@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.metrics.completion_metrics.COMET import COMET
+from eval_framework.metrics.completion.comet import COMET
 from eval_framework.shared.types import Completion
 from eval_framework.tasks.benchmarks.flores_plus import UntemplatedPrompt
 

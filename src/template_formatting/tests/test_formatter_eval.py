@@ -77,7 +77,7 @@ def test_llama3_formatter_with_system_and_assistant_simple(
     formatted_conversation = llama3_formatter.format(conversation, output_mode="string")
     expected_output = (
         "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"  # noqa: E501
+        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
         "What is France's capital?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         "Bonjour! The capital of France is Paris!"
     )
@@ -105,7 +105,7 @@ def test_llama3_formatter_with_system_and_assistant(
     formatted_conversation = llama3_formatter.format(conversation, output_mode="string")
     expected_output = (
         "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"  # noqa: E501
+        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
         "What is France's capital?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         "Bonjour! The capital of France is Paris!<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
         "Great, thanks!<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
@@ -262,7 +262,7 @@ def test_reasoning_formatter_with_system_and_user(llama3_reasoning_formatter: Ba
     formatted_conversation = llama3_reasoning_formatter.format(conversation, output_mode="string")
     expected_output = (
         "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"  # noqa: E501
+        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
         "What is France's capital?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         "<|begin_of_thought|>"
     )
@@ -277,7 +277,7 @@ def test_reasoning_formatter_with_user(llama3_reasoning_formatter: BaseFormatter
 
     formatted_conversation = llama3_reasoning_formatter.format(conversation, output_mode="string")
     expected_output = (
-        "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n"  # noqa: E501
+        "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n"
         "What is France's capital?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         "<|begin_of_thought|>"
     )
@@ -295,7 +295,7 @@ def test_reasoning_formatter_with_system_user_and_thought(llama3_reasoning_forma
     formatted_conversation = llama3_reasoning_formatter.format(conversation, output_mode="string")
     expected_output = (
         "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"  # noqa: E501
+        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
         "What is France's capital?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         "<|begin_of_thought|>Bonjour! Let me think about this...<|end_of_thought|>"
         "<|begin_of_solution|>"
@@ -314,7 +314,7 @@ def test_reasoning_formatter_with_system_user_thought_and_solution(llama3_reason
     formatted_conversation = llama3_reasoning_formatter.format(conversation, output_mode="string")
     expected_output = (
         "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"  # noqa: E501
+        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
         "What is France's capital?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         "<|begin_of_thought|>Bonjour! Let me think about this..."
         "<|end_of_thought|><|begin_of_solution|>Merci! The capital of France is Paris!"
@@ -338,7 +338,7 @@ def test_reasoning_formatter_with_system_user_thought_solution_and_answer(
     formatted_conversation = llama3_reasoning_formatter.format(conversation, output_mode="string")
     expected_output = (
         "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n"
-        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"  # noqa: E501
+        "You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n"
         "What is France's capital?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         "<|begin_of_thought|>Bonjour! Let me think about this...<|end_of_thought|>"
         "<|begin_of_solution|>Merci! The capital of France is Paris!"

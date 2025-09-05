@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from eval_framework.metrics.completion_metrics.length_control import LengthControl, LengthRequirementUnit
+from eval_framework.metrics.completion.length_control import LengthControl, LengthRequirementUnit
 from eval_framework.shared.types import Completion
 
 UNIT_STRINGS = {

@@ -2,9 +2,9 @@ import random
 from itertools import product
 from typing import Any
 
-from eval_framework.metrics.completion_metrics.bleu import BLEU
-from eval_framework.metrics.completion_metrics.chrf import CHRF
-from eval_framework.metrics.completion_metrics.COMET import COMET
+from eval_framework.metrics.completion.bleu import BLEU
+from eval_framework.metrics.completion.chrf import CHRF
+from eval_framework.metrics.completion.comet import COMET
 from eval_framework.shared.types import BaseMetricContext, UntemplatedPrompt
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 

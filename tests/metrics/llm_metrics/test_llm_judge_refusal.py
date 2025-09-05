@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from eval_framework.llm.base import BaseLLM, RawCompletion
-from eval_framework.metrics.llm_metrics.llm_judge_refusal import LLMJudgeRefusal
+from eval_framework.metrics.llm.llm_judge_refusal import LLMJudgeRefusal
 from eval_framework.shared.types import Completion
 from template_formatting.formatter import Message, Role
 

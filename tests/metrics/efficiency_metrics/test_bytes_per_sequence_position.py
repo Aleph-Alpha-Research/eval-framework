@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.metrics.efficiency_metrics.bytes_per_sequence_position import (
+from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesCompletion,
     BytesLoglikelihood,
     SequencePositionsCompletion,

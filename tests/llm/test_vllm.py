@@ -2,7 +2,7 @@ import gc
 import logging
 import time
 from collections.abc import Sequence
-from typing import Any, TypeVar
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -10,17 +10,12 @@ import torch
 from vllm import SamplingParams
 from vllm.distributed.parallel_state import destroy_distributed_environment, destroy_model_parallel
 
-from eval_framework.llm.models import (
-    Qwen3_0_6B,
-    Qwen3_0_6B_VLLM,
-    Qwen3_0_6B_VLLM_No_Thinking,
-)
-from eval_framework.llm.vllm_models import MistralAdapter, MistralVLLM, VLLMModel, VLLMTokenizer
+from eval_framework.llm.huggingface import Qwen3_0_6B
+from eval_framework.llm.mistral import MistralAdapter, MistralVLLM
+from eval_framework.llm.vllm import Qwen3_0_6B_VLLM, Qwen3_0_6B_VLLM_No_Thinking, VLLMModel, VLLMTokenizer
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import ConcatFormatter, Message, Role
-
-T = TypeVar("T", bound=VLLMModel)
 
 
 def clean_up() -> None:
@@ -265,7 +260,7 @@ def test_seq_length_priority_order() -> None:
     # Test 2: SEQ_LENGTH class attribute is used when max_model_len is None
     class Dummy_Qwen3_0_6B_VLLM(VLLMModel):
         LLM_NAME = "Qwen/Qwen3-0.6B"
-        DEFAULT_FORMATTER = ConcatFormatter()
+        DEFAULT_FORMATTER = ConcatFormatter
         SEQ_LENGTH = 128
 
     if torch.cuda.is_available():
@@ -700,10 +695,10 @@ def test_vllm_generate_with_llama_tokenizer_avoids_double_bos() -> None:
     # Create a custom model class that uses Llama tokenizer with Llama3Formatter
     class TestLlamaVLLMModel(VLLMModel):
         LLM_NAME = "meta-llama/Llama-3.1-8B-Instruct"
-        DEFAULT_FORMATTER = Llama3Formatter()
+        DEFAULT_FORMATTER = Llama3Formatter
 
     # Mock the VLLM engine to avoid actual model loading
-    with patch("eval_framework.llm.vllm_models.LLM") as mock_llm:
+    with patch("eval_framework.llm.vllm.LLM") as mock_llm:
         model = TestLlamaVLLMModel(max_model_len=64, tensor_parallel_size=1)
 
         try:
@@ -774,10 +769,10 @@ def test_vllm_logprobs_with_llama_tokenizer_avoids_double_bos() -> None:
     # Create a custom model class that uses Llama tokenizer with Llama3Formatter
     class TestLlamaVLLMModel(VLLMModel):
         LLM_NAME = "meta-llama/Llama-3.1-8B-Instruct"
-        DEFAULT_FORMATTER = Llama3Formatter()
+        DEFAULT_FORMATTER = Llama3Formatter
 
     # Mock the VLLM engine to avoid actual model loading
-    with patch("eval_framework.llm.vllm_models.LLM"):
+    with patch("eval_framework.llm.vllm.LLM"):
         model = TestLlamaVLLMModel(max_model_len=64, tensor_parallel_size=1)
 
         try:
@@ -834,7 +829,7 @@ def test_tokenizer_single_initialization(
     # Create a simple subclass of VLLMModel for testing
     class TestVLLMModel(model_cls):  # type: ignore
         LLM_NAME = "test-model"
-        DEFAULT_FORMATTER = ConcatFormatter()
+        DEFAULT_FORMATTER = ConcatFormatter
 
     with patch(f"{tokenizer_cls.__module__}.{tokenizer_cls.__name__}") as mock_tokenizer_cls:
         # Create a mock tokenizer instance that will be returned by the constructor
@@ -842,7 +837,7 @@ def test_tokenizer_single_initialization(
         mock_tokenizer_cls.return_value = mock_tokenizer
 
         # Create the model with mocked LLM to avoid actual model loading
-        with patch("eval_framework.llm.vllm_models.LLM"):
+        with patch("eval_framework.llm.vllm.LLM"):
             model = TestVLLMModel(max_model_len=128)
 
             # Get tokenizer references multiple times
@@ -877,10 +872,10 @@ def test_tokenizer_initialization_performance(
 
     class TestVLLMModel(base_model_cls):  # type: ignore
         LLM_NAME = base_model_name
-        DEFAULT_FORMATTER = ConcatFormatter()
+        DEFAULT_FORMATTER = ConcatFormatter
 
     # Only mock the LLM to avoid loading the actual model weights
-    with patch("eval_framework.llm.vllm_models.LLM"):
+    with patch("eval_framework.llm.vllm.LLM"):
         # Create the model with real tokenizer but mocked LLM and measure first access
         # (which should be slow as it is the real tokenizer initialization)
         model = TestVLLMModel(max_model_len=128)

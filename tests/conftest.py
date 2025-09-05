@@ -4,22 +4,8 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from eval_framework.llm.base import BaseLLM, Sample
-from eval_framework.llm.models import (
-    Bert,
-    Llama31_8B_Instruct_API,
-    Llama31_70B_Instruct_API,
-    Llama31_405B_Instruct_API,
-    Llama33_70B_Instruct_API,
-    Pharia1_7B_Control_API,
-    Phi3Mini4kInstruct,
-    Poro_34bChat_API,
-    Pythia410m,
-    Qwen1_5B,
-    SmolLM135M,
-    Smollm135MInstruct,
-    SmolLM_1_7B_Instruct,
-    Viking_7b_API,
-)
+from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MInstruct
+from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
 from tests.mock_wandb import MockArtifact, MockWandb, MockWandbApi
@@ -74,17 +60,7 @@ model_dict = {
     "Pythia410m": Pythia410m,
     "SmolLM135M": SmolLM135M,
     "Smollm135MInstruct": Smollm135MInstruct,
-    "SmolLM-1.7B-Instruct": SmolLM_1_7B_Instruct,
-    "Phi3Mini4kInstruct": Phi3Mini4kInstruct,
-    "llama-3.1-8b-instruct": Llama31_8B_Instruct_API,
-    "llama-3.1-70b-instruct": Llama31_70B_Instruct_API,
-    "llama-3.3-70b-instruct": Llama33_70B_Instruct_API,
-    "llama-3.1-405b-instruct": Llama31_405B_Instruct_API,
-    "pharia-1-llm-7b-control": Pharia1_7B_Control_API,
-    "viking-7b": Viking_7b_API,
-    "poro-34b-chat": Poro_34bChat_API,
-    "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B": Qwen1_5B,
-    "Bert": Bert,
+    "Qwen3_0_6B_VLLM": Qwen3_0_6B_VLLM,
     "MockLLM": MockLLM,
 }
 

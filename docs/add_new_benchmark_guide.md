@@ -126,39 +126,39 @@ These metrics work with generated text outputs from COMPLETION tasks:
 
 ```python
 # Accuracy metrics
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
-from eval_framework.metrics.completion_metrics.math_reasoning_completion import MathReasoningCompletion
-from eval_framework.metrics.completion_metrics.cwe_accuracy import CWEAccuracy
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
+from eval_framework.metrics.completion.cwe_accuracy import CWEAccuracy
 
 # Translation and similarity metrics
-from eval_framework.metrics.completion_metrics.bleu import BLEU
-from eval_framework.metrics.completion_metrics.chrf import CHRF
-from eval_framework.metrics.completion_metrics.ter import TER
-from eval_framework.metrics.completion_metrics.rouge_1 import ROUGE_1
-from eval_framework.metrics.completion_metrics.rouge_2 import ROUGE_2
-from eval_framework.metrics.completion_metrics.rouge_l import ROUGE_L
-from eval_framework.metrics.completion_metrics.rouge_geometric_mean import ROUGE_GEOMETRIC_MEAN
-from eval_framework.metrics.completion_metrics.f1 import F1
+from eval_framework.metrics.completion.bleu import BLEU
+from eval_framework.metrics.completion.chrf import CHRF
+from eval_framework.metrics.completion.ter import TER
+from eval_framework.metrics.completion.rouge_1 import ROUGE_1
+from eval_framework.metrics.completion.rouge_2 import ROUGE_2
+from eval_framework.metrics.completion.rouge_l import ROUGE_L
+from eval_framework.metrics.completion.rouge_geometric_mean import ROUGE_GEOMETRIC_MEAN
+from eval_framework.metrics.completion.f1 import F1
 
 # Code evaluation metrics
-from eval_framework.metrics.completion_metrics.code_assertion import CodeCompletionAssertion
-from eval_framework.metrics.completion_metrics.code_execution_pass_at_one import CodeExecutionPassAtOne
+from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
+from eval_framework.metrics.completion.code_execution_pass_at_one import CodeExecutionPassAtOne
 
 # Format validation metrics
-from eval_framework.metrics.completion_metrics.json_format import JsonFormat
-from eval_framework.metrics.completion_metrics.csv_format import CSVFormat
-from eval_framework.metrics.completion_metrics.format_checker import CheckJsonFormat
-from eval_framework.metrics.completion_metrics.format_checker import CheckPostScriptFormat
+from eval_framework.metrics.completion.json_format import JsonFormat
+from eval_framework.metrics.completion.csv_format import CSVFormat
+from eval_framework.metrics.completion.format_checker import CheckJsonFormat
+from eval_framework.metrics.completion.format_checker import CheckPostScriptFormat
 
 
 # Specialized metrics
-from eval_framework.metrics.completion_metrics.ifeval import IFEvalMetric
-from eval_framework.metrics.completion_metrics.language_checker import LanguageChecker
-from eval_framework.metrics.completion_metrics.length_control import LengthControl
-from eval_framework.metrics.completion_metrics.niah_accuracy import NIAHAccuracy
-from eval_framework.metrics.completion_metrics.text_counter import WordCounter
-from eval_framework.metrics.completion_metrics.text_counter import ParagraphCounter
-from eval_framework.metrics.completion_metrics.text_counter import ResponseToOriginalLengthRatio
+from eval_framework.metrics.completion.ifeval import IFEvalMetric
+from eval_framework.metrics.completion.language_checker import LanguageChecker
+from eval_framework.metrics.completion.length_control import LengthControl
+from eval_framework.metrics.completion.niah_accuracy import NIAHAccuracy
+from eval_framework.metrics.completion.text_counter import WordCounter
+from eval_framework.metrics.completion.text_counter import ParagraphCounter
+from eval_framework.metrics.completion.text_counter import ResponseToOriginalLengthRatio
 
 ```
 
@@ -168,12 +168,12 @@ These metrics work with probability rankings from LOGLIKELIHOODS tasks:
 
 ```python
 # Standard accuracy metrics
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import AccuracyLoglikelihood
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import AccuracyNormLoglikelihood
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyNormLoglikelihood
 
 # Probability metrics
-from eval_framework.metrics.loglikelihood_metrics.probability_mass import ProbabilityMass
-from eval_framework.metrics.loglikelihood_metrics.probability_mass import ProbabilityMassNorm
+from eval_framework.metrics.loglikelihood.probability_mass import ProbabilityMass
+from eval_framework.metrics.loglikelihood.probability_mass import ProbabilityMassNorm
 ```
 
 #### LLM Judge Metrics
@@ -182,46 +182,46 @@ These metrics use another LLM to evaluate generated outputs, useful for complex 
 
 
 ```python
-from eval_framework.metrics.llm_metrics.llm_judge_chatbot_style import LLMJudgeChatbotStyle
+from eval_framework.metrics.llm.llm_judge_chatbot_style import LLMJudgeChatbotStyle
 # Classifies whether a text generation model's response follows a chatbot-style format by evaluating characteristics like friendly introductions, verbose language, follow-up questions, and conversational fluff, returning a boolean classification with reasoning. (English and German)
 
-from eval_framework.metrics.llm_metrics.llm_judge_completion_accuracy import LLMJudgeCompletionAccuracy
+from eval_framework.metrics.llm.llm_judge_completion_accuracy import LLMJudgeCompletionAccuracy
 # Evaluates whether a text generation model's response matches the target response by assessing if the generation addresses the question correctly and provides the right information, returning a boolean classification. (English)
 
 
-from eval_framework.metrics.llm_metrics.llm_judge_conciseness import LLMJudgeConciseness
+from eval_framework.metrics.llm.llm_judge_conciseness import LLMJudgeConciseness
 # Assesses if the model's response is concise by evaluating whether it is brief and to the point without unnecessary details or elaboration, returning a boolean classification with reasoning. (English and German)
 
 
-from eval_framework.metrics.llm_metrics.llm_judge_contains_names import LLMJudgeAvoidsNames
+from eval_framework.metrics.llm.llm_judge_contains_names import LLMJudgeAvoidsNames
 # Checks whether the model text generation contains names of individuals, returning a boolean classification. (English, French and German)
 
 
-from eval_framework.metrics.llm_metrics.llm_judge_format_correctness import LLMJudgeFormatCorrectness
+from eval_framework.metrics.llm.llm_judge_format_correctness import LLMJudgeFormatCorrectness
 # Evaluates the correctness and quality of models' outputs by checking if they comply with format specifications stated in the prompt, returning a detailed assessment with format correctness status (1 for correct, 0 for incorrect) and reasoning. (English)
 
 
-from eval_framework.metrics.llm_metrics.llm_judge_instruction import LLMJudgeInstruction
+from eval_framework.metrics.llm.llm_judge_instruction import LLMJudgeInstruction
 # Evaluates how well the response from a text generation model fulfills the requirements of a given user instruction on a fixed set of criteria, where the user cannot ask follow-up questions to the model. (English, Finnish and German)
 
 
-from eval_framework.metrics.llm_metrics.llm_judge_mtbench_pair import MTBenchJudgePair
+from eval_framework.metrics.llm.llm_judge_mtbench_pair import MTBenchJudgePair
 # Evaluates the quality of two AI assistant responses by acting as an impartial judge, comparing factors like helpfulness, relevance, accuracy, and depth to determine which assistant provides a better answer (A wins, B wins, or tie). (English, Finnish and German)
 
 
-from eval_framework.metrics.llm_metrics.llm_judge_mtbench_single import MTBenchJudgeSingle
+from eval_framework.metrics.llm.llm_judge_mtbench_single import MTBenchJudgeSingle
 # Evaluates a single AI assistant response on a 1-10 scale, considering factors like helpfulness, relevance, accuracy, depth, creativity, and detail level to provide an objective quality rating. (English, Finnish and German)
 
 
-from eval_framework.metrics.llm_metrics.llm_judge_refusal import LLMJudgeRefusal
+from eval_framework.metrics.llm.llm_judge_refusal import LLMJudgeRefusal
 # Assesses whether the assistant's response is a refusal to answer the question. (English)
 
 
-from eval_framework.metrics.llm_metrics.llm_judge_sql import LLMJudgeSql
+from eval_framework.metrics.llm.llm_judge_sql import LLMJudgeSql
 # Evaluates SQL query quality against specified requirements, rating efficiency and accuracy on an A-F scale and providing detailed reasoning for the grade assigned. (English and German)
 
 
-from eval_framework.metrics.llm_metrics.llm_judge_world_knowledge import LLMJudgeWorldKnowledge
+from eval_framework.metrics.llm.llm_judge_world_knowledge import LLMJudgeWorldKnowledge
 # Evaluates whether a summary contains information that goes beyond the reference text (also known as "world knowledge"), returning a boolean classification with detailed reasoning for the assessment. (English, French and German)
 
 ```
@@ -239,7 +239,7 @@ Practical example of creating a geography question-answering benchmark.
 from typing import Any
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
-from eval_framework.metrics.completion_metrics.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 
 class GeographyQATask(BaseTask[str]):
     # Required class attributes
@@ -275,13 +275,13 @@ class GeographyQATask(BaseTask[str]):
 
 ### Add to Task Registry
 
-Register your new benchmark in `task_names.py`:
+Add a registration call for your new benchmark to `register_all_tasks` in `src/eval_framework/tasks/task_names.py`:
 
 ```python
-class TaskName(Enum):
-    # ...existing tasks...
-    GEOGRAPHYQA = "GeographyQA"  # Add your new task here
+register_lazy_task("eval_framework.tasks.benchmarks.geographyqa.GeographyQA")
 ```
+
+The task will now be available through `get_task("GeographyQA")`.
 
 ### Testing your benchmark
 

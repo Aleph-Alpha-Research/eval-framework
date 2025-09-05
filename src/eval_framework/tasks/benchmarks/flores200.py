@@ -2,7 +2,7 @@ from typing import Any
 
 import pycountry
 
-from eval_framework.metrics.completion_metrics.bleu import BLEU
+from eval_framework.metrics.completion.bleu import BLEU
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 
 FLORES_LANGUAGES = [

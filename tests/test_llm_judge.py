@@ -5,8 +5,8 @@ import pytest
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.main import main
-from eval_framework.task_names import TaskName
 from eval_framework.tasks.eval_config import EvalConfig
+from eval_framework.tasks.registry import get_task
 from tests.utils import _almost_equal
 
 NUM_SAMPLES = 1
@@ -27,7 +27,7 @@ experiment_setups: list[tuple] = []
 def test_llm_judge_tasks(
     tmp_path: Path,
     test_llms: BaseLLM,
-    task_name: TaskName,
+    task_name: str,
     expected_results: dict[str, float],
     num_samples: int,
     llm_judge_class: type[BaseLLM],
@@ -43,8 +43,9 @@ def test_llm_judge_tasks(
     )
 
     # limit number of subjects to three
-    subjects_subset = task_name.value.SUBJECTS[:3]
-    with patch(f"{task_name.__module__}.{task_name.value.__name__}.SUBJECTS", new=subjects_subset):
+    task = get_task(task_name)
+    subjects_subset = task.SUBJECTS[:3]
+    with patch(f"{task.__module__}.{task.__name__}.SUBJECTS", new=subjects_subset):
         results = main(test_llms, eval_config)
 
     full_metric_names = [

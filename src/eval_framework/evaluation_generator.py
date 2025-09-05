@@ -1,3 +1,4 @@
+import logging
 import math
 
 import numpy as np
@@ -7,20 +8,20 @@ from tqdm import tqdm
 
 from eval_framework.constants import RED, RESET
 from eval_framework.metrics.base import BaseMetric
-from eval_framework.metrics.efficiency_metrics.bytes_per_sequence_position import (
+from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesCompletion,
     BytesLoglikelihood,
     SequencePositionsCompletion,
     SequencePositionsLoglikelihood,
 )
-from eval_framework.metrics.llm_metrics.base import BaseLLMJudgeMetric
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.result_processors.base import Result, ResultProcessor
 from eval_framework.shared.types import Completion, Loglikelihood
 from eval_framework.tasks.base import ResponseType
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.utils.logging_config import get_logger
+from eval_framework.tasks.registry import get_task
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class EvaluationGenerator:
@@ -34,7 +35,7 @@ class EvaluationGenerator:
         self.result_processor = result_processor
         self.save_intermediate_results = config.save_intermediate_results
 
-        task_class = config.task_name.value
+        task_class = get_task(config.task_name)
         if task_class.RESPONSE_TYPE == ResponseType.COMPLETION:
             self.metrics = task_class.METRICS + [BytesCompletion, SequencePositionsCompletion]
         elif task_class.RESPONSE_TYPE == ResponseType.LOGLIKELIHOODS:

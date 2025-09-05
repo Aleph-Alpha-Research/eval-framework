@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-from eval_framework.metrics.loglikelihood_metrics.accuracy_loglikelihood import (
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -21,7 +21,7 @@ CHEMBENCH_SUBJECTS = [
 ]
 
 
-class ChemBenchMultipleChoice(BaseTask[str]):
+class ChemBench(BaseTask[str]):
     """ChemBench dataset: https://huggingface.co/datasets/jablonkagroup/ChemBench"""
 
     NAME = "ChemBench"

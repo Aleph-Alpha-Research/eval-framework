@@ -1,10 +1,11 @@
 from pathlib import Path
 
-from eval_framework.llm.models import Llama31_8B_Instruct_API
+from eval_framework.llm.aleph_alpha import Llama31_8B_Instruct_API
 from eval_framework.main import main
 from eval_framework.tasks.eval_config import EvalConfig
+from eval_framework.tasks.task_loader import load_extra_tasks
 
-# from eval_framework.task_loader import load_extra_tasks
+SCRIPT_DIR = Path(__file__).parent.resolve()
 
 if __name__ == "__main__":
     # Using Llama 3.1 8B Instruct hosted on Aleph Alpha Research API
@@ -12,7 +13,7 @@ if __name__ == "__main__":
     llm = Llama31_8B_Instruct_API()
 
     # Load custom tasks from the specified directory or file:
-    # load_extra_tasks(["examples/custom_tasks/"])
+    load_extra_tasks([SCRIPT_DIR / "custom_tasks"])
 
     # Running evaluation on COPA task using 2 few-shot examples and 5 samples
     config = EvalConfig(
