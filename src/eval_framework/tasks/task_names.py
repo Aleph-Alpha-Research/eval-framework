@@ -112,6 +112,13 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.struct_eval.StructEval")
     register_lazy_task("eval_framework.tasks.benchmarks.struct_eval.RenderableStructEval")
 
+    try:
+        # Importing the companion registers the additional tasks from the module.
+        # This is mostly for convenience for internal use-cases
+        import eval_framework_companion  # noqa
+    except ImportError:
+        pass
+
 
 def make_sure_all_hf_datasets_are_in_cache() -> None:
     for task_name, task_class in registered_tasks_iter():

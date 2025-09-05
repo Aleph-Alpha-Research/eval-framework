@@ -206,11 +206,10 @@ def test_vllm_hf_token_equivalence() -> None:
             content="Tell me a short story about a robot learning to paint.",
         )
     ]
-    prompt = vllm_model._formatter.format(messages, output_mode="string")
-    prompt_obj = vllm_model.tokenizer.encode_formatted_struct(prompt)
-    sampling_params = SamplingParams(max_tokens=50, temperature=0)
-    vllm_outputs = vllm_model._model_generate(prompt_objs=[prompt_obj], sampling_params=sampling_params)
-    vllm_tokens = vllm_model.tokenizer.encode_plain_text(vllm_outputs[0].outputs[0].text).tokens[:20]
+    vllm_results = vllm_model.generate_from_messages(messages=[messages], max_tokens=50, temperature=0)
+    vllm_completion = vllm_results[0].completion
+    vllm_tokens = vllm_model.tokenizer.encode_plain_text(vllm_completion).tokens[:20]
+
     # free up memory
     del vllm_model
     gc.collect()
@@ -225,6 +224,7 @@ def test_vllm_hf_token_equivalence() -> None:
     clean_up()
 
     assert vllm_tokens == hf_tokens, f"First 20 tokens don't match:\nVLLM: {vllm_tokens}\nHF: {hf_tokens}"
+    assert vllm_results[0].concat_compression == hf_results[0].concat_compression
 
 
 @pytest.mark.vllm

@@ -1,9 +1,9 @@
 import csv
 import io
 import json
+import tomllib
 from typing import Any
 
-import toml
 import xmltodict
 import yaml
 from lxml import etree
@@ -39,7 +39,7 @@ class StructMetric(BaseMetric[Completion]):
                     else:
                         raise yaml.YAMLError("Multiple documents found in YAML")
                 case "toml":
-                    result = toml.loads(response.completion)
+                    result = tomllib.loads(response.completion)
                 case "xml":
                     result = xmltodict.parse(response.completion)
                 case "csv":
@@ -53,7 +53,7 @@ class StructMetric(BaseMetric[Completion]):
                 case _:
                     raise ValueError(f"Unsupported format: {output_type}")
             valid_format = 1.0
-        except (json.JSONDecodeError, yaml.YAMLError, toml.TomlDecodeError, csv.Error, Exception):
+        except (json.JSONDecodeError, yaml.YAMLError, tomllib.TOMLDecodeError, csv.Error, Exception):
             valid_format = 0.0
 
         has_required_fields = 0.0

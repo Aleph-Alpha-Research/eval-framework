@@ -20,7 +20,13 @@ from eval_framework import __version__ as eval_framework_version
 from eval_framework.constants import RED, RESET
 from eval_framework.llm.base import BaseLLM
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
-from eval_framework.shared.types import Completion, Error, Loglikelihood, RawCompletion, RawLoglikelihood
+from eval_framework.shared.types import (
+    Completion,
+    Error,
+    Loglikelihood,
+    RawCompletion,
+    RawLoglikelihood,
+)
 from eval_framework.tasks.base import Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import create_perturbation_class
@@ -153,6 +159,7 @@ class ResponseGenerator:
                     ground_truth=sample.ground_truth,
                     prompt=raw_completion.prompt,
                     prompt_sequence_positions=raw_completion.prompt_sequence_positions,
+                    concat_compression=raw_completion.concat_compression,
                     messages=messages,
                     completion=completion,
                     raw_completion=raw_completion.completion,
@@ -202,6 +209,7 @@ class ResponseGenerator:
                     ground_truth=sample.ground_truth,
                     prompt=raw_loglikelihood.prompt,
                     prompt_sequence_positions=raw_loglikelihood.prompt_sequence_positions,
+                    concat_compression=raw_loglikelihood.concat_compression,
                     loglikelihoods=raw_loglikelihood.loglikelihoods,
                     loglikelihoods_sequence_positions=raw_loglikelihood.loglikelihoods_sequence_positions,
                     error=raw_loglikelihood.raw_loglikelihood_error,
