@@ -5,8 +5,7 @@ from huggingface_hub import hf_hub_download, try_to_load_from_cache
 
 # mistral's api specific imports
 from mistral_common.protocol.instruct.messages import AssistantMessage, SystemMessage, UserMessage
-from mistral_common.protocol.instruct.request import ChatCompletionRequest
-from mistral_common.tokens.instruct.request import InstructRequest
+from mistral_common.protocol.instruct.request import ChatCompletionRequest, InstructRequest
 from mistral_common.tokens.tokenizers.base import InstructTokenizer
 from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
 
