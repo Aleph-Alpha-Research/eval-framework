@@ -26,8 +26,8 @@ class MATHReasoning(BaseTask[str]):
     ANSWER_PATTERN = r"(?i)Answer\s*:\s*(.*)"
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
         # Max tokens are going to be determined by the model.
         # however GPT paper and results used 1024 tokens, s1 used 2048
 
@@ -346,9 +346,9 @@ class AIME2024(MATHReasoning):
     Problem: {Question}"""  # noqa: E501
     ANSWER_PATTERN = r"Therefore, the final answer is:(.*?). I hope it is correct."
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
         assert num_fewshot == 0, "AIME evaluation does not include few shot"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return self.QUERY_TEMPLATE.format(Question=item["problem"])
@@ -388,9 +388,9 @@ class MATH500(MATHReasoning):
     where [answer] is just the final number or expression that solves the problem.
     """.strip()  # noqa: E501
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
         assert num_fewshot == 0, "MATH-500 evaluation does not include few shot"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         extracted_answer_boxed = self._extract_answer(completion_text)
@@ -432,8 +432,8 @@ class MATH(MATHReasoning):
     ]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
         self.stop_sequences = ["\nProblem:", "\nProblem", "\n\nProblem:", "\n\nProblem"]
 
     def extract_last_two_dollar_text(self, s: str) -> str:
@@ -530,9 +530,9 @@ Question: {question}
 
 Answer:"""
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
         assert num_fewshot == 0, "GSM8K Reasoning is designed for zero-shot evaluation only"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
         self.stop_sequences: list[str] = []
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:

@@ -59,9 +59,9 @@ class SPHYR(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = None
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for SPHYR"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
 
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
         FILL_INSTRUCTION = EASY_FILL_INSTRUCTION if "easy" in item["subject"] else HARD_FILL_INSTRUCTION

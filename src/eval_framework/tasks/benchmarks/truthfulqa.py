@@ -45,9 +45,9 @@ class TRUTHFULQA(BaseTask[str]):
     FEWSHOT_ITEMS = FEWSHOT_ITEMS
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
         assert num_fewshot <= 6, f"Fewshot larger than 6 is not supported for {self.NAME}"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
 
     def _load_dataset(self, subject: SubjectType) -> None:
         """The original dataset only provides one subject 'multiple_choice', but with multiple target columns

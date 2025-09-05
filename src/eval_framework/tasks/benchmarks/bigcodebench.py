@@ -39,9 +39,9 @@ class BigCodeBench(BaseTask[str]):
     SUBJECTS = ["original", "calibrated"]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for BigCodeBench"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
 
     def _load_dataset(self, subject: SubjectType) -> None:
         hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=None)

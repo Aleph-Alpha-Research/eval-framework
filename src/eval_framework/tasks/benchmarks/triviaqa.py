@@ -19,8 +19,8 @@ class TRIVIAQA(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
         self.stop_sequences = ["\n"]
         self.max_tokens = 400  # the max length of the ground truth is 282 characters while the average is ~16
         self.rnd_choice_shuffle = random.Random()

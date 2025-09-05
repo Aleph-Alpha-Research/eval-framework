@@ -23,8 +23,8 @@ class BELEBELE(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"] + get_n_letters(4)
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
 
         self.keys = get_n_letters(4)
         self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}

@@ -83,8 +83,8 @@ class MMLU(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"] + get_n_letters(4)
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
 
         self.keys = get_n_letters(4)
 
@@ -152,9 +152,9 @@ class MMLU_COT(MMLU):
 
     ANS_RE = re.compile(r"Therefore, the answer is: ([ABCD])")
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for MMLU_COT"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
         self.stop_sequences: list[str] = ["Question:"]
 
     def _extract_answer(self, completion: str) -> str:

@@ -35,8 +35,8 @@ class HumanEval(BaseTask[str]):
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
         self.stop_sequences: list[str] = ["```"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -82,9 +82,9 @@ class HumanEvalInstruct(HumanEval):
     NAME = "Human Eval Instruct"
     CUE_PREFIX = "Here is the completed function:\n```python\n"
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for Human Eval Instruct"
-        super().__init__(num_fewshot)
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         instruction_text = (

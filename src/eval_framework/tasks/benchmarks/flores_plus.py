@@ -44,8 +44,8 @@ class FloresPlus(BaseTask[str]):
         "ukr_Cyrl": Language.UKR,
     }
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
         self.stop_sequences = ["\n"]
 
     def _load_dataset(self, subject: str) -> None:

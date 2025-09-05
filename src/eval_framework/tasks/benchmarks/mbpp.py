@@ -38,8 +38,9 @@ class MBPP(BaseTask[str]):
     SUBJECTS = ["full"]  # , "sanitized"]  # these are HF dataset SUBSETS!
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+
         self.stop_sequences = [END]
 
     @staticmethod
