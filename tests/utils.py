@@ -99,7 +99,7 @@ class DatasetPatcher[T: BaseTask]:
         self.patch_obj = None
 
     def __enter__(self) -> T:
-        task = self.task_class(num_fewshot=self.num_fewshot)
+        task = self.task_class(num_fewshot=self.num_fewshot, custom_subjects=None, custom_hf_revision=None)
 
         # First, we record what arguments are passed to _load_hf_dataset for each subject
         # We do this by patching the _load_hf_dataset method and recording the keyword arguments

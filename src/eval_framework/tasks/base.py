@@ -93,18 +93,21 @@ class BaseTask[SubjectType](ABC):
     # language by subtopic, or `None` (for tasks not specific to a single language).
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
 
-    def __init__(self, num_fewshot: int = 0, subjects: list[str] | None = None, hf_revision: str | None = None) -> None:
+    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
         self.num_fewshot = num_fewshot
         self.stop_sequences: list[str] | None = None
         self.max_tokens: int | None = None
 
-        self.CUSTOM_SUBJECTS: list[SubjectType] | list[tuple] = self._filter_task_subjects(custom_subjects=subjects)  # type: ignore[assignment]
-        if self.CUSTOM_SUBJECTS:
-            logger.info(f"Setting SUBJECTS to `{self.CUSTOM_SUBJECTS}` for the task {self.__name__}")
+        # If custom subjects were provided during initialization, they take precedence over the class-level SUBJECTS.
+        filtered_subjects = self._filter_task_subjects(custom_subjects=custom_subjects)
+        if filtered_subjects:
+            logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {self.__name__}")
+            self.SUBJECTS = filtered_subjects  # type: ignore[assignment]
 
-        self.CUSTOM_HF_REVISION = hf_revision
-        if self.CUSTOM_HF_REVISION:
-            logger.info(f"Setting HF revision to `{self.CUSTOM_HF_REVISION}` for the task {self.__name__}")
+        # If a custom revision was provided during initialization, it takes precedence over the class-level HF_REVISION.
+        if custom_hf_revision:
+            logger.info(f"Setting HF revision to `{custom_hf_revision}` for the task {self.__name__}")
+            self.HF_REVISION = custom_hf_revision
 
     def _filter_task_subjects(self, custom_subjects: list[str] | None) -> list[str] | list[tuple] | None:
         """Process custom subjects passed from EvalConfig. Check and returns restricted task subjects if specified."""
@@ -135,25 +138,11 @@ class BaseTask[SubjectType](ABC):
                 assert subject in self.SUBJECTS, f"Subject {subject} not found in task {self.__name__}"
             return custom_subjects
 
-    def get_subjects(self) -> list[SubjectType] | list[tuple]:
-        """
-        Returns the list of subjects to use for loading the dataset. If custom subjects were provided during
-        initialization, they take precedence over the class-level SUBJECTS.
-        """
-        return self.CUSTOM_SUBJECTS if self.CUSTOM_SUBJECTS else self.SUBJECTS
-
-    def _get_hf_revision(self) -> str | None:
-        """
-        Returns the Hugging Face revision to use for loading the dataset. If a custom revision
-        was provided during initialization, it takes precedence over the class-level HF_REVISION.
-        """
-        return self.CUSTOM_HF_REVISION if self.CUSTOM_HF_REVISION else self.HF_REVISION
-
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
         # Check if the HF revision is valid before loading the dataset
-        if self._get_hf_revision():
+        if self.HF_REVISION:
             try:
-                _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=self._get_hf_revision(), timeout=100.0)
+                _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=self.HF_REVISION, timeout=100.0)
             except Exception as e:
                 if isinstance(e, RevisionNotFoundError):
                     raise e
@@ -163,7 +152,7 @@ class BaseTask[SubjectType](ABC):
         try:
             return load_dataset(
                 **kwargs,
-                revision=self._get_hf_revision(),
+                revision=self.HF_REVISION,
                 trust_remote_code=True,
                 cache_dir=cache_dir,
                 download_config=download_config,
@@ -171,7 +160,7 @@ class BaseTask[SubjectType](ABC):
         except Exception:
             return load_dataset(
                 **kwargs,
-                revision=self._get_hf_revision(),
+                revision=self.HF_REVISION,
                 trust_remote_code=True,
                 cache_dir=f"{Path.home()}/.cache/eval-framework",
             )
@@ -229,7 +218,8 @@ class BaseTask[SubjectType](ABC):
         return [Message(role=Role.USER, content=self._get_instruction_text(item))]
 
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
-        for subject in self.get_subjects():
+        for subject in self.SUBJECTS:
+            assert isinstance(subject, str), "only supports string subjects in this implementation"
             self._load_dataset(subject)
             assert len(self.dataset[self.SAMPLE_SPLIT]) > 0
             done = False
@@ -303,5 +293,5 @@ class BaseTask[SubjectType](ABC):
             "fewshot_split": self.FEWSHOT_SPLIT,
             "response_type": self.RESPONSE_TYPE.value,
             "metrics": [m.NAME for m in self.METRICS],
-            "subjects": [str(s) for s in self.get_subjects()],
+            "subjects": [str(s) for s in self.SUBJECTS],
         }

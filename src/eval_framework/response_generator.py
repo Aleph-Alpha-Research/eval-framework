@@ -61,11 +61,11 @@ class ResponseGenerator:
         if config.perturbation_config is not None:
             perturbation_task_class = create_perturbation_class(task_class, config.perturbation_config)
             self.task = perturbation_task_class(
-                self.few_shot, subjects=self.config.task_subjects, hf_revision=self.config.hf_revision
+                self.few_shot, custom_subjects=self.config.task_subjects, custom_hf_revision=self.config.hf_revision
             )
         else:
             self.task = task_class(
-                self.few_shot, subjects=self.config.task_subjects, hf_revision=self.config.hf_revision
+                self.few_shot, custom_subjects=self.config.task_subjects, custom_hf_revision=self.config.hf_revision
             )
 
         self.response_type = task_class.RESPONSE_TYPE
