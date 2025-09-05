@@ -28,7 +28,12 @@ class RegistryModel(BaseLLM):
     """
 
     def __init__(
-        self, artifact_name: str, version: str | None = None, formatter: str = "", backend: str = "hfllm", **kwargs: Any
+        self,
+        artifact_name: str,
+        version: str | None = None,
+        formatter: str = "",
+        backend: str = "huggingface",
+        **kwargs: Any,
     ) -> None:
         """
         Initialize registry model
