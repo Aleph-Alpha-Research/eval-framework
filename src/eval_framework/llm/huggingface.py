@@ -11,7 +11,7 @@ from eval_framework.constants import RED, RESET
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from eval_framework.tasks.utils import raise_errors, redis_cache
+from eval_framework.tasks.utils import raise_errors
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Llama3Formatter, Message
 
 logger = logging.getLogger(__name__)
@@ -181,11 +181,6 @@ class HFLLM(BaseLLM):
             )
         return raw_completions
 
-    @redis_cache(
-        version_id="v8",
-        args_key_func=lambda _, kwargs: str(kwargs["redis_key"]),
-        load_func=lambda d: tuple(d),
-    )
     def _model_generate(self, redis_key: Any, prompt_token_count: int, **kwargs: Any) -> tuple[str, int]:
         outputs = self.model.generate(**kwargs)[0]
         completion = self.tokenizer.decode(outputs[prompt_token_count:], skip_special_tokens=True)
@@ -241,7 +236,6 @@ class HFLLM(BaseLLM):
             )
         return results
 
-    @redis_cache(version_id="v8")
     def _model_log_probs(self, prompt: str, num_choice_tokens: int) -> float:
         with torch.no_grad():
             inputs = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False).to(self.device)
