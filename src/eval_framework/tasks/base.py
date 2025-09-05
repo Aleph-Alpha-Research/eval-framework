@@ -28,7 +28,7 @@ class ResponseType(Enum):
     LOGLIKELIHOODS = "loglikelihoods"
 
 
-class BaseLanguage(Enum):
+class Language(Enum):
     ENG = "English"
     DEU = "German"
     FRA = "French"
@@ -46,7 +46,7 @@ class BaseLanguage(Enum):
     SRP = "Serbian"
 
     @classmethod
-    def add_members(cls, new_members: dict[str, Any]) -> type["BaseLanguage"]:
+    def add_members(cls, new_members: dict[str, Any]) -> type["Language"]:
         members = {member.name: member.value for member in cls}
         for name, value in new_members.items():
             if name not in members:
@@ -61,7 +61,7 @@ for language in iso639.ALL_LANGUAGES:
 
 # src/eval_framework/tasks/base.py:94: error:
 # Variable "eval_framework.tasks.base.Language" is not valid as a type  [valid-type]
-Language: type[Enum] = BaseLanguage.add_members(languages)  # type: ignore[no-redef]
+Language: type[Enum] = Language.add_members(languages)  # type: ignore[no-redef]
 
 
 class Sample(BaseModel):
