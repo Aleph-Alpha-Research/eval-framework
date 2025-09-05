@@ -7,6 +7,7 @@
 - Our benchmarks tasks are now registered lazily, which reduces the amount of code that is imported
   at startup time.
 - Task look-ups are now insensitive to case, hyphens, underscores and whitespace
+- Special tokens are now ignored when computing compression ratios
 - Added missing `DOCKER_CODE_EXECUTION` variable to `.env.example`
 - Added support for weights and biases + determined pre-emption
 - Fixed loading of extra task modules (skip non-evaluation BaseTasks with no NAME attribute), add test that no task with same names get registered
@@ -16,6 +17,7 @@
 - Renamed `ChemBenchMultipleChoice` to `ChemBench` for consistency.
 - We've removed all models except those used for testing (they were largely old). The recommended way going forward is to provide
   your own models implementation to the framework.
+- Removed and relaxes several main-dependencies
 - Moves the generate_task_docs utility to inside the package and add test that documentation is up-to-date
 - Fix inconsistent language code for Croatian/Serbian in INCLUDE task
 
