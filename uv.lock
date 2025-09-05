@@ -814,7 +814,7 @@ wheels = [
 
 [[package]]
 name = "eval-framework"
-version = "0.2.0.dev0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "datasets" },
@@ -979,7 +979,7 @@ requires-dist = [
     { name = "wandb", specifier = ">=0.21.1,<1" },
     { name = "xmltodict", specifier = ">=0.13.0,<0.16" },
 ]
-provides-extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "comet", "optional", "mistral", "all"]
+provides-extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "mistral", "comet", "optional", "all"]
 
 [package.metadata.requires-dev]
 cpu = [{ name = "torch", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "eval-framework", group = "cpu" } }]
