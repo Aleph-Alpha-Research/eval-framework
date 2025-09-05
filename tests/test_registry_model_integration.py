@@ -2,8 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from eval_framework.llm.models import RegistryModel
-from eval_framework.task_names import TaskName
+from eval_framework.llm.registry import RegistryModel
 from eval_framework.tasks.eval_config import EvalConfig
 
 
@@ -37,7 +36,7 @@ def test_registry_model_config_integration(backend, extra_args, expected_backend
     config = EvalConfig(
         llm_class=RegistryModel,
         llm_args=llm_args,
-        task_name=TaskName.ARC,
+        task_name="ARC",
         num_fewshot=2,
         num_samples=10,
         output_dir=Path("/tmp/test_output"),
