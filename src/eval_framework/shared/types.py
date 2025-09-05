@@ -5,7 +5,7 @@ from typing import Annotated, NamedTuple, Self, TypeVar, cast
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.metrics.llm.graders.language import detect_language_of
-from eval_framework.utils import count_bytes
+from eval_framework.utils.utils import count_bytes
 from template_formatting.formatter import ConcatFormatter, Message, Role
 
 

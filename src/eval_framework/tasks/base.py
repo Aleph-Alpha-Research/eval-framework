@@ -29,7 +29,6 @@ class ResponseType(Enum):
 
 
 class BaseLanguage(Enum):
-    # Default languages
     ENG = "English"
     DEU = "German"
     FRA = "French"
@@ -43,13 +42,11 @@ class BaseLanguage(Enum):
     POL = "Polish"
     RUS = "Russian"
     UKR = "Ukrainian"
-
-    # additional langues with problematic codes
     HRV = "Croatian"
     SRP = "Serbian"
 
     @classmethod
-    def add_members(cls, new_members: dict[str, Any]) -> type["Enum"]:
+    def add_members(cls, new_members: dict[str, Any]) -> type["BaseLanguage"]:
         members = {member.name: member.value for member in cls}
         for name, value in new_members.items():
             if name not in members:
@@ -62,7 +59,9 @@ for language in iso639.ALL_LANGUAGES:
     enum_name = language.part3.upper()
     languages[enum_name] = language.name
 
-Language = BaseLanguage.add_members(languages)
+# src/eval_framework/tasks/base.py:94: error:
+# Variable "eval_framework.tasks.base.Language" is not valid as a type  [valid-type]
+Language: type[Enum] = BaseLanguage.add_members(languages)  # type: ignore[no-redef]
 
 
 class Sample(BaseModel):
@@ -93,6 +92,7 @@ class BaseTask[SubjectType](ABC):
     # Words in _get_instruction_text() not to be perturbed. List of words is case insensitive. No special characters
     # or whitespace should be included.
     PERTURBATION_UNMODIFIABLE_WORDS: list[str] | None
+
     # The language (or languages) tested by the benchmark. Accepts a single string, a dictionary specifying
     # language by subtopic, or `None` (for tasks not specific to a single language).
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
