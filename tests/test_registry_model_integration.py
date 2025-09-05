@@ -23,7 +23,9 @@ def test_registry_model_backend_selection() -> None:
         ),
     ],
 )
-def test_registry_model_config_integration(backend, extra_args, expected_backend) -> None:
+def test_registry_model_config_integration(
+    backend: str, extra_args: dict[str, int | float], expected_backend: str
+) -> None:
     base_llm_args = {
         "artifact_name": "test-model",
         "version": "v1.0.0",

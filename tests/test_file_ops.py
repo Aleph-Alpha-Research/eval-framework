@@ -79,9 +79,12 @@ class TestWandbFs:
         assert bucket == "my-bucket"
         assert prefix == "/path/to/file.json"
 
-    def test_ls(self, wandb_fs: WandbFs) -> None:
+    def test_ls(self, wandb_fs: WandbFs, mock_wandb_api: Mock) -> None:
+        # Ensure the wandb_fs uses the same mock API instance
+        wandb_fs.api = mock_wandb_api
+
         # Set up artifact with specific files
-        wandb_fs.api.set_artifact("test-model", ["s3://bucket/model/config.json", "s3://bucket/model/tokenizer.json"])
+        mock_wandb_api.set_artifact("test-model", ["s3://bucket/model/config.json", "s3://bucket/model/tokenizer.json"])
         artifact = wandb_fs.get_artifact("test-model")
 
         file_list = wandb_fs.ls(artifact)
@@ -95,23 +98,28 @@ class TestWandbFs:
         wandb_run: wandb.Run,
         mock_wandb: Mock,
         wandb_fs_with_env: tuple[WandbFs, Mock, Mock],
+        mock_wandb_api: Mock,
     ) -> None:
         with patch.dict(os.environ, aws_env):
             wandb_fs, _, _ = wandb_fs_with_env
+            # Ensure the wandb_fs uses the same mock API instance
+            wandb_fs.api = mock_wandb_api
+
             artifact = wandb.Artifact(name="test-model", type="model")
             artifact.add_reference("s3://bucket/model/config.json")
             logged_artifact = wandb_run.log_artifact(artifact, "model")
             assert logged_artifact
             # set artifact in api for testing purposes
-            wandb_fs.api.set_artifact("test-model", [x.path_uri for x in logged_artifact.files()])
+            mock_wandb_api.set_artifact("test-model", [x.path_uri for x in logged_artifact.files()])
 
             artifact = wandb_fs.get_artifact(logged_artifact.name)
             assert wandb_fs.download_and_use_artifact(artifact)
 
     def test_find_hf_checkpoint_from_s3_paths(self, wandb_fs: WandbFs) -> None:
         # Create temporary files to simulate the directory structure
-        wandb_fs.download_path = tempfile.TemporaryDirectory()
-        tempdir = Path(wandb_fs.download_path.name)
+        temp_dir = tempfile.TemporaryDirectory()
+        wandb_fs.download_path = Path(temp_dir.name)
+        tempdir = Path(temp_dir.name)
         model_dir = tempdir / "models" / "my-model"
         model_dir.mkdir(parents=True)
 
@@ -126,9 +134,13 @@ class TestWandbFs:
         result = wandb_fs.find_hf_checkpoint_root_from_path_list()
         assert result == str(tempdir / "models/my-model")
 
+        # Clean up
+        temp_dir.cleanup()
+
     def test_find_hf_checkpoint_from_empty_dir(self, wandb_fs: WandbFs) -> None:
-        wandb_fs.download_path = tempfile.TemporaryDirectory()
-        tempdir = Path(wandb_fs.download_path.name)
+        temp_dir = tempfile.TemporaryDirectory()
+        wandb_fs.download_path = Path(temp_dir.name)
+        tempdir = Path(temp_dir.name)
         model_dir = tempdir / "models" / "my-model"
         model_dir.mkdir(parents=True)
 
@@ -137,3 +149,6 @@ class TestWandbFs:
 
         result = wandb_fs.find_hf_checkpoint_root_from_path_list()
         assert result is None
+
+        # Clean up
+        temp_dir.cleanup()
