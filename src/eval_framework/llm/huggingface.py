@@ -308,7 +308,7 @@ class HFLLM_from_name(HFLLM):
         elif formatter == "HFFormatter":
             return HFFormatter(model_name)
         else:
-            supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
+            supported = ["Llama3Formatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
             raise ValueError(f"Unsupported formatter: {formatter}. Supported formatters: {supported}")
 
 
