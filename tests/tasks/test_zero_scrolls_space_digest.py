@@ -39,6 +39,6 @@ from eval_framework.tasks.benchmarks.zero_scrolls import (
     ],
 )
 def test_post_process_generated_completion(completion_text: str, expected_result: str) -> None:
-    task = ZERO_SCROLLS_SPACE_DIGEST(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
+    task = ZERO_SCROLLS_SPACE_DIGEST()
     result = task.post_process_generated_completion(completion_text)
     assert result == expected_result

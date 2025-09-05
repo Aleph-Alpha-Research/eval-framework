@@ -15,7 +15,7 @@ from tests.utils import DatasetPatcher
 class Test_InfiniteBench_CodeRun:
     @pytest.fixture
     def task(self) -> InfiniteBench_CodeRun:
-        return InfiniteBench_CodeRun(0, None, None)
+        return InfiniteBench_CodeRun()
 
     def test_InfiniteBench_CodeRun_postprocessing(self, task: InfiniteBench_CodeRun) -> None:
         assert (

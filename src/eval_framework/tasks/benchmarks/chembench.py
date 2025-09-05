@@ -33,9 +33,9 @@ class ChemBench(BaseTask[str]):
     SUBJECTS = CHEMBENCH_SUBJECTS
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+    def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for ChemBench"
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+        super().__init__(num_fewshot)
 
         self.keys = get_n_letters(16)
 

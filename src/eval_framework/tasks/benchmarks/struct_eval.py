@@ -43,10 +43,10 @@ class StructEval(BaseTask[str]):
     SUBJECTS = StructEvalSubjects
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+    def __init__(self, num_fewshot: int = 0) -> None:
         if num_fewshot > 0:
             raise ValueError("StructEval only supports zero-shot evaluation.")
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+        super().__init__(num_fewshot)
 
     def _load_dataset(self, subject: str) -> None:
         hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH)

@@ -6,7 +6,7 @@ from eval_framework.tasks.benchmarks.struct_eval import StructEval
 class TestStructEval:
     @pytest.fixture
     def struct_eval_task(self) -> StructEval:
-        return StructEval(0, None, None)
+        return StructEval()
 
     @pytest.mark.parametrize("subject", StructEval.SUBJECTS)
     def test_struct_eval_task_loads_dataset_for_subjects(self, struct_eval_task: StructEval, subject: str) -> None:

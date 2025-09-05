@@ -30,8 +30,8 @@ class YourBenchmarkTask(BaseTask[str]):  # Replace with your class name
     METRICS = [AccuracyCompletion]  # List your metric classes
     SUBJECTS = ["subject1", "subject2"]  # Define your subjects/categories
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         """Generate the instruction/question text for a sample."""
@@ -93,8 +93,8 @@ class GeographyQATask(BaseTask[str]):
     METRICS = [AccuracyCompletion]
     SUBJECTS = ["Europe", "Asia"]
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         """Format the question from the dataset item."""

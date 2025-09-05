@@ -41,8 +41,8 @@ class MMLU_PRO(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = get_n_letters(10)
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
 
         self.keys = get_n_letters(10)
 
@@ -97,9 +97,9 @@ class MMLU_PRO_COT(MMLU_PRO):
     )
     ANS_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+    def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for MMLU_PRO_COT"
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+        super().__init__(num_fewshot)
 
         self.stop_sequences: list[str] = ["Question:"]
 

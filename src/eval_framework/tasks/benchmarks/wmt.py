@@ -22,8 +22,8 @@ class WMT(BaseTask[str], ABC):
     METRICS = [LINEWISE_BLEU, LINEWISE_CHRF, LINEWISE_TER]
     PERTURBATION_UNMODIFIABLE_WORDS = ["phrase"]
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
         self.stop_sequences: list[str] = [".\n", " phrase: ", "phrase:", "phrase: ", " phrase:", "\n\n"]
 
     def _load_dataset(self, subject: str | None) -> None:
@@ -103,8 +103,8 @@ class WMT_INSTRUCT(WMT):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Please", "translate"]
     COMPLETION_PREFIX = "This is the translation:"
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
         self.stop_sequences: list[str] = ["Please translate"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

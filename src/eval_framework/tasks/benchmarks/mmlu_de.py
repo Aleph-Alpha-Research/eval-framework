@@ -81,8 +81,8 @@ class MMLU_DE(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Frage"] + get_n_letters(4)
     LANGUAGE = Language.DEU
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
 
         self.keys = get_n_letters(4)
 

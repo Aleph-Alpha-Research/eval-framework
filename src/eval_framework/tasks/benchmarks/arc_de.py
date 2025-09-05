@@ -21,8 +21,8 @@ class ARC_DE(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Frage"] + get_n_letters(5)
     LANGUAGE = Language.DEU
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
 
         self.keys = get_n_letters(5)  # needs to be 5 because there is one sample with 5 answer possibilities
         self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}

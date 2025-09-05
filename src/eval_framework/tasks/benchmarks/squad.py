@@ -20,8 +20,8 @@ class SQUAD2(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer", "Context", "unanswerable"]
     LANGUAGE = Language.ENG
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
         self.stop_sequences = [".\n"]
         self.max_tokens = 300  # the max length of the ground truth is 160 characters while the average is ~19
         self.rnd_choice_shuffle = random.Random()

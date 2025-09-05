@@ -432,8 +432,8 @@ class MMMLU(BaseTask[tuple[str, str]]):
         for subject in subjects
     }
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
         self.keys = get_n_letters(4)
 
     def _load_dataset(self, subject: tuple[str, str]) -> None:
@@ -490,9 +490,9 @@ class MMMLU_GERMAN_COT(MMMLU):
 
     ANS_RE = re.compile(r"Daher lautet die Antwort: ([ABCD])")
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
+    def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for MMMLU_GERMAN_COT"
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+        super().__init__(num_fewshot)
 
         self.stop_sequences: list[str] = ["Frage:", "Question:"]
 

@@ -33,8 +33,8 @@ class Flores200(BaseTask[str]):
         "nld_Latn": Language.NLD,
     }
 
-    def __init__(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> None:
-        super().__init__(num_fewshot, custom_subjects, custom_hf_revision)
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
 
         self.stop_sequences = ["\n"]
 

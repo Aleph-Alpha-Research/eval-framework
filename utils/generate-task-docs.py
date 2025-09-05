@@ -70,11 +70,11 @@ def generate_docs_for_task(task_name: str, formatters: list[BaseFormatter], add_
 
     try:
         num_fewshot = 1
-        task = task_class(num_fewshot=num_fewshot, custom_subjects=None, custom_hf_revision=None)
+        task = task_class(num_fewshot=num_fewshot)
     except Exception:
         try:
             num_fewshot = 0
-            task = task_class(num_fewshot=num_fewshot, custom_subjects=None, custom_hf_revision=None)
+            task = task_class(num_fewshot=num_fewshot)
         except Exception as e:
             print(f"Failed to instantiate task {task_name}: {e}")
             return
