@@ -59,9 +59,7 @@ for language in iso639.ALL_LANGUAGES:
     enum_name = language.part3.upper()
     languages[enum_name] = language.name
 
-# src/eval_framework/tasks/base.py:94: error:
-# Variable "eval_framework.tasks.base.Language" is not valid as a type  [valid-type]
-Language: type[Enum] = Language.add_members(languages)  # type: ignore[no-redef]
+Language.add_members(languages)
 
 
 class Sample(BaseModel):
