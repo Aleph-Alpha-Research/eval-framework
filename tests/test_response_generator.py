@@ -435,7 +435,7 @@ def test_perturbed_response_differs(tmp_path: Path, perturbation_type: Perturbat
     )
 
     task_class = get_task(perturbed_eval_config.task_name)
-    task = task_class()
+    task = task_class(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
     perturbed_response_generator = ResponseGenerator(MockLLM(), perturbed_eval_config, Mock(spec=ResultsFileProcessor))
 
     task._load_dataset(task.SUBJECTS[0])
