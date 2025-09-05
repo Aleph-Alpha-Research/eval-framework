@@ -7,7 +7,6 @@ import re
 import time
 import traceback
 from collections.abc import Callable, Sequence
-from dataclasses import asdict
 
 import aiohttp
 from aleph_alpha_client import (
@@ -26,7 +25,7 @@ from dotenv import load_dotenv
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from eval_framework.tasks.utils import raise_errors, redis_cache
+from eval_framework.tasks.utils import raise_errors
 from template_formatting.formatter import BaseFormatter, Llama3Formatter, Message
 
 load_dotenv()
@@ -89,12 +88,6 @@ class AlephAlphaAPIModel(BaseLLM):
         except Exception as e:
             raise RuntimeError(f"Model '{self._llm_name}' is not available: {e}")
 
-    @redis_cache(
-        version_id="v8",
-        args_key_func=lambda _, kwargs: str(kwargs["request"]),  # request dataclass keeps field ordering in str()
-        dump_func=lambda x: x.to_json() if isinstance(x, CompletionRequest) else asdict(x),  # type: ignore
-        load_func=lambda d: CompletionResponse.from_json(d) if "completions" in d else EvaluationResponse.from_json(d),
-    )
     async def _request_with_backoff(
         self, client: AsyncClient, request: CompletionRequest | EvaluationRequest, id: int
     ) -> CompletionResponse | EvaluationResponse:

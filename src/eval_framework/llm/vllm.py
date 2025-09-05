@@ -15,7 +15,7 @@ from eval_framework.constants import RED, RESET
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from eval_framework.tasks.utils import raise_errors, redis_cache
+from eval_framework.tasks.utils import raise_errors
 from template_formatting.formatter import BaseFormatter, HFFormatter, Message
 
 logger = logging.getLogger(__name__)
@@ -349,7 +349,6 @@ class VLLMModel(BaseLLM):
 
         return cast(list[RawLoglikelihood], results)
 
-    @redis_cache(version_id="v10")
     def _model_log_probs(self, batch_data: list[tuple[TokenizedContainer, TokenizedContainer]]) -> list[float]:
         """Batched version of _model_log_probs for processing multiple prompt-choice pairs at once."""
         sampling_params = SamplingParams(
