@@ -33,6 +33,7 @@ dependencies = [
   "lxml>=6,<7",
   "python-iso639>=2025.2.18",
   "wandb>=0.21.1,<1",
+  "tqdm>=4.67.1,<5.0.0",
   # Needed for uv bug: https://github.com/astral-sh/uv/issues/15661
   "torch",
 ]
