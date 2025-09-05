@@ -1,12 +1,12 @@
-# INFINITE_BENCH_CODE_DEBUG
+# InfiniteBench_EnDia
 
 ````
-NAME = INFINITE_BENCH_CODE_DEBUG
+NAME = InfiniteBench_EnDia
 DATASET_PATH = xinrongzhang2022/InfiniteBench
-SAMPLE_SPLIT = code_debug
-FEWSHOT_SPLIT = code_debug
-RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood]
+SAMPLE_SPLIT = longdialogue_qa_eng
+FEWSHOT_SPLIT = longdialogue_qa_eng
+RESPONSE_TYPE = COMPLETION
+METRICS = [AccuracyCompletion]
 SUBJECTS = ['default']
 LANGUAGE = <Language.ENG: 'English'>
 ````
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench](https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "INFINITE_BENCH_CODE_DEBUG"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "InfiniteBench_EnDia"`.

@@ -1,7 +1,7 @@
-# CHEM_BENCH_MULTIPLE_CHOICE
+# ChemBench
 
 ````
-NAME = CHEM_BENCH_MULTIPLE_CHOICE
+NAME = ChemBench
 DATASET_PATH = jablonkagroup/ChemBench
 SAMPLE_SPLIT = train
 FEWSHOT_SPLIT = train
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/jablonkagroup/ChemBench](https://huggingface.co/datasets/jablonkagroup/ChemBench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "CHEM_BENCH_MULTIPLE_CHOICE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "ChemBench"`.

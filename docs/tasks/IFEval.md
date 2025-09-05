@@ -1,7 +1,7 @@
-# IFEVAL
+# IFEval
 
 ````
-NAME = IFEVAL
+NAME = IFEval
 DATASET_PATH = google/IFEval
 SAMPLE_SPLIT = train
 FEWSHOT_SPLIT = train
@@ -17,4 +17,4 @@ LANGUAGE = {'no_subject': <Language.ENG: 'English'>}
 
 - Link to dataset: [https://huggingface.co/datasets/google/IFEval](https://huggingface.co/datasets/google/IFEval)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "IFEVAL"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "IFEval"`.

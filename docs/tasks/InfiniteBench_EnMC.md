@@ -1,12 +1,12 @@
-# INFINITE_BENCH_RETRIEVE_KV2
+# InfiniteBench_EnMC
 
 ````
-NAME = INFINITE_BENCH_RETRIEVE_KV2
+NAME = InfiniteBench_EnMC
 DATASET_PATH = xinrongzhang2022/InfiniteBench
-SAMPLE_SPLIT = kv_retrieval
-FEWSHOT_SPLIT = kv_retrieval
-RESPONSE_TYPE = COMPLETION
-METRICS = [AccuracyCompletion]
+SAMPLE_SPLIT = longbook_choice_eng
+FEWSHOT_SPLIT = longbook_choice_eng
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood]
 SUBJECTS = ['default']
 LANGUAGE = <Language.ENG: 'English'>
 ````
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench](https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "INFINITE_BENCH_RETRIEVE_KV2"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "InfiniteBench_EnMC"`.

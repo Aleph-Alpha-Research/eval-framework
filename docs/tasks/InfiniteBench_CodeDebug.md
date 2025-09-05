@@ -1,12 +1,12 @@
-# INFINITE_BENCH_MATH_FIND
+# InfiniteBench_CodeDebug
 
 ````
-NAME = INFINITE_BENCH_MATH_FIND
+NAME = InfiniteBench_CodeDebug
 DATASET_PATH = xinrongzhang2022/InfiniteBench
-SAMPLE_SPLIT = math_find
-FEWSHOT_SPLIT = math_find
-RESPONSE_TYPE = COMPLETION
-METRICS = [AccuracyCompletion]
+SAMPLE_SPLIT = code_debug
+FEWSHOT_SPLIT = code_debug
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood]
 SUBJECTS = ['default']
 LANGUAGE = <Language.ENG: 'English'>
 ````
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench](https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "INFINITE_BENCH_MATH_FIND"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "InfiniteBench_CodeDebug"`.

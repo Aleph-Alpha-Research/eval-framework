@@ -1,7 +1,7 @@
-# TABLEBENCH
+# TableBench
 
 ````
-NAME = TABLEBENCH
+NAME = TableBench
 DATASET_PATH = Multilingual-Multimodal-NLP/TableBench
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = test
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/Multilingual-Multimodal-NLP/TableBench](https://huggingface.co/datasets/Multilingual-Multimodal-NLP/TableBench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "TABLEBENCH"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "TableBench"`.

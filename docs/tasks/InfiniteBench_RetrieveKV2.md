@@ -1,10 +1,10 @@
-# INFINITE_BENCH_RETRIEVE_NUMBER
+# InfiniteBench_RetrieveKV2
 
 ````
-NAME = INFINITE_BENCH_RETRIEVE_NUMBER
+NAME = InfiniteBench_RetrieveKV2
 DATASET_PATH = xinrongzhang2022/InfiniteBench
-SAMPLE_SPLIT = number_string
-FEWSHOT_SPLIT = number_string
+SAMPLE_SPLIT = kv_retrieval
+FEWSHOT_SPLIT = kv_retrieval
 RESPONSE_TYPE = COMPLETION
 METRICS = [AccuracyCompletion]
 SUBJECTS = ['default']
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench](https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "INFINITE_BENCH_RETRIEVE_NUMBER"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "InfiniteBench_RetrieveKV2"`.

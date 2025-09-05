@@ -1,12 +1,12 @@
-# INFINITE_BENCH_EN_MC
+# InfiniteBench_EnQA
 
 ````
-NAME = INFINITE_BENCH_EN_MC
+NAME = InfiniteBench_EnQA
 DATASET_PATH = xinrongzhang2022/InfiniteBench
-SAMPLE_SPLIT = longbook_choice_eng
-FEWSHOT_SPLIT = longbook_choice_eng
-RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood]
+SAMPLE_SPLIT = longbook_qa_eng
+FEWSHOT_SPLIT = longbook_qa_eng
+RESPONSE_TYPE = COMPLETION
+METRICS = [AccuracyCompletion]
 SUBJECTS = ['default']
 LANGUAGE = <Language.ENG: 'English'>
 ````
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench](https://huggingface.co/datasets/xinrongzhang2022/InfiniteBench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "INFINITE_BENCH_EN_MC"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "InfiniteBench_EnQA"`.

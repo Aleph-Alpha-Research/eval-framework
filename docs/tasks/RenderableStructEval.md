@@ -1,7 +1,7 @@
-# RENDERABLE_STRUCT_EVAL
+# RenderableStructEval
 
 ````
-NAME = RENDERABLE_STRUCT_EVAL
+NAME = RenderableStructEval
 DATASET_PATH = TIGER-Lab/StructEval
 SAMPLE_SPLIT = train
 FEWSHOT_SPLIT = train
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/TIGER-Lab/StructEval](https://huggingface.co/datasets/TIGER-Lab/StructEval)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "RENDERABLE_STRUCT_EVAL"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "RenderableStructEval"`.

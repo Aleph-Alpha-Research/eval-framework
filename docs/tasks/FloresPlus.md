@@ -1,7 +1,7 @@
-# FLORES_PLUS
+# FloresPlus
 
 ````
-NAME = FLORES_PLUS
+NAME = FloresPlus
 DATASET_PATH = openlanguagedata/flores_plus
 SAMPLE_SPLIT = dev
 FEWSHOT_SPLIT = devtest
@@ -17,4 +17,4 @@ LANGUAGE = {'deu_Latn': <Language.DEU: 'German'>, 'eng_Latn': <Language.ENG: 'En
 
 - Link to dataset: [https://huggingface.co/datasets/openlanguagedata/flores_plus](https://huggingface.co/datasets/openlanguagedata/flores_plus)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "FLORES_PLUS"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "FloresPlus"`.
