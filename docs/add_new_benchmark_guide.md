@@ -93,7 +93,7 @@ def post_process_generated_completion(self, completion_text: str, sample: Sample
 def _get_subject(self, item: dict[str, Any]) -> str:
     """Extract subject/category from dataset item."""
     # Default returns first subject - override for dynamic subject extraction
-    return self.SUBJECTS[0]
+    return self.get_subjects()[0]
 ```
 
 ## Response Types, Metrics, and Configuration Attributes Reference

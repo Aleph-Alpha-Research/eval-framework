@@ -57,60 +57,18 @@ class ResponseGenerator:
         self.save_intermediate_results = config.save_intermediate_results
 
         task_class = get_task(config.task_name)
-        # TODO: This globally modified the task_class, not a great idea
-        task_class.SUBJECTS = self._filter_task_subjects()
-        task_class.HF_REVISION = self._set_hf_revision()
 
         if config.perturbation_config is not None:
             perturbation_task_class = create_perturbation_class(task_class, config.perturbation_config)
-            self.task = perturbation_task_class(self.few_shot)
+            self.task = perturbation_task_class(
+                self.few_shot, subjects=self.config.task_subjects, hf_revision=self.config.hf_revision
+            )
         else:
-            self.task = task_class(self.few_shot)
+            self.task = task_class(
+                self.few_shot, subjects=self.config.task_subjects, hf_revision=self.config.hf_revision
+            )
 
         self.response_type = task_class.RESPONSE_TYPE
-
-    def _set_hf_revision(self) -> str | None:
-        """Sets a tag name, a branch name, or commit hash for the HF dataset"""
-        task_class = get_task(self.config.task_name)
-        if task_class.HF_REVISION is None:  # Do not override an HF_REVISION hard-coded in the task
-            if self.config.hf_revision is None:
-                return None
-            logger.info(f"Setting HF revision to `{self.config.hf_revision}` for the task {self.task_name}")
-            return self.config.hf_revision
-        else:
-            logger.info(f"HF revision set to `{task_class.HF_REVISION}` for the task {self.task_name}")
-            return task_class.HF_REVISION
-
-    def _filter_task_subjects(self) -> list[str] | list[tuple]:
-        """Restrict task subjects if specified in the config."""
-        task_class = get_task(self.config.task_name)
-
-        if not self.config.task_subjects:
-            return task_class.SUBJECTS
-
-        if isinstance(task_class.SUBJECTS[0], tuple):
-            # subjects are specified as strings but we need tuples
-            filters = [tuple(item.strip() for item in subject.split(",")) for subject in self.config.task_subjects]
-
-            # check if all parts of user subjects exists (* is a wildcard)
-            num_items = len(task_class.SUBJECTS[0])
-            legal_values = [set([s[i] for s in task_class.SUBJECTS] + ["*"]) for i in range(num_items)]
-            for tpl in filters:
-                for i, v in enumerate(tpl):
-                    assert v in legal_values[i], f"Subject part {v} not found in task {task_class.NAME}"
-
-            # filter task subjects. * is a supported wildcard for a specific item in a tuple, e.g. "DE_DE, *"
-            chosen_subjects = []
-            for subject in task_class.SUBJECTS:
-                for filter in filters:
-                    if all(filter[i] == "*" or filter[i] == subject[i] for i in range(num_items)):
-                        chosen_subjects.append(subject)
-                        break
-            return chosen_subjects
-        else:
-            for subject in self.config.task_subjects:
-                assert subject in task_class.SUBJECTS, f"Subject {subject} not found in task {task_class.NAME}"
-            return self.config.task_subjects
 
     def _llm_task_param_precedence(self) -> tuple[list[str] | None, int | None]:
         """

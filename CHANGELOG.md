@@ -16,6 +16,7 @@
 - Renamed `ChemBenchMultipleChoice` to `ChemBench` for consistency.
 - We've removed all models except those used for testing (they were largely old). The recommended way going forward is to provide
   your own models implementation to the framework.
+- added `subjects`and `hf_revision` to BaseTask `__init__` to replace global task re-definition when running with non default values
 
 ## 0.1.0
 

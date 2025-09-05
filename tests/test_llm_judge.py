@@ -1,5 +1,4 @@
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
@@ -44,9 +43,8 @@ def test_llm_judge_tasks(
 
     # limit number of subjects to three
     task = get_task(task_name)
-    subjects_subset = task.SUBJECTS[:3]
-    with patch(f"{task.__module__}.{task.__name__}.SUBJECTS", new=subjects_subset):
-        results = main(test_llms, eval_config)
+    eval_config.task_subjects = task.SUBJECTS[:3]
+    results = main(test_llms, eval_config)
 
     full_metric_names = [
         (result.metric_name, result.key) for result in results if result.metric_name in list(expected_results.keys())
