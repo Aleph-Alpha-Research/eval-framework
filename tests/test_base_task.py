@@ -54,7 +54,7 @@ from tests.tasks.test_registry import temporary_registry
 )
 @temporary_registry
 def test_task_custom_subjects(
-    self, subjects: list[str], custom_subjects: list[str] | None, expected_value: list[str]
+    subjects: list[str] | list[tuple], custom_subjects: list[str] | None, expected_value: list[str] | list[tuple] | str
 ) -> None:
     class MyTask(BaseTask):
         SUBJECTS = subjects
@@ -67,11 +67,10 @@ def test_task_custom_subjects(
             return []
 
     register_task(MyTask)  # type: ignore[type-abstract]
-    task = MyTask(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)
     if expected_value == "AssertionError":
         with pytest.raises(AssertionError):
-            result = task.SUBJECTS
-        return
+            task = MyTask(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)
     else:
+        task = MyTask(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)
         result = task.SUBJECTS
         assert result == expected_value

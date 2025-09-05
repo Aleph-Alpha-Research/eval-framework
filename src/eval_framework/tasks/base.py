@@ -223,7 +223,6 @@ class BaseTask[SubjectType](ABC):
 
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
         for subject in self.SUBJECTS:
-            assert isinstance(subject, str), "only supports string subjects in this implementation"
             self._load_dataset(subject)
             assert len(self.dataset[self.SAMPLE_SPLIT]) > 0
             done = False
