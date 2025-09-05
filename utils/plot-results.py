@@ -1,3 +1,10 @@
+#!/usr/bin/env -S uv run --script
+#
+# /// script
+# dependencies = [
+#   "seaborn>=0.13.2,<0.14",
+# ]
+# ///
 import argparse
 import json
 import math
