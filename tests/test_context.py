@@ -1,3 +1,4 @@
+import shutil
 from collections.abc import Generator
 from pathlib import Path
 from unittest import mock
@@ -5,8 +6,8 @@ from unittest import mock
 import pytest
 from pydantic import ValidationError
 
-import eval_framework
 import eval_framework.context.determined as determined
+import eval_framework.llm
 from eval_framework.context.determined import DeterminedContext
 from eval_framework.context.eval import import_models
 from eval_framework.context.local import LocalContext
@@ -187,16 +188,30 @@ def test_local_context() -> None:
         assert ctx.config.judge_model_args is not None
 
 
-def test_import_models() -> None:
-    models = import_models(Path("src/eval_framework/llm/models.py"))
-    huggingface_llm = import_models(Path("src/eval_framework/llm/huggingface.py"))
+def test_import_models(tmp_path: Path) -> None:
+    llm_dir = Path(eval_framework.llm.__path__[0])
+    models = import_models(llm_dir / "models.py")
+    huggingface = import_models(llm_dir / "huggingface.py")
 
     assert "SmolLM135M" in models
     assert "Pythia410m" in models
-    assert "HFLLM" in huggingface_llm
-    del huggingface_llm["HFLLM"]
+    assert "HFLLM" in huggingface
+    del huggingface["HFLLM"]
 
     for model in models.values():
+        assert issubclass(model, BaseLLM)
+
+    shutil.copy(llm_dir / "models.py", tmp_path / "models.py")
+    shutil.copy(llm_dir / "huggingface.py", tmp_path / "huggingface.py")
+    models2 = import_models(tmp_path / "models.py")
+    huggingface2 = import_models(tmp_path / "huggingface.py")
+
+    assert "SmolLM135M" in models2
+    assert "Pythia410m" in models2
+    assert "HFLLM" in huggingface2
+    del huggingface2["HFLLM"]
+
+    for model in models2.values():
         assert issubclass(model, BaseLLM)
 
 
