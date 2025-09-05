@@ -59,7 +59,7 @@ for language in iso639.ALL_LANGUAGES:
     enum_name = language.part3.upper()
     languages[enum_name] = language.name
 
-Language.add_members(languages)
+Language: type[Enum] = Language.add_members(languages)  # type: ignore[no-redef]
 
 
 class Sample(BaseModel):
