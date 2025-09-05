@@ -4,9 +4,9 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from eval_framework.constants import RED, RESET
+from eval_framework.file_utils.file_ops import WandbFs
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import ConcatFormatter, HFFormatter, Llama3Formatter, Message
 from template_formatting.mistral_formatter import MagistralFormatter
 
@@ -99,14 +99,17 @@ class BaseLLM(ABC):
         Returns:
             Formatter instance
         """
-        if formatter_name == "Llama3Formatter":
-            return Llama3Formatter()
-        elif formatter_name == "MistralFormatter":
-            return MagistralFormatter(model_identifier)
-        elif formatter_name == "ConcatFormatter":
-            return ConcatFormatter()
-        elif formatter_name == "HFFormatter":
-            return HFFormatter(model_identifier)
-        else:
-            supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
-            raise ValueError(f"Unsupported formatter: {formatter_name}. Supported formatters: {supported}")
+        match formatter_name:
+            case "Llama3Formatter":
+                return Llama3Formatter()
+            case "MistralFormatter":
+                from eval_framework.llm.mistral import MagistralFormatter
+
+                return MagistralFormatter(model_identifier)
+            case "ConcatFormatter":
+                return ConcatFormatter()
+            case "HFFormatter":
+                return HFFormatter(model_identifier)
+            case _:
+                supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
+                raise ValueError(f"Unsupported formatter: {formatter_name}. Supported formatters: {supported}")

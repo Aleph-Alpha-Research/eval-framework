@@ -417,6 +417,51 @@ class VLLMModel(BaseLLM):
         return self.max_seq_length
 
 
+class _VLLM_from_wandb_registry(VLLMModel):
+    """
+    A class to create VLLM instances from registered models in Wandb registry.
+    Downloads the model artifacts from Wandb and creates a local VLLM instance.
+    """
+
+    LLM_NAME = ""
+
+    def __init__(
+        self,
+        artifact_name: str,
+        version: str = "latest",
+        formatter: str = "",
+        formatter_identifier: str = "",
+        **kwargs: Any,
+    ) -> None:
+        """
+        Initialize VLLM from a Wandb registered model artifact.
+
+        Args:
+            artifact_name: Name of the artifact in the Wandb registry
+            version: Version of the artifact to download (default: "latest")
+            formatter: Type of formatter to use (default: "")
+            **kwargs: Additional arguments passed to VLLMModel
+        """
+        print(f"{RED}[ Loading registered model from Wandb for VLLM: {artifact_name}:{version} ]{RESET}")
+
+        self.artifact_name = artifact_name
+        self.artifact_version = version
+        selected_formatter = self.get_formatter(formatter, formatter_identifier)
+
+        download_path = (
+            str(kwargs.pop("download_path", None)) if kwargs.get("download_path") else None
+        )  # Remove download_path from kwargs
+        with self.download_wandb_artifact(
+            artifact_name, version, user_supplied_download_path=download_path
+        ) as local_artifact_path:
+            self.LLM_NAME = local_artifact_path
+            super().__init__(formatter=selected_formatter, checkpoint_path=local_artifact_path, **kwargs)
+
+        print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
+        print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
+        print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+
+
 class Qwen3_0_6B_VLLM(VLLMModel):
     LLM_NAME = "Qwen/Qwen3-0.6B"
     DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME, chat_template_kwargs={"enable_thinking": True})

@@ -171,18 +171,3 @@ class WandbFs:
 
     def __del__(self) -> None:
         self._cleanup_temp_dir()
-
-
-if __name__ == "__main__":
-    from eval_framework.llm.models import HFLLM_from_wandb_registry, VLLM_from_wandb_registry
-
-    wandb.init(project="test-project")
-    name = "SmolLM2-135M"
-    version = "v1"
-    model = HFLLM_from_wandb_registry(name, version=version, formatter="Llama3Formatter")
-    model = HFLLM_from_wandb_registry(
-        name, version=version, formatter="Llama3Formatter", download_path="./registry_cache"
-    )
-    model = VLLM_from_wandb_registry(
-        name, version=version, formatter="Llama3Formatter", download_path="./registry_cache"
-    )
