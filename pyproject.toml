@@ -155,6 +155,8 @@ files = ["src", "tests", "utils"]
 
 [tool.pytest.ini_options]
 testpaths = ["./tests"]
+minversion = 8.0
+addopts = "-p 'no:legacypath' --doctest-modules"
 markers = [
     "gpu: needs a GPU runner, otherwise test can not be run",
     "cpu_slow: runs for a long time (on CPU)",
