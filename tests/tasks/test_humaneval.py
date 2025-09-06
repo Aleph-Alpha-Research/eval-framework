@@ -12,6 +12,7 @@ class TestHumanEvalCode:
             return patched_task
 
     def test_code_is_executed(self, human_eval_task: HumanEval) -> None:
+        assert len(human_eval_task.SUBJECTS) > 0
         human_eval_task._load_dataset(human_eval_task.SUBJECTS[0])
         i = 0
         for i, item in enumerate(human_eval_task.dataset[human_eval_task.SAMPLE_SPLIT][:10]):
@@ -30,6 +31,7 @@ class TestHumanEvalInstructCode:
             return patched_task
 
     def test_code_is_executed(self, human_eval_task_inst: HumanEvalInstruct) -> None:
+        assert len(human_eval_task_inst.SUBJECTS) > 0
         human_eval_task_inst._load_dataset(human_eval_task_inst.SUBJECTS[0])
         i = 0
         for i, item in enumerate(human_eval_task_inst.dataset[human_eval_task_inst.SAMPLE_SPLIT][:10]):

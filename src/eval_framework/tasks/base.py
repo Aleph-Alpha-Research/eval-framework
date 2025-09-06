@@ -1,10 +1,11 @@
+import logging
 import os
 import random
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 import iso639
 from datasets import DownloadConfig, load_dataset
@@ -72,6 +73,8 @@ class Sample(BaseModel):
 
 SubjectType = TypeVar("SubjectType")
 
+logger = logging.getLogger(__name__)
+
 
 class BaseTask[SubjectType](ABC):
     NAME: str
@@ -94,6 +97,59 @@ class BaseTask[SubjectType](ABC):
         self.num_fewshot = num_fewshot
         self.stop_sequences: list[str] | None = None
         self.max_tokens: int | None = None
+
+    @classmethod
+    def with_overwrite(
+        cls, num_fewshot: int, *, custom_subjects: list[str] | None, custom_hf_revision: str | None
+    ) -> Self:
+        instance = cls(num_fewshot=num_fewshot)
+
+        # If custom subjects were provided during initialization, they take precedence over the class-level SUBJECTS.
+        filtered_subjects = instance._filter_task_subjects(custom_subjects=custom_subjects)
+        if filtered_subjects:
+            logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {instance.__class__.__name__}")
+            instance.SUBJECTS = filtered_subjects  # type: ignore[assignment]
+
+        # If a custom revision was provided during initialization, it takes precedence over the class-level HF_REVISION.
+        if custom_hf_revision:
+            logger.info(f"Setting HF revision to `{custom_hf_revision}` for the task {instance.__class__.__name__}")
+            instance.HF_REVISION = custom_hf_revision
+
+        return instance
+
+    def _filter_task_subjects(self, custom_subjects: list[str] | None) -> list[str] | list[tuple] | None:
+        """Process custom subjects passed from EvalConfig. Check and returns restricted task subjects if specified."""
+        if not custom_subjects:
+            return None
+
+        assert hasattr(self, "SUBJECTS") and len(self.SUBJECTS) > 0
+        if isinstance(self.SUBJECTS[0], tuple):
+            # subjects are specified as strings but we need tuples
+            filters = [tuple(item.strip() for item in subject.split(",")) for subject in custom_subjects]
+
+            # check if all parts of custom subjects exists (* is a wildcard)
+            num_items = len(self.SUBJECTS[0])
+            legal_values = [
+                set([s[i] for s in self.SUBJECTS if isinstance(s, tuple)] + ["*"]) for i in range(num_items)
+            ]
+
+            for tpl in filters:
+                for i, v in enumerate(tpl):
+                    assert v in legal_values[i], f"Subject part {v} not found in task {self.__class__.__name__}"
+
+            # filter task subjects. * is a supported wildcard for a specific item in a tuple, e.g. "DE_DE, *"
+            chosen_subjects = []
+            for subject in self.SUBJECTS:
+                subject_tuple = subject if isinstance(subject, tuple) else tuple(str(subject).split(","))
+                for filter in filters:
+                    if all(filter[i] == "*" or filter[i] == subject_tuple[i] for i in range(num_items)):
+                        chosen_subjects.append(subject_tuple)
+                        break
+            return chosen_subjects  # type: ignore[return-value]
+        else:
+            for cs in custom_subjects:
+                assert cs in self.SUBJECTS, f"Subject {cs} not found in task {self.__class__.__name__}"
+            return custom_subjects  # type: ignore[return-value]
 
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
         # Check if the HF_REVISION is valid before loading the dataset
