@@ -1,28 +1,47 @@
 import traceback
 from typing import Callable, Self
 
+from pydantic import Field
+
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, extract_context_metric
 from eval_framework.tasks.utils import CallableSerializer, ExecutionResult, get_external_dependencies, run_python_code
 
 
 class CodeExecutionPassAtOneContext(BaseMetricContext):
+    run_env: str = Field(description="Name of docker image to run unit-tests inside")
+    code_prompt: str = Field(description="Prompt to LLM for code generation")
+    test_code: str = Field(description="Python code that contains logic for unit test execution")
+    benchmark_timeout: int = Field(default=60, description="Time in seconds for the full test execution run")
+    snippet_merge_fn: str = Field(
+        description="logic for merging LLM generated code with test execution code;"
+        "this code will be passed into the sandbox to run the testing process"
+        "This code is serialized"
+    )
+    output_parse_fn: str = Field(
+        description="logic for parsing the output of test code execution run within the LLM sandbox"
+        "This code is serialized"
+    )
+    package_downloads: dict[str, str | None] = Field(
+        description="a dictionary listing the packages and their respective names in PyPiinto the LLM sandbox"
+    )
+
+
+class RealtimeCodeExectionContext(BaseMetricContext):
+    # this class has same types of CodeExecutionPassAtOneContext
+    # with callables dedoceed from their serialized formats
     run_env: str
     code_prompt: str
     test_code: str
-    benchmark_timeout: int = 60
-    snippet_merge_fn: str
-    output_parse_fn: str
-    package_downloads: dict[str, str | None]
-
-
-class RealtimeCodeExectionContext(CodeExecutionPassAtOneContext):
+    benchmark_timeout: int = Field(default=60)
     snippet_merge_fn: Callable[[str, str], str]
     output_parse_fn: Callable[[str], ExecutionResult]
+    package_downloads: dict[str, str | None]
 
     @classmethod
     def from_context(cls, context: CodeExecutionPassAtOneContext) -> Self:
         return cls(
+            run_env=context.run_env,
             code_prompt=context.code_prompt,
             test_code=context.test_code,
             benchmark_timeout=context.benchmark_timeout,

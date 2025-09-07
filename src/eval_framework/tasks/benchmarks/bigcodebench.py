@@ -1,4 +1,3 @@
-import os
 import random
 import re
 from typing import Any
@@ -73,22 +72,23 @@ class BigCodeBench(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return None
 
+    @staticmethod
+    def merge_snippets(code: str, test_code: str) -> str:
+        # Add unittest.main() if not present (note that without "if" sometimes it just reports
+        # "Ran 0 tests" errorneously).
+        if "unittest.main(" not in test_code:
+            test_code += "\n\nif __name__ == '__main__':\n  unittest.main()"
+
+        # Combine the implementation code and test code
+        combined_code = code + "\n\n" + test_code
+        return combined_code
+
     def _get_context(self, item: dict[str, Any]) -> CodeExecutionPassAtOneContext:
-        def merge_snippets(code: str, test_code: str) -> str:
-            # Add unittest.main() if not present (note that without "if" sometimes it just reports
-            # "Ran 0 tests" errorneously).
-            if "unittest.main(" not in test_code:
-                test_code += "\n\nif __name__ == '__main__':\n  unittest.main()"
-
-            # Combine the implementation code and test code
-            combined_code = code + "\n\n" + test_code
-            return combined_code
-
         return CodeExecutionPassAtOneContext(
-            run_env=os.environ.get("DOCKER_CODE_EXECUTION"),
+            run_env="python:3.12",  # os.environ.get("DOCKER_CODE_EXECUTION"),
             code_prompt=item["code_prompt"],
             test_code=item["test"],
-            snippet_merge_fn=self.serializer.encode(merge_snippets),
+            snippet_merge_fn=self.serializer.encode(self.merge_snippets),
             output_parse_fn=self.serializer.encode(_parse_unittest_output),
             package_downloads=BIG_CODE_BENCH_PACKAGE_MAPPING,
         )
