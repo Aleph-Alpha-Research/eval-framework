@@ -10,6 +10,7 @@ from eval_framework.tasks.utils import (
     extract_imports,
     get_external_dependencies,
     run_python_code,
+    unittest_merge_snippets,
 )
 
 
@@ -148,6 +149,38 @@ class TestParseUnittestOutput:
         assert result.output == "All tests completed successfully."
 
 
+class TestCodeComposition:
+    def test_merge(self) -> None:
+        code = "import random\nimport statistics\ndef task_func(LETTERS):\n\treturn LETTERS"
+        test_code = """
+        import unittest
+        class TestCases(unittest.TestCase):
+        \tdef setup(self):
+        \t\tself.letters = ['a','b','c']
+        \tdef testcase1(self):
+        \t\tself.assertTrue(self.letters == task_func(self.letters))
+        """
+        merged_code = unittest_merge_snippets(code, test_code)
+        gt = code + "\n\n" + test_code
+        assert merged_code.startswith(gt)
+
+    def test_with_main(self) -> None:
+        code = "import random\nimport statistics\ndef task_func(LETTERS):\n\treturn LETTERS"
+        test_code = """
+        import unittest
+        class TestCases(unittest.TestCase):
+        \tdef setup(self):
+        \t\tself.letters = ['a','b','c']
+        \tdef testcase1(self):
+        \t\tself.assertTrue(self.letters == task_func(self.letters))
+        if __name__ == '__main__':
+        \tunittest.main()
+        """
+        merged_code = unittest_merge_snippets(code, test_code)
+        gt = code + "\n\n" + test_code
+        assert merged_code.startswith(gt)
+
+
 class TestExecutePythonCodeWithTests:
     """Integration tests for execute_python_code_with_tests."""
 
@@ -162,7 +195,15 @@ class TestAdd(unittest.TestCase):
         self.assertEqual(add(1, 2), 3)
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is True
         assert "tests completed successfully" in result.output
@@ -172,7 +213,15 @@ class TestAdd(unittest.TestCase):
         code = "def add(a, b): return a - b"  # Incorrect implementation
         test_code = "assert add(1, 2) == 3"
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "AssertionError" in result.output
@@ -182,7 +231,15 @@ class TestAdd(unittest.TestCase):
         code = "def add(a, b) return a + b"  # Missing colon
         test_code = "assert add(1, 2) == 3"
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "SyntaxError" in result.output
@@ -192,7 +249,15 @@ class TestAdd(unittest.TestCase):
         code = "def divide(a, b): return a / b"
         test_code = "assert divide(1, 0) == float('inf')"
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert any(err in result.output for err in ["ZeroDivisionError", "division by zero"])
@@ -208,7 +273,15 @@ class TestHang(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING, timeout=1)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=1,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "timeout" in result.output.lower()
@@ -224,7 +297,15 @@ class TestCircleArea(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is True
         assert "tests completed successfully" in result.output
@@ -246,7 +327,15 @@ class TestIsEven(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is True
         assert "tests completed successfully" in result.output
@@ -263,7 +352,15 @@ assert is_positive(-5) == False
 assert is_positive(0) == True  # This will fail
         """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "AssertionError" in result.output
@@ -305,7 +402,15 @@ class TestStack(unittest.TestCase):
 unittest.main()
         """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is True
         assert "tests completed successfully" in result.output
@@ -315,7 +420,15 @@ unittest.main()
         code = "def get_pi(): return math.pi"  # Missing import
         test_code = "assert get_pi() > 3.1"
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert any(err in result.output for err in ["NameError", "math is not defined"])
@@ -329,7 +442,15 @@ def function():
         """
         test_code = "assert True"
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "IndentationError" in result.output
@@ -345,7 +466,15 @@ class TestEmptyCode(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is True
         assert "tests completed successfully" in result.output
@@ -355,7 +484,15 @@ unittest.main()
         code = "def function(): return True"
         test_code = ""
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "'unittest' is not defined" in result.output
@@ -406,7 +543,15 @@ class TestCases(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
         assert result.success is True
         assert result.output == "All 2 tests completed successfully."
 
@@ -452,7 +597,15 @@ class TestCases(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
         assert result.success is False
         assert "FAILED" in result.output
 
@@ -479,7 +632,15 @@ class TestCases(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
         assert result.success is False
         assert "NameError" in result.output
         assert "task_func" in result.output
