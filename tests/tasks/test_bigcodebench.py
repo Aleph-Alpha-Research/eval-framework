@@ -1,7 +1,7 @@
 import pytest
 from datasets import DownloadConfig, load_dataset
 
-from eval_framework.tasks.benchmarks.bigcodebench import BigCodeBench, extract_executable_code
+from eval_framework.tasks.benchmarks.bigcodebench import extract_executable_code
 from eval_framework.tasks.utils import BIG_CODE_BENCH_PACKAGE_MAPPING, extract_imports
 
 
@@ -319,35 +319,3 @@ def test_all_imports_in_mapping() -> None:
 
     except Exception as e:
         pytest.skip(f"Skipping dataset test due to error: {str(e)}")
-
-
-class TestCodeComposition:
-    def test_merge(self):
-        code = "import random\nimport statistics\ndef task_func(LETTERS):\n\treturn LETTERS"
-        test_code = """
-        import unittest
-        class TestCases(unittest.TestCase):
-        \tdef setup(self):
-        \t\tself.letters = ['a','b','c']
-        \tdef testcase1(self):
-        \t\tself.assertTrue(self.letters == task_func(self.letters))
-        """
-        merged_code = BigCodeBench.merge_snippets(code, test_code)
-        gt = code + "\n\n" + test_code
-        assert merged_code.startswith(gt)
-
-    def test_with_main(self):
-        code = "import random\nimport statistics\ndef task_func(LETTERS):\n\treturn LETTERS"
-        test_code = """
-        import unittest
-        class TestCases(unittest.TestCase):
-        \tdef setup(self):
-        \t\tself.letters = ['a','b','c']
-        \tdef testcase1(self):
-        \t\tself.assertTrue(self.letters == task_func(self.letters))
-        if __name__ == '__main__':
-        \tunittest.main()
-        """
-        merged_code = BigCodeBench.merge_snippets(code, test_code)
-        gt = code + "\n\n" + test_code
-        assert merged_code.startswith(gt)

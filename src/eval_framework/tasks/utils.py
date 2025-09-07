@@ -52,6 +52,17 @@ def run_python_code(
         return session.run(code, libraries=packages).text.strip()
 
 
+def unittest_merge_snippets(code: str, test_code: str) -> str:
+    # Add unittest.main() if not present (note that without "if" sometimes it just reports
+    # "Ran 0 tests" errorneously).
+    if "unittest.main(" not in test_code:
+        test_code += "\n\nif __name__ == '__main__':\n  unittest.main()"
+
+    # Combine the implementation code and test code
+    combined_code = code + "\n\n" + test_code
+    return combined_code
+
+
 class ExecutionResult(NamedTuple):
     """
     A named tuple to store the result of code execution.
@@ -63,6 +74,38 @@ class ExecutionResult(NamedTuple):
 
     success: bool
     output: str
+
+
+def execute_python_code_with_tests(
+    code: str,
+    test_code: str,
+    package_mapping: dict[str, str | None],
+    merge_code_fn: Callable[[str, str], str],
+    image: str | None,
+    timeout: int,
+    parse_output_fn: Callable[[str], ExecutionResult],
+) -> ExecutionResult:
+    """
+    Executes the given code with test cases in a sandboxed environment.
+
+    :param code: The code to be tested.
+    :param test_code: The test cases to run against the code.
+    :param package_mapping: Mapping of package names to install commands.
+    :param merge_code_fn: function to merge LLM and test code
+    :param image: Docker image to use.
+    :param timeout: Timeout for the execution in seconds.
+    :param parse_otuput_fn: function to parse docker execution output
+    :return: An ExecutionResult named tuple with success status and output or errors.
+    """
+    combined_code = merge_code_fn(code, test_code)
+
+    packages = get_external_dependencies(combined_code, package_mapping)
+
+    # Run the combined code in the sandbox
+    output = run_python_code(combined_code, image=image, timeout=timeout, packages=packages)
+
+    # Parse the output to determine success
+    return parse_output_fn(output)
 
 
 class SerializationError(Exception):

@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 import iso639
-from datasets import DownloadConfig, load_dataset
+from datasets import DatasetDict, DownloadConfig, load_dataset
 from huggingface_hub import HfApi
 from huggingface_hub.errors import RevisionNotFoundError
 from pydantic import BaseModel, ConfigDict
@@ -180,7 +180,7 @@ class BaseTask[SubjectType](ABC):
                 cache_dir=f"{Path.home()}/.cache/eval-framework",
             )
 
-    def _shuffle_splits(self, hf_dataset) -> dict[str, list[dict[str, Any]]]:
+    def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, list[dict[str, Any]]]:
         dataset = {}
         self.rnd = random.Random(RANDOM_SEED)
 

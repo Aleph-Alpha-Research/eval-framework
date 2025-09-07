@@ -5,7 +5,7 @@ from pydantic import Field
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, extract_context_metric
-from eval_framework.tasks.utils import CallableSerializer, ExecutionResult, get_external_dependencies, run_python_code
+from eval_framework.tasks.utils import CallableSerializer, ExecutionResult, execute_python_code_with_tests
 
 
 class CodeExecutionPassAtOneContext(BaseMetricContext):
@@ -86,13 +86,15 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
         ]
 
     def _count_correct_samples(self, completion: str, context: RealtimeCodeExectionContext) -> tuple[int, str]:
-        combined_code = context.snippet_merge_fn(completion, context.test_code)
-        packages = get_external_dependencies(combined_code, context.package_downloads)
-        # Run the combined code in the sandbox
-        output = run_python_code(
-            combined_code, image=context.run_env, timeout=context.benchmark_timeout, packages=packages
+        result = execute_python_code_with_tests(
+            code=completion,
+            test_code=context.test_code,
+            package_mapping=context.package_downloads,
+            merge_code_fn=context.snippet_merge_fn,
+            image=context.run_env,
+            timeout=context.benchmark_timeout,
+            parse_output_fn=context.output_parse_fn,
         )
-        result = context.output_parse_fn(output)
         return (1 if result.success else 0), result.output
 
 
