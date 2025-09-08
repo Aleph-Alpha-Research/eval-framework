@@ -780,6 +780,7 @@ class TestBigCodeBenchDataset:
         for pkg in common_packages:
             assert pkg in BIG_CODE_BENCH_PACKAGE_MAPPING, f"Package {pkg} not in mapping"
 
+
 def test_fn_recover() -> None:
     def fn(x: int) -> int:
         return x * 2
