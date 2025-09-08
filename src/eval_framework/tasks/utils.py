@@ -4,8 +4,9 @@ import os
 import random
 import re
 import string
+from collections.abc import Callable
 from pathlib import Path
-from typing import Literal, NamedTuple, Callable, Any
+from typing import Any, Literal, NamedTuple
 
 import dill
 import numpy as np
