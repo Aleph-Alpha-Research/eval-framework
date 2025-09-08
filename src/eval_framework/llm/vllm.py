@@ -156,7 +156,7 @@ class VLLMModel(BaseLLM):
         elif self.DEFAULT_FORMATTER is not None:
             self._formatter = self.DEFAULT_FORMATTER()
         elif self.tokenizer.chat_template is not None:
-            self._formatter = HFFormatter(self.LLM_NAME)
+            self._formatter = HFFormatter(self.checkpoint_path or self.LLM_NAME)
         else:
             raise ValueError("No formatter specified and no default formatter available.")
 
@@ -167,7 +167,7 @@ class VLLMModel(BaseLLM):
     @property
     def tokenizer(self) -> VLLMTokenizerAPI:
         if self._tokenizer is None:
-            self._tokenizer = VLLMTokenizer(target_mdl=self.LLM_NAME)
+            self._tokenizer = VLLMTokenizer(target_mdl=self.checkpoint_path or self.LLM_NAME)
         return self._tokenizer
 
     def count_tokens(self, text: str, /) -> int:
