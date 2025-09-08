@@ -304,7 +304,7 @@ class ResponseGenerator:
 
         # In order to enable parallelism we group samples in batches and send them in parallel to the `run_fn`.
         # The BaseLLM class is then in charge of managing the parallelism (eg, using AsyncClient in API models).
-        # If samples_batch_size = None, then a single batch is used; otherwise, we return here after finishing each
+        # If samples_batch_size = 1, samples are run sequentially; in any case, we return here after finishing each
         # individual batch to honor preemption requests and save cached results.
         samples_batch_size = self.config.batch_size
 
