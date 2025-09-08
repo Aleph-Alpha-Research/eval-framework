@@ -36,7 +36,7 @@ Path to the Python module file containing model classes.
 ### Execution Configuration
 
 **`--llm-name LLM_NAME`**
-The class derived from `eval_framework.llm.base.BaseLLM` found in the models module to instantiate for evaluation.
+The class derived from `eval_framework.llm.base.BaseLLM` found in the `models.py` module to instantiate for evaluation.
 
 **`--llm-args [LLM_ARGS ...]`**
 Arguments to pass to the LLM as key=value pairs.
@@ -82,10 +82,10 @@ The args of the judge model used within OpenAIModel wrapper.
 ### Perturbations
 
 **`--perturbation-type TYPE`**
-The type of perturbation to apply to task instructions. Note that this may not make sense especially for prompts containing math and code.
+The type of perturbation to apply to task instructions. Note that this may not make sense for some prompts for example, those containing math and code.
 
 **`--perturbation-probability PROBABILITY`**
-The probability of applying perturbation to each word or character (between 0.0 and 1.0).
+The probability of applying a perturbation to each word or character (between 0.0 and 1.0).
 
 **`--perturbation-seed SEED`**
 Random seed controlling perturbations.
