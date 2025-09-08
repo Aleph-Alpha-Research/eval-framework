@@ -1,7 +1,15 @@
 # HELLASWAG_DE
 
 ````
-NAME = HELLASWAG_DEDATASET_PATH = LeoLM/HellaSwag_deSAMPLE_SPLIT = validationFEWSHOT_SPLIT = trainRESPONSE_TYPE = LOGLIKELIHOODSMETRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]SUBJECTS = ['no_subject']LANGUAGE = <Language.DEU: 'German'>````
+NAME = HELLASWAG_DE
+DATASET_PATH = LeoLM/HellaSwag_de
+SAMPLE_SPLIT = validation
+FEWSHOT_SPLIT = train
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+SUBJECTS = ['no_subject']
+LANGUAGE = <Language.DEU: 'German'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.hellaswag_de](eval_framework.tasks.benchmarks.hellaswag_de)
 
@@ -9,4 +17,4 @@ NAME = HELLASWAG_DEDATASET_PATH = LeoLM/HellaSwag_deSAMPLE_SPLIT = validationFEW
 
 - Link to dataset: [https://huggingface.co/datasets/LeoLM/HellaSwag_de](https://huggingface.co/datasets/LeoLM/HellaSwag_de)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "HELLASWAG_DE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "HELLASWAG_DE"`.

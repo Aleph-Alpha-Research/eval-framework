@@ -13,6 +13,7 @@ class TestGPQA:
             return patched_task
 
     def test_ground_truth_in_completion(self, gpqa_task: GPQA) -> None:
+        assert len(gpqa_task.SUBJECTS) > 0
         subject = gpqa_task.SUBJECTS[0]
         gpqa_task._load_dataset(subject)
         for x in range(5):
@@ -36,6 +37,7 @@ class TestGPQA_COT:
             return patched_task
 
     def test_get_possible_completions_marked_deterministic(self, gpqa_cot_task: GPQA_COT) -> None:
+        assert len(gpqa_cot_task.SUBJECTS) > 0
         subject = gpqa_cot_task.SUBJECTS[0]
         gpqa_cot_task._load_dataset(subject)
         item = gpqa_cot_task.dataset[gpqa_cot_task.SAMPLE_SPLIT][0]
@@ -48,6 +50,7 @@ class TestGPQA_COT:
         assert re.sub(r"\([A-Z]\)\s+", "", choices[correct_index]) == item["Correct Answer"]
 
     def test_get_ground_truth_returns_correct_letter(self, gpqa_cot_task: GPQA_COT) -> None:
+        assert len(gpqa_cot_task.SUBJECTS) > 0
         subject = gpqa_cot_task.SUBJECTS[0]
         gpqa_cot_task._load_dataset(subject)
         item = gpqa_cot_task.dataset[gpqa_cot_task.SAMPLE_SPLIT][0]
@@ -57,6 +60,7 @@ class TestGPQA_COT:
         assert result == expected_correct_letter
 
     def test_ground_truth_in_completion(self, gpqa_cot_task: GPQA_COT) -> None:
+        assert len(gpqa_cot_task.SUBJECTS) > 0
         subject = gpqa_cot_task.SUBJECTS[0]
         gpqa_cot_task._load_dataset(subject)
         item = gpqa_cot_task.dataset[gpqa_cot_task.SAMPLE_SPLIT][0]
@@ -66,6 +70,7 @@ class TestGPQA_COT:
         assert f"({ground_truth})" in possible_completions
 
     def test_ground_truth_in_completion_cot(self, gpqa_cot_task: GPQA_COT) -> None:
+        assert len(gpqa_cot_task.SUBJECTS) > 0
         subject = gpqa_cot_task.SUBJECTS[0]
         gpqa_cot_task._load_dataset(subject)
         for x in range(5):

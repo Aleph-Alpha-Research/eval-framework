@@ -1,6 +1,5 @@
 # Aleph Alpha Eval-Framework
 
-
 > **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 90+ benchmarks.
 
 ## Features
@@ -16,9 +15,7 @@
 - Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
 - LLM-as-a-Judge: Evaluation using LLM judges.
 
-
 ![eval-framework](docs/eval-framework.png "eval-framework")
-
 
 ## Benchmark Coverage & Task Categories
 
@@ -42,22 +39,26 @@
 | German/Finnish tasks | Scientific (SciQ) | Harmful content | Cost analysis |
 
 ### Completion
+
 Tasks focused on logical reasoning, text distillation, instruction following, and output control. Examples include:
 - **AIME 2024:** Logical Reasoning (Math)
 - **DUC Abstractive:** Text Distillation (Extraction)
 - **Custom Data: Complaint Summarization:** Text Distillation (Summarization)
 
 ### Loglikelihoods
+
 Tasks emphasizing classification, reasoning, and open QA. Examples include:
 - **Abstract Reasoning Challenge (ARC):** Classification
 - **Casehold:** Open QA
 
 ### Long-Context
+
 Tasks designed for long-context scenarios, including QA, summarization, and aggregation. Examples include:
 - **InfiniteBench_CodeDebug:** Programming
 - **ZeroSCROLLS GovReport:** QA (Government)
 
 ### Metrics
+
 Evaluation metrics include:
 - **Completion Metrics:** Accuracy, Bleu, F1, Rouge
 - **Loglikelihood Metrics:** Accuracy Loglikelihood, Probability Mass
@@ -65,7 +66,6 @@ Evaluation metrics include:
 - **Efficiency Metrics:** Bytes per Sequence Position
 
 For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmarks_and_metrics.md).
-
 
 ## Quick Start
 
@@ -105,7 +105,12 @@ Thus, the following will setup the project with `flash_attn` and CUDA 12.4
 uv sync --all-extras --group flash_attn --group cu124
 ```
 
-After installation, task documentation can be generated with `uv run python utils/generate-task-docs.py` (see [docs/installation.md(docs/installation.md)) for more details.
+There is also a pre-commit hook to help with development:
+```
+uv run pre-commit install
+```
+
+After installation, task documentation can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py` (see [docs/installation.md(docs/installation.md)) for more details.
 
 ## Getting Started
 
@@ -190,35 +195,34 @@ eval_framework \
     --num-samples 10
 ```
 
-
 For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usage.md).
-
 
 ## Documentation
 
 ### Getting Started
+
 - **[CLI Usage Guide](docs/cli_usage.md)** - Detailed instructions for using the command-line interface
 - **[Evaluating HuggingFace Models](docs/evaluate_huggingface_model.md)** - Complete guide for evaluating HuggingFace models
 - **[Understanding Results](docs/understanding_results_guide.md)** - How to read and interpret evaluation results
 
 ### Advanced Usage
+
 - **[Adding New Benchmarks](docs/add_new_benchmark_guide.md)** - Complete guide with practical examples for adding new benchmarks
 - **[Benchmarks and Metrics](docs/benchmarks_and_metrics.md)** - Comprehensive overview of all available benchmarks and evaluation metrics
 - **[Overview of Dataloading](docs/overview_dataloading.md)** - Explanation of dataloading and task/sample/message structure
 
 ### Scaling & Production
+
 - **[Using Determined](docs/using_determined.md)** - Guide for distributed evaluation using Determined AI
 - **[Controlling Upload Results](docs/controlling_upload_results.md)** - How to manage and control the upload of evaluation results
 
-
-
 ### Citation
 
-If you use Eval-Framework in your research, please cite:
+If you use `eval-framework` in your research, please cite:
 
 ```bibtex
 @software{eval_framework,
-  title={Eval Framework},
+  title={Aleph Alpha Eval Framework},
   year={2025},
   url={https://github.com/Aleph-Alpha-Research/eval-framework}
 }

@@ -11,11 +11,17 @@ from vllm.inputs.data import TokensPrompt
 from vllm.outputs import RequestOutput
 from vllm.transformers_utils.tokenizer import get_tokenizer
 
-from eval_framework.constants import RED, RESET
 from eval_framework.llm.base import BaseLLM
-from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
+from eval_framework.shared.types import (
+    ConcatCompression,
+    Error,
+    PromptTooLongException,
+    RawCompletion,
+    RawLoglikelihood,
+)
 from eval_framework.tasks.base import Sample
-from eval_framework.tasks.utils import raise_errors, redis_cache
+from eval_framework.tasks.utils import raise_errors
+from eval_framework.utils.constants import RED, RESET
 from template_formatting.formatter import BaseFormatter, HFFormatter, Message
 
 logger = logging.getLogger(__name__)
@@ -164,6 +170,9 @@ class VLLMModel(BaseLLM):
             self._tokenizer = VLLMTokenizer(target_mdl=self.LLM_NAME)
         return self._tokenizer
 
+    def count_tokens(self, text: str, /) -> int:
+        return len(self.tokenizer.encode_plain_text(text).tokens)
+
     @property
     def formatter_output_mode(self) -> Literal["string", "list"]:
         return "string"
@@ -192,7 +201,7 @@ class VLLMModel(BaseLLM):
     ) -> list[RawCompletion]:
         raw_completions: list[RawCompletion | None] = [None] * len(messages)
         prompt_objs = []
-        valid_indices = []
+        prompt_info = []
 
         sampling_params = self._resolve_sampling_params(self.sampling_params, max_tokens, stop_sequences, temperature)
 
@@ -225,19 +234,18 @@ class VLLMModel(BaseLLM):
                 continue
 
             prompt_objs.append(prompt_obj)
-            valid_indices.append(i)
+            prompt_info.append((i, single_messages))
 
         if prompt_objs:
-            model_outputs = self._model_generate(
-                prompt_objs=prompt_objs,
-                sampling_params=sampling_params,
-            )
+            model_outputs = self._model_generate(prompt_objs=prompt_objs, sampling_params=sampling_params)
 
-            for j, output in enumerate(model_outputs):
-                original_index = valid_indices[j]
+            for (original_index, single_messages), prompt_obj, output in zip(prompt_info, prompt_objs, model_outputs):
                 raw_completions[original_index] = RawCompletion(
-                    prompt=prompt_objs[j].text,
+                    prompt=prompt_obj.text,
                     prompt_sequence_positions=len(output.prompt_token_ids) if output.prompt_token_ids else 0,
+                    concat_compression=ConcatCompression.calculate(
+                        single_messages, count_tokens=self.count_tokens, completion=output.outputs[0].text
+                    ),
                     completion=output.outputs[0].text,
                     completion_sequence_positions=len(output.outputs[0].token_ids)
                     if output.outputs[0].token_ids
@@ -334,6 +342,9 @@ class VLLMModel(BaseLLM):
                     loglikelihoods=choices_log_probs,
                     loglikelihoods_sequence_positions=choices_log_probs_sequence_positions,
                     raw_loglikelihood_error=None,
+                    concat_compression=ConcatCompression.calculate(
+                        sample.messages, count_tokens=self.count_tokens, choices=valid_choices
+                    ),
                 )
 
         # Process batch if we have valid data
@@ -349,7 +360,6 @@ class VLLMModel(BaseLLM):
 
         return cast(list[RawLoglikelihood], results)
 
-    @redis_cache(version_id="v10")
     def _model_log_probs(self, batch_data: list[tuple[TokenizedContainer, TokenizedContainer]]) -> list[float]:
         """Batched version of _model_log_probs for processing multiple prompt-choice pairs at once."""
         sampling_params = SamplingParams(

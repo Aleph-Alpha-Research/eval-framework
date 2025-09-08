@@ -11,9 +11,9 @@ from unittest.mock import patch
 
 from datasets import Dataset, DatasetDict
 
-from eval_framework.constants import RED, RESET
 from eval_framework.result_processors.base import Result
 from eval_framework.tasks.base import BaseTask, SubjectType
+from eval_framework.utils.constants import RED, RESET
 
 HASHES_FILE = Path(__file__).parent / "tasks" / "task-prompts-hashes.json"
 
@@ -99,7 +99,9 @@ class DatasetPatcher[T: BaseTask]:
         self.patch_obj = None
 
     def __enter__(self) -> T:
-        task = self.task_class(num_fewshot=self.num_fewshot)
+        task = self.task_class.with_overwrite(
+            num_fewshot=self.num_fewshot, custom_subjects=None, custom_hf_revision=None
+        )
 
         # First, we record what arguments are passed to _load_hf_dataset for each subject
         # We do this by patching the _load_hf_dataset method and recording the keyword arguments

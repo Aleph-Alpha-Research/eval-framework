@@ -493,6 +493,7 @@ class MMMLU_GERMAN_COT(MMMLU):
     def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for MMMLU_GERMAN_COT"
         super().__init__(num_fewshot)
+
         self.stop_sequences: list[str] = ["Frage:", "Question:"]
 
     def _extract_answer(self, completion: str) -> str:

@@ -86,7 +86,8 @@ jobs:
         else
           # head_ref is the correct branch name for PRs
           BRANCH_NAME=${{ github.head_ref || github.ref_name }}
-          TAG="${BRANCH_NAME::20}"
+          # Convert slashes with hyphens and ensure valid Docker tag format
+          TAG=$(echo "${BRANCH_NAME}" | sed 's/[^a-zA-Z0-9._-]/-/g' | cut -c1-20)
         fi
         echo "tag=$TAG" >> $GITHUB_OUTPUT
         echo "image=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
