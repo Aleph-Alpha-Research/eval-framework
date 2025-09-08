@@ -13,7 +13,7 @@ import boto3
 import boto3.session
 import requests
 import wandb
-from aiohttp import ClientError
+from botocore.exceptions import ClientError
 
 
 class WandbFs:
@@ -101,10 +101,15 @@ class WandbFs:
             artifact_path = artifact.download(root=str(self.download_path))
             wandb.use_artifact(artifact)
         except ClientError as e:
-            raise (
-                f"{e.response}"
-                f"Client error raised, unable to access artifact: {artifact.name}. "
-                f"Please check your AWS credentials and endpoint"
+            raise ClientError(
+                error_response={
+                    "Error": {
+                        "Code": "DownloadArtifact",
+                        "Message": f"{e}. Client error raised, unable to access artifact: {artifact.name}. "
+                        f"Please check your AWS credentials and endpoint",
+                    }
+                },
+                operation_name="DownloadArtifact",
             )
         except Exception as e:
             # patch the wandb boto3 call to disable ssl verification
