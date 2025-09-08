@@ -77,7 +77,7 @@ The path to the Python module file containing LLM judge model classes.
 The class derived from `eval_framework.llm.base.BaseLLM` found in the judge-models module to instantiate for LLM judge evaluation metrics.
 
 **`--judge-model-args JUDGE_MODEL_ARGS`**
-The args of the judge model used within OpenAIModel wrapper.
+The args of the judge model used.
 
 ### Perturbations
 

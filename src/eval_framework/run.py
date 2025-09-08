@@ -122,7 +122,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         required=False,
         default=None,
-        help="A tag name, a branch name, or commit hash for the task HF dataset",
+        help="A tag name, a branch name, or commit hash for the task HF dataset.",
     )
     parser.add_argument(
         "--judge-models",
@@ -142,14 +142,14 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default="Aleph-Alpha/evaluation-results",
         required=False,
-        help="Customizable path for the HuggingFace git repository where runs will be stored",
+        help="Customizable path for the HuggingFace git repository where runs will be stored.",
     )
     parser.add_argument(
         "--hf-upload-dir",
         type=str,
         default="",
         required=False,
-        help="Folder name for the HuggingFace git repository where runs will be stored",
+        help="Folder name for the HuggingFace git repository where runs will be stored.",
     )
     parser.add_argument(
         "--wandb-project",
@@ -157,14 +157,14 @@ def parse_args() -> argparse.Namespace:
         default=None,
         required=False,
         help="The name of the Weights & Biases project to log runs to. "
-        "The environment variable WANDB_API_KEY must be set",
+        "The environment variable WANDB_API_KEY must be set.",
     )
     parser.add_argument(
         "--wandb-entity",
         type=str,
         default=None,
         required=False,
-        help="The name of the Weights & Biases entity to log runs to. Defaults to the user's default entity",
+        help="The name of the Weights & Biases entity to log runs to. Defaults to the user's default entity.",
     )
     parser.add_argument(
         "--wandb-run-id",
