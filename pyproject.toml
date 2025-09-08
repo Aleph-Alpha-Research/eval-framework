@@ -1,12 +1,21 @@
 [project]
 name = "eval-framework"
-version = "0.2.0-dev"
+version = "0.2.0"
 description = "Evalulation Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.12,<3.13"
 authors = [
   { name = "Aleph Alpha Research" }
+]
+classifiers = [
+  "Operating System :: OS Independent",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Libraries",
+  "Typing :: Typed",
 ]
 dependencies = [
   "pyyaml>=6.0.1,<7",
@@ -54,6 +63,11 @@ vllm = [
   "vllm>=0.8.5,<0.9",
   "torch>=2.5,<3"
 ]
+mistral = [
+  "mistral-common>=1.7,<2",
+  "huggingface-hub>=0.33.2,<0.34",
+  "eval_framework[vllm]",
+]
 # Benchmark/metric specific extras
 comet = [
   "unbabel-comet>=2.2.6,<3",
@@ -62,11 +76,6 @@ comet = [
 optional = [
   "transformers>=4.45.2,<5",
   "jinja2>=3.1.6,<4"
-]
-mistral = [
-  "mistral-common>=1.7,<2",
-  "huggingface-hub>=0.33.2,<0.34",
-  "eval_framework[vllm]",
 ]
 all = [
   "eval_framework[determined,api,openai,transformers,accelerate,vllm,comet,optional,mistral]"
