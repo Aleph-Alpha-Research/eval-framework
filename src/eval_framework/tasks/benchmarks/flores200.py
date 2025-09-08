@@ -35,6 +35,7 @@ class Flores200(BaseTask[str]):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
+
         self.stop_sequences = ["\n"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

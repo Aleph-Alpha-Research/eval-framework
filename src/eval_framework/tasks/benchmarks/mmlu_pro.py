@@ -100,6 +100,7 @@ class MMLU_PRO_COT(MMLU_PRO):
     def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for MMLU_PRO_COT"
         super().__init__(num_fewshot)
+
         self.stop_sequences: list[str] = ["Question:"]
 
     def _extract_answer(self, completion: str) -> str:
