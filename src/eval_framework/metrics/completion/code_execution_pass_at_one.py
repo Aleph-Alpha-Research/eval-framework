@@ -59,7 +59,7 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
 
     def __init__(self) -> None:
         self.k = 1
-        # NOTE : this class should be symmetric to the class initialized in the metric class
+        # NOTE : this serializer should be the same class as initialized in the benchmark
         self.serializer = CallableSerializer()
 
     def calculate(self, response: Completion) -> list[MetricResult]:

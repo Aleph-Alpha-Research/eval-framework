@@ -47,6 +47,7 @@ class BigCodeBench(BaseTask[str]):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for BigCodeBench"
+        # NOTE : this serializer should be the same class as initialized in the metric
         self.serializer = CallableSerializer()
         super().__init__(num_fewshot)
 
