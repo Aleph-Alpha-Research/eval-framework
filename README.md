@@ -69,9 +69,26 @@ For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmark
 
 ## Quick Start
 
-The codebase is tested and compatible with Python 3.12 and PyTorch 2.5
+The codebase is tested and compatible with Python 3.12 and PyTorch 2.5.
 You will also need the appropriate CUDA dependencies and version installed on your system for GPU support.
-As a first step, please install [uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+The easiest way to get started is by installing the library via `pip` and use it as an external dependency.
+```
+pip install eval_framework
+```
+
+There are optional extras available to unlock specific features of the library:
+- `mistral` for inference on Mistral models
+- `transformers` for inference using the transformers library
+- `api` for inference using the aleph-alpha client.
+- `vllm` for inference via VLLM
+- `determined` for running jobs via determined
+- `comet` for the COMET metric
+
+As a short hand, the `all` extra installs all of the above.
+
+For development, you can instead install it directly from the repository instead, please first install
+ [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 To install the project with all optional extras use
 ```bash
@@ -118,6 +135,9 @@ Eval-Framework provides a unified interface for evaluating language models acros
 ### Your First Evaluation
 
 1. **Install the framework** (see Quick Start above)
+```
+pip install eval_framework[transformers]
+```
 
 2. **Create and run your first evaluation using HuggingFace model**:
 
@@ -166,7 +186,7 @@ Eval-Framework provides a unified interface for evaluating language models acros
 To evaluate a single benchmark locally, you can use the following command:
 
 ```bash
-uv run --all-extras eval_framework \
+eval_framework \
     --models src/eval_framework/llm/models.py \
     --llm-name Smollm135MInstruct \
     --task-name "GSM8K" \
