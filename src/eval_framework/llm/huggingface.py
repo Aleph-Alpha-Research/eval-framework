@@ -74,7 +74,7 @@ class HFLLM(BaseLLM):
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
 
-    def __init__(self, formatter: BaseFormatter | None = None, registry_model: bool = False) -> None:
+    def __init__(self, formatter: BaseFormatter | None = None) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained(self.LLM_NAME)
         self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
