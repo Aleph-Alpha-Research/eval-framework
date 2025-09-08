@@ -438,6 +438,7 @@ def test_perturbed_response_differs(tmp_path: Path, perturbation_type: Perturbat
     task = task_class()
     perturbed_response_generator = ResponseGenerator(MockLLM(), perturbed_eval_config, Mock(spec=ResultsFileProcessor))
 
+    assert len(task.SUBJECTS) > 0
     task._load_dataset(task.SUBJECTS[0])
     original_item = task.dataset[task.SAMPLE_SPLIT][0]
     original_sample = task._get_instruction_text(original_item)

@@ -1,11 +1,14 @@
+import base64
 import logging
 import os
 import random
 import re
 import string
+from collections.abc import Callable
 from pathlib import Path
-from typing import Literal, NamedTuple
+from typing import Any, Literal, NamedTuple
 
+import dill
 import numpy as np
 from llm_sandbox import SandboxSession
 
@@ -50,6 +53,17 @@ def run_python_code(
         return session.run(code, libraries=packages).text.strip()
 
 
+def unittest_merge_snippets(code: str, test_code: str) -> str:
+    # Add unittest.main() if not present (note that without "if" sometimes it just reports
+    # "Ran 0 tests" errorneously).
+    if "unittest.main(" not in test_code:
+        test_code += "\n\nif __name__ == '__main__':\n  unittest.main()"
+
+    # Combine the implementation code and test code
+    combined_code = code + "\n\n" + test_code
+    return combined_code
+
+
 class ExecutionResult(NamedTuple):
     """
     A named tuple to store the result of code execution.
@@ -64,7 +78,13 @@ class ExecutionResult(NamedTuple):
 
 
 def execute_python_code_with_tests(
-    code: str, test_code: str, package_mapping: dict[str, str | None], image: str | None = None, timeout: int = 60
+    code: str,
+    test_code: str,
+    package_mapping: dict[str, str | None],
+    merge_code_fn: Callable[[str, str], str],
+    image: str | None,
+    timeout: int,
+    parse_output_fn: Callable[[str], ExecutionResult],
 ) -> ExecutionResult:
     """
     Executes the given code with test cases in a sandboxed environment.
@@ -72,23 +92,57 @@ def execute_python_code_with_tests(
     :param code: The code to be tested.
     :param test_code: The test cases to run against the code.
     :param package_mapping: Mapping of package names to install commands.
+    :param merge_code_fn: function to merge LLM and test code
     :param image: Docker image to use.
     :param timeout: Timeout for the execution in seconds.
+    :param parse_otuput_fn: function to parse docker execution output
     :return: An ExecutionResult named tuple with success status and output or errors.
     """
-    # Add unittest.main() if not present (note that without "if" sometimes it just reports "Ran 0 tests" errorneously).
-    if "unittest.main(" not in test_code:
-        test_code += "\n\nif __name__ == '__main__':\n  unittest.main()"
+    combined_code = merge_code_fn(code, test_code)
 
-    # Combine the implementation code and test code
-    combined_code = code + "\n\n" + test_code
     packages = get_external_dependencies(combined_code, package_mapping)
 
     # Run the combined code in the sandbox
     output = run_python_code(combined_code, image=image, timeout=timeout, packages=packages)
 
     # Parse the output to determine success
-    return _parse_unittest_output(output)
+    return parse_output_fn(output)
+
+
+class SerializationError(Exception):
+    """Base exception for callable serialization errors."""
+
+    pass
+
+
+class EncodingError(SerializationError):
+    """Raised when encoding a callable fails."""
+
+    pass
+
+
+class DecodingError(SerializationError):
+    """Raised when decoding a callable fails."""
+
+    pass
+
+
+class CallableSerializer:
+    @staticmethod
+    def encode(fn: Callable[..., Any]) -> str:
+        try:
+            serialized = dill.dumps(fn)
+            return base64.b64encode(serialized).decode("utf-8")
+        except Exception as e:
+            raise EncodingError(f"Failed to encode callable {fn}: {e}") from e
+
+    @staticmethod
+    def decode(fn_str: str) -> Callable[..., Any]:
+        try:
+            decoded = base64.b64decode(fn_str.encode("utf-8"))
+            return dill.loads(decoded)
+        except Exception as e:
+            raise DecodingError(f"Failed to decode callable from string: {e}") from e
 
 
 def _parse_unittest_output(output: str) -> ExecutionResult:

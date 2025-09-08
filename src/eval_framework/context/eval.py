@@ -5,30 +5,39 @@ from contextlib import AbstractContextManager
 from pathlib import Path
 from typing import Any
 
+import eval_framework
 from eval_framework.llm.base import BaseLLM
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig
 
 
-def import_models(models_file: Path) -> dict[str, type[BaseLLM]]:
-    models_file = models_file.resolve()
+def import_models(models_file: Path | str) -> dict[str, type[BaseLLM]]:
+    models_file = Path(models_file).resolve()
+    library_path = Path(eval_framework.__path__[0]).resolve()
 
-    module_name = models_file.stem
+    # Imports from the eval_framework module need special care to avoid
+    # import issues
+    if models_file.is_relative_to(library_path):
+        relative_path = models_file.relative_to(library_path.parent)
+        module_name = ".".join(relative_path.with_suffix("").parts)
+        module = importlib.import_module(module_name)
+    else:
+        module_name = models_file.stem
+
+        spec = importlib.util.spec_from_file_location(module_name, str(models_file))
+
+        if spec is None:
+            raise ImportError(f"Could not load module '{models_file}'.")
+
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+
+        if spec.loader is None:
+            raise ImportError(f"Could not load module '{models_file}'.")
+
+        spec.loader.exec_module(module)
+
     subclasses = {}
-
-    spec = importlib.util.spec_from_file_location(module_name, str(models_file))
-
-    if spec is None:
-        raise ImportError(f"Could not load module '{models_file}'.")
-
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-
-    if spec.loader is None:
-        raise ImportError(f"Could not load module '{models_file}'.")
-
-    spec.loader.exec_module(module)
-
     for name, clazz in inspect.getmembers(module, inspect.isclass):
         if issubclass(clazz, BaseLLM) and clazz is not BaseLLM:
             subclasses[name] = clazz

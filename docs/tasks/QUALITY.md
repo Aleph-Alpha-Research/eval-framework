@@ -1,7 +1,15 @@
 # QUALITY
 
 ````
-NAME = QUALITYDATASET_PATH = emozilla/qualitySAMPLE_SPLIT = validationFEWSHOT_SPLIT = validationRESPONSE_TYPE = LOGLIKELIHOODSMETRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]SUBJECTS = ['hard', 'easy']LANGUAGE = <Language.ENG: 'English'>````
+NAME = QUALITY
+DATASET_PATH = emozilla/quality
+SAMPLE_SPLIT = validation
+FEWSHOT_SPLIT = validation
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+SUBJECTS = ['hard', 'easy']
+LANGUAGE = <Language.ENG: 'English'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.quality](eval_framework.tasks.benchmarks.quality)
 
@@ -9,4 +17,4 @@ NAME = QUALITYDATASET_PATH = emozilla/qualitySAMPLE_SPLIT = validationFEWSHOT_SP
 
 - Link to dataset: [https://huggingface.co/datasets/emozilla/quality](https://huggingface.co/datasets/emozilla/quality)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "QUALITY"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "QUALITY"`.

@@ -7,7 +7,6 @@ import torch
 from tokenizers import Tokenizer
 from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, StoppingCriteriaList
 
-from eval_framework.constants import RED, RESET
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import (
     ConcatCompression,
@@ -18,6 +17,7 @@ from eval_framework.shared.types import (
 )
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors
+from eval_framework.utils.constants import RED, RESET
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message
 
 logger = logging.getLogger(__name__)

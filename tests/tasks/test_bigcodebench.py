@@ -1,9 +1,7 @@
 import pytest
 from datasets import DownloadConfig, load_dataset
 
-from eval_framework.tasks.benchmarks.bigcodebench import (
-    extract_executable_code,
-)
+from eval_framework.tasks.benchmarks.bigcodebench import extract_executable_code
 from eval_framework.tasks.utils import BIG_CODE_BENCH_PACKAGE_MAPPING, extract_imports
 
 
