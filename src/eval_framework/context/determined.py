@@ -2,9 +2,10 @@ import logging
 from pathlib import Path
 from typing import Annotated, Any
 
-from determined import get_cluster_info
-from determined.core import Context, DummyDistributedContext
-from determined.core import init as determined_core_init
+from determined._info import get_cluster_info
+from determined.core._context import Context
+from determined.core._context import init as determined_core_init
+from determined.core._distributed import DummyDistributedContext
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
 from eval_framework.context.eval import EvalContext, import_models

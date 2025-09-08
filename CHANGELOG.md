@@ -18,6 +18,8 @@
 - We've removed all models except those used for testing (they were largely old). The recommended way going forward is to provide
   your own models implementation to the framework.
 - Removed and relaxes several main-dependencies
+- Moves the generate_task_docs utility to inside the package and add test that documentation is up-to-date
+- Fix inconsistent language code for Croatian/Serbian in INCLUDE task
 - added `subjects`and `hf_revision` to BaseTask arguments to replace global task re-definition when running with non default values
 
 ## 0.1.0

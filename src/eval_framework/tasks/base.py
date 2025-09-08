@@ -29,7 +29,6 @@ class ResponseType(Enum):
 
 
 class Language(Enum):
-    # Default languages
     ENG = "English"
     DEU = "German"
     FRA = "French"
@@ -43,6 +42,8 @@ class Language(Enum):
     POL = "Polish"
     RUS = "Russian"
     UKR = "Ukrainian"
+    HRV = "Croatian"
+    SRP = "Serbian"
 
     @classmethod
     def add_members(cls, new_members: dict[str, Any]) -> type["Language"]:
@@ -89,6 +90,7 @@ class BaseTask[SubjectType](ABC):
     # Words in _get_instruction_text() not to be perturbed. List of words is case insensitive. No special characters
     # or whitespace should be included.
     PERTURBATION_UNMODIFIABLE_WORDS: list[str] | None
+
     # The language (or languages) tested by the benchmark. Accepts a single string, a dictionary specifying
     # language by subtopic, or `None` (for tasks not specific to a single language).
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None

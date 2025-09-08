@@ -21,6 +21,12 @@ uv sync --all-extras
 uv sync --all-extras --group cu124 --group flash-attn
 ```
 
+There is also a pre-commit hook to help with development:
+```
+uv tool install pre-commit
+uv run pre-commit install
+```
+
 #### Generate task documentation
 
 Generate task documentation
@@ -67,7 +73,6 @@ AA_INFERENCE_ENDPOINT="your_inference_url"
 # Debug mode
 DEBUG=false
 
-
 ## Docker Installation
 
 For containerized deployment:
@@ -92,7 +97,6 @@ docker build -t eval-framework .
 # Run with GPU support
 docker run -it --gpus all -v $(pwd):/workspace eval-framework
 ```
-
 
 #### Specialized Builds
 

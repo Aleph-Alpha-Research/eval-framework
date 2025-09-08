@@ -9,7 +9,6 @@ from unittest.mock import Mock, patch
 import pytest
 from datasets import disable_caching
 
-from eval_framework.constants import GREEN, RED, RESET
 from eval_framework.llm.base import BaseLLM
 from eval_framework.main import main
 from eval_framework.result_processors.base import Result
@@ -17,6 +16,7 @@ from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
 from eval_framework.tasks.benchmarks.wmt import WMT14
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import get_task
+from eval_framework.utils.constants import GREEN, RED, RESET
 from tests.conftest import MockLLM
 
 NUM_FEWSHOT = 2

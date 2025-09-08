@@ -1,5 +1,4 @@
 import contextlib
-import importlib.metadata
 import importlib.util
 import re
 from collections.abc import Generator, Iterator, Sequence
@@ -9,7 +8,7 @@ import pydantic
 from pydantic import AfterValidator
 
 from eval_framework.tasks.base import BaseTask
-from eval_framework.utils import is_extra_installed, validate_package_extras
+from eval_framework.utils.packaging import is_extra_installed, validate_package_extras
 
 __all__ = [
     "register_task",
