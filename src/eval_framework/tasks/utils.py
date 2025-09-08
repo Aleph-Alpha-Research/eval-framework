@@ -1,7 +1,4 @@
-import asyncio
-import functools
-import hashlib
-import json
+import base64
 import logging
 import os
 import random
@@ -11,16 +8,11 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal, NamedTuple
 
+import dill
 import numpy as np
-from dotenv import load_dotenv
 from llm_sandbox import SandboxSession
 
 logger = logging.getLogger(__name__)
-
-try:
-    import redis
-except ImportError:
-    logger.info("`redis` package is not installed, RedisCacheDecorator will not be available.")
 
 RANDOM_SEED = 42  # hacky way to get around circular import
 redis_warning_printed = False
@@ -61,6 +53,17 @@ def run_python_code(
         return session.run(code, libraries=packages).text.strip()
 
 
+def unittest_merge_snippets(code: str, test_code: str) -> str:
+    # Add unittest.main() if not present (note that without "if" sometimes it just reports
+    # "Ran 0 tests" errorneously).
+    if "unittest.main(" not in test_code:
+        test_code += "\n\nif __name__ == '__main__':\n  unittest.main()"
+
+    # Combine the implementation code and test code
+    combined_code = code + "\n\n" + test_code
+    return combined_code
+
+
 class ExecutionResult(NamedTuple):
     """
     A named tuple to store the result of code execution.
@@ -75,7 +78,13 @@ class ExecutionResult(NamedTuple):
 
 
 def execute_python_code_with_tests(
-    code: str, test_code: str, package_mapping: dict[str, str | None], image: str | None = None, timeout: int = 60
+    code: str,
+    test_code: str,
+    package_mapping: dict[str, str | None],
+    merge_code_fn: Callable[[str, str], str],
+    image: str | None,
+    timeout: int,
+    parse_output_fn: Callable[[str], ExecutionResult],
 ) -> ExecutionResult:
     """
     Executes the given code with test cases in a sandboxed environment.
@@ -83,23 +92,57 @@ def execute_python_code_with_tests(
     :param code: The code to be tested.
     :param test_code: The test cases to run against the code.
     :param package_mapping: Mapping of package names to install commands.
+    :param merge_code_fn: function to merge LLM and test code
     :param image: Docker image to use.
     :param timeout: Timeout for the execution in seconds.
+    :param parse_otuput_fn: function to parse docker execution output
     :return: An ExecutionResult named tuple with success status and output or errors.
     """
-    # Add unittest.main() if not present (note that without "if" sometimes it just reports "Ran 0 tests" errorneously).
-    if "unittest.main(" not in test_code:
-        test_code += "\n\nif __name__ == '__main__':\n  unittest.main()"
+    combined_code = merge_code_fn(code, test_code)
 
-    # Combine the implementation code and test code
-    combined_code = code + "\n\n" + test_code
     packages = get_external_dependencies(combined_code, package_mapping)
 
     # Run the combined code in the sandbox
     output = run_python_code(combined_code, image=image, timeout=timeout, packages=packages)
 
     # Parse the output to determine success
-    return _parse_unittest_output(output)
+    return parse_output_fn(output)
+
+
+class SerializationError(Exception):
+    """Base exception for callable serialization errors."""
+
+    pass
+
+
+class EncodingError(SerializationError):
+    """Raised when encoding a callable fails."""
+
+    pass
+
+
+class DecodingError(SerializationError):
+    """Raised when decoding a callable fails."""
+
+    pass
+
+
+class CallableSerializer:
+    @staticmethod
+    def encode(fn: Callable[..., Any]) -> str:
+        try:
+            serialized = dill.dumps(fn)
+            return base64.b64encode(serialized).decode("utf-8")
+        except Exception as e:
+            raise EncodingError(f"Failed to encode callable {fn}: {e}") from e
+
+    @staticmethod
+    def decode(fn_str: str) -> Callable[..., Any]:
+        try:
+            decoded = base64.b64decode(fn_str.encode("utf-8"))
+            return dill.loads(decoded)
+        except Exception as e:
+            raise DecodingError(f"Failed to decode callable from string: {e}") from e
 
 
 def _parse_unittest_output(output: str) -> ExecutionResult:
@@ -188,116 +231,6 @@ def extract_imports(code: str) -> tuple[list[str], set[str]]:
                 packages.add(pkg)
 
     return imports, packages
-
-
-def _get_redis_client() -> redis.Redis | None:
-    global redis_warning_printed
-    load_dotenv()
-
-    if (redis_connection := os.getenv("REDIS_CONNECTION", "")) != "":
-        if "PYTEST_VERSION" not in os.environ:
-            if not redis_warning_printed:
-                logger.info(
-                    "Warning: REDIS_CONNECTION is defined but you don't seem to be running tests but rather a "
-                    "regular evaluation. It is potentially very misleading to use cached results. I will disable Redis "
-                    "just to be on the safe side."
-                )
-                redis_warning_printed = True
-            return None
-        client = redis.from_url(redis_connection)
-        client.ping()
-        return client
-    else:
-        if not redis_warning_printed and "PYTEST_VERSION" in os.environ:
-            logger.info("Warning: REDIS_CONNECTION not defined, redis_cache will not be available.")
-            redis_warning_printed = True
-        return None
-
-
-def redis_cache(
-    version_id: str = "",
-    args_key_func: Callable[..., str] = lambda args, kwargs: str(args) + str(kwargs),
-    dump_func: Callable[[Any], dict[str, Any]] = lambda x: x,
-    load_func: Callable[[dict[str, Any]], Any] = lambda d: d,
-    expiration_sec: int = 60 * 60 * 24 * 30,  # 30 days
-) -> Callable[..., Any]:
-    """Decorator to cache LLM inference results in Redis.
-
-    The cache key is a combination of the LLM class name, LLM_NAME, `version_id` and stringified call arguments prepared
-    by the custom function `args_key_func`.
-
-    The return type of the wrapped function is serialized with `dump_func` and deserialized with `load_func`.
-
-    Note that it doesn't account for any changes in the wrapped function (i.e. typically the LLM class implementation
-    or the LLM itself)! If the implementation has changed, the cache should be invalidated in the sense that the
-    `version_id` should be changed.
-
-    Exceptions raised in the wrapped function are not cached.
-
-    Entries expire after `expiration_sec` seconds if not having been read in that time period. This prevents old
-    entries from staying in the cache indefinitely.
-    """
-    client = _get_redis_client()
-    bad_serialization = re.compile(r"object at 0x[0-9a-fA-F]+>")
-
-    def redis_cache_decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-        def create_key(args: Any, kwargs: Any) -> str:
-            from eval_framework.llm.base import BaseLLM
-
-            if not isinstance(args[0], BaseLLM):  # func must be a method of an LLM class
-                raise NotImplementedError
-            llm_name = getattr(args[0], "_llm_name", "") or getattr(args[0], "LLM_NAME", "")
-            llm_id = args[0].__class__.__name__ + "-" + llm_name
-            args_id = args_key_func(args[1:], kwargs)
-            assert bad_serialization.search(args_id) is None, (
-                f"Some arguments could not be converted to a string and a memory address was used instead: {args_id}"
-            )
-            args_id = hashlib.sha256(args_id.encode("utf-8")).hexdigest()
-            key = f"eval_framework:{llm_id}-{func.__name__}-{version_id}:{args_id}"
-            return key
-
-        @functools.wraps(func)
-        def sync_func_wrapper(*args: Any, **kwargs: Any) -> Any:
-            assert client is not None
-            key = create_key(args, kwargs)
-
-            if (cache := client.get(key)) is not None:
-                logger.info("redis_cache: hit")
-                client.expire(key, time=expiration_sec)  # refresh expiration on access
-                result = json.loads(cache)  # type: ignore
-                return load_func(result)
-            else:
-                logger.info("redis_cache: miss")
-                result = func(*args, **kwargs)
-                value = dump_func(result)
-                client.setex(key, time=expiration_sec, value=json.dumps(value))
-                return result
-
-        @functools.wraps(func)
-        async def async_func_wrapper(*args: Any, **kwargs: Any) -> Any:
-            assert client is not None
-            key = create_key(args, kwargs)
-
-            if (cache := client.get(key)) is not None:
-                logger.info("redis_cache: hit")
-                client.expire(key, time=expiration_sec)  # refresh expiration on access
-                result = json.loads(cache)  # type: ignore
-                return load_func(result)
-            else:
-                logger.info("redis_cache: miss")
-                result = await func(*args, **kwargs)
-                value = dump_func(result)
-                client.setex(key, time=expiration_sec, value=json.dumps(value))
-                return result
-
-        if client is None:
-            return func
-        elif asyncio.iscoroutinefunction(func):
-            return async_func_wrapper
-        else:
-            return sync_func_wrapper
-
-    return redis_cache_decorator
 
 
 def get_docker_address() -> str:

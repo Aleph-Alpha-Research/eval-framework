@@ -1,24 +1,17 @@
 import os
 import tempfile
 import time
-import uuid
-from collections.abc import Sequence
 
-import pytest
-
-from eval_framework.llm.base import BaseLLM
-from eval_framework.shared.types import Error, RawCompletion, RawLoglikelihood
-from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import (
     BIG_CODE_BENCH_PACKAGE_MAPPING,
+    CallableSerializer,
     _parse_unittest_output,
     execute_python_code_with_tests,
     extract_imports,
     get_external_dependencies,
-    redis_cache,
     run_python_code,
+    unittest_merge_snippets,
 )
-from template_formatting.formatter import ConcatFormatter, Message, Role
 
 
 def test_run_python_code() -> None:
@@ -156,6 +149,38 @@ class TestParseUnittestOutput:
         assert result.output == "All tests completed successfully."
 
 
+class TestCodeComposition:
+    def test_merge(self) -> None:
+        code = "import random\nimport statistics\ndef task_func(LETTERS):\n\treturn LETTERS"
+        test_code = """
+        import unittest
+        class TestCases(unittest.TestCase):
+        \tdef setup(self):
+        \t\tself.letters = ['a','b','c']
+        \tdef testcase1(self):
+        \t\tself.assertTrue(self.letters == task_func(self.letters))
+        """
+        merged_code = unittest_merge_snippets(code, test_code)
+        gt = code + "\n\n" + test_code
+        assert merged_code.startswith(gt)
+
+    def test_with_main(self) -> None:
+        code = "import random\nimport statistics\ndef task_func(LETTERS):\n\treturn LETTERS"
+        test_code = """
+        import unittest
+        class TestCases(unittest.TestCase):
+        \tdef setup(self):
+        \t\tself.letters = ['a','b','c']
+        \tdef testcase1(self):
+        \t\tself.assertTrue(self.letters == task_func(self.letters))
+        if __name__ == '__main__':
+        \tunittest.main()
+        """
+        merged_code = unittest_merge_snippets(code, test_code)
+        gt = code + "\n\n" + test_code
+        assert merged_code.startswith(gt)
+
+
 class TestExecutePythonCodeWithTests:
     """Integration tests for execute_python_code_with_tests."""
 
@@ -170,7 +195,15 @@ class TestAdd(unittest.TestCase):
         self.assertEqual(add(1, 2), 3)
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is True
         assert "tests completed successfully" in result.output
@@ -180,7 +213,15 @@ class TestAdd(unittest.TestCase):
         code = "def add(a, b): return a - b"  # Incorrect implementation
         test_code = "assert add(1, 2) == 3"
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "AssertionError" in result.output
@@ -190,7 +231,15 @@ class TestAdd(unittest.TestCase):
         code = "def add(a, b) return a + b"  # Missing colon
         test_code = "assert add(1, 2) == 3"
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "SyntaxError" in result.output
@@ -200,7 +249,15 @@ class TestAdd(unittest.TestCase):
         code = "def divide(a, b): return a / b"
         test_code = "assert divide(1, 0) == float('inf')"
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert any(err in result.output for err in ["ZeroDivisionError", "division by zero"])
@@ -216,7 +273,15 @@ class TestHang(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING, timeout=1)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=1,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "timeout" in result.output.lower()
@@ -232,7 +297,15 @@ class TestCircleArea(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is True
         assert "tests completed successfully" in result.output
@@ -254,7 +327,15 @@ class TestIsEven(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is True
         assert "tests completed successfully" in result.output
@@ -271,7 +352,15 @@ assert is_positive(-5) == False
 assert is_positive(0) == True  # This will fail
         """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "AssertionError" in result.output
@@ -313,7 +402,15 @@ class TestStack(unittest.TestCase):
 unittest.main()
         """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is True
         assert "tests completed successfully" in result.output
@@ -323,7 +420,15 @@ unittest.main()
         code = "def get_pi(): return math.pi"  # Missing import
         test_code = "assert get_pi() > 3.1"
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert any(err in result.output for err in ["NameError", "math is not defined"])
@@ -337,7 +442,15 @@ def function():
         """
         test_code = "assert True"
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "IndentationError" in result.output
@@ -353,7 +466,15 @@ class TestEmptyCode(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is True
         assert "tests completed successfully" in result.output
@@ -363,7 +484,15 @@ unittest.main()
         code = "def function(): return True"
         test_code = ""
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
 
         assert result.success is False
         assert "'unittest' is not defined" in result.output
@@ -414,7 +543,15 @@ class TestCases(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
         assert result.success is True
         assert result.output == "All 2 tests completed successfully."
 
@@ -460,7 +597,15 @@ class TestCases(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
         assert result.success is False
         assert "FAILED" in result.output
 
@@ -487,7 +632,15 @@ class TestCases(unittest.TestCase):
 unittest.main()
     """
 
-        result = execute_python_code_with_tests(code, test_code, BIG_CODE_BENCH_PACKAGE_MAPPING)
+        result = execute_python_code_with_tests(
+            code=code,
+            test_code=test_code,
+            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
+            merge_code_fn=unittest_merge_snippets,
+            image="python:3.12",
+            timeout=10,
+            parse_output_fn=_parse_unittest_output,
+        )
         assert result.success is False
         assert "NameError" in result.output
         assert "task_func" in result.output
@@ -628,140 +781,11 @@ class TestBigCodeBenchDataset:
             assert pkg in BIG_CODE_BENCH_PACKAGE_MAPPING, f"Package {pkg} not in mapping"
 
 
-@pytest.mark.gpu  # we need an on premise CI worker for access to StackIt
-@pytest.mark.skip("Skipped: Redis server not configured for public CI.")
-def test_redis_cache() -> None:
-    cache_id = str(uuid.uuid4())
-    error = Error(error_class="x", message="y", traceback="z")
+def test_fn_recover() -> None:
+    def fn(x: int) -> int:
+        return x * 2
 
-    # GIVEN two LLMs with redis cache
-    class FooLLM(BaseLLM):
-        LLM_NAME = "foo"
-        NUM_CALLS = 0
-
-        def __init__(self) -> None:
-            super().__init__()
-            self._formatter = ConcatFormatter()
-
-        def generate_from_messages(
-            self,
-            messages: list[Sequence[Message]],
-            stop_sequences: list[str] | None = None,
-            max_tokens: int | None = None,
-            temperature: float | None = None,
-        ) -> list[RawCompletion]:
-            return [self.do_one(single_messages) for single_messages in messages]
-
-        @redis_cache(
-            version_id=cache_id,
-            dump_func=lambda x: x.model_dump(mode="json"),
-            load_func=lambda d: RawCompletion(**d),
-            expiration_sec=2,
-        )
-        def do_one(self, messages: Sequence[Message]) -> RawCompletion:
-            self.NUM_CALLS += 1
-            return RawCompletion(
-                prompt=self._formatter.format(messages, output_mode="string") if len(messages) != 0 else "prompt",
-                prompt_sequence_positions=None,
-                completion=self.LLM_NAME,
-                completion_sequence_positions=None,
-                raw_completion_error=error,
-            )
-
-        def logprobs(self, sample: list[Sample]) -> list[RawLoglikelihood]:
-            raise NotImplementedError
-
-    class BarLLM(FooLLM):
-        LLM_NAME = "bar"
-
-    dummy_completion = [
-        RawCompletion(
-            prompt="prompt",
-            completion="foo",
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
-            raw_completion_error=error,
-        )
-    ]
-
-    dummy_completion_hi = [
-        RawCompletion(
-            prompt="Hi",
-            completion="foo",
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
-            raw_completion_error=error,
-        )
-    ]
-
-    # WHEN called twice
-    foo = FooLLM()
-    assert foo.generate_from_messages([[]]) == dummy_completion and foo.NUM_CALLS == 1
-    # THEN only one call is made, the second one is cached
-    assert foo.generate_from_messages([[]]) == dummy_completion and foo.NUM_CALLS == 1
-    # and WHEN called with a different argument, THEN a new call is made
-    assert (
-        foo.generate_from_messages([[Message(role=Role.USER, content="Hi")]]) == dummy_completion_hi
-        and foo.NUM_CALLS == 2
-    )
-
-    # WHEN using a second LLM
-    bar = BarLLM()
-    dummy_completion_bar = [
-        RawCompletion(
-            prompt="prompt",
-            completion="bar",
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
-            raw_completion_error=error,
-        )
-    ]
-    # THEN this LLM has its own cache and the call is made
-    assert bar.generate_from_messages([[]]) == dummy_completion_bar and foo.NUM_CALLS == 2 and bar.NUM_CALLS == 1
-
-    # WHEN using a new implementation version of the same class
-    class FooLLM(BaseLLM):  # type: ignore[no-redef]
-        LLM_NAME = "foo"
-        NUM_CALLS = 0
-
-        def generate_from_messages(
-            self,
-            messages: list[Sequence[Message]],
-            stop_sequences: list[str] | None = None,
-            max_tokens: int | None = None,
-            temperature: float | None = None,
-        ) -> list[RawCompletion]:
-            return [self.do_one(single_messages) for single_messages in messages]
-
-        @redis_cache(
-            version_id=cache_id + "X",
-            dump_func=lambda x: x.model_dump(mode="json"),
-            load_func=lambda d: RawCompletion(**d),
-            expiration_sec=2,
-        )
-        def do_one(self, messages: Sequence[Message]) -> RawCompletion:
-            self.NUM_CALLS += 1
-            return RawCompletion(
-                prompt="prompt1",
-                prompt_sequence_positions=None,
-                completion=self.LLM_NAME,
-                completion_sequence_positions=None,
-            )
-
-        def logprobs(self, sample: list[Sample]) -> list[RawLoglikelihood]:
-            raise NotImplementedError
-
-    dummy_completion_1 = [
-        RawCompletion(
-            prompt="prompt1", completion="foo", prompt_sequence_positions=None, completion_sequence_positions=None
-        )
-    ]
-
-    v1_foo = FooLLM()
-    # THEN the call is made
-    assert v1_foo.generate_from_messages([[]]) == dummy_completion_1 and v1_foo.NUM_CALLS == 1
-
-    # WHEN the cache expires
-    time.sleep(2)
-    # THEN the call is made again
-    assert foo.generate_from_messages([[]]) == dummy_completion and foo.NUM_CALLS == 3
+    serializer = CallableSerializer()
+    encoded_fn = serializer.encode(fn)
+    decoded_fn = serializer.decode(encoded_fn)
+    assert decoded_fn(2) == fn(2)

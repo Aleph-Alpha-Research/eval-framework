@@ -132,6 +132,7 @@ class InfiniteBench_EnDia(InfiniteBenchCompletion):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
+
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 30  # Avg Output Tokens: 3.4
 
@@ -161,6 +162,7 @@ class InfiniteBench_EnQA(InfiniteBenchCompletion):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
+
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 30  # Avg Output Tokens: 4.8
 
@@ -187,6 +189,7 @@ class InfiniteBench_MathFind(InfiniteBenchCompletion):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
+
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 30  # Avg Output Tokens: 1.3
 
@@ -242,6 +245,7 @@ class InfiniteBench_RetrieveNumber(InfiniteBenchCompletion):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
+
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 12  # Avg Output Tokens: 4.0 (all answers are 10 digits integers)
 
@@ -274,6 +278,7 @@ class InfiniteBench_RetrievePassKey1(InfiniteBenchCompletion):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
+
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 8  # Avg Output Tokens: 2.0 (all answers are 5 digits integers)
 

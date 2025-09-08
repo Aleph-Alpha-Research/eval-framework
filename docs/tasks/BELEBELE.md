@@ -1,7 +1,15 @@
 # BELEBELE
 
 ````
-NAME = BELEBELEDATASET_PATH = facebook/belebeleSAMPLE_SPLIT = testFEWSHOT_SPLIT = testRESPONSE_TYPE = LOGLIKELIHOODSMETRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]SUBJECTS = ['eng_Latn']LANGUAGE = <Language.ENG: 'English'>````
+NAME = BELEBELE
+DATASET_PATH = facebook/belebele
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = test
+RESPONSE_TYPE = LOGLIKELIHOODS
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+SUBJECTS = ['eng_Latn']
+LANGUAGE = <Language.ENG: 'English'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.belebele](eval_framework.tasks.benchmarks.belebele)
 
@@ -9,4 +17,4 @@ NAME = BELEBELEDATASET_PATH = facebook/belebeleSAMPLE_SPLIT = testFEWSHOT_SPLIT 
 
 - Link to dataset: [https://huggingface.co/datasets/facebook/belebele](https://huggingface.co/datasets/facebook/belebele)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "BELEBELE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "BELEBELE"`.

@@ -1,7 +1,15 @@
 # TRIVIAQA
 
 ````
-NAME = TRIVIAQADATASET_PATH = mandarjoshi/trivia_qaSAMPLE_SPLIT = validationFEWSHOT_SPLIT = trainRESPONSE_TYPE = COMPLETIONMETRICS = [AccuracyCompletion, F1]SUBJECTS = ['rc.wikipedia.nocontext']LANGUAGE = <Language.ENG: 'English'>````
+NAME = TRIVIAQA
+DATASET_PATH = mandarjoshi/trivia_qa
+SAMPLE_SPLIT = validation
+FEWSHOT_SPLIT = train
+RESPONSE_TYPE = COMPLETION
+METRICS = [AccuracyCompletion, F1]
+SUBJECTS = ['rc.wikipedia.nocontext']
+LANGUAGE = <Language.ENG: 'English'>
+````
 
 - Module: [eval_framework.tasks.benchmarks.triviaqa](eval_framework.tasks.benchmarks.triviaqa)
 
@@ -9,4 +17,4 @@ NAME = TRIVIAQADATASET_PATH = mandarjoshi/trivia_qaSAMPLE_SPLIT = validationFEWS
 
 - Link to dataset: [https://huggingface.co/datasets/mandarjoshi/trivia_qa](https://huggingface.co/datasets/mandarjoshi/trivia_qa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python utils/generate-task-docs.py --add-prompt-examples --only-tasks "TRIVIAQA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "TRIVIAQA"`.
