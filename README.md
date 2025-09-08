@@ -188,7 +188,7 @@ To evaluate a single benchmark locally, you can use the following command:
 ```bash
 eval_framework \
     --models src/eval_framework/llm/models.py \
-    --llm-name Llama31_8B_Instruct_HF \
+    --llm-name Smollm135MInstruct \
     --task-name "GSM8K" \
     --output-dir ./eval \
     --num-fewshot 5 \
