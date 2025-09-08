@@ -180,7 +180,7 @@ class BaseTask[SubjectType](ABC):
                 cache_dir=f"{Path.home()}/.cache/eval-framework",
             )
 
-    def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, list[dict[str, Any]]]:
+    def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, Any]:
         dataset = {}
         self.rnd = random.Random(RANDOM_SEED)
 
