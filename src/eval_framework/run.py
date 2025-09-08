@@ -187,8 +187,8 @@ def parse_args() -> argparse.Namespace:
         default=1,
         required=False,
         help=(
-            "Size of batch of samples to send to the LLM for evaluation in parallel."
-            "Use 1 for sequential running (default) and None to have a single batch."
+            "Size of batch of samples to send to the LLM for evaluation in parallel. "
+            "Use 1 for sequential running (default)."
         ),
     )
     parser.add_argument(
