@@ -8,6 +8,15 @@ requires-python = ">=3.12,<3.13"
 authors = [
   { name = "Aleph Alpha Research" }
 ]
+classifiers = [
+  "Operating System :: OS Independent",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Libraries",
+  "Typing :: Typed",
+]
 dependencies = [
   "pyyaml>=6.0.1,<7",
   "xmltodict>=0.13.0,<0.16",
