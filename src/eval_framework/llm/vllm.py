@@ -434,8 +434,6 @@ class _VLLM_from_wandb_registry(VLLMModel):
     Downloads the model artifacts from Wandb and creates a local VLLM instance.
     """
 
-    LLM_NAME = ""
-
     def __init__(
         self,
         artifact_name: str,
@@ -455,8 +453,6 @@ class _VLLM_from_wandb_registry(VLLMModel):
         """
         print(f"{RED}[ Loading registered model from Wandb for VLLM: {artifact_name}:{version} ]{RESET}")
 
-        self.artifact_name = artifact_name
-        self.artifact_version = version
         selected_formatter = self.get_formatter(formatter, formatter_identifier)
 
         download_path = (
@@ -465,11 +461,13 @@ class _VLLM_from_wandb_registry(VLLMModel):
         with self.download_wandb_artifact(
             artifact_name, version, user_supplied_download_path=download_path
         ) as local_artifact_path:
+            # Set LLM_NAME to local path which VLLM can use directly
             self.LLM_NAME = local_artifact_path
+            self.checkpoint_name = f"{artifact_name}:{version}"
             super().__init__(formatter=selected_formatter, checkpoint_path=local_artifact_path, **kwargs)
 
         print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
-        print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
+        print(f"{artifact_name}:{version} {RED}]{RESET}")
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
 
 
