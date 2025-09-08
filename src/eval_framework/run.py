@@ -90,8 +90,8 @@ def parse_args() -> argparse.Namespace:
             "uppercase",
         ],
         help=(
-            "The type of perturbation to apply. Note that this may not make sense especially for prompts"
-            " containing math and code."
+            "The type of perturbation to apply. Note that this may not make sense for some prompts, for example those "
+            "containing math and code."
         ),
     )
     parser.add_argument(
@@ -99,7 +99,7 @@ def parse_args() -> argparse.Namespace:
         type=float,
         required=False,
         default=None,
-        help="The probability of applying perturbation to each word or character (between 0.0 and 1.0).",
+        help="The probability of applying a perturbation to each word or character (between 0.0 and 1.0).",
     )
     parser.add_argument(
         "--perturbation-seed",
@@ -212,7 +212,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         required=False,
         nargs="*",
-        help=("The args of the judge model used within OpenAIModel wrapper."),
+        help=("The args of the judge model used."),
     )
 
     llm_args: dict[str, Any] = {}
