@@ -8,11 +8,17 @@ from eval_framework.shared.types import BaseMetricContext, Completion, Error, ex
 from eval_framework.tasks.utils import CallableSerializer, ExecutionResult, execute_python_code_with_tests
 
 
-class CodeExecutionPassAtOneContext(BaseMetricContext):
+class CodeExecutionBaseContext(BaseMetricContext):
     run_env: str = Field(description="Name of docker image to run unit-tests inside")
     code_prompt: str = Field(description="Prompt to LLM for code generation")
     test_code: str = Field(description="Python code that contains logic for unit test execution")
     benchmark_timeout: int = Field(default=60, description="Time in seconds for the full test execution run")
+    package_downloads: dict[str, str | None] = Field(
+        description="a dictionary listing the packages and their respective names in PyPiinto the LLM sandbox"
+    )
+
+
+class CodeExecutionPassAtOneContext(CodeExecutionBaseContext):
     snippet_merge_fn: str = Field(
         description="logic for merging LLM generated code with test execution code;"
         "this code will be passed into the sandbox to run the testing process"
@@ -22,21 +28,18 @@ class CodeExecutionPassAtOneContext(BaseMetricContext):
         description="logic for parsing the output of test code execution run within the LLM sandbox"
         "This code is serialized"
     )
-    package_downloads: dict[str, str | None] = Field(
-        description="a dictionary listing the packages and their respective names in PyPiinto the LLM sandbox"
+
+
+class RealtimeCodeExectionContext(CodeExecutionBaseContext):
+    snippet_merge_fn: Callable[[str, str], str] = Field(
+        description="logic for merging LLM generated code with test execution code;"
+        "this code will be passed into the sandbox to run the testing process"
+        "This code is deserialized"
     )
-
-
-class RealtimeCodeExectionContext(BaseMetricContext):
-    # this class has same types of CodeExecutionPassAtOneContext
-    # with callables dedoceed from their serialized formats
-    run_env: str
-    code_prompt: str
-    test_code: str
-    benchmark_timeout: int = Field(default=60)
-    snippet_merge_fn: Callable[[str, str], str]
-    output_parse_fn: Callable[[str], ExecutionResult]
-    package_downloads: dict[str, str | None]
+    output_parse_fn: Callable[[str], ExecutionResult] = Field(
+        description="logic for parsing the output of test code execution run within the LLM sandbox"
+        "This code is deserialized"
+    )
 
     @classmethod
     def from_context(cls, context: CodeExecutionPassAtOneContext) -> Self:
@@ -56,6 +59,7 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
 
     def __init__(self) -> None:
         self.k = 1
+        # NOTE : this class should be symmetric to the class initialized in the metric class
         self.serializer = CallableSerializer()
 
     def calculate(self, response: Completion) -> list[MetricResult]:
