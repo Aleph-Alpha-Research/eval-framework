@@ -1,10 +1,10 @@
 from collections.abc import Sequence
 from typing import Any
 
-from eval_framework.constants import RED, RESET
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
+from eval_framework.utils.constants import RED, RESET
 from template_formatting.formatter import Message
 
 
