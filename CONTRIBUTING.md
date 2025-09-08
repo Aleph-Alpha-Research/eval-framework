@@ -115,6 +115,7 @@ To launch a new release, please follow these steps:
    - Click on `Generate release notes`
    - Manually copy the highlights from the changelog on top of the auto-generated notes
    - Click on Publish Release
+- Update `CHANGELOG.md` and `pyproject.toml` to switch the version to a incremented `dev` release
 
 This will create a new version tag and run the release workflow. Open the [Github Actions](https://github.com/Aleph-Alpha-Research/eval-framework/actions)
 panel and look for the release workflow. Once things are ready, you will have to approve publishing to PyPi.
