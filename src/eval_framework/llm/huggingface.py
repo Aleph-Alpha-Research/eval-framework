@@ -356,6 +356,10 @@ class _HFLLM_from_wandb_registry(HFLLM):
         self.use_artifact()
         return super().logprobs(samples)
 
+    @property
+    def name(self) -> str:
+        return f"{self.__class__.__name__}_checkpoint_{self.artifact_name}/{self.artifact_version}"
+
 
 class Pythia410m(HFLLM):
     LLM_NAME = "EleutherAI/pythia-410m"
