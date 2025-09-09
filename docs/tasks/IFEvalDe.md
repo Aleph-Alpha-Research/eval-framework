@@ -17,4 +17,4 @@ LANGUAGE = {'no_subject': <Language.DEU: 'German'>}
 
 - Link to dataset: [https://huggingface.co/datasets/jzhang86/de_ifeval](https://huggingface.co/datasets/jzhang86/de_ifeval)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "IFEvalDe"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "IFEvalDe"`.

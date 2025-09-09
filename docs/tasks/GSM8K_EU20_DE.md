@@ -17,4 +17,4 @@ LANGUAGE = <Language.DEU: 'German'>
 
 - Link to dataset: [https://huggingface.co/datasets/openGPT-X/gsm8kx](https://huggingface.co/datasets/openGPT-X/gsm8kx)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "GSM8K_EU20_DE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "GSM8K_EU20_DE"`.
