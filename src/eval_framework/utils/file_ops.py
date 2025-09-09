@@ -41,7 +41,7 @@ class WandbFs:
     >>> with WandbFs("./my-download-path/) as wandb_fs:
     ...    artifact = wandb_fs.get_artifact("my-artifact", version="v1")
     ...    file_list = wandb_fs.ls(artifact)
-    ...    download_path = wandb_fs.download_and_use_artifact(artifact)
+    ...    download_path = wandb_fs.download_artifact(artifact)
     ...    checkpoint_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
 
     """
@@ -108,7 +108,7 @@ class WandbFs:
         file_list = list(map(lambda x: x.path_uri, [x for x in artifact.files()]))
         return file_list
 
-    def download_and_use_artifact(
+    def download_artifact(
         self,
         artifact: wandb.Artifact,
     ) -> Path:

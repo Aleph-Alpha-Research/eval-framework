@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 import pytest
 import wandb
 
-from eval_framework.file_utils.file_ops import (
+from eval_framework.utils.file_ops import (
     WandbFs,
 )
 
@@ -113,7 +113,7 @@ class TestWandbFs:
             mock_wandb_api.set_artifact("test-model", [x.path_uri for x in logged_artifact.files()])
 
             artifact = wandb_fs.get_artifact(logged_artifact.name)
-            assert wandb_fs.download_and_use_artifact(artifact)
+            assert wandb_fs.download_artifact(artifact)
 
     def test_find_hf_checkpoint_from_s3_paths(self, wandb_fs: WandbFs) -> None:
         # Create temporary files to simulate the directory structure
