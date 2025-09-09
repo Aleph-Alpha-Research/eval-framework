@@ -3,10 +3,10 @@ from collections.abc import Generator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 
-from eval_framework.file_utils.file_ops import WandbFs
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from eval_framework.utils.constants import RED, RESET
+from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import ConcatFormatter, HFFormatter, Llama3Formatter, Message
 from template_formatting.mistral_formatter import MagistralFormatter
 
