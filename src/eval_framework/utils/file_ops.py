@@ -14,15 +14,24 @@ import boto3.session
 import requests
 import wandb
 
-original_resource = boto3.session.Session().resource
-
-
-def unverified_resource(_: Any, *args: Any, **kwargs: Any) -> None:
-    kwargs["verify"] = False
-    return original_resource(*args, **kwargs)
-
 
 class WandbFs:
+    """
+    WandbFs provides an interface to interact with Weights & Biases artifacts,
+
+    Args:
+        user_supplied_download_path: Optional path to download artifacts to. This acts
+        as a cache, so if the artifact is already present, it will not be re-downloaded.
+
+    example usage:
+    >>> with WandbFs("./my-download-path/) as wandb_fs:
+    ...    artifact = wandb_fs.get_artifact("my-artifact", version="v1")
+    ...    file_list = wandb_fs.ls(artifact)
+    ...    download_path = wandb_fs.download_and_use_artifact(artifact)
+    ...    checkpoint_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
+
+    """
+
     def __init__(self, user_supplied_download_path: str | None = None):
         self.api = wandb.Api()
         self.user_supplied_download_path: Path | tempfile.TemporaryDirectory | None = (
@@ -32,6 +41,11 @@ class WandbFs:
         self.download_path: Path | None = None
         self._setup_s3_client()
         self._setup_cleanup_handlers()
+        self.original_resource = boto3.session.Session().resource
+
+    def _unverified_resource(self, service_name: str, *args: Any, **kwargs: Any) -> Any:
+        kwargs["verify"] = False
+        return self.original_resource(service_name, *args, **kwargs)
 
     def _setup_cleanup_handlers(self) -> None:
         """
@@ -102,7 +116,7 @@ class WandbFs:
             if self.download_path.exists():
                 return self.download_path
 
-        with patch("boto3.session.Session.resource", new=unverified_resource):
+        with patch("boto3.session.Session.resource", new=self._unverified_resource):
             with warnings.catch_warnings():
                 # this is to suppress the insecure request warning from urllib3
                 # the attribute exists, but mypy cannot resolve it
