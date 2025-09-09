@@ -472,17 +472,17 @@ class _VLLM_from_wandb_registry(VLLMModel):
         print(f"{artifact_name}:{version} {RED}]{RESET}")
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
 
-    def use_artifact(self):
+    def use_artifact(self) -> None:
         if self.artifact_used is False:
             wandb.use_artifact(self.artifact)
             self.artifact_used = True
 
     def generate_from_messages(
         self,
-        messages: list[dict[str, str]],
-        stop_sequences: list[str] = None,
-        max_tokens: int = None,
-        temperature: float = None,
+        messages: list[Sequence[Message]],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
     ) -> list[RawCompletion]:
         # use artifact should only be called once per run
         self.use_artifact()

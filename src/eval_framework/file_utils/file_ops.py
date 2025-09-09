@@ -17,7 +17,7 @@ import wandb
 original_resource = boto3.session.Session().resource
 
 
-def unverified_resource(_, *args, **kwargs):
+def unverified_resource(_: Any, *args: Any, **kwargs: Any) -> None:
     kwargs["verify"] = False
     return original_resource(*args, **kwargs)
 

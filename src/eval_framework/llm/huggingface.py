@@ -343,10 +343,10 @@ class _HFLLM_from_wandb_registry(HFLLM):
 
     def generate_from_messages(
         self,
-        messages: list[dict[str, str]],
-        stop_sequences: list[str] = None,
-        max_tokens: int = None,
-        temperature: float = None,
+        messages: list[Sequence[Message]],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
     ) -> list[RawCompletion]:
         # use artifact should only be called once per run
         self.use_artifact()
