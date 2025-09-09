@@ -465,8 +465,12 @@ class _VLLM_from_wandb_registry(VLLMModel):
         ) as local_artifact_path:
             # Set LLM_NAME to local path which VLLM can use directly
             self.LLM_NAME = local_artifact_path
-            self.checkpoint_name = f"{artifact_name}:{version}"
-            super().__init__(formatter=selected_formatter, checkpoint_path=local_artifact_path, **kwargs)
+            super().__init__(
+                formatter=selected_formatter,
+                checkpoint_path=local_artifact_path,
+                checkpoint_name=f"{artifact_name}/{version}",
+                **kwargs,
+            )
 
         print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
         print(f"{artifact_name}:{version} {RED}]{RESET}")
