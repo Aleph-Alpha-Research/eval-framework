@@ -17,4 +17,4 @@ LANGUAGE = <Language.DEU: 'German'>
 
 - Link to dataset: [https://huggingface.co/datasets/demelin/wino_x](https://huggingface.co/datasets/demelin/wino_x)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "WINOX_DE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "WINOX_DE"`.

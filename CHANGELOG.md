@@ -2,7 +2,14 @@
 
 ## Unreleased: 0.2.1-dev
 
+### Models
 
+### Tasks
+
+### Metrics
+
+### General
+- updated docs wrt. usage of `eval_framework.utils.generate_task_docs`
 
 ## 0.2.0
 

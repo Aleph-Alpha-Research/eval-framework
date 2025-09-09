@@ -17,4 +17,4 @@ LANGUAGE = <Language.DEU: 'German'>
 
 - Link to dataset: [https://huggingface.co/datasets/LeoLM/HellaSwag_de](https://huggingface.co/datasets/LeoLM/HellaSwag_de)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples --only-tasks "HELLASWAG_DE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "HELLASWAG_DE"`.
