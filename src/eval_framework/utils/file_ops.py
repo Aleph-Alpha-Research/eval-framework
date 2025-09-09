@@ -17,7 +17,21 @@ import wandb
 
 class WandbFs:
     """
-    WandbFs provides an interface to interact with Weights & Biases artifacts,
+    WandbFs provides an interface to interact with Weights & Biases artifacts.
+
+    WandB provides a unified API to access artifacts with artifact.download().
+
+    Several issues with the standard WandB artifact handling motivated the creation of this class:
+    1. Custom S3 endpoints: Users may have custom S3-compatible storage solutions.
+    The standard WandB artifact handling does not natively support self-signed certificates.
+
+    2. Artifacts may not always be in a HuggingFace-compatible format and may have extra directories.
+    This class includes methods to find HuggingFace checkpoints in downloaded artifacts.
+
+    3. Custom download paths with clean up upon failure: Rather than downloading to a
+    WandB-managed cache directory, this class allows users to specify a custom download path
+    (which can be a persistent directory). If no path is provided, a temporary directory is
+    created and cleaned up automatically.
 
     Args:
         user_supplied_download_path: Optional path to download artifacts to. This acts
