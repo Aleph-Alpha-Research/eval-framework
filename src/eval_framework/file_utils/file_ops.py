@@ -13,7 +13,13 @@ import boto3
 import boto3.session
 import requests
 import wandb
-from botocore.exceptions import ClientError
+
+original_resource = boto3.session.Session().resource
+
+
+def unverified_resource(_, *args, **kwargs):
+    kwargs["verify"] = False
+    return original_resource(*args, **kwargs)
 
 
 class WandbFs:
@@ -97,35 +103,15 @@ class WandbFs:
                 wandb.use_artifact(artifact)
                 return self.download_path
 
-        try:
-            artifact_path = artifact.download(root=str(self.download_path))
-            wandb.use_artifact(artifact)
-        except ClientError as e:
-            raise ClientError(
-                error_response={
-                    "Error": {
-                        "Code": "DownloadArtifact",
-                        "Message": f"{e}. Client error raised, unable to access artifact: {artifact.name}. "
-                        f"Please check your AWS credentials and endpoint",
-                    }
-                },
-                operation_name="DownloadArtifact",
-            )
-        except Exception as e:
-            # patch the wandb boto3 call to disable ssl verification
-            print(f"failed to download artifact {e}, patching boto3")
-            with patch(
-                "boto3.session.Session.resource",
-                lambda _, *args, **kwargs: boto3.session.Session().resource(*args, **kwargs, verify=False),
-            ):
-                with warnings.catch_warnings():
-                    # this is to suppress the insecure request warning from urllib3
-                    # the attribute exists, but mypy cannot resolve it
-                    warnings.simplefilter(
-                        "ignore",
-                        category=requests.packages.urllib3.exceptions.InsecureRequestWarning,  # type: ignore
-                    )
-                    artifact_path = artifact.download(root=str(self.download_path))
+        with patch("boto3.session.Session.resource", new=unverified_resource):
+            with warnings.catch_warnings():
+                # this is to suppress the insecure request warning from urllib3
+                # the attribute exists, but mypy cannot resolve it
+                warnings.simplefilter(
+                    "ignore",
+                    category=requests.packages.urllib3.exceptions.InsecureRequestWarning,  # type: ignore
+                )
+                artifact_path = artifact.download(root=str(self.download_path))
             wandb.use_artifact(artifact)
         return Path(artifact_path)
 
