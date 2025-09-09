@@ -2,7 +2,14 @@
 
 ## Unreleased: 0.2.1-dev
 
+### Models
 
+### Tasks
+
+### Metrics
+
+### General
+- Renamed utility files that caused circular imports.
 
 ## 0.2.0
 
