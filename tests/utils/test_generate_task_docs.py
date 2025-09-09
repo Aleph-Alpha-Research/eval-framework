@@ -34,7 +34,6 @@ def test_task_docs_are_up_to_date(tmp_path: Path) -> None:
         repo_file = repo_docs_path / name
         if not filecmp.cmp(gen_file, repo_file, shallow=False):
             diffs.append(name)
-            # print the content of gen_file and repo_file for debugging
             with open(gen_file) as gf, open(repo_file) as rf:
                 gen_content = gf.read()
                 repo_content = rf.read()
@@ -42,5 +41,4 @@ def test_task_docs_are_up_to_date(tmp_path: Path) -> None:
                 print(f"Generated content:\n{gen_content}\n")
                 print(f"Repo content:\n{repo_content}\n")
 
-    # TEMPORARY COMMENTING TO TEST THE CI
     assert not diffs, f"Files differ between generated and repo docs: {diffs}"
