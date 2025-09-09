@@ -115,7 +115,7 @@ def generate_docs_for_task(
         if not add_prompt_examples:
             f.write(
                 f"More detailed documentation, with prompt examples and ground truth completions, can be generated "
-                f"with `uv run python src/eval_framework/utils/generate_task_docs.py --add-prompt-examples "
+                f"with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples "
                 f'--only-tasks "{task_name}"`.\n'
             )
 
@@ -159,6 +159,8 @@ def generate_readme_list(output_docs_directory: Path) -> None:
         f.write(
             "# Task documentation\n\n"
             "This directory contains the generated documentation for all benchmark tasks available in the package.\n\n"
+            "The documentation can be generated or updated with "
+            "`uv run -m eval_framework.utils.generate_task_docs`.\n\n"
             "NOTE: This is an automatically generated file. Any manual modifications will not be preserved when"
             "the file is next updated.\n\n"
         )

@@ -9,7 +9,7 @@
 ### Metrics
 
 ### General
-- Renamed utility files that caused circular imports.
+- updated docs wrt. usage of `eval_framework.utils.generate_task_docs`
 
 ## 0.2.0
 
