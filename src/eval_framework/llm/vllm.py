@@ -6,6 +6,7 @@ from functools import partial
 from typing import Any, Literal, Protocol, cast, override
 
 import torch
+import wandb
 from vllm import LLM, SamplingParams
 from vllm.inputs.data import TokensPrompt
 from vllm.outputs import RequestOutput
@@ -452,6 +453,7 @@ class _VLLM_from_wandb_registry(VLLMModel):
             **kwargs: Additional arguments passed to VLLMModel
         """
         print(f"{RED}[ Loading registered model from Wandb for VLLM: {artifact_name}:{version} ]{RESET}")
+        self.artifact_used = False
 
         selected_formatter = self.get_formatter(formatter, formatter_identifier)
 
@@ -469,6 +471,26 @@ class _VLLM_from_wandb_registry(VLLMModel):
         print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
         print(f"{artifact_name}:{version} {RED}]{RESET}")
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+
+    def use_artifact(self):
+        if self.artifact_used is False:
+            wandb.use_artifact(self.artifact)
+            self.artifact_used = True
+
+    def generate_from_messages(
+        self,
+        messages: list[dict[str, str]],
+        stop_sequences: list[str] = None,
+        max_tokens: int = None,
+        temperature: float = None,
+    ) -> list[RawCompletion]:
+        # use artifact should only be called once per run
+        self.use_artifact()
+        return super().generate_from_messages(messages, stop_sequences, max_tokens, temperature)
+
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+        self.use_artifact()
+        return super().logprobs(samples)
 
 
 class Qwen3_0_6B_VLLM(VLLMModel):

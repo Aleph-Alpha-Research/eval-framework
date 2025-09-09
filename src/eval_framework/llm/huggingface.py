@@ -4,6 +4,7 @@ from functools import partial
 from typing import Any
 
 import torch
+import wandb
 from tokenizers import Tokenizer
 from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, StoppingCriteriaList
 
@@ -319,6 +320,7 @@ class _HFLLM_from_wandb_registry(HFLLM):
             formatter: Type of formatter to use (default: "")
             **kwargs: Additional arguments passed to the parent class
         """
+        self.artifact_used = False
         print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
         download_path = str(kwargs.pop("download_path", None)) if kwargs.get("download_path") else None
         with self.download_wandb_artifact(
@@ -333,6 +335,26 @@ class _HFLLM_from_wandb_registry(HFLLM):
         print(f"{RED}[ Model initialized --------------------- {RESET}")
         print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+
+    def use_artifact(self) -> None:
+        if self.artifact_used is False:
+            wandb.use_artifact(self.artifact)
+            self.artifact_used = True
+
+    def generate_from_messages(
+        self,
+        messages: list[dict[str, str]],
+        stop_sequences: list[str] = None,
+        max_tokens: int = None,
+        temperature: float = None,
+    ) -> list[RawCompletion]:
+        # use artifact should only be called once per run
+        self.use_artifact()
+        return super().generate_from_messages(messages, stop_sequences, max_tokens, temperature)
+
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+        self.use_artifact()
+        return super().logprobs(samples)
 
 
 class Pythia410m(HFLLM):

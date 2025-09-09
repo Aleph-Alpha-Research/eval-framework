@@ -100,7 +100,6 @@ class WandbFs:
             assert isinstance(self.user_supplied_download_path, Path)
             self.download_path = self.user_supplied_download_path / artifact_subdir
             if self.download_path.exists():
-                wandb.use_artifact(artifact)
                 return self.download_path
 
         with patch("boto3.session.Session.resource", new=unverified_resource):
@@ -112,7 +111,6 @@ class WandbFs:
                     category=requests.packages.urllib3.exceptions.InsecureRequestWarning,  # type: ignore
                 )
                 artifact_path = artifact.download(root=str(self.download_path))
-            wandb.use_artifact(artifact)
         return Path(artifact_path)
 
     def find_hf_checkpoint_root_from_path_list(self) -> str | None:

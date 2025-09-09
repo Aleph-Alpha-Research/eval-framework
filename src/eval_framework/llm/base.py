@@ -68,8 +68,8 @@ class BaseLLM(ABC):
     ) -> Generator[str, None, None]:
         wandb_fs = WandbFs(user_supplied_download_path=user_supplied_download_path)
         try:
-            artifact = wandb_fs.get_artifact(artifact_name, version)
-            wandb_fs.download_and_use_artifact(artifact)
+            self.artifact = wandb_fs.get_artifact(artifact_name, version)
+            wandb_fs.download_and_use_artifact(self.artifact)
             file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
             if file_root is None:
                 raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
