@@ -1,7 +1,8 @@
 # Changelog
 
 ## Unreleased: 0.2.1-dev
-
+### General
+- Added wandb logging and registry checkpoint loading with huggingface and vllm backends
 
 
 ## 0.2.0
@@ -35,7 +36,6 @@
 - Removed and relaxes several main-dependencies
 - Added support for weights and biases + determined pre-emption
 - Added missing `DOCKER_CODE_EXECUTION` variable to `.env.example`
-- Added wandb logging and registry checkpoint loading with huggingface and vllm backends
 
 ## 0.1.0
 
