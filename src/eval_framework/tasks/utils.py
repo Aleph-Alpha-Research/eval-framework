@@ -19,7 +19,13 @@ redis_warning_printed = False
 
 
 def raise_errors() -> bool:
-    return os.environ.get("DEBUG", "FALSE").lower() == "true"
+    debug = os.environ.get("DEBUG", "FALSE").lower()
+    if debug in {"1", "true"}:
+        return True
+    elif debug in {"0", "false"}:
+        return False
+    else:
+        raise ValueError(f"Invalid value for DEBUG environment variable: {debug}. Use one of 1, 0, true, false.")
 
 
 def get_n_letters(n: int) -> list[str]:
