@@ -1,5 +1,6 @@
 import atexit
 import os
+import shutil
 import signal
 import tempfile
 import urllib
@@ -66,12 +67,22 @@ class WandbFs:
         because wandbfs deals with downloading files, we will need to
         make sure that at exit and at failure, the directory does not persist
         """
-        atexit.register(self._cleanup_temp_dir)
-        for sig in [signal.SIGTERM, signal.SIGINT]:
-            signal.signal(sig, self._signal_handler)
+        if self.user_supplied_download_path:
+            signal.signal(signal.SIGTERM, self._clean_user_path_on_signal)
+            signal.signal(signal.SIGINT, self._clean_user_path_on_signal)
+        else:
+            atexit.register(self._cleanup_dir)
+            signal.signal(signal.SIGTERM, self._clean_temp_on_signal)
+            signal.signal(signal.SIGINT, self._clean_temp_on_signal)
 
-    def _signal_handler(self, signum: int, frame: FrameType | None) -> None:
-        self._cleanup_temp_dir()
+    def _clean_temp_on_signal(self, signum: int, frame: FrameType | None) -> None:
+        self._cleanup_dir()
+        # we need to re-raise the signal to terminate gracefully
+        signal.signal(signum, signal.SIG_DFL)
+        os.kill(os.getpid(), signum)
+
+    def _clean_user_path_on_signal(self, signum: int, frame: FrameType | None) -> None:
+        self._cleanup_dir(user_path=True)
         # we need to re-raise the signal to terminate gracefully
         signal.signal(signum, signal.SIG_DFL)
         os.kill(os.getpid(), signum)
@@ -169,16 +180,20 @@ class WandbFs:
         return None
 
     def cleanup(self) -> None:
-        self._cleanup_temp_dir()
+        self._cleanup_dir()
 
     def __enter__(self) -> "WandbFs":
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        self._cleanup_temp_dir()
+        self._cleanup_dir()
 
-    def _cleanup_temp_dir(self) -> None:
-        if hasattr(self, "_temp_dir") and self._temp_dir:
+    def _cleanup_dir(self, user_path: bool = False) -> None:
+        if user_path:
+            # remove the contents of the download path.
+            print(f"Cleaning up user-specified download path...{self.download_path}")
+            shutil.rmtree(self.download_path)
+        if self._temp_dir:
             try:
                 self._temp_dir.cleanup()
             except (OSError, FileNotFoundError):
