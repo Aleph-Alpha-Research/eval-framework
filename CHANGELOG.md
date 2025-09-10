@@ -1,9 +1,16 @@
 # Changelog
 
 ## Unreleased: 0.2.1-dev
-### General
-- Added wandb logging and registry checkpoint loading with huggingface and vllm backends
 
+### Models
+
+### Tasks
+
+### Metrics
+
+### General
+- updated docs wrt. usage of `eval_framework.utils.generate_task_docs`
+- Added wandb logging and registry checkpoint loading with huggingface and vllm backends
 
 ## 0.2.0
 

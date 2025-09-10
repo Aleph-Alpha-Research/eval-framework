@@ -4,14 +4,6 @@ from eval_framework.tasks.registry import get_task, registered_task_names
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.utils import DatasetPatcher, assert_hash_string
 
-# Tasks to skip temporarily (due to known issues).
-SKIP_TASKS = {
-    "SQUAD",  # Feature type 'List' not found - datasets library compatibility issue
-    "SQUAD2",  # Feature type 'List' not found - datasets library compatibility issue
-    "Flores200",  # Could not instantiate: 'utf-8' codec can't decode byte 0x80 in position 108: invalid start byte
-    "SPHYR",  # Could not instantiate SPHYR: JSON parse error: Column() changed from object to array in row 0
-}
-
 # Special initialization arguments for specific tasks (can be extended).
 SPECIAL_ARGS = {
     "ARC": {"num_fewshot": 1},  # Keep existing 1-shot
@@ -93,9 +85,18 @@ SPECIAL_ARGS = {
     "WMT20_INSTRUCT": {"num_fewshot": 1},
 }
 
+# Tasks to skip temporarily (due to known issues).
+SKIP_TASKS = [
+    "SQUAD",  # Feature type 'List' not found - datasets library compatibility issue
+    "SQUAD2",  # Feature type 'List' not found - datasets library compatibility issue
+    "Flores200",  # Could not instantiate: 'utf-8' codec can't decode byte 0x80 in position 108: invalid start byte
+    "SPHYR",  # Could not instantiate SPHYR: JSON parse error: Column() changed from object to array in row 0
+]
+TASKS_TO_TEST = set(registered_task_names()) - set(SKIP_TASKS)
+
 
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-@pytest.mark.parametrize("task_name", registered_task_names())
+@pytest.mark.parametrize("task_name", list(TASKS_TO_TEST))
 def test_all_tasks_formatter(task_name: str, formatter_cls: type["BaseFormatter"]) -> None:
     """
     Test that the formatted sample for each (Task, Formatter) pair is consistent by hashing the output.
