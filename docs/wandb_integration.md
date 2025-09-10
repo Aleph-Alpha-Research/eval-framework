@@ -36,7 +36,7 @@ This integration automatically:
 
 **Experiment details**:
 
-Runs are grouped within projects by checkpoint name and version. Additional heierarchical groupings are available, but not limited to the following:
+Runs are grouped within projects by checkpoint name and version. Additional hierarchical groupings are available, but not limited to the following:
 
 - Language
 - Benchmark Task
