@@ -67,10 +67,10 @@ RUN uv tool install --no-cache pre-commit
 COPY pyproject.toml uv.lock README.md LICENSE .python-version ./
 
 RUN --mount=target=$UV_CACHE_DIR,type=cache,sharing=locked,id=uv-cache \
-  uv sync --frozen --link-mode="copy" --all-extras --group cu124 --group flash-attn --no-install-project
+  uv sync --frozen --link-mode="copy" --all-extras --group flash-attn --no-install-project
 
 # For better docker stage caching, we install the package separately, since that changes
 # more frequently than the dependencies in the lock file.
 COPY . .
 RUN --mount=target=$UV_CACHE_DIR,type=cache,sharing=locked,id=uv-cache \
-  uv sync --link-mode="copy" --all-extras --group cu124 --group flash-attn
+  uv sync --link-mode="copy" --all-extras --group flash-attn

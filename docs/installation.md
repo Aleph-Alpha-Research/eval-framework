@@ -17,8 +17,8 @@ cd eval-framework
 # Install all dependencies including optional extras
 uv sync --all-extras
 
-# Install flash-attention with CUDA 12.4 (requires compilation)
-uv sync --all-extras --group cu124 --group flash-attn
+# Install flash-attention (requires compilation)
+uv sync --all-extras --group flash-attn
 ```
 
 There is also a pre-commit hook to help with development:

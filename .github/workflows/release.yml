@@ -16,7 +16,7 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
         with:
-          version: "~=0.8.10"
+          version: "~=0.8.16"
 
       - name: Check tag
         # For test releases, we allow any version
