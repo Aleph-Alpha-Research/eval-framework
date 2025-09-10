@@ -2,13 +2,16 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.file_ops import WandbFs
-from template_formatting.formatter import ConcatFormatter, HFFormatter, Llama3Formatter, Message
-from template_formatting.mistral_formatter import MagistralFormatter
+
+if TYPE_CHECKING:
+    from template_formatting.formatter import ConcatFormatter, HFFormatter, Llama3Formatter, Message
+    from template_formatting.mistral_formatter import MagistralFormatter
 
 
 class BaseLLM(ABC):
@@ -88,7 +91,7 @@ class BaseLLM(ABC):
 
     def get_formatter(
         self, formatter_name: str, model_identifier: str = ""
-    ) -> Llama3Formatter | MagistralFormatter | ConcatFormatter | HFFormatter:
+    ) -> "Llama3Formatter" | "MagistralFormatter" | "ConcatFormatter" | "HFFormatter":
         """
         Create formatter instance based on formatter name.
 
@@ -101,14 +104,20 @@ class BaseLLM(ABC):
         """
         match formatter_name:
             case "Llama3Formatter":
+                from template_formatting.formatter import Llama3Formatter
+
                 return Llama3Formatter()
             case "MistralFormatter":
                 from eval_framework.llm.mistral import MagistralFormatter
 
                 return MagistralFormatter(model_identifier)
             case "ConcatFormatter":
+                from template_formatting.formatter import ConcatFormatter
+
                 return ConcatFormatter()
             case "HFFormatter":
+                from template_formatting.formatter import HFFormatter
+
                 return HFFormatter(model_identifier)
             case _:
                 supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
