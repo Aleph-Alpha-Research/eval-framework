@@ -96,13 +96,11 @@ uv sync --all-extras
 ```
 
 We provide custom groups to control optional extras.
-- `cpu`: Use the CPU backend for torch
-- `cu124`: Use the CUDA 12.4 backend
 - `flash_attn`: Install `flash_attn` with correct handling of build isolation
 
-Thus, the following will setup the project with `flash_attn` and CUDA 12.4
+Thus, the following will setup the project with `flash_attn`
 ```bash
-uv sync --all-extras --group flash_attn --group cu124
+uv sync --all-extras --group flash_attn
 ```
 
 There is also a pre-commit hook to help with development:
