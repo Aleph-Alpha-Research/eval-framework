@@ -8,7 +8,7 @@ from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MIns
 from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
-from tests.mock_wandb import MockWandb, MockWandbRun
+from tests.mock_wandb import MockArtifact, MockWandb, MockWandbApi
 
 
 class MockLLM(BaseLLM):
@@ -79,16 +79,31 @@ def should_preempt_callable() -> Callable[[], bool]:
 
 @pytest.fixture(autouse=True)
 def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
-    """Automatically mock wandb for all tests."""
     mock_wandb_instance = MockWandb()
     monkeypatch.setattr("wandb.init", mock_wandb_instance.init)
     monkeypatch.setattr("wandb.log", mock_wandb_instance.log)
     monkeypatch.setattr("wandb.login", mock_wandb_instance.login)
     monkeypatch.setattr("wandb.finish", mock_wandb_instance.finish)
+    monkeypatch.setattr("wandb.use_artifact", mock_wandb_instance.use_artifact)
+    monkeypatch.setattr("wandb.Artifact", MockArtifact)
+    monkeypatch.setattr("wandb.Api", MockWandbApi)
     return mock_wandb_instance
 
 
-@pytest.fixture
-def wandb_run(mock_wandb: MockWandb) -> MockWandbRun:
-    """Provide a wandb run for tests that need to verify logging."""
-    return mock_wandb.init(project="test-project")
+@pytest.fixture(autouse=True)
+def mock_wandb_artifact(monkeypatch: pytest.MonkeyPatch) -> MockArtifact:
+    # required by test_download_and_use_artifact
+    mock_artifact_instance = MockArtifact("__mock_artifact__", "model")
+    monkeypatch.setattr("wandb.Artifact.files", mock_artifact_instance.files)
+    monkeypatch.setattr("wandb.Artifact.download", mock_artifact_instance.download)
+    monkeypatch.setattr("wandb.Artifact.add_reference", mock_artifact_instance.add_reference)
+    return mock_artifact_instance
+
+
+@pytest.fixture(autouse=True)
+def mock_wandb_api(monkeypatch: pytest.MonkeyPatch) -> MockWandbApi:
+    """Automatically mock wandb api for tests."""
+    mock_api_instance = MockWandbApi()
+    monkeypatch.setattr("wandb.Api", MockWandbApi)
+    monkeypatch.setattr("wandb.Api.artifact", MockWandbApi.artifact)
+    return mock_api_instance
