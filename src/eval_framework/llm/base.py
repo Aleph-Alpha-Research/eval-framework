@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
@@ -92,7 +92,7 @@ class BaseLLM(ABC):
 
     def get_formatter(
         self, formatter_name: str, model_identifier: str = ""
-    ) -> "Llama3Formatter" | "MagistralFormatter" | "ConcatFormatter" | "HFFormatter":
+    ) -> Union["Llama3Formatter", "MagistralFormatter", "ConcatFormatter", "HFFormatter"]:
         """
         Create formatter instance based on formatter name.
 
