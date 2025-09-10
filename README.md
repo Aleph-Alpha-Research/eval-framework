@@ -180,6 +180,7 @@ pip install eval_framework[transformers]
 - **Create custom benchmarks**: Follow our [benchmark creation guide](docs/add_new_benchmark_guide.md)
 - **Scale your evaluations**: Use [Determined AI integration](docs/using_determined.md) for distributed evaluation
 - **Understand your results**: Read our [results interpretation guide](docs/understanding_results_guide.md)
+- **Log results in WandB**: See how [we integrate WandB](docs/wandb_integration.md) for metric and lineage tracking
 
 ### Example CLI Usage
 
