@@ -187,6 +187,3 @@ class WandbFs:
             finally:
                 self._temp_dir = None
                 self.download_path = None
-
-    def __del__(self) -> None:
-        self._cleanup_temp_dir()
