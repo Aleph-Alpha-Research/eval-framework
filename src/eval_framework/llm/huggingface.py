@@ -70,14 +70,23 @@ class RepeatedTokenSequenceCriteria(StoppingCriteria):
 
 
 class HFLLM(BaseLLM):
+    """Huggingface Inference class
+
+    Args:
+        formatter: The formatter to use. If None, will use the DEFAULT_FORMATTER if specified.
+        trust_remote_code: Whether to trust remote code when loading the model.
+    """
+
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
 
-    def __init__(self, formatter: BaseFormatter | None = None) -> None:
+    def __init__(self, formatter: BaseFormatter | None = None, trust_remote_code: bool = False) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained(self.LLM_NAME)
-        self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
+        self.model = AutoModelForCausalLM.from_pretrained(
+            self.LLM_NAME, device_map="auto", trust_remote_code=trust_remote_code
+        )
         logger.info(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
         self._set_formatter(formatter)
 
