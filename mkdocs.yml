@@ -1,0 +1,8 @@
+site_name: Eval Framework
+nav:
+  - Home: README.md
+  - Getting Started:
+    - Installation: installation.md
+  - Advanced Topics:
+    - CLI Usage: cli_usage.md
+    - Utilites: utilities.md
