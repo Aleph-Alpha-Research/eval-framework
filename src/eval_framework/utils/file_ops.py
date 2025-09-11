@@ -142,7 +142,7 @@ class WandbFs:
                     category=requests.packages.urllib3.exceptions.InsecureRequestWarning,  # type: ignore
                 )
                 print(f"Downloading artifact to {self.download_path}")
-                artifact_path = artifact.download(root=str(self.download_path))
+                artifact_path = artifact.download(root=str(self.download_path), skip_cache=True)
         return Path(artifact_path)
 
     def find_hf_checkpoint_root_from_path_list(self) -> str | None:
