@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING, Union
 
@@ -66,7 +65,6 @@ class BaseLLM(ABC):
         messages: list[Sequence[Message]] = [sample.messages for sample in samples]
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
 
-    @contextmanager
     def download_wandb_artifact(self, artifact_name: str, version: str, user_supplied_download_path: str | None) -> str:
         wandb_fs = WandbFs(user_supplied_download_path=user_supplied_download_path)
         self.artifact = wandb_fs.get_artifact(artifact_name, version)
