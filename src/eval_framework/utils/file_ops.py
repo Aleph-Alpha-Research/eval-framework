@@ -201,7 +201,6 @@ class WandbFs:
                 self._temp_dir.cleanup()
             except (OSError, FileNotFoundError):
                 # Directory might already be cleaned up or removed
-                print("Temporary directory already removed.")
                 pass
             finally:
                 self._temp_dir = None
