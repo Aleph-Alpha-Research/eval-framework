@@ -13,6 +13,7 @@
 - Added wandb logging and registry checkpoint loading with huggingface and vllm backends
 - Removed `torch` as a main dependency of `eval_framework`
 - Updated docs wrt. usage of `eval_framework.utils.generate_task_docs`
+- Refactoring of clean up handlers in `eval_framework.utils.file_ops.WandbFs`
 
 ## 0.2.0
 
