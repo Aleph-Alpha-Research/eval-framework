@@ -106,9 +106,7 @@ def generate_docs_for_task(
         f.write("````\n\n")
 
         f.write(f"- Module: [{task_class.__module__}]({task_class.__module__})\n\n")
-        # task_file = re.sub(".*eval_framework/", "src/eval_framework/", inspect.getfile(task_class))
-        # task_file = re.sub(".*eval_framework_companion/", "src/eval_framework_companion/", task_file)
-        task_file = re.sub(r".*(eval_framework)[^/]*?/", r"src/\1/", inspect.getfile(task_class))
+        task_file = re.sub(r".*(eval_framework[^/]*)/", r"src/\1/", inspect.getfile(task_class))
         f.write(f"- File: [{task_file}](../../{task_file})\n\n")
 
         if http_path:
