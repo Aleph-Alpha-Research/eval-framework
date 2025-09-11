@@ -182,7 +182,7 @@ class WandbFs:
         self._cleanup_dir()
 
     def _cleanup_dir(self) -> None:
-        if self.user_supplied_download_path:
+        if self.user_supplied_download_path and self.download_path and self.download_path.exists():
             # remove the contents of the download path.
             print(f"Cleaning up user-specified download path...{self.download_path}")
             shutil.rmtree(self.download_path)
