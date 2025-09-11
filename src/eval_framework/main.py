@@ -1,3 +1,4 @@
+import gc
 import json
 import logging
 import os
@@ -90,6 +91,9 @@ def main(
         # update config from response generator with get metadata
         if trial_id is not None:
             _delete_preemption_file(config, trial_id)
+
+        del response_generator
+        gc.collect()
 
         evaluator = EvaluationGenerator(config, file_processor)
         results = evaluator.run_eval()

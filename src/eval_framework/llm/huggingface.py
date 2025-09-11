@@ -1,3 +1,5 @@
+import contextlib
+import gc
 import logging
 from collections.abc import Callable, Sequence
 from functools import partial
@@ -108,6 +110,14 @@ class HFLLM(BaseLLM):
     def count_tokens(self, text: str, /) -> int:
         """Count the number of tokens in a string."""
         return len(self.tokenizer(text, add_special_tokens=False)["input_ids"])
+
+    def __del__(self) -> None:
+        if hasattr(self, "model"):
+            del self.model
+        with contextlib.suppress(AssertionError):
+            torch.distributed.destroy_process_group()
+        gc.collect()
+        torch.cuda.empty_cache()
 
     def generate_from_messages(
         self,
