@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from functools import partial
+from pathlib import Path
 from typing import Any, Literal, Protocol, cast, override
 
 import torch
@@ -74,7 +75,7 @@ class HFTokenizerProtocol(Protocol):
 
 
 class VLLMTokenizer(VLLMTokenizerAPI[str]):
-    def __init__(self, target_mdl: str) -> None:
+    def __init__(self, target_mdl: str | Path) -> None:
         self.tokenizer = cast(HFTokenizerProtocol, get_tokenizer(target_mdl))
 
     def _encode_text(self, text: str) -> TokenizedContainer:
@@ -108,7 +109,7 @@ class VLLMModel(BaseLLM):
         tensor_parallel_size: int = 1,
         gpu_memory_utilization: float = 0.9,
         batch_size: int = 1,
-        checkpoint_path: str | None = None,
+        checkpoint_path: str | Path | None = None,
         checkpoint_name: str | None = None,
         sampling_params: SamplingParams | dict[str, Any] | None = None,
         **kwargs: Any,
@@ -467,7 +468,7 @@ class _VLLM_from_wandb_registry(VLLMModel):
             self.LLM_NAME = str(local_artifact_path)
             super().__init__(
                 formatter=selected_formatter,
-                checkpoint_path=str(local_artifact_path),
+                checkpoint_path=local_artifact_path,
                 checkpoint_name=f"{artifact_name}/{version}",
                 **kwargs,
             )
