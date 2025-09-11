@@ -1,3 +1,4 @@
+import gc
 import json
 import logging
 from collections.abc import Callable
@@ -69,6 +70,7 @@ def main(
         mode=_wandb_mode(config.wandb_project),
     ) as run:
         _, preempted = response_generator.generate(should_preempt_callable)
+
         if preempted:
             logger.info("Response generation was preempted")
             assert trial_id is not None
@@ -79,6 +81,9 @@ def main(
         # update config from response generator with get metadata
         if trial_id is not None:
             _delete_preemption_file(config, trial_id)
+
+        del response_generator
+        gc.collect()
 
         evaluator = EvaluationGenerator(config, file_processor)
         results = evaluator.run_eval()
