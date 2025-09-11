@@ -1,3 +1,5 @@
+import contextlib
+import gc
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
@@ -8,6 +10,10 @@ from typing import Any, Literal, Protocol, cast, override
 
 import torch
 from vllm import LLM, SamplingParams
+from vllm.distributed.parallel_state import (
+    destroy_distributed_environment,
+    destroy_model_parallel,
+)
 from vllm.inputs.data import TokensPrompt
 from vllm.outputs import RequestOutput
 from vllm.transformers_utils.tokenizer import get_tokenizer
@@ -195,6 +201,17 @@ class VLLMModel(BaseLLM):
         TokenizedContainers are not serializable so we just pass the tokens and sampling params.
         """
         return ([obj.tokens for obj in prompt_objs], sampling_params)
+
+    def __del__(self) -> None:
+        destroy_model_parallel()
+        destroy_distributed_environment()
+        if hasattr(self, "model"):
+            self.model.llm_engine.engine_core.shutdown()
+            del self.model
+        with contextlib.suppress(AssertionError):
+            torch.distributed.destroy_process_group()
+        gc.collect()
+        torch.cuda.empty_cache()
 
     def generate_from_messages(
         self,
