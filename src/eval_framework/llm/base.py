@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from collections.abc import Generator, Sequence
+from collections.abc import Sequence
 from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING, Union
@@ -67,9 +67,7 @@ class BaseLLM(ABC):
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
 
     @contextmanager
-    def download_wandb_artifact(
-        self, artifact_name: str, version: str, user_supplied_download_path: str | None
-    ) -> Generator[str, None, None]:
+    def download_wandb_artifact(self, artifact_name: str, version: str, user_supplied_download_path: str | None) -> str:
         wandb_fs = WandbFs(user_supplied_download_path=user_supplied_download_path)
         self.artifact = wandb_fs.get_artifact(artifact_name, version)
         wandb_fs.download_artifact(self.artifact)
@@ -86,7 +84,7 @@ class BaseLLM(ABC):
             local_artifact_path = Path(wandb_fs.download_path.name) / file_root
 
         print(f"{RED}[ Model located at: {local_artifact_path} ]{RESET}")
-        yield str(local_artifact_path)
+        return str(local_artifact_path)
 
     def get_formatter(
         self, formatter_name: str, model_identifier: str = ""
