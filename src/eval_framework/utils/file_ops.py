@@ -67,14 +67,18 @@ class WandbFs:
         because wandbfs deals with downloading files, we will need to
         make sure that at exit and at failure, the directory does not persist
         """
-        # at exit
-        atexit.register(self._cleanup_dir)
+        # only clean up temp dir at exit
+        atexit.register(self._cleanup_temp_dir)
+
         # on interrupt or termination
         signal.signal(signal.SIGTERM, self._clean_on_signal)
         signal.signal(signal.SIGINT, self._clean_on_signal)
 
     def _clean_on_signal(self, signum: int, frame: FrameType | None) -> None:
-        self._cleanup_dir()
+        if self.user_supplied_download_path:
+            self._cleanup_user_dir()
+        else:
+            self._cleanup_temp_dir()
         # we need to re-raise the signal to terminate gracefully
         signal.signal(signum, signal.SIG_DFL)
         os.kill(os.getpid(), signum)
@@ -142,6 +146,8 @@ class WandbFs:
                     category=requests.packages.urllib3.exceptions.InsecureRequestWarning,  # type: ignore
                 )
                 print(f"Downloading artifact to {self.download_path}")
+                # Since the cache lives inside the docker container, it is unused in future
+                # runs. Skipping the cache also avoids file duplication and extra copying.
                 artifact_path = artifact.download(root=str(self.download_path), skip_cache=True)
         return Path(artifact_path)
 
@@ -172,25 +178,30 @@ class WandbFs:
 
         return None
 
-    def cleanup(self) -> None:
-        self._cleanup_dir()
-
     def __enter__(self) -> "WandbFs":
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        self._cleanup_dir()
+        """
+        exit the context manager, we only want temp files to be cleaned up
+        """
+        self._cleanup_temp_dir()
 
-    def _cleanup_dir(self) -> None:
+    def _cleanup_user_dir(self) -> None:
         if self.user_supplied_download_path and self.download_path and self.download_path.exists():
             # remove the contents of the download path.
             print(f"Cleaning up user-specified download path...{self.download_path}")
             shutil.rmtree(self.download_path)
+        else:
+            print("No user-specified download path to clean up.")
+
+    def _cleanup_temp_dir(self) -> None:
         if self._temp_dir:
             try:
                 self._temp_dir.cleanup()
             except (OSError, FileNotFoundError):
                 # Directory might already be cleaned up or removed
+                print("Temporary directory already removed.")
                 pass
             finally:
                 self._temp_dir = None
