@@ -68,8 +68,8 @@ class BaseLLM(ABC):
 
     @contextmanager
     def download_wandb_artifact(
-        self, artifact_name: str, version: str, user_supplied_download_path: str | None
-    ) -> Generator[str, None, None]:
+        self, artifact_name: str, version: str, user_supplied_download_path: Path | None
+    ) -> Generator[Path, None, None]:
         wandb_fs = WandbFs(user_supplied_download_path=user_supplied_download_path)
         try:
             self.artifact = wandb_fs.get_artifact(artifact_name, version)
@@ -86,7 +86,7 @@ class BaseLLM(ABC):
                 local_artifact_path = Path(wandb_fs.download_path.name) / file_root
 
             print(f"{RED}[ Model located at: {local_artifact_path} ]{RESET}")
-            yield str(local_artifact_path)
+            yield local_artifact_path
         finally:
             wandb_fs.cleanup()
 

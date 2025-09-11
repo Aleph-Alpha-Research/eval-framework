@@ -458,16 +458,16 @@ class _VLLM_from_wandb_registry(VLLMModel):
         selected_formatter = self.get_formatter(formatter, formatter_identifier)
 
         download_path = (
-            str(kwargs.pop("download_path", None)) if kwargs.get("download_path") else None
+            (kwargs.pop("download_path", None)) if kwargs.get("download_path") else None
         )  # Remove download_path from kwargs
         with self.download_wandb_artifact(
             artifact_name, version, user_supplied_download_path=download_path
         ) as local_artifact_path:
             # Set LLM_NAME to local path which VLLM can use directly
-            self.LLM_NAME = local_artifact_path
+            self.LLM_NAME = str(local_artifact_path)
             super().__init__(
                 formatter=selected_formatter,
-                checkpoint_path=local_artifact_path,
+                checkpoint_path=str(local_artifact_path),
                 checkpoint_name=f"{artifact_name}/{version}",
                 **kwargs,
             )
