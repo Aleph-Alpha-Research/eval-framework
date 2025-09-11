@@ -15,6 +15,7 @@
 - Minor fix of paths quoted in generated docs
 - Refactoring of clean up handlers in `eval_framework.utils.file_ops.WandbFs`
 
+
 ## 0.2.0
 
 ### Models
