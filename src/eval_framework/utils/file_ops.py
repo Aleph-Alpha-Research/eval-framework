@@ -67,22 +67,12 @@ class WandbFs:
         because wandbfs deals with downloading files, we will need to
         make sure that at exit and at failure, the directory does not persist
         """
-        if self.user_supplied_download_path:
-            signal.signal(signal.SIGTERM, self._clean_user_path_on_signal)
-            signal.signal(signal.SIGINT, self._clean_user_path_on_signal)
-        else:
-            atexit.register(self._cleanup_dir)
-            signal.signal(signal.SIGTERM, self._clean_temp_on_signal)
-            signal.signal(signal.SIGINT, self._clean_temp_on_signal)
+        atexit.register(self._cleanup_dir)
+        signal.signal(signal.SIGTERM, self._clean_on_signal)
+        signal.signal(signal.SIGINT, self._clean_on_signal)
 
-    def _clean_temp_on_signal(self, signum: int, frame: FrameType | None) -> None:
+    def _clean_on_signal(self, signum: int, frame: FrameType | None) -> None:
         self._cleanup_dir()
-        # we need to re-raise the signal to terminate gracefully
-        signal.signal(signum, signal.SIG_DFL)
-        os.kill(os.getpid(), signum)
-
-    def _clean_user_path_on_signal(self, signum: int, frame: FrameType | None) -> None:
-        self._cleanup_dir(user_path=True)
         # we need to re-raise the signal to terminate gracefully
         signal.signal(signum, signal.SIG_DFL)
         os.kill(os.getpid(), signum)
@@ -149,6 +139,7 @@ class WandbFs:
                     "ignore",
                     category=requests.packages.urllib3.exceptions.InsecureRequestWarning,  # type: ignore
                 )
+                print(f"Downloading artifact to {self.download_path}")
                 artifact_path = artifact.download(root=str(self.download_path))
         return Path(artifact_path)
 
@@ -188,8 +179,8 @@ class WandbFs:
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self._cleanup_dir()
 
-    def _cleanup_dir(self, user_path: bool = False) -> None:
-        if user_path:
+    def _cleanup_dir(self) -> None:
+        if self.user_supplied_download_path:
             # remove the contents of the download path.
             print(f"Cleaning up user-specified download path...{self.download_path}")
             shutil.rmtree(self.download_path)
