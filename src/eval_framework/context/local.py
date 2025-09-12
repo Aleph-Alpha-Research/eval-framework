@@ -1,3 +1,5 @@
+import importlib
+from os import PathLike
 from typing import Any
 
 from eval_framework.context.eval import EvalContext, import_models
@@ -5,19 +7,40 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.tasks.eval_config import EvalConfig
 
 
+def _load_model(llm_name: str, models_path: str | PathLike | None, *, info: str = "") -> type[BaseLLM]:
+    """Load a model class either from a models file or as a fully qualified module path.
+
+    Args:
+        llm_name: The name of the model class to load, or a fully qualified module path.
+        models_path: The path to a Python file containing model class definitions
+        info: Additional info to include in error messages.
+    Returns:
+        The model class.
+    """
+    if models_path is None or "." in llm_name:
+        # The llm_name must a a fully qualified module path
+        if "." not in llm_name:
+            raise ValueError(f"LLM {info}'{llm_name}' is not a fully qualified module path.")
+        module_path, llm_class_name = llm_name.rsplit(".", 1)
+        module = importlib.import_module(module_path)
+        if not hasattr(module, llm_class_name):
+            raise ValueError(f"LLM '{llm_class_name}' not found in module '{module_path}'.")
+        return getattr(module, llm_class_name)
+    else:
+        models_dict = import_models(models_path)
+        if llm_name not in models_dict:
+            if info:
+                info = f"{info.strip()} "
+            raise ValueError(f"LLM {info}'{llm_name}' not found in {models_path}.")
+        return models_dict[llm_name]
+
+
 class LocalContext(EvalContext):
     def __enter__(self) -> "LocalContext":
-        models = import_models(self.models_path)
-        if self.llm_name not in models:
-            raise ValueError(f"LLM '{self.llm_name}' not found.")
-        llm_class = models[self.llm_name]
-
+        llm_class = _load_model(self.llm_name, models_path=self.models_path)
         self.llm_judge_class: type[BaseLLM] | None = None
-        if self.judge_models_path is not None and self.judge_model_name is not None:
-            judge_models = import_models(self.judge_models_path)
-            if self.judge_model_name not in judge_models:
-                raise ValueError(f"LLM judge '{self.judge_model_name}' not found.")
-            self.llm_judge_class = judge_models[self.judge_model_name]
+        if self.judge_model_name is not None:
+            self.llm_judge_class = _load_model(self.judge_model_name, models_path=self.judge_models_path, info="judge")
 
         self.config = EvalConfig(
             llm_class=llm_class,
