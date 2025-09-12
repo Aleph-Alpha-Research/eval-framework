@@ -322,7 +322,7 @@ class _HFLLM_from_wandb_registry(HFLLM):
         """
         self.artifact_used = False
         print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
-        download_path = kwargs.pop("download_path", None) if kwargs.get("download_path") else None
+        download_path = kwargs.pop("download_path", None)
         with self.download_wandb_artifact(
             artifact_name, version, user_supplied_download_path=download_path
         ) as local_artifact_path:
