@@ -1,21 +1,13 @@
 # Aleph Alpha Eval-Framework
 
 > **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 90+ benchmarks.
-
-## Features
-
-- 90+ Benchmarks: Covers reasoning, knowledge, coding, long-context, and safety tasks.
-- Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
-- Distributed Evaluation: Integration with Determined AI for scalable distributed evaluation.
-- Docker Support: Pre-configured Dockerfiles for local and distributed setups.
-- Flexible Model Integration: Supports models loaded via HuggingFace Transformers or custom implementations using the BaseLLM class.
-- Custom Metrics: Easily define new metrics using the BaseMetric class.
-- Rich Outputs: Generates JSON results, plots, and detailed analysis reports.
-- Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
-- Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
-- LLM-as-a-Judge: Evaluation using LLM judges.
-
 ![eval-framework](docs/eval-framework.png "eval-framework")
+
+Why Choose This Framework?
+- **Scalability**: Built for distributed evaluation using an integration with Determined AI.
+- **Extensibility**: Easily add custom models, benchmarks, and metrics with object-oriented base classes.
+- **Comprehensive**: Comes pre-loaded with over 150 tasks covering everything from reasoning and coding to safety and long-context.
+- **Robust Analysis**: Built-in support for perturbation testing, statistical significance, and LLM-as-a-judge evaluations.
 
 ## Quick Start
 
@@ -59,6 +51,20 @@ uv run pre-commit install
 ```
 
 After installation, task documentation can be generated with `uv run python -m eval_framework.utils.generate_task_docs` (see [installation docs](docs/installation.md)) for more details.
+
+
+## Features
+
+- 90+ Benchmarks: Covers reasoning, knowledge, coding, long-context, and safety tasks.
+- Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
+- Distributed Evaluation: Integration with Determined AI for scalable distributed evaluation.
+- Docker Support: Pre-configured Dockerfiles for local and distributed setups.
+- Flexible Model Integration: Supports models loaded via HuggingFace Transformers or custom implementations using the BaseLLM class.
+- Custom Metrics: Easily define new metrics using the BaseMetric class.
+- Rich Outputs: Generates JSON results, plots, and detailed analysis reports.
+- Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
+- Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
+- LLM-as-a-Judge: Evaluation using LLM judges.
 
 
 ## Benchmark Coverage & Task Categories
