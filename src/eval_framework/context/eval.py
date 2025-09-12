@@ -2,6 +2,7 @@ import importlib.util
 import inspect
 import sys
 from contextlib import AbstractContextManager
+from os import PathLike
 from pathlib import Path
 from typing import Any
 
@@ -11,7 +12,7 @@ from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig
 
 
-def import_models(models_file: Path | str) -> dict[str, type[BaseLLM]]:
+def import_models(models_file: PathLike | str) -> dict[str, type[BaseLLM]]:
     models_file = Path(models_file).resolve()
     library_path = Path(eval_framework.__path__[0]).resolve()
 
@@ -86,10 +87,10 @@ class EvalContext(AbstractContextManager):
         self.wandb_run_id = wandb_run_id
         self.hf_upload_dir = hf_upload_dir
         self.hf_upload_repo = hf_upload_repo
-        self.llm_args = llm_args
+        self.llm_args = llm_args if llm_args is not None else {}
         self.judge_models_path = judge_models_path
         self.judge_model_name = judge_model_name
-        self.judge_model_args = judge_model_args
+        self.judge_model_args = judge_model_args if judge_model_args is not None else {}
         self.batch_size = batch_size
         self.description = description
 

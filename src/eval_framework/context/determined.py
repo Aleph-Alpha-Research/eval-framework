@@ -8,7 +8,8 @@ from determined.core._context import init as determined_core_init
 from determined.core._distributed import DummyDistributedContext
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
-from eval_framework.context.eval import EvalContext, import_models
+from eval_framework.context.eval import EvalContext
+from eval_framework.context.local import _load_model
 from eval_framework.llm.base import BaseLLM
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig
@@ -111,18 +112,10 @@ class DeterminedContext(EvalContext):
             if val_cli and val_hparams and val_cli != val_hparams:
                 logger.info(f"CLI argument {name} ({val_cli}) is being overridden by hyperparameters: ({val_hparams}).")
 
-        models = import_models(self.models_path)
-        if self.hparams.llm_name not in models:
-            raise ValueError(f"LLM '{self.hparams.llm_name}' not found.")
-        llm_class = models[self.hparams.llm_name]
-
+        llm_class = _load_model(self.llm_name, models_path=self.models_path)
         llm_judge_class: type[BaseLLM] | None = None
-        judge_model_name = self.hparams.task_args.judge_model_name or self.judge_model_name
-        if self.judge_models_path is not None and judge_model_name is not None:
-            judge_models = import_models(self.judge_models_path)
-            if judge_model_name not in judge_models:
-                raise ValueError(f"LLM judge '{judge_model_name}' not found.")
-            llm_judge_class = judge_models[judge_model_name]
+        if self.judge_model_name is not None:
+            llm_judge_class = _load_model(self.judge_model_name, models_path=self.judge_models_path, info="judge")
 
         # for all optional hyperparameters, resort to the respective CLI argument if the hyperparameter is not set
         self.config = EvalConfig(
