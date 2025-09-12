@@ -1,15 +1,18 @@
+import errno
 import os
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
+from unittest import mock
 from unittest.mock import Mock, patch
 
 import pytest
-import wandb
 
+import wandb
 from eval_framework.utils.file_ops import (
     WandbFs,
 )
+from tests.mock_wandb import MockArtifact
 
 
 @pytest.fixture
@@ -152,3 +155,33 @@ class TestWandbFs:
 
         # Clean up
         temp_dir.cleanup()
+
+    def test_download_artifact_out_of_disk_space(
+        self, wandb_fs: WandbFs, mock_wandb_api: Mock, mock_wandb_artifact: MockArtifact
+    ) -> None:
+        """
+        Test the download_artifact method to ensure it handles artifact downloads correctly.
+        """
+        wandb_fs.api = mock_wandb_api
+
+        def fail_open(*args, **kwargs):
+            raise OSError(errno.ENOSPC, "No space left on device")
+
+        # Call the download_artifact method
+        with pytest.raises(OSError, match="No space left on device"):
+            with mock.patch.object(mock_wandb_artifact, "download", side_effect=fail_open):
+                _ = wandb_fs.download_artifact(mock_wandb_artifact)
+        assert wandb_fs.artifact_downloaded is False
+
+    def test_download_artifact(
+        self, wandb_fs: WandbFs, mock_wandb_api: Mock, mock_wandb_artifact: MockArtifact
+    ) -> None:
+        """
+        Test the download_artifact method to ensure it handles artifact downloads correctly.
+        """
+        # Mock the artifact to simulate download behavior
+        # Assign the mock API to the WandbFs instance
+        wandb_fs.api = mock_wandb_api
+
+        wandb_fs.download_artifact(mock_wandb_artifact)
+        assert wandb_fs.artifact_downloaded is True
