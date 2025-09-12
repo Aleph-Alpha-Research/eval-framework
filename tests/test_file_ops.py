@@ -132,7 +132,7 @@ class TestWandbFs:
         (other_dir / "readme.txt").touch()
 
         result = wandb_fs.find_hf_checkpoint_root_from_path_list()
-        assert result == str(tempdir / "models/my-model")
+        assert result == tempdir / "models/my-model"
 
         # Clean up
         temp_dir.cleanup()

@@ -2,6 +2,7 @@ import re
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from enum import Enum
+from pathlib import Path
 from typing import Any, Literal, overload, override
 
 from pydantic import BaseModel, field_serializer, field_validator
@@ -288,7 +289,7 @@ class Llama3Formatter(BaseFormatter):
 
 
 class HFFormatter(BaseFormatter):
-    def __init__(self, hf_llm_name: str, chat_template_kwargs: dict[str, Any] | None = None) -> None:
+    def __init__(self, hf_llm_name: str | Path, chat_template_kwargs: dict[str, Any] | None = None) -> None:
         super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained(hf_llm_name)
         self.chat_template_kwargs = chat_template_kwargs or {}
