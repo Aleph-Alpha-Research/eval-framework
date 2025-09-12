@@ -1,5 +1,6 @@
 import atexit
 import os
+import shutil
 import signal
 import tempfile
 import urllib
@@ -12,6 +13,7 @@ from unittest.mock import patch
 import boto3
 import boto3.session
 import requests
+
 import wandb
 
 
@@ -54,7 +56,7 @@ class WandbFs:
         self._temp_dir: tempfile.TemporaryDirectory | None = None
         self.download_path: Path | None = None
         self._setup_s3_client()
-        self._setup_cleanup_handlers()
+        # self._setup_cleanup_handlers()
         self.original_resource = boto3.session.Session().resource
 
     def _unverified_resource(self, service_name: str, *args: Any, **kwargs: Any) -> Any:
@@ -66,12 +68,18 @@ class WandbFs:
         because wandbfs deals with downloading files, we will need to
         make sure that at exit and at failure, the directory does not persist
         """
+        # only clean up temp dir at exit
         atexit.register(self._cleanup_temp_dir)
-        for sig in [signal.SIGTERM, signal.SIGINT]:
-            signal.signal(sig, self._signal_handler)
 
-    def _signal_handler(self, signum: int, frame: FrameType | None) -> None:
-        self._cleanup_temp_dir()
+        # on interrupt or termination
+        signal.signal(signal.SIGTERM, self._clean_on_signal)
+        signal.signal(signal.SIGINT, self._clean_on_signal)
+
+    def _clean_on_signal(self, signum: int, frame: FrameType | None) -> None:
+        if self.user_supplied_download_path:
+            self._cleanup_user_dir()
+        else:
+            self._cleanup_temp_dir()
         # we need to re-raise the signal to terminate gracefully
         signal.signal(signum, signal.SIG_DFL)
         os.kill(os.getpid(), signum)
@@ -108,17 +116,7 @@ class WandbFs:
         file_list = list(map(lambda x: x.path_uri, [x for x in artifact.files()]))
         return file_list
 
-    def download_artifact(
-        self,
-        artifact: wandb.Artifact,
-    ) -> Path:
-        """
-        use_artifact determines the filesystem that the artifact is on, and does one of two things:
-        1. if the file system is remote (s3 type storage) then it will download the artifact to a temp diectory
-           we then call wandb.use_artifact on the artifact that we downloaded.
-        2. if this download fails, we patch boto3 to retrieve the artifact.
-        """
-        # create tempdir
+    def _download(self, artifact: wandb.Artifact) -> Path:
         artifact_subdir = "/".join(artifact.name.split(":"))
         if self.user_supplied_download_path is None:
             temp_dir = tempfile.TemporaryDirectory()
@@ -138,7 +136,25 @@ class WandbFs:
                     "ignore",
                     category=requests.packages.urllib3.exceptions.InsecureRequestWarning,  # type: ignore
                 )
-                artifact_path = artifact.download(root=str(self.download_path))
+                print(f"Downloading artifact to {self.download_path}")
+                # Since the cache lives inside the docker container, it is unused in future
+                # runs. Skipping the cache also avoids file duplication and extra copying.
+                artifact_path = artifact.download(root=str(self.download_path), skip_cache=True)
+        return Path(artifact_path)
+
+    def download_artifact(
+        self,
+        artifact: wandb.Artifact,
+    ) -> Path:
+        """
+        use_artifact determines the filesystem that the artifact is on, and does one of two things:
+        1. if the file system is remote (s3 type storage) then it will download the artifact to a temp diectory
+           we then call wandb.use_artifact on the artifact that we downloaded.
+        2. if this download fails, we patch boto3 to retrieve the artifact.
+        """
+        self.artifact_downloaded = False
+        artifact_path = self._download(artifact)
+        self.artifact_downloaded = True
         return Path(artifact_path)
 
     def find_hf_checkpoint_root_from_path_list(self) -> str | None:
@@ -168,17 +184,30 @@ class WandbFs:
 
         return None
 
-    def cleanup(self) -> None:
-        self._cleanup_temp_dir()
-
     def __enter__(self) -> "WandbFs":
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        """
+        exit the context manager, we only want temp files to be cleaned up
+        """
         self._cleanup_temp_dir()
 
+    def _cleanup_user_dir(self) -> None:
+        if (
+            not self._artifact_downloaded  # failed or not downloaded
+            and self.user_supplied_download_path  # user specified a path
+            and self.download_path  # path to the download directory
+            and self.download_path.exists()  # path exists
+        ):
+            # remove the contents of the download path.
+            print(f"Cleaning up user-specified download path...{self.download_path}")
+            shutil.rmtree(self.download_path)
+        else:
+            print("No user-specified download path to clean up.")
+
     def _cleanup_temp_dir(self) -> None:
-        if hasattr(self, "_temp_dir") and self._temp_dir:
+        if self._temp_dir:
             try:
                 self._temp_dir.cleanup()
             except (OSError, FileNotFoundError):
@@ -187,6 +216,3 @@ class WandbFs:
             finally:
                 self._temp_dir = None
                 self.download_path = None
-
-    def __del__(self) -> None:
-        self._cleanup_temp_dir()
