@@ -1,6 +1,57 @@
 # Aleph Alpha Eval-Framework
 
 > **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 90+ benchmarks.
+![eval-framework](docs/eval-framework.png "eval-framework")
+
+Why Choose This Framework?
+- **Scalability**: Built for distributed evaluation using an integration with Determined AI.
+- **Extensibility**: Easily add custom models, benchmarks, and metrics with object-oriented base classes.
+- **Comprehensive**: Comes pre-loaded with over 150 tasks covering everything from reasoning and coding to safety and long-context.
+- **Robust Analysis**: Built-in support for perturbation testing, statistical significance, and LLM-as-a-judge evaluations.
+
+## Quick Start
+
+The codebase is tested and compatible with Python 3.12 and PyTorch 2.5.
+You will also need the appropriate CUDA dependencies and version installed on your system for GPU support.
+
+The easiest way to get started is by installing the library via `pip` and use it as an external dependency.
+```
+pip install eval_framework
+```
+
+There are optional extras available to unlock specific features of the library:
+- `mistral` for inference on Mistral models
+- `transformers` for inference using the transformers library
+- `api` for inference using the aleph-alpha client.
+- `vllm` for inference via VLLM
+- `determined` for running jobs via determined
+- `comet` for the COMET metric
+
+As a short hand, the `all` extra installs all of the above.
+
+For development, you can instead install it directly from the repository instead, please first install
+ [uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+To install the project with all optional extras use
+```bash
+uv sync --all-extras
+```
+
+We provide custom groups to control optional extras.
+- `flash_attn`: Install `flash_attn` with correct handling of build isolation
+
+Thus, the following will setup the project with `flash_attn`
+```bash
+uv sync --all-extras --group flash_attn
+```
+
+There is also a pre-commit hook to help with development:
+```
+uv run pre-commit install
+```
+
+After installation, task documentation can be generated with `uv run python -m eval_framework.utils.generate_task_docs` (see [installation docs](docs/installation.md)) for more details.
+
 
 ## Features
 
@@ -15,7 +66,6 @@
 - Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
 - LLM-as-a-Judge: Evaluation using LLM judges.
 
-![eval-framework](docs/eval-framework.png "eval-framework")
 
 ## Benchmark Coverage & Task Categories
 
@@ -66,49 +116,6 @@ Evaluation metrics include:
 - **Efficiency Metrics:** Bytes per Sequence Position
 
 For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmarks_and_metrics.md).
-
-## Quick Start
-
-The codebase is tested and compatible with Python 3.12 and PyTorch 2.5.
-You will also need the appropriate CUDA dependencies and version installed on your system for GPU support.
-
-The easiest way to get started is by installing the library via `pip` and use it as an external dependency.
-```
-pip install eval_framework
-```
-
-There are optional extras available to unlock specific features of the library:
-- `mistral` for inference on Mistral models
-- `transformers` for inference using the transformers library
-- `api` for inference using the aleph-alpha client.
-- `vllm` for inference via VLLM
-- `determined` for running jobs via determined
-- `comet` for the COMET metric
-
-As a short hand, the `all` extra installs all of the above.
-
-For development, you can instead install it directly from the repository instead, please first install
- [uv](https://docs.astral.sh/uv/getting-started/installation/)
-
-To install the project with all optional extras use
-```bash
-uv sync --all-extras
-```
-
-We provide custom groups to control optional extras.
-- `flash_attn`: Install `flash_attn` with correct handling of build isolation
-
-Thus, the following will setup the project with `flash_attn`
-```bash
-uv sync --all-extras --group flash_attn
-```
-
-There is also a pre-commit hook to help with development:
-```
-uv run pre-commit install
-```
-
-After installation, task documentation can be generated with `uv run python -m eval_framework.utils.generate_task_docs` (see [docs/installation.md(docs/installation.md)) for more details.
 
 ## Getting Started
 
