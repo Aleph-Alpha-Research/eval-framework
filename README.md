@@ -29,7 +29,7 @@ There are optional extras available to unlock specific features of the library:
 
 As a short hand, the `all` extra installs all of the above.
 
-For development, you can instead install it directly from the repository instead, please first install
+For development, you can install it directly from the repository instead, please first install
  [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 To install the project with all optional extras use
