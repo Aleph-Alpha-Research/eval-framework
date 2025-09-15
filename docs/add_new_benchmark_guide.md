@@ -72,7 +72,7 @@ def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
     assert target is not None and isinstance(target, str)
     return target
 
-def _get_eval_kwargs(self, item: dict[str, Any]) -> dict[str, Any] | None:
+def _get_context(self, item: dict[str, Any]) -> BaseMetricContext | list[BaseMetricContext] | None:
     """Additional parameters for evaluation metrics."""
     return None
 
