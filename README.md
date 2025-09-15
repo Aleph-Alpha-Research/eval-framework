@@ -4,10 +4,9 @@
 ![eval-framework](docs/eval-framework.png "eval-framework")
 
 Why Choose This Framework?
-- **Scalability**: Built for distributed evaluation using an integration with Determined AI.
+- **Scalability**: Built for distributed evaluation. Currently providing an integration with Determined AI.
 - **Extensibility**: Easily add custom models, benchmarks, and metrics with object-oriented base classes.
-- **Comprehensive**: Comes pre-loaded with over 150 tasks covering everything from reasoning and coding to safety and long-context.
-- **Robust Analysis**: Built-in support for perturbation testing, statistical significance, and LLM-as-a-judge evaluations.
+- **Comprehensive**: Comes pre-loaded with over 90 tasks covering a broad and diverse range, from reasoning and coding to safety and long-context. Also comes with a comprehensive set of metrics, including LLM-as-a-judge evaluations.
 
 ## Quick Start
 
@@ -29,7 +28,7 @@ There are optional extras available to unlock specific features of the library:
 
 As a short hand, the `all` extra installs all of the above.
 
-For development, you can install it directly from the repository instead, please first install
+For development, you can instead install it directly from the repository. Please first install
  [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 To install the project with all optional extras use
@@ -44,13 +43,6 @@ Thus, the following will setup the project with `flash_attn`
 ```bash
 uv sync --all-extras --group flash_attn
 ```
-
-There is also a pre-commit hook to help with development:
-```
-uv run pre-commit install
-```
-
-After installation, task documentation can be generated with `uv run python -m eval_framework.utils.generate_task_docs` (see [installation docs](docs/installation.md)) for more details.
 
 
 ## Features
