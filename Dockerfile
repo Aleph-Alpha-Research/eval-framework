@@ -28,7 +28,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
     # Installation
     apt-get update && \
     apt-get install -y --no-install-recommends \
-      openssh-client \
       htop \
       ibverbs-providers \
       libibverbs1  \
@@ -36,6 +35,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache \
       git \
       jq \
       docker-ce-cli \
+      # determined
+      openssh-client \
+      openssh-server \
       # Needed for Github caching
       zstd \
       # Correct language support

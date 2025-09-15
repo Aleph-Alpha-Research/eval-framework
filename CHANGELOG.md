@@ -4,6 +4,9 @@
 
 ### Models
 
+- The `--llm-name` (and `--judge-model-name`) argument can now also be a module path like `eval_framework.llm.huggingface.HFLLM`.
+  Combining this with `--llm-args` (`-judge-model-args`) should cover many use-cases without having to provide a `models.py` file.
+
 ### Tasks
 
 ### Metrics

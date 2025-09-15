@@ -14,8 +14,7 @@ And execute a single evaluation locally:
 
 ```bash
 uv run eval_framework \
-    --models src/eval_framework/llm/models.py \
-    --llm-name Smollm135MInstruct \
+    --llm-name 'eval_framework.llm.models.Smollm135MInstruct' \
     --task-name "GSM8K" \
     --output-dir ./eval \
     --num-fewshot 5 \
@@ -30,13 +29,13 @@ uv run eval_framework [OPTIONS]
 
 ### Required Arguments
 
-**`--models MODELS`**
-Path to the Python module file containing model classes.
+**`--llm-name LLM_NAME`**
+Either a module path to a model, or the name of a model found in the file provided via the `--models` flag.
 
 ### Execution Configuration
 
-**`--llm-name LLM_NAME`**
-The class derived from `eval_framework.llm.base.BaseLLM` found in the `models.py` module to instantiate for evaluation.
+**`--models MODELS`**
+Path to the Python module file containing model classes.
 
 **`--llm-args [LLM_ARGS ...]`**
 Arguments to pass to the LLM as key=value pairs.
@@ -118,8 +117,7 @@ You can run models directly from Hugging Face Hub using the `HFLLM_from_name` cl
 
 ```bash
 uv run eval_framework \
-    --models src/eval_framework/llm/models.py \
-    --llm-name HFLLM_from_name \
+    --llm-name 'eval_framework.llm.huggingface.HFLLM_from_name' \
     --llm-args model_name="microsoft/DialoGPT-medium" formatter="Llama3Formatter" \
     --task-name "GSM8K" \
     --output-dir ./eval \
@@ -135,8 +133,7 @@ vLLM models support configurable sampling parameters through the `--llm-args` pa
 
 ```bash
 uv run eval_framework \
-    --models src/eval_framework/llm/models.py \
-    --llm-name Qwen3_0_6B_VLLM \
+    --llm-name 'eval_framework.llm.models.Qwen3_0_6B_VLLM' \
     --llm-args sampling_params.temperature=0.7 sampling_params.top_p=0.95 sampling_params.max_tokens=150 \
     --task-name "GSM8K" \
     --output-dir ./eval \
@@ -148,8 +145,7 @@ You can also combine sampling parameters with other model arguments:
 
 ```bash
 uv run eval_framework \
-    --models src/eval_framework/llm/models.py \
-    --llm-name Qwen3_0_6B_VLLM \
+    --llm-name 'eval_framework.llm.models.Qwen3_0_6B_VLLM' \
     --llm-args max_model_len=2048 sampling_params.temperature=0.8 sampling_params.top_p=0.9 \
     --task-name "GSM8K" \
     --output-dir ./eval \
