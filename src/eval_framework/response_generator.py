@@ -374,7 +374,7 @@ class ResponseGenerator:
 
         # add task specific metadata
         metadata["task_metadata"] = self.task.get_metadata()
-        
+
         try:
             assert get_cluster_info is not None, "Determined cluster info not available"
             info = get_cluster_info()
