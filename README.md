@@ -11,7 +11,7 @@ Why Choose This Framework?
 ## Quick Start
 
 The codebase is tested and compatible with Python 3.12 and PyTorch 2.5.
-You will also need the appropriate CUDA dependencies and version installed on your system for GPU support.
+You will also need the appropriate CUDA dependencies and version installed on your system for GPU support. Detailed installation instructions can be found [here](docs/installation.md).
 
 The easiest way to get started is by installing the library via `pip` and use it as an external dependency.
 ```
@@ -44,6 +44,19 @@ Thus, the following will setup the project with `flash_attn`
 uv sync --all-extras --group flash_attn
 ```
 
+To evaluate a single benchmark locally, you can use the following command:
+
+```bash
+eval_framework \
+    --models src/eval_framework/llm/models.py \
+    --llm-name Smollm135MInstruct \
+    --task-name "GSM8K" \
+    --output-dir ./eval \
+    --num-fewshot 5 \
+    --num-samples 10
+```
+
+For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usage.md).
 
 ## Features
 
@@ -178,22 +191,6 @@ pip install eval_framework[transformers]
 - **Scale your evaluations**: Use [Determined AI integration](docs/using_determined.md) for distributed evaluation
 - **Understand your results**: Read our [results interpretation guide](docs/understanding_results_guide.md)
 - **Log results in WandB**: See how [we integrate WandB](docs/wandb_integration.md) for metric and lineage tracking
-
-### Example CLI Usage
-
-To evaluate a single benchmark locally, you can use the following command:
-
-```bash
-eval_framework \
-    --models src/eval_framework/llm/models.py \
-    --llm-name Smollm135MInstruct \
-    --task-name "GSM8K" \
-    --output-dir ./eval \
-    --num-fewshot 5 \
-    --num-samples 10
-```
-
-For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usage.md).
 
 ## Documentation
 
