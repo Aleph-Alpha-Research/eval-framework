@@ -49,7 +49,7 @@ class WandbFs:
     def __init__(self, user_supplied_download_path: str | Path | None = None):
         self.api = wandb.Api()
         self.user_supplied_download_path: Path | tempfile.TemporaryDirectory | None = (
-            user_supplied_download_path if user_supplied_download_path else None
+            user_supplied_download_path
         )
         self._temp_dir: tempfile.TemporaryDirectory | None = None
         self.download_path: Path | None = None
