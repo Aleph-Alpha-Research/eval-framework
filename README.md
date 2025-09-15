@@ -214,6 +214,10 @@ For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usa
 - **[Using Determined](docs/using_determined.md)** - Guide for distributed evaluation using Determined AI
 - **[Controlling Upload Results](docs/controlling_upload_results.md)** - How to manage and control the upload of evaluation results
 
+### Contributing
+
+- **[Contributing Guide](CONTRIBUTING.md)** - Guide for contributing to this project
+
 ### Citation
 
 If you use `eval-framework` in your research, please cite:
