@@ -17,6 +17,7 @@
 - Added wandb logging and registry checkpoint loading with huggingface and vllm backends
 - Removed `torch` as a main dependency of `eval_framework`
 - Documentation improvements
+- Reduced redundant string/path casting
 
 ## 0.2.0
 
