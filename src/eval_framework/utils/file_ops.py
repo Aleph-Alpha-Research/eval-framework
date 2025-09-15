@@ -3,7 +3,6 @@ import os
 import shutil
 import signal
 import tempfile
-import urllib
 import warnings
 from pathlib import Path
 from types import FrameType
@@ -13,7 +12,6 @@ from unittest.mock import patch
 import boto3
 import boto3.session
 import requests
-
 import wandb
 
 
@@ -40,12 +38,10 @@ class WandbFs:
         as a cache, so if the artifact is already present, it will not be re-downloaded.
 
     example usage:
-    >>> with WandbFs("./my-download-path/) as wandb_fs:
-    ...    artifact = wandb_fs.get_artifact("my-artifact", version="v1")
-    ...    file_list = wandb_fs.ls(artifact)
-    ...    download_path = wandb_fs.download_artifact(artifact)
-    ...    checkpoint_root = wandb_fs.find_hf_checkpoint_root_from_path_list(file_list)
-
+    >> with WandbFs("./my-download-path/") as wandb_fs:
+    ..    artifact = wandb_fs.get_artifact("my-artifact", version="v1")
+    ..    download_path = wandb_fs.download_artifact(artifact)
+    ..    file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
     """
 
     def __init__(self, user_supplied_download_path: str | None = None):
@@ -100,24 +96,19 @@ class WandbFs:
     def get_artifact(self, artifact_id: str, version: str = "latest") -> wandb.Artifact:
         return self.api.artifact(f"wandb-registry-model/{artifact_id}:{version}")
 
-    def get_bucket_prefix(self, artifact: str) -> tuple[str, str]:
-        _, bucket, prefix, *_ = urllib.parse.urlparse(artifact)
-        return bucket, prefix
-
-    def ls(self, artifact: wandb.Artifact) -> list[str]:
+    def download_artifact(
+        self,
+        artifact: wandb.Artifact,
+    ) -> Path:
         """
-        list all files in the artifact
-
-        Args:
-            artifact: The wandb.Artifact to list files from.
-        Returns:
-            list | The list of file paths in the artifact.
+        use_artifact determines the filesystem that the artifact is on, and does one of two things:
+        1. if the file system is remote (s3 type storage) then it will download the artifact to a temp diectory
+           we then call wandb.use_artifact on the artifact that we downloaded.
+        2. if this download fails, we patch boto3 to retrieve the artifact.
         """
-        file_list = list(map(lambda x: x.path_uri, [x for x in artifact.files()]))
-        return file_list
+        self.artifact_downloaded = False
 
-    def _download(self, artifact: wandb.Artifact) -> Path:
-        artifact_subdir = "/".join(artifact.name.split(":"))
+        artifact_subdir = "/".join(artifact.name.split(":"))  # this is fine if not tempdir
         if self.user_supplied_download_path is None:
             temp_dir = tempfile.TemporaryDirectory()
             self.download_path = Path(temp_dir.name) / artifact_subdir
@@ -140,24 +131,12 @@ class WandbFs:
                 # Since the cache lives inside the docker container, it is unused in future
                 # runs. Skipping the cache also avoids file duplication and extra copying.
                 artifact_path = artifact.download(root=str(self.download_path), skip_cache=True)
-        return Path(artifact_path)
 
-    def download_artifact(
-        self,
-        artifact: wandb.Artifact,
-    ) -> Path:
-        """
-        use_artifact determines the filesystem that the artifact is on, and does one of two things:
-        1. if the file system is remote (s3 type storage) then it will download the artifact to a temp diectory
-           we then call wandb.use_artifact on the artifact that we downloaded.
-        2. if this download fails, we patch boto3 to retrieve the artifact.
-        """
-        self.artifact_downloaded = False
-        artifact_path = self._download(artifact)
         self.artifact_downloaded = True
+
         return Path(artifact_path)
 
-    def find_hf_checkpoint_root_from_path_list(self) -> str | None:
+    def find_hf_checkpoint_root_from_path_list(self) -> Path | None:
         """Find HuggingFace checkpoint root from a list of file paths.
 
         Args:
@@ -180,7 +159,7 @@ class WandbFs:
             assert len(checkpoint_roots) == 1, (
                 "Multiple checkpoints found"
             )  # if there are more than one, we have a problem
-            return str(checkpoint_roots[0].parent)
+            return checkpoint_roots[0].parent
 
         return None
 

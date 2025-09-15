@@ -7,8 +7,8 @@ from unittest import mock
 from unittest.mock import Mock, patch
 
 import pytest
-
 import wandb
+
 from eval_framework.utils.file_ops import (
     WandbFs,
 )
@@ -75,24 +75,6 @@ class TestWandbFs:
 
     def test_entity_property(self, wandb_fs: WandbFs) -> None:
         assert wandb_fs.entity == "test-entity"
-
-    def test_get_bucket_prefix(self, wandb_fs: WandbFs) -> None:
-        bucket, prefix = wandb_fs.get_bucket_prefix("s3://my-bucket/path/to/file.json")
-
-        assert bucket == "my-bucket"
-        assert prefix == "/path/to/file.json"
-
-    def test_ls(self, wandb_fs: WandbFs, mock_wandb_api: Mock) -> None:
-        # Ensure the wandb_fs uses the same mock API instance
-        wandb_fs.api = mock_wandb_api
-
-        # Set up artifact with specific files
-        mock_wandb_api.set_artifact("test-model", ["s3://bucket/model/config.json", "s3://bucket/model/tokenizer.json"])
-        artifact = wandb_fs.get_artifact("test-model")
-
-        file_list = wandb_fs.ls(artifact)
-
-        assert file_list == ["s3://bucket/model/config.json", "s3://bucket/model/tokenizer.json"]
 
     def test_download_and_use_artifact_s3(
         self,
