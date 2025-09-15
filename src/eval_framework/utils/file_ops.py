@@ -64,8 +64,8 @@ class WandbFs:
         because wandbfs deals with downloading files, we will need to
         make sure that at exit and at failure, the directory does not persist
         """
-        # only clean up temp dir at exit
         atexit.register(self._cleanup_temp_dir)
+        atexit.register(self._cleanup_user_dir)
 
         # on interrupt or termination
         signal.signal(signal.SIGTERM, self._clean_on_signal)
