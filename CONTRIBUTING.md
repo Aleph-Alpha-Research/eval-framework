@@ -39,6 +39,7 @@ We welcome several types of contributions:
    uv tool install pre-commit
    uv run pre-commit install
    ```
+7. **Documentation** After installation, task documentation can be generated with `uv run python -m eval_framework.utils.generate_task_docs` (see [installation docs](docs/installation.md)) for more details.
 
 ## Submitting Changes
 
