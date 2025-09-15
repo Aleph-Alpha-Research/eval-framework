@@ -106,7 +106,7 @@ class WandbFs:
            we then call wandb.use_artifact on the artifact that we downloaded.
         2. if this download fails, we patch boto3 to retrieve the artifact.
         """
-        self.artifact_downloaded = False
+        self._artifact_downloaded = False
 
         artifact_subdir = "/".join(artifact.name.split(":"))
         if self.user_supplied_download_path is None:
@@ -117,7 +117,7 @@ class WandbFs:
 
         self.download_path = base_path / artifact_subdir
         if self.user_supplied_download_path and self.download_path.exists():
-            self.artifact_downloaded = True
+            self._artifact_downloaded = True
             return self.download_path
 
         with patch("boto3.session.Session.resource", new=self._unverified_resource):
@@ -133,7 +133,7 @@ class WandbFs:
                 # runs. Skipping the cache also avoids file duplication and extra copying.
                 artifact_path = artifact.download(root=str(self.download_path), skip_cache=True)
 
-        self.artifact_downloaded = True
+        self._artifact_downloaded = True
 
         return Path(artifact_path)
 

@@ -3,6 +3,7 @@ import os
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 from unittest import mock
 from unittest.mock import Mock, patch
 
@@ -146,14 +147,15 @@ class TestWandbFs:
         """
         wandb_fs.api = mock_wandb_api
 
-        def fail_open(*args, **kwargs):
+        def fail_open(*args: Any, **kwargs: Any) -> None:
             raise OSError(errno.ENOSPC, "No space left on device")
 
         # Call the download_artifact method
         with pytest.raises(OSError, match="No space left on device"):
             with mock.patch.object(mock_wandb_artifact, "download", side_effect=fail_open):
-                _ = wandb_fs.download_artifact(mock_wandb_artifact)
-        assert wandb_fs.artifact_downloaded is False
+                # ignore the type since we're using a mock artifact
+                _ = wandb_fs.download_artifact(mock_wandb_artifact)  # type: ignore
+        assert wandb_fs._artifact_downloaded is False
 
     def test_download_artifact(
         self, wandb_fs: WandbFs, mock_wandb_api: Mock, mock_wandb_artifact: MockArtifact
@@ -165,5 +167,6 @@ class TestWandbFs:
         # Assign the mock API to the WandbFs instance
         wandb_fs.api = mock_wandb_api
 
-        wandb_fs.download_artifact(mock_wandb_artifact)
-        assert wandb_fs.artifact_downloaded is True
+        # ignore the type since we're using a mock artifact
+        wandb_fs.download_artifact(mock_wandb_artifact)  # type: ignore
+        assert wandb_fs._artifact_downloaded is True
