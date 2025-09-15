@@ -4,15 +4,18 @@
 
 ### Models
 
+- The `--llm-name` (and `--judge-model-name`) argument can now also be a module path like `eval_framework.llm.huggingface.HFLLM`.
+  Combining this with `--llm-args` (`-judge-model-args`) should cover many use-cases without having to provide a `models.py` file.
+
 ### Tasks
 
 ### Metrics
 
 ### General
-- updated docs wrt. usage of `eval_framework.utils.generate_task_docs`
 - Added wandb logging and registry checkpoint loading with huggingface and vllm backends
 - Removed `torch` as a main dependency of `eval_framework`
 - Updated docs wrt. usage of `eval_framework.utils.generate_task_docs`
+- Minor fix of paths quoted in generated docs
 
 ## 0.2.0
 
