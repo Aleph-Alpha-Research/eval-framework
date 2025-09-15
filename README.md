@@ -186,8 +186,7 @@ To evaluate a single benchmark locally, you can use the following command:
 
 ```bash
 eval_framework \
-    --models src/eval_framework/llm/models.py \
-    --llm-name Smollm135MInstruct \
+    --models 'eval_framework.llm.models.Smollm135MInstruct' \
     --task-name "GSM8K" \
     --output-dir ./eval \
     --num-fewshot 5 \
