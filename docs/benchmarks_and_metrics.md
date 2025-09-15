@@ -25,6 +25,7 @@ Additional task documentation can be generated with the script `utils/generate-t
 | MBPP | `MBPP_PROMPT_WITHOUT_TESTS` | Logical Reasoning | Programming | [0] | en |
 | MBPP | `MBPP_PROMPT_WITHOUT_TESTS_SANITIZED` | Logical Reasoning | Programming | [0] | en |
 | PAWS-X | `PAWS-X` | Text Distillation | Classification | [0, 5] | en |
+| SPhyR  | `SPHYR` | Logical Reasoning | Puzzle | [0] | en |
 | SQuAD | `SQuAD` | Text Distillation | Closed QA | [0, 5] | en |
 | SQuAD v2 | `SQuAD2` | Text Distillation | Closed QA | [0, 5] | en |
 | TableBench | `TableBench` | Text Distillation, Logical Reasoning | Classification, Math | [0] | en |
@@ -32,7 +33,6 @@ Additional task documentation can be generated with the script `utils/generate-t
 | WMT 14 | `WMT14` | Text Translation | Translation | [0, 5] | en, fr |
 | WMT 16 | `WMT16` | Text Translation | Translation | [0, 5] | en, ger |
 | WMT 20 | `WMT20` | Text Translation | Translation | [0, 5] | en, ger, fr |
-| SPhyR  | `SPHYR` | Logical Reasoning | Puzzle | [0] | en |
 
 ## Loglikelihoods
 
@@ -46,12 +46,10 @@ Additional task documentation can be generated with the script `utils/generate-t
 | GPQA | `GPQA` | Text Distillation | Classification | [0] | en |
 | Hellaswag | `HellaSwag` | Logical Reasoning | Reasoning | [0, 5, 10] | en |
 | Hellaswag German | `HellaSwag German` | Logical Reasoning | Reasoning | [0, 5, 10] | en, ger |
-| Legal Sentence Classification | `LSC` | Text Distillation | Classification | [0, 5] | en |
 | MMLU | `MMLU` | Text Distillation | Classification | [0, 5] | en |
 | Full Text MMLU | `Full Text MMLU` | Text Distillation | Classification | [0, 5] | en |
 | MMLU Pro | `MMLU Pro` | Text Distillation | Classification | [0, 5] | en |
 | MMMLU | `MMMLU` | Text Distillation | Classification | [0, 5] | fr, de, es, it, pt, ar |
-| MuSR | `MuSR` | Logical Reasoning | Reasoning | [0] | en |
 | PIQA | `PIQA` | Text Distillation | Classification | [0] | en |
 | OpenBookQA | `OpenBookQA` | Text Distillation | Classification | [0] | en |
 | SciQ | `SciQ` | Text Distillation | Classification | [0] | en |

@@ -106,7 +106,7 @@ def generate_docs_for_task(
         f.write("````\n\n")
 
         f.write(f"- Module: [{task_class.__module__}]({task_class.__module__})\n\n")
-        task_file = re.sub(".*eval_framework/", "src/eval_framework/", inspect.getfile(task_class))
+        task_file = re.sub(r".*(eval_framework[^/]*)/", r"src/\1/", inspect.getfile(task_class))
         f.write(f"- File: [{task_file}](../../{task_file})\n\n")
 
         if http_path:
@@ -161,8 +161,8 @@ def generate_readme_list(output_docs_directory: Path) -> None:
             "This directory contains the generated documentation for all benchmark tasks available in the package.\n\n"
             "The documentation can be generated or updated with "
             "`uv run -m eval_framework.utils.generate_task_docs`.\n\n"
-            "NOTE: This is an automatically generated file. Any manual modifications will not be preserved when"
-            "the file is next updated.\n\n"
+            "NOTE: This is an automatically generated file. Any manual modifications will not be preserved when "
+            "the file is updated.\n\n"
         )
 
         f.write("## List of tasks\n\n")
