@@ -458,9 +458,8 @@ class _VLLM_from_wandb_registry(VLLMModel):
 
         selected_formatter = self.get_formatter(formatter, formatter_identifier)
 
-        download_path = (
-            (kwargs.pop("download_path", None)) if kwargs.get("download_path") else None
-        )  # Remove download_path from kwargs
+        # Remove download_path from kwargs
+        download_path = kwargs.pop("download_path", None)
         with self.download_wandb_artifact(
             artifact_name, version, user_supplied_download_path=download_path
         ) as local_artifact_path:
