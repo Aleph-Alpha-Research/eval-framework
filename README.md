@@ -3,10 +3,21 @@
 > **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 90+ benchmarks.
 ![eval-framework](docs/eval-framework.png "eval-framework")
 
-Why Choose This Framework?
+## Why Choose This Framework?
+
 - **Scalability**: Built for distributed evaluation. Currently providing an integration with Determined AI.
 - **Extensibility**: Easily add custom models, benchmarks, and metrics with object-oriented base classes.
 - **Comprehensive**: Comes pre-loaded with over 90 tasks covering a broad and diverse range, from reasoning and coding to safety and long-context. Also comes with a comprehensive set of metrics, including LLM-as-a-judge evaluations.
+
+## Other features
+
+- Flexible Model Integration: Supports models loaded via HuggingFace Transformers or custom implementations using the BaseLLM class.
+- Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
+- Custom Metrics: Easily define new metrics using the BaseMetric class.
+- Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
+- Rich Outputs: Generates JSON results, plots, and detailed analysis reports.
+- Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
+- Docker Support: Pre-configured Dockerfiles for local and distributed setups.
 
 ## Quick Start
 
@@ -19,12 +30,12 @@ pip install eval_framework
 ```
 
 There are optional extras available to unlock specific features of the library:
-- `mistral` for inference on Mistral models
-- `transformers` for inference using the transformers library
 - `api` for inference using the aleph-alpha client.
-- `vllm` for inference via VLLM
-- `determined` for running jobs via determined
-- `comet` for the COMET metric
+- `comet` for the COMET metric.
+- `determined` for running jobs via determined.
+- `mistral` for inference on Mistral models.
+- `transformers` for inference using the transformers library.
+- `vllm` for inference via VLLM.
 
 As a short hand, the `all` extra installs all of the above.
 
@@ -57,20 +68,6 @@ eval_framework \
 ```
 
 For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usage.md).
-
-## Features
-
-- 90+ Benchmarks: Covers reasoning, knowledge, coding, long-context, and safety tasks.
-- Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
-- Distributed Evaluation: Integration with Determined AI for scalable distributed evaluation.
-- Docker Support: Pre-configured Dockerfiles for local and distributed setups.
-- Flexible Model Integration: Supports models loaded via HuggingFace Transformers or custom implementations using the BaseLLM class.
-- Custom Metrics: Easily define new metrics using the BaseMetric class.
-- Rich Outputs: Generates JSON results, plots, and detailed analysis reports.
-- Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
-- Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
-- LLM-as-a-Judge: Evaluation using LLM judges.
-
 
 ## Benchmark Coverage & Task Categories
 
