@@ -16,6 +16,7 @@
 - Removed `torch` as a main dependency of `eval_framework`
 - Updated docs wrt. usage of `eval_framework.utils.generate_task_docs`
 - Minor fix of paths quoted in generated docs
+- Reducing string/path casting redundancy
 
 ## 0.2.0
 
