@@ -68,7 +68,7 @@ class BaseLLM(ABC):
 
     @contextmanager
     def download_wandb_artifact(
-        self, artifact_name: str, version: str, user_supplied_download_path: Path | None
+        self, artifact_name: str, version: str, user_supplied_download_path: str | Path | None
     ) -> Generator[Path, None, None]:
         wandb_fs = WandbFs(user_supplied_download_path=user_supplied_download_path)
         try:
