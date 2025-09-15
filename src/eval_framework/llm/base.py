@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from collections.abc import Generator, Sequence
-from contextlib import contextmanager
+from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING, Union
 
@@ -66,30 +65,20 @@ class BaseLLM(ABC):
         messages: list[Sequence[Message]] = [sample.messages for sample in samples]
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
 
-    @contextmanager
     def download_wandb_artifact(
         self, artifact_name: str, version: str, user_supplied_download_path: str | Path | None
-    ) -> Generator[Path, None, None]:
-        try:
-            wandb_fs = WandbFs(user_supplied_download_path=user_supplied_download_path)
-            self.artifact = wandb_fs.get_artifact(artifact_name, version)
-            wandb_fs.download_artifact(self.artifact)
-            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
+    ) -> Path:
+        self.wandb_fs = WandbFs(user_supplied_download_path=user_supplied_download_path)
+        self.artifact = self.wandb_fs.get_artifact(artifact_name, version)
+        self.wandb_fs.download_artifact(self.artifact)
+        file_root = self.wandb_fs.find_hf_checkpoint_root_from_path_list()
 
-            if file_root is None:
-                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
+        if file_root is None:
+            raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
 
-            assert wandb_fs.download_path is not None
-            # if it's a temp directory, we need to append the artifact subdir
-            if isinstance(wandb_fs.download_path, Path):
-                local_artifact_path = file_root
-            else:
-                local_artifact_path = Path(wandb_fs.download_path.name) / file_root
-
-                print(f"{RED}[ Model located at: {local_artifact_path} ]{RESET}")
-                yield local_artifact_path
-        finally:
-            wandb_fs.cleanup()
+        assert self.wandb_fs.download_path is not None
+        print(f"{RED}[ Model located at: {file_root} ]{RESET}")
+        return file_root
 
     def get_formatter(
         self, formatter_name: str, model_identifier: str = ""

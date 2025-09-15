@@ -120,7 +120,9 @@ class VLLMModel(BaseLLM):
         self.checkpoint_path = checkpoint_path
 
         model_args = {
-            "model": self.checkpoint_path or self.LLM_NAME,
+            "model": str(self.checkpoint_path)
+            if self.checkpoint_path
+            else self.LLM_NAME,  # for some reason vllm needs a str here even though it can take an os.pathlike
             "max_model_len": max_model_len or self.SEQ_LENGTH,
             "max_num_seqs": batch_size,
             "tensor_parallel_size": tensor_parallel_size,
@@ -460,17 +462,17 @@ class _VLLM_from_wandb_registry(VLLMModel):
 
         # Remove download_path from kwargs
         download_path = kwargs.pop("download_path", None)
-        with self.download_wandb_artifact(
+        local_artifact_path = self.download_wandb_artifact(
             artifact_name, version, user_supplied_download_path=download_path
-        ) as local_artifact_path:
-            # Set LLM_NAME to local path which VLLM can use directly
-            self.LLM_NAME = str(local_artifact_path)
-            super().__init__(
-                formatter=selected_formatter,
-                checkpoint_path=local_artifact_path,
-                checkpoint_name=f"{artifact_name}/{version}",
-                **kwargs,
-            )
+        )
+        # Set LLM_NAME to local path which VLLM can use directly
+        self.LLM_NAME = str(local_artifact_path)
+        super().__init__(
+            formatter=selected_formatter,
+            checkpoint_path=local_artifact_path,
+            checkpoint_name=f"{artifact_name}/{version}",
+            **kwargs,
+        )
 
         print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
         print(f"{artifact_name}:{version} {RED}]{RESET}")

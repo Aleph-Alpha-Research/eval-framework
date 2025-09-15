@@ -52,7 +52,7 @@ class WandbFs:
         self._temp_dir: tempfile.TemporaryDirectory | None = None
         self.download_path: Path | None = None
         self._setup_s3_client()
-        # self._setup_cleanup_handlers()
+        self._setup_cleanup_handlers()
         self.original_resource = boto3.session.Session().resource
 
     def _unverified_resource(self, service_name: str, *args: Any, **kwargs: Any) -> Any:
@@ -108,15 +108,17 @@ class WandbFs:
         """
         self.artifact_downloaded = False
 
-        artifact_subdir = "/".join(artifact.name.split(":"))  # this is fine if not tempdir
+        artifact_subdir = "/".join(artifact.name.split(":"))
         if self.user_supplied_download_path is None:
-            temp_dir = tempfile.TemporaryDirectory()
-            self.download_path = Path(temp_dir.name) / artifact_subdir
-            self._temp_dir = temp_dir  # Keep reference to prevent pre-mature cleanup
+            self._temp_dir = tempfile.TemporaryDirectory()
+            base_path = Path(self._temp_dir.name)
         else:
-            self.download_path = self.user_supplied_download_path / artifact_subdir
-            if self.download_path.exists():
-                return self.download_path
+            base_path = self.user_supplied_download_path
+
+        self.download_path = base_path / artifact_subdir
+        if self.user_supplied_download_path and self.download_path.exists():
+            self.artifact_downloaded = True
+            return self.download_path
 
         with patch("boto3.session.Session.resource", new=self._unverified_resource):
             with warnings.catch_warnings():
@@ -181,8 +183,6 @@ class WandbFs:
             # remove the contents of the download path.
             print(f"Cleaning up user-specified download path...{self.download_path}")
             shutil.rmtree(self.download_path)
-        else:
-            print("No user-specified download path to clean up.")
 
     def _cleanup_temp_dir(self) -> None:
         if self._temp_dir:
