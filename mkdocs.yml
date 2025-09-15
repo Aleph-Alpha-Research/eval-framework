@@ -1,6 +1,6 @@
 site_name: Eval Framework
 nav:
-  - Home: README.md
+  - Home: index.md
   - Getting Started:
     - Installation: installation.md
   - Advanced Topics:
