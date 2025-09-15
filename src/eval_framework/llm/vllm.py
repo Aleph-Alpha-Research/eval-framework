@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from functools import partial
+from pathlib import Path
 from typing import Any, Literal, Protocol, cast, override
 
 import torch
@@ -74,7 +75,7 @@ class HFTokenizerProtocol(Protocol):
 
 
 class VLLMTokenizer(VLLMTokenizerAPI[str]):
-    def __init__(self, target_mdl: str) -> None:
+    def __init__(self, target_mdl: str | Path) -> None:
         self.tokenizer = cast(HFTokenizerProtocol, get_tokenizer(target_mdl))
 
     def _encode_text(self, text: str) -> TokenizedContainer:
@@ -108,7 +109,7 @@ class VLLMModel(BaseLLM):
         tensor_parallel_size: int = 1,
         gpu_memory_utilization: float = 0.9,
         batch_size: int = 1,
-        checkpoint_path: str | None = None,
+        checkpoint_path: str | Path | None = None,
         checkpoint_name: str | None = None,
         sampling_params: SamplingParams | dict[str, Any] | None = None,
         **kwargs: Any,
@@ -457,14 +458,13 @@ class _VLLM_from_wandb_registry(VLLMModel):
 
         selected_formatter = self.get_formatter(formatter, formatter_identifier)
 
-        download_path = (
-            str(kwargs.pop("download_path", None)) if kwargs.get("download_path") else None
-        )  # Remove download_path from kwargs
+        # Remove download_path from kwargs
+        download_path = kwargs.pop("download_path", None)
         with self.download_wandb_artifact(
             artifact_name, version, user_supplied_download_path=download_path
         ) as local_artifact_path:
             # Set LLM_NAME to local path which VLLM can use directly
-            self.LLM_NAME = local_artifact_path
+            self.LLM_NAME = str(local_artifact_path)
             super().__init__(
                 formatter=selected_formatter,
                 checkpoint_path=local_artifact_path,

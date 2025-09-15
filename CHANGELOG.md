@@ -4,6 +4,9 @@
 
 ### Models
 
+- The `--llm-name` (and `--judge-model-name`) argument can now also be a module path like `eval_framework.llm.huggingface.HFLLM`.
+  Combining this with `--llm-args` (`-judge-model-args`) should cover many use-cases without having to provide a `models.py` file.
+
 ### Tasks
 
 ### Metrics
@@ -14,7 +17,7 @@
 - Updated docs wrt. usage of `eval_framework.utils.generate_task_docs`
 - Minor fix of paths quoted in generated docs
 - Refactoring of clean up handlers in `eval_framework.utils.file_ops.WandbFs`
-
+- Reducing string/path casting redundancy
 
 ## 0.2.0
 

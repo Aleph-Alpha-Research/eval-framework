@@ -44,10 +44,10 @@ class WandbFs:
     ..    file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
     """
 
-    def __init__(self, user_supplied_download_path: str | None = None):
+    def __init__(self, user_supplied_download_path: str | Path | None = None):
         self.api = wandb.Api()
-        self.user_supplied_download_path: Path | tempfile.TemporaryDirectory | None = (
-            Path(user_supplied_download_path) if user_supplied_download_path else None
+        self.user_supplied_download_path = (
+            Path(user_supplied_download_path) if user_supplied_download_path is not None else None
         )
         self._temp_dir: tempfile.TemporaryDirectory | None = None
         self.download_path: Path | None = None
@@ -114,7 +114,6 @@ class WandbFs:
             self.download_path = Path(temp_dir.name) / artifact_subdir
             self._temp_dir = temp_dir  # Keep reference to prevent pre-mature cleanup
         else:
-            assert isinstance(self.user_supplied_download_path, Path)
             self.download_path = self.user_supplied_download_path / artifact_subdir
             if self.download_path.exists():
                 return self.download_path
