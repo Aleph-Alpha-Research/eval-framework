@@ -1,3 +1,4 @@
+import difflib
 import filecmp
 from pathlib import Path
 
@@ -19,15 +20,12 @@ def test_task_docs_are_up_to_date(tmp_path: Path) -> None:
     repo_root = Path(__file__).resolve().parents[2]
     repo_docs_path = repo_root / "docs" / "tasks"
 
-    # Collect only .md files (filenames)
     generated = sorted(p.name for p in tmp_path.iterdir() if p.suffix == ".md")
     repo_docs = sorted(p.name for p in repo_docs_path.iterdir() if p.suffix == ".md")
 
-    # Check same file lists
     assert generated == repo_docs, f"Generated docs {generated} do not match repo docs {repo_docs}"
 
-    # Check file contents are identical
-    # filecmp.cmp performs a fast comparison; use shallow=False for full content compare
+    # Check file contents are identical; using shallow=False for full content compare
     diffs = []
     for name in generated:
         gen_file = tmp_path / name
@@ -41,4 +39,14 @@ def test_task_docs_are_up_to_date(tmp_path: Path) -> None:
                 print(f"Generated content:\n{gen_content}\n")
                 print(f"Repo content:\n{repo_content}\n")
 
-    assert not diffs, f"Files differ between generated and repo docs: {diffs}"
+            gen_lines = gen_file.read_text().splitlines(keepends=True)
+            repo_lines = repo_file.read_text().splitlines(keepends=True)
+            diff = difflib.unified_diff(
+                repo_lines, gen_lines, fromfile=f"repo/{name}", tofile=f"generated/{name}", lineterm=""
+            )
+            print(f"--- Differences for {name} ---")
+            for line in diff:
+                print(line)
+            print()
+
+    assert not diffs, f"Files differ between generated and repo docs:\n{diffs}"
