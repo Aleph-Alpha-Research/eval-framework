@@ -138,6 +138,12 @@ class MathTask(BaseTask[str]):
 #### Pattern 3: Code Generation
 ```python
 from eval_framework.metrics.completion.code_execution_pass_at_one import CodeExecutionPassAtOne
+from eval_framework.shared.types import BaseMetricContext
+
+class CodeTaskMetricContext(BaseMetricContext):
+    """Will be passed to the metric for this task."""
+    test_cases: list
+    entry_point: str
 
 class CodeTask(BaseTask[str]):
     NAME = "Code Generation"
@@ -154,12 +160,12 @@ class CodeTask(BaseTask[str]):
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
         return item['canonical_solution']
 
-    def _get_eval_kwargs(self, item: dict[str, Any]) -> dict[str, Any]:
+    def _get_context(self, item: dict[str, Any]) -> CodeTaskMetricContext:
         """Provide test cases for code execution."""
-        return {
-            'test_cases': item['test_cases'],
-            'entry_point': item['entry_point']
-        }
+        return CodeTaskMetricContext(
+            test_cases=item['text_cases'],
+            entry_point=item['entry_point'],
+        )
 ```
 
 ### 4. Advanced Customization
