@@ -224,7 +224,7 @@ class WandbFs:
             shutil.rmtree(self.download_path)
 
     def _cleanup_temp_dir(self) -> None:
-        if hasattr(self, "_temp_dir"):
+        if hasattr(self, "_temp_dir") and self._temp_dir is not None:
             try:
                 self._temp_dir.cleanup()
             except (OSError, FileNotFoundError):
