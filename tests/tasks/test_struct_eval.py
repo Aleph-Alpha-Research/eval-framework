@@ -1,5 +1,6 @@
 import pytest
 
+from eval_framework.metrics.completion.struct_eval_metrics import StructMetricContext
 from eval_framework.tasks.benchmarks.struct_eval import StructEval
 
 
@@ -22,11 +23,15 @@ class TestStructEval:
         assert len(struct_eval_task.SUBJECTS) > 0 and isinstance(struct_eval_task.SUBJECTS[0], str)
         struct_eval_task._load_dataset(struct_eval_task.SUBJECTS[0])
         assert struct_eval_task.dataset is not None, "Dataset should not be None after loading."
-        eval_kwargs = struct_eval_task._get_eval_kwargs(struct_eval_task.dataset[struct_eval_task.SAMPLE_SPLIT][0])
-        assert eval_kwargs is not None, "Eval kwargs should not be None."
-        assert isinstance(eval_kwargs, dict), "Eval kwargs should be a dictionary."
-        assert "output_type" in eval_kwargs, "Eval kwargs must contain 'output_type'."
-        assert "paths" in eval_kwargs, "Eval kwargs must contain 'paths'."
+        eval_context = struct_eval_task._get_context(struct_eval_task.dataset[struct_eval_task.SAMPLE_SPLIT][0])
+        assert eval_context is not None, "Eval context should not be None."
+        assert isinstance(eval_context, StructMetricContext), "Eval context should be a StructMetricContext."
+        assert isinstance(eval_context.output_type, str) and len(eval_context.output_type) > 0, (
+            "Eval context output_type should be a non-empty string."
+        )
+        assert isinstance(eval_context.paths, list) and len(eval_context.paths) > 0, (
+            "Eval context paths should be a non-empty list."
+        )
 
     @pytest.mark.parametrize(
         "sample_text",

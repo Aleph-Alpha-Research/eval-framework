@@ -5,7 +5,12 @@ from typing import Any
 
 from datasets import DatasetDict
 
-from eval_framework.metrics.completion.struct_eval_metrics import RenderableStructMetric, StructMetric
+from eval_framework.metrics.completion.struct_eval_metrics import (
+    RenderableStructMetric,
+    RenderableStructMetricContext,
+    StructMetric,
+    StructMetricContext,
+)
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
 
 StructEvalSubjects = [
@@ -70,11 +75,11 @@ class StructEval(BaseTask[str]):
             "No other text output (explanation, comments, etc.) are allowed.  Do not use markdown code fences.\n"
         )
 
-    def _get_eval_kwargs(self, item: dict[str, Any]) -> dict[str, Any] | None:
-        return {
-            "output_type": item["output_type"],
-            "paths": item["raw_output_metric"],
-        }
+    def _get_context(self, item: dict[str, Any]) -> StructMetricContext | RenderableStructMetricContext:
+        return StructMetricContext(
+            output_type=item["output_type"],
+            paths=item["raw_output_metric"],
+        )
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "<|BEGIN_CODE|>"
@@ -103,8 +108,8 @@ class RenderableStructEval(StructEval):
     SUBJECTS = RENDERABLE_STRUCTEVAL_SUBJECTS
     METRICS = [RenderableStructMetric]  # Define appropriate metrics for StructEval
 
-    def _get_eval_kwargs(self, item: dict[str, Any]) -> dict[str, Any] | None:
-        return {
-            "output_type": item["output_type"],
-            "keywords": item["raw_output_metric"],
-        }
+    def _get_context(self, item: dict[str, Any]) -> RenderableStructMetricContext:
+        return RenderableStructMetricContext(
+            output_type=item["output_type"],
+            keywords=item["raw_output_metric"],
+        )

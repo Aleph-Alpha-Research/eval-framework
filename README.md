@@ -1,21 +1,73 @@
 # Aleph Alpha Eval-Framework
 
 > **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 90+ benchmarks.
-
-## Features
-
-- 90+ Benchmarks: Covers reasoning, knowledge, coding, long-context, and safety tasks.
-- Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
-- Distributed Evaluation: Integration with Determined AI for scalable distributed evaluation.
-- Docker Support: Pre-configured Dockerfiles for local and distributed setups.
-- Flexible Model Integration: Supports models loaded via HuggingFace Transformers or custom implementations using the BaseLLM class.
-- Custom Metrics: Easily define new metrics using the BaseMetric class.
-- Rich Outputs: Generates JSON results, plots, and detailed analysis reports.
-- Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
-- Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
-- LLM-as-a-Judge: Evaluation using LLM judges.
-
 ![eval-framework](docs/eval-framework.png "eval-framework")
+
+## Why Choose This Framework?
+
+- **Scalability**: Built for distributed evaluation. Currently providing an integration with Determined AI.
+- **Extensibility**: Easily add custom models, benchmarks, and metrics with object-oriented base classes.
+- **Comprehensive**: Comes pre-loaded with over 90 tasks covering a broad and diverse range, from reasoning and coding to safety and long-context. Also comes with a comprehensive set of metrics, including LLM-as-a-judge evaluations.
+
+## Other features
+
+- Flexible Model Integration: Supports models loaded via HuggingFace Transformers or custom implementations using the BaseLLM class.
+- Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
+- Custom Metrics: Easily define new metrics using the BaseMetric class.
+- Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
+- Rich Outputs: Generates JSON results, plots, and detailed analysis reports.
+- Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
+- Docker Support: Pre-configured Dockerfiles for local and distributed setups.
+
+## Quick Start
+
+The codebase is tested and compatible with Python 3.12 and PyTorch 2.5.
+You will also need the appropriate CUDA dependencies and version installed on your system for GPU support. Detailed installation instructions can be found [here](docs/installation.md).
+
+The easiest way to get started is by installing the library via `pip` and use it as an external dependency.
+```
+pip install eval_framework
+```
+
+There are optional extras available to unlock specific features of the library:
+- `api` for inference using the aleph-alpha client.
+- `comet` for the COMET metric.
+- `determined` for running jobs via determined.
+- `mistral` for inference on Mistral models.
+- `transformers` for inference using the transformers library.
+- `vllm` for inference via VLLM.
+
+As a short hand, the `all` extra installs all of the above.
+
+For development, you can instead install it directly from the repository. Please first install
+ [uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+To install the project with all optional extras use
+```bash
+uv sync --all-extras
+```
+
+We provide custom groups to control optional extras.
+- `flash_attn`: Install `flash_attn` with correct handling of build isolation
+
+Thus, the following will setup the project with `flash_attn`
+```bash
+uv sync --all-extras --group flash_attn
+```
+
+To evaluate a single benchmark locally, you can use the following command:
+
+```bash
+eval_framework \
+    --models src/eval_framework/llm/models.py \
+    --llm-name Smollm135MInstruct \
+    --task-name "GSM8K" \
+    --output-dir ./eval \
+    --num-fewshot 5 \
+    --num-samples 10
+```
+
+For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usage.md).
 
 ## Benchmark Coverage & Task Categories
 
@@ -66,49 +118,6 @@ Evaluation metrics include:
 - **Efficiency Metrics:** Bytes per Sequence Position
 
 For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmarks_and_metrics.md).
-
-## Quick Start
-
-The codebase is tested and compatible with Python 3.12 and PyTorch 2.5.
-You will also need the appropriate CUDA dependencies and version installed on your system for GPU support.
-
-The easiest way to get started is by installing the library via `pip` and use it as an external dependency.
-```
-pip install eval_framework
-```
-
-There are optional extras available to unlock specific features of the library:
-- `mistral` for inference on Mistral models
-- `transformers` for inference using the transformers library
-- `api` for inference using the aleph-alpha client.
-- `vllm` for inference via VLLM
-- `determined` for running jobs via determined
-- `comet` for the COMET metric
-
-As a short hand, the `all` extra installs all of the above.
-
-For development, you can instead install it directly from the repository instead, please first install
- [uv](https://docs.astral.sh/uv/getting-started/installation/)
-
-To install the project with all optional extras use
-```bash
-uv sync --all-extras
-```
-
-We provide custom groups to control optional extras.
-- `flash_attn`: Install `flash_attn` with correct handling of build isolation
-
-Thus, the following will setup the project with `flash_attn`
-```bash
-uv sync --all-extras --group flash_attn
-```
-
-There is also a pre-commit hook to help with development:
-```
-uv run pre-commit install
-```
-
-After installation, task documentation can be generated with `uv run python -m eval_framework.utils.generate_task_docs` (see [docs/installation.md(docs/installation.md)) for more details.
 
 ## Getting Started
 
@@ -180,21 +189,6 @@ pip install eval_framework[transformers]
 - **Understand your results**: Read our [results interpretation guide](docs/understanding_results_guide.md)
 - **Log results in WandB**: See how [we integrate WandB](docs/wandb_integration.md) for metric and lineage tracking
 
-### Example CLI Usage
-
-To evaluate a single benchmark locally, you can use the following command:
-
-```bash
-eval_framework \
-    --models 'eval_framework.llm.models.Smollm135MInstruct' \
-    --task-name "GSM8K" \
-    --output-dir ./eval \
-    --num-fewshot 5 \
-    --num-samples 10
-```
-
-For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usage.md).
-
 ## Documentation
 
 ### Getting Started
@@ -213,6 +207,10 @@ For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usa
 
 - **[Using Determined](docs/using_determined.md)** - Guide for distributed evaluation using Determined AI
 - **[Controlling Upload Results](docs/controlling_upload_results.md)** - How to manage and control the upload of evaluation results
+
+### Contributing
+
+- **[Contributing Guide](CONTRIBUTING.md)** - Guide for contributing to this project
 
 ### Citation
 

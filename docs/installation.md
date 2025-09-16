@@ -47,12 +47,12 @@ linking to their documentation.
 
 Run with:
 ```
-uv run python utils/generate-task-docs.py
+uv run python -m eval_framework.utils.generate_task_docs
 ```
 
-By default, formatted prompt examples are not included to this documentation file. Those can be added is you run instead:
+By default, formatted prompt examples are not included to this documentation file. Those can be added if you run instead:
 ```
-uv run python utils/generate-task-docs.py --add-prompt-examples
+uv run python -m eval_framework.utils.generate_task_docs --add-prompt-examples
 ```
 
 ## Environment Configuration

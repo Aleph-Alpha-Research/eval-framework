@@ -31,9 +31,12 @@ class StopSequenceCriteria(StoppingCriteria):
         self.prompt_token_count = prompt_token_count
         # (relatively weak) upper bound for the number of tokens that
         # need to be decoded to check for stop sequences
-        self.token_history_length = max(map(len, stop_sequences))
+        self.token_history_length = max(map(len, stop_sequences), default=0)
 
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs: Any) -> bool:
+        if not self.stop_sequences:
+            return False
+
         sequence = input_ids[0].tolist()
         sequence = sequence[self.prompt_token_count :]
         if len(sequence) > self.token_history_length:
