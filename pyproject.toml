@@ -41,6 +41,7 @@ dependencies = [
   "python-iso639>=2025.2.18",
   "wandb>=0.21.1,<1",
   "mkdocs>=1.6.1",
+  "mkdocs-mermaid2-plugin>=1.2.2",
 ]
 
 [project.optional-dependencies]

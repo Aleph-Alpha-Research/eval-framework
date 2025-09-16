@@ -1,8 +1,23 @@
 site_name: Eval Framework
+plugins:
+  - search
+  - mermaid2
 nav:
   - Home: index.md
   - Getting Started:
     - Installation: installation.md
-  - Advanced Topics:
+    - Quickstart: quickstart.md
+  - Reference:
     - CLI Usage: cli_usage.md
+    - Dataloading: overview_dataloading.md
+    - Benchmarks and Metrics: benchmarks_and_metrics.md
     - Utilites: utilities.md
+  - Guides:
+    - Loglikelihood Tasks: loglikelihood_task_guide.md
+    - Completion Tasks: completion_task_guide.md
+    - Evaluate HuggingFace Models: evaluate_huggingface_models.md
+    - Uploading Results: controlling_upload_results.md
+    - Add New Benchmark: add_new_benchmark.md
+    - Understanding Results: understanding_results_guide.md
+    - Using Determined AI: using_determined.md
+    - WandB Integration: wandb_integration.md
