@@ -62,7 +62,6 @@ class RegistryModel(BaseLLM):
                 self._model = _VLLM_from_wandb_registry(
                     artifact_name=artifact_name, version=version, formatter=formatter, **kwargs
                 )
-
             case "huggingface":
                 from eval_framework.llm.huggingface import _HFLLM_from_wandb_registry
 
@@ -71,9 +70,10 @@ class RegistryModel(BaseLLM):
                 self._model = _HFLLM_from_wandb_registry(
                     artifact_name=artifact_name, version=version, formatter=formatter, **kwargs
                 )
-
             case _:
                 raise ValueError(f"Unsupported backend: {backend}. Supported backends: 'hfllm', 'vllm'")
+
+        self.artifact = self._model.artifact  # expose artifact for use in main.py
 
     def generate_from_messages(
         self,

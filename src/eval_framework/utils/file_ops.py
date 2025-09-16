@@ -12,6 +12,7 @@ from unittest.mock import patch
 import boto3
 import boto3.session
 import requests
+
 import wandb
 
 
@@ -186,11 +187,6 @@ class WandbFs:
         # Store original handlers for restoration
         self._original_sigterm = signal.signal(signal.SIGTERM, self._clean_on_signal)
         self._original_sigint = signal.signal(signal.SIGINT, self._clean_on_signal)
-
-        # on interrupt or termination
-        signal.signal(signal.SIGTERM, self._clean_on_signal)
-        signal.signal(signal.SIGINT, self._clean_on_signal)
-
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:

@@ -456,7 +456,6 @@ class _VLLM_from_wandb_registry(VLLMModel):
             **kwargs: Additional arguments passed to VLLMModel
         """
         print(f"{RED}[ Loading registered model from Wandb for VLLM: {artifact_name}:{version} ]{RESET}")
-        self.artifact_used = False
 
         selected_formatter = self.get_formatter(formatter, formatter_identifier)
 

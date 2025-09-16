@@ -323,7 +323,6 @@ class _HFLLM_from_wandb_registry(HFLLM):
             formatter: Type of formatter to use (default: "")
             **kwargs: Additional arguments passed to the parent class
         """
-        self.artifact_used = False
         print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
         download_path = kwargs.pop("download_path", None)
         with WandbFs(user_supplied_download_path=download_path) as wandb_fs:

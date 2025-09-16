@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Literal
 
 import wandb
-
 from eval_framework.evaluation_generator import EvaluationGenerator, Result
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator
@@ -72,7 +71,7 @@ def main(
         # this is placed here in the case that an artifact is used to generate completions,
         # crashes during the evaluation step, and subsequent reruns use the same generations,
         # the runs are still linked to the artifact
-        if hasattr(llm, "_model") and hasattr(llm._model, "artifact"):  # BaseLLM doesn't have _model attribute
+        if hasattr(llm, "artifact"):  # BaseLLM doesn't have _model attribute
             wandb.use_artifact(llm._model.artifact)
 
         _, preempted = response_generator.generate(should_preempt_callable)
