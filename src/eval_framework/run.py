@@ -50,16 +50,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--llm-name",
         type=str,
-        required=False,
+        required=True,
         help=(
-            "The class derived from `eval_framework.llm.base.BaseLLM` found in the "
-            "models module to instantiate for evaluation."
+            "Either a full import path for a model (e.g., `eval_framework.huggingface.HFLLM`) or the "
+            "name of a class derived from `eval_framework.llm.base.BaseLLM` that can be found in the "
+            "models file. The resulting model is instantiated with the arguments provided via `--llm-args`."
         ),
     )
     parser.add_argument(
         "--llm-args",
         type=str,
-        nargs="*",
+        nargs="+",
+        default=(),
         required=False,
         help="The arguments to pass to the LLM as key=value pairs.",
     )
@@ -113,9 +115,11 @@ def parse_args() -> argparse.Namespace:
         type=str,
         nargs="+",
         required=False,
-        help="The subjects of the task to evaluate. If empty, all subjects are evaluated. Subjects in the form of "
-        "tuples can be specified in a comma-delimited way, possibly using wildcard * in some dimensions of a tuple, "
-        'e.g. "DE_DE, *" or "FR_FR, astronomy".',
+        help=(
+            "The subjects of the task to evaluate. If empty, all subjects are evaluated. Subjects in the form of "
+            "tuples can be specified in a comma-delimited way, possibly using wildcard * in some dimensions of a "
+            "tuple, e.g., 'DE_DE, *' or 'FR_FR, astronomy'."
+        ),
     )
     parser.add_argument(
         "--hf-revision",
@@ -156,8 +160,10 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         required=False,
-        help="The name of the Weights & Biases project to log runs to. "
-        "The environment variable WANDB_API_KEY must be set.",
+        help=(
+            "The name of the Weights & Biases project to log runs to. "
+            "The environment variable WANDB_API_KEY must be set."
+        ),
     )
     parser.add_argument(
         "--wandb-entity",
@@ -171,9 +177,11 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         required=False,
-        help="The ID of an existing Weights & Biases run to resume. "
-        "If not given, creates a new fun. If given and exists, "
-        "will continue the run but will overwrite the pthon command logged in wandb.",
+        help=(
+            "The ID of an existing Weights & Biases run to resume. "
+            "If not given, creates a new run. If given and exists, "
+            "will continue the run but will overwrite the Python command logged in wandb."
+        ),
     )
     parser.add_argument(
         "--description",
@@ -198,27 +206,31 @@ def parse_args() -> argparse.Namespace:
         required=False,
         help="Whether to save logs to a file in the output directory (default: True).",
     )
+
     parser.add_argument(
         "--judge-model-name",
         type=str,
         required=False,
         help=(
-            "The class derived from `eval_framework.llm.base.BaseLLM` found in the "
-            "judge-models module to instantiate for LLM judge evaluation metrics."
+            "Either a full import path for a judge (e.g., `eval_framework.huggingface.HFLLM`) or the "
+            "name of a class derived from `eval_framework.llm.base.BaseLLM` that can be found in the "
+            "models file. The resulting judge model is instantiated with the arguments provided via "
+            "`--judge-model-args`."
         ),
     )
     parser.add_argument(
         "--judge-model-args",
         type=str,
         required=False,
-        nargs="*",
-        help=("The args of the judge model used."),
+        nargs="+",
+        default=(),
+        help="The args of the judge model used.",
     )
 
     llm_args: dict[str, Any] = {}
     args = parser.parse_args()
 
-    for arg in args.llm_args or []:
+    for arg in args.llm_args:
         if "=" in arg:
             key, value = arg.split("=", 1)
 
@@ -234,7 +246,7 @@ def parse_args() -> argparse.Namespace:
     args.llm_args = llm_args
 
     judge_model_args = {}
-    for arg in args.judge_model_args or []:
+    for arg in args.judge_model_args:
         if "=" in arg:
             key, value = arg.split("=", 1)
             judge_model_args[key] = value
