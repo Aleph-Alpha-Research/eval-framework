@@ -300,7 +300,7 @@ class HFLLM_from_name(HFLLM):
         self._set_formatter(selected_formatter)
 
 
-class _HFLLM_from_wandb_registry(HFLLM):
+class HFLLMRegistryModel(HFLLM):
     """
     A class to create HFLLM instances from registered models in Wandb registry.
     Downloads the model artifacts from Wandb and creates a local HFLLM instance.

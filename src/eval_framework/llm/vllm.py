@@ -432,7 +432,7 @@ class VLLMModel(BaseLLM):
         return self.max_seq_length
 
 
-class _VLLM_from_wandb_registry(VLLMModel):
+class VLLMRegistryModel(VLLMModel):
     """
     A class to create VLLM instances from registered models in Wandb registry.
     Downloads the model artifacts from Wandb and creates a local VLLM instance.
