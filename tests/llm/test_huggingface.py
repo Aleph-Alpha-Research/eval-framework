@@ -1,6 +1,9 @@
-import pytest
+from unittest.mock import Mock
 
-from eval_framework.llm.huggingface import SmolLM135M
+import pytest
+import torch
+
+from eval_framework.llm.huggingface import SmolLM135M, StopSequenceCriteria
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import Message, Role
@@ -96,3 +99,26 @@ def test_error_on_overly_long_prompt() -> None:
         cresults[0].raw_completion_error is not None
         and cresults[0].raw_completion_error.error_class == PromptTooLongException.__name__
     )
+
+
+@pytest.mark.parametrize("stop_sequences", [[], ["stop", "end"]])
+def test_stop_sequence_criteria(stop_sequences: list[str]) -> None:
+    """Test StopSequenceCriteria with empty and non-empty stop sequences."""
+    # Mock tokenizer
+    mock_tokenizer = Mock()
+    mock_tokenizer.decode.return_value = "decoded text end"
+
+    criteria = StopSequenceCriteria(
+        stop_sequences=stop_sequences,
+        tokenizer=mock_tokenizer,
+        prompt_token_count=2,
+    )
+
+    if not stop_sequences:
+        input_ids = torch.LongTensor([[1, 2, 3, 4]])
+        scores = torch.FloatTensor([[0.1, 0.2, 0.3, 0.4]])
+        assert not criteria(input_ids, scores), "Criteria should return False when no stop sequences are provided."
+    else:
+        input_ids = torch.LongTensor([list(range(16))])
+        scores = torch.FloatTensor([[0.1] * 16])
+        assert criteria(input_ids, scores), "Text contains stop sequence, criteria should return True."
