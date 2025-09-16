@@ -106,18 +106,16 @@ class WandbFs:
            we then call wandb.use_artifact on the artifact that we downloaded.
         2. if this download fails, we patch boto3 to retrieve the artifact.
         """
-        self._artifact_downloaded = False
-
-        artifact_subdir = "/".join(artifact.name.split(":"))
+        # create the base path for either a temp or user dir
         if self.user_supplied_download_path is None:
             self._temp_dir = tempfile.TemporaryDirectory()
             base_path = Path(self._temp_dir.name)
         else:
             base_path = self.user_supplied_download_path
 
+        artifact_subdir = "/".join(artifact.name.split(":"))
         self.download_path = base_path / artifact_subdir
         if self.user_supplied_download_path and self.download_path.exists():
-            self._artifact_downloaded = True
             return self.download_path
 
         with patch("boto3.session.Session.resource", new=self._unverified_resource):
@@ -131,9 +129,9 @@ class WandbFs:
                 print(f"Downloading artifact to {self.download_path}")
                 # Since the cache lives inside the docker container, it is unused in future
                 # runs. Skipping the cache also avoids file duplication and extra copying.
+                self._artifact_downloaded = False
                 artifact_path = artifact.download(root=str(self.download_path), skip_cache=True)
-
-        self._artifact_downloaded = True
+                self._artifact_downloaded = True
 
         return Path(artifact_path)
 
@@ -146,21 +144,15 @@ class WandbFs:
         Returns:
             str | None: Path to the HuggingFace checkpoint root folder, or None if not found
         """
-        download_path = (
-            self.download_path.name
-            if isinstance(self.download_path, tempfile.TemporaryDirectory)
-            else self.download_path
-        )
 
-        if not download_path:
-            return None
-
-        checkpoint_roots = [x for x in Path(download_path).glob("**/config.json")]
-        if checkpoint_roots:
-            assert len(checkpoint_roots) == 1, (
-                "Multiple checkpoints found"
-            )  # if there are more than one, we have a problem
-            return checkpoint_roots[0].parent
+        # self.download_path can be None if download_artifact was never called
+        if self.download_path and self.download_path.exists():
+            checkpoint_roots = [x for x in Path(self.download_path).glob("**/config.json")]
+            if checkpoint_roots:
+                assert len(checkpoint_roots) == 1, (
+                    "Multiple checkpoints found"
+                )  # if there are more than one, we have a problem
+                return checkpoint_roots[0].parent
 
         return None
 
@@ -174,11 +166,17 @@ class WandbFs:
         self._cleanup_temp_dir()
 
     def _cleanup_user_dir(self) -> None:
+        """
+        _cleanup_user_dir will remove the contents of the user specified
+        download path if there was an attempt to download the artifact and it failed.
+        """
         if (
-            not self._artifact_downloaded  # failed or not downloaded
-            and self.user_supplied_download_path  # user specified a path
-            and self.download_path  # path to the download directory
-            and self.download_path.exists()  # path exists
+            # check to make sure this flag was set; if not, there was no attempt to download.
+            hasattr(self, "_artifact_downloaded")
+            and not self._artifact_downloaded  # check that the artifact was not downloaded
+            and self.user_supplied_download_path
+            and self.download_path
+            and self.download_path.exists()
         ):
             # remove the contents of the download path.
             print(f"Cleaning up user-specified download path...{self.download_path}")
