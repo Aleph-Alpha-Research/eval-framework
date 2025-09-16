@@ -12,10 +12,12 @@ from unittest.mock import patch
 import boto3
 import boto3.session
 import requests
+
 import wandb
 
 
 class WandbFs:
+    REGISTRY_MODEL_ROOT = "wandb-registry-model"
     """
     WandbFs provides an interface to interact with Weights & Biases artifacts.
 
@@ -32,6 +34,10 @@ class WandbFs:
     WandB-managed cache directory, this class allows users to specify a custom download path
     (which can be a persistent directory). If no path is provided, a temporary directory is
     created and cleaned up automatically.
+
+    4. Cleanup is handled in two ways, and exit/signal handles are registered accordingly:
+        - when not used as a context manager atexit handlers ensure cleanup on normal script termination
+        - when used as a context manager, cleanup is handled in __exit__ directly
 
     Args:
         user_supplied_download_path: Optional path to download artifacts to. This acts
@@ -54,6 +60,7 @@ class WandbFs:
         self._setup_s3_client()
         self._setup_cleanup_handlers()
         self.original_resource = boto3.session.Session().resource
+        self._used_as_context_manager = False
 
     def _unverified_resource(self, service_name: str, *args: Any, **kwargs: Any) -> Any:
         kwargs["verify"] = False
@@ -64,12 +71,14 @@ class WandbFs:
         because wandbfs deals with downloading files, we will need to
         make sure that at exit and at failure, the directory does not persist
         """
-        atexit.register(self._cleanup_temp_dir)
-        atexit.register(self._cleanup_user_dir)
+        if self._used_as_context_manager:
+            return  # if used as a context manager, __exit__ handles cleanup
 
-        # on interrupt or termination
-        signal.signal(signal.SIGTERM, self._clean_on_signal)
-        signal.signal(signal.SIGINT, self._clean_on_signal)
+        # we only want to register the appropriate cleanup function
+        if self.user_supplied_download_path:
+            atexit.register(self._cleanup_user_dir)
+        else:
+            atexit.register(self._cleanup_temp_dir)
 
     def _clean_on_signal(self, signum: int, frame: FrameType | None) -> None:
         if self.user_supplied_download_path:
@@ -94,17 +103,21 @@ class WandbFs:
         return self.api.default_entity
 
     def get_artifact(self, artifact_id: str, version: str = "latest") -> wandb.Artifact:
-        return self.api.artifact(f"wandb-registry-model/{artifact_id}:{version}")
+        return self.api.artifact(f"{self.REGISTRY_MODEL_ROOT}/{artifact_id}:{version}")
 
     def download_artifact(
         self,
         artifact: wandb.Artifact,
     ) -> Path:
         """
-        use_artifact determines the filesystem that the artifact is on, and does one of two things:
-        1. if the file system is remote (s3 type storage) then it will download the artifact to a temp diectory
-           we then call wandb.use_artifact on the artifact that we downloaded.
-        2. if this download fails, we patch boto3 to retrieve the artifact.
+        download_artifact downloads the specified artifact to either a user-specified
+        directory or a temporary directory. If the user-specified directory already
+        contains the artifact, it will not be re-downloaded.
+
+        Args:
+            artifact: The WandB artifact object to download.
+        Returns:
+            Path: The path to the downloaded artifact.
         """
         # create the base path for either a temp or user dir
         if self.user_supplied_download_path is None:
@@ -157,13 +170,29 @@ class WandbFs:
         return None
 
     def __enter__(self) -> "WandbFs":
+        self._used_as_context_manager = True
+        # Store original handlers for restoration
+        self._original_sigterm = signal.signal(signal.SIGTERM, self._clean_on_signal)
+        self._original_sigint = signal.signal(signal.SIGINT, self._clean_on_signal)
+
+        # on interrupt or termination
+        signal.signal(signal.SIGTERM, self._clean_on_signal)
+        signal.signal(signal.SIGINT, self._clean_on_signal)
+
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """
-        exit the context manager, we only want temp files to be cleaned up
+        exit the context manager, cleaning up the temporary directory if it was used
+        or the user directory if it was specified and failed to download.
         """
-        self._cleanup_temp_dir()
+        if self.user_supplied_download_path:
+            self._cleanup_user_dir()
+        else:
+            self._cleanup_temp_dir()
+
+        signal.signal(signal.SIGTERM, self._original_sigterm)
+        signal.signal(signal.SIGINT, self._original_sigint)
 
     def _cleanup_user_dir(self) -> None:
         """
@@ -183,7 +212,7 @@ class WandbFs:
             shutil.rmtree(self.download_path)
 
     def _cleanup_temp_dir(self) -> None:
-        if self._temp_dir:
+        if hasattr(self, "_temp_dir"):
             try:
                 self._temp_dir.cleanup()
             except (OSError, FileNotFoundError):
