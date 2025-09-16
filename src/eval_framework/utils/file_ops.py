@@ -12,7 +12,6 @@ from unittest.mock import patch
 import boto3
 import boto3.session
 import requests
-
 import wandb
 
 
@@ -35,7 +34,7 @@ class WandbFs:
     (which can be a persistent directory). If no path is provided, a temporary directory is
     created and cleaned up automatically.
 
-    4. Cleanup is handled in two ways, and exit/signal handles are registered accordingly:
+    4. Cleanup is handled in two ways, and exit handles are registered accordingly:
         - when not used as a context manager atexit handlers ensure cleanup on normal script termination
         - when used as a context manager, cleanup is handled in __exit__ directly
 
@@ -48,6 +47,14 @@ class WandbFs:
     ..    artifact = wandb_fs.get_artifact("my-artifact", version="v1")
     ..    download_path = wandb_fs.download_artifact(artifact)
     ..    file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
+
+    >> wandb_fs = WandbFs("./my-download-path/")
+    .. wandb_fs.setup_cleanup_handlers()
+    .. artifact = wandb_fs.get_artifact("my-artifact", version="v1")
+    .. download_path = wandb_fs.download_artifact(artifact)
+    .. file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
+    .. wandb_fs.restore_cleanup_handlers()
+    .. some_function_that_uses_the_artifact(file_root)
     """
 
     def __init__(self, user_supplied_download_path: str | Path | None = None):
@@ -58,27 +65,33 @@ class WandbFs:
         self._temp_dir: tempfile.TemporaryDirectory | None = None
         self.download_path: Path | None = None
         self._setup_s3_client()
-        self._setup_cleanup_handlers()
         self.original_resource = boto3.session.Session().resource
-        self._used_as_context_manager = False
 
     def _unverified_resource(self, service_name: str, *args: Any, **kwargs: Any) -> Any:
         kwargs["verify"] = False
         return self.original_resource(service_name, *args, **kwargs)
 
-    def _setup_cleanup_handlers(self) -> None:
+    def setup_cleanup_handlers(self) -> None:
         """
         because wandbfs deals with downloading files, we will need to
         make sure that at exit and at failure, the directory does not persist
-        """
-        if self._used_as_context_manager:
-            return  # if used as a context manager, __exit__ handles cleanup
 
+        these are present to ensure cleanup on normal script termination if not a context manager.
+        """
         # we only want to register the appropriate cleanup function
         if self.user_supplied_download_path:
             atexit.register(self._cleanup_user_dir)
         else:
             atexit.register(self._cleanup_temp_dir)
+
+    def restore_cleanup_handlers(self) -> None:
+        """
+        unregister the cleanup handlers
+        """
+        if self.user_supplied_download_path:
+            atexit.unregister(self._cleanup_user_dir)
+        else:
+            atexit.unregister(self._cleanup_temp_dir)
 
     def _clean_on_signal(self, signum: int, frame: FrameType | None) -> None:
         if self.user_supplied_download_path:
@@ -170,7 +183,6 @@ class WandbFs:
         return None
 
     def __enter__(self) -> "WandbFs":
-        self._used_as_context_manager = True
         # Store original handlers for restoration
         self._original_sigterm = signal.signal(signal.SIGTERM, self._clean_on_signal)
         self._original_sigint = signal.signal(signal.SIGINT, self._clean_on_signal)

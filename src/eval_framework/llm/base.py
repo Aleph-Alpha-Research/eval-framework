@@ -1,12 +1,9 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from pathlib import Path
 from typing import TYPE_CHECKING, Union
 
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from eval_framework.utils.constants import RED, RESET
-from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
@@ -64,21 +61,6 @@ class BaseLLM(ABC):
     ) -> list[RawCompletion]:
         messages: list[Sequence[Message]] = [sample.messages for sample in samples]
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
-
-    def download_wandb_artifact(
-        self, artifact_name: str, version: str, user_supplied_download_path: str | Path | None
-    ) -> Path:
-        self.wandb_fs = WandbFs(user_supplied_download_path=user_supplied_download_path)
-        self.artifact = self.wandb_fs.get_artifact(artifact_name, version)
-        self.wandb_fs.download_artifact(self.artifact)
-        file_root = self.wandb_fs.find_hf_checkpoint_root_from_path_list()
-
-        if file_root is None:
-            raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
-
-        assert self.wandb_fs.download_path is not None
-        print(f"{RED}[ Model located at: {file_root} ]{RESET}")
-        return file_root
 
     def get_formatter(
         self, formatter_name: str, model_identifier: str = ""

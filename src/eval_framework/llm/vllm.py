@@ -24,6 +24,7 @@ from eval_framework.shared.types import (
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
+from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import BaseFormatter, HFFormatter, Message
 
 logger = logging.getLogger(__name__)
@@ -462,17 +463,25 @@ class _VLLM_from_wandb_registry(VLLMModel):
 
         # Remove download_path from kwargs
         download_path = kwargs.pop("download_path", None)
-        local_artifact_path = self.download_wandb_artifact(
-            artifact_name, version, user_supplied_download_path=download_path
-        )
-        # Set LLM_NAME to local path which VLLM can use directly
-        self.LLM_NAME = str(local_artifact_path)
-        super().__init__(
-            formatter=selected_formatter,
-            checkpoint_path=local_artifact_path,
-            checkpoint_name=f"{artifact_name}/{version}",
-            **kwargs,
-        )
+
+        with WandbFs(user_supplied_download_path=download_path) as wandb_fs:
+            self.artifact = wandb_fs.get_artifact(artifact_name, version)
+            wandb_fs.download_artifact(self.artifact)
+            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
+
+            if file_root is None:
+                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
+
+            print(f"{RED}[ Model located at: {file_root} ]{RESET}")
+
+            # Set LLM_NAME to local path which VLLM can use directly
+            self.LLM_NAME = str(file_root)
+            super().__init__(
+                formatter=selected_formatter,
+                checkpoint_path=file_root,
+                checkpoint_name=f"{artifact_name}/{version}",
+                **kwargs,
+            )
 
         print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
         print(f"{artifact_name}:{version} {RED}]{RESET}")
