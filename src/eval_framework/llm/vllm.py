@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any, Literal, Protocol, cast, override
 
 import torch
-import wandb
 from vllm import LLM, SamplingParams
 from vllm.inputs.data import TokensPrompt
 from vllm.outputs import RequestOutput
@@ -465,6 +464,7 @@ class _VLLM_from_wandb_registry(VLLMModel):
         download_path = kwargs.pop("download_path", None)
 
         with WandbFs(user_supplied_download_path=download_path) as wandb_fs:
+            # needs to be self since we check to see if this attribute exists in main
             self.artifact = wandb_fs.get_artifact(artifact_name, version)
             wandb_fs.download_artifact(self.artifact)
             file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
@@ -486,26 +486,6 @@ class _VLLM_from_wandb_registry(VLLMModel):
         print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
         print(f"{artifact_name}:{version} {RED}]{RESET}")
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
-
-    def use_artifact(self) -> None:
-        if self.artifact_used is False:
-            wandb.use_artifact(self.artifact)
-            self.artifact_used = True
-
-    def generate_from_messages(
-        self,
-        messages: list[Sequence[Message]],
-        stop_sequences: list[str] | None = None,
-        max_tokens: int | None = None,
-        temperature: float | None = None,
-    ) -> list[RawCompletion]:
-        # use artifact should only be called once per run
-        self.use_artifact()
-        return super().generate_from_messages(messages, stop_sequences, max_tokens, temperature)
-
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
-        self.use_artifact()
-        return super().logprobs(samples)
 
 
 class Qwen3_0_6B_VLLM(VLLMModel):
