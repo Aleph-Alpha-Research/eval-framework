@@ -73,8 +73,6 @@ class RegistryModel(BaseLLM):
             case _:
                 raise ValueError(f"Unsupported backend: {backend}. Supported backends: 'hfllm', 'vllm'")
 
-        self.artifact = self._model.artifact  # expose artifact for use in main.py
-
     def generate_from_messages(
         self,
         messages: list[Sequence[Message]],
@@ -92,3 +90,7 @@ class RegistryModel(BaseLLM):
     @property
     def name(self) -> str:
         return self._model.name
+
+    @property
+    def artifact(self) -> Any:
+        return self._model.artifact
