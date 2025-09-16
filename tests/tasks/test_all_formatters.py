@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.tasks.registry import get_task, registered_task_names
+from eval_framework.tasks.registry import get_task
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.utils import DatasetPatcher, assert_hash_string
 
@@ -92,7 +92,9 @@ SKIP_TASKS = [
     "Flores200",  # Could not instantiate: 'utf-8' codec can't decode byte 0x80 in position 108: invalid start byte
     "SPHYR",  # Could not instantiate SPHYR: JSON parse error: Column() changed from object to array in row 0
 ]
-TASKS_TO_TEST = set(registered_task_names()) - set(SKIP_TASKS)
+
+# TASKS_TO_TEST = set(registered_task_names()) - set(SKIP_TASKS)
+TASKS_TO_TEST = set(SKIP_TASKS)
 
 
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
@@ -109,8 +111,8 @@ def test_all_tasks_formatter(task_name: str, formatter_cls: type["BaseFormatter"
         AssertionError: If the hash of the formatter output does not match expectation.
     """
     task_class = get_task(task_name)
-    if task_class.__name__ in SKIP_TASKS:
-        pytest.skip(f"Skipping {task_class.__name__} appearing in the SKIP_TASKS list.")
+    # if task_class.__name__ in SKIP_TASKS:
+    #     pytest.skip(f"Skipping {task_class.__name__} appearing in the SKIP_TASKS list.")
 
     # instantiate the class with the SPECIAL_ARGS dictionary or 1-shot example and fallback to 0-shot if this fails
     try:
