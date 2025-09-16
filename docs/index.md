@@ -16,12 +16,22 @@
 - LLM-as-a-Judge: Evaluation using LLM judges.
 
 ```mermaid
-graph LR
-    A["**Prompt preparation**<br/>• Prompt formatting<br/>• Few-shot prompting<br/>• Single or multi-turn prompts<br/>• Robustness via text perturbations"]
-    B["**Model**<br/>• API models: Aleph Alpha AsyncClient API, OpenAI API<br/>• Checkpoint-based: Hugging Face, vLLM<br/>• Support for consumable models in separate codebases"]
-    C["**LLM Response Types**<br/>• Completion: next-token evaluation vs expected output; can use LLM judges/logit checks<br/>• Loglikelihood: pick highest-prob option among choices and compare with expected"]
-    D["**35+ Metrics**<br/>• Completion: Accuracy, F1, BLEU<br/>• Loglikelihood: Accuracy<br/>• LLM-judge: Chatbot style, instruction adherence<br/>• Efficiency: Compression ratios<br/>• Code & math metrics"]
-    E["**Results**<br/>• Average metrics (± std dev)<br/>• Completions & intermediate results per sample<br/>• Task versioning, metadata & logging"]
+graph TD
+    %% Define custom classes for your colors
+    classDef yellow fill:#e6f542,stroke:#000000,stroke-width:2px
+    classDef green  fill:#9fa88d,stroke:#000000,stroke-width:2px
+    classDef beige  fill:#f1efd9,stroke:#000000,stroke-width:2px
+
+    %% Define nodes and apply classes
+    A["<b>Prompt preparation</b><br/>• Prompt formatting<br/>• Few-shot prompting<br/>• Single or multi-turn prompts<br/>• Robustness via text perturbations"]:::yellow
+    B["<b>Model</b><br/>• API models: Aleph Alpha AsyncClient API, OpenAI API<br/>• Checkpoint-based: Hugging Face, vLLM<br/>• Support for consumable models in separate codebases"]:::green
+    C["<b>LLM Response Types</b><br/>• Completion: next-token evaluation vs expected output; can use LLM judges/logit checks<br/>• Loglikelihood: pick highest-prob option among choices and compare with expected"]:::yellow
+    D["<b>3S+ Metrics</b><br/>• Completion: Accuracy, F1, BLEU<br/>• Loglikelihood: Accuracy<br/>• LLM-judge: Chatbot style, instruction adherence<br/>• Efficiency: Compression ratios<br/>• Code & math metrics"]:::beige
+    E["<b>Results</b><br/>• Average metrics (± std dev)<br/>• Completions & intermediate results per sample<br/>• Task versioning, metadata & logging"]:::green
+
+
+    %% Define the flow
+    A --> B --> C --> D --> E
 ```
 
 ## Benchmark Coverage & Task Categories
