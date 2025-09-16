@@ -21,3 +21,6 @@ nav:
     - Understanding Results: understanding_results_guide.md
     - Using Determined AI: using_determined.md
     - WandB Integration: wandb_integration.md
+
+extra_css:
+  - stylesheets/extra.css
