@@ -92,11 +92,10 @@ class WandbFs:
             atexit.unregister(self._cleanup_temp_dir)
 
     def _clean_on_signal(self, signum: int, frame: FrameType | None) -> None:
-        if self.user_supplied_download_path:
-            self._cleanup_user_dir()
-        else:
-            self._cleanup_temp_dir()
-        # we need to re-raise the signal to terminate gracefully
+        # we need to re-raise the signal to terminate gracefully with __exit__
+        # if we call cleanup directly, then the first time we try to rmtree
+        # we get an OSError
+        self.__exit__(None, None, None)
         signal.signal(signum, signal.SIG_DFL)
         os.kill(os.getpid(), signum)
 
@@ -181,6 +180,7 @@ class WandbFs:
         return None
 
     def __enter__(self) -> "WandbFs":
+        self._original_sigterm = signal.signal(signal.SIGTERM, self._clean_on_signal)
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -192,6 +192,8 @@ class WandbFs:
             self._cleanup_user_dir()
         else:
             self._cleanup_temp_dir()
+
+        signal.signal(signal.SIGTERM, self._original_sigterm)
 
     def _cleanup_user_dir(self) -> None:
         """
@@ -207,7 +209,8 @@ class WandbFs:
         ):
             # remove the contents of the download path.
             print(f"Cleaning up user-specified download path...{self.download_path}")
-            shutil.rmtree(self.download_path)
+            # ignore errors because the directory is not empty
+            shutil.rmtree(self.download_path, ignore_errors=True)
 
     def _cleanup_temp_dir(self) -> None:
         if hasattr(self, "_temp_dir") and self._temp_dir is not None:
