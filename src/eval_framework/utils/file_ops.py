@@ -12,7 +12,6 @@ from unittest.mock import patch
 import boto3
 import boto3.session
 import requests
-
 import wandb
 
 

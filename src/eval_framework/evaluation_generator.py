@@ -3,9 +3,9 @@ import math
 
 import numpy as np
 import pandas as pd
+import wandb
 from tqdm import tqdm
 
-import wandb
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesCompletion,

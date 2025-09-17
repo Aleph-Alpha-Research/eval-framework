@@ -1,8 +1,8 @@
 from collections.abc import Generator
 
 import pytest
-
 import wandb
+
 from tests.mock_wandb import MockWandbRun
 
 

@@ -8,8 +8,8 @@ from unittest import mock
 from unittest.mock import Mock, patch
 
 import pytest
-
 import wandb
+
 from eval_framework.utils.file_ops import (
     WandbFs,
 )

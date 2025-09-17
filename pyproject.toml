@@ -143,6 +143,12 @@ select = [
     "UP", # Auto-upgrading of new Python features
     "I", # Sort imports
 ]
+[tool.ruff.lint.isort]
+# https://github.com/astral-sh/ruff-pre-commit/issues/121
+# https://github.com/astral-sh/ruff/issues/10519
+# wandb creates a folder called 'wandb' during local runs (not logged in)
+# this needs to be added to prevent isort from incorrectly sorting
+known-third-party = ["wandb"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "__init__.py" = ["F401"]
