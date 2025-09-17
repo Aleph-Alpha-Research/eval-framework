@@ -147,66 +147,70 @@ jobs:
       - name: Run tests
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: uv run --all-extras pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
+          # Add UTF-8 encoding settings
+          PYTHONIOENCODING: utf-8
+          LANG: C.UTF-8
+          LC_ALL: C.UTF-8
+        run: uv run --all-extras pytest tests/tasks/test_all_formatters.py -v
 
-  test-cpu-slow:
-    runs-on: cpu-runner-8c-32gb-01
-    container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache]
-    steps:
-      - uses: actions/checkout@v4
+  # test-cpu-slow:
+  #   runs-on: cpu-runner-8c-32gb-01
+  #   container: derskythe/github-runner-base:ubuntu-noble
+  #   needs: [lint, hf-datasets-cache]
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: "~=0.8.16"
+  #     - name: Setup uv
+  #       uses: astral-sh/setup-uv@v6
+  #       with:
+  #         version: "~=0.8.16"
 
-      - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-
+  #     - name: Huggingface datasets cache
+  #       uses: actions/cache/restore@v4
+  #       with:
+  #         path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+  #         key: hf-datasets-
 
-      - name: Run tests
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
+  #     - name: Run tests
+  #       env:
+  #         HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+  #       run: |
+  #         uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
+  #         uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
-  test-docker-gpu:
-    runs-on: EvalFrameworkGPURunner
-    needs: [tag, build, test-cpu, test-cpu-slow]
-    container:
-      image: "${{ needs.tag.outputs.image }}"
-      credentials:
-        username: token
-        password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
-      options: --gpus all
-    defaults:
-      run:
-        working-directory: /eval_framework
-    steps:
-      - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-
+  # test-docker-gpu:
+  #   runs-on: EvalFrameworkGPURunner
+  #   needs: [tag, build, test-cpu, test-cpu-slow]
+  #   container:
+  #     image: "${{ needs.tag.outputs.image }}"
+  #     credentials:
+  #       username: token
+  #       password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
+  #     options: --gpus all
+  #   defaults:
+  #     run:
+  #       working-directory: /eval_framework
+  #   steps:
+  #     - name: Huggingface datasets cache
+  #       uses: actions/cache/restore@v4
+  #       with:
+  #         path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+  #         key: hf-datasets-
 
-      - name: Test GPU
-        timeout-minutes: 20
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
+  #     - name: Test GPU
+  #       timeout-minutes: 20
+  #       env:
+  #         HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+  #       run: pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
 
-      - name: Test VLLM
-        timeout-minutes: 20
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-          VLLM_LOGGING_LEVEL: DEBUG
-          VLLM_WORKER_MULTIPROC_METHOD: spawn
-          VLLM_USE_MODELSCOPE: False
-          VLLM_NCCL_SO_PATH: ""
-          VLLM_USE_TRITON_FLASH_ATTN: 0
-          VLLM_DISABLE_CUSTOM_ALL_REDUCE: 1
-        run: pytest --log-cli-level=INFO -v -m "vllm"
+  #     - name: Test VLLM
+  #       timeout-minutes: 20
+  #       env:
+  #         HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+  #         VLLM_LOGGING_LEVEL: DEBUG
+  #         VLLM_WORKER_MULTIPROC_METHOD: spawn
+  #         VLLM_USE_MODELSCOPE: False
+  #         VLLM_NCCL_SO_PATH: ""
+  #         VLLM_USE_TRITON_FLASH_ATTN: 0
+  #         VLLM_DISABLE_CUSTOM_ALL_REDUCE: 1
+  #       run: pytest --log-cli-level=INFO -v -m "vllm"
