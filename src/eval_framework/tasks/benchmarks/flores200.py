@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import pycountry
-from datasets import Dataset, DatasetDict, DownloadConfig, load_dataset
+from datasets import DownloadConfig, load_dataset
 from huggingface_hub import HfApi
 from huggingface_hub.errors import RevisionNotFoundError
 
@@ -44,7 +44,7 @@ class Flores200(BaseTask[str]):
         self.stop_sequences = ["\n"]
 
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
-        """Override to handle FLORES-200 encoding issues by using parquet files if available."""
+        """Override to handle FLORES-200 encoding issues by using parquet files."""
         # Check if the HF_REVISION is valid before loading the dataset
         if self.HF_REVISION:
             try:
@@ -58,13 +58,6 @@ class Flores200(BaseTask[str]):
 
         # First, try to load using parquet files to bypass the problematic loading script
         try:
-            import warnings
-
-            warnings.warn(
-                f"Attempting to load {kwargs.get('path', self.DATASET_PATH)} from parquet files "
-                "to avoid encoding issues in the loading script"
-            )
-
             # Try loading without the loading script by using data_files
             # This forces the dataset library to use the parquet files directly
             dataset = load_dataset(
@@ -80,83 +73,17 @@ class Flores200(BaseTask[str]):
 
             return dataset
 
-        except Exception as e:
-            # If parquet loading fails, try the original method with encoding fixes
-            import warnings
-
-            warnings.warn(f"Parquet loading failed ({e}), falling back to loading script with encoding fixes")
-
-            # Try the original loading with the problematic script
-            try:
-                dataset = load_dataset(
-                    **kwargs,
-                    revision=self.HF_REVISION,
-                    trust_remote_code=True,
-                    cache_dir=cache_dir,
-                    download_config=download_config,
-                )
-                return dataset
-
-            except (UnicodeDecodeError, Exception) as load_error:
-                if "UnicodeDecodeError" in str(type(load_error)) or "'utf-8' codec can't decode" in str(load_error):
-                    warnings.warn(
-                        f"Dataset {kwargs.get('path', self.DATASET_PATH)} has encoding issues. "
-                        "Creating minimal dataset for testing."
-                    )
-
-                    # Create a minimal dataset for testing purposes
-                    return self._create_minimal_dataset(kwargs.get("name"), kwargs.get("split"))
-                else:
-                    # For other errors, try the alternative cache
-                    return load_dataset(
-                        **kwargs,
-                        revision=self.HF_REVISION,
-                        trust_remote_code=True,
-                        cache_dir=f"{Path.home()}/.cache/eval-framework",
-                    )
-
-    def _create_minimal_dataset(self, config_name: str | None, split: str | None) -> Dataset | DatasetDict:
-        """Create a minimal FLORES-200 dataset for testing when the real dataset fails to load."""
-
-        # Determine which splits to create
-        if split:
-            splits_to_create = [split]
-        else:
-            splits_to_create = ["dev", "devtest"]
-
-        datasets = {}
-
-        for split_name in splits_to_create:
-            # Create minimal examples that match FLORES structure
-            examples = []
-
-            # Create 10 examples for testing
-            for i in range(10):
-                example = {
-                    "id": i,
-                    "URL": f"https://example.com/article_{i}",
-                    "domain": "news",
-                    "topic": "general",
-                    "has_image": "no",
-                    "has_hyperlink": "no",
-                }
-
-                # Add sentence fields for all languages in FLORES_LANGUAGES
-                for lang_code in FLORES_LANGUAGES:
-                    example[f"sentence_{lang_code}"] = f"This is a test sentence {i} in {lang_code}."
-
-                # Add sentences for the specific config if provided
-                if config_name:
-                    example[f"sentence_{config_name}"] = f"This is a test sentence {i} in {config_name}."
-
-                examples.append(example)
-
-            datasets[split_name] = Dataset.from_list(examples)
-
-        if split:
-            return datasets[split]
-        else:
-            return DatasetDict(datasets)
+        except Exception:
+            # If parquet loading fails, try the original method
+            # Try the original loading with the loading script
+            dataset = load_dataset(
+                **kwargs,
+                revision=self.HF_REVISION,
+                trust_remote_code=True,
+                cache_dir=cache_dir,
+                download_config=download_config,
+            )
+            return dataset
 
     def _load_dataset(self, subject: SubjectType) -> None:
         # Store the subject (language pair) for use in other methods
