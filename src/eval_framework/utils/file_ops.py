@@ -206,8 +206,7 @@ class WandbFs:
         """
         if (
             # check to make sure this flag was set; if not, there was no attempt to download.
-            hasattr(self, "_artifact_downloaded")
-            and not self._artifact_downloaded  # check that the artifact was not downloaded
+            not getattr(self, "_artifact_downloaded", True)
             and self.user_supplied_download_path
             and self.download_path
             and self.download_path.exists()
