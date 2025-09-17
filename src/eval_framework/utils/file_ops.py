@@ -181,9 +181,6 @@ class WandbFs:
         return None
 
     def __enter__(self) -> "WandbFs":
-        # Store original handlers for restoration
-        self._original_sigterm = signal.signal(signal.SIGTERM, self._clean_on_signal)
-        self._original_sigint = signal.signal(signal.SIGINT, self._clean_on_signal)
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
@@ -195,9 +192,6 @@ class WandbFs:
             self._cleanup_user_dir()
         else:
             self._cleanup_temp_dir()
-
-        signal.signal(signal.SIGTERM, self._original_sigterm)
-        signal.signal(signal.SIGINT, self._original_sigint)
 
     def _cleanup_user_dir(self) -> None:
         """
