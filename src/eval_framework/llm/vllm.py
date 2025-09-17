@@ -462,7 +462,7 @@ class VLLMRegistryModel(VLLMModel):
         # Remove download_path from kwargs
         download_path = kwargs.pop("download_path", None)
 
-        with WandbFs(user_supplied_download_path=download_path) as wandb_fs:
+        with WandbFs(download_path=download_path) as wandb_fs:
             # needs to be self since we check to see if this attribute exists in main
             self.artifact = wandb_fs.get_artifact(artifact_name, version)
             wandb_fs.download_artifact(self.artifact)

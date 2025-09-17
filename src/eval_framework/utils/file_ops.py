@@ -58,11 +58,9 @@ class WandbFs:
     .. some_function_that_uses_the_artifact(file_root)
     """
 
-    def __init__(self, user_supplied_download_path: str | Path | None = None):
+    def __init__(self, download_path: str | Path | None = None):
         self.api = wandb.Api()
-        self.user_supplied_download_path = (
-            Path(user_supplied_download_path) if user_supplied_download_path is not None else None
-        )
+        self.user_supplied_download_path = Path(download_path) if download_path is not None else None
         self._temp_dir: tempfile.TemporaryDirectory | None = None
         self.download_path: Path | None = None
         self._setup_s3_client()
