@@ -72,7 +72,7 @@ def main(
         # crashes during the evaluation step, and subsequent reruns use the same generations,
         # the runs are still linked to the artifact
         if hasattr(llm, "artifact"):  # BaseLLM doesn't have _model attribute
-            wandb.use_artifact(llm._model.artifact)
+            wandb.use_artifact(llm.artifact)
 
         _, preempted = response_generator.generate(should_preempt_callable)
 
