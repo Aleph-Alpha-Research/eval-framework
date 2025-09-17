@@ -50,7 +50,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--llm-name",
         type=str,
-        required=True,
+        required=False,
         help=(
             "Either a full import path for a model (e.g., `eval_framework.huggingface.HFLLM`) or the "
             "name of a class derived from `eval_framework.llm.base.BaseLLM` that can be found in the "
