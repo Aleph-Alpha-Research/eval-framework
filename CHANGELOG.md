@@ -18,6 +18,7 @@
 - Removed `torch` as a main dependency of `eval_framework`
 - Documentation improvements
 - Reduced redundant string/path casting
+- Fix for empty `stop_sequences` in `eval_framework.llm.huggingface.StopSequenceCriteria`.
 
 ## 0.2.0
 
