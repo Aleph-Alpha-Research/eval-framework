@@ -32,7 +32,7 @@
   "DUC_EXTRACTIVE.ConcatFormatter": "9654d6668ca667d6e3409c6f83d7ca5d",
   "DUC_EXTRACTIVE.Llama3Formatter": "fb181ebb983c14ffd7dc9a8ab3fd4bf4",
   "Flores200.ConcatFormatter": "4b27953a611ad350fa048ee46ee638cc",
-  "Flores200.Llama3Formatter": "b8c6cf26902df73dec7315e73e188c42",
+  "Flores200.Llama3Formatter": "054f185667634c7a8159de77420c9931",
   "FloresPlus.ConcatFormatter": "3906ba0589b1def3e243b16b93a26044",
   "FloresPlus.Llama3Formatter": "7bf018e090b6cf8846d46c834bbf2041",
   "FullTextMMLU.ConcatFormatter": "8fff503f2c04a7d38d20650d950d3c66",
