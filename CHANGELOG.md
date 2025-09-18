@@ -29,6 +29,7 @@
 - `DEFAULT_FORMATTER` in our models is now a callable, to avoid instantiating formatters at import time.
 
 ### Tasks
+- Fixed dataset loading issues for SQUAD, SQUAD2, FLORES-200, and SPHYR that were causing formatter test failures.
 - Our benchmarks tasks are now registered lazily, which reduces the amount of code that is imported
   at startup time. Task look-ups are now insensitive to case, hyphens, underscores and whitespace.
 - Task names in the registry are now enforced to be equal to the class names.
