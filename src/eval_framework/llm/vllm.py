@@ -475,6 +475,8 @@ class VLLMRegistryModel(VLLMModel):
 
             # Set LLM_NAME to local path which VLLM can use directly
             self.LLM_NAME = str(file_root)
+            self.artifact_name = artifact_name
+            self.artifact_version = version
             super().__init__(
                 formatter=selected_formatter,
                 checkpoint_path=file_root,
@@ -485,6 +487,10 @@ class VLLMRegistryModel(VLLMModel):
         print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
         print(f"{artifact_name}:{version} {RED}]{RESET}")
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
+
+    @property
+    def name(self) -> str:
+        return f"{self.__class__.__name__}_checkpoint_{self.artifact_name}/{self.artifact_version}"
 
 
 class Qwen3_0_6B_VLLM(VLLMModel):

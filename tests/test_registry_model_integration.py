@@ -8,20 +8,17 @@ from eval_framework.tasks.eval_config import EvalConfig
 
 
 @pytest.mark.parametrize(
-    "model_class,extra_args,expected_backend",
+    "model_class,extra_args",
     [
-        pytest.param(HFLLMRegistryModel, {}, "hfllm", id="hfllm_backend"),
+        pytest.param(HFLLMRegistryModel, {}, id="hfllm_backend"),
         pytest.param(
             VLLMRegistryModel,
             {"tensor_parallel_size": 2, "gpu_memory_utilization": 0.8, "batch_size": 4},
-            "vllm",
             id="vllm_backend_with_params",
         ),
     ],
 )
-def test_registry_model_config_integration(
-    model_class: type, extra_args: dict[str, int | float], expected_backend: str
-) -> None:
+def test_registry_model_config_integration(model_class: type, extra_args: dict[str, int | float]) -> None:
     base_llm_args = {
         "artifact_name": "test-model",
         "version": "v1.0.0",
