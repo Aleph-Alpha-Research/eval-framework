@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any, Literal, Protocol, cast, override
 
 import torch
-import wandb
 from vllm import LLM, SamplingParams
 from vllm.inputs.data import TokensPrompt
 from vllm.outputs import RequestOutput
@@ -24,6 +23,7 @@ from eval_framework.shared.types import (
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
+from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import BaseFormatter, HFFormatter, Message
 
 logger = logging.getLogger(__name__)
@@ -120,7 +120,9 @@ class VLLMModel(BaseLLM):
         self.checkpoint_path = checkpoint_path
 
         model_args = {
-            "model": self.checkpoint_path or self.LLM_NAME,
+            "model": str(self.checkpoint_path)
+            if self.checkpoint_path
+            else self.LLM_NAME,  # for some reason vllm needs a str here even though it can take an os.pathlike
             "max_model_len": max_model_len or self.SEQ_LENGTH,
             "max_num_seqs": batch_size,
             "tensor_parallel_size": tensor_parallel_size,
@@ -430,7 +432,7 @@ class VLLMModel(BaseLLM):
         return self.max_seq_length
 
 
-class _VLLM_from_wandb_registry(VLLMModel):
+class VLLMRegistryModel(VLLMModel):
     """
     A class to create VLLM instances from registered models in Wandb registry.
     Downloads the model artifacts from Wandb and creates a local VLLM instance.
@@ -454,20 +456,30 @@ class _VLLM_from_wandb_registry(VLLMModel):
             **kwargs: Additional arguments passed to VLLMModel
         """
         print(f"{RED}[ Loading registered model from Wandb for VLLM: {artifact_name}:{version} ]{RESET}")
-        self.artifact_used = False
 
         selected_formatter = self.get_formatter(formatter, formatter_identifier)
 
         # Remove download_path from kwargs
         download_path = kwargs.pop("download_path", None)
-        with self.download_wandb_artifact(
-            artifact_name, version, user_supplied_download_path=download_path
-        ) as local_artifact_path:
+
+        with WandbFs(download_path=download_path) as wandb_fs:
+            # needs to be self since we check to see if this attribute exists in main
+            self.artifact = wandb_fs.get_artifact(artifact_name, version)
+            wandb_fs.download_artifact(self.artifact)
+            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
+
+            if file_root is None:
+                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
+
+            print(f"{RED}[ Model located at: {file_root} ]{RESET}")
+
             # Set LLM_NAME to local path which VLLM can use directly
-            self.LLM_NAME = str(local_artifact_path)
+            self.LLM_NAME = str(file_root)
+            self.artifact_name = artifact_name
+            self.artifact_version = version
             super().__init__(
                 formatter=selected_formatter,
-                checkpoint_path=local_artifact_path,
+                checkpoint_path=file_root,
                 checkpoint_name=f"{artifact_name}/{version}",
                 **kwargs,
             )
@@ -476,25 +488,9 @@ class _VLLM_from_wandb_registry(VLLMModel):
         print(f"{artifact_name}:{version} {RED}]{RESET}")
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
 
-    def use_artifact(self) -> None:
-        if self.artifact_used is False:
-            wandb.use_artifact(self.artifact)
-            self.artifact_used = True
-
-    def generate_from_messages(
-        self,
-        messages: list[Sequence[Message]],
-        stop_sequences: list[str] | None = None,
-        max_tokens: int | None = None,
-        temperature: float | None = None,
-    ) -> list[RawCompletion]:
-        # use artifact should only be called once per run
-        self.use_artifact()
-        return super().generate_from_messages(messages, stop_sequences, max_tokens, temperature)
-
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
-        self.use_artifact()
-        return super().logprobs(samples)
+    @property
+    def name(self) -> str:
+        return f"{self.__class__.__name__}_checkpoint_{self.artifact_name}/{self.artifact_version}"
 
 
 class Qwen3_0_6B_VLLM(VLLMModel):

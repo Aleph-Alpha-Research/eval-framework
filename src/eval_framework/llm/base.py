@@ -1,13 +1,9 @@
 from abc import ABC, abstractmethod
-from collections.abc import Generator, Sequence
-from contextlib import contextmanager
-from pathlib import Path
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Union
 
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from eval_framework.utils.constants import RED, RESET
-from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
@@ -65,30 +61,6 @@ class BaseLLM(ABC):
     ) -> list[RawCompletion]:
         messages: list[Sequence[Message]] = [sample.messages for sample in samples]
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
-
-    @contextmanager
-    def download_wandb_artifact(
-        self, artifact_name: str, version: str, user_supplied_download_path: str | Path | None
-    ) -> Generator[Path, None, None]:
-        wandb_fs = WandbFs(user_supplied_download_path=user_supplied_download_path)
-        try:
-            self.artifact = wandb_fs.get_artifact(artifact_name, version)
-            wandb_fs.download_artifact(self.artifact)
-            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
-            if file_root is None:
-                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
-
-            assert wandb_fs.download_path is not None
-            # if it's a temp directory, we need to append the artifact subdir
-            if isinstance(wandb_fs.download_path, Path):
-                local_artifact_path = file_root
-            else:
-                local_artifact_path = Path(wandb_fs.download_path.name) / file_root
-
-            print(f"{RED}[ Model located at: {local_artifact_path} ]{RESET}")
-            yield local_artifact_path
-        finally:
-            wandb_fs.cleanup()
 
     def get_formatter(
         self, formatter_name: str, model_identifier: str = ""
