@@ -3,8 +3,8 @@
 ````
 NAME = RenderableStructEval
 DATASET_PATH = TIGER-Lab/StructEval
-SAMPLE_SPLIT = test
-FEWSHOT_SPLIT = test
+SAMPLE_SPLIT = train
+FEWSHOT_SPLIT = train
 RESPONSE_TYPE = COMPLETION
 METRICS = [RenderableStructMetric]
 SUBJECTS = ['Convert Markdown to HTML', 'Convert React to HTML', 'Convert Vue to HTML', 'Text to HTML']
