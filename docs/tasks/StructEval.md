@@ -3,8 +3,8 @@
 ````
 NAME = StructEval
 DATASET_PATH = TIGER-Lab/StructEval
-SAMPLE_SPLIT = train
-FEWSHOT_SPLIT = train
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = test
 RESPONSE_TYPE = COMPLETION
 METRICS = [StructMetric]
 SUBJECTS = ['CSV to YAML', 'JSON to XML', 'JSON to CSV', 'XML to JSON', 'XML to YAML', 'Text to XML', 'Text to YAML', 'Text to TOML', 'YAML to JSON', 'TOML to JSON', 'Text to CSV', 'YAML to XML', 'JSON to YAML', 'TOML to YAML', 'YAML to CSV', 'CSV to JSON', 'CSV to XML', 'Text to JSON', 'XML to CSV']
