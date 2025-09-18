@@ -9,6 +9,7 @@
 - Minor fix allowing for empty `stop_sequences` in `eval_framework.llm.huggingface.StopSequenceCriteria`.
 
 ### Tasks
+- Pinned HF_REVISION for StructEval to "b5512175"; train split was renamed test upstream
 
 ### Metrics
 
