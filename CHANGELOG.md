@@ -9,7 +9,10 @@
 - Minor fix allowing for empty `stop_sequences` in `eval_framework.llm.huggingface.StopSequenceCriteria`.
 
 ### Tasks
+- Fixed dataset loading issues for SQUAD, SQUAD2, FLORES-200, and SPHYR that were causing formatter test failures,
+- Renamed `_get_eval_kwargs` method to `_get_context` in the StructEval task
 - Pinned HF_REVISION for StructEval to "b5512175"; train split was renamed test upstream
+
 
 ### Metrics
 
@@ -29,7 +32,6 @@
 - `DEFAULT_FORMATTER` in our models is now a callable, to avoid instantiating formatters at import time.
 
 ### Tasks
-- Fixed dataset loading issues for SQUAD, SQUAD2, FLORES-200, and SPHYR that were causing formatter test failures.
 - Our benchmarks tasks are now registered lazily, which reduces the amount of code that is imported
   at startup time. Task look-ups are now insensitive to case, hyphens, underscores and whitespace.
 - Task names in the registry are now enforced to be equal to the class names.
