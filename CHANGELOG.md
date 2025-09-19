@@ -1,12 +1,8 @@
 # Changelog
 
-## Unreleased: 0.2.1-dev
+## Unreleased: 0.2.2-dev
 
 ### Models
-
-- The `--llm-name` (and `--judge-model-name`) argument can now also be a module path like `eval_framework.llm.huggingface.HFLLM`.
-  Combining this with `--llm-args` (`-judge-model-args`) should cover many use-cases without having to provide a `models.py` file.
-- Minor fix allowing for empty `stop_sequences` in `eval_framework.llm.huggingface.StopSequenceCriteria`.
 
 ### Tasks
 - Fixed dataset loading issues for SQUAD, SQUAD2, FLORES-200, and SPHYR that were causing formatter test failures,
@@ -17,12 +13,16 @@
 ### Metrics
 
 ### General
+
+## 0.2.1
+
+- The `--llm-name` (and `--judge-model-name`) argument can now also be a module path like `eval_framework.llm.huggingface.HFLLM`.
+  Combining this with `--llm-args` (`-judge-model-args`) should cover many use-cases without having to provide a `models.py` file.
 - Added wandb logging and registry checkpoint loading with huggingface and vllm backends
 - Removed `torch` as a main dependency of `eval_framework`
-- Updated docs wrt. usage of `eval_framework.utils.generate_task_docs`
-- Minor fix of paths quoted in generated docs
-- Refactoring of clean up handlers in `eval_framework.utils.file_ops.WandbFs`
-- Reducing string/path casting redundancy
+- Documentation improvements
+- Reduced redundant string/path casting
+- Fix for empty `stop_sequences` in `eval_framework.llm.huggingface.StopSequenceCriteria`.
 
 ## 0.2.0
 
@@ -38,10 +38,6 @@
 - Added `subjects`and `hf_revision` to BaseTask arguments to replace global task re-definition when running with non default values.
 - Generate task documentation in `docs/tasks`. Moves the generate_task_docs utility to inside the package and added test that documentation is up-to-date.
 - Renamed `ChemBenchMultipleChoice` to `ChemBench` for consistency.
-- We've removed all models except those used for testing (they were largely old). The recommended way going forward is to provide
-  your own models implementation to the framework.
-- Removed and relaxes several main-dependencies
-- Moves the generate_task_docs utility to inside the package and add test that documentation is up-to-date
 - Fixed `ZERO_SCROLLS_QMSUM` missing from task_names.py
 - Fix inconsistent language code for Croatian/Serbian in INCLUDE task
 
