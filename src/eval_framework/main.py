@@ -68,7 +68,15 @@ def main(
         resume="allow",
         mode=_wandb_mode(config.wandb_project),
     ) as run:
+        # check to see if this is a registered model. If so, use the artifact.
+        # this is placed here in the case that an artifact is used to generate completions,
+        # crashes during the evaluation step, and subsequent reruns use the same generations,
+        # the runs are still linked to the artifact
+        if hasattr(llm, "artifact"):  # BaseLLM doesn't have _model attribute
+            wandb.use_artifact(llm.artifact)
+
         _, preempted = response_generator.generate(should_preempt_callable)
+
         if preempted:
             logger.info("Response generation was preempted")
             assert trial_id is not None

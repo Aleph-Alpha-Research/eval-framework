@@ -5,6 +5,10 @@
 ### Models
 
 ### Tasks
+- Fixed dataset loading issues for SQUAD, SQUAD2, FLORES-200, and SPHYR that were causing formatter test failures,
+- Renamed `_get_eval_kwargs` method to `_get_context` in the StructEval task
+- Pinned HF_REVISION for StructEval to "b5512175"; train split was renamed test upstream
+
 
 ### Metrics
 

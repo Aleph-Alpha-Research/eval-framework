@@ -47,6 +47,7 @@ class StructEval(BaseTask[str]):
     METRICS = [StructMetric]  # Define appropriate metrics for StructEval
     SUBJECTS = StructEvalSubjects
     LANGUAGE = Language.ENG
+    HF_REVISION = "b551217560cf225245b0607a21c505e24a58e396"
 
     def __init__(self, num_fewshot: int = 0) -> None:
         if num_fewshot > 0:

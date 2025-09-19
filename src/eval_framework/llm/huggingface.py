@@ -4,7 +4,6 @@ from functools import partial
 from typing import Any
 
 import torch
-import wandb
 from tokenizers import Tokenizer
 from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, StoppingCriteriaList
 
@@ -19,6 +18,7 @@ from eval_framework.shared.types import (
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
+from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message
 
 logger = logging.getLogger(__name__)
@@ -300,7 +300,7 @@ class HFLLM_from_name(HFLLM):
         self._set_formatter(selected_formatter)
 
 
-class _HFLLM_from_wandb_registry(HFLLM):
+class HFLLMRegistryModel(HFLLM):
     """
     A class to create HFLLM instances from registered models in Wandb registry.
     Downloads the model artifacts from Wandb and creates a local HFLLM instance.
@@ -323,13 +323,21 @@ class _HFLLM_from_wandb_registry(HFLLM):
             formatter: Type of formatter to use (default: "")
             **kwargs: Additional arguments passed to the parent class
         """
-        self.artifact_used = False
         print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
         download_path = kwargs.pop("download_path", None)
-        with self.download_wandb_artifact(
-            artifact_name, version, user_supplied_download_path=download_path
-        ) as local_artifact_path:
-            self.LLM_NAME = str(local_artifact_path)
+        with WandbFs(download_path=download_path) as wandb_fs:
+            # needs to be self since we check to see if this attribute exists in main
+            self.artifact = wandb_fs.get_artifact(artifact_name, version)
+            wandb_fs.download_artifact(self.artifact)
+            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
+
+            if file_root is None:
+                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
+
+            assert wandb_fs.download_path is not None
+            print(f"{RED}[ Model located at: {file_root} ]{RESET}")
+
+            self.LLM_NAME = str(file_root)
             self.artifact_name = artifact_name
             self.artifact_version = version
             selected_formatter = self.get_formatter(formatter, formatter_identifier)
@@ -338,26 +346,6 @@ class _HFLLM_from_wandb_registry(HFLLM):
         print(f"{RED}[ Model initialized --------------------- {RESET}")
         print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
         print(f"{RED}[ Formatter: {formatter} ]{RESET}")
-
-    def use_artifact(self) -> None:
-        if self.artifact_used is False:
-            wandb.use_artifact(self.artifact)
-            self.artifact_used = True
-
-    def generate_from_messages(
-        self,
-        messages: list[Sequence[Message]],
-        stop_sequences: list[str] | None = None,
-        max_tokens: int | None = None,
-        temperature: float | None = None,
-    ) -> list[RawCompletion]:
-        # use artifact should only be called once per run
-        self.use_artifact()
-        return super().generate_from_messages(messages, stop_sequences, max_tokens, temperature)
-
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
-        self.use_artifact()
-        return super().logprobs(samples)
 
     @property
     def name(self) -> str:

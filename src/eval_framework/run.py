@@ -270,7 +270,7 @@ def run_with_kwargs(kwargs: dict) -> None:
     now = datetime.datetime.now()
     logger.info(f"starting time: {now}")
 
-    if kwargs["extra_task_modules"]:
+    if kwargs.get("extra_task_modules"):
         load_extra_tasks(kwargs["extra_task_modules"])
 
     context_name = kwargs.pop("context")
