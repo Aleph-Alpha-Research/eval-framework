@@ -114,10 +114,12 @@ class HFLLM(BaseLLM):
     def __del__(self) -> None:
         if hasattr(self, "model"):
             del self.model
-        with contextlib.suppress(AssertionError):
-            torch.distributed.destroy_process_group()
-        gc.collect()
+        num_gpus = len(self.model.hf_device_map)
+        if num_gpus > 1 and torch.distributed.get_rank() == 0:
+            with contextlib.suppress(AssertionError):
+                torch.distributed.destroy_process_group()
         torch.cuda.empty_cache()
+        gc.collect()
 
     def generate_from_messages(
         self,
@@ -210,6 +212,7 @@ class HFLLM(BaseLLM):
 
     def _model_generate(self, redis_key: Any, prompt_token_count: int, **kwargs: Any) -> tuple[str, int]:
         outputs = self.model.generate(**kwargs)[0]
+        outputs = outputs.detach().cpu()
         completion = self.tokenizer.decode(outputs[prompt_token_count:], skip_special_tokens=True)
 
         if kwargs["stopping_criteria"][0].__class__.__name__ == "StopSequenceCriteria":
@@ -270,6 +273,7 @@ class HFLLM(BaseLLM):
         with torch.no_grad():
             inputs = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False).to(self.device)
             outputs = self.model(**inputs, labels=inputs["input_ids"])
+            outputs = outputs.detach().cpu()
             logits = outputs.logits[:, :-1, :].squeeze(0)
             target_ids = inputs["input_ids"][:, 1:].squeeze(0)
 
