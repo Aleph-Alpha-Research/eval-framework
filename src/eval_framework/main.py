@@ -1,6 +1,7 @@
 import json
 import logging
 from collections.abc import Callable
+import os
 from pathlib import Path
 from typing import Any, Literal
 
@@ -72,8 +73,10 @@ def main(
         # this is placed here in the case that an artifact is used to generate completions,
         # crashes during the evaluation step, and subsequent reruns use the same generations,
         # the runs are still linked to the artifact
-        if hasattr(llm, "artifact"):  # BaseLLM doesn't have _model attribute
+        if hasattr(llm, "artifact"):
             wandb.use_artifact(llm.artifact)
+        for additional_artifact in os.getenv("ADDITIONAL_USED_WANDB_ARTIFACTS", "").split(","):
+            wandb.use_artifact(additional_artifact.strip())
 
         _, preempted = response_generator.generate(should_preempt_callable)
 
