@@ -203,3 +203,7 @@ class OpenAIModel(BaseLLM):
                 logger.info(f"Raw response: {completion.completion}")
                 raise
         return responses
+
+    def __del__(self):
+        if hasattr(self, "_client"):
+            del self._client
