@@ -317,6 +317,9 @@ class AlephAlphaAPIModel(BaseLLM):
 
         return results
 
+    def __del__(self):
+        pass
+
 
 class Llama31_8B_Instruct_API(AlephAlphaAPIModel):
     LLM_NAME = "llama-3.1-8b-instruct"
