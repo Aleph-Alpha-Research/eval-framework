@@ -75,7 +75,7 @@ def main(
         # the runs are still linked to the artifact
         if hasattr(llm, "artifact"):
             wandb.use_artifact(llm.artifact)
-        for additional_artifact in os.getenv("WANDB_ADDITIONAL_ARTIFACTS_USED", "").split(","):
+        for additional_artifact in os.getenv("WANDB_ADDITIONAL_ARTIFACT_REFERENCES", "").split(","):
             wandb.use_artifact(additional_artifact.strip())
 
         _, preempted = response_generator.generate(should_preempt_callable)

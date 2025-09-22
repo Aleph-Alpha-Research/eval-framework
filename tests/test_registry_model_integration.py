@@ -59,7 +59,7 @@ def test_additional_artifact_use(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
         llm_class=mock_llm.__class__,
     )
 
-    monkeypatch.setenv("WANDB_ADDITIONAL_ARTIFACTS_USED", "artifact1:latest, artifact2:v2.0.0")
+    monkeypatch.setenv("WANDB_ADDITIONAL_ARTIFACT_REFERENCES", "artifact1:latest, artifact2:v2.0.0")
     with patch.object(main_file.wandb, "use_artifact") as mock_use_artifact:
         main_file.main(mock_llm, eval_config)
     mock_use_artifact.assert_any_call("artifact1:latest")

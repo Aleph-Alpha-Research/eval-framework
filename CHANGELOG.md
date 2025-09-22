@@ -23,7 +23,7 @@
 - Minor fix of paths quoted in generated docs
 - Refactoring of clean up handlers in `eval_framework.utils.file_ops.WandbFs`
 - Reducing string/path casting redundancy
-- Added W&B using artifacts mentioned in `WANDB_ADDITIONAL_ARTIFACTS_USED`
+- Added W&B using artifacts mentioned in `WANDB_ADDITIONAL_ARTIFACT_REFERENCES`
 
 ## 0.2.0
 
