@@ -5,10 +5,6 @@
 ### Models
 
 ### Tasks
-- Fixed dataset loading issues for SQUAD, SQUAD2, FLORES-200, and SPHYR that were causing formatter test failures,
-- Renamed `_get_eval_kwargs` method to `_get_context` in the StructEval task
-- Pinned HF_REVISION for StructEval to "b5512175"; train split was renamed test upstream
-
 
 ### Metrics
 
@@ -16,13 +12,23 @@
 
 ## 0.2.1
 
+### Models
 - The `--llm-name` (and `--judge-model-name`) argument can now also be a module path like `eval_framework.llm.huggingface.HFLLM`.
   Combining this with `--llm-args` (`-judge-model-args`) should cover many use-cases without having to provide a `models.py` file.
-- Added wandb logging and registry checkpoint loading with huggingface and vllm backends
+- Added `eval_framwork.llm.huggingface.HFLLMRegistryModel` and `eval_framwork.llm.vllm.VLLMRegistryModel`
+  to conveniently load models from `wandb`.
+
+### Tasks
+- Fix for empty `stop_sequences` in `eval_framework.llm.huggingface.StopSequenceCriteria`.
+- Fixed dataset loading issues for SQUAD, SQUAD2, FLORES-200, and SPHYR that were causing formatter test failures.
+- Pinned `HF_REVISION` for StructEval to `b5512175`, since the train split was renamed test upstream
+- Renamed `_get_eval_kwargs` method to `_get_context` in the StructEval task.
+
+### General
 - Removed `torch` as a main dependency of `eval_framework`
+- Added wandb logging
 - Documentation improvements
 - Reduced redundant string/path casting
-- Fix for empty `stop_sequences` in `eval_framework.llm.huggingface.StopSequenceCriteria`.
 
 ## 0.2.0
 
