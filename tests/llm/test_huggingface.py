@@ -123,6 +123,7 @@ def test_stop_sequence_criteria(stop_sequences: list[str]) -> None:
         scores = torch.FloatTensor([[0.1] * 16])
         assert criteria(input_ids, scores), "Text contains stop sequence, criteria should return True."
 
+
 @pytest.mark.gpu
 def test_resource_cleanup() -> None:
     class Qwen8B(HFLLM):
