@@ -62,6 +62,7 @@ SPECIAL_ARGS = {
     "PAWSX": {"num_fewshot": 2},
     "RenderableStructEval": {"num_fewshot": 0},
     "SCIQ": {"num_fewshot": 1},
+    "SCIQEvalHarness": {"num_fewshot": 1},
     "SQUAD": {"num_fewshot": 1},
     "SQUAD2": {"num_fewshot": 1},
     "SPHYR": {"num_fewshot": 0},
