@@ -1,10 +1,6 @@
 import random
 from typing import Any
 
-from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
-    AccuracyLoglikelihood,
-    AccuracyNormLoglikelihood,
-)
 from eval_framework.metrics.loglikelihood.probability_mass import ProbabilityMass, ProbabilityMassNorm
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
 
@@ -32,14 +28,14 @@ FEWSHOT_ITEMS = [
 
 
 class TRUTHFULQA(BaseTask[str]):
-    """TRUTHFULQA dataset: https://huggingface.co/datasets/truthful_qa"""
+    """TRUTHFULQA dataset: https://huggingface.co/datasets/truthfulqa/truthful_qa"""
 
     NAME = "TruthfulQA"
     DATASET_PATH = "truthful_qa"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = ""
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, ProbabilityMass, ProbabilityMassNorm]
+    METRICS = [ProbabilityMass, ProbabilityMassNorm]
     SUBJECTS = ["mc1", "mc2"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Q", "A"]
     FEWSHOT_ITEMS = FEWSHOT_ITEMS
@@ -83,7 +79,8 @@ class TRUTHFULQA(BaseTask[str]):
         return "A:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        ground_truth_index = item[self.target_identifier]["labels"].index(1)
+        ground_truth_index = item[self.target_identifier]["labels"].index(0) - 1
+        assert ground_truth_index >= 0
         ground_truth = item[self.target_identifier]["choices"][ground_truth_index]
         return f" {ground_truth}"
 
