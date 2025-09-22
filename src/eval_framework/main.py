@@ -25,6 +25,7 @@ def main(
     config: EvalConfig,
     should_preempt_callable: Callable[[], bool] | None = None,
     trial_id: int | None = None,
+    resource_cleanup: bool = False,
 ) -> list[Result]:
     """Runs the entire evaluation process: responses generation and evaluation."""
     # Set up centralized logging early
@@ -92,8 +93,9 @@ def main(
         if trial_id is not None:
             _delete_preemption_file(config, trial_id)
 
-        del response_generator
-        gc.collect()
+        if resource_cleanup:
+            del response_generator
+            gc.collect()
 
         evaluator = EvaluationGenerator(config, file_processor)
         results = evaluator.run_eval()
