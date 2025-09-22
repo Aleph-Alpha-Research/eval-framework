@@ -4,7 +4,7 @@ from typing import Any
 
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, Language, SubjectType
 from eval_framework.tasks.benchmarks.arc import ARC
-from eval_framework.tasks.benchmarks.gsm8k import GSM8K
+from eval_framework.tasks.benchmarks.gsm8k import GSM8KEvalHarness
 from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
 from eval_framework.tasks.benchmarks.mmlu import MMLU, MMLU_SUBJECTS
 from eval_framework.tasks.benchmarks.mmlu_de import MMLU_SUBJECTS_TRANSLATION
@@ -42,7 +42,7 @@ class ARC_EU20_FR(ARC):
     LANGUAGE = Language.FRA
 
 
-class GSM8K_EU20_DE(GSM8K):
+class GSM8K_EU20_DE(GSM8KEvalHarness):
     """
     https://huggingface.co/datasets/openGPT-X/gsm8kx
       entries in 'DE': 1319 test, 104 train
@@ -58,7 +58,7 @@ class GSM8K_EU20_DE(GSM8K):
     LANGUAGE = Language.DEU
 
 
-class GSM8K_EU20_FR(GSM8K):
+class GSM8K_EU20_FR(GSM8KEvalHarness):
     NAME = "GSM8K_EU20_FR"
     DATASET_PATH = "openGPT-X/gsm8kx"
     SAMPLE_SPLIT = "test"

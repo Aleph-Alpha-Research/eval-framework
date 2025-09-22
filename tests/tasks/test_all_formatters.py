@@ -24,7 +24,7 @@ SPECIAL_ARGS = {
     "GPQA": {"num_fewshot": 1},
     "GPQA_COT": {"num_fewshot": 1},
     "GSM8K": {"num_fewshot": 1},
-    "GSM8KLlamaVersion": {"num_fewshot": 1},
+    "GSM8KEvalHarness": {"num_fewshot": 1},
     "GSM8KReasoning": {"num_fewshot": 0},
     "GSM8K_EU20_DE": {"num_fewshot": 1},
     "GSM8K_EU20_FR": {"num_fewshot": 1},
