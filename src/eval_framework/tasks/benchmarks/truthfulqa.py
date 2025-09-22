@@ -1,6 +1,10 @@
 import random
 from typing import Any
 
+from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyLoglikelihood,
+    AccuracyNormLoglikelihood,
+)
 from eval_framework.metrics.loglikelihood.probability_mass import ProbabilityMass, ProbabilityMassNorm
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
 
@@ -35,7 +39,7 @@ class TRUTHFULQA(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = ""
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [ProbabilityMass, ProbabilityMassNorm]
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, ProbabilityMass, ProbabilityMassNorm]
     SUBJECTS = ["mc1", "mc2"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Q", "A"]
     FEWSHOT_ITEMS = FEWSHOT_ITEMS
@@ -78,11 +82,10 @@ class TRUTHFULQA(BaseTask[str]):
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "A:"
 
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        ground_truth_index = item[self.target_identifier]["labels"].index(0) - 1
-        assert ground_truth_index >= 0
-        ground_truth = item[self.target_identifier]["choices"][ground_truth_index]
-        return f" {ground_truth}"
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+        labels = item[self.target_identifier]["labels"]
+        choices = item[self.target_identifier]["choices"]
+        return [f" {choice}" for label, choice in zip(labels, choices) if label == 1]
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         choices = item[self.target_identifier]["choices"]
