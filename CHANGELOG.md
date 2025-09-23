@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: 0.2.2-dev
+## Unreleased: 0.2.3-dev
 
 ### Models
 
@@ -9,6 +9,12 @@
 ### Metrics
 
 ### General
+
+## 0.2.2
+
+### General
+
+- Fix LLM judge not being available via CLI in Determined context
 
 ## 0.2.1
 
