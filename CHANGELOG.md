@@ -1,12 +1,16 @@
 # Changelog
 
-## Unreleased: 0.2.2-dev
+## Unreleased: 0.2.3-dev
 
 ### Models
 
 ### Tasks
 
 ### Metrics
+
+### General
+
+## 0.2.2
 
 ### General
 
