@@ -112,13 +112,16 @@ class DeterminedContext(EvalContext):
             if val_cli and val_hparams and val_cli != val_hparams:
                 logger.info(f"CLI argument {name} ({val_cli}) is being overridden by hyperparameters: ({val_hparams}).")
 
-        llm_name = getattr(self.hparams, "llm_name", self.llm_name)
-        judge_model_name = getattr(self.hparams.task_args, "judge_model_name", self.judge_model_name)
+        # Hyperparameters take precedence over core context
+        llm_name = self.hparams.llm_name or self.llm_name
+        judge_model_name = self.hparams.task_args.judge_model_name or self.judge_model_name
 
         llm_class = _load_model(llm_name, models_path=self.models_path)
-        llm_judge_class: type[BaseLLM] | None = None
-        if judge_model_name is not None:
-            llm_judge_class = _load_model(judge_model_name, models_path=self.judge_models_path, info="judge")
+        llm_judge_class: type[BaseLLM] | None = (
+            _load_model(judge_model_name, models_path=self.judge_models_path, info="judge")
+            if judge_model_name
+            else None
+        )
 
         # for all optional hyperparameters, resort to the respective CLI argument if the hyperparameter is not set
         self.config = EvalConfig(

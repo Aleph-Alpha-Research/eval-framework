@@ -20,7 +20,7 @@ def _load_model(llm_name: str, models_path: str | PathLike | None, *, info: str 
     if models_path is None or "." in llm_name:
         # The llm_name must a a fully qualified module path
         if "." not in llm_name:
-            raise ValueError(f"LLM {info}'{llm_name}' is not a fully qualified module path.")
+            raise ValueError(f"LLM {info} '{llm_name}' is not a fully qualified module path.")
         module_path, llm_class_name = llm_name.rsplit(".", 1)
         module = importlib.import_module(module_path)
         if not hasattr(module, llm_class_name):
@@ -31,7 +31,7 @@ def _load_model(llm_name: str, models_path: str | PathLike | None, *, info: str 
         if llm_name not in models_dict:
             if info:
                 info = f"{info.strip()} "
-            raise ValueError(f"LLM {info}'{llm_name}' not found in {models_path}.")
+            raise ValueError(f"LLM {info} '{llm_name}' not found in {models_path}.")
         return models_dict[llm_name]
 
 

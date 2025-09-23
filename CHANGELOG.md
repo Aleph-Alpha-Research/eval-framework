@@ -10,6 +10,8 @@
 
 ### General
 
+- Fix LLM judge not being available via CLI in Determined context
+
 ## 0.2.1
 
 ### Models
