@@ -9,6 +9,7 @@
 ### Metrics
 
 ### General
+- Added `WANDB_ADDITIONAL_ARTIFACT_REFERENCES` environment variable to reference custom artifacts in W&B.
 
 ## 0.2.2
 
