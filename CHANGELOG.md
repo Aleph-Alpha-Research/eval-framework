@@ -33,10 +33,9 @@
 
 ### General
 - Removed `torch` as a main dependency of `eval_framework`
-- Updated docs wrt. usage of `eval_framework.utils.generate_task_docs`
-- Minor fix of paths quoted in generated docs
-- Refactoring of clean up handlers in `eval_framework.utils.file_ops.WandbFs`
-- Reducing string/path casting redundancy
+- Added wandb logging
+- Documentation improvements
+- Reduced redundant string/path casting
 
 
 ## 0.2.0
