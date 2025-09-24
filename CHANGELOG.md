@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: 0.2.2-dev
+## Unreleased: 0.2.3-dev
 
 ### Models
 
@@ -10,6 +10,12 @@
 
 ### General
 - Added `WANDB_ADDITIONAL_ARTIFACT_REFERENCES` environment variable to reference custom artifacts in W&B.
+
+## 0.2.2
+
+### General
+
+- Fix LLM judge not being available via CLI in Determined context
 
 ## 0.2.1
 
