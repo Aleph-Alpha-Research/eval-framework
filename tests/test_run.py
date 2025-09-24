@@ -41,6 +41,7 @@ def test_run(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_pa
         perturbation_seed=123,
         extra_task_modules=None,
         save_logs=True,
+        resource_cleanup=True,
     )
 
     mock_create_perturbation_class.side_effect = lambda x, _: x  # don't spin up docker here just for the test

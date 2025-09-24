@@ -3,10 +3,10 @@ from unittest.mock import Mock
 import pytest
 import torch
 
-from eval_framework.llm.huggingface import SmolLM135M, StopSequenceCriteria
+from eval_framework.llm.huggingface import HFLLM, SmolLM135M, StopSequenceCriteria
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import Message, Role
+from template_formatting.formatter import HFFormatter, Message, Role
 
 
 @pytest.mark.gpu
@@ -122,3 +122,39 @@ def test_stop_sequence_criteria(stop_sequences: list[str]) -> None:
         input_ids = torch.LongTensor([list(range(16))])
         scores = torch.FloatTensor([[0.1] * 16])
         assert criteria(input_ids, scores), "Text contains stop sequence, criteria should return True."
+
+
+@pytest.mark.gpu
+def test_resource_cleanup() -> None:
+    class Qwen8B(HFLLM):
+        LLM_NAME = "Qwen/Qwen3-8B"
+
+    try:
+        formatter = HFFormatter("Qwen/Qwen3-8B", chat_template_kwargs={"enable_thinking": True})
+        generator_model = Qwen8B(formatter=formatter)
+        generator_model.generate_from_messages(
+            messages=[[Message(role=Role.USER, content="What is capital of Germany ?")]],
+            max_tokens=100,
+            temperature=0.0,
+        )
+        del generator_model
+        judge_model = Qwen8B(formatter=formatter)
+        judge_model.generate_from_messages(
+            messages=[
+                [
+                    Message(
+                        role=Role.USER,
+                        content=(
+                            "Rank the following responses between 0 and 1"
+                            "based on clarity : \nResponse 1: {response1}"
+                            "\nResponse 2: {response2}"
+                        ).format(response1="This is an ambiguous answer", response2="This is a clear answer"),
+                    )
+                ]
+            ],
+            max_tokens=100,
+            temperature=0.0,
+        )
+        del judge_model
+    except Exception as e:
+        pytest.fail(f"{e.__class__.__name__} : {e}")
