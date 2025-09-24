@@ -37,7 +37,6 @@
 - Documentation improvements
 - Reduced redundant string/path casting
 
-
 ## 0.2.0
 
 ### Models
