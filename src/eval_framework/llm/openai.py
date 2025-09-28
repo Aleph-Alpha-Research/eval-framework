@@ -204,6 +204,6 @@ class OpenAIModel(BaseLLM):
                 raise
         return responses
 
-    def __del__(self):
+    def __del__(self) -> None:
         if hasattr(self, "_client"):
             self._client.close()

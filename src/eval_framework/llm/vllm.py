@@ -9,7 +9,7 @@ from typing import Any, Literal, Protocol, cast, override
 
 import torch
 from vllm import LLM, SamplingParams
-from vllm.distributed.parallel_state import cleanup_dist_env_and_memory, get_node_count
+from vllm.distributed.parallel_state import cleanup_dist_env_and_memory
 from vllm.inputs.data import TokensPrompt
 from vllm.outputs import RequestOutput
 from vllm.transformers_utils.tokenizer import get_tokenizer
@@ -202,8 +202,7 @@ class VLLMModel(BaseLLM):
         if hasattr(self, "model"):
             self.model.llm_engine.engine_core.shutdown()
             del self.model
-        if get_node_count() > 1:
-            cleanup_dist_env_and_memory()
+        cleanup_dist_env_and_memory()
         gc.collect()
         torch.cuda.empty_cache()
 

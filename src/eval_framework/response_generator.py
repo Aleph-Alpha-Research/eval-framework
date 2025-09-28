@@ -408,7 +408,6 @@ class ResponseGenerator:
 
     def __del__(self) -> None:
         self.llm.__del__()
-        super().__del__()
 
     def generate(self, should_preempt_callable: Callable[[], bool]) -> tuple[list[Completion | Loglikelihood], bool]:
         """Generates responses and saves them along with metadata.

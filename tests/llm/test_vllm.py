@@ -896,7 +896,7 @@ def test_tokenizer_initialization_performance(
         )
 
 
-@pytest.mark.gpu
+# @pytest.mark.gpu
 @pytest.mark.parametrize(
     "generator_gpus, evaluator_gpus",
     [
@@ -906,6 +906,10 @@ def test_tokenizer_initialization_performance(
     ],
 )
 def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
+    num_gpus = torch.cuda.device_count()
+    if max(generator_gpus, evaluator_gpus) <= num_gpus:
+        pytest.skip("GPUs not available")
+
     class Qwen8B(VLLMModel):
         LLM_NAME = "Qwen/Qwen3-8B"
 
@@ -924,6 +928,7 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
             temperature=0.0,
         )
         del response_generator_model
+        model_config["tensor_parallel_size"] = evaluator_gpus
         judge_model = Qwen8B(**model_config)
         judge_model.generate_from_messages(
             messages=[
