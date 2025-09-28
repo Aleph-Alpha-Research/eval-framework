@@ -896,7 +896,8 @@ def test_tokenizer_initialization_performance(
         )
 
 
-# @pytest.mark.gpu
+@pytest.mark.vllm
+@pytest.mark.gpu
 @pytest.mark.parametrize(
     "generator_gpus, evaluator_gpus",
     [
