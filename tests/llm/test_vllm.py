@@ -908,7 +908,7 @@ def test_tokenizer_initialization_performance(
 )
 def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
     num_gpus = torch.cuda.device_count()
-    if max(generator_gpus, evaluator_gpus) >= num_gpus:
+    if min(generator_gpus, evaluator_gpus) >= num_gpus:
         pytest.skip("GPUs not available")
 
     class Qwen8B(VLLMModel):
