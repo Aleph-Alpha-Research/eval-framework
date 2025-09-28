@@ -200,7 +200,8 @@ class VLLMModel(BaseLLM):
 
     def __del__(self) -> None:
         if hasattr(self, "model"):
-            self.model.llm_engine.engine_core.shutdown()
+            if hasattr(self.model, "llm_engine") and hasattr(self.model.llm_engine, "engine_core"):
+                self.model.llm_engine.engine_core.shutdown()
             del self.model
         cleanup_dist_env_and_memory()
         gc.collect()
