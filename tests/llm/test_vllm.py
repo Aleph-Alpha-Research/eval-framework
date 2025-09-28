@@ -2,7 +2,7 @@ import gc
 import logging
 import time
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, cast
 from unittest.mock import Mock, patch
 
 import pytest
@@ -914,12 +914,15 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
         LLM_NAME = "Qwen/Qwen3-8B"
 
     try:
-        model_config = {
-            "max_model_len": 1000,
-            "enforce_eager": True,
-            "tensor_parallel_size": generator_gpus,
-            "formatter": HFFormatter("Qwen/Qwen3-8B", chat_template_kwargs={"enable_thinking": True}),
-        }
+        model_config = cast(
+            dict[str, Any],
+            {
+                "max_model_len": 1000,
+                "enforce_eager": True,
+                "tensor_parallel_size": generator_gpus,
+                "formatter": HFFormatter("Qwen/Qwen3-8B", chat_template_kwargs={"enable_thinking": True}),
+            },
+        )
 
         response_generator_model = Qwen8B(**model_config)
         response_generator_model.generate_from_messages(
