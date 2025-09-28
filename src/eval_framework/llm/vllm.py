@@ -1,4 +1,3 @@
-import contextlib
 import gc
 import logging
 from abc import ABC, abstractmethod
@@ -10,10 +9,7 @@ from typing import Any, Literal, Protocol, cast, override
 
 import torch
 from vllm import LLM, SamplingParams
-from vllm.distributed.parallel_state import (
-    destroy_distributed_environment,
-    destroy_model_parallel,
-)
+from vllm.distributed.parallel_state import cleanup_dist_env_and_memory, get_node_count
 from vllm.inputs.data import TokensPrompt
 from vllm.outputs import RequestOutput
 from vllm.transformers_utils.tokenizer import get_tokenizer
@@ -203,13 +199,11 @@ class VLLMModel(BaseLLM):
         return ([obj.tokens for obj in prompt_objs], sampling_params)
 
     def __del__(self) -> None:
-        destroy_model_parallel()
-        destroy_distributed_environment()
         if hasattr(self, "model"):
             self.model.llm_engine.engine_core.shutdown()
             del self.model
-        with contextlib.suppress(AssertionError):
-            torch.distributed.destroy_process_group()
+        if get_node_count() > 1:
+            cleanup_dist_env_and_memory()
         gc.collect()
         torch.cuda.empty_cache()
 

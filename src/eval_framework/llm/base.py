@@ -62,7 +62,6 @@ class BaseLLM(ABC):
         messages: list[Sequence[Message]] = [sample.messages for sample in samples]
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
 
-    @abstractmethod
     def __del__(self) -> None:
         """
         Method for custom resource cleanup (particularly GPUs)

@@ -206,4 +206,4 @@ class OpenAIModel(BaseLLM):
 
     def __del__(self):
         if hasattr(self, "_client"):
-            del self._client
+            self._client.close()

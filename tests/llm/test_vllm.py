@@ -194,7 +194,7 @@ def test_vllm_hf_token_equivalence() -> None:
             "max_model_len": 128,
             "dtype": "float16",
             "tensor_parallel_size": 1,
-            # "gpu_memory_utilization": 0.3,
+            "gpu_memory_utilization": 0.3,
             "swap_space": 0,
             "enforce_eager": True,
         },
