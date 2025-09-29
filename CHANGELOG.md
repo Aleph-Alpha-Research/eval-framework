@@ -3,6 +3,7 @@
 ## Unreleased: 0.2.3-dev
 
 ### Models
+- The BASELLM class is equiped with `del` call to clear up resources. VLLM and HF APIs offload the respective models off the gpus. OpenAI class disconnects the client.
 
 ### Tasks
 
@@ -10,6 +11,7 @@
 
 ### General
 - Added `WANDB_ADDITIONAL_ARTIFACT_REFERENCES` environment variable to reference custom artifacts in W&B.
+- Added `resource-cleanup` argument to run.py; enabling a smooth transition in GPU workflows between response generation/evaluation
 
 ## 0.2.2
 
