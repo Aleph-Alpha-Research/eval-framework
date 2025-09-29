@@ -25,6 +25,7 @@ def main(
     config: EvalConfig,
     should_preempt_callable: Callable[[], bool] | None = None,
     trial_id: int | None = None,
+    *.
     resource_cleanup: bool = False,
 ) -> list[Result]:
     """Runs the entire evaluation process: responses generation and evaluation."""
