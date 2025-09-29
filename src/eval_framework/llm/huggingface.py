@@ -1,3 +1,4 @@
+import gc
 import logging
 from collections.abc import Callable, Sequence
 from functools import partial
@@ -109,6 +110,15 @@ class HFLLM(BaseLLM):
         """Count the number of tokens in a string."""
         return len(self.tokenizer(text, add_special_tokens=False)["input_ids"])
 
+    def __del__(self) -> None:
+        if hasattr(self, "model"):
+            num_gpus = len(self.model.hf_device_map)
+            del self.model
+            if num_gpus > 1 and torch.distributed.is_initialized():
+                torch.distributed.destroy_process_group()
+        torch.cuda.empty_cache()
+        gc.collect()
+
     def generate_from_messages(
         self,
         messages: list[Sequence[Message]],
@@ -199,13 +209,14 @@ class HFLLM(BaseLLM):
         return raw_completions
 
     def _model_generate(self, redis_key: Any, prompt_token_count: int, **kwargs: Any) -> tuple[str, int]:
-        outputs = self.model.generate(**kwargs)[0]
-        completion = self.tokenizer.decode(outputs[prompt_token_count:], skip_special_tokens=True)
+        with torch.no_grad():
+            outputs = self.model.generate(**kwargs)[0]
+            completion = self.tokenizer.decode(outputs[prompt_token_count:], skip_special_tokens=True)
 
-        if kwargs["stopping_criteria"][0].__class__.__name__ == "StopSequenceCriteria":
-            for stop_sequence in kwargs["stopping_criteria"][0].stop_sequences:
-                completion = completion.split(stop_sequence)[0]
-        return completion, len(outputs[prompt_token_count:])
+            if kwargs["stopping_criteria"][0].__class__.__name__ == "StopSequenceCriteria":
+                for stop_sequence in kwargs["stopping_criteria"][0].stop_sequences:
+                    completion = completion.split(stop_sequence)[0]
+            return completion, len(outputs[prompt_token_count:])
 
     def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         results = []

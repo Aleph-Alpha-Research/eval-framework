@@ -226,9 +226,18 @@ def parse_args() -> argparse.Namespace:
         default=(),
         help="The args of the judge model used.",
     )
+    parser.add_argument(
+        "--resource-cleanup",
+        action="store_true",
+        required=False,
+        default=False,
+        help=("Add this flag to free up GPU resources between response generation and evaluation"),
+    )
 
     llm_args: dict[str, Any] = {}
     args = parser.parse_args()
+
+    print(args)
 
     for arg in args.llm_args:
         if "=" in arg:
@@ -311,6 +320,7 @@ def run_with_kwargs(kwargs: dict) -> None:
             config=ctx.config,
             should_preempt_callable=ctx.should_preempt,
             trial_id=ctx.get_trial_id(),
+            resource_cleanup=kwargs.pop("resource_cleanup", False),
         )
 
     logger.info(f"time since start: {datetime.datetime.now() - now}")

@@ -406,6 +406,9 @@ class ResponseGenerator:
             if loaded_metadata[key] != current_metadata[key]:
                 raise ValueError(f"Existing metadata does not match current metadata for {key}.")
 
+    def __del__(self) -> None:
+        self.llm.__del__()
+
     def generate(self, should_preempt_callable: Callable[[], bool]) -> tuple[list[Completion | Loglikelihood], bool]:
         """Generates responses and saves them along with metadata.
         :param should_preempt_callable: function to check if preempt is called
