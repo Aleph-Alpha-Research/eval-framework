@@ -21,7 +21,7 @@ class SCIQ(BaseTask[str]):
     LANGUAGE = Language.ENG
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return f"{item['support'].lstrip()}\nQuestion: {item['question']}\n"
+        return f"Question: {item['question']}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return f" {item['correct_answer']}"
@@ -42,3 +42,24 @@ class SCIQ(BaseTask[str]):
             item["correct_answer"],
         ]
         return [f" {choice}" for choice in choices]
+
+
+class SCIQEvalHarness(SCIQ):
+    """Based on
+    https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/sciq/sciq.yaml#L8
+    In the Eval Harness implementation, the instruction text includes a context passage.
+    This passage often contains the answer, reducing the benchmark to a straightforward copy-and-paste task.
+    """
+
+    NAME = "SciQ Eval Harness"
+    DATASET_PATH = "allenai/sciq"
+    SAMPLE_SPLIT = "validation"  # 1000 examples (same split as lm-eval)
+    FEWSHOT_SPLIT = "test"  # 1000 examples
+    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+    SUBJECTS = [NO_SUBJECT]
+    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
+    LANGUAGE = Language.ENG
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return f"{item['support'].lstrip()}\nQuestion: {item['question']}\n"

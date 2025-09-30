@@ -32,7 +32,7 @@ FEWSHOT_ITEMS = [
 
 
 class TRUTHFULQA(BaseTask[str]):
-    """TRUTHFULQA dataset: https://huggingface.co/datasets/truthful_qa"""
+    """TRUTHFULQA dataset: https://huggingface.co/datasets/truthfulqa/truthful_qa"""
 
     NAME = "TruthfulQA"
     DATASET_PATH = "truthful_qa"
@@ -82,10 +82,10 @@ class TRUTHFULQA(BaseTask[str]):
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "A:"
 
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        ground_truth_index = item[self.target_identifier]["labels"].index(1)
-        ground_truth = item[self.target_identifier]["choices"][ground_truth_index]
-        return f" {ground_truth}"
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+        labels = item[self.target_identifier]["labels"]
+        choices = item[self.target_identifier]["choices"]
+        return [f" {choice}" for label, choice in zip(labels, choices) if label == 1]
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         choices = item[self.target_identifier]["choices"]
