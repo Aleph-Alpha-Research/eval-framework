@@ -54,6 +54,12 @@ openai = [
   "tiktoken>=0.9,<0.10"
 ]
 transformers = ["transformers>=4.45.2,<5", "torch>=2.5,<3"]
+hat = [
+  "hat-splitter>=0.1.9,<0.2",
+  "transformers==4.46.3",
+  "flash-attn>=2.7,<2.8",
+  "flashinfer-python>=0.2,<0.3",
+]
 accelerate = ["accelerate"]
 vllm = [
   "vllm>=0.8.5,<0.9",
