@@ -18,7 +18,7 @@ class DistributionalCorrectnessScore(BaseMetric[Loglikelihood]):
         *,
         lc: float | None = None,
         lw: float | None = None,
-        assume_normalised: bool = False,
+        assume_len_normalised: bool = False,
     ) -> None:
         self._lc = float(lc) if lc is not None else float(self.LC)
         self._lw = float(lw) if lw is not None else float(self.LW)
@@ -26,7 +26,7 @@ class DistributionalCorrectnessScore(BaseMetric[Loglikelihood]):
             raise ValueError(
                 f"Invalid DCS loadings: lc={self._lc}, lw={self._lw}. Require lc>=0, lw>=0, and lc>=lw."
             )
-        self._assume_normalised = assume_normalised
+        self._assume_len_normalised = assume_len_normalised
 
     def _length_normalise_loglikelihoods(self, loglikelihoods: dict) -> dict:
         output = {}
@@ -46,7 +46,7 @@ class DistributionalCorrectnessScore(BaseMetric[Loglikelihood]):
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 
-        loglikelihoods = response.loglikelihoods if self._assume_normalised else self._length_normalise_loglikelihoods(response.loglikelihoods)
+        loglikelihoods = response.loglikelihoods if self._assume_len_normalised else self._length_normalise_loglikelihoods(response.loglikelihoods)
         probs = self._softmax(loglikelihoods)
 
         if not loglikelihoods or not probs:
