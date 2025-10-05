@@ -2,8 +2,9 @@ from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.loglikelihood.base import BaseLoglikelihoodMetric
 
 
-class AccuracyTernary(BaseLoglikelihoodMetric):
-    NAME = "Accuracy Ternary"
+class TernaryScore(BaseLoglikelihoodMetric):
+    """Based on Kalai et al. (2025) Why language models hallucinate. arXiv:2509.04664"""
+    NAME = "Ternary Score"
 
     def __init__(
         self,

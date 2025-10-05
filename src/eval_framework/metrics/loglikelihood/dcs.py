@@ -3,6 +3,7 @@ from eval_framework.metrics.loglikelihood.base import BaseLoglikelihoodMetric
 
 
 class DistributionalCorrectnessScore(BaseLoglikelihoodMetric):
+    """Based on Burns (2025) Measuring Language Model Hallucinations Through Distributional Correctness."""
     NAME = "Distributional Correctness Score"
 
     def __init__(
