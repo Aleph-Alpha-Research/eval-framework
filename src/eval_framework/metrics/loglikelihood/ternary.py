@@ -24,7 +24,7 @@ class AccuracyTernary(BaseMetric[Loglikelihood]):
         self._lw = float(lw) if lw is not None else float(self.LW)
         if not (self._lc >= 0 and self._lw >= 0):
             raise ValueError(
-                f"Reward and penalty loadings, respectively: lc={self._lc}, lw={self._lw}. Require lc>=0, lw>=0."
+                f"Invalid reward and penalty values: lc={self._lc}, lw={self._lw}. Require lc>=0, lw>=0."
             )
         self._assume_normalised = assume_normalised
 
