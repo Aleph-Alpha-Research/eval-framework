@@ -1,17 +1,12 @@
-import numpy as np
-
-from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.shared.types import Loglikelihood
+from eval_framework.metrics.base import MetricResult
+from eval_framework.metrics.loglikelihood.base import BaseLoglikelihoodMetric
 
 
-class AccuracyTernary(BaseMetric[Loglikelihood]):
+class AccuracyTernary(BaseLoglikelihoodMetric):
     NAME = "Accuracy Ternary"
 
     LC: float = 1.0 # Default reward for correct answers
-    LW: float = 1.0 # Default penalty for wrong answers
-
-    def _normalise_text(self, text: str) -> str:
-        return text.strip().lower()
+    LW: float = 1.0 # Default penalty for wrong answers (note: this will be negated in the score)
 
     def __init__(
         self,
@@ -20,20 +15,13 @@ class AccuracyTernary(BaseMetric[Loglikelihood]):
         lw: float | None = None,
         assume_len_normalised: bool = False,
     ) -> None:
+        super().__init__(assume_len_normalised=assume_len_normalised)
         self._lc = float(lc) if lc is not None else float(self.LC)
         self._lw = float(lw) if lw is not None else float(self.LW)
         if not (self._lc >= 0 and self._lw >= 0):
             raise ValueError(
                 f"Invalid reward and penalty values: lc={self._lc}, lw={self._lw}. Require lc>=0, lw>=0."
             )
-        self._assume_len_normalised = assume_len_normalised
-
-    def _length_normalise_loglikelihoods(self, loglikelihoods: dict) -> dict:
-        output = {}
-        for k, v in loglikelihoods.items():
-            length = len(k)
-            output[k] = v / length if length > 0 else v
-        return output
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
         if response.error is not None:

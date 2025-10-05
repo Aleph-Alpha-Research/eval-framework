@@ -1,35 +1,16 @@
-import math
-
-from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.shared.types import Loglikelihood
+from eval_framework.metrics.base import MetricResult
+from eval_framework.metrics.loglikelihood.base import BaseLoglikelihoodMetric
 
 
-class ConfidenceWeightedAccuracy(BaseMetric[Loglikelihood]):
+class ConfidenceWeightedAccuracy(BaseLoglikelihoodMetric):
     NAME = "Confidence-weighted Accuracy"
-
-    def _normalise_text(self, text: str) -> str:
-        return text.strip().lower()
 
     def __init__(
         self,
         *,
         assume_len_normalised: bool = False,
     ) -> None:
-        self._assume_len_normalised = assume_len_normalised
-
-    def _length_normalise_loglikelihoods(self, loglikelihoods: dict) -> dict:
-        output = {}
-        for k, v in loglikelihoods.items():
-            length = len(k)
-            output[k] = v / length if length > 0 else v
-        return output
-
-    def _softmax(self, log_probs: dict) -> dict:
-        vals = list(log_probs.values())
-        m = max(vals)
-        exp_vals = [math.exp(x - m) for x in vals]
-        total = sum(exp_vals)
-        return {k: ev / total for k, ev in zip(log_probs.keys(), exp_vals)}
+        super().__init__(assume_len_normalised=assume_len_normalised)
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
         if response.error is not None:

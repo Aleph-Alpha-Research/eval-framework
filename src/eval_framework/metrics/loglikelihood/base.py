@@ -1,0 +1,41 @@
+import math
+from abc import abstractmethod
+
+from eval_framework.metrics.base import BaseMetric
+from eval_framework.shared.types import Loglikelihood
+
+
+class BaseLoglikelihoodMetric(BaseMetric[Loglikelihood]):
+    """Base class for metrics that operate on loglikelihood responses."""
+    
+    def __init__(
+        self,
+        *,
+        _assume_len_normalised: bool = False,
+    ) -> None:
+        self._assume_len_normalised = _assume_len_normalised
+
+    def _normalise_text(self, text: str) -> str:
+        return text.strip().lower()
+
+    def _length_normalise_loglikelihoods(self, loglikelihoods: dict) -> dict:
+        """Return a dict of length-normalised loglikelihoods."""
+        output = {}
+        for k, v in loglikelihoods.items():
+            length = len(k)
+            output[k] = v / length if length > 0 else v
+        return output
+
+    def _softmax(self, log_probs: dict) -> dict:
+        """Convert log-likelihoods to probabilities with softmax."""
+        vals = list(log_probs.values())
+        if not vals:  # no valid entries
+            return {}
+        m = max(vals)
+        exp_vals = [math.exp(x - m) for x in vals]
+        total = sum(exp_vals)
+        return {k: ev / total for k, ev in zip(log_probs.keys(), exp_vals)}
+
+    @abstractmethod
+    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+        raise NotImplementedError
