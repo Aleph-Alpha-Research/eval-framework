@@ -5,19 +5,16 @@ from eval_framework.metrics.loglikelihood.base import BaseLoglikelihoodMetric
 class DistributionalCorrectnessScore(BaseLoglikelihoodMetric):
     NAME = "Distributional Correctness Score"
 
-    LC: float = 1.0 # Default reward weight for correct answers
-    LW: float = 1.0 # Default penalty weight for wrong answers
-
     def __init__(
         self,
         *,
-        lc: float | None = None,
-        lw: float | None = None,
-        assume_len_normalised: bool = False,
+        lc: float = 1.0, # Default reward weight for correct answers
+        lw: float = 1.0, # Default penalty weight for wrong answers
+        len_normalised: bool = True,
     ) -> None:
-        super().__init__(assume_len_normalised=assume_len_normalised)
-        self._lc = float(lc) if lc is not None else float(self.LC)
-        self._lw = float(lw) if lw is not None else float(self.LW)
+        super().__init__(len_normalised=len_normalised)
+        self._lc = float(lc)
+        self._lw = float(lw)
         if not (self._lc >= 0 and self._lw >= 0 and self._lc >= self._lw):
             raise ValueError(
                 f"Invalid DCS loadings: lc={self._lc}, lw={self._lw}. Require lc>=0, lw>=0, and lc>=lw."
@@ -27,17 +24,14 @@ class DistributionalCorrectnessScore(BaseLoglikelihoodMetric):
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 
-        loglikelihoods = response.loglikelihoods if self._assume_len_normalised else self._length_normalise_loglikelihoods(response.loglikelihoods)
+        loglikelihoods = self._length_normalise_loglikelihoods(response.loglikelihoods) if self.len_normalised else response.loglikelihoods
         probs = self._softmax(loglikelihoods)
-
-        if not loglikelihoods or not probs:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=None)]
 
         ground_truths = set(
             self._normalise_text(gt) for gt in (response.ground_truth if isinstance(response.ground_truth, list) else [response.ground_truth])
         )
 
-        idk_key = self._normalise_text(list(response.loglikelihoods.keys())[-1])
+        idk_key = self._normalise_text(list(response.loglikelihoods.keys())[-1]) # we assume last key is "I don't know" option
 
         p_c = sum(p for k, p in probs.items() if self._normalise_text(k) in ground_truths)
         p_idk = probs.get(idk_key, 0.0)

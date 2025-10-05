@@ -5,22 +5,15 @@ from eval_framework.metrics.loglikelihood.base import BaseLoglikelihoodMetric
 class ConfidenceWeightedAccuracy(BaseLoglikelihoodMetric):
     NAME = "Confidence-weighted Accuracy"
 
-    def __init__(
-        self,
-        *,
-        assume_len_normalised: bool = False,
-    ) -> None:
-        super().__init__(assume_len_normalised=assume_len_normalised)
+    def __init__(self, *, len_normalised: bool = True) -> None:
+        super().__init__(len_normalised=len_normalised)
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 
-        loglikelihoods = response.loglikelihoods if self._assume_len_normalised else self._length_normalise_loglikelihoods(response.loglikelihoods)
+        loglikelihoods = self._length_normalise_loglikelihoods(response.loglikelihoods) if self.len_normalised else response.loglikelihoods
         probs = self._softmax(loglikelihoods)
-
-        if not loglikelihoods or not probs:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=None)]
 
         ground_truths = set(
             self._normalise_text(gt) for gt in (response.ground_truth if isinstance(response.ground_truth, list) else [response.ground_truth])

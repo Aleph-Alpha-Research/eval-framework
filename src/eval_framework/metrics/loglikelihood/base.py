@@ -7,13 +7,13 @@ from eval_framework.shared.types import Loglikelihood
 
 class BaseLoglikelihoodMetric(BaseMetric[Loglikelihood]):
     """Base class for metrics that operate on loglikelihood responses."""
-    
+
     def __init__(
         self,
         *,
-        _assume_len_normalised: bool = False,
+        len_normalised: bool = True,
     ) -> None:
-        self._assume_len_normalised = _assume_len_normalised
+        self.len_normalised = len_normalised
 
     def _normalise_text(self, text: str) -> str:
         return text.strip().lower()
