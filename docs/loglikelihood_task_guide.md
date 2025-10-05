@@ -180,6 +180,26 @@ class TrueFalseTask(BaseTask[str]):
         return [" True", " False"]
 ```
 
+#### Pattern 4: Creating an "I Don't Know" (IDK) Task Variant
+```python
+class ExistingTask_IDK(ExistingTask):
+    NAME = "ExistingTask_IDK"
+    METRICS = [
+        TernaryScore, 
+        DistributionalCorrectnessScore,
+    ]
+
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+        return (
+            "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
+            "It is acceptable to answer with 'I don't know' if you are unsure, and you will receive 0 points."
+        )
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        completions = super()._get_possible_completions(item)
+        return (completions or []) + [" I don't know."]
+```
+
 
 ### 4. Advanced Customization
 
@@ -246,22 +266,35 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import Accuracy
 # Normalized accuracy (for unbalanced datasets)
 from eval_framework.metrics.loglikelihood.accuracy_norm_loglikelihood import AccuracyNormLoglikelihood
 
-# Probability mass analysis
+# Confidence-weighted accuracy
+from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
+
+# Probability mass metrics
 from eval_framework.metrics.loglikelihood.probability_mass import ProbabilityMass
 from eval_framework.metrics.loglikelihood.probability_mass_norm import ProbabilityMassNorm
+
+# Penalty-based metrics (N.B. requires inclusion of "IDK" response option in task implementation)
+from eval_framework.metrics.loglikelihood.ternary import TernaryScore
+from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 
 class YourTask(BaseTask[str]):
     # Most common choice
     METRICS = [AccuracyLoglikelihood]
 
+    # For confidence-weighted accuracy
+    # METRICS = [ConfidenceWeightedAccuracy]
+
     # For unbalanced datasets
     # METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
 
-    # For probability analysis
+    # For probability mass analysis
     # METRICS = [AccuracyLoglikelihood, ProbabilityMass]
 
-    # For comprehensive analysis
-    # METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, ProbabilityMass, ProbabilityMassNorm]
+    # For broad analysis without an "IDK" response option
+    # METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, ConfidenceWeightedAccuracy, ProbabilityMass, ProbabilityMassNorm]
+
+    # For broad analysis with an "IDK" response option
+    # METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, ConfidenceWeightedAccuracy, TernaryScore, DistributionalCorrectnessScore]
 ```
 
 
