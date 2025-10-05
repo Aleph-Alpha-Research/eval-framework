@@ -1,0 +1,59 @@
+import numpy as np
+
+from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.shared.types import Loglikelihood
+
+
+class AccuracyTernary(BaseMetric[Loglikelihood]):
+    NAME = "Accuracy Ternary"
+
+    LC: float = 1.0 # Default reward for correct answers
+    LW: float = 1.0 # Default penalty for wrong answers
+
+    def _normalise_text(self, text: str) -> str:
+        return text.strip().lower()
+
+    def __init__(
+        self,
+        *,
+        lc: float | None = None,
+        lw: float | None = None,
+        assume_normalised: bool = False,
+    ) -> None:
+        self._lc = float(lc) if lc is not None else float(self.LC)
+        self._lw = float(lw) if lw is not None else float(self.LW)
+        if not (self._lc >= 0 and self._lw >= 0):
+            raise ValueError(
+                f"Reward and penalty loadings, respectively: lc={self._lc}, lw={self._lw}. Require lc>=0, lw>=0."
+            )
+        self._assume_normalised = assume_normalised
+
+    def _length_normalise_loglikelihoods(self, loglikelihoods: dict) -> dict:
+        output = {}
+        for k, v in loglikelihoods.items():
+            length = len(k)
+            output[k] = v / length if length > 0 else v
+        return output
+
+    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+        if response.error is not None:
+            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
+
+        loglikelihoods = response.loglikelihoods if self._assume_normalised else self._length_normalise_loglikelihoods(response.loglikelihoods)
+        
+        ground_truths = set(
+            self._normalise_text(gt) for gt in (response.ground_truth if isinstance(response.ground_truth, list) else [response.ground_truth])
+        )
+        completion_text = max(loglikelihoods, key=loglikelihoods.get)  # type: ignore[arg-type]
+        norm_text = self._normalise_text(completion_text)
+        
+        idk_key = self._normalise_text(list(response.loglikelihoods.keys())[-1])
+
+        if norm_text in ground_truths:
+            score = self._lc
+        elif norm_text == idk_key:
+            score = 0.0
+        else:
+            score = -self._lw
+
+        return [MetricResult(metric_name=self.NAME, value=score, higher_is_better=True, error=response.error)]
