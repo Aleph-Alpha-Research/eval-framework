@@ -1,5 +1,6 @@
 from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.loglikelihood.base import BaseLoglikelihoodMetric
+from eval_framework.shared.types import Loglikelihood
 
 
 class TernaryScore(BaseLoglikelihoodMetric):

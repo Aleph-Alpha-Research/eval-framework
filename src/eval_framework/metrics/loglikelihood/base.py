@@ -35,7 +35,3 @@ class BaseLoglikelihoodMetric(BaseMetric[Loglikelihood]):
         exp_vals = [math.exp(x - m) for x in vals]
         total = sum(exp_vals)
         return {k: ev / total for k, ev in zip(log_probs.keys(), exp_vals)}
-
-    @abstractmethod
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        raise NotImplementedError
