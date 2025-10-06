@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import Completion, Error, Loglikelihood
+from eval_framework.tasks.eval_config import EvalConfig
 
 MAIN = "eval_framework_results"
 
@@ -71,4 +73,13 @@ class ResultProcessor(ABC):
     @abstractmethod
     def load_metrics_results(self) -> list[Result]:
         """Load the aggregated results."""
+        pass
+
+
+class ResultsUploader(ABC):
+    @abstractmethod
+    def upload(self, llm_name: str, config: EvalConfig, output_dir: Path) -> bool:
+        """Upload relevant parts from `output_dir` to the desired destination.
+        Returns True if upload was successful, False otherwise.
+        """
         pass

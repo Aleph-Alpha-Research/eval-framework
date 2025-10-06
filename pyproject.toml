@@ -87,6 +87,7 @@ eval_framework = "eval_framework.run:run"
 dev = [
   "mypy>=1.10,<2",
   "pytest>=8.3.3,<9",
+  "pytest-mock>=3.14.1",
   "pytest-xdist>=3.6.1,<4",
   "pytest-sugar>1.1,<2",
   "types-pyyaml>=6.0.12.20240917,<7",
