@@ -79,7 +79,8 @@ def main(
         if hasattr(llm, "artifact"):
             wandb.use_artifact(llm.artifact)
         for additional_artifact in os.getenv("WANDB_ADDITIONAL_ARTIFACT_REFERENCES", "").split(","):
-            wandb.use_artifact(additional_artifact.strip())
+            if additional_artifact.strip():
+                wandb.use_artifact(additional_artifact.strip())
 
         _, preempted = response_generator.generate(should_preempt_callable)
 
