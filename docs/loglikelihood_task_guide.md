@@ -185,7 +185,7 @@ class TrueFalseTask(BaseTask[str]):
 class ExistingTask_IDK(ExistingTask):
     NAME = "ExistingTask_IDK"
     METRICS = [
-        TernaryScore, 
+        TernaryScore,
         DistributionalCorrectnessScore,
     ]
 

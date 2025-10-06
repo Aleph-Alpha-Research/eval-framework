@@ -31,14 +31,17 @@ def test_ternary_score_cases(loglikelihoods, ground_truth, expected):
     result = metric.calculate(response)[0]
     assert result.value == expected
 
+
 def test_ternary_score_normalisation():
     metric = TernaryScore()
     response = make_response({" a ": 0.0, "B": -1.0, "IDK": -2.0}, "A")
     result = metric.calculate(response)[0]
     assert result.value == 1.0
 
+
 def test_ternary_score_error():
     from eval_framework.shared.types import Error
+
     metric = TernaryScore()
     err = Error(error_class="fail", message="fail", traceback="")
     response = make_response({"A": -1.0}, "A", error=err)

@@ -16,6 +16,7 @@ def make_response(loglikelihoods, ground_truth, error=None):
         error=error,
     )
 
+
 @pytest.mark.parametrize(
     "loglikelihoods,ground_truth,expected",
     [
@@ -31,6 +32,7 @@ def test_dcs_loglikelihood_cases(loglikelihoods, ground_truth, expected):
     result = metric.calculate(response)[0]
     assert result.value == pytest.approx(expected)
 
+
 @pytest.mark.parametrize(
     "probs,ground_truth,expected",
     [
@@ -42,20 +44,28 @@ def test_dcs_loglikelihood_cases(loglikelihoods, ground_truth, expected):
 )
 def test_dcs_probs_cases(probs, ground_truth, expected):
     metric = DistributionalCorrectnessScore()
-    response = make_response({k: float('nan') for k in probs}, ground_truth)
-    def fake_softmax(_): return probs
+    response = make_response({k: float("nan") for k in probs}, ground_truth)
+
+    def fake_softmax(_):
+        return probs
+
     metric._softmax = fake_softmax
     result = metric.calculate(response)[0]
     assert result.value == pytest.approx(expected, rel=1e-6)
 
+
 def test_dcs_normalisation():
     metric = DistributionalCorrectnessScore()
     probs = {"a ": 0.01, " B": 0.01, "C": 0.96, " d ": 0.01, "IDK": 0.01}
-    response = make_response({k: float('nan') for k in probs}, "C")
-    def fake_softmax(_): return probs
+    response = make_response({k: float("nan") for k in probs}, "C")
+
+    def fake_softmax(_):
+        return probs
+
     metric._softmax = fake_softmax
     result = metric.calculate(response)[0]
     assert result.value == pytest.approx(0.93, rel=1e-6)
+
 
 def test_dcs_error():
     metric = DistributionalCorrectnessScore()

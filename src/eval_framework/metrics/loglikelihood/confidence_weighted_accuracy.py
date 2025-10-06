@@ -20,10 +20,8 @@ class ConfidenceWeightedAccuracy(BaseLoglikelihoodMetric):
         probs = self._softmax(loglikelihoods)
 
         ground_truths = set(
-            self._normalise_text(gt) for gt in (
-                response.ground_truth 
-                if isinstance(response.ground_truth, list) 
-                else [response.ground_truth])
+            self._normalise_text(gt)
+            for gt in (response.ground_truth if isinstance(response.ground_truth, list) else [response.ground_truth])
         )
 
         best_key = max(loglikelihoods, key=loglikelihoods.get)  # type: ignore[arg-type]

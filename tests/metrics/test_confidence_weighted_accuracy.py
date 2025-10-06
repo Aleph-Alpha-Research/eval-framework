@@ -16,6 +16,7 @@ def make_response(loglikelihoods, ground_truth, error=None):
         error=error,
     )
 
+
 @pytest.mark.parametrize(
     "loglikelihoods,ground_truth,expected",
     [
@@ -32,6 +33,7 @@ def test_confidence_weighted_accuracy_cases(loglikelihoods, ground_truth, expect
     assert result.metric_name == "Confidence-weighted Accuracy"
     assert result.higher_is_better is True
 
+
 def test_confidence_weighted_normalise():
     metric = ConfidenceWeightedAccuracy()
     loglikelihoods = {" a ": 0.0, "B": -1.0, "c ": -2.0}
@@ -39,8 +41,10 @@ def test_confidence_weighted_normalise():
     result = metric.calculate(response)[0]
     assert result.value == pytest.approx(0.576, rel=1e-3)
 
+
 def test_confidence_weighted_accuracy_error():
     from eval_framework.shared.types import Error
+
     metric = ConfidenceWeightedAccuracy()
     err = Error(error_class="fail", message="fail", traceback="")
     response = make_response({"A": -1.0}, "A", error=err)
