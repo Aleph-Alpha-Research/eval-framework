@@ -1,4 +1,5 @@
 import pytest
+
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.shared.types import Loglikelihood
 

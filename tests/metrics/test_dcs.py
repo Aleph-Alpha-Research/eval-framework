@@ -1,4 +1,5 @@
 import pytest
+
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.shared.types import Error, Loglikelihood
 
@@ -57,7 +58,6 @@ def test_dcs_normalisation():
     assert result.value == pytest.approx(0.93, rel=1e-6)
 
 def test_dcs_error():
-    from eval_framework.shared.types import Error
     metric = DistributionalCorrectnessScore()
     err = Error(error_class="fail", message="fail", traceback="")
     response = make_response({"A": -1.0}, "A", error=err)

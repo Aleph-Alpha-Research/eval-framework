@@ -26,18 +26,31 @@ class DistributionalCorrectnessScore(BaseLoglikelihoodMetric):
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 
-        loglikelihoods = self._length_normalise_loglikelihoods(response.loglikelihoods) if self.len_normalised else response.loglikelihoods
+        if self.len_normalised:
+            loglikelihoods = self._length_normalise_loglikelihoods(response.loglikelihoods)
+        else:
+            loglikelihoods = response.loglikelihoods
         probs = self._softmax(loglikelihoods)
 
         ground_truths = set(
-            self._normalise_text(gt) for gt in (response.ground_truth if isinstance(response.ground_truth, list) else [response.ground_truth])
+            self._normalise_text(gt) for gt in (
+                response.ground_truth 
+                if isinstance(response.ground_truth, list) 
+                else [response.ground_truth])
         )
 
-        idk_key = self._normalise_text(list(response.loglikelihoods.keys())[-1]) # we assume last key is "I don't know" option
+        idk_key = self._normalise_text(list(response.loglikelihoods.keys())[-1]) # assumes last key is "IDK" option
 
         p_c = sum(p for k, p in probs.items() if self._normalise_text(k) in ground_truths)
         p_idk = probs.get(idk_key, 0.0)
-        p_w = sum(p for k, p in probs.items() if self._normalise_text(k) not in ground_truths and self._normalise_text(k) != idk_key)
+        p_w = sum(
+            p 
+            for k, p in probs.items() 
+            if (
+                self._normalise_text(k) not in ground_truths 
+                and self._normalise_text(k) != idk_key
+            )
+        )
 
         dcs = (self._lc * p_c - self._lw * p_w) * (1.0 - p_idk)
 

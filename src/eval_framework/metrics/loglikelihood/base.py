@@ -1,5 +1,4 @@
 import math
-from abc import abstractmethod
 
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.shared.types import Loglikelihood

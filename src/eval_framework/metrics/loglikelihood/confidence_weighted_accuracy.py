@@ -13,11 +13,17 @@ class ConfidenceWeightedAccuracy(BaseLoglikelihoodMetric):
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 
-        loglikelihoods = self._length_normalise_loglikelihoods(response.loglikelihoods) if self.len_normalised else response.loglikelihoods
+        if self.len_normalised:
+            loglikelihoods = self._length_normalise_loglikelihoods(response.loglikelihoods)
+        else:
+            loglikelihoods = response.loglikelihoods
         probs = self._softmax(loglikelihoods)
 
         ground_truths = set(
-            self._normalise_text(gt) for gt in (response.ground_truth if isinstance(response.ground_truth, list) else [response.ground_truth])
+            self._normalise_text(gt) for gt in (
+                response.ground_truth 
+                if isinstance(response.ground_truth, list) 
+                else [response.ground_truth])
         )
 
         best_key = max(loglikelihoods, key=loglikelihoods.get)  # type: ignore[arg-type]

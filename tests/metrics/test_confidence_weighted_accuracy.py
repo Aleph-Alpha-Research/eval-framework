@@ -1,4 +1,5 @@
 import pytest
+
 from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
 from eval_framework.shared.types import Loglikelihood
 
