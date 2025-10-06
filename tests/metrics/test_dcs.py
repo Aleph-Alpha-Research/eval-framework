@@ -1,10 +1,12 @@
+from typing import Any
+
 import pytest
 
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.shared.types import Error, Loglikelihood
 
 
-def make_response(loglikelihoods, ground_truth, error=None):
+def make_response(loglikelihoods: dict[str, float], ground_truth: Any, error: Error | None = None) -> Loglikelihood:
     return Loglikelihood(
         id=1,
         subject="test",
@@ -26,7 +28,7 @@ def make_response(loglikelihoods, ground_truth, error=None):
         ({"A": 0.0, "B": 0.0, "IDK": -100.0}, "A", 0.0),
     ],
 )
-def test_dcs_loglikelihood_cases(loglikelihoods, ground_truth, expected):
+def test_dcs_loglikelihood_cases(loglikelihoods: dict[str, float], ground_truth: Any, expected: float) -> None:
     metric = DistributionalCorrectnessScore()
     response = make_response(loglikelihoods, ground_truth)
     result = metric.calculate(response)[0]
@@ -42,32 +44,32 @@ def test_dcs_loglikelihood_cases(loglikelihoods, ground_truth, expected):
         ({"A": 0.01, "B": 0.01, "C": 0.96, "D": 0.01, "IDK": 0.01}, "C", 0.93),
     ],
 )
-def test_dcs_probs_cases(probs, ground_truth, expected):
+def test_dcs_probs_cases(probs: dict[str, float], ground_truth: Any, expected: float) -> None:
     metric = DistributionalCorrectnessScore()
     response = make_response({k: float("nan") for k in probs}, ground_truth)
 
-    def fake_softmax(_):
+    def fake_softmax(_: Any) -> dict[str, float]:
         return probs
 
-    metric._softmax = fake_softmax
+    object.__setattr__(metric, "_softmax", fake_softmax)
     result = metric.calculate(response)[0]
     assert result.value == pytest.approx(expected, rel=1e-6)
 
 
-def test_dcs_normalisation():
+def test_dcs_normalisation() -> None:
     metric = DistributionalCorrectnessScore()
     probs = {"a ": 0.01, " B": 0.01, "C": 0.96, " d ": 0.01, "IDK": 0.01}
     response = make_response({k: float("nan") for k in probs}, "C")
 
-    def fake_softmax(_):
+    def fake_softmax(_: Any) -> dict[str, float]:
         return probs
 
-    metric._softmax = fake_softmax
+    object.__setattr__(metric, "_softmax", fake_softmax)
     result = metric.calculate(response)[0]
     assert result.value == pytest.approx(0.93, rel=1e-6)
 
 
-def test_dcs_error():
+def test_dcs_error() -> None:
     metric = DistributionalCorrectnessScore()
     err = Error(error_class="fail", message="fail", traceback="")
     response = make_response({"A": -1.0}, "A", error=err)
