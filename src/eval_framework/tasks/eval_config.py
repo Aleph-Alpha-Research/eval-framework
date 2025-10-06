@@ -13,12 +13,28 @@ from eval_framework.tasks.perturbation import PerturbationConfig
 from eval_framework.tasks.registry import get_task, validate_task_name
 from eval_framework.utils.constants import ROOT_DIR
 
+# Keys that don't impact actual evaluation results and should be excluded from config dumps for hashing purposes.
+KEYS_UNRELATED_TO_RESULTS = {
+    "output_dir",
+    "wandb_project",
+    "wandb_entity",
+    "wandb_run_id",
+    "wandb_upload_results",
+    "hf_upload_dir",
+    "hf_upload_repo",
+    "description",
+    "save_intermediate_results",
+    "save_logs",
+    "delete_output_dir_after_upload",
+}
+
 
 class EvalConfig(BaseConfig):
     output_dir: Path = ROOT_DIR
     wandb_project: str | None = None
     wandb_entity: str | None = None
     wandb_run_id: str | None = None
+    wandb_upload_results: bool = True
     hf_upload_dir: str | None = None
     hf_upload_repo: str | None = None
     num_fewshot: Annotated[int, Field(ge=0)] = 0
@@ -36,6 +52,7 @@ class EvalConfig(BaseConfig):
     description: str | None = None
     save_intermediate_results: bool = True
     save_logs: bool = True
+    delete_output_dir_after_upload: bool = False
 
     @property
     def task_class(self) -> type[BaseTask]:
@@ -109,4 +126,8 @@ class EvalConfig(BaseConfig):
 
     def model_json_dump(self) -> str:
         model_dump = self.model_dump()
+        return json.dumps(model_dump, sort_keys=True)
+
+    def model_json_robust_subset_dump(self) -> str:
+        model_dump = self.model_dump(exclude=KEYS_UNRELATED_TO_RESULTS)
         return json.dumps(model_dump, sort_keys=True)

@@ -42,10 +42,12 @@ class Hyperparameters(BaseModel):
     wandb_project: str | None = None
     wandb_entity: str | None = None
     wandb_run_id: str | None = None
+    wandb_upload_results: bool | None = None
     description: str | None = None
     task_args: TaskArgs
     llm_args: dict[str, Any] | None = {}
     extra_task_modules: list[str] | None = None
+    delete_output_dir_after_upload: bool | None = None
 
 
 class DeterminedContext(EvalContext):
@@ -88,7 +90,9 @@ class DeterminedContext(EvalContext):
             "wandb_project",
             "wandb_entity",
             "wandb_run_id",
+            "wandb_upload_results",
             "description",
+            "delete_output_dir_after_upload",
         ]:
             val_cli = getattr(self, name, None)
             val_hparams = getattr(self.hparams, name, None)
@@ -142,8 +146,11 @@ class DeterminedContext(EvalContext):
             wandb_project=self.hparams.wandb_project or self.wandb_project,
             wandb_entity=self.hparams.wandb_entity or self.wandb_entity,
             wandb_run_id=self.hparams.wandb_run_id or self.wandb_run_id,
+            wandb_upload_results=self.hparams.wandb_upload_results or self.wandb_upload_results,
             batch_size=self.hparams.task_args.batch_size or self.batch_size,
             description=self.hparams.description or self.description,
+            delete_output_dir_after_upload=self.hparams.delete_output_dir_after_upload
+            or self.delete_output_dir_after_upload,
         )
 
         return self

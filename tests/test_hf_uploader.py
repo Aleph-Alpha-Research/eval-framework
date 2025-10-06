@@ -88,3 +88,18 @@ def test_init_login_failure(mocker: MockerFixture, sample_config: EvalConfig) ->
 
     # Should return early without crashing
     uploader.upload("test-model", sample_config, Path("/non-existent"))
+
+
+def test_init_turned_off() -> None:
+    """Test initialization when HF details are not specified."""
+    sample_config = EvalConfig(
+        task_name=ARC.NAME,
+        num_fewshot=0,
+        num_samples=10,
+        llm_class=Qwen3_0_6B,
+    )
+    uploader = HFUploader(sample_config)
+    assert uploader.hf_api is None
+
+    # Should return early without crashing
+    uploader.upload("test-model", sample_config, Path("/non-existent"))

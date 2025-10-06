@@ -2,6 +2,7 @@ import gc
 import json
 import logging
 import os
+import shutil
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal
@@ -11,8 +12,9 @@ import wandb
 from eval_framework.evaluation_generator import EvaluationGenerator, Result
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator
-from eval_framework.result_processors.hf_processor import HFProcessor
+from eval_framework.result_processors.hf_uploader import HFUploader
 from eval_framework.result_processors.result_processor import ResultsFileProcessor, generate_output_dir
+from eval_framework.result_processors.wandb_uploader import WandbUploader
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.logging import setup_logging
@@ -48,8 +50,7 @@ def main(
 
     if preemption_data is None:
         output_dir = generate_output_dir(llm.name, config)
-        # config.wandb_run_id  defaults to none, if no run_id is provided then it starts a new one
-        wandb_run_id = config.wandb_run_id
+        wandb_run_id = config.wandb_run_id  # defaults to none, if no run_id is provided then it starts a new one
     else:
         logger.info("Found preempted run restarting ...")
         output_dir = preemption_data["output_dir"]
@@ -60,26 +61,22 @@ def main(
 
     file_processor = ResultsFileProcessor(output_dir)
     response_generator = ResponseGenerator(llm, config, file_processor)
-    # take care of init after preemption handling. If we have a run
-    # id from preemption, then we resume the original wandb run
+
     with wandb.init(
         entity=config.wandb_entity,
         project=config.wandb_project,
         group=llm.name,
         job_type=config.task_name,
-        id=wandb_run_id,
+        id=wandb_run_id,  # (potentially resuming run after preemption)
         config=response_generator._get_metadata(),
         resume="allow",
         mode=_wandb_mode(config.wandb_project),
     ) as run:
-        # check to see if this is a registered model. If so, use the artifact.
-        # this is placed here in the case that an artifact is used to generate completions,
-        # crashes during the evaluation step, and subsequent reruns use the same generations,
-        # the runs are still linked to the artifact
         if hasattr(llm, "artifact"):
             wandb.use_artifact(llm.artifact)
         for additional_artifact in os.getenv("WANDB_ADDITIONAL_ARTIFACT_REFERENCES", "").split(","):
-            wandb.use_artifact(additional_artifact.strip())
+            if additional_artifact.strip():
+                wandb.use_artifact(additional_artifact.strip())
 
         _, preempted = response_generator.generate(should_preempt_callable)
 
@@ -101,22 +98,13 @@ def main(
         evaluator = EvaluationGenerator(config, file_processor)
         results = evaluator.run_eval()
 
-        if config.hf_upload_dir:
-            hf_processor = HFProcessor(config, output_dir)
-            status, hf_url = hf_processor.upload_responses_to_HF()
-            if not status:
-                status_message = "*** Warning: Result upload to HF failed ***"
-            else:
-                status_message = "Successfully uploaded results to HuggingFace"
-                if hf_url and run:
-                    try:
-                        run.notes = f"Results uploaded to HuggingFace: [{hf_url}]({hf_url})"
-                    except Exception as e:
-                        logger.warning(f"Failed to update wandb notes with HF URL: {e}")
-        else:
-            status_message = f"{RED}[ Results not persisted in a HuggingFace repo ------- ]{RESET}"
+        upload_success = False
+        for uploader in [HFUploader(config), WandbUploader(config)]:
+            upload_success |= uploader.upload(llm.name, config, output_dir)
 
-        logger.info(status_message)
+        if config.delete_output_dir_after_upload and upload_success:
+            logger.warning(f"Deleting output directory {config.output_dir} after successful upload!")
+            shutil.rmtree(config.output_dir, ignore_errors=True)
 
     return results
 
@@ -149,38 +137,6 @@ def _delete_preemption_file(config: EvalConfig, trial_id: int) -> None:
     logger.info(f"Saved preemption data to {preemption_file}")
 
 
-def _configure_logging(output_dir: Path) -> None:
-    """Configure logging to save logs to a file in the output directory."""
-
-    # Ensure the output directory exists
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Set up log file path
-    log_file = output_dir / "evaluation.log"
-
-    # Create file handler
-    file_handler = logging.FileHandler(log_file, mode="w", encoding="utf-8")
-    file_handler.setLevel(logging.INFO)
-
-    # Create formatter
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    file_handler.setFormatter(formatter)
-
-    # Get the root logger and add the file handler
-    root_logger = logging.getLogger()
-
-    # Remove existing file handlers to avoid duplicates
-    for handler in root_logger.handlers[:]:
-        if isinstance(handler, logging.FileHandler):
-            root_logger.removeHandler(handler)
-
-    root_logger.addHandler(file_handler)
-
-    # Set logging level if not already set
-    if root_logger.level == logging.NOTSET:
-        root_logger.setLevel(logging.INFO)
-
-
 def _wandb_mode(project: str | None) -> Literal["online", "disabled"] | None:
     """
     Checks to see if a WandB API key is found. If not, wandb starts in offline mode.
@@ -198,8 +154,8 @@ def _wandb_mode(project: str | None) -> Literal["online", "disabled"] | None:
                 )
                 return "disabled"
             else:
-                logger.info("wandb login detected. Using online mode.")
+                logger.info("Wandb login detected. Using online mode.")
         except Exception as e:
-            logger.warning(f"wandb login check failed: {e}. Disabling Wandb logging.")
+            logger.warning(f"Wandb login check failed: {e}. Disabling Wandb logging.")
             return "disabled"
     return "online"

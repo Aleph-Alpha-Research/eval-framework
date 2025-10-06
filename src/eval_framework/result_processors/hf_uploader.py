@@ -7,13 +7,10 @@ import os
 from pathlib import Path
 
 import wandb
-from dotenv import load_dotenv
 from huggingface_hub import HfApi, login
 
 from eval_framework.result_processors.base import ResultsUploader
 from eval_framework.tasks.eval_config import EvalConfig
-
-load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -21,19 +18,19 @@ logger = logging.getLogger(__name__)
 class HFUploader(ResultsUploader):
     def __init__(self, config: EvalConfig):
         if not config.hf_upload_dir:
-            logger.warning("Results not persisted in HuggingFace (`hf_upload_dir` not configured)")
+            logger.warning("Results will not be persisted in HuggingFace (`hf_upload_dir` not configured).")
             return
         if config.output_dir is None:
             raise ValueError("Output directory is not set in the configuration.")
-        if config.hf_upload_repo is None:
+        if not config.hf_upload_repo:
             raise ValueError("HuggingFace upload repository is not set in the configuration.")
 
         self.hf_api = HFUploader._login_into_hf()
         if self.hf_api is None:
-            logger.error("Could not login into HuggingFace. Check credentials.")
+            logger.error("Could not login into HuggingFace (check HF_TOKEN). Results not persisted in HuggingFace.")
 
     def upload(self, llm_name: str, config: EvalConfig, output_dir: Path) -> bool:
-        if self.hf_api is None:
+        if getattr(self, "hf_api", None) is None:
             return False
         assert config.hf_upload_repo is not None and config.hf_upload_dir is not None
 

@@ -1,12 +1,15 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import Completion, Error, Loglikelihood
 from eval_framework.tasks.eval_config import EvalConfig
 
 MAIN = "eval_framework_results"
+
+load_dotenv()
 
 
 class Result(BaseModel):

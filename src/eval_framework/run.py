@@ -184,6 +184,13 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--wandb-upload-results",
+        action=argparse.BooleanOptionalAction,
+        required=False,
+        default=True,
+        help=("Whether to upload results as an artifact to Weights & Biases (default: True). Needs `--wandb-project`."),
+    )
+    parser.add_argument(
         "--description",
         type=str,
         required=False,
@@ -232,6 +239,13 @@ def parse_args() -> argparse.Namespace:
         required=False,
         default=False,
         help=("Add this flag to free up GPU resources between response generation and evaluation"),
+    )
+    parser.add_argument(
+        "--delete-output-dir-after-upload",
+        action="store_true",
+        required=False,
+        default=False,
+        help=("Add this flag to remove the output directory after a successful upload to HF or WandB."),
     )
 
     llm_args: dict[str, Any] = {}
@@ -297,6 +311,7 @@ def run_with_kwargs(kwargs: dict) -> None:
         wandb_project=kwargs["wandb_project"],
         wandb_entity=kwargs["wandb_entity"],
         wandb_run_id=kwargs["wandb_run_id"],
+        wandb_upload_results=kwargs["wandb_upload_results"],
         hf_upload_dir=kwargs["hf_upload_dir"],
         hf_upload_repo=kwargs["hf_upload_repo"],
         llm_args=kwargs["llm_args"],
@@ -308,6 +323,7 @@ def run_with_kwargs(kwargs: dict) -> None:
         perturbation_type=kwargs["perturbation_type"],
         perturbation_probability=kwargs["perturbation_probability"],
         perturbation_seed=kwargs["perturbation_seed"],
+        delete_output_dir_after_upload=kwargs["delete_output_dir_after_upload"],
         # save_logs=kwargs["save_logs"],
     )
 

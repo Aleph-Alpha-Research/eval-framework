@@ -100,6 +100,9 @@ The name of the Weights & Biases entity to log runs to. Defaults to the user's d
 **`--wandb-run-id WANDB_RUN_ID`**
 The ID of an existing Weights & Biases run to resume. If not given, creates a new run. If given and exists, will continue the run but will overwrite the python command logged in WandB.
 
+**`--wandb-upload-results` or `--no-wandb-upload-results`**
+Whether to upload results as an artifact to Weights & Biases (default: True). Needs `--wandb-project` to be set.
+
 **`--description DESCRIPTION`**
 Description of the run. This will be added to the metadata of the run to help with bookkeeping.
 
