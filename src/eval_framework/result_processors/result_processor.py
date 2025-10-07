@@ -24,7 +24,7 @@ class ResultsFileProcessor(ResultProcessor):
 
     def save_metadata(self, metadata: dict) -> None:
         with open(self.output_dir / "metadata.json", "w") as f:
-            json.dump(metadata, f, indent=2)
+            json.dump(metadata, f, indent=2, sort_keys=True)
 
     def load_metadata(self) -> dict:
         metadata_file = self.output_dir / "metadata.json"
@@ -82,7 +82,7 @@ class ResultsFileProcessor(ResultProcessor):
 
     def save_aggregated_results(self, results: dict[str, float | None]) -> None:
         with open(self.output_dir / "aggregated_results.json", "w") as f:
-            json.dump(results, f, indent=4)
+            json.dump(results, f, indent=4, sort_keys=True)
 
     def load_metrics_results(self) -> list[Result]:
         results_file = self.output_dir / "results.jsonl"

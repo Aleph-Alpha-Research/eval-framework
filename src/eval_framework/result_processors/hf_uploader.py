@@ -30,9 +30,9 @@ class HFUploader(ResultsUploader):
             logger.error("Could not login into HuggingFace (check HF_TOKEN). Results not persisted in HuggingFace.")
 
     def upload(self, llm_name: str, config: EvalConfig, output_dir: Path) -> bool:
-        if getattr(self, "hf_api", None) is None:
+        if not hasattr(self, "hf_api") or self.hf_api is None:
             return False
-        assert config.hf_upload_repo is not None and config.hf_upload_dir is not None
+        assert config.hf_upload_repo and config.hf_upload_dir
 
         rel_upload_dir = output_dir.relative_to(config.output_dir)
         upload_dir = Path(config.hf_upload_dir.replace("/", "")) / rel_upload_dir
@@ -41,7 +41,7 @@ class HFUploader(ResultsUploader):
         upload_counter = 0
         for fp in output_dir.iterdir():
             if fp.name not in ["aggregated_results.json", "metadata.json"]:
-                logger.info(f"Skipping {fp}; file too large.")
+                logger.info(f"Skipping {fp}.")
             else:
                 try:
                     self.hf_api.upload_file(

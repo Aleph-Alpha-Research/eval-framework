@@ -103,8 +103,8 @@ def main(
             upload_success |= uploader.upload(llm.name, config, output_dir)
 
         if config.delete_output_dir_after_upload and upload_success:
-            logger.warning(f"Deleting output directory {config.output_dir} after successful upload!")
-            shutil.rmtree(config.output_dir, ignore_errors=True)
+            logger.warning(f"Deleting output directory '{output_dir}' after successful upload(s)!")
+            shutil.rmtree(output_dir, ignore_errors=True)
 
     return results
 

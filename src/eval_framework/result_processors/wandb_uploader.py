@@ -1,5 +1,5 @@
 """
-Module for writing result folder and its contents to W&B artifact
+Module for writing result folder to a W&B artifact
 """
 
 import hashlib
@@ -27,7 +27,13 @@ def register_artifact_upload_function(func: ArtifactUploadFunction) -> None:
 def artifact_upload_function(artifact_name: str, root: Path, file_paths: list[Path]) -> str | None:
     if _ARTIFACT_UPLOAD_FUNCTION is None:
         return None
-    return _ARTIFACT_UPLOAD_FUNCTION(artifact_name, root, file_paths)
+    logger.info(f"Uploading {artifact_name} from {root}.")
+    reference_path = _ARTIFACT_UPLOAD_FUNCTION(artifact_name, root, file_paths)
+    if reference_path is None:
+        logger.warning("Failed uploading, upload function returned empty destination path!")
+    else:
+        logger.info(f"Successfully uploaded to {reference_path}.")
+    return reference_path
 
 
 class WandbUploader(ResultsUploader):
@@ -69,16 +75,14 @@ class WandbUploader(ResultsUploader):
                 file_paths = list(output_dir.glob("*.json"))
 
             artifact_name = self._get_artifact_name(llm_name, config)
+            alias_name = self._get_alias(output_dir)
 
             try:
                 reference_path = artifact_upload_function(artifact_name, config.output_dir, file_paths)
             except Exception as e:
                 logger.error(f"Problem during artifact upload function, aborting registration: {e}.")
                 return False
-            if reference_path is not None:
-                logger.info(f"Successfully uploaded '{artifact_name}' from {config.output_dir} to {reference_path}.")
 
-            logger.info(f"Registering '{artifact_name}' in WandB")
             artifact = wandb.Artifact(name=artifact_name, type="eval")  # note: metadata is added from run automatically
             if reference_path:
                 artifact.add_reference(reference_path, checksum=True)
@@ -86,7 +90,9 @@ class WandbUploader(ResultsUploader):
                 for fp in file_paths:
                     artifact.add_file(str(fp))
 
-            wandb.log_artifact(artifact)
+            # Because metadata and e.g. logs are added to the artifact, we get a new version everytime!
+            # To mitigate this, we also add an alias based on the content hash of the "pure" result files.
+            wandb.log_artifact(artifact, aliases=[alias_name])
             if self._wandb_registry:
                 artifact.link(f"wandb-registry-{self._wandb_registry}/{artifact_name}")
             logger.info(f"Successfully registered '{artifact_name}' in WandB")
@@ -113,8 +119,13 @@ class WandbUploader(ResultsUploader):
 
         return f"{llm_name}__{config.task_name}__{params_str}__{config_hash}"
 
-    # def _get_edition(self) -> str:
-    #     timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
-    #     version_str = f"v{importlib.metadata.version('eval_framework')}"
-    #     companion_version_str = f"companion_v{importlib.metadata.version('eval_framework_companion')}"
-    #     return f"{timestamp}__{version_str}__{companion_version_str}"
+    def _get_alias(self, output_dir: Path) -> str:
+        digests = []
+        # These files don't contain result-irrelevant things such as timestamps or paths and are fields are ordered.
+        # This makes them good for generating a hash that identifies the actual results and not "random" metadata.
+        for filename in ["aggregated_results.json", "output.jsonl", "results.jsonl"]:
+            if (output_dir / filename).exists():
+                with open(output_dir / filename, "rb") as f:
+                    digests.append(hashlib.file_digest(f, "sha256").hexdigest())
+        hash = hashlib.sha256("".join(digests).encode("utf-8")).hexdigest()
+        return f"H-{hash[:10]}"

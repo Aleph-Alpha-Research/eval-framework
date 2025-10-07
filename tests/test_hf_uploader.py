@@ -31,7 +31,7 @@ def sample_config(tmp_path: Path) -> EvalConfig:
         num_fewshot=0,
         num_samples=10,
         output_dir=tmp_path,
-        hf_upload_repo="test-org",
+        hf_upload_repo="test-org/test-repo",
         hf_upload_dir="results",
         llm_class=Qwen3_0_6B,
     )
@@ -51,9 +51,6 @@ def test_upload_success(
     mock_wandb = mocker.patch("eval_framework.result_processors.hf_uploader.wandb")
     mock_wandb.run = mock_wandb_run
 
-    # Update config to use the temporary directory
-    # sample_config.output_dir = sample_output_dir.parent
-
     uploader = HFUploader(sample_config)
     uploader.upload("test-model", sample_config, sample_output_dir)
 
@@ -69,12 +66,12 @@ def test_upload_success(
         mock_hf_api_instance.upload_file.assert_any_call(
             path_or_fileobj=str(sample_output_dir / filename),
             path_in_repo=expected_dest,
-            repo_id="test-org",
+            repo_id="test-org/test-repo",
             repo_type="dataset",
         )
 
     # Verify wandb notes were updated
-    expected_url = "https://huggingface.co/datasets/test-org/tree/main/results/my_model/my_task/fewshot_0"
+    expected_url = "https://huggingface.co/datasets/test-org/test-repo/tree/main/results/my_model/my_task/fewshot_0"
     assert f"Results uploaded to HuggingFace: [{expected_url}]({expected_url})" in mock_wandb_run.notes
 
 
@@ -87,7 +84,7 @@ def test_init_login_failure(mocker: MockerFixture, sample_config: EvalConfig) ->
     assert uploader.hf_api is None
 
     # Should return early without crashing
-    uploader.upload("test-model", sample_config, Path("/non-existent"))
+    assert not uploader.upload("test-model", sample_config, Path("/non-existent"))
 
 
 def test_init_turned_off() -> None:
@@ -99,7 +96,6 @@ def test_init_turned_off() -> None:
         llm_class=Qwen3_0_6B,
     )
     uploader = HFUploader(sample_config)
-    assert uploader.hf_api is None
 
     # Should return early without crashing
-    uploader.upload("test-model", sample_config, Path("/non-existent"))
+    assert not uploader.upload("test-model", sample_config, Path("/non-existent"))
