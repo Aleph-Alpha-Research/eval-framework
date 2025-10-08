@@ -31,7 +31,7 @@ from eval_framework.shared.types import Loglikelihood
                 loglikelihoods={"A": np.log(0.2), "B": np.log(0.3), "C": np.log(0.5)},
                 loglikelihoods_sequence_positions={"A": -1, "B": -1, "C": -1},
             ),
-            1.0,
+            0.5,
             id="prob_mass_last_position",
         ),
     ],
