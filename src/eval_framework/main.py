@@ -1,5 +1,7 @@
+import gc
 import json
 import logging
+import os
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal
@@ -23,6 +25,8 @@ def main(
     config: EvalConfig,
     should_preempt_callable: Callable[[], bool] | None = None,
     trial_id: int | None = None,
+    *args: Any,
+    resource_cleanup: bool = False,
 ) -> list[Result]:
     """Runs the entire evaluation process: responses generation and evaluation."""
     # Set up centralized logging early
@@ -72,8 +76,11 @@ def main(
         # this is placed here in the case that an artifact is used to generate completions,
         # crashes during the evaluation step, and subsequent reruns use the same generations,
         # the runs are still linked to the artifact
-        if hasattr(llm, "artifact"):  # BaseLLM doesn't have _model attribute
+        if hasattr(llm, "artifact"):
             wandb.use_artifact(llm.artifact)
+        for additional_artifact in os.getenv("WANDB_ADDITIONAL_ARTIFACT_REFERENCES", "").split(","):
+            if additional_artifact.strip():
+                wandb.use_artifact(additional_artifact.strip())
 
         _, preempted = response_generator.generate(should_preempt_callable)
 
@@ -87,6 +94,10 @@ def main(
         # update config from response generator with get metadata
         if trial_id is not None:
             _delete_preemption_file(config, trial_id)
+
+        if resource_cleanup:
+            del response_generator
+            gc.collect()
 
         evaluator = EvaluationGenerator(config, file_processor)
         results = evaluator.run_eval()

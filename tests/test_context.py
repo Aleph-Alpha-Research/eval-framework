@@ -27,8 +27,6 @@ def mock_get_cluster_info_minimal() -> Generator[mock.Mock, None, None]:
             "task_args": {
                 "num_fewshot": 0,
                 "task_name": "ARC",
-                "judge_model_name": Llama31_8B_Instruct_API.__name__,
-                "judge_model_args": {},
             },
         }
         mock_get_cluster_info.return_value = mock_info
@@ -69,6 +67,7 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
     # Test that values from determined configuration are used if given but otherwise run.py values are used.
     # Here, we specify as few values as possible in the hparams to test that run.py values are used.
     models_path = Path(eval_framework.__path__[0]) / "llm" / "aleph_alpha.py"
+    judge_model_name = Llama31_8B_Instruct_API.__name__
     with DeterminedContext(
         llm_name="some_llm",  # overriden by hparams
         models_path=models_path,
@@ -80,7 +79,7 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         output_dir=Path("dummyXXX"),  # overriden by hparams
         hf_upload_dir="dummy123",
         llm_args={"run_key": "run_val"},
-        judge_model_name="some_judge",
+        judge_model_name=judge_model_name,
         judge_model_args={},
         judge_models_path=models_path,
         batch_size=1,
@@ -101,7 +100,7 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         assert ctx.config.hf_upload_dir == "dummy123"
         assert ctx.config.llm_args == {"run_key": "run_val"}
         assert ctx.config.llm_judge_class is not None
-        assert ctx.config.llm_judge_class.__name__ == Llama31_8B_Instruct_API.__name__
+        assert ctx.config.llm_judge_class.__name__ == judge_model_name
         assert ctx.config.judge_model_args is not None
         assert ctx.config.batch_size == 1
         assert ctx.config.description == "d"
@@ -126,7 +125,7 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         output_dir=Path("dummyXXX"),  # overriden by hparams
         hf_upload_dir="dummy123",  # overriden by hparams
         llm_args={"run_key": "run_val"},  # overriden by hparams
-        judge_model_name="Pharia1_7B_Control_API",
+        judge_model_name="Pharia1_7B_Control_API",  # overriden by hparams
         judge_model_args={},
         judge_models_path=models_path,
         batch_size=1,  # overriden by hparams

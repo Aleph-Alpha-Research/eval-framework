@@ -2,7 +2,7 @@ import gc
 import logging
 import time
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, cast
 from unittest.mock import Mock, patch
 
 import pytest
@@ -15,7 +15,7 @@ from eval_framework.llm.mistral import MistralAdapter, MistralVLLM
 from eval_framework.llm.vllm import Qwen3_0_6B_VLLM, Qwen3_0_6B_VLLM_No_Thinking, VLLMModel, VLLMTokenizer
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import ConcatFormatter, Message, Role
+from template_formatting.formatter import ConcatFormatter, HFFormatter, Message, Role
 
 
 def clean_up() -> None:
@@ -210,7 +210,7 @@ def test_vllm_hf_token_equivalence() -> None:
     vllm_completion = vllm_results[0].completion
     vllm_tokens = vllm_model.tokenizer.encode_plain_text(vllm_completion).tokens[:20]
 
-    # free up memory
+    # # free up memory
     del vllm_model
     gc.collect()
     torch.cuda.empty_cache()
@@ -894,3 +894,62 @@ def test_tokenizer_initialization_performance(
             f"Cached tokenizer access should be much faster than initialization "
             f"(first init: {first_access_time:.6f}s, cached access: {cached_access_time:.6f}s)"
         )
+
+
+@pytest.mark.vllm
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    "generator_gpus, evaluator_gpus",
+    [
+        pytest.param(1, 1, id="single gpu inference"),
+        pytest.param(1, 2, id="single to multi-gpu inference"),
+        pytest.param(2, 4, id="multi-gpu inference"),
+    ],
+)
+def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
+    num_gpus = torch.cuda.device_count()
+    if min(generator_gpus, evaluator_gpus) >= num_gpus:
+        pytest.skip("GPUs not available")
+
+    class Qwen8B(VLLMModel):
+        LLM_NAME = "Qwen/Qwen3-8B"
+
+    try:
+        model_config = cast(
+            dict[str, Any],
+            {
+                "max_model_len": 1000,
+                "enforce_eager": True,
+                "tensor_parallel_size": generator_gpus,
+                "formatter": HFFormatter("Qwen/Qwen3-8B", chat_template_kwargs={"enable_thinking": True}),
+            },
+        )
+
+        response_generator_model = Qwen8B(**model_config)
+        response_generator_model.generate_from_messages(
+            messages=[[Message(role=Role.USER, content="What is capital of Germany ?")]],
+            max_tokens=100,
+            temperature=0.0,
+        )
+        del response_generator_model
+        model_config["tensor_parallel_size"] = evaluator_gpus
+        judge_model = Qwen8B(**model_config)
+        judge_model.generate_from_messages(
+            messages=[
+                [
+                    Message(
+                        role=Role.USER,
+                        content=(
+                            "Rank the following responses between 0 and 1"
+                            "based on clarity : \nResponse 1: {response1}"
+                            "\nResponse 2: {response2}"
+                        ).format(response1="This is an ambiguous answer", response2="This is a clear answer"),
+                    )
+                ]
+            ],
+            max_tokens=100,
+            temperature=0.0,
+        )
+        del judge_model
+    except Exception as e:
+        pytest.fail(f"{e.__class__.__name__} : {e}")
