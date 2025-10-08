@@ -27,10 +27,10 @@ def register_artifact_upload_function(func: ArtifactUploadFunction) -> None:
 def artifact_upload_function(artifact_name: str, root: Path, file_paths: list[Path]) -> str | None:
     if _ARTIFACT_UPLOAD_FUNCTION is None:
         return None
-    logger.info(f"Uploading {artifact_name} from {root}.")
+    logger.info(f"Uploading '{artifact_name}' from {root}.")
     reference_path = _ARTIFACT_UPLOAD_FUNCTION(artifact_name, root, file_paths)
     if reference_path is None:
-        logger.warning("Failed uploading, upload function returned empty destination path!")
+        logger.warning("Failed uploading, the custom upload function returned empty destination path!")
     else:
         logger.info(f"Successfully uploaded to {reference_path}.")
     return reference_path
@@ -87,6 +87,7 @@ class WandbUploader(ResultsUploader):
             if reference_path:
                 artifact.add_reference(reference_path, checksum=True)
             else:
+                logger.info("Uploading results directly to WandB.")
                 for fp in file_paths:
                     artifact.add_file(str(fp))
 

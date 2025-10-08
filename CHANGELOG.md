@@ -12,6 +12,8 @@
 ### General
 - Added `WANDB_ADDITIONAL_ARTIFACT_REFERENCES` environment variable to reference custom artifacts in W&B.
 - Added `resource-cleanup` argument to run.py; enabling a smooth transition in GPU workflows between response generation/evaluation
+- Added `WandbUploader` (for uploading results as W&B artifacts) and refactored `HFUploader` (no change in functionality).
+- Config hashes in output directories now do not consider config elements which are irrelevant to actual results.
 
 ## 0.2.2
 

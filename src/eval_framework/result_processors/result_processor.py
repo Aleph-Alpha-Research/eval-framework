@@ -111,7 +111,7 @@ def generate_output_dir(llm_name: str, config: EvalConfig) -> Path:
 
     # Serialize the full config for hashing
     # Convert the config to a dict and sort keys to ensure consistent hashing
-    config_json = config.model_json_dump()
+    config_json = config.model_json_robust_subset_dump()
     config_hash = hashlib.sha256(config_json.encode("utf-8")).hexdigest()[:5]  # Short hash of 5 characters
 
     # Include the hash in the directory name
