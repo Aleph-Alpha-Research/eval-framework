@@ -54,6 +54,8 @@ class EvalConfig(BaseConfig):
     save_logs: bool = True
     delete_output_dir_after_upload: bool = False
 
+    # Adding a new member? Remember to update KEYS_UNRELATED_TO_RESULTS if it doesn't impact eval results.
+
     @property
     def task_class(self) -> type[BaseTask]:
         return get_task(self.task_name)

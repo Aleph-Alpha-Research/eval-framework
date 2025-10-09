@@ -105,6 +105,8 @@ def main(
         if config.delete_output_dir_after_upload and upload_success:
             logger.warning(f"Deleting output directory '{output_dir}' after successful upload(s)!")
             shutil.rmtree(output_dir, ignore_errors=True)
+            if output_dir.exists() and any(output_dir.iterdir()):
+                logger.warning("Could not delete output directory, some files remain.")
 
     return results
 
