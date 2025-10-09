@@ -8,12 +8,11 @@ from eval_framework.shared.types import Loglikelihood
 @pytest.mark.parametrize(
     "response,expected_value",
     [
-        # PROB_MASS Tests
         pytest.param(
             Loglikelihood(
                 id=1,
                 subject="test",
-                ground_truth="A",
+                ground_truth=["A"],
                 prompt="test",
                 prompt_sequence_positions=None,
                 loglikelihoods={"A": np.log(0.5), "B": np.log(0.3), "C": np.log(0.2)},
@@ -26,13 +25,13 @@ from eval_framework.shared.types import Loglikelihood
             Loglikelihood(
                 id=1,
                 subject="test",
-                ground_truth="C",
+                ground_truth=["C"],
                 prompt="test",
                 prompt_sequence_positions=None,
                 loglikelihoods={"A": np.log(0.2), "B": np.log(0.3), "C": np.log(0.5)},
                 loglikelihoods_sequence_positions={"A": -1, "B": -1, "C": -1},
             ),
-            1.0,
+            0.5,
             id="prob_mass_last_position",
         ),
     ],
@@ -49,12 +48,11 @@ def test_probability_mass(response: Loglikelihood, expected_value: float) -> Non
 @pytest.mark.parametrize(
     "response,expected_value",
     [
-        # PROB_MASS_NORM Tests
         pytest.param(
             Loglikelihood(
                 id=1,
                 subject="test",
-                ground_truth="long_answer",
+                ground_truth=["long_answer"],
                 prompt="test",
                 prompt_sequence_positions=None,
                 loglikelihoods={"long_answer": -4.0, "short": -1.0},
@@ -67,7 +65,7 @@ def test_probability_mass(response: Loglikelihood, expected_value: float) -> Non
             Loglikelihood(
                 id=1,
                 subject="test",
-                ground_truth="",
+                ground_truth=[""],
                 prompt="test",
                 prompt_sequence_positions=None,
                 loglikelihoods={"": -1.0, "text": -4.0},
