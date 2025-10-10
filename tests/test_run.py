@@ -26,6 +26,7 @@ def test_run(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_pa
         wandb_project="test-project",
         wandb_entity="test-entity",
         wandb_run_id="test-run",
+        wandb_upload_results=True,
         output_dir=tmp_path,
         hf_upload_dir="",
         hf_upload_repo="",
@@ -42,6 +43,7 @@ def test_run(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_pa
         extra_task_modules=None,
         save_logs=True,
         resource_cleanup=True,
+        delete_output_dir_after_upload=False,
     )
 
     mock_create_perturbation_class.side_effect = lambda x, _: x  # don't spin up docker here just for the test
@@ -72,6 +74,7 @@ def test_run_path(mock_create_perturbation_class: Mock, mock_parse_args: Mock, t
         wandb_project="test-project",
         wandb_entity="test-entity",
         wandb_run_id="test-run",
+        wandb_upload_results=True,
         output_dir=tmp_path,
         hf_upload_dir="",
         hf_upload_repo="",
@@ -87,6 +90,7 @@ def test_run_path(mock_create_perturbation_class: Mock, mock_parse_args: Mock, t
         perturbation_seed=123,
         extra_task_modules=None,
         save_logs=True,
+        delete_output_dir_after_upload=False,
     )
 
     mock_create_perturbation_class.side_effect = lambda x, _: x  # don't spin up docker here just for the test
@@ -116,6 +120,7 @@ def test_run_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
         wandb_project="test-project",
         wandb_entity="test-entity",
         wandb_run_id="test-run",
+        wandb_upload_results=True,
         hf_upload_dir="",
         hf_upload_repo="",
         llm_args=[],
@@ -130,6 +135,7 @@ def test_run_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
         perturbation_seed=None,
         extra_task_modules=None,
         save_logs=True,
+        delete_output_dir_after_upload=False,
     )
 
     run()
@@ -158,6 +164,7 @@ def test_run_path_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
         wandb_project="test-project",
         wandb_entity="test-entity",
         wandb_run_id="test-run",
+        wandb_upload_results=True,
         hf_upload_dir="",
         hf_upload_repo="",
         llm_args=[],
@@ -172,6 +179,7 @@ def test_run_path_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
         perturbation_seed=None,
         extra_task_modules=None,
         save_logs=True,
+        delete_output_dir_after_upload=False,
     )
 
     run()

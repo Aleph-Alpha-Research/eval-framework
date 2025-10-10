@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from typing import Annotated, Any
 
-from pydantic import AfterValidator, Field, field_serializer, field_validator, model_validator
+from pydantic import AfterValidator, BeforeValidator, Field, field_serializer, field_validator, model_validator
 
 from eval_framework.base_config import BaseConfig
 from eval_framework.llm.base import BaseLLM
@@ -34,7 +34,7 @@ class EvalConfig(BaseConfig):
     wandb_project: str | None = None
     wandb_entity: str | None = None
     wandb_run_id: str | None = None
-    wandb_upload_results: bool = True
+    wandb_upload_results: Annotated[bool, BeforeValidator(lambda v: True if v is None else v)] = True
     hf_upload_dir: str | None = None
     hf_upload_repo: str | None = None
     num_fewshot: Annotated[int, Field(ge=0)] = 0
@@ -50,9 +50,9 @@ class EvalConfig(BaseConfig):
     judge_model_args: dict[str, Any] = Field(default_factory=dict)
     batch_size: Annotated[int, Field(ge=1)] = 1
     description: str | None = None
-    save_intermediate_results: bool = True
-    save_logs: bool = True
-    delete_output_dir_after_upload: bool = False
+    save_intermediate_results: Annotated[bool, BeforeValidator(lambda v: True if v is None else v)] = True
+    save_logs: Annotated[bool, BeforeValidator(lambda v: True if v is None else v)] = True
+    delete_output_dir_after_upload: Annotated[bool, BeforeValidator(lambda v: False if v is None else v)] = False
 
     # Adding a new member? Remember to update KEYS_UNRELATED_TO_RESULTS if it doesn't impact eval results.
 
