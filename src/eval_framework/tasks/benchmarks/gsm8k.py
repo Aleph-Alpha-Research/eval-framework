@@ -85,10 +85,12 @@ FEWSHOT_ITEMS = [
 ]
 
 
-class GSM8K(BaseTask[str]):
-    """GSM8K dataset: https://huggingface.co/datasets/openai/gsm8k"""
+class GSM8KEvalHarness(BaseTask[str]):
+    """GSM8K dataset: https://huggingface.co/datasets/openai/gsm8k
+    This version uses samples from the train split as fewshot examples.
+    """
 
-    NAME = "GSM8K"
+    NAME = "GSM8KEvalHarness"
     DATASET_PATH = "gsm8k"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -130,8 +132,8 @@ class GSM8K(BaseTask[str]):
         return self._extract_answer(item["answer"])
 
 
-class GSM8KLlamaVersion(GSM8K):
-    NAME = "GSM8K Llama Version"
+class GSM8K(GSM8KEvalHarness):
+    NAME = "GSM8K"
     FEWSHOT_SPLIT = ""  # Changed to empty string since we're using predefined examples
 
     def __init__(self, num_fewshot: int = 0) -> None:

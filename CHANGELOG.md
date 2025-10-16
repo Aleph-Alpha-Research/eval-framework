@@ -6,6 +6,9 @@
 - The BASELLM class is equiped with `del` call to clear up resources. VLLM and HF APIs offload the respective models off the gpus. OpenAI class disconnects the client.
 
 ### Tasks
+- `SciQ`: Previously, the benchmark included instructions with context passages that revealed the answer. A new version has been created that removes this context while keeping the original as `SCIQEvalHarness`.
+- `TruthfulQA`: Fixed an indexing error that caused the benchmark to return the first correct item instead of the last. Corrected the ground truth for Accuracy to include all label-1 items, rather than only a single item.
+- `GSM8K`: In line with the convention of naming the recommended default version as the primary benchmark, `GSM8KLlamaVersion` has been renamed to `GSM8K`, and the original `GSM8K` has been renamed to `GSM8KEvalHarness`.
 
 ### Metrics
 

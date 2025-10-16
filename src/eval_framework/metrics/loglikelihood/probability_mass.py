@@ -11,15 +11,13 @@ class ProbabilityMass(BaseMetric[Loglikelihood]):
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 
-        assert isinstance(response.ground_truth, str)
+        assert isinstance(response.ground_truth, list)
         # https://docs.python.org/3.10/library/stdtypes.html?highlight=dictview#dictionary-view-objects
-        possible_completions = list(response.loglikelihoods.keys())
-        ground_truth_index = possible_completions.index(response.ground_truth)
-        split_idx = ground_truth_index + 1
-
+        in_ground_truths = [completion in response.ground_truth for completion in response.loglikelihoods]
         log_probs = list(response.loglikelihoods.values())
+
         probs = np.exp(log_probs) / np.sum(np.exp(log_probs))
-        prob_mass = np.sum(probs[:split_idx])
+        prob_mass = np.sum(probs[in_ground_truths])
 
         return [
             MetricResult(metric_name=self.NAME, value=float(prob_mass), higher_is_better=True, error=response.error)
@@ -33,7 +31,7 @@ class ProbabilityMassNorm(BaseMetric[Loglikelihood]):
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 
-        assert isinstance(response.ground_truth, str)
+        assert isinstance(response.ground_truth, list)
         # len normalized
 
         output_len_normalized = {}
@@ -45,12 +43,11 @@ class ProbabilityMassNorm(BaseMetric[Loglikelihood]):
             else:
                 output_len_normalized[k] = v
 
-        possible_completions = list(response.loglikelihoods.keys())
-        ground_truth_index = possible_completions.index(response.ground_truth)
-        split_idx = ground_truth_index + 1
-
         log_probs = list(output_len_normalized.values())
+        in_ground_truths = [completion in response.ground_truth for completion in response.loglikelihoods]
+        log_probs = list(output_len_normalized.values())
+
         probs = np.exp(log_probs) / np.sum(np.exp(log_probs))
-        prob_mass_norm = np.sum(probs[:split_idx])
+        prob_mass_norm = np.sum(probs[in_ground_truths])
 
         return [MetricResult(metric_name=self.NAME, value=prob_mass_norm, higher_is_better=True, error=response.error)]
