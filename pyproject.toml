@@ -173,3 +173,6 @@ markers = [
 filterwarnings = [
     "ignore::DeprecationWarning:datasets.utils._dill:",
 ]
+env = [
+    "WANDB_MODE = disabled",
+]

@@ -78,7 +78,7 @@ def should_preempt_callable() -> Callable[[], bool]:
     return lambda: False
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture  # (autouse=True)
 def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     mock_wandb_instance = MockWandb()
     # module-level patching (because it's already imported in the target modules)
