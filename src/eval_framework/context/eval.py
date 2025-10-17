@@ -61,6 +61,7 @@ class EvalContext(AbstractContextManager):
         wandb_project: str | None = None,
         wandb_entity: str | None = None,
         wandb_run_id: str | None = None,
+        wandb_upload_results: bool | None = None,
         hf_upload_dir: str | None = None,
         hf_upload_repo: str | None = None,
         llm_args: dict[str, Any] | None = None,
@@ -72,6 +73,7 @@ class EvalContext(AbstractContextManager):
         perturbation_type: str | None = None,
         perturbation_probability: float | None = None,
         perturbation_seed: int | None = None,
+        delete_output_dir_after_upload: bool | None = None,
     ) -> None:
         self.llm_name = llm_name
         self.models_path = models_path
@@ -85,6 +87,7 @@ class EvalContext(AbstractContextManager):
         self.wandb_project = wandb_project
         self.wandb_entity = wandb_entity
         self.wandb_run_id = wandb_run_id
+        self.wandb_upload_results = wandb_upload_results
         self.hf_upload_dir = hf_upload_dir
         self.hf_upload_repo = hf_upload_repo
         self.llm_args = llm_args if llm_args is not None else {}
@@ -93,6 +96,7 @@ class EvalContext(AbstractContextManager):
         self.judge_model_args = judge_model_args if judge_model_args is not None else {}
         self.batch_size = batch_size
         self.description = description
+        self.delete_output_dir_after_upload = delete_output_dir_after_upload
 
         if perturbation_type or perturbation_probability is not None:
             perturbation = {

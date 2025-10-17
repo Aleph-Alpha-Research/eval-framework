@@ -1,6 +1,9 @@
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Generator, Sequence
+from typing import Any
+from unittest.mock import Mock
 
 import pytest
+import wandb
 from _pytest.fixtures import FixtureRequest
 
 from eval_framework.llm.base import BaseLLM, Sample
@@ -8,7 +11,7 @@ from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MIns
 from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
-from tests.mock_wandb import MockArtifact, MockWandb, MockWandbApi
+from tests.mock_wandb import MockArtifact, MockWandb, MockWandbApi, MockWandbRun
 
 
 class MockLLM(BaseLLM):
@@ -77,33 +80,30 @@ def should_preempt_callable() -> Callable[[], bool]:
     return lambda: False
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     mock_wandb_instance = MockWandb()
-    monkeypatch.setattr("wandb.init", mock_wandb_instance.init)
+    # module-level patching (because it's already imported in the target modules)
     monkeypatch.setattr("wandb.log", mock_wandb_instance.log)
     monkeypatch.setattr("wandb.login", mock_wandb_instance.login)
     monkeypatch.setattr("wandb.finish", mock_wandb_instance.finish)
+    monkeypatch.setattr("wandb.log_artifact", mock_wandb_instance.log_artifact)
     monkeypatch.setattr("wandb.use_artifact", mock_wandb_instance.use_artifact)
     monkeypatch.setattr("wandb.Artifact", MockArtifact)
     monkeypatch.setattr("wandb.Api", MockWandbApi)
+    monkeypatch.setattr("wandb.run", None)  # initial value
+
+    def patched_init(*args: Any, **kwargs: Any) -> MockWandbRun:
+        result = mock_wandb_instance.init(*args, **kwargs)
+        monkeypatch.setattr("wandb.run", result)  # update when wandb.init is called
+        return result
+
+    monkeypatch.setattr("wandb.init", patched_init)
+
     return mock_wandb_instance
 
 
-@pytest.fixture(autouse=True)
-def mock_wandb_artifact(monkeypatch: pytest.MonkeyPatch) -> MockArtifact:
-    # required by test_download_and_use_artifact
-    mock_artifact_instance = MockArtifact("__mock_artifact__", "model")
-    monkeypatch.setattr("wandb.Artifact.files", mock_artifact_instance.files)
-    monkeypatch.setattr("wandb.Artifact.download", mock_artifact_instance.download)
-    monkeypatch.setattr("wandb.Artifact.add_reference", mock_artifact_instance.add_reference)
-    return mock_artifact_instance
-
-
-@pytest.fixture(autouse=True)
-def mock_wandb_api(monkeypatch: pytest.MonkeyPatch) -> MockWandbApi:
-    """Automatically mock wandb api for tests."""
-    mock_api_instance = MockWandbApi()
-    monkeypatch.setattr("wandb.Api", MockWandbApi)
-    monkeypatch.setattr("wandb.Api.artifact", MockWandbApi.artifact)
-    return mock_api_instance
+@pytest.fixture
+def wandb_run(mock_wandb: Mock) -> Generator[wandb.Run, None, None]:
+    with wandb.init(project="test-project") as run:
+        yield run
