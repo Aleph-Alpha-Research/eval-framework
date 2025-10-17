@@ -25,7 +25,7 @@ class BaseLoglikelihoodMetric(BaseMetric[Loglikelihood]):
             output[k] = v / length if length > 0 else v
         return output
 
-    def _compute_probabilities(self, loglikelihoods: dict) -> dict:
+    def _compute_probabilities(self, loglikelihoods: dict) -> tuple[dict, dict]:
         """Compute probabilities from loglikelihoods, with optional length normalisation."""
         if self.len_normalised:
             loglikelihoods = self._length_normalise_loglikelihoods(loglikelihoods)
