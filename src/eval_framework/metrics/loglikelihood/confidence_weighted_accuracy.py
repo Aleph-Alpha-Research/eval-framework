@@ -14,7 +14,6 @@ class ConfidenceWeightedAccuracy(BaseLoglikelihoodMetric):
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 
         loglikelihoods, probs = self._compute_probabilities(response.loglikelihoods)
-
         ground_truths = self._gather_ground_truths(response)
 
         best_key = max(loglikelihoods, key=loglikelihoods.get)  # type: ignore[arg-type]

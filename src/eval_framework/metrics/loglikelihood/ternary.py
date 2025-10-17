@@ -25,15 +25,9 @@ class TernaryScore(BaseLoglikelihoodMetric):
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 
-        if self.len_normalised:
-            loglikelihoods = self._length_normalise_loglikelihoods(response.loglikelihoods)
-        else:
-            loglikelihoods = response.loglikelihoods
-
-        ground_truths = set(
-            self._normalise_text(gt)
-            for gt in (response.ground_truth if isinstance(response.ground_truth, list) else [response.ground_truth])
-        )
+        loglikelihoods, probs = self._compute_probabilities(response.loglikelihoods)
+        ground_truths = self._gather_ground_truths(response)
+        
         completion_text = max(loglikelihoods, key=loglikelihoods.get)  # type: ignore[arg-type]
         norm_text = self._normalise_text(completion_text)
         idk_key = self._normalise_text(list(response.loglikelihoods.keys())[-1])  # assumes last key is "IDK" option
