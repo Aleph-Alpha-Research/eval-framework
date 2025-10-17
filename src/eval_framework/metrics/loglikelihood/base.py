@@ -25,6 +25,20 @@ class BaseLoglikelihoodMetric(BaseMetric[Loglikelihood]):
             output[k] = v / length if length > 0 else v
         return output
 
+    def _compute_probabilities(self, loglikelihoods: dict) -> dict:
+        """Compute probabilities from loglikelihoods, with optional length normalisation."""
+        if self.len_normalised:
+            loglikelihoods = self._length_normalise_loglikelihoods(loglikelihoods)
+        return loglikelihoods, self._softmax(loglikelihoods)
+
+    def _gather_ground_truths(self, response: Loglikelihood) -> set[str]:
+        """Extract and normalize ground truth completions from a Loglikelihood response."""
+        ground_truths = set(
+            self._normalise_text(gt)
+            for gt in (response.ground_truth if isinstance(response.ground_truth, list) else [response.ground_truth])
+        )
+        return ground_truths
+
     def _softmax(self, log_probs: dict) -> dict:
         """Convert log-likelihoods to probabilities with softmax."""
         vals = list(log_probs.values())
