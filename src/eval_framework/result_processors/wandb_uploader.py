@@ -19,7 +19,7 @@ ArtifactUploadFunction = Callable[[str, Path, list[Path]], str | None]  # return
 _ARTIFACT_UPLOAD_FUNCTION: ArtifactUploadFunction | None = None
 
 
-def register_artifact_upload_function(func: ArtifactUploadFunction) -> None:
+def register_artifact_upload_function(func: ArtifactUploadFunction | None) -> None:
     global _ARTIFACT_UPLOAD_FUNCTION
     _ARTIFACT_UPLOAD_FUNCTION = func
 
@@ -59,7 +59,7 @@ class WandbUploader(ResultsUploader):
 
     def upload(self, llm_name: str, config: EvalConfig, output_dir: Path) -> bool:
         if hasattr(self, "_wandb_registry") is False:
-            return False
+            return False  # not initialized
 
         try:
             if self._include_all and self._compress_non_json:

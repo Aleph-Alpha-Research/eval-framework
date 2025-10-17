@@ -3,21 +3,19 @@ import os
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from unittest import mock
 from unittest.mock import Mock, patch
 
 import pytest
 import wandb
 
-from eval_framework.utils.file_ops import (
-    WandbFs,
-)
-from tests.mock_wandb import MockArtifact
+from eval_framework.utils.file_ops import WandbFs
+from tests.mock_wandb import MockWandbApi
 
 
 @pytest.fixture
-def wandb_run(mock_wandb_artifact: Mock) -> Generator[wandb.Run, None, None]:
+def wandb_run() -> Generator[wandb.Run, None, None]:
     with wandb.init(project="test-project") as run:
         yield run
 
@@ -84,19 +82,16 @@ class TestWandbFs:
         wandb_run: wandb.Run,
         mock_wandb: Mock,
         wandb_fs_with_env: tuple[WandbFs, Mock, Mock],
-        mock_wandb_api: Mock,
     ) -> None:
         with patch.dict(os.environ, aws_env):
             wandb_fs, _, _ = wandb_fs_with_env
-            # Ensure the wandb_fs uses the same mock API instance
-            wandb_fs.api = mock_wandb_api
 
             artifact = wandb.Artifact(name="test-model", type="model")
             artifact.add_reference("s3://bucket/model/config.json")
             logged_artifact = wandb_run.log_artifact(artifact, "model")
             assert logged_artifact
             # set artifact in api for testing purposes
-            mock_wandb_api.set_artifact("test-model", [x.path_uri for x in logged_artifact.files()])
+            cast(MockWandbApi, wandb_fs.api).set_artifact("test-model", [x.path_uri for x in logged_artifact.files()])
 
             artifact = wandb_fs.get_artifact(logged_artifact.name)
             assert wandb_fs.download_artifact(artifact)
@@ -139,34 +134,27 @@ class TestWandbFs:
         # Clean up
         temp_dir.cleanup()
 
-    def test_download_artifact_out_of_disk_space(
-        self, wandb_fs: WandbFs, mock_wandb_api: Mock, mock_wandb_artifact: MockArtifact
-    ) -> None:
+    def test_download_artifact_out_of_disk_space(self, wandb_fs: WandbFs) -> None:
         """
         Test the download_artifact method to ensure it handles artifact downloads correctly.
         """
-        wandb_fs.api = mock_wandb_api
 
         def fail_open(*args: Any, **kwargs: Any) -> None:
             raise OSError(errno.ENOSPC, "No space left on device")
 
         # Call the download_artifact method
+        mock_wandb_artifact = wandb.Artifact("__mock_artifact__", "model")
         with pytest.raises(OSError, match="No space left on device"):
             with mock.patch.object(mock_wandb_artifact, "download", side_effect=fail_open):
                 # ignore the type since we're using a mock artifact
                 _ = wandb_fs.download_artifact(mock_wandb_artifact)  # type: ignore
         assert wandb_fs._artifact_downloaded is False
 
-    def test_download_artifact(
-        self, wandb_fs: WandbFs, mock_wandb_api: Mock, mock_wandb_artifact: MockArtifact
-    ) -> None:
+    def test_download_artifact(self, wandb_fs: WandbFs) -> None:
         """
         Test the download_artifact method to ensure it handles artifact downloads correctly.
         """
-        # Mock the artifact to simulate download behavior
-        # Assign the mock API to the WandbFs instance
-        wandb_fs.api = mock_wandb_api
-
         # ignore the type since we're using a mock artifact
+        mock_wandb_artifact = wandb.Artifact("__mock_artifact__", "model")
         wandb_fs.download_artifact(mock_wandb_artifact)  # type: ignore
         assert wandb_fs._artifact_downloaded is True

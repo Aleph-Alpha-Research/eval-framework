@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
+import wandb
 from pytest_mock import MockerFixture
 
 from eval_framework.llm.huggingface import Qwen3_0_6B
@@ -46,33 +47,30 @@ def test_upload_success(
     mock_hf_api_instance = Mock()
     mock_hf_api_class.return_value = mock_hf_api_instance
 
-    mock_wandb_run = Mock()
-    mock_wandb_run.notes = ""
-    mock_wandb = mocker.patch("eval_framework.result_processors.hf_uploader.wandb")
-    mock_wandb.run = mock_wandb_run
+    with wandb.init():
+        uploader = HFUploader(sample_config)
+        uploader.upload("test-model", sample_config, sample_output_dir)
 
-    uploader = HFUploader(sample_config)
-    uploader.upload("test-model", sample_config, sample_output_dir)
+        # Verify upload_file was called for the correct files (excluding large files)
+        expected_calls = [
+            ("aggregated_results.json", "results/my_model/my_task/fewshot_0/aggregated_results.json"),
+            ("metadata.json", "results/my_model/my_task/fewshot_0/metadata.json"),
+        ]
 
-    # Verify upload_file was called for the correct files (excluding large files)
-    expected_calls = [
-        ("aggregated_results.json", "results/my_model/my_task/fewshot_0/aggregated_results.json"),
-        ("metadata.json", "results/my_model/my_task/fewshot_0/metadata.json"),
-    ]
+        assert mock_hf_api_instance.upload_file.call_count == 2
 
-    assert mock_hf_api_instance.upload_file.call_count == 2
+        for filename, expected_dest in expected_calls:
+            mock_hf_api_instance.upload_file.assert_any_call(
+                path_or_fileobj=str(sample_output_dir / filename),
+                path_in_repo=expected_dest,
+                repo_id="test-org/test-repo",
+                repo_type="dataset",
+            )
 
-    for filename, expected_dest in expected_calls:
-        mock_hf_api_instance.upload_file.assert_any_call(
-            path_or_fileobj=str(sample_output_dir / filename),
-            path_in_repo=expected_dest,
-            repo_id="test-org/test-repo",
-            repo_type="dataset",
-        )
-
-    # Verify wandb notes were updated
-    expected_url = "https://huggingface.co/datasets/test-org/test-repo/tree/main/results/my_model/my_task/fewshot_0"
-    assert f"Results uploaded to HuggingFace: [{expected_url}]({expected_url})" in mock_wandb_run.notes
+        # Verify wandb notes were updated
+        assert wandb.run is not None and wandb.run.notes is not None
+        expected_url = "https://huggingface.co/datasets/test-org/test-repo/tree/main/results/my_model/my_task/fewshot_0"
+        assert f"Results uploaded to HuggingFace: [{expected_url}]({expected_url})" in wandb.run.notes
 
 
 def test_init_login_failure(mocker: MockerFixture, sample_config: EvalConfig) -> None:
