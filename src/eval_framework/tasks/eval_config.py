@@ -127,9 +127,9 @@ class EvalConfig(BaseConfig):
         return None
 
     def model_json_dump(self) -> str:
-        model_dump = self.model_dump()
+        model_dump = self.model_dump(mode="json")
         return json.dumps(model_dump, sort_keys=True)
 
     def model_json_robust_subset_dump(self) -> str:
-        model_dump = self.model_dump(exclude=KEYS_UNRELATED_TO_RESULTS)
+        model_dump = self.model_dump(mode="json", exclude=KEYS_UNRELATED_TO_RESULTS)
         return json.dumps(model_dump, sort_keys=True)

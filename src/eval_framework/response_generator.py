@@ -358,7 +358,7 @@ class ResponseGenerator:
     def _get_metadata(self) -> dict[str, Any]:
         """Prepares metadata dictionary from the configuration."""
         all_metrics = getattr(self.task, "METRICS", None)
-        metadata = self.config.model_dump()
+        metadata = self.config.model_dump(mode="json")
         metadata["llm_name"] = self.llm.name
         metadata["task_name"] = self.task_name
         language = getattr(self.task, "LANGUAGE", None)

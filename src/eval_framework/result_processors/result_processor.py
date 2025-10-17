@@ -36,13 +36,13 @@ class ResultsFileProcessor(ResultProcessor):
             return {}
 
     def save_responses(self, responses: list[Completion | Loglikelihood]) -> None:
-        responses_data = [response.model_dump(serialize_as_any=True) for response in responses]
+        responses_data = [response.model_dump(mode="json", serialize_as_any=True) for response in responses]
         with jsonlines.open(self.output_dir / "output.jsonl", "w") as f:
             f.write_all(responses_data)
 
     def save_response(self, response: Completion | Loglikelihood) -> None:
         with jsonlines.open(self.output_dir / "output.jsonl", "a") as f:
-            f.write(response.model_dump(serialize_as_any=True))
+            f.write(response.model_dump(mode="json", serialize_as_any=True))
 
     def load_responses(self) -> list[Completion | Loglikelihood]:
         output_file = self.output_dir / "output.jsonl"
@@ -72,13 +72,13 @@ class ResultsFileProcessor(ResultProcessor):
         return responses
 
     def save_metrics_results(self, results: list[Result]) -> None:
-        result_data = [x.model_dump() for x in results]
+        result_data = [x.model_dump(mode="json") for x in results]
         with jsonlines.open(self.output_dir / "results.jsonl", "w") as f:
             f.write_all(result_data)
 
     def save_metrics_result(self, result: Result) -> None:
         with jsonlines.open(self.output_dir / "results.jsonl", "a") as f:
-            f.write(result.model_dump())
+            f.write(result.model_dump(mode="json"))
 
     def save_aggregated_results(self, results: dict[str, float | None]) -> None:
         with open(self.output_dir / "aggregated_results.json", "w") as f:
