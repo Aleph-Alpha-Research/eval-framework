@@ -1,4 +1,5 @@
 from collections.abc import Callable, Sequence
+from typing import Any
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -8,7 +9,7 @@ from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MIns
 from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
-from tests.mock_wandb import MockArtifact, MockWandb, MockWandbApi
+from tests.mock_wandb import MockArtifact, MockWandb, MockWandbApi, MockWandbRun
 
 
 class MockLLM(BaseLLM):
@@ -90,7 +91,7 @@ def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     monkeypatch.setattr("wandb.Api", MockWandbApi)
     monkeypatch.setattr("wandb.run", None)  # initial value
 
-    def patched_init(*args, **kwargs):
+    def patched_init(*args: Any, **kwargs: Any) -> MockWandbRun:
         result = mock_wandb_instance.init(*args, **kwargs)
         monkeypatch.setattr("wandb.run", result)  # update when wandb.init is called
         return result

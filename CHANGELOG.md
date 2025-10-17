@@ -17,6 +17,7 @@
 - Added `resource-cleanup` argument to run.py; enabling a smooth transition in GPU workflows between response generation/evaluation
 - Added `WandbUploader` (for uploading results as W&B artifacts) and refactored `HFUploader` (no change in functionality).
 - Config hashes in output directories now do not consider config elements which are irrelevant to actual results.
+- WandB initialization does not crash on overly long model names anymore.
 
 ## 0.2.2
 

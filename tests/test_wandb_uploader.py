@@ -1,6 +1,7 @@
 import gzip
 from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
@@ -82,7 +83,7 @@ def test_upload_all_files_gz(
 
     # Custom MockArtifact to verify gzipped files
     class CapturingMockArtifact(MockArtifact):
-        def add_file(self, local_path: str, name: str | None = None, **kwargs):
+        def add_file(self, local_path: str, name: str | None = None, **kwargs: Any) -> None:  # type: ignore[override]
             super().add_file(local_path, name, **kwargs)
             if local_path.endswith(".gz"):
                 with gzip.open(local_path, "rb") as f:
