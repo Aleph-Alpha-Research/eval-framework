@@ -106,20 +106,20 @@ def test_upload_all_files_gz(
         assert len(list(sample_output_dir.glob("*.gz"))) == 0  # original files are not left in the directory
 
 
-def test_init_missing(sample_config: EvalConfig) -> None:
+def test_init_missing(mock_wandb: Mock, sample_config: EvalConfig) -> None:
     """Test initialization when wandb is not initialized."""
     uploader = WandbUploader(sample_config, include_all=False, compress_non_json=False)
     assert not uploader.upload("test-model", sample_config, Path("/non-existent"))
 
 
-def test_init_disabled(sample_config: EvalConfig) -> None:
+def test_init_disabled(mock_wandb: Mock, sample_config: EvalConfig) -> None:
     """Test initialization when wandb is disabled."""
     with wandb.init(mode="disabled"):
         uploader = WandbUploader(sample_config, include_all=False, compress_non_json=False)
         assert not uploader.upload("test-model", sample_config, Path("/non-existent"))
 
 
-def test_turned_off() -> None:
+def test_turned_off(mock_wandb: Mock) -> None:
     """Test initialization when the upload is disabled in config."""
     sample_config = EvalConfig(
         task_name=ARC.NAME,

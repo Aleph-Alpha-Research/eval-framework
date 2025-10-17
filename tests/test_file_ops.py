@@ -15,7 +15,7 @@ from tests.mock_wandb import MockWandbApi
 
 
 @pytest.fixture
-def wandb_run() -> Generator[wandb.Run, None, None]:
+def wandb_run(mock_wandb: Mock) -> Generator[wandb.Run, None, None]:
     with wandb.init(project="test-project") as run:
         yield run
 
@@ -48,7 +48,7 @@ def mock_s3_client() -> Generator[tuple[Mock, Mock], None, None]:
 
 @pytest.fixture
 def wandb_fs_with_env(
-    aws_env: dict[str, str], mock_s3_client: tuple[Mock, Mock]
+    aws_env: dict[str, str], mock_s3_client: tuple[Mock, Mock], mock_wandb: Mock
 ) -> Generator[tuple[WandbFs, Mock, Mock], None, None]:
     mock_s3_client_instance, mock_boto_client = mock_s3_client
     with patch.dict(os.environ, aws_env):
@@ -80,7 +80,6 @@ class TestWandbFs:
         aws_env: dict[str, str],
         mock_s3_client: tuple[Mock, Mock],
         wandb_run: wandb.Run,
-        mock_wandb: Mock,
         wandb_fs_with_env: tuple[WandbFs, Mock, Mock],
     ) -> None:
         with patch.dict(os.environ, aws_env):
