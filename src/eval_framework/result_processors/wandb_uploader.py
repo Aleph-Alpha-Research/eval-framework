@@ -15,7 +15,7 @@ from eval_framework.tasks.eval_config import EvalConfig
 
 logger = logging.getLogger(__name__)
 
-ArtifactUploadFunction = Callable[[str, Path, list[Path]], str | None]  # returns reference path for W&B or None
+ArtifactUploadFunction = Callable[[str, str, list[Path]], str | None]  # returns reference path for W&B or None
 _ARTIFACT_UPLOAD_FUNCTION: ArtifactUploadFunction | None = None
 
 
@@ -24,11 +24,11 @@ def register_artifact_upload_function(func: ArtifactUploadFunction | None) -> No
     _ARTIFACT_UPLOAD_FUNCTION = func
 
 
-def artifact_upload_function(artifact_name: str, root: Path, file_paths: list[Path]) -> str | None:
+def artifact_upload_function(artifact_name: str, subpath: str, file_paths: list[Path]) -> str | None:
     if _ARTIFACT_UPLOAD_FUNCTION is None:
         return None
-    logger.info(f"Uploading '{artifact_name}' from {root}.")
-    reference_path = _ARTIFACT_UPLOAD_FUNCTION(artifact_name, root, file_paths)
+    logger.info(f"Uploading '{artifact_name}'.")
+    reference_path = _ARTIFACT_UPLOAD_FUNCTION(artifact_name, subpath, file_paths)
     if reference_path is None:
         logger.warning("Failed uploading, the custom upload function returned empty destination path!")
     else:
@@ -78,7 +78,8 @@ class WandbUploader(ResultsUploader):
             alias_name = self._get_alias(output_dir)
 
             try:
-                reference_path = artifact_upload_function(artifact_name, config.output_dir, file_paths)
+                rel_upload_dir = str(output_dir.relative_to(config.output_dir))
+                reference_path = artifact_upload_function(artifact_name, rel_upload_dir, file_paths)
             except Exception as e:
                 logger.error(f"Problem during artifact upload function, aborting registration: {e}.")
                 return False

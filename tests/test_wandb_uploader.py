@@ -43,8 +43,8 @@ def sample_config(tmp_path: Path) -> EvalConfig:
 
 @pytest.fixture
 def custom_upload_function() -> Generator[None, None, None]:
-    def custom_artifact_upload_function(artifact_name: str, base_output_dir: Path, file_paths: list[Path]) -> str:
-        return "custom/reference/path"
+    def custom_artifact_upload_function(artifact_name: str, subpath: str, file_paths: list[Path]) -> str:
+        return subpath
 
     register_artifact_upload_function(custom_artifact_upload_function)
     yield
@@ -142,7 +142,7 @@ def test_custom_upload_function(
         uploader.upload("test-model", sample_config, sample_output_dir)
 
         uploaded = get_logged_artifact(mock_wandb)
-        assert uploaded == ["custom/reference/path"]
+        assert uploaded == ["my_model/my_task/fewshot_0"]
 
 
 def test_name_and_alias(mock_wandb: Mock, sample_config: EvalConfig, sample_output_dir: Path) -> None:
