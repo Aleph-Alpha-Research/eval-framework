@@ -27,7 +27,7 @@ class TernaryScore(BaseLoglikelihoodMetric):
 
         loglikelihoods, probs = self._compute_probabilities(response.loglikelihoods)
         ground_truths = self._gather_ground_truths(response)
-        
+
         completion_text = max(loglikelihoods, key=loglikelihoods.get)  # type: ignore[arg-type]
         norm_text = self._normalise_text(completion_text)
         idk_key = self._normalise_text(list(response.loglikelihoods.keys())[-1])  # assumes last key is "IDK" option
