@@ -1,7 +1,9 @@
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Generator, Sequence
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
+import wandb
 from _pytest.fixtures import FixtureRequest
 
 from eval_framework.llm.base import BaseLLM, Sample
@@ -99,3 +101,9 @@ def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
     monkeypatch.setattr("wandb.init", patched_init)
 
     return mock_wandb_instance
+
+
+@pytest.fixture
+def wandb_run(mock_wandb: Mock) -> Generator[wandb.Run, None, None]:
+    with wandb.init(project="test-project") as run:
+        yield run

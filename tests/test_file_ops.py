@@ -15,12 +15,6 @@ from tests.mock_wandb import MockWandbApi
 
 
 @pytest.fixture
-def wandb_run(mock_wandb: Mock) -> Generator[wandb.Run, None, None]:
-    with wandb.init(project="test-project") as run:
-        yield run
-
-
-@pytest.fixture
 def aws_env() -> dict[str, str]:
     return {
         "AWS_ENDPOINT_URL": "http://localhost:9000",
