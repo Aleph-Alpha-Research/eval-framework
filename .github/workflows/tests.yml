@@ -138,11 +138,11 @@ jobs:
         with:
           version: "~=0.8.16"
 
-      - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-
+      # - name: Huggingface datasets cache
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+      #     key: hf-datasets-
 
       - name: Run tests
         env:
