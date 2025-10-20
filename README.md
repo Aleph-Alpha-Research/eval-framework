@@ -61,8 +61,9 @@ To evaluate a single benchmark locally, you can use the following command:
 eval_framework \
     --models src/eval_framework/llm/models.py \
     --llm-name Smollm135MInstruct \
-    --task-name "GSM8K" \
-    --output-dir ./eval \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" \
+    --output-dir ./eval_results \
     --num-fewshot 5 \
     --num-samples 10
 ```
@@ -149,6 +150,7 @@ pip install eval_framework[transformers]
 2. **Create and run your first evaluation using HuggingFace model**:
 
    ```python
+    from functools import partial
     from pathlib import Path
 
     from eval_framework.llm.huggingface import HFLLM
@@ -165,12 +167,13 @@ pip install eval_framework[transformers]
         # Initialize your model
         llm = MyHuggingFaceModel()
 
-        # Running evaluation on GSM8K task using 5 few-shot examples and 10 samples
+        # Running evaluation on MMLU abstract algebra task using 5 few-shot examples and 10 samples
         config = EvalConfig(
             output_dir=Path("./eval_results"),
             num_fewshot=5,
             num_samples=10,
-            task_name="GSM8K",
+            task_name="MMLU",
+            task_subjects="abstract_algebra",
             llm_class=MyHuggingFaceModel,
         )
 
