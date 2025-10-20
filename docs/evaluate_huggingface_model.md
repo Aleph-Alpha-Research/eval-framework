@@ -147,13 +147,12 @@ config = EvalConfig(
     task_name="MMLU",                    # Benchmark to run
     num_fewshot=5,                       # Number of examples in prompt
     num_samples=100,                     # How many questions to evaluate
-    output_dir=Path("./results"),        # Where to save results
+    output_dir=Path("./eval_results"),        # Where to save results
     llm_class=YourModelClass,            # Your model class
 
     # Optional settings
     task_subjects=["astronomy"],             # Specific subjects (if applicable)
     batch_size=8,                        # Batch processing size
-    random_seed=42,                      # Reproducibility
 )
 ```
 
