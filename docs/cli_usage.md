@@ -13,10 +13,12 @@ uv sync --all-extras
 And execute a single evaluation locally:
 
 ```bash
-uv run eval_framework \
-    --llm-name 'eval_framework.llm.models.Smollm135MInstruct' \
-    --task-name "GSM8K" \
-    --output-dir ./eval \
+eval_framework \
+    --models src/eval_framework/llm/models.py \
+    --llm-name Smollm135MInstruct \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" \
+    --output-dir ./eval_results \
     --num-fewshot 5 \
     --num-samples 10
 ```
@@ -122,7 +124,8 @@ You can run models directly from Hugging Face Hub using the `HFLLM_from_name` cl
 uv run eval_framework \
     --llm-name 'eval_framework.llm.huggingface.HFLLM_from_name' \
     --llm-args model_name="microsoft/DialoGPT-medium" formatter="Llama3Formatter" \
-    --task-name "GSM8K" \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" \
     --output-dir ./eval \
     --num-fewshot 5 \
     --num-samples 10

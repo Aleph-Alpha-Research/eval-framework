@@ -173,7 +173,7 @@ pip install eval_framework[transformers]
             num_fewshot=5,
             num_samples=10,
             task_name="MMLU",
-            task_subjects="abstract_algebra",
+            task_subjects=["abstract_algebra", "astronomy"],
             llm_class=MyHuggingFaceModel,
         )
 
