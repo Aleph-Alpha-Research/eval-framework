@@ -1,5 +1,7 @@
 import gc
 import logging
+import os
+import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -25,7 +27,6 @@ from eval_framework.shared.types import (
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
-from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import BaseFormatter, HFFormatter, Message
 
 logger = logging.getLogger(__name__)
@@ -99,7 +100,7 @@ class VLLMTokenizer(VLLMTokenizerAPI[str]):
         return self.tokenizer.chat_template
 
 
-class VLLMModel(BaseLLM):
+class BaseVLLMModel(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
@@ -122,9 +123,7 @@ class VLLMModel(BaseLLM):
         self.checkpoint_path = checkpoint_path
 
         model_args = {
-            "model": str(self.checkpoint_path)
-            if self.checkpoint_path
-            else self.LLM_NAME,  # for some reason vllm needs a str here even though it can take an os.pathlike
+            "model": str(self.checkpoint_path) if self.checkpoint_path else self.LLM_NAME,
             "max_model_len": max_model_len or self.SEQ_LENGTH,
             "max_num_seqs": batch_size,
             "tensor_parallel_size": tensor_parallel_size,
@@ -443,7 +442,54 @@ class VLLMModel(BaseLLM):
         return self.max_seq_length
 
 
-class VLLMRegistryModel(VLLMModel):
+class VLLMModel(BaseVLLMModel):
+    """A class to create VLLM instances from various model sources."""
+
+    def __init__(
+        self,
+        # Model source (3 options: file path, HuggingFace model name, Wandb artifact name):
+        checkpoint_path: str | Path | None = None,
+        model_name: str | None = None,
+        artifact_name: str | None = None,
+        # Formatter (2 options):
+        formatter: BaseFormatter | None = None,
+        formatter_name: str | None = None,
+        formatter_kwargs: dict[str, Any] | None = None,
+        # Explicit name for the `name` property:
+        checkpoint_name: str | None = None,
+        # VLLM parameters (not complete):
+        max_model_len: int | None = None,
+        tensor_parallel_size: int = 1,
+        gpu_memory_utilization: float = 0.9,
+        batch_size: int = 1,
+        sampling_params: SamplingParams | dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        final_path, possible_name = self._get_final_checkpoint(checkpoint_path, model_name, artifact_name)
+
+        final_name = checkpoint_name
+        if final_name is None and possible_name is not None:
+            final_name = possible_name.replace("/", "_").replace(":", "_")  # sanitize pathname
+
+        if not self.LLM_NAME:
+            self.LLM_NAME = final_name or str(final_path)
+
+        final_formatter = self._get_final_formatter(formatter, formatter_name, formatter_kwargs)
+
+        super().__init__(
+            formatter=final_formatter,
+            checkpoint_path=final_path,
+            checkpoint_name=final_name,
+            max_model_len=max_model_len,
+            tensor_parallel_size=tensor_parallel_size,
+            gpu_memory_utilization=gpu_memory_utilization,
+            batch_size=batch_size,
+            sampling_params=sampling_params,
+            **kwargs,
+        )
+
+
+class VLLMRegistryModel(VLLMModel):  # deprecated
     """
     A class to create VLLM instances from registered models in Wandb registry.
     Downloads the model artifacts from Wandb and creates a local VLLM instance.
@@ -466,42 +512,20 @@ class VLLMRegistryModel(VLLMModel):
             formatter: Type of formatter to use (default: "")
             **kwargs: Additional arguments passed to VLLMModel
         """
-        print(f"{RED}[ Loading registered model from Wandb for VLLM: {artifact_name}:{version} ]{RESET}")
 
-        selected_formatter = self.get_formatter(formatter, formatter_identifier)
+        warnings.warn("`VLLMRegistryModel` is deprecated, please use `VLLMModel`.", DeprecationWarning)
 
-        # Remove download_path from kwargs
         download_path = kwargs.pop("download_path", None)
+        if download_path is not None and os.getenv("WANDB_ARTIFACT_DIR") is None:
+            os.environ["WANDB_ARTIFACT_DIR"] = download_path
 
-        with WandbFs(download_path=download_path) as wandb_fs:
-            # needs to be self since we check to see if this attribute exists in main
-            self.artifact = wandb_fs.get_artifact(artifact_name, version)
-            wandb_fs.download_artifact(self.artifact)
-            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
-
-            if file_root is None:
-                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
-
-            print(f"{RED}[ Model located at: {file_root} ]{RESET}")
-
-            # Set LLM_NAME to local path which VLLM can use directly
-            self.LLM_NAME = str(file_root)
-            self.artifact_name = artifact_name
-            self.artifact_version = version
-            super().__init__(
-                formatter=selected_formatter,
-                checkpoint_path=file_root,
-                checkpoint_name=f"{artifact_name}/{version}",
-                **kwargs,
-            )
-
-        print(f"{RED}[ VLLM Model initialized ----------------- {RESET}")
-        print(f"{artifact_name}:{version} {RED}]{RESET}")
-        print(f"{RED}[ Formatter: {formatter} ]{RESET}")
-
-    @property
-    def name(self) -> str:
-        return f"{self.__class__.__name__}_checkpoint_{self.artifact_name}/{self.artifact_version}"
+        super().__init__(
+            artifact_name=f"{artifact_name}:{version}",
+            formatter_name=formatter,
+            formatter_kwargs={"hf_llm_name": formatter_identifier} if formatter_identifier else {},
+            checkpoint_name=f"{artifact_name}/{version}",
+            **kwargs,
+        )
 
 
 class Qwen3_0_6B_VLLM(VLLMModel):

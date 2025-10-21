@@ -1,14 +1,11 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Union
+from pathlib import Path
+from typing import Any
 
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import Message
-
-if TYPE_CHECKING:
-    from template_formatting.formatter import ConcatFormatter, HFFormatter, Llama3Formatter
-    from template_formatting.mistral_formatter import MagistralFormatter
+from template_formatting.formatter import BaseFormatter, Message
 
 
 class BaseLLM(ABC):
@@ -68,36 +65,67 @@ class BaseLLM(ABC):
         """
         pass
 
-    def get_formatter(
-        self, formatter_name: str, model_identifier: str = ""
-    ) -> Union["Llama3Formatter", "MagistralFormatter", "ConcatFormatter", "HFFormatter"]:
-        """
-        Create formatter instance based on formatter name.
+    def _get_final_checkpoint(
+        self, checkpoint_path: str | Path | None = None, model_name: str | None = None, artifact_name: str | None = None
+    ) -> tuple[str | Path | None, str | None]:
+        if (num_provided := sum(x is not None for x in [checkpoint_path, model_name, artifact_name])) == 0:
+            return None, None  # none given, so will use the LLM_NAME of the class
+        elif num_provided > 1:
+            raise ValueError("At most one of `checkpoint_path`, `model_name`, or `artifact_name` must be provided.")
 
-        Args:
-            formatter_name: Name of the formatter to create
-            model_identifier: Model name/identifier for formatters that need it
+        if checkpoint_path is not None:
+            return checkpoint_path, str(checkpoint_path)
 
-        Returns:
-            Formatter instance
-        """
-        match formatter_name:
-            case "Llama3Formatter":
-                from template_formatting.formatter import Llama3Formatter
+        elif model_name is not None:
+            return model_name, model_name
 
-                return Llama3Formatter()
-            case "MistralFormatter":
-                from eval_framework.llm.mistral import MagistralFormatter
+        elif artifact_name is not None:
+            from eval_framework.utils.file_ops import WandbFs
 
-                return MagistralFormatter(model_identifier)
-            case "ConcatFormatter":
-                from template_formatting.formatter import ConcatFormatter
+            artifact_name, version = artifact_name.split(":", 1) if ":" in artifact_name else (artifact_name, "latest")
+            with WandbFs() as wandb_fs:
+                self.artifact = wandb_fs.get_artifact(artifact_name, version)  # self.artifact being read in main()
+                wandb_fs.download_artifact(self.artifact)
+                file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
+                if file_root is None:
+                    raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
+                return file_root, artifact_name
 
-                return ConcatFormatter()
-            case "HFFormatter":
-                from template_formatting.formatter import HFFormatter
+        else:
+            raise RuntimeError("Unreachable code reached.")
 
-                return HFFormatter(model_identifier)
-            case _:
-                supported = ["Llama3Formatter", "QwenFormatter", "MistralFormatter", "ConcatFormatter", "HFFormatter"]
-                raise ValueError(f"Unsupported formatter: {formatter_name}. Supported formatters: {supported}")
+    def _get_final_formatter(
+        self,
+        formatter: BaseFormatter | None = None,
+        formatter_name: str | None = None,
+        formatter_kwargs: dict[str, Any] | None = None,
+    ) -> BaseFormatter | None:
+        if (num_provided := sum(x is not None for x in [formatter, formatter_name])) == 0:
+            return None  # none given, so will use the default of the class
+        elif num_provided > 1:
+            raise ValueError("At most one of `formatter` or `formatter_name` must be provided.")
+
+        if formatter:
+            return formatter
+        elif formatter_name:
+            kwargs = formatter_kwargs or {}
+            match formatter_name:
+                case "Llama3Formatter":
+                    from template_formatting.formatter import Llama3Formatter
+
+                    return Llama3Formatter()
+                case "MistralFormatter" | "MagistralFormatter":
+                    from eval_framework.llm.mistral import MagistralFormatter
+
+                    return MagistralFormatter(**kwargs)
+                case "ConcatFormatter":
+                    from template_formatting.formatter import ConcatFormatter
+
+                    return ConcatFormatter()
+                case "HFFormatter":
+                    from template_formatting.formatter import HFFormatter
+
+                    return HFFormatter(**kwargs)
+                case _:
+                    raise ValueError(f"Unsupported formatter: {formatter_name}.")
+        return None

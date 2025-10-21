@@ -2,6 +2,7 @@ import gc
 import logging
 from collections.abc import Callable, Sequence
 from functools import partial
+from pathlib import Path
 from typing import Any
 
 import torch
@@ -74,7 +75,7 @@ class RepeatedTokenSequenceCriteria(StoppingCriteria):
         return torch.BoolTensor([False]).to(input_ids.device)
 
 
-class HFLLM(BaseLLM):
+class BaseHFLLM(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
@@ -287,6 +288,47 @@ class HFLLM(BaseLLM):
     def seq_length(self) -> int | None:
         config = self.model.config
         return config.max_position_embeddings if hasattr(config, "max_position_embeddings") else None
+
+
+class HFLLM(BaseHFLLM):
+    """A class to create HFLLM instances from various model sources."""
+
+    def __init__(
+        self,
+        # Model source (3 options: file path, HuggingFace model name, Wandb artifact name):
+        checkpoint_path: str | Path | None = None,
+        model_name: str | None = None,
+        artifact_name: str | None = None,
+        # Formatter (2 options):
+        formatter: BaseFormatter | None = None,
+        formatter_name: str | None = None,
+        formatter_kwargs: dict[str, Any] | None = None,
+        # Explicit name for the `name` property:
+        checkpoint_name: str | None = None,
+        # HFLLM parameters:
+        **kwargs: Any,
+    ) -> None:
+        final_path, possible_name = self._get_final_checkpoint(checkpoint_path, model_name, artifact_name)
+
+        self.checkpoint_name = checkpoint_name
+        if self.checkpoint_name is None and possible_name is not None:
+            self.checkpoint_name = possible_name.replace("/", "_").replace(":", "_")  # sanitize pathname
+
+        if not self.LLM_NAME:
+            self.LLM_NAME = str(final_path)
+
+        final_formatter = self._get_final_formatter(formatter, formatter_name, formatter_kwargs)
+
+        super().__init__(
+            formatter=final_formatter,
+            **kwargs,
+        )
+
+    @property
+    def name(self) -> str:
+        if self.checkpoint_name is not None:
+            return f"{self.__class__.__name__}_checkpoint_{self.checkpoint_name}"
+        return super().name
 
 
 class HFLLM_from_name(HFLLM):
