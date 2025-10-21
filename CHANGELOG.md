@@ -73,6 +73,7 @@
 - Removed and relaxes several main-dependencies
 - Added support for weights and biases + determined pre-emption
 - Added missing `DOCKER_CODE_EXECUTION` variable to `.env.example`
+- Added accelerate import as default for [transformers] and boto3 in pyproject.toml
 
 ## 0.1.0
 
