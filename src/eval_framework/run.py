@@ -191,6 +191,16 @@ def parse_args() -> argparse.Namespace:
         help=("Whether to upload results as an artifact to Weights & Biases (default: True). Needs `--wandb-project`."),
     )
     parser.add_argument(
+        "--wandb-checkpoint-step",
+        type=int,
+        default=None,
+        required=False,
+        help=(
+            "Model checkpoint step number to associate with W&B aggregated results log. If not provided, W&B model"
+            "artifact's metadata is probed for 'global-step' field."
+        ),
+    )
+    parser.add_argument(
         "--description",
         type=str,
         required=False,
