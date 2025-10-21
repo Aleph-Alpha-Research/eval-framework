@@ -2,6 +2,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
+import wandb
 
 from eval_framework.evaluation_generator import EvaluationGenerator
 from eval_framework.metrics.base import MetricResult
@@ -45,7 +46,7 @@ def test_evaluator_run_completions(tmp_path: Path, should_preempt_callable: Call
     assert (output_dir / "metadata.json").exists()
 
 
-def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable) -> None:
+def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable, wandb_run: wandb.Run) -> None:
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,
@@ -74,7 +75,7 @@ def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable) -
     assert (output_dir / "aggregated_results.json").exists()
 
 
-def test_evaluator_run_eval_no_completions(tmp_path: Path) -> None:
+def test_evaluator_run_eval_no_completions(tmp_path: Path, wandb_run: wandb.Run) -> None:
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,
@@ -95,7 +96,7 @@ def test_evaluator_run_eval_no_completions(tmp_path: Path) -> None:
     assert str(exc_info.value) == "No saved completions found. Run 'run_completions' first."
 
 
-def test_evaluator_run_all(tmp_path: Path, should_preempt_callable: Callable) -> None:
+def test_evaluator_run_all(tmp_path: Path, should_preempt_callable: Callable, wandb_run: wandb.Run) -> None:
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,

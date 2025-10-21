@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+import wandb
 
 from eval_framework import main as main_file
 from eval_framework.llm.huggingface import HFLLMRegistryModel
@@ -48,7 +49,7 @@ def test_registry_model_config_integration(model_class: type, extra_args: dict[s
         assert config.llm_args["batch_size"] == 4
 
 
-def test_additional_artifact_use(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_additional_artifact_use(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, wandb_run: wandb.Run) -> None:
     """Test that additional wandb artifacts are registered as being used during evaluation."""
     mock_llm = MockLLM()
     eval_config = EvalConfig(

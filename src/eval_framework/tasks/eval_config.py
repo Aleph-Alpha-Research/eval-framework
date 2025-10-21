@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from typing import Annotated, Any
 
-from pydantic import AfterValidator, Field, field_serializer, field_validator, model_validator
+from pydantic import AfterValidator, BeforeValidator, Field, field_serializer, field_validator, model_validator
 
 from eval_framework.base_config import BaseConfig
 from eval_framework.llm.base import BaseLLM
@@ -13,12 +13,28 @@ from eval_framework.tasks.perturbation import PerturbationConfig
 from eval_framework.tasks.registry import get_task, validate_task_name
 from eval_framework.utils.constants import ROOT_DIR
 
+# Keys that don't impact actual evaluation results and should be excluded from config dumps for hashing purposes.
+KEYS_UNRELATED_TO_RESULTS = {
+    "output_dir",
+    "wandb_project",
+    "wandb_entity",
+    "wandb_run_id",
+    "wandb_upload_results",
+    "hf_upload_dir",
+    "hf_upload_repo",
+    "description",
+    "save_intermediate_results",
+    "save_logs",
+    "delete_output_dir_after_upload",
+}
+
 
 class EvalConfig(BaseConfig):
     output_dir: Path = ROOT_DIR
     wandb_project: str | None = None
     wandb_entity: str | None = None
     wandb_run_id: str | None = None
+    wandb_upload_results: Annotated[bool, BeforeValidator(lambda v: True if v is None else v)] = True
     hf_upload_dir: str | None = None
     hf_upload_repo: str | None = None
     num_fewshot: Annotated[int, Field(ge=0)] = 0
@@ -34,8 +50,11 @@ class EvalConfig(BaseConfig):
     judge_model_args: dict[str, Any] = Field(default_factory=dict)
     batch_size: Annotated[int, Field(ge=1)] = 1
     description: str | None = None
-    save_intermediate_results: bool = True
-    save_logs: bool = True
+    save_intermediate_results: Annotated[bool, BeforeValidator(lambda v: True if v is None else v)] = True
+    save_logs: Annotated[bool, BeforeValidator(lambda v: True if v is None else v)] = True
+    delete_output_dir_after_upload: Annotated[bool, BeforeValidator(lambda v: False if v is None else v)] = False
+
+    # Adding a new member? Remember to update KEYS_UNRELATED_TO_RESULTS if it doesn't impact eval results.
 
     @property
     def task_class(self) -> type[BaseTask]:
@@ -108,5 +127,9 @@ class EvalConfig(BaseConfig):
         return None
 
     def model_json_dump(self) -> str:
-        model_dump = self.model_dump()
+        model_dump = self.model_dump(mode="json")
+        return json.dumps(model_dump, sort_keys=True)
+
+    def model_json_robust_subset_dump(self) -> str:
+        model_dump = self.model_dump(mode="json", exclude=KEYS_UNRELATED_TO_RESULTS)
         return json.dumps(model_dump, sort_keys=True)

@@ -164,3 +164,6 @@ test_outputs/
 # evaluation result outputs default path
 outputs/
 comet_model/
+
+# WandB files and folders
+wandb

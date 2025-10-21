@@ -36,7 +36,7 @@ def test_generate_output_dir_with_valid_values() -> None:
     fewshot_str = f"fewshot_{config.num_fewshot}"
     samples_str = f"samples_{config.num_samples}"
     params_str = f"{fewshot_str}__{samples_str}"
-    config_json = config.model_json_dump()
+    config_json = config.model_json_robust_subset_dump()
     config_hash = hashlib.sha256(config_json.encode("utf-8")).hexdigest()[:5]
 
     dir_name = f"{params_str}_{config_hash}"
@@ -66,7 +66,7 @@ def test_generate_output_dir_with_none_values() -> None:
     fewshot_str = "fewshot_0"
     samples_str = "samples_None"
     params_str = f"{fewshot_str}__{samples_str}"
-    config_json = config.model_json_dump()
+    config_json = config.model_json_robust_subset_dump()
     config_hash = hashlib.sha256(config_json.encode("utf-8")).hexdigest()[:5]
     dir_name = f"{params_str}_{config_hash}"
 

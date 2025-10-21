@@ -3,61 +3,24 @@ import traceback
 from collections.abc import Sequence
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Literal, TypedDict, Unpack
+from typing import Any, Literal
 
 from wandb import Settings
-from wandb.apis.public import RetryingClient
 from wandb.sdk.lib.paths import StrPath
 
 
-class InitKwargs(TypedDict, total=False):
-    entity: str | None
-    project: str | None
-    dir: StrPath | None
-    id: str | None
-    name: str | None
-    notes: str | None
-    tags: Sequence[str] | None
-    config: dict[str, Any] | str | None
-    config_exclude_keys: list[str] | None
-    config_include_keys: list[str] | None
-    allow_val_change: bool | None
-    group: str | None
-    job_type: str | None
-    mode: Literal["online", "offline", "disabled"] | None
-    force: bool | None
-    anonymous: Literal["never", "allow", "must"] | None
-    reinit: bool | Literal[None, "default", "return_previous", "finish_previous", "create_new"]
-    resume: bool | Literal["allow", "never", "must", "auto"] | None
-    resume_from: str | None
-    fork_from: str | None
-    save_code: bool | None
-    tensorboard: bool | None
-    sync_tensorboard: bool | None
-    monitor_gym: bool | None
-    settings: Settings | dict[str, Any] | None
-
-
-class RunInitKwargs(TypedDict, total=False):
-    client: RetryingClient | None
-    entity: str | None
-    project: str | None
-    filters: dict[str, Any] | None
-    order: str | None
-    per_page: int
-    include_sweeps: bool
-
-
 class MockWandbRun:
-    def __init__(self, **kwargs: Unpack[RunInitKwargs]):
+    def __init__(self, **kwargs: Any):
         self.config: dict = {}
         self.summary: dict = {}
         self.name: str = "mock_run"
-        self.project: str = kwargs.get("project") or ""
+        self.project: str = kwargs.get("project", "")
         self.logged_data: list[dict] = []  # Store all logged data for testing
         self._finished: bool = False
         self.id: str = str(kwargs.get("id") or "mock_run_id")
-        self.logged_artifacts: list[MockArtifact] = []
+        self._logged_artifacts: list[dict[str, Any]] = []
+        self.notes = ""
+        self.settings = kwargs.get("settings") or Settings(mode=kwargs.get("mode", "online"))
 
     def __enter__(self) -> "MockWandbRun":
         return self
@@ -95,7 +58,7 @@ class MockWandbRun:
         else:
             # Handle Path-like objects
             artifact = MockArtifact(str(artifact_or_path), "mock_artifact")
-        self.logged_artifacts.append(artifact)
+        self._logged_artifacts.append(dict(artifact=artifact, aliases=aliases or []))
         return artifact
 
     def finish(self, exit_code: int = 0) -> None:
@@ -114,12 +77,10 @@ class MockWandb:
         self.run: MockWandbRun | None = None
         self._login_called = False
         self.Api = MockWandbApi  # Make Api class available
+        self.Artifact = MockArtifact  # Make Artifact class available
 
-    def init(self, **kwargs: Unpack[InitKwargs]) -> MockWandbRun:
-        # get the intersection between initkwargs and runinitkwargs.
-        # some are used in the actual init and others are generated. we just need the intersection for tests.
-        run_kwargs: dict[str, Any] = {k: v for k, v in kwargs.items() if k in RunInitKwargs.__annotations__}
-        self.run = MockWandbRun(**run_kwargs)
+    def init(self, **kwargs: Any) -> MockWandbRun:
+        self.run = MockWandbRun(**kwargs)
         return self.run
 
     def log(self, data: dict, step: int | None = None, commit: bool = True) -> None:
@@ -134,11 +95,21 @@ class MockWandb:
             self.run.finish(exit_code)
 
     def use_artifact(self, artifact: "MockArtifact | str") -> "MockArtifact":
-        """Mock wandb.use_artifact function"""
         if isinstance(artifact, str):
-            # Create a mock artifact from string
             return MockArtifact(artifact, "mock_artifact")
         return artifact
+
+    def log_artifact(
+        self,
+        artifact_or_path: "MockArtifact" | StrPath,
+        name: str | None = None,
+        type: str | None = None,
+        aliases: list[str] | None = None,
+        tags: list[str] | None = None,
+    ) -> "MockArtifact":
+        if self.run:
+            return self.run.log_artifact(artifact_or_path, name, type, aliases, tags)
+        raise RuntimeError("No active run to log artifact to.")
 
 
 class MockArtifactFile:
@@ -167,10 +138,10 @@ class MockArtifact:
         self.metadata = metadata
         self.incremental = incremental
         self.use_as = use_as
-        self.files_: list = []
+        self._files: list = []
 
     def files(self) -> Sequence[MockArtifactFile]:
-        return self.files_
+        return self._files
 
     def download(
         self,
@@ -189,8 +160,20 @@ class MockArtifact:
         self, uri: str, name: StrPath | None = None, checksum: bool = True, max_objects: int | None = None
     ) -> Sequence[str]:
         # Mock implementation: just return the URI for testing
-        self.files_.append(MockArtifactFile(uri))
+        self._files.append(MockArtifactFile(uri))
         return [uri]
+
+    def add_file(
+        self,
+        local_path: str,
+        name: str | None = None,
+        is_tmp: bool | None = False,
+        skip_cache: bool | None = False,
+        policy: Literal["mutable", "immutable"] | None = "mutable",
+        overwrite: bool = False,
+    ) -> None:
+        # Mock implementation: just return None instead of `ArtifactManifestEntry`
+        self._files.append(MockArtifactFile(Path(local_path).name if name is None else name))
 
 
 class MockWandbApi:
