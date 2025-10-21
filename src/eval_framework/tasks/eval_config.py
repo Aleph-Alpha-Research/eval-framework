@@ -20,6 +20,7 @@ KEYS_UNRELATED_TO_RESULTS = {
     "wandb_entity",
     "wandb_run_id",
     "wandb_upload_results",
+    "wandb_checkpoint_step",
     "hf_upload_dir",
     "hf_upload_repo",
     "description",
@@ -35,6 +36,7 @@ class EvalConfig(BaseConfig):
     wandb_entity: str | None = None
     wandb_run_id: str | None = None
     wandb_upload_results: Annotated[bool, BeforeValidator(lambda v: True if v is None else v)] = True
+    wandb_checkpoint_step: int | None = None
     hf_upload_dir: str | None = None
     hf_upload_repo: str | None = None
     num_fewshot: Annotated[int, Field(ge=0)] = 0

@@ -7,8 +7,10 @@ from datetime import datetime
 from pathlib import Path
 
 import jsonlines
+import wandb
 from pydantic import RootModel
 
+from eval_framework.llm.base import BaseLLM
 from eval_framework.result_processors.base import Result, ResultProcessor
 from eval_framework.shared.types import Completion, Loglikelihood
 from eval_framework.tasks.eval_config import EvalConfig
@@ -127,3 +129,46 @@ def generate_output_dir(llm_name: str, config: EvalConfig) -> Path:
     output_dir = config.output_dir / llm_name / f"{version_str}_{config.task_name}" / dir_name
 
     return output_dir
+
+
+class ResultsWandbProcessor(ResultProcessor):
+    def __init__(self, llm: BaseLLM, config: EvalConfig) -> None:
+        self._checkpoint_step = config.wandb_checkpoint_step
+        if hasattr(llm, "artifact"):
+            if "global-step" in llm.artifact.metadata and self._checkpoint_step is None:
+                self._checkpoint_step = int(llm.artifact.metadata["global-step"])
+
+    def save_aggregated_results(self, results: dict[str, float | None]) -> None:
+        if wandb.run is not None:
+            if self._checkpoint_step is not None:
+                # Step must be part of the `data`, `step` argument is not supported when sharing wandb run ids and
+                #  w&b would need to write steps in consecutive order anyway (which is not given with separate evals).
+                # Note also that the last run (which may not have the largest step number) appears as summary metrics.
+                wandb.run.define_metric("*", step_metric="checkpoint_step")
+                wandb.log(results | {"checkpoint_step": self._checkpoint_step})
+            else:
+                wandb.log(results)
+
+    def save_metadata(self, metadata: dict) -> None:
+        raise NotImplementedError
+
+    def load_metadata(self) -> dict:
+        raise NotImplementedError
+
+    def save_responses(self, responses: list[Completion | Loglikelihood]) -> None:
+        raise NotImplementedError
+
+    def save_response(self, response: Completion | Loglikelihood) -> None:
+        raise NotImplementedError
+
+    def load_responses(self) -> list[Completion | Loglikelihood]:
+        raise NotImplementedError
+
+    def save_metrics_results(self, results: list[Result]) -> None:
+        raise NotImplementedError
+
+    def save_metrics_result(self, result: Result) -> None:
+        raise NotImplementedError
+
+    def load_metrics_results(self) -> list[Result]:
+        raise NotImplementedError

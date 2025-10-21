@@ -62,6 +62,7 @@ class EvalContext(AbstractContextManager):
         wandb_entity: str | None = None,
         wandb_run_id: str | None = None,
         wandb_upload_results: bool | None = None,
+        wandb_checkpoint_step: int | None = None,
         hf_upload_dir: str | None = None,
         hf_upload_repo: str | None = None,
         llm_args: dict[str, Any] | None = None,
@@ -88,6 +89,7 @@ class EvalContext(AbstractContextManager):
         self.wandb_entity = wandb_entity
         self.wandb_run_id = wandb_run_id
         self.wandb_upload_results = wandb_upload_results
+        self.wandb_checkpoint_step = wandb_checkpoint_step
         self.hf_upload_dir = hf_upload_dir
         self.hf_upload_repo = hf_upload_repo
         self.llm_args = llm_args if llm_args is not None else {}
