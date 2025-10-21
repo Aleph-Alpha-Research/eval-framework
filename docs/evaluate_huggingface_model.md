@@ -17,8 +17,8 @@ from template_formatting.formatter import HFFormatter
 
 # Define your model
 class MyHuggingFaceModel(HFLLM):
-    LLM_NAME = "meta-llama/Llama-3.2-3B-Instruct"
-    DEFAULT_FORMATTER = partial(HFFormatter, "meta-llama/Llama-3.2-3B-Instruct")
+    LLM_NAME = "context-labs/meta-llama-Llama-3.2-3B-Instruct-FP16"
+    DEFAULT_FORMATTER = partial(HFFormatter, "context-labs/meta-llama-Llama-3.2-3B-Instruct-FP16")
 
 if __name__ == "__main__":
     # Initialize your model
@@ -147,13 +147,12 @@ config = EvalConfig(
     task_name="MMLU",                    # Benchmark to run
     num_fewshot=5,                       # Number of examples in prompt
     num_samples=100,                     # How many questions to evaluate
-    output_dir=Path("./results"),        # Where to save results
+    output_dir=Path("./eval_results"),        # Where to save results
     llm_class=YourModelClass,            # Your model class
 
     # Optional settings
-    subjects=["mathematics"],             # Specific subjects (if applicable)
+    task_subjects=["astronomy"],             # Specific subjects (if applicable)
     batch_size=8,                        # Batch processing size
-    random_seed=42,                      # Reproducibility
 )
 ```
 
