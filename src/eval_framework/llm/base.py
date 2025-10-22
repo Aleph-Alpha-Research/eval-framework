@@ -65,8 +65,9 @@ class BaseLLM(ABC):
     def post_process_completion(self, completion: str, sample: Sample) -> str:
         """
         Model-specific post-processing of generated completions.
+
         Override this method to apply model-specific cleanup or transformations
-        (e.g., removing specific artifacts, handling special tokens).
+        (e.g., removing specific artifacts such as reasoning traces, handling special tokens).
 
         Args:
             completion: The raw completion string from the model
