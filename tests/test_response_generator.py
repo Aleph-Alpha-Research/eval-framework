@@ -466,11 +466,11 @@ def test_response_generator_applies_model_then_task_post_processing(tmp_path: Pa
 
     original_task_post_process = generator.task.post_process_generated_completion
 
-    def task_post_process_with_marker(completion: str, sample: Sample) -> str:
+    def task_post_process_with_marker(completion: str, sample: Sample | None = None) -> str:
         result = original_task_post_process(completion, sample)
         return f"TASK[{result}]"
 
-    generator.task.post_process_generated_completion = task_post_process_with_marker
+    generator.task.post_process_generated_completion = task_post_process_with_marker  # type: ignore[method-assign, assignment]
 
     sample = Sample(
         id=0,
@@ -480,7 +480,7 @@ def test_response_generator_applies_model_then_task_post_processing(tmp_path: Pa
         possible_completions=None,
     )
 
-    llm.generate = Mock(
+    llm.generate = Mock(  # type: ignore[method-assign]
         return_value=[
             RawCompletion(
                 prompt="prompt",
