@@ -43,7 +43,6 @@ class Hyperparameters(BaseModel):
     wandb_entity: str | None = None
     wandb_run_id: str | None = None
     wandb_upload_results: bool | None = None
-    wandb_checkpoint_step: int | None = None
     description: str | None = None
     task_args: TaskArgs
     llm_args: dict[str, Any] | None = {}
@@ -92,7 +91,6 @@ class DeterminedContext(EvalContext):
             "wandb_entity",
             "wandb_run_id",
             "wandb_upload_results",
-            "wandb_checkpoint_step",
             "description",
             "delete_output_dir_after_upload",
         ]:
@@ -149,7 +147,6 @@ class DeterminedContext(EvalContext):
             wandb_entity=self.hparams.wandb_entity or self.wandb_entity,
             wandb_run_id=self.hparams.wandb_run_id or self.wandb_run_id,
             wandb_upload_results=self.hparams.wandb_upload_results or self.wandb_upload_results,
-            wandb_checkpoint_step=self.hparams.wandb_checkpoint_step or self.wandb_checkpoint_step,
             batch_size=self.hparams.task_args.batch_size or self.batch_size,
             description=self.hparams.description or self.description,
             delete_output_dir_after_upload=self.hparams.delete_output_dir_after_upload

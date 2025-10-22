@@ -13,11 +13,7 @@ from eval_framework.evaluation_generator import EvaluationGenerator, Result
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.hf_uploader import HFUploader
-from eval_framework.result_processors.result_processor import (
-    ResultsFileProcessor,
-    ResultsWandbProcessor,
-    generate_output_dir,
-)
+from eval_framework.result_processors.result_processor import ResultsFileProcessor, generate_output_dir
 from eval_framework.result_processors.wandb_uploader import WandbUploader
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.utils.constants import RED, RESET
@@ -64,7 +60,6 @@ def main(
     assert output_dir is not None
 
     file_processor = ResultsFileProcessor(output_dir)
-    wandb_processor = ResultsWandbProcessor(llm, config)
     response_generator = ResponseGenerator(llm, config, file_processor)
 
     with wandb.init(
@@ -76,7 +71,6 @@ def main(
         config=response_generator._get_metadata(),
         resume="allow",
         mode=_wandb_mode(config.wandb_project),
-        settings=wandb.Settings(mode="shared", x_label=output_dir.name) if config.wandb_run_id is not None else None,
     ) as run:
         if hasattr(llm, "artifact"):
             wandb.use_artifact(llm.artifact)
@@ -101,7 +95,7 @@ def main(
             del response_generator
             gc.collect()
 
-        evaluator = EvaluationGenerator(config, file_processor, wandb_processor)
+        evaluator = EvaluationGenerator(config, file_processor)
         results = evaluator.run_eval()
 
         upload_success = False

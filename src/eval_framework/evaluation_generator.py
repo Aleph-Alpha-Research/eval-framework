@@ -3,6 +3,7 @@ import math
 
 import numpy as np
 import pandas as pd
+import wandb
 from tqdm import tqdm
 
 from eval_framework.metrics.base import BaseMetric
@@ -14,7 +15,6 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
 )
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.result_processors.base import Result, ResultProcessor
-from eval_framework.result_processors.result_processor import ResultsWandbProcessor
 from eval_framework.shared.types import Completion, Loglikelihood
 from eval_framework.tasks.base import ResponseType
 from eval_framework.tasks.eval_config import EvalConfig
@@ -25,21 +25,15 @@ logger = logging.getLogger(__name__)
 
 
 class EvaluationGenerator:
-    def __init__(
-        self,
-        config: EvalConfig,
-        result_processor: ResultProcessor,
-        wandb_processor: ResultsWandbProcessor | None = None,
-    ) -> None:
+    def __init__(self, config: EvalConfig, result_processor: ResultProcessor) -> None:
         logger.info("EvaluationGenerator initialized")
 
-        self.config = config
         self.few_shot = config.num_fewshot
+        self.config = config
         self.num_samples = config.num_samples
         self.max_tokens = config.max_tokens
-        self.save_intermediate_results = config.save_intermediate_results
         self.result_processor = result_processor
-        self.wandb_processor = wandb_processor
+        self.save_intermediate_results = config.save_intermediate_results
 
         task_class = get_task(config.task_name)
         if task_class.RESPONSE_TYPE == ResponseType.COMPLETION:
@@ -229,9 +223,9 @@ class EvaluationGenerator:
         metrics_results = self._run_metric_calculators(responses)
         aggregated_results = self._aggregate_results(metrics_results)
 
+        wandb.log(aggregated_results)
+
         self.result_processor.save_aggregated_results(aggregated_results)
-        if self.wandb_processor is not None:
-            self.wandb_processor.save_aggregated_results(aggregated_results)
         logger.info(aggregated_results)
         logger.info(f"{RED}[ Evaluation completed and results saved! ]{RESET}")
         return metrics_results

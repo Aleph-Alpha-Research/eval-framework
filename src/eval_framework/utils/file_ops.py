@@ -141,7 +141,7 @@ class WandbFs:
         # Since the cache lives inside the docker container, it is unused in future
         # runs. Skipping the cache also avoids file duplication and extra copying.
         self._artifact_downloaded = False
-        skip_cache = os.getenv("WANDB_CACHE_SKIP", "true").lower() in ["true", "1", "yes"]
+        skip_cache = os.getenv("WANDB_CACHE_SKIP", "true").lower() == "true"
         artifact_path = artifact.download(root=str(self.download_path), skip_cache=skip_cache)
         self._artifact_downloaded = True
 

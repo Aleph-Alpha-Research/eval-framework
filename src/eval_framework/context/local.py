@@ -59,7 +59,6 @@ class LocalContext(EvalContext):
             wandb_project=self.wandb_project,
             wandb_run_id=self.wandb_run_id,
             wandb_upload_results=self.wandb_upload_results,
-            wandb_checkpoint_step=self.wandb_checkpoint_step,
             llm_judge_class=self.llm_judge_class,
             judge_model_args=self.judge_model_args,
             batch_size=self.batch_size,

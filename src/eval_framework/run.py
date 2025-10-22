@@ -312,7 +312,6 @@ def run_with_kwargs(kwargs: dict) -> None:
         wandb_entity=kwargs["wandb_entity"],
         wandb_run_id=kwargs["wandb_run_id"],
         wandb_upload_results=kwargs["wandb_upload_results"],
-        wandb_checkpoint_step=kwargs["wandb_checkpoint_step"],
         hf_upload_dir=kwargs["hf_upload_dir"],
         hf_upload_repo=kwargs["hf_upload_repo"],
         llm_args=kwargs["llm_args"],
