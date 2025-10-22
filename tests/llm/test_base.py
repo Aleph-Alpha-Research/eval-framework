@@ -1,5 +1,7 @@
 from eval_framework.shared.types import Completion, LanguageMetricContext
+from eval_framework.tasks.base import Sample
 from template_formatting.formatter import Message, Role
+from tests.conftest import MockLLM
 
 
 def test_completion_languages() -> None:
@@ -58,3 +60,19 @@ def test_completion_instructions() -> None:
     assert completion.last_user_instruction == "I'm already dead. Are you scared?"
     # AND special tokens in completion are broken
     assert completion.sanitized_completion == "Oh dear I'll <| hack |> <you>!"
+
+
+def test_base_llm_post_process_completion_default_is_passthrough() -> None:
+    llm = MockLLM()
+    sample = Sample(
+        id=0,
+        subject="test",
+        ground_truth="test",
+        messages=[Message(role=Role.USER, content="Hello")],
+        possible_completions=None,
+    )
+    completion = "This is a raw completion with special chars: <|endoftext|>"
+
+    result = llm.post_process_completion(completion, sample)
+
+    assert result == completion

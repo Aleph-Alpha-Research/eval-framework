@@ -446,3 +446,52 @@ def test_perturbed_response_differs(tmp_path: Path, perturbation_type: Perturbat
     assert original_sample != perturbed_sample, (
         f"Original sample should differ from perturbed sample for perturbation type {perturbation_type}"
     )
+
+
+def test_response_generator_applies_model_then_task_post_processing(tmp_path: Path) -> None:
+    class MarkerLLM(MockLLM):
+        def post_process_completion(self, completion: str, sample: Sample) -> str:
+            return f"MODEL[{completion}]"
+
+    llm = MarkerLLM()
+    config = EvalConfig(
+        task_name="ARC",
+        num_fewshot=0,
+        num_samples=1,
+        llm_class=llm.__class__,
+        save_intermediate_results=False,
+    )
+    result_processor = ResultsFileProcessor(tmp_path)
+    generator = ResponseGenerator(llm, config, result_processor)
+
+    original_task_post_process = generator.task.post_process_generated_completion
+
+    def task_post_process_with_marker(completion: str, sample: Sample) -> str:
+        result = original_task_post_process(completion, sample)
+        return f"TASK[{result}]"
+
+    generator.task.post_process_generated_completion = task_post_process_with_marker
+
+    sample = Sample(
+        id=0,
+        subject="ARC-Easy",
+        ground_truth="A",
+        messages=[Message(role=Role.USER, content="Test question")],
+        possible_completions=None,
+    )
+
+    llm.generate = Mock(
+        return_value=[
+            RawCompletion(
+                prompt="prompt",
+                completion="raw_answer",
+                prompt_sequence_positions=None,
+                completion_sequence_positions=None,
+            )
+        ]
+    )
+
+    completions = generator._generate_completions([sample])
+
+    assert completions[0].raw_completion == "raw_answer"
+    assert completions[0].completion == "TASK[MODEL[raw_answer]]"
