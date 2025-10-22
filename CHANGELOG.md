@@ -3,6 +3,7 @@
 ## Unreleased: 0.2.3-dev
 
 ### Models
+- Added `post_process_completion` method to `BaseLLM` class to enable model-specific post-processing of completions before task-specific post-processing is applied.
 - The BASELLM class is equiped with `del` call to clear up resources. VLLM and HF APIs offload the respective models off the gpus. OpenAI class disconnects the client.
 
 ### Tasks
