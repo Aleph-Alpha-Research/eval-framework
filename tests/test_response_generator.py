@@ -53,6 +53,7 @@ def test_generate_completions_message_handling() -> None:
             completion_sequence_positions=None,
         )
     ]
+    llm.post_process_completion.side_effect = lambda completion, sample: completion
 
     # Execute and assert for case 1
     completion_with_cue = generator._generate_completions([sample_with_cue])[0]
