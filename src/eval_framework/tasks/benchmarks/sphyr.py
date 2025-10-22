@@ -63,13 +63,17 @@ class SPHYR(BaseTask[str]):
         assert num_fewshot == 0, "Fewshot is not supported for SPHYR"
         super().__init__(num_fewshot)
 
+    def _grid_to_str(self, grid: list[list[str]]) -> str:
+        return "\n".join(" ".join(str(cell) for cell in row) for row in grid)
+
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
         FILL_INSTRUCTION = EASY_FILL_INSTRUCTION if "easy" in item["subject"] else HARD_FILL_INSTRUCTION
         return SYSTEM_PROMPT.format(FILL_INSTRUCTION=FILL_INSTRUCTION)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         FILL_INSTRUCTION = EASY_FILL_INSTRUCTION if "easy" in item["subject"] else HARD_FILL_INSTRUCTION
-        return PROMPT_TEMPLATE.format(GRID=item["input_grid"], FILL_INSTRUCTION=FILL_INSTRUCTION)
+        grid = self._grid_to_str(item["input_grid"])
+        return PROMPT_TEMPLATE.format(GRID=grid, FILL_INSTRUCTION=FILL_INSTRUCTION)
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        return item["ground_truth"]
+        return self._grid_to_str(item["ground_truth"])

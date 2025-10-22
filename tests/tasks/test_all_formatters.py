@@ -103,10 +103,6 @@ def test_all_tasks_formatter(task_name: str, formatter_cls: type["BaseFormatter"
     Raises:
         AssertionError: If the hash of the formatter output does not match expectation.
     """
-    # FIXME!
-    if task_name == "SPHYR":
-        pytest.skip("SPHYR task seems to be currently broken in CI.")
-
     task_class = get_task(task_name)
 
     # instantiate the class with the SPECIAL_ARGS dictionary or 1-shot example and fallback to 0-shot if this fails
