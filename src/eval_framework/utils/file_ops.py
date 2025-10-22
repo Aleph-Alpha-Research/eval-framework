@@ -4,6 +4,7 @@ import os
 import shutil
 import signal
 import tempfile
+import time
 from pathlib import Path
 from types import FrameType
 from typing import Any
@@ -106,10 +107,40 @@ class WandbFs:
         return self.api.default_entity
 
     def get_artifact(self, artifact_id: str, version: str = "latest") -> wandb.Artifact:
-        if "/" in artifact_id:
-            return self.api.artifact(f"{artifact_id}:{version}")
+        name = f"{artifact_id}:{version}"
+        if "/" not in artifact_id:
+            name = f"{self.REGISTRY_MODEL_ROOT}/{name}"
+
+        # Prefer checkpoints refering to local file system (speed & immediate availability)
+        local_name = name if name.endswith("-local") else f"{name}-local"
+        if self.api.artifact_exists(local_name):
+            artifact = self.api.artifact(local_name)
+            availabilities = []
+            for f in artifact.files():
+                local_path = Path(f.path_uri.removeprefix("file://"))
+                availabilities.append(local_path.exists() and local_path.stat().st_size == f.size)
+            if all(availabilities):
+                if local_name != name:
+                    logger.info(f"Local artifact '{local_name}' available, using it instead of '{version}'.")
+                return artifact
+
+        # Otherwise fall back to the non-local version (requires download)
+        final_name = name if not name.endswith("-local") else name.removesuffix("-local")
+        if final_name != name:
+            logger.info(f"Local artifact '{name}' NOT available, using '{final_name}' instead.")
+
+        if self.api.artifact_exists(local_name):
+            # Wait for a non-local artifact to pop-up, which is expected when a local one exists
+            end_time = int(os.getenv("WANDB_ARTIFACT_WAIT_TIMEOUT_SEC", "3600")) + time.time()
+            while end_time > time.time():
+                if self.api.artifact_exists(final_name):
+                    return self.api.artifact(final_name)
+                logger.info(f"Artifact '{final_name}' not found, retrying in 30 seconds...")
+                time.sleep(30)
+            raise FileNotFoundError("Artifact not available, perhaps increase `WANDB_ARTIFACT_WAIT_TIMEOUT_SEC`.")
         else:
-            return self.api.artifact(f"{self.REGISTRY_MODEL_ROOT}/{artifact_id}:{version}")
+            # Return artifact or crash if not found
+            return self.api.artifact(final_name)
 
     def download_artifact(
         self,
@@ -125,6 +156,12 @@ class WandbFs:
         Returns:
             Path: The path to the downloaded artifact.
         """
+        if artifact.qualified_name.endswith("-local"):
+            self.download_path = Path(
+                os.path.commonpath([Path(f.path_uri.removeprefix("file://")) for f in artifact.files()])
+            )
+            return self.download_path
+
         # create the base path for either a temp or user dir
         if self.user_supplied_download_path is None:
             self._temp_dir = tempfile.TemporaryDirectory()
