@@ -76,7 +76,7 @@ def main(
         config=response_generator._get_metadata(),
         resume="allow",
         mode=_wandb_mode(config.wandb_project),
-        settings=wandb.Settings(mode="shared", x_label=output_dir.name) if config.wandb_run_id is not None else None,
+        settings=_wandb_settings(config, output_dir),
     ) as run:
         if hasattr(llm, "artifact"):
             wandb.use_artifact(llm.artifact)
@@ -167,3 +167,10 @@ def _wandb_mode(project: str | None) -> Literal["online", "disabled"] | None:
             logger.warning(f"Wandb login check failed: {e}. Disabling Wandb logging.")
             return "disabled"
     return "online"
+
+
+def _wandb_settings(config: EvalConfig, output_dir: Path) -> wandb.Settings:
+    if config.wandb_run_id is not None:
+        return wandb.Settings(mode="shared", x_label=output_dir.name, disable_code=True)
+    else:
+        return wandb.Settings(disable_code=True)  # "wandb-history" artifacts not needed

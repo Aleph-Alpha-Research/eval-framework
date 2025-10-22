@@ -133,6 +133,7 @@ def generate_output_dir(llm_name: str, config: EvalConfig) -> Path:
 
 class ResultsWandbProcessor(ResultProcessor):
     def __init__(self, llm: BaseLLM, config: EvalConfig) -> None:
+        # Either the step is given explicitly or we take it from W&B model artifact metadata
         self._checkpoint_step = config.wandb_checkpoint_step
         if hasattr(llm, "artifact"):
             if "global-step" in llm.artifact.metadata and self._checkpoint_step is None:
@@ -142,10 +143,14 @@ class ResultsWandbProcessor(ResultProcessor):
         if wandb.run is not None:
             if self._checkpoint_step is not None:
                 # Step must be part of the `data`, `step` argument is not supported when sharing wandb run ids and
-                #  w&b would need to write steps in consecutive order anyway (which is not given with separate evals).
-                # Note also that the last run (which may not have the largest step number) appears as summary metrics.
+                # w&b requires writing steps in consecutive order anyway (which is not given with separate eval runs).
+                # Also, the last run (which may not have the largest step number) appears as summary metrics, so we
+                # need to preserve the summary for the largest step.
                 wandb.run.define_metric("*", step_metric="checkpoint_step")
+                old_summary = wandb.run.summary._as_dict()
                 wandb.log(results | {"checkpoint_step": self._checkpoint_step})
+                if old_summary.get("checkpoint_step", -1) > self._checkpoint_step:
+                    wandb.run.summary.update(old_summary)  # (minuscule chance of race condition with other eval runs)
             else:
                 wandb.log(results)
 
