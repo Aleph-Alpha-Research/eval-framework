@@ -147,7 +147,8 @@ class ResponseGenerator:
 
             try:
                 error = None
-                completion = self.task.post_process_generated_completion(raw_completion.completion, sample)
+                model_post_processed_completion = self.llm.post_process_completion(raw_completion.completion, sample)
+                completion = self.task.post_process_generated_completion(model_post_processed_completion, sample)
             except Exception as e:
                 error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
                 completion = ""
