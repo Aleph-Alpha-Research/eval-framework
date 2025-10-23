@@ -102,10 +102,6 @@ class WandbFs:
         if not endpoint.startswith(("http://", "https://")):
             os.environ["AWS_ENDPOINT_URL"] = f"https://{endpoint}"
 
-    @property
-    def entity(self) -> str | None:
-        return self.api.default_entity
-
     def get_artifact(self, artifact_id: str, version: str = "latest") -> wandb.Artifact:
         name = f"{artifact_id}:{version}"
         if "/" not in artifact_id:
@@ -125,7 +121,7 @@ class WandbFs:
                 return artifact
 
         # Otherwise fall back to the non-local version (requires download)
-        final_name = name if not name.endswith("-local") else name.removesuffix("-local")
+        final_name = name.removesuffix("-local")
         if final_name != name:
             logger.info(f"Local artifact '{name}' NOT available, using '{final_name}' instead.")
 
@@ -137,7 +133,7 @@ class WandbFs:
                     return self.api.artifact(final_name)
                 logger.info(f"Artifact '{final_name}' not found, retrying in 30 seconds...")
                 time.sleep(30)
-            raise FileNotFoundError("Artifact not available, perhaps increase `WANDB_ARTIFACT_WAIT_TIMEOUT_SEC`.")
+            raise RuntimeError(f"Timed out waiting for {final_name}, perhaps increase WANDB_ARTIFACT_WAIT_TIMEOUT_SEC.")
         else:
             # Return artifact or crash if not found
             return self.api.artifact(final_name)
@@ -160,7 +156,7 @@ class WandbFs:
             self.download_path = Path(
                 os.path.commonpath([Path(f.path_uri.removeprefix("file://")) for f in artifact.files()])
             )
-            return self.download_path
+            return self.download_path if self.download_path.is_dir() else self.download_path.parent
 
         # create the base path for either a temp or user dir
         if self.user_supplied_download_path is None:
