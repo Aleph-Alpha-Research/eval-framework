@@ -1,12 +1,11 @@
 import re
-import traceback
 
 from pydantic import BaseModel
 
 from eval_framework.logger import logger
 from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
-from eval_framework.shared.types import BaseMetricContext, Completion, Error, extract_context_metric
+from eval_framework.shared.types import BaseMetricContext, Completion, extract_context_metric
 from template_formatting.formatter import Message, Role
 
 SINGLE_JUDGE_PROMPTS = {
