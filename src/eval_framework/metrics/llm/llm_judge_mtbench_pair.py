@@ -1,11 +1,12 @@
 import re
+import traceback
 
 from pydantic import BaseModel
 
 from eval_framework.logger import logger
 from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
-from eval_framework.shared.types import BaseMetricContext, Completion, extract_context_metric
+from eval_framework.shared.types import BaseMetricContext, Completion, Error, extract_context_metric
 from template_formatting.formatter import Message, Role
 
 PAIR_JUDGE_PROMPTS = {
@@ -170,28 +171,27 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
     NAME = "pairwise_judgement"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
+        prompts_to_judge: list[PromptToJudge] = generate_pair_judge_prompts(response)
+
+        all_metrics = []
+        for prompt_to_judge in prompts_to_judge:
+            messages = [Message(role=Role.USER, content=prompt_to_judge.prompt_text)]
+            all_metrics.append(self._evaluate_prompt(prompt_to_judge, messages))
+
+        return all_metrics
+
+    def _evaluate_prompt(self, prompt_to_judge: PromptToJudge, messages: list[Message]) -> MetricResult:
         try:
-            prompts_to_judge: list[PromptToJudge] = generate_pair_judge_prompts(response)
-
-            all_metrics = []
-            for prompt_to_judge in prompts_to_judge:
-                messages = [Message(role=Role.USER, content=prompt_to_judge.prompt_text)]
-                output = self._llm_judge.generate_from_messages([messages])
-                parsed_output = self._output_to_rating(output[0].completion)
-
-                all_metrics.append(
-                    MetricResult(
-                        metric_name=prompt_to_judge.comparison_type,
-                        value=parsed_output,
-                        higher_is_better=True,
-                    )
-                )
-
-            return all_metrics
-
-        except KeyError as e:
-            logger.info(f"LLM judge did not produce an expected output, sample will be ignored in aggregations. {e}")
-            return []
+            output = self._llm_judge.generate_from_messages([messages])
+            parsed_output = self._output_to_rating(output[0].completion)
+            return self._create_metric_result(
+                metric_name=prompt_to_judge.comparison_type, value=parsed_output, higher_is_better=True
+            )
+        except Exception as e:
+            logger.info(f"LLM judge failed to generate output for prompt: {prompt_to_judge.prompt_text}. Error: {e}")
+            return self._create_metric_result(
+                metric_name=prompt_to_judge.comparison_type, value=None, higher_is_better=True, error=e
+            )
 
     @staticmethod
     def _output_to_rating(output: str) -> float:
