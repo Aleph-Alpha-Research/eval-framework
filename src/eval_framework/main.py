@@ -71,6 +71,7 @@ def main(
         config=response_generator._get_metadata(),
         resume="allow",
         mode=_wandb_mode(config.wandb_project),
+        settings=wandb.Settings(disable_code=True),  # ("wandb-history" artifacts not needed)
     ) as run:
         if hasattr(llm, "artifact"):
             wandb.use_artifact(llm.artifact)

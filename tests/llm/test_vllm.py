@@ -3,10 +3,11 @@ import logging
 import time
 from collections.abc import Sequence
 from typing import Any, cast
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 import torch
+from pytest_mock import MockerFixture
 from vllm import SamplingParams
 from vllm.distributed.parallel_state import destroy_distributed_environment, destroy_model_parallel
 
@@ -15,7 +16,14 @@ from eval_framework.llm.mistral import MistralAdapter, MistralVLLM
 from eval_framework.llm.vllm import Qwen3_0_6B_VLLM, Qwen3_0_6B_VLLM_No_Thinking, VLLMModel, VLLMTokenizer
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import ConcatFormatter, HFFormatter, Message, Role
+from template_formatting.formatter import (
+    ConcatFormatter,
+    HFFormatter,
+    IdentityFormatter,
+    Llama3Formatter,
+    Message,
+    Role,
+)
 
 
 def clean_up() -> None:
@@ -953,3 +961,121 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
         del judge_model
     except Exception as e:
         pytest.fail(f"{e.__class__.__name__} : {e}")
+
+
+@pytest.mark.vllm
+@pytest.mark.parametrize(
+    "kwargs, expected_model, expected_name",
+    [
+        pytest.param(dict(), "org/model", "MyModel", id="default init"),
+        pytest.param(dict(checkpoint_path="/ckpt/m"), "/ckpt/m", "MyModel_checkpoint_ckpt_m", id="checkpoint_path"),
+        pytest.param(dict(model_name="org/other"), "org/other", "MyModel_checkpoint_org_other", id="model_name"),
+        pytest.param(dict(artifact_name="art:v0"), "/download", "MyModel_checkpoint_art_v0", id="artifact_name"),
+        pytest.param(dict(checkpoint_name="CN"), "org/model", "MyModel_checkpoint_CN", id="default init w/CN"),
+        pytest.param(
+            dict(checkpoint_name="CN", checkpoint_path="/ckpt/m"),
+            "/ckpt/m",
+            "MyModel_checkpoint_CN",
+            id="checkpoint_path w/CN",
+        ),
+        pytest.param(
+            dict(checkpoint_name="CN", model_name="org/other"),
+            "org/other",
+            "MyModel_checkpoint_CN",
+            id="model_name w/CN",
+        ),
+        pytest.param(
+            dict(checkpoint_name="CN", artifact_name="art:v0"),
+            "/download",
+            "MyModel_checkpoint_CN",
+            id="artifact_name w/CN",
+        ),
+    ],
+)
+def test_vllm_init_source(mocker: MockerFixture, kwargs: Any, expected_model: str, expected_name: str) -> None:
+    """Test that VLLMModel initializes correctly with different checkpoint source arguments."""
+
+    VLLM_patch = mocker.patch("eval_framework.llm.vllm.LLM")
+    mock_wandb_fs = MagicMock()
+    mock_wandb_fs.__enter__().find_hf_checkpoint_root_from_path_list.return_value = "/download"
+    mocker.patch("eval_framework.utils.file_ops.WandbFs", return_value=mock_wandb_fs)
+
+    # Test with a typical subclass
+    class MyModel(VLLMModel):
+        LLM_NAME = "org/model"
+        DEFAULT_FORMATTER = ConcatFormatter
+
+    model = MyModel(**kwargs)
+    assert VLLM_patch.call_args[1]["model"] == expected_model
+    assert model.name == expected_name
+    assert model.LLM_NAME == "org/model"  # TODO: Does it make sense????
+
+    # Test with the base class
+    if not kwargs or list(kwargs.keys()) == ["checkpoint_name"]:  # no checkpoint source -> error
+        with pytest.raises(ValueError):
+            VLLMModel(**kwargs)
+    else:
+        model = VLLMModel(**kwargs, formatter=ConcatFormatter())
+        assert VLLM_patch.call_args[1]["model"] == expected_model
+        assert model.name == expected_name.replace("MyModel", "VLLMModel")
+        assert model.LLM_NAME == expected_name.removeprefix("MyModel_checkpoint_")  # TODO: Does it make sense????
+
+
+@pytest.mark.vllm
+def test_vllm_init_source_multiple_args() -> None:
+    """Test that providing multiple checkpoint source arguments raises an error."""
+    with pytest.raises(ValueError):
+        VLLMModel(checkpoint_path="/ckpt/m", model_name="org/other")
+    with pytest.raises(ValueError):
+        VLLMModel(checkpoint_path="/ckpt/m", artifact_name="art:v0")
+    with pytest.raises(ValueError):
+        VLLMModel(model_name="org/other", artifact_name="art:v0")
+
+
+@pytest.mark.vllm
+@pytest.mark.parametrize(
+    "kwargs, expected_formatter_cls",
+    [
+        pytest.param(dict(model_name="org/other"), ConcatFormatter, id="default init"),
+        pytest.param(dict(model_name="org/other", formatter=IdentityFormatter()), IdentityFormatter, id="formatter"),
+        pytest.param(
+            dict(model_name="org/other", formatter_name="Llama3Formatter"), Llama3Formatter, id="formatter_name"
+        ),
+        pytest.param(
+            dict(
+                model_name="org/other",
+                formatter_name="HFFormatter",
+                formatter_kwargs=dict(hf_llm_name="HuggingFaceTB/SmolLM-135M-Instruct"),
+            ),
+            HFFormatter,
+            id="formatter_kwargs",
+        ),
+    ],
+)
+def test_vllm_init_formatter(mocker: MockerFixture, kwargs: Any, expected_formatter_cls: type) -> None:
+    mocker.patch("eval_framework.llm.vllm.LLM")
+
+    # Test with a typical subclass
+    class MyModel(VLLMModel):
+        LLM_NAME = "org/model"
+        DEFAULT_FORMATTER = ConcatFormatter
+
+    model = MyModel(**kwargs)
+    assert isinstance(model._formatter, expected_formatter_cls)
+
+    # Test with the base class
+    if len(kwargs) <= 1:  # no formatter -> error
+        with pytest.raises(OSError):
+            VLLMModel(**kwargs)
+    else:
+        model = VLLMModel(**kwargs)
+        assert isinstance(model._formatter, expected_formatter_cls)
+
+
+@pytest.mark.vllm
+def test_vllm_init_formatter_multiple_args() -> None:
+    """Test that providing multiple formatter arguments raises an error."""
+    with pytest.raises(ValueError):
+        VLLMModel(formatter=IdentityFormatter(), formatter_name="Llama3Formatter")
+    with pytest.raises(ValueError):
+        VLLMModel(formatter=IdentityFormatter(), formatter_kwargs=dict(hf_llm_name="HuggingFaceTB/SmolLM-135M"))

@@ -1,18 +1,17 @@
 import atexit
+import logging
 import os
 import shutil
 import signal
 import tempfile
-import warnings
+import time
 from pathlib import Path
 from types import FrameType
 from typing import Any
-from unittest.mock import patch
 
-import boto3
-import boto3.session
-import requests
 import wandb
+
+logger = logging.getLogger(__name__)
 
 
 class WandbFs:
@@ -23,24 +22,22 @@ class WandbFs:
     WandB provides a unified API to access artifacts with artifact.download().
 
     Several issues with the standard WandB artifact handling motivated the creation of this class:
-    1. Custom S3 endpoints: Users may have custom S3-compatible storage solutions.
-    The standard WandB artifact handling does not natively support self-signed certificates.
 
-    2. Artifacts may not always be in a HuggingFace-compatible format and may have extra directories.
+    1. Artifacts may not always be in a HuggingFace-compatible format and may have extra directories.
     This class includes methods to find HuggingFace checkpoints in downloaded artifacts.
 
-    3. Custom download paths with clean up upon failure: Rather than downloading to a
+    2. Custom download paths with clean up upon failure: Rather than downloading to a
     WandB-managed cache directory, this class allows users to specify a custom download path
     (which can be a persistent directory). If no path is provided, a temporary directory is
     created and cleaned up automatically.
 
-    4. Cleanup is handled in two ways, and exit handles are registered accordingly:
+    3. Cleanup is handled in two ways, and exit handles are registered accordingly:
         - when not used as a context manager atexit handlers ensure cleanup on normal script termination
         - when used as a context manager, cleanup is handled in __exit__ directly
 
     Args:
-        user_supplied_download_path: Optional path to download artifacts to. This acts
-        as a cache, so if the artifact is already present, it will not be re-downloaded.
+        user_supplied_download_path: Optional path to download artifacts to. If not given, WANDB_ARTIFACT_DIR is used.
+        This acts as a cache, so if the artifact is already present, it will not be re-downloaded.
 
     example usage:
     >> with WandbFs("./my-download-path/") as wandb_fs:
@@ -59,15 +56,12 @@ class WandbFs:
 
     def __init__(self, download_path: str | Path | None = None):
         self.api = wandb.Api()
+        if download_path is None and os.getenv("WANDB_ARTIFACT_DIR") is not None:
+            download_path = os.getenv("WANDB_ARTIFACT_DIR")
         self.user_supplied_download_path = Path(download_path) if download_path is not None else None
         self._temp_dir: tempfile.TemporaryDirectory | None = None
         self.download_path: Path | None = None
         self._setup_s3_client()
-        self.original_resource = boto3.session.Session().resource
-
-    def _unverified_resource(self, service_name: str, *args: Any, **kwargs: Any) -> Any:
-        kwargs["verify"] = False
-        return self.original_resource(service_name, *args, **kwargs)
 
     def setup_cleanup_handlers(self) -> None:
         """
@@ -108,12 +102,41 @@ class WandbFs:
         if not endpoint.startswith(("http://", "https://")):
             os.environ["AWS_ENDPOINT_URL"] = f"https://{endpoint}"
 
-    @property
-    def entity(self) -> str | None:
-        return self.api.default_entity
-
     def get_artifact(self, artifact_id: str, version: str = "latest") -> wandb.Artifact:
-        return self.api.artifact(f"{self.REGISTRY_MODEL_ROOT}/{artifact_id}:{version}")
+        name = f"{artifact_id}:{version}"
+        if "/" not in artifact_id:
+            name = f"{self.REGISTRY_MODEL_ROOT}/{name}"
+
+        # Prefer checkpoints refering to local file system (speed & immediate availability)
+        local_name = name if name.endswith("-local") else f"{name}-local"
+        if self.api.artifact_exists(local_name):
+            artifact = self.api.artifact(local_name)
+            availabilities = []
+            for f in artifact.files():
+                local_path = Path(f.path_uri.removeprefix("file://"))
+                availabilities.append(local_path.exists() and local_path.stat().st_size == f.size)
+            if all(availabilities):
+                if local_name != name:
+                    logger.info(f"Local artifact '{local_name}' available, using it instead of '{version}'.")
+                return artifact
+
+        # Otherwise fall back to the non-local version (requires download)
+        final_name = name.removesuffix("-local")
+        if final_name != name:
+            logger.info(f"Local artifact '{name}' NOT available, using '{final_name}' instead.")
+
+        if self.api.artifact_exists(local_name):
+            # Wait for a non-local artifact to pop-up, which is expected when a local one exists
+            end_time = int(os.getenv("WANDB_ARTIFACT_WAIT_TIMEOUT_SEC", "3600")) + time.time()
+            while end_time > time.time():
+                if self.api.artifact_exists(final_name):
+                    return self.api.artifact(final_name)
+                logger.info(f"Artifact '{final_name}' not found, retrying in 30 seconds...")
+                time.sleep(30)
+            raise RuntimeError(f"Timed out waiting for {final_name}, perhaps increase WANDB_ARTIFACT_WAIT_TIMEOUT_SEC.")
+        else:
+            # Return artifact or crash if not found
+            return self.api.artifact(final_name)
 
     def download_artifact(
         self,
@@ -129,6 +152,12 @@ class WandbFs:
         Returns:
             Path: The path to the downloaded artifact.
         """
+        if artifact.qualified_name.endswith("-local"):
+            self.download_path = Path(
+                os.path.commonpath([Path(f.path_uri.removeprefix("file://")) for f in artifact.files()])
+            )
+            return self.download_path if self.download_path.is_dir() else self.download_path.parent
+
         # create the base path for either a temp or user dir
         if self.user_supplied_download_path is None:
             self._temp_dir = tempfile.TemporaryDirectory()
@@ -141,20 +170,13 @@ class WandbFs:
         if self.user_supplied_download_path and self.download_path.exists():
             return self.download_path
 
-        with patch("boto3.session.Session.resource", new=self._unverified_resource):
-            with warnings.catch_warnings():
-                # this is to suppress the insecure request warning from urllib3
-                # the attribute exists, but mypy cannot resolve it
-                warnings.simplefilter(
-                    "ignore",
-                    category=requests.packages.urllib3.exceptions.InsecureRequestWarning,  # type: ignore
-                )
-                print(f"Downloading artifact to {self.download_path}")
-                # Since the cache lives inside the docker container, it is unused in future
-                # runs. Skipping the cache also avoids file duplication and extra copying.
-                self._artifact_downloaded = False
-                artifact_path = artifact.download(root=str(self.download_path), skip_cache=True)
-                self._artifact_downloaded = True
+        logger.info(f"Downloading artifact to {self.download_path}")
+        # Since the cache lives inside the docker container, it is unused in future
+        # runs. Skipping the cache also avoids file duplication and extra copying.
+        self._artifact_downloaded = False
+        skip_cache = os.getenv("WANDB_CACHE_SKIP", "true").lower() in ["true", "1", "yes"]
+        artifact_path = artifact.download(root=str(self.download_path), skip_cache=skip_cache)
+        self._artifact_downloaded = True
 
         return Path(artifact_path)
 
@@ -172,9 +194,8 @@ class WandbFs:
         if self.download_path and self.download_path.exists():
             checkpoint_roots = [x for x in Path(self.download_path).glob("**/config.json")]
             if checkpoint_roots:
-                assert len(checkpoint_roots) == 1, (
-                    "Multiple checkpoints found"
-                )  # if there are more than one, we have a problem
+                assert len(checkpoint_roots) == 1, "Multiple checkpoints found"
+                logger.info(f"Checkpoint found in {checkpoint_roots[0].parent}.")
                 return checkpoint_roots[0].parent
 
         return None
@@ -208,7 +229,7 @@ class WandbFs:
             and self.download_path.exists()
         ):
             # remove the contents of the download path.
-            print(f"Cleaning up user-specified download path...{self.download_path}")
+            logger.info(f"Cleaning up user-specified download path...{self.download_path}")
             # ignore errors because the directory is not empty
             shutil.rmtree(self.download_path, ignore_errors=True)
 
