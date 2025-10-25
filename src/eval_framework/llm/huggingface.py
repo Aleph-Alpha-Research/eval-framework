@@ -313,9 +313,9 @@ class HFLLM(BaseHFLLM):
 
         self.checkpoint_name = checkpoint_name
         if self.checkpoint_name is None and possible_name is not None:
-            self.checkpoint_name = possible_name.replace("/", "_").replace(":", "_")  # sanitize pathname
+            self.checkpoint_name = possible_name.replace("/", "_").replace(":", "_").strip("_")  # sanitize pathname
 
-        if not self.LLM_NAME:
+        if final_path:
             self.LLM_NAME = str(final_path)
 
         final_formatter = self._get_final_formatter(formatter, formatter_name, formatter_kwargs)

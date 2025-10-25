@@ -469,9 +469,9 @@ class VLLMModel(BaseVLLMModel):
 
         final_name = checkpoint_name
         if final_name is None and possible_name is not None:
-            final_name = possible_name.replace("/", "_").replace(":", "_")  # sanitize pathname
+            final_name = possible_name.replace("/", "_").replace(":", "_").strip("_")  # sanitize pathname
 
-        if not self.LLM_NAME:
+        if not getattr(self, "LLM_NAME", ""):
             self.LLM_NAME = final_name or str(final_path)
 
         final_formatter = self._get_final_formatter(formatter, formatter_name, formatter_kwargs)

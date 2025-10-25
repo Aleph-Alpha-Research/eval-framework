@@ -69,7 +69,9 @@ class BaseLLM(ABC):
         self, checkpoint_path: str | Path | None = None, model_name: str | None = None, artifact_name: str | None = None
     ) -> tuple[str | Path | None, str | None]:
         if (num_provided := sum(x is not None for x in [checkpoint_path, model_name, artifact_name])) == 0:
-            return None, None  # none given, so will use the LLM_NAME of the class
+            if not getattr(self, "LLM_NAME", ""):
+                raise ValueError("Either LLM_NAME, checkpoint_path, model_name, or artifact_name must be provided.")
+            return None, None  # no argument given, so will use the LLM_NAME of the class
         elif num_provided > 1:
             raise ValueError("At most one of `checkpoint_path`, `model_name`, or `artifact_name` must be provided.")
 
@@ -82,13 +84,13 @@ class BaseLLM(ABC):
         elif artifact_name is not None:
             from eval_framework.utils.file_ops import WandbFs
 
-            artifact_name, version = artifact_name.split(":", 1) if ":" in artifact_name else (artifact_name, "latest")
+            artifact_base, version = artifact_name.split(":", 1) if ":" in artifact_name else (artifact_name, "latest")
             with WandbFs() as wandb_fs:
-                self.artifact = wandb_fs.get_artifact(artifact_name, version)  # self.artifact being read in main()
+                self.artifact = wandb_fs.get_artifact(artifact_base, version)  # self.artifact being read in main()
                 wandb_fs.download_artifact(self.artifact)
                 file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
                 if file_root is None:
-                    raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
+                    raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_base}:{version}")
                 return file_root, artifact_name
 
         else:
@@ -106,6 +108,8 @@ class BaseLLM(ABC):
             raise ValueError("At most one of `formatter` or `formatter_name` must be provided.")
 
         if formatter:
+            if formatter_kwargs:
+                raise ValueError("Cannot provide `formatter_kwargs` when `formatter` is provided.")
             return formatter
         elif formatter_name:
             kwargs = formatter_kwargs or {}
