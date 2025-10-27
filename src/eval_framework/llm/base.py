@@ -59,6 +59,22 @@ class BaseLLM(ABC):
         messages: list[Sequence[Message]] = [sample.messages for sample in samples]
         return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
 
+    def post_process_completion(self, completion: str, sample: Sample) -> str:
+        """
+        Model-specific post-processing of generated completions.
+
+        Override this method to apply model-specific cleanup or transformations
+        (e.g., removing specific artifacts such as reasoning traces, handling special tokens).
+
+        Args:
+            completion: The raw completion string from the model
+            sample: The sample that was used to generate the completion
+
+        Returns:
+            The post-processed completion string
+        """
+        return completion
+
     def __del__(self) -> None:
         """
         Method for custom resource cleanup (particularly GPUs)
