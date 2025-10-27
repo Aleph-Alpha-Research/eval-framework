@@ -3,6 +3,7 @@
 ## Unreleased: 0.2.3-dev
 
 ### Models
+- Added `post_process_completion` method to `BaseLLM` class to enable model-specific post-processing of completions before task-specific post-processing is applied.
 - The BASELLM class is equiped with `del` call to clear up resources. VLLM and HF APIs offload the respective models off the gpus. OpenAI class disconnects the client.
 
 ### Tasks
@@ -11,6 +12,7 @@
 - `GSM8K`: In line with the convention of naming the recommended default version as the primary benchmark, `GSM8KLlamaVersion` has been renamed to `GSM8K`, and the original `GSM8K` has been renamed to `GSM8KEvalHarness`.
 
 ### Metrics
+- `MTBenchJudgePair` and `MTBenchJudgeSingle`: The expected error (KeyError) wouldn't be thrown, resulting in uncaught errors. We now use the same error handling that we do in other tasks.
 - Added `ConfidenceWeightedAccuracy`, i.e., the score = probability of the correctly-chosen answer (when it is also the argmax)
 - Added `DistributionalCorrectnessScore`, based on Burns (2025) Measuring Language Model Hallucinations Through Distributional Correctness.
 - Added `TernaryScore`, based on Kalai et al. (2025) Why language models hallucinate. arXiv:2509.04664.
@@ -76,6 +78,7 @@
 - Removed and relaxes several main-dependencies
 - Added support for weights and biases + determined pre-emption
 - Added missing `DOCKER_CODE_EXECUTION` variable to `.env.example`
+- Added accelerate import as default for [transformers] and boto3 in pyproject.toml
 
 ## 0.1.0
 
