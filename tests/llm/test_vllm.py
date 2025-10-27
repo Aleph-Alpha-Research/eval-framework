@@ -1008,17 +1008,17 @@ def test_vllm_init_source(mocker: MockerFixture, kwargs: Any, expected_model: st
     model = MyModel(**kwargs)
     assert VLLM_patch.call_args[1]["model"] == expected_model
     assert model.name == expected_name
-    assert model.LLM_NAME == "org/model"  # TODO: Does it make sense????
+    assert model.LLM_NAME == expected_model
 
     # Test with the base class
     if not kwargs or list(kwargs.keys()) == ["checkpoint_name"]:  # no checkpoint source -> error
         with pytest.raises(ValueError):
             VLLMModel(**kwargs)
     else:
-        model = VLLMModel(**kwargs, formatter=ConcatFormatter())
+        base_model = VLLMModel(**kwargs, formatter=ConcatFormatter())
         assert VLLM_patch.call_args[1]["model"] == expected_model
-        assert model.name == expected_name.replace("MyModel", "VLLMModel")
-        assert model.LLM_NAME == expected_name.removeprefix("MyModel_checkpoint_")  # TODO: Does it make sense????
+        assert base_model.name == expected_name.replace("MyModel", "VLLMModel")
+        assert base_model.LLM_NAME == expected_model
 
 
 @pytest.mark.vllm
@@ -1053,6 +1053,7 @@ def test_vllm_init_source_multiple_args() -> None:
     ],
 )
 def test_vllm_init_formatter(mocker: MockerFixture, kwargs: Any, expected_formatter_cls: type) -> None:
+    tokenizer_mock = mocker.patch("eval_framework.llm.vllm.get_tokenizer")
     mocker.patch("eval_framework.llm.vllm.LLM")
 
     # Test with a typical subclass
@@ -1065,11 +1066,12 @@ def test_vllm_init_formatter(mocker: MockerFixture, kwargs: Any, expected_format
 
     # Test with the base class
     if len(kwargs) <= 1:  # no formatter -> error
-        with pytest.raises(OSError):
+        tokenizer_mock.return_value.chat_template = None
+        with pytest.raises(ValueError):
             VLLMModel(**kwargs)
     else:
-        model = VLLMModel(**kwargs)
-        assert isinstance(model._formatter, expected_formatter_cls)
+        base_model = VLLMModel(**kwargs)
+        assert isinstance(base_model._formatter, expected_formatter_cls)
 
 
 @pytest.mark.vllm

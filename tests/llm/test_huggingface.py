@@ -222,10 +222,10 @@ def test_hfllm_init_source(mocker: MockerFixture, kwargs: Any, expected_model: s
         with pytest.raises(ValueError):
             HFLLM(**kwargs)
     else:
-        model = HFLLM(**kwargs, formatter=ConcatFormatter())
+        base_model = HFLLM(**kwargs, formatter=ConcatFormatter())
         assert HF_patch.call_args[0][0] == expected_model
-        assert model.name == expected_name.replace("MyModel", "HFLLM")
-        assert model.LLM_NAME == expected_model
+        assert base_model.name == expected_name.replace("MyModel", "HFLLM")
+        assert base_model.LLM_NAME == expected_model
 
 
 def test_hfllm_init_source_multiple_args() -> None:
@@ -257,8 +257,8 @@ def test_hfllm_init_source_multiple_args() -> None:
         ),
     ],
 )
-def test_vllm_init_formatter(mocker: MockerFixture, kwargs: Any, expected_formatter_cls: type) -> None:
-    mocker.patch("eval_framework.llm.huggingface.AutoTokenizer.from_pretrained")
+def test_hfllm_init_formatter(mocker: MockerFixture, kwargs: Any, expected_formatter_cls: type) -> None:
+    tokenizer_mock = mocker.patch("eval_framework.llm.huggingface.AutoTokenizer.from_pretrained")
     mocker.patch("eval_framework.llm.huggingface.AutoModelForCausalLM.from_pretrained")
 
     # Test with a typical subclass
@@ -271,11 +271,12 @@ def test_vllm_init_formatter(mocker: MockerFixture, kwargs: Any, expected_format
 
     # Test with the base class
     if len(kwargs) <= 1:  # no formatter -> error
-        with pytest.raises(OSError):
+        tokenizer_mock.return_value.chat_template = None
+        with pytest.raises(ValueError):
             HFLLM(**kwargs)
     else:
-        model = HFLLM(**kwargs)
-        assert isinstance(model._formatter, expected_formatter_cls)
+        base_model = HFLLM(**kwargs)
+        assert isinstance(base_model._formatter, expected_formatter_cls)
 
 
 def test_hfllm_init_formatter_multiple_args() -> None:

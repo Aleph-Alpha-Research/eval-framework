@@ -140,7 +140,9 @@ class BaseVLLMModel(BaseLLM):
 
         self.sampling_params: SamplingParams = self._process_sampling_params(sampling_params)
 
-        logger.info(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
+        logger.info(
+            f"{RED}[ Model initialized ------------------- {RESET}{self.checkpoint_path or self.LLM_NAME} {RED}]{RESET}"
+        )
         self._set_formatter(formatter)
 
     def _process_sampling_params(self, sampling_params: SamplingParams | dict[str, Any] | None) -> SamplingParams:
@@ -467,12 +469,12 @@ class VLLMModel(BaseVLLMModel):
     ) -> None:
         final_path, possible_name = self._get_final_checkpoint(checkpoint_path, model_name, artifact_name)
 
+        if final_path:
+            self.LLM_NAME = str(final_path)
+
         final_name = checkpoint_name
         if final_name is None and possible_name is not None:
             final_name = possible_name.replace("/", "_").replace(":", "_").strip("_")  # sanitize pathname
-
-        if not getattr(self, "LLM_NAME", ""):
-            self.LLM_NAME = final_name or str(final_path)
 
         final_formatter = self._get_final_formatter(formatter, formatter_name, formatter_kwargs)
 
