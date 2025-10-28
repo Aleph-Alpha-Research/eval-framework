@@ -13,6 +13,7 @@ class JsonFormatEvaluation(BaseModel):
     is_just_json: bool = False
     is_valid_json: bool = False
     fulfills_schema: bool | None = None
+    exact_match: bool | None = None
     json_parsing_error: str | None = None
     schema_validation_error: str | None = None
 
@@ -25,6 +26,7 @@ class JsonFormat(BaseMetric[Completion]):
             "is_just_json",
             "is_valid_json",
             "fulfills_schema",
+            "exact_match",
         ]
 
         if response.error is not None:
@@ -40,11 +42,17 @@ class JsonFormat(BaseMetric[Completion]):
             ]
 
         json_dict, grading = self._extract_and_parse_json(response.completion)
-        schema = json.loads(str(response.ground_truth))["json_schema"]
+
+        ground_truth_dict = json.loads(str(response.ground_truth))
+        schema = ground_truth_dict["json_schema"]
+        expected_object = ground_truth_dict.get("expected_output", None)
+
         if schema and json_dict is None:
             grading.fulfills_schema = False
         if schema and json_dict is not None:
             grading = self._validate_json_against_schema(json_dict, schema, grading)
+        if expected_object is not None and json_dict is not None:
+            grading.exact_match = json_dict == expected_object
 
         results = []
         for key in keys:
