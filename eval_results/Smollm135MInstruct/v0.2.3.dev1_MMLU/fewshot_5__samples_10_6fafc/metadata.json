@@ -1,0 +1,52 @@
+{
+  "batch_size": 1,
+  "delete_output_dir_after_upload": false,
+  "description": null,
+  "end_time": "2025-10-28 18:18:37.546125+00:00",
+  "eval_framework_version": "0.2.3.dev1",
+  "hf_revision": null,
+  "hf_upload_dir": "",
+  "hf_upload_repo": "Aleph-Alpha/evaluation-results",
+  "judge_model_args": {},
+  "language": "English",
+  "llm_args": {},
+  "llm_class": "Smollm135MInstruct",
+  "llm_judge_class": null,
+  "llm_name": "Smollm135MInstruct",
+  "max_tokens": null,
+  "metrics": [
+    "Accuracy Loglikelihood",
+    "Accuracy Normalized Loglikelihood"
+  ],
+  "num_fewshot": 5,
+  "num_samples": 10,
+  "output_dir": "eval_results",
+  "perturbation_config": null,
+  "primary_metrics": null,
+  "save_intermediate_results": true,
+  "save_logs": true,
+  "start_time": "2025-10-28 18:18:33.632133+00:00",
+  "task_metadata": {
+    "dataset_path": "cais/mmlu",
+    "fewshot_split": "dev",
+    "metrics": [
+      "Accuracy Loglikelihood",
+      "Accuracy Normalized Loglikelihood"
+    ],
+    "response_type": "loglikelihoods",
+    "sample_split": "test",
+    "subjects": [
+      "abstract_algebra"
+    ]
+  },
+  "task_name": "MMLU",
+  "task_output_dir": "eval_results/Smollm135MInstruct/v0.2.3.dev1_MMLU/fewshot_5__samples_10_6fafc",
+  "task_subjects": [
+    "abstract_algebra"
+  ],
+  "total_time": 3.913992709480226,
+  "wandb_entity": null,
+  "wandb_project": null,
+  "wandb_run_id": null,
+  "wandb_upload_results": true
+}

@@ -1,0 +1,15 @@
+{
+    "ErrorFreeRatio Accuracy Loglikelihood": 1.0,
+    "Average Accuracy Loglikelihood": 0.3,
+    "StdErr Accuracy Loglikelihood": 0.15275252316519466,
+    "NumSamples Accuracy Loglikelihood": 10,
+    "ErrorFreeRatio Accuracy Normalized Loglikelihood": 1.0,
+    "Average Accuracy Normalized Loglikelihood": 0.3,
+    "StdErr Accuracy Normalized Loglikelihood": 0.15275252316519466,
+    "NumSamples Accuracy Normalized Loglikelihood": 10,
+    "ErrorFreeRatio Bytes": 1.0,
+    "Average Bytes": 1105.6,
+    "ErrorFreeRatio SequencePositions": 1.0,
+    "Average SequencePositions": 384.9,
+    "Average Bytes per Sequence Position": 2.8724343985450767
+}
