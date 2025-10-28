@@ -24,6 +24,7 @@
 - Config hashes in output directories now do not consider config elements which are irrelevant to actual results.
 - Fix: WandB initialization does not crash on overly long model names anymore.
 - Fix: "Object of type Role is not JSON serializable" type of errors were fixed.
+- Fix: defining versions in the .toml file for [all] fixes pip install eval_framework[all]
 
 ## 0.2.2
 
