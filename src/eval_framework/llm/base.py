@@ -91,15 +91,16 @@ class BaseLLM(ABC):
         elif num_provided > 1:
             raise ValueError("At most one of `checkpoint_path`, `model_name`, or `artifact_name` must be provided.")
 
-        if checkpoint_path is not None:
+        elif checkpoint_path is not None:
             return checkpoint_path, str(checkpoint_path)
 
         elif model_name is not None:
             return model_name, model_name
 
-        elif artifact_name is not None:
+        else:
             from eval_framework.utils.file_ops import WandbFs
 
+            assert artifact_name is not None
             artifact_base, version = artifact_name.split(":", 1) if ":" in artifact_name else (artifact_name, "latest")
             with WandbFs() as wandb_fs:
                 self.artifact = wandb_fs.get_artifact(artifact_base, version)  # self.artifact being read in main()
@@ -108,9 +109,6 @@ class BaseLLM(ABC):
                 if file_root is None:
                     raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_base}:{version}")
                 return file_root, artifact_name
-
-        else:
-            raise RuntimeError("Unreachable code reached.")
 
     def _get_final_formatter(
         self,
