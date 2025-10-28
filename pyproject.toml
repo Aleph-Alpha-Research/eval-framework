@@ -79,7 +79,19 @@ optional = [
   "jinja2>=3.1.6,<4"
 ]
 all = [
-  "eval_framework[determined,api,openai,transformers,accelerate,vllm,comet,optional,mistral]"
+  "determined>=0.38,<0.39",
+  "tensorboard==2.19.0",
+  "aleph-alpha-client>=10,<11",
+  "openai>=1.62,<2",
+  "tiktoken>=0.9,<0.10",
+  "transformers>=4.45.2,<5",
+  "torch>=2.5,<3",
+  "accelerate>=0.30.0,<1",
+  "vllm>=0.8.5,<0.9",
+  "mistral-common>=1.7,<2",
+  "huggingface-hub>=0.33.2,<0.34",
+  "unbabel-comet>=2.2.6,<3",
+  "jinja2>=3.1.6,<4",
 ]
 
 [project.urls]
