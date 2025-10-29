@@ -152,7 +152,7 @@ jobs:
         run: |
           python -m venv isolated_venv
           source isolated_venv/bin/activate
-          pip install "dist/*.whl${{ matrix.extras }}"
+          pip install $(ls dist/*.whl)${{ matrix.extras }}
           pip show eval-framework
 
       - name: Verify core functionality
