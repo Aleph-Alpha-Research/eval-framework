@@ -12,10 +12,10 @@ from template_formatting.formatter import (
     ConcatFormatter,
     HFFormatter,
     IdentityFormatter,
-    Llama3Formatter,
     Message,
     Role,
 )
+from tests.llm.test_base import LLM_INIT_FORMATTER_PARAMS, LLM_INIT_SOURCE_PARAMS
 
 
 @pytest.mark.gpu
@@ -169,34 +169,7 @@ def test_resource_cleanup() -> None:
         pytest.fail(f"{e.__class__.__name__} : {e}")
 
 
-@pytest.mark.parametrize(
-    "kwargs, expected_model, expected_name",
-    [
-        pytest.param(dict(), "org/model", "MyModel", id="default init"),
-        pytest.param(dict(checkpoint_path="/ckpt/m"), "/ckpt/m", "MyModel_checkpoint_ckpt_m", id="checkpoint_path"),
-        pytest.param(dict(model_name="org/other"), "org/other", "MyModel_checkpoint_org_other", id="model_name"),
-        pytest.param(dict(artifact_name="art:v0"), "/download", "MyModel_checkpoint_art_v0", id="artifact_name"),
-        pytest.param(dict(checkpoint_name="CN"), "org/model", "MyModel_checkpoint_CN", id="default init w/CN"),
-        pytest.param(
-            dict(checkpoint_name="CN", checkpoint_path="/ckpt/m"),
-            "/ckpt/m",
-            "MyModel_checkpoint_CN",
-            id="checkpoint_path w/CN",
-        ),
-        pytest.param(
-            dict(checkpoint_name="CN", model_name="org/other"),
-            "org/other",
-            "MyModel_checkpoint_CN",
-            id="model_name w/CN",
-        ),
-        pytest.param(
-            dict(checkpoint_name="CN", artifact_name="art:v0"),
-            "/download",
-            "MyModel_checkpoint_CN",
-            id="artifact_name w/CN",
-        ),
-    ],
-)
+@pytest.mark.parametrize("kwargs, expected_model, expected_name", LLM_INIT_SOURCE_PARAMS)
 def test_hfllm_init_source(mocker: MockerFixture, kwargs: Any, expected_model: str, expected_name: str) -> None:
     """Test that VLLMModel initializes correctly with different checkpoint source arguments."""
 
@@ -238,25 +211,7 @@ def test_hfllm_init_source_multiple_args() -> None:
         HFLLM(model_name="org/other", artifact_name="art:v0")
 
 
-@pytest.mark.parametrize(
-    "kwargs, expected_formatter_cls",
-    [
-        pytest.param(dict(model_name="org/other"), ConcatFormatter, id="default init"),
-        pytest.param(dict(model_name="org/other", formatter=IdentityFormatter()), IdentityFormatter, id="formatter"),
-        pytest.param(
-            dict(model_name="org/other", formatter_name="Llama3Formatter"), Llama3Formatter, id="formatter_name"
-        ),
-        pytest.param(
-            dict(
-                model_name="org/other",
-                formatter_name="HFFormatter",
-                formatter_kwargs=dict(hf_llm_name="HuggingFaceTB/SmolLM-135M-Instruct"),
-            ),
-            HFFormatter,
-            id="formatter_kwargs",
-        ),
-    ],
-)
+@pytest.mark.parametrize("kwargs, expected_formatter_cls", LLM_INIT_FORMATTER_PARAMS)
 def test_hfllm_init_formatter(mocker: MockerFixture, kwargs: Any, expected_formatter_cls: type) -> None:
     tokenizer_mock = mocker.patch("eval_framework.llm.huggingface.AutoTokenizer.from_pretrained")
     mocker.patch("eval_framework.llm.huggingface.AutoModelForCausalLM.from_pretrained")
