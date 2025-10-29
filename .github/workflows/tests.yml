@@ -187,7 +187,7 @@ jobs:
 
               # Test task registry (comet required for FloresPlus tasks)
               python -c "from eval_framework.tasks.task_names import registered_tasks_iter; print(f'✓ {len(list(registered_tasks_iter()))} tasks loaded')"
-              
+
               echo "✓ All extras verified"
               ;;
           esac
