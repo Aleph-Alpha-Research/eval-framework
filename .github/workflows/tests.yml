@@ -183,7 +183,9 @@ jobs:
             "[all]")
               python -c "from eval_framework.llm.huggingface import HFLLM"
               python -c "from eval_framework.llm.openai import OpenAI"
-              python -c "from eval_framework.llm.vllm import VLLM"
+
+              # Skip VLLM import since no GPU in CI
+              echo "[INFO] Skipping VLLM import (no CUDA available)"
 
               # Test task registry (comet required for FloresPlus tasks)
               python -c "from eval_framework.tasks.task_names import registered_tasks_iter; print(f'✓ {len(list(registered_tasks_iter()))} tasks loaded')"
