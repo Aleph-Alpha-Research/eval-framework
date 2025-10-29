@@ -125,7 +125,7 @@ jobs:
           file: Dockerfile
           push: true
           tags: ${{ needs.tag.outputs.image }}
-  
+
   test-pip-install:
     name: Test pip install in clean venv
     runs-on: ubuntu-latest
@@ -158,16 +158,16 @@ jobs:
       - name: Verify core functionality
         run: |
           source isolated_venv/bin/activate
-          
+
           # Test imports
           python -c "import eval_framework; print(f'✓ Version: {eval_framework.__version__}')"
           python -c "from eval_framework.llm.base import BaseLLM; print('✓ BaseLLM')"
           python -c "from eval_framework.tasks.base import BaseTask; print('✓ BaseTask')"
           python -c "from template_formatting.formatter import HFFormatter; print('✓ HFFormatter')"
-          
+
           # Test CLI
           eval_framework --help > /dev/null && echo "✓ CLI works"
-          
+
           # Test task registry
           python -c "from eval_framework.tasks import task_registry; print(f'✓ {len(task_registry)} tasks loaded')"
 
@@ -175,7 +175,7 @@ jobs:
         if: matrix.extras != ''
         run: |
           source isolated_venv/bin/activate
-          
+
           case "${{ matrix.extras }}" in
             "[transformers]")
               python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
