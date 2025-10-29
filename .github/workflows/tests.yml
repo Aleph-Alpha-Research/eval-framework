@@ -168,9 +168,6 @@ jobs:
           # Test CLI
           eval_framework --help > /dev/null && echo "✓ CLI works"
 
-          # Test task registry
-          python -c "from eval_framework.tasks import task_registry; print(f'✓ {len(task_registry)} tasks loaded')"
-
       - name: Verify extras functionality
         if: matrix.extras != ''
         run: |
@@ -187,6 +184,10 @@ jobs:
               python -c "from eval_framework.llm.huggingface import HFLLM"
               python -c "from eval_framework.llm.openai import OpenAI"
               python -c "from eval_framework.llm.vllm import VLLM"
+
+              # Test task registry (comet required for FloresPlus tasks)
+              python -c "from eval_framework.tasks.task_names import registered_tasks_iter; print(f'✓ {len(list(registered_tasks_iter()))} tasks loaded')"
+              
               echo "✓ All extras verified"
               ;;
           esac
