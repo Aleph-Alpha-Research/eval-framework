@@ -1,0 +1,51 @@
+{
+  "batch_size": 1,
+  "delete_output_dir_after_upload": false,
+  "description": null,
+  "eval_framework_version": "0.2.3.dev1",
+  "hf_revision": null,
+  "hf_upload_dir": "",
+  "hf_upload_repo": "Aleph-Alpha/evaluation-results",
+  "judge_model_args": {},
+  "language": "English",
+  "llm_args": {
+    "sampling_params": {
+      "max_tokens": 150,
+      "temperature": 0.7,
+      "top_p": 0.95
+    }
+  },
+  "llm_class": "Qwen3_0_6B_VLLM",
+  "llm_judge_class": null,
+  "llm_name": "Qwen3_0_6B_VLLM",
+  "max_tokens": null,
+  "metrics": [
+    "Accuracy Completion"
+  ],
+  "num_fewshot": 5,
+  "num_samples": 10,
+  "output_dir": "eval",
+  "perturbation_config": null,
+  "primary_metrics": null,
+  "save_intermediate_results": true,
+  "save_logs": true,
+  "task_metadata": {
+    "dataset_path": "gsm8k",
+    "fewshot_split": "",
+    "metrics": [
+      "Accuracy Completion"
+    ],
+    "response_type": "completion",
+    "sample_split": "test",
+    "subjects": [
+      "main"
+    ]
+  },
+  "task_name": "GSM8K",
+  "task_output_dir": "eval/Qwen3_0_6B_VLLM/v0.2.3.dev1_GSM8K/fewshot_5__samples_10_962c5",
+  "task_subjects": null,
+  "wandb_entity": null,
+  "wandb_project": null,
+  "wandb_run_id": null,
+  "wandb_upload_results": true
+}

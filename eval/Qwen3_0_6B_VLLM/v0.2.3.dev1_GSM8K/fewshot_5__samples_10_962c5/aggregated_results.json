@@ -1,0 +1,11 @@
+{
+    "Average Accuracy Completion": 0.3,
+    "Average Bytes": 4260.3,
+    "Average Bytes per Sequence Position": 3.438498789346247,
+    "Average SequencePositions": 1239.0,
+    "ErrorFreeRatio Accuracy Completion": 1.0,
+    "ErrorFreeRatio Bytes": 1.0,
+    "ErrorFreeRatio SequencePositions": 1.0,
+    "NumSamples Accuracy Completion": 10,
+    "StdErr Accuracy Completion": 0.15275252316519466
+}
