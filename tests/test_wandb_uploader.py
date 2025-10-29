@@ -53,7 +53,7 @@ def custom_upload_function() -> Generator[None, None, None]:
 
 def get_logged_artifact(mock_wandb: Mock) -> list[str]:
     assert len(mock_wandb.run._logged_artifacts) == 1
-    return sorted([f.path_uri for f in mock_wandb.run._logged_artifacts[0]["artifact"].files()])
+    return sorted([f.path_uri for f in mock_wandb.run._logged_artifacts[0].files()])
 
 
 def test_upload_only_json(mock_wandb: Mock, sample_config: EvalConfig, sample_output_dir: Path) -> None:
@@ -152,7 +152,6 @@ def test_name_and_alias(mock_wandb: Mock, sample_config: EvalConfig, sample_outp
         uploader.upload("test-model", sample_config, sample_output_dir)
 
         assert len(mock_wandb.run._logged_artifacts) == 1
-        artifact = mock_wandb.run._logged_artifacts[0]["artifact"]
-        aliases = mock_wandb.run._logged_artifacts[0]["aliases"]
-        assert artifact.name == "test-model__ARC__fewshot_0__samples_10__1e5d9"
-        assert "H-03b43ebe7c" in aliases
+        artifact = mock_wandb.run._logged_artifacts[0]
+        assert artifact.name.split(":")[0] == "test-model__ARC__fewshot_0__samples_10__1e5d9"
+        assert "H-03b43ebe7c" in artifact.aliases

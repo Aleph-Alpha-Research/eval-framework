@@ -1,4 +1,4 @@
-# Controlling Upload Results Guide
+# Controlling HuggingFace Upload Results Guide
 
 This guide explains how to upload evaluation results to HuggingFace repositories and manage your result storage.
 

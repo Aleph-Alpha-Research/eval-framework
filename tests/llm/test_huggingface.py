@@ -1,12 +1,21 @@
-from unittest.mock import Mock
+from typing import Any
+from unittest.mock import MagicMock, Mock
 
 import pytest
 import torch
+from pytest_mock import MockerFixture
 
 from eval_framework.llm.huggingface import HFLLM, SmolLM135M, StopSequenceCriteria
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import HFFormatter, Message, Role
+from template_formatting.formatter import (
+    ConcatFormatter,
+    HFFormatter,
+    IdentityFormatter,
+    Message,
+    Role,
+)
+from tests.llm.test_base import LLM_INIT_FORMATTER_PARAMS, LLM_INIT_SOURCE_PARAMS
 
 
 @pytest.mark.gpu
@@ -158,3 +167,76 @@ def test_resource_cleanup() -> None:
         del judge_model
     except Exception as e:
         pytest.fail(f"{e.__class__.__name__} : {e}")
+
+
+@pytest.mark.parametrize("kwargs, expected_model, expected_name", LLM_INIT_SOURCE_PARAMS)
+def test_hfllm_init_source(mocker: MockerFixture, kwargs: Any, expected_model: str, expected_name: str) -> None:
+    """Test that VLLMModel initializes correctly with different checkpoint source arguments."""
+
+    mocker.patch("eval_framework.llm.huggingface.AutoTokenizer.from_pretrained")
+    HF_patch = mocker.patch("eval_framework.llm.huggingface.AutoModelForCausalLM.from_pretrained")
+
+    mock_wandb_fs = MagicMock()
+    mock_wandb_fs.__enter__().find_hf_checkpoint_root_from_path_list.return_value = "/download"
+    mocker.patch("eval_framework.utils.file_ops.WandbFs", return_value=mock_wandb_fs)
+
+    # Test with a typical subclass
+    class MyModel(HFLLM):
+        LLM_NAME = "org/model"
+        DEFAULT_FORMATTER = ConcatFormatter
+
+    model = MyModel(**kwargs)
+    assert HF_patch.call_args[0][0] == expected_model
+    assert model.name == expected_name
+    assert model.LLM_NAME == expected_model
+
+    # Test with the base class
+    if not kwargs or list(kwargs.keys()) == ["checkpoint_name"]:  # no checkpoint source -> error
+        with pytest.raises(ValueError):
+            HFLLM(**kwargs)
+    else:
+        base_model = HFLLM(**kwargs, formatter=ConcatFormatter())
+        assert HF_patch.call_args[0][0] == expected_model
+        assert base_model.name == expected_name.replace("MyModel", "HFLLM")
+        assert base_model.LLM_NAME == expected_model
+
+
+def test_hfllm_init_source_multiple_args() -> None:
+    """Test that providing multiple checkpoint source arguments raises an error."""
+    with pytest.raises(ValueError):
+        HFLLM(checkpoint_path="/ckpt/m", model_name="org/other")
+    with pytest.raises(ValueError):
+        HFLLM(checkpoint_path="/ckpt/m", artifact_name="art:v0")
+    with pytest.raises(ValueError):
+        HFLLM(model_name="org/other", artifact_name="art:v0")
+
+
+@pytest.mark.parametrize("kwargs, expected_formatter_cls", LLM_INIT_FORMATTER_PARAMS)
+def test_hfllm_init_formatter(mocker: MockerFixture, kwargs: Any, expected_formatter_cls: type) -> None:
+    tokenizer_mock = mocker.patch("eval_framework.llm.huggingface.AutoTokenizer.from_pretrained")
+    mocker.patch("eval_framework.llm.huggingface.AutoModelForCausalLM.from_pretrained")
+
+    # Test with a typical subclass
+    class MyModel(HFLLM):
+        LLM_NAME = "org/model"
+        DEFAULT_FORMATTER = ConcatFormatter
+
+    model = MyModel(**kwargs)
+    assert isinstance(model._formatter, expected_formatter_cls)
+
+    # Test with the base class
+    if len(kwargs) <= 1:  # no formatter -> error
+        tokenizer_mock.return_value.chat_template = None
+        with pytest.raises(ValueError):
+            HFLLM(**kwargs)
+    else:
+        base_model = HFLLM(**kwargs)
+        assert isinstance(base_model._formatter, expected_formatter_cls)
+
+
+def test_hfllm_init_formatter_multiple_args() -> None:
+    """Test that providing multiple formatter arguments raises an error."""
+    with pytest.raises(ValueError):
+        HFLLM(formatter=IdentityFormatter(), formatter_name="Llama3Formatter")
+    with pytest.raises(ValueError):
+        HFLLM(formatter=IdentityFormatter(), formatter_kwargs=dict(hf_llm_name="HuggingFaceTB/SmolLM-135M"))

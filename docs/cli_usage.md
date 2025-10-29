@@ -118,12 +118,12 @@ Show help message and exit.
 
 ## Running Hugging Face Models
 
-You can run models directly from Hugging Face Hub using the `HFLLM_from_name` class:
+You can run models directly from Hugging Face Hub using the `HFLLM` class:
 
 ```bash
 uv run eval_framework \
-    --llm-name 'eval_framework.llm.huggingface.HFLLM_from_name' \
-    --llm-args model_name="microsoft/DialoGPT-medium" formatter="Llama3Formatter" \
+    --llm-name 'eval_framework.llm.huggingface.HFLLM' \
+    --llm-args model_name="microsoft/DialoGPT-medium" formatter_name="Llama3Formatter" \
     --task-name "MMLU" \
     --task-subjects "abstract_algebra" \
     --output-dir ./eval_results \
@@ -131,7 +131,7 @@ uv run eval_framework \
     --num-samples 10
 ```
 
-This approach allows you to evaluate any model available on Hugging Face by specifying the `model_name` and appropriate `formatter` in the `--llm-args` parameter.
+This approach allows you to evaluate any model available on Hugging Face by specifying the `model_name` and appropriate `formatter_name` in the `--llm-args` parameter.
 
 ## Configuring Sampling Parameters for vLLM Models
 

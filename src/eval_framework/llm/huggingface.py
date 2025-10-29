@@ -1,7 +1,10 @@
 import gc
 import logging
+import os
+import warnings
 from collections.abc import Callable, Sequence
 from functools import partial
+from pathlib import Path
 from typing import Any
 
 import torch
@@ -19,7 +22,6 @@ from eval_framework.shared.types import (
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
-from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message
 
 logger = logging.getLogger(__name__)
@@ -74,7 +76,7 @@ class RepeatedTokenSequenceCriteria(StoppingCriteria):
         return torch.BoolTensor([False]).to(input_ids.device)
 
 
-class HFLLM(BaseLLM):
+class BaseHFLLM(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
@@ -289,29 +291,62 @@ class HFLLM(BaseLLM):
         return config.max_position_embeddings if hasattr(config, "max_position_embeddings") else None
 
 
-class HFLLM_from_name(HFLLM):
+class HFLLM(BaseHFLLM):
+    """A class to create HFLLM instances from various model sources."""
+
+    def __init__(
+        self,
+        # Model source (3 options: file path, HuggingFace model name, Wandb artifact name):
+        checkpoint_path: str | Path | None = None,
+        model_name: str | None = None,
+        artifact_name: str | None = None,
+        # Formatter (2 options):
+        formatter: BaseFormatter | None = None,
+        formatter_name: str | None = None,
+        formatter_kwargs: dict[str, Any] | None = None,
+        # Explicit name for the `name` property:
+        checkpoint_name: str | None = None,
+        # HFLLM parameters:
+        **kwargs: Any,
+    ) -> None:
+        final_path, possible_name = self._get_final_checkpoint(checkpoint_path, model_name, artifact_name)
+
+        self.checkpoint_name = checkpoint_name
+        if self.checkpoint_name is None and possible_name is not None:
+            self.checkpoint_name = possible_name.replace("/", "_").replace(":", "_").strip("_")  # sanitize pathname
+
+        if final_path:
+            self.LLM_NAME = str(final_path)
+
+        final_formatter = self._get_final_formatter(formatter, formatter_name, formatter_kwargs)
+
+        super().__init__(
+            formatter=final_formatter,
+            **kwargs,
+        )
+
+    @property
+    def name(self) -> str:
+        if self.checkpoint_name is not None:
+            return f"{self.__class__.__name__}_checkpoint_{self.checkpoint_name}"
+        return super().name
+
+
+class HFLLM_from_name(HFLLM):  # deprecated
     """
     A generic class to create HFLLM instances from a given model name.
     """
 
-    def __init__(self, model_name: str | None = None, formatter: str = "Llama3Formatter", **kwargs: Any) -> None:
-        if model_name is None:
-            raise ValueError("model_name is required")
-
-        self.LLM_NAME = model_name
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.tokenizer = AutoTokenizer.from_pretrained(self.LLM_NAME)
-        self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
-
-        # Lazy formatter initialization - only create the one we need
-        selected_formatter = self.get_formatter(formatter, model_name)
-
-        print(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
-        print(f"{RED}[ Formatter: {formatter} ]{RESET}")
-        self._set_formatter(selected_formatter)
+    def __init__(self, model_name: str, formatter: str = "Llama3Formatter", **kwargs: Any) -> None:
+        warnings.warn("`HFLLM_from_name` is deprecated, please use `HFLLM`.", DeprecationWarning)
+        super().__init__(
+            model_name=model_name,
+            formatter_name=formatter,
+            **kwargs,
+        )
 
 
-class HFLLMRegistryModel(HFLLM):
+class HFLLMRegistryModel(HFLLM):  # deprecated
     """
     A class to create HFLLM instances from registered models in Wandb registry.
     Downloads the model artifacts from Wandb and creates a local HFLLM instance.
@@ -334,33 +369,19 @@ class HFLLMRegistryModel(HFLLM):
             formatter: Type of formatter to use (default: "")
             **kwargs: Additional arguments passed to the parent class
         """
-        print(f"{RED}[ Loading registered model from Wandb: {artifact_name}:{version} ]{RESET}")
+        warnings.warn("`HFLLMRegistryModel` is deprecated, please use `HFLLM`.", DeprecationWarning)
+
         download_path = kwargs.pop("download_path", None)
-        with WandbFs(download_path=download_path) as wandb_fs:
-            # needs to be self since we check to see if this attribute exists in main
-            self.artifact = wandb_fs.get_artifact(artifact_name, version)
-            wandb_fs.download_artifact(self.artifact)
-            file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
+        if download_path is not None and os.getenv("WANDB_ARTIFACT_DIR") is None:
+            os.environ["WANDB_ARTIFACT_DIR"] = download_path
 
-            if file_root is None:
-                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_name}:{version}")
-
-            assert wandb_fs.download_path is not None
-            print(f"{RED}[ Model located at: {file_root} ]{RESET}")
-
-            self.LLM_NAME = str(file_root)
-            self.artifact_name = artifact_name
-            self.artifact_version = version
-            selected_formatter = self.get_formatter(formatter, formatter_identifier)
-            super().__init__(formatter=selected_formatter, **kwargs)
-
-        print(f"{RED}[ Model initialized --------------------- {RESET}")
-        print(f"{self.artifact_name}:{self.artifact_version} {RED}]{RESET}")
-        print(f"{RED}[ Formatter: {formatter} ]{RESET}")
-
-    @property
-    def name(self) -> str:
-        return f"{self.__class__.__name__}_checkpoint_{self.artifact_name}/{self.artifact_version}"
+        super().__init__(
+            artifact_name=f"{artifact_name}:{version}",
+            formatter_name=formatter,
+            formatter_kwargs={"hf_llm_name": formatter_identifier} if formatter_identifier else {},
+            checkpoint_name=f"{artifact_name}/{version}",
+            **kwargs,
+        )
 
 
 class Pythia410m(HFLLM):
