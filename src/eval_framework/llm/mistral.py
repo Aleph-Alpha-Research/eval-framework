@@ -1,4 +1,5 @@
 from functools import partial
+from pathlib import Path
 from typing import Any, Literal, override
 
 from vllm import SamplingParams
@@ -32,26 +33,38 @@ class MistralAdapter(VLLMTokenizerAPI[list[Message]]):
 class MistralVLLM(VLLMModel):
     def __init__(
         self,
+        # Model source (3 options: file path, HuggingFace model name, Wandb artifact name):
+        checkpoint_path: str | Path | None = None,
+        model_name: str | None = None,
+        artifact_name: str | None = None,
+        # Formatter (2 options):
         formatter: BaseFormatter | None = None,
+        formatter_name: str | None = None,
+        formatter_kwargs: dict[str, Any] | None = None,
+        # Explicit name for the `name` property:
+        checkpoint_name: str | None = None,
+        # VLLM parameters (not complete):
         max_model_len: int | None = None,
         tensor_parallel_size: int = 1,
         gpu_memory_utilization: float = 0.9,
         batch_size: int = 1,
-        checkpoint_path: str | None = None,
-        checkpoint_name: str | None = None,
         sampling_params: SamplingParams | dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
         model_args = {"tokenizer_mode": "mistral", "config_format": "mistral", "load_format": "mistral"}
         super().__init__(
-            formatter,
-            max_model_len,
-            tensor_parallel_size,
-            gpu_memory_utilization,
-            batch_size,
-            checkpoint_path,
-            checkpoint_name,
-            sampling_params,
+            checkpoint_path=checkpoint_path,
+            model_name=model_name,
+            artifact_name=artifact_name,
+            formatter=formatter,
+            formatter_name=formatter_name,
+            formatter_kwargs=formatter_kwargs,
+            checkpoint_name=checkpoint_name,
+            max_model_len=max_model_len,
+            tensor_parallel_size=tensor_parallel_size,
+            gpu_memory_utilization=gpu_memory_utilization,
+            batch_size=batch_size,
+            sampling_params=sampling_params,
             **{**model_args, **kwargs},
         )
 

@@ -1,10 +1,13 @@
+import copy
 import tempfile
 import traceback
 from collections.abc import Sequence
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Literal
+from typing import Any, Literal, cast
+from urllib.parse import urlparse
 
+import wandb
 from wandb import Settings
 from wandb.sdk.lib.paths import StrPath
 
@@ -18,9 +21,9 @@ class MockWandbRun:
         self.logged_data: list[dict] = []  # Store all logged data for testing
         self._finished: bool = False
         self.id: str = str(kwargs.get("id") or "mock_run_id")
-        self._logged_artifacts: list[dict[str, Any]] = []
         self.notes = ""
         self.settings = kwargs.get("settings") or Settings(mode=kwargs.get("mode", "online"))
+        self._logged_artifacts: list[MockArtifact] = []
 
     def __enter__(self) -> "MockWandbRun":
         return self
@@ -51,15 +54,11 @@ class MockWandbRun:
         aliases: list[str] | None = None,
         tags: list[str] | None = None,
     ) -> "MockArtifact":
-        if isinstance(artifact_or_path, str):
-            artifact = MockArtifact(artifact_or_path, "mock_artifact")
-        elif isinstance(artifact_or_path, MockArtifact):
-            artifact = artifact_or_path
-        else:
-            # Handle Path-like objects
-            artifact = MockArtifact(str(artifact_or_path), "mock_artifact")
-        self._logged_artifacts.append(dict(artifact=artifact, aliases=aliases or []))
-        return artifact
+        assert isinstance(artifact_or_path, MockArtifact)
+        logged_artifact = copy.deepcopy(artifact_or_path)
+        logged_artifact.aliases = aliases or []  # Don't bother here with auto-adding "latest", for test purposes
+        self._logged_artifacts.append(logged_artifact)
+        return logged_artifact
 
     def finish(self, exit_code: int = 0) -> None:
         self.exit_code = exit_code
@@ -115,10 +114,15 @@ class MockWandb:
 class MockArtifactFile:
     def __init__(self, path_uri: str):
         self.path_uri = path_uri
+        self._path = Path(urlparse(self.path_uri).path)
 
     @property
     def name(self) -> str:
-        return Path(self.path_uri).name
+        return self._path.name
+
+    @property
+    def size(self) -> int:
+        return self._path.stat().st_size if self._path.exists() else -1
 
 
 class MockArtifact:
@@ -132,13 +136,14 @@ class MockArtifact:
         use_as: str | None = None,
     ) -> None:
         self.id = name
-        self.name = name
+        self._name = name
         self.type = type
         self.description = description
         self.metadata = metadata
         self.incremental = incremental
         self.use_as = use_as
         self._files: list = []
+        self.aliases: list[str] = []
 
     def files(self) -> Sequence[MockArtifactFile]:
         return self._files
@@ -175,21 +180,27 @@ class MockArtifact:
         # Mock implementation: just return None instead of `ArtifactManifestEntry`
         self._files.append(MockArtifactFile(Path(local_path).name if name is None else name))
 
+    @property
+    def name(self) -> str:
+        return f"{self._name}:{self.aliases[0]}" if self.aliases else self._name
+
+    @property
+    def qualified_name(self) -> str:
+        return f"test-entity/project/{self.name}"
+
 
 class MockWandbApi:
     def __init__(self) -> None:
         self.default_entity = "test-entity"
-        self._artifacts: dict[str, MockArtifact] = {}
 
     def artifact(self, name: str) -> MockArtifact | None:
-        return self.get_artifact(name)
+        if wandb.run:
+            basename, version = name.split(":", 1)
+            for artifact in cast(MockWandbRun, wandb.run)._logged_artifacts:
+                if artifact.qualified_name.split(":", 1)[0] == basename and version in artifact.aliases:
+                    return artifact
+        return None
 
-    def set_artifact(self, artifact_id: str, file_list: list[str]) -> None:
-        # used only for testing purposes
-        artifact = MockArtifact(artifact_id, "model")
-        for file in file_list:
-            artifact.add_reference(file)
-        self._artifacts[f"wandb-registry-model/{artifact_id}:latest"] = artifact
-
-    def get_artifact(self, artifact_id: str) -> MockArtifact | None:
-        return self._artifacts.get(artifact_id)
+    def artifact_exists(self, name: str, type: str | None = None) -> bool:
+        artifact = self.artifact(name)
+        return artifact is not None and (type is None or artifact.type == type)
