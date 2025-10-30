@@ -3,8 +3,12 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**/*.md'
   pull_request:
     types: [opened, reopened, synchronize, labeled]
+    paths-ignore:
+      - '**/*.md'
   # Manually trigger a workflow for a branch
   workflow_dispatch:
   # Merge queue trigger
@@ -197,7 +201,7 @@ jobs:
   test-pip-install-vllm:
     name: Test pip install eval_framework[vllm] in clean venv and on GPU
     runs-on: EvalFrameworkGPURunner
-    needs: [build, test-pip-install]
+    needs: [lint, tag]
     container:
       image: "${{ needs.tag.outputs.image }}"
       credentials:
