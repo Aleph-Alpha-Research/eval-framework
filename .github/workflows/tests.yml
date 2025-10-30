@@ -201,7 +201,7 @@ jobs:
   test-pip-install-vllm:
     name: Test pip install eval_framework[vllm] in clean venv and on GPU
     runs-on: EvalFrameworkGPURunner
-    needs: [build]
+    needs: [tag, build]
     container:
       image: "${{ needs.tag.outputs.image }}"
       credentials:
@@ -285,7 +285,7 @@ jobs:
 
   test-docker-gpu:
     runs-on: EvalFrameworkGPURunner
-    needs: [test-cpu, test-cpu-slow]
+    needs: [tag, test-cpu, test-cpu-slow]
     container:
       image: "${{ needs.tag.outputs.image }}"
       credentials:
