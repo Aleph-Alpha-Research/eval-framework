@@ -25,6 +25,8 @@
 - Fix: WandB initialization does not crash on overly long model names anymore.
 - Fix: "Object of type Role is not JSON serializable" type of errors were fixed.
 - Fix: defining versions in the .toml file for [all] fixes pip install eval_framework[all]
+- Added a CI workflow to test pip installs (CPU only and GPU for VLLM) and avoid trigger with .md changes.
+- Updated the CI workflow graph to decouple CPU only test and full test suite with GPU: cpu tests dont wait for docker build.
 
 ## 0.2.2
 
