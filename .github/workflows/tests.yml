@@ -201,7 +201,7 @@ jobs:
   test-pip-install-vllm:
     name: Test pip install eval_framework[vllm] in clean venv and on GPU
     runs-on: EvalFrameworkGPURunner
-    needs: [lint, tag]
+    needs: [build]
     container:
       image: "${{ needs.tag.outputs.image }}"
       credentials:
@@ -226,7 +226,7 @@ jobs:
           python -m venv isolated_venv
           source isolated_venv/bin/activate
           # Install eval_framework with vllm extra and --no-cache-dir to avoid uv cache
-          pip install --no-cache-dir dist/*.whl[vllm]
+          pip install --no-cache-dir $(ls dist/*.whl)[vllm]
           pip show eval-framework
 
       - name: Test VLLM pip install
