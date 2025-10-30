@@ -209,7 +209,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Ensure pip is available
-        run: uv pip install --system pip
+        run: python -m ensurepip --upgrade
 
       - name: Build package
         run: |
