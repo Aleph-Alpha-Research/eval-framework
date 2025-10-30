@@ -208,6 +208,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Ensure pip is available
+        run: python -m ensurepip --upgrade
+
       - name: Build package
         run: |
           python -m pip install --upgrade pip build
@@ -217,11 +220,13 @@ jobs:
         run: |
           python -m venv isolated_venv
           source isolated_venv/bin/activate
-          pip install dist/*.whl[vllm]
+          pip install --no-cache-dir dist/*.whl[vllm]
           pip show eval-framework
 
       - name: Test VLLM pip install
-        run: python -c "from eval_framework.llm.vllm import VLLM"
+        run: |
+          source isolated_venv/bin/activate
+          python -c "from eval_framework.llm.vllm import VLLM"
 
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
