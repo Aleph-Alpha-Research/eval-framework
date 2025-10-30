@@ -217,6 +217,7 @@ jobs:
           python -m build --outdir dist/
 
       - name: Create self-contained venv with vllm and install via pip
+        shell: bash
         run: |
           python -m venv isolated_venv
           source isolated_venv/bin/activate
@@ -225,6 +226,7 @@ jobs:
           pip show eval-framework
 
       - name: Test VLLM pip install
+        shell: bash
         run: |
           source isolated_venv/bin/activate
           python -c "from eval_framework.llm.vllm import VLLM; print('✓ vllm')"
