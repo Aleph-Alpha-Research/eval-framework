@@ -197,7 +197,7 @@ jobs:
   test-pip-install-vllm:
     name: Test pip install eval_framework[vllm] in clean venv and on GPU
     runs-on: EvalFrameworkGPURunner
-    needs: [lint, tag, test-pip-install]
+    needs: [build, test-pip-install]
     container:
       image: "${{ needs.tag.outputs.image }}"
       credentials:
@@ -209,7 +209,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Ensure pip is available
-        run: python -m ensurepip --upgrade
+        run: uv pip install --system pip
 
       - name: Build package
         run: |
@@ -220,18 +220,19 @@ jobs:
         run: |
           python -m venv isolated_venv
           source isolated_venv/bin/activate
+          # Install eval_framework with vllm extra and --no-cache-dir to avoid uv cache
           pip install --no-cache-dir dist/*.whl[vllm]
           pip show eval-framework
 
       - name: Test VLLM pip install
         run: |
           source isolated_venv/bin/activate
-          python -c "from eval_framework.llm.vllm import VLLM"
+          python -c "from eval_framework.llm.vllm import VLLM; print('✓ vllm')"
 
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache, test-pip-install, test-pip-install-vllm]
+    needs: [hf-datasets-cache, test-pip-install-vllm]
     steps:
       - uses: actions/checkout@v4
 
@@ -254,7 +255,7 @@ jobs:
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache, test-pip-install, test-pip-install-vllm]
+    needs: [hf-datasets-cache, test-pip-install-vllm]
     steps:
       - uses: actions/checkout@v4
 
@@ -278,7 +279,7 @@ jobs:
 
   test-docker-gpu:
     runs-on: EvalFrameworkGPURunner
-    needs: [tag, build, test-cpu, test-cpu-slow, test-pip-install, test-pip-install-vllm]
+    needs: [test-cpu, test-cpu-slow]
     container:
       image: "${{ needs.tag.outputs.image }}"
       credentials:
