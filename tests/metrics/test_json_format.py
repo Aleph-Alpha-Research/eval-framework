@@ -38,43 +38,60 @@ CITY_JSON = json.dumps(
         ]
     }
 )
-
+DIFFERENT_CONTENT_CITY_JSON = json.dumps(
+    {
+        "cities": [
+            {"name": "Paris", "country": "France", "population": 2211297},
+            {"name": "Rome", "country": "Italy", "population": 2746984},
+        ]
+    }
+)
 OTHER_JSON = json.dumps({"knock knock": "who's there?"})
 
 
 @pytest.mark.parametrize(
-    "answer, schema, is_just_json, is_valid_json, fulfills_schema",
+    "answer, schema, expected_answer, is_just_json, is_valid_json, fulfills_schema, exact_match",
     [
-        (f"{CITY_JSON}", CITY_SCHEMA, True, True, True),
-        (f"```{CITY_JSON}```", CITY_SCHEMA, True, True, True),
+        (f"{CITY_JSON}", CITY_SCHEMA, CITY_JSON, True, True, True, True),
+        (f"```{CITY_JSON}```", CITY_SCHEMA, CITY_JSON, True, True, True, True),
         (
             (
                 "Sure! Here's the JSON object that holds the five largest cities in Europe and "
                 f"their population:\n```{CITY_JSON}```"
             ),
             CITY_SCHEMA,
+            CITY_JSON,
             False,
             True,
             True,
+            True,
         ),
-        (f"{OTHER_JSON}", CITY_SCHEMA, True, True, False),
-        ("no json here", CITY_SCHEMA, False, False, False),
-        ("no json here", None, False, False, None),
-        (f"{CITY_JSON}", INVALID_SCHEMA, True, True, None),
-        ("{this is no json}", None, False, False, None),
+        (f"{CITY_JSON}", CITY_SCHEMA, None, True, True, True, None),
+        (f"{DIFFERENT_CONTENT_CITY_JSON}", CITY_SCHEMA, CITY_JSON, True, True, True, False),
+        (f"{OTHER_JSON}", CITY_SCHEMA, CITY_JSON, True, True, False, False),
+        ("no json here", CITY_SCHEMA, CITY_JSON, False, False, False, False),
+        ("no json here", None, CITY_JSON, False, False, None, False),
+        ("no json here", CITY_SCHEMA, None, False, False, None, None),
+        (f"{CITY_JSON}", INVALID_SCHEMA, CITY_JSON, True, True, None, True),
+        ("{this is no json}", None, None, False, False, None, None),
     ],
 )
 def test_do_evaluate_single_output(
     answer: str,
     schema: Mapping[str, Any] | None,
+    expected_answer: str | None,
     is_just_json: bool,
     is_valid_json: bool,
     fulfills_schema: bool,
+    exact_match: bool,
 ) -> None:
+    ground_truth = {"json_schema": schema}
+    if expected_answer is not None:
+        ground_truth["expected_output"] = json.loads(expected_answer)
     completion = Completion(
         id=0,
         subject="en",
-        ground_truth=json.dumps({"json_schema": schema}),
+        ground_truth=json.dumps(ground_truth),
         prompt="",
         prompt_sequence_positions=None,
         messages=None,
@@ -85,7 +102,7 @@ def test_do_evaluate_single_output(
 
     metric = JsonFormat()
     results = metric.calculate(completion)
-    assert len(results) == 3
+    assert len(results) == 4
     for result in results:
         match result.metric_name:
             case "json_format/is_just_json":
@@ -94,6 +111,8 @@ def test_do_evaluate_single_output(
                 assert result.value == is_valid_json
             case "json_format/fulfills_schema":
                 assert result.value == fulfills_schema
+            case "json_format/exact_match":
+                assert result.value == exact_match
 
 
 @pytest.mark.parametrize(
