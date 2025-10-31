@@ -341,7 +341,7 @@ jobs:
   test-docker-gpu:
     name: Run full test suite in Docker Container with GPU
     runs-on: EvalFrameworkGPURunner
-    needs: [tag, test-cpu, test-cpu-slow, test-pip-install-vllm]
+    needs: [tag, test-cpu, test-cpu-slow, test-pip-install-gpu]
     container:
       image: "${{ needs.tag.outputs.image }}"
       credentials:
