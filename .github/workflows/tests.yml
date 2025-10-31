@@ -266,6 +266,7 @@ jobs:
           pip show eval-framework
 
       - name: Verify core functionality
+        shell: bash
         run: |
           source isolated_venv/bin/activate
 
@@ -279,6 +280,7 @@ jobs:
           eval_framework --help > /dev/null && echo "✓ CLI works"
 
       - name: Verify extras functionality
+        shell: bash
         if: matrix.extras != ''
         run: |
           source isolated_venv/bin/activate
