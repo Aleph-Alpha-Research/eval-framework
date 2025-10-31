@@ -207,7 +207,7 @@ jobs:
               python -c "from eval_framework.tasks.task_names import registered_tasks_iter; print(f'✓ {len(list(registered_tasks_iter()))} tasks loaded, comet extra works')"
               ;;
             "[optional]")
-              python -c "from jinja2 import Template; print('Jinja2 OK:', Template('Hello {{ name }}!').render(name='World'))"python -c "import transformers; from transformers import pipeline; print(pipeline('sentiment-analysis')('test'))"
+              python -c "from jinja2 import Template; print('Jinja2 OK:', Template('Hello {{ name }}!').render(name='World'))"
               python -c "import transformers; from transformers import pipeline; print(pipeline('sentiment-analysis')('test'))"
               ;;
             "[all]")
