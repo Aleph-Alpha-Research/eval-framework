@@ -132,6 +132,89 @@ jobs:
           push: true
           tags: ${{ needs.tag.outputs.image }}
 
+  test-uv-install:
+    name: Test uv installs (CPU)
+    runs-on: ubuntu-latest
+    needs: [lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        extras: ['', '[determined]', '[api]', '[openai]', '[transformers]', '[accelerate]', '[comet]', '[optional]', '[all]']
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install package via
+        run: |
+          if [ "${{ matrix.extras }}" != "" ]; then
+            uv sync --extra ${{ matrix.extras }}
+          else
+            uv sync
+          fi
+
+      - name: Verify core functionality
+        run: |
+          # Test imports
+          uv run python -c "import eval_framework; print(f'✓ Version: {eval_framework.__version__}')"
+          uv run python -c "from eval_framework.llm.base import BaseLLM; print('✓ BaseLLM')"
+          uv run python -c "from eval_framework.tasks.base import BaseTask; print('✓ BaseTask')"
+          uv run python -c "from template_formatting.formatter import HFFormatter; print('✓ HFFormatter')"
+
+          # Test CLI
+          uv run eval_framework --help > /dev/null && echo "✓ CLI works"
+
+      - name: Verify extras functionality
+        if: matrix.extras != ''
+        run: |
+          case "${{ matrix.extras }}" in
+            "[determined]")
+              uv run python -c "import determined; print('Determined version:', determined.__version__)"
+              uv run python -c "from eval_framework.context.determined import DeterminedContext; print('✓ determined')"
+              ;;
+            "[api]")
+              uv run python -c "from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel; print('✓ api')"
+              ;;
+            "[openai]")
+              uv run python -c "from eval_framework.llm.openai import OpenAI; print('✓ openai')"
+              ;;
+            "[transformers]")
+              uv run python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
+              ;;
+            "[accelerate]")
+              uv run python -c "import accelerate; print('Accelerate version:', accelerate.__version__)"
+              echo "Running 'accelerate env'..."
+              uv run accelerate env
+              ;;
+            "[comet]")
+              # Test task registry (comet required for FloresPlus tasks)
+              uv run python -c "from eval_framework.tasks.task_names import registered_tasks_iter; print(f'✓ {len(list(registered_tasks_iter()))} tasks loaded, comet extra works')"
+              ;;
+            "[optional]")
+              uv run python -c "from jinja2 import Template; print('Jinja2 OK:', Template('Hello {{ name }}!').render(name='World'))"
+              uv run python -c "import transformers; print('transformers', transformers.__version__, 'OK')"
+              ;;
+            "[all]")
+              uv run python -c "from eval_framework.context.determined import DeterminedContext; print('✓ determined')"
+              uv run python -c "from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel; print('✓ api')"
+              uv run python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
+              uv run python -c "from eval_framework.llm.openai import OpenAI; print('✓ openai')"
+              uv run python -c "import accelerate; print('Accelerate version:', accelerate.__version__)"
+
+              # Skip VLLM import since no GPU in CI
+              echo "[INFO] Skipping VLLM import (no CUDA available)"
+
+              # Test task registry (comet required for FloresPlus tasks)
+              uv run python -c "from eval_framework.tasks.task_names import registered_tasks_iter; print(f'✓ {len(list(registered_tasks_iter()))} tasks loaded')"
+
+              echo "✓ All extras verified"
+              ;;
+          esac
+
   test-pip-install:
     name: Test pip installs (CPU)
     runs-on: ubuntu-latest
@@ -225,6 +308,76 @@ jobs:
 
               echo "✓ All extras verified"
               ;;
+          esac
+
+  test-uv-install:
+    name: Test uv installs (Docker GPU)
+    runs-on: EvalFrameworkGPURunner
+    needs: [tag, build, test-pip-install]
+    container:
+      image: "${{ needs.tag.outputs.image }}"
+      credentials:
+        username: token
+        password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
+      options: --gpus all
+    strategy:
+      fail-fast: false
+      matrix:
+        extras: ['[mistral]', '[vllm]', '[all]']
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install package via
+        shell: bash
+        run: |
+          if [ "${{ matrix.extras }}" != "" ]; then
+            uv sync --extra ${{ matrix.extras }}
+          else
+            uv sync
+          fi
+
+      - name: Verify core functionality
+        shell: bash
+        run: |
+          # Test imports
+          uv run python -c "import eval_framework; print(f'✓ Version: {eval_framework.__version__}')"
+          uv run python -c "from eval_framework.llm.base import BaseLLM; print('✓ BaseLLM')"
+          uv run python -c "from eval_framework.tasks.base import BaseTask; print('✓ BaseTask')"
+          uv run python -c "from template_formatting.formatter import HFFormatter; print('✓ HFFormatter')"
+
+          # Test CLI
+          uv run eval_framework --help > /dev/null && echo "✓ CLI works"
+
+      - name: Verify extras functionality
+        shell: bash
+        if: matrix.extras != ''
+        run: |
+          case "${{ matrix.extras }}" in
+            "[vllm]")
+              uv run python -c "from eval_framework.llm.vllm import VLLMModel; print('✓ vllm')"
+              ;;
+            "[mistral]")
+              uv run python -c "from eval_framework.llm.mistral import MistralVLLM; print('✓ mistral')"
+              ;;
+            "[all]")
+              uv run python -c "from eval_framework.context.determined import DeterminedContext; print('✓ determined')"
+              uv run python -c "from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel; print('✓ api')"
+              uv run python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
+              uv run python -c "from eval_framework.llm.openai import OpenAI; print('✓ openai')"
+              uv run python -c "import accelerate; print('Accelerate version:', accelerate.__version__)"
+
+              uv run ython -c "from eval_framework.llm.vllm import VLLMModel; print('✓ vllm')"
+              uv run python -c "from eval_framework.llm.mistral import MistralVLLM; print('✓ mistral')"
+
+              # Test task registry (comet required for FloresPlus tasks)
+              uv run python -c "from eval_framework.tasks.task_names import registered_tasks_iter; print(f'✓ {len(list(registered_tasks_iter()))} tasks loaded')"
+
+              echo "✓ All extras verified"
           esac
 
   test-pip-install-gpu:
