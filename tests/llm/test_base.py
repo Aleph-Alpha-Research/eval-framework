@@ -1,5 +1,14 @@
+import pytest
+
 from eval_framework.shared.types import Completion, LanguageMetricContext
-from template_formatting.formatter import Message, Role
+from template_formatting.formatter import (
+    ConcatFormatter,
+    HFFormatter,
+    IdentityFormatter,
+    Llama3Formatter,
+    Message,
+    Role,
+)
 
 
 def test_completion_languages() -> None:
@@ -58,3 +67,45 @@ def test_completion_instructions() -> None:
     assert completion.last_user_instruction == "I'm already dead. Are you scared?"
     # AND special tokens in completion are broken
     assert completion.sanitized_completion == "Oh dear I'll <| hack |> <you>!"
+
+
+LLM_INIT_SOURCE_PARAMS = [
+    pytest.param(dict(), "org/model", "MyModel", id="default init"),
+    pytest.param(dict(checkpoint_path="/ckpt/m"), "/ckpt/m", "MyModel_checkpoint_ckpt_m", id="checkpoint_path"),
+    pytest.param(dict(model_name="org/other"), "org/other", "MyModel_checkpoint_org_other", id="model_name"),
+    pytest.param(dict(artifact_name="art:v0"), "/download", "MyModel_checkpoint_art_v0", id="artifact_name"),
+    pytest.param(dict(checkpoint_name="CN"), "org/model", "MyModel_checkpoint_CN", id="default init w/CN"),
+    pytest.param(
+        dict(checkpoint_name="CN", checkpoint_path="/ckpt/m"),
+        "/ckpt/m",
+        "MyModel_checkpoint_CN",
+        id="checkpoint_path w/CN",
+    ),
+    pytest.param(
+        dict(checkpoint_name="CN", model_name="org/other"),
+        "org/other",
+        "MyModel_checkpoint_CN",
+        id="model_name w/CN",
+    ),
+    pytest.param(
+        dict(checkpoint_name="CN", artifact_name="art:v0"),
+        "/download",
+        "MyModel_checkpoint_CN",
+        id="artifact_name w/CN",
+    ),
+]
+
+LLM_INIT_FORMATTER_PARAMS = [
+    pytest.param(dict(model_name="org/other"), ConcatFormatter, id="default init"),
+    pytest.param(dict(model_name="org/other", formatter=IdentityFormatter()), IdentityFormatter, id="formatter"),
+    pytest.param(dict(model_name="org/other", formatter_name="Llama3Formatter"), Llama3Formatter, id="formatter_name"),
+    pytest.param(
+        dict(
+            model_name="org/other",
+            formatter_name="HFFormatter",
+            formatter_kwargs=dict(hf_llm_name="HuggingFaceTB/SmolLM-135M-Instruct"),
+        ),
+        HFFormatter,
+        id="formatter_kwargs",
+    ),
+]

@@ -13,10 +13,12 @@ uv sync --all-extras
 And execute a single evaluation locally:
 
 ```bash
-uv run eval_framework \
-    --llm-name 'eval_framework.llm.models.Smollm135MInstruct' \
-    --task-name "GSM8K" \
-    --output-dir ./eval \
+eval_framework \
+    --models src/eval_framework/llm/models.py \
+    --llm-name Smollm135MInstruct \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" "anatomy" \
+    --output-dir ./eval_results \
     --num-fewshot 5 \
     --num-samples 10
 ```
@@ -116,19 +118,20 @@ Show help message and exit.
 
 ## Running Hugging Face Models
 
-You can run models directly from Hugging Face Hub using the `HFLLM_from_name` class:
+You can run models directly from Hugging Face Hub using the `HFLLM` class:
 
 ```bash
 uv run eval_framework \
-    --llm-name 'eval_framework.llm.huggingface.HFLLM_from_name' \
-    --llm-args model_name="microsoft/DialoGPT-medium" formatter="Llama3Formatter" \
-    --task-name "GSM8K" \
-    --output-dir ./eval \
+    --llm-name 'eval_framework.llm.huggingface.HFLLM' \
+    --llm-args model_name="microsoft/DialoGPT-medium" formatter_name="Llama3Formatter" \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" \
+    --output-dir ./eval_results \
     --num-fewshot 5 \
     --num-samples 10
 ```
 
-This approach allows you to evaluate any model available on Hugging Face by specifying the `model_name` and appropriate `formatter` in the `--llm-args` parameter.
+This approach allows you to evaluate any model available on Hugging Face by specifying the `model_name` and appropriate `formatter_name` in the `--llm-args` parameter.
 
 ## Configuring Sampling Parameters for vLLM Models
 
@@ -138,8 +141,9 @@ vLLM models support configurable sampling parameters through the `--llm-args` pa
 uv run eval_framework \
     --llm-name 'eval_framework.llm.models.Qwen3_0_6B_VLLM' \
     --llm-args sampling_params.temperature=0.7 sampling_params.top_p=0.95 sampling_params.max_tokens=150 \
-    --task-name "GSM8K" \
-    --output-dir ./eval \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" \
+    --output-dir ./eval_results \
     --num-fewshot 5 \
     --num-samples 10
 ```
@@ -150,8 +154,9 @@ You can also combine sampling parameters with other model arguments:
 uv run eval_framework \
     --llm-name 'eval_framework.llm.models.Qwen3_0_6B_VLLM' \
     --llm-args max_model_len=2048 sampling_params.temperature=0.8 sampling_params.top_p=0.9 \
-    --task-name "GSM8K" \
-    --output-dir ./eval \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" \
+    --output-dir ./eval_results \
     --num-fewshot 5 \
     --num-samples 10
 ```

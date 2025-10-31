@@ -1,4 +1,4 @@
-# Controlling Upload Results Guide
+# Controlling HuggingFace Upload Results Guide
 
 This guide explains how to upload evaluation results to HuggingFace repositories and manage your result storage.
 
@@ -20,7 +20,7 @@ uv run eval_framework \
     --task-name ARC \
     --num-fewshot 3 \
     --num-samples 100 \
-    --output-dir "./test_outputs_folder" \
+    --output-dir "./eval_results" \
     --hf-upload-repo "my_arbitrary_repo"  # Hugging Face repository
     --hf-upload-dir "my_arbitrary_name"
 ```

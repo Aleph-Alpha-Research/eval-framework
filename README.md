@@ -68,8 +68,9 @@ To evaluate a single benchmark locally, you can use the following command:
 eval_framework \
     --models src/eval_framework/llm/models.py \
     --llm-name Smollm135MInstruct \
-    --task-name "GSM8K" \
-    --output-dir ./eval \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" \
+    --output-dir ./eval_results \
     --num-fewshot 5 \
     --num-samples 10
 ```
@@ -155,35 +156,37 @@ pip install eval_framework[transformers]
 
 2. **Create and run your first evaluation using HuggingFace model**:
 
-   ```python
-    from pathlib import Path
+```python
+from functools import partial
+from pathlib import Path
 
-    from eval_framework.llm.huggingface import HFLLM
-    from eval_framework.main import main
-    from eval_framework.tasks.eval_config import EvalConfig
-    from template_formatting.formatter import HFFormatter
+from eval_framework.llm.huggingface import HFLLM
+from eval_framework.main import main
+from eval_framework.tasks.eval_config import EvalConfig
+from template_formatting.formatter import HFFormatter
 
-    # Define your model
-    class MyHuggingFaceModel(HFLLM):
-        LLM_NAME = "microsoft/DialoGPT-medium"
-        DEFAULT_FORMATTER = partial(HFFormatter, "microsoft/DialoGPT-medium")
+# Define your model
+class MyHuggingFaceModel(HFLLM):
+    LLM_NAME = "microsoft/DialoGPT-medium"
+    DEFAULT_FORMATTER = partial(HFFormatter, "microsoft/DialoGPT-medium")
 
-    if __name__ == "__main__":
-        # Initialize your model
-        llm = MyHuggingFaceModel()
+if __name__ == "__main__":
+    # Initialize your model
+    llm = MyHuggingFaceModel()
 
-        # Running evaluation on GSM8K task using 5 few-shot examples and 10 samples
-        config = EvalConfig(
-            output_dir=Path("./eval_results"),
-            num_fewshot=5,
-            num_samples=10,
-            task_name="GSM8K",
-            llm_class=MyHuggingFaceModel,
-        )
+    # Running evaluation on MMLU abstract algebra task using 5 few-shot examples and 10 samples
+    config = EvalConfig(
+        output_dir=Path("./eval_results"),
+        num_fewshot=5,
+        num_samples=10,
+        task_name="MMLU",
+        task_subjects=["abstract_algebra", "astronomy"],
+        llm_class=MyHuggingFaceModel,
+    )
 
-        # Run evaluation and get results
-        results = main(llm=llm, config=config)
-   ```
+    # Run evaluation and get results
+    results = main(llm=llm, config=config)
+```
 
 3. **Review results** - Check `./eval_results/` for detailed outputs and use our [results guide](docs/understanding_results_guide.md) to interpret them
 

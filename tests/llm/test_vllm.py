@@ -3,10 +3,11 @@ import logging
 import time
 from collections.abc import Sequence
 from typing import Any, cast
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 import torch
+from pytest_mock import MockerFixture
 from vllm import SamplingParams
 from vllm.distributed.parallel_state import destroy_distributed_environment, destroy_model_parallel
 
@@ -15,7 +16,15 @@ from eval_framework.llm.mistral import MistralAdapter, MistralVLLM
 from eval_framework.llm.vllm import Qwen3_0_6B_VLLM, Qwen3_0_6B_VLLM_No_Thinking, VLLMModel, VLLMTokenizer
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import ConcatFormatter, HFFormatter, Message, Role
+from template_formatting.formatter import (
+    ConcatFormatter,
+    HFFormatter,
+    IdentityFormatter,
+    Llama3Formatter,
+    Message,
+    Role,
+)
+from tests.llm.test_base import LLM_INIT_FORMATTER_PARAMS, LLM_INIT_SOURCE_PARAMS
 
 
 def clean_up() -> None:
@@ -653,8 +662,6 @@ def test_vllm_tokenizer_double_bos_problem() -> None:
     """
     from transformers import AutoTokenizer
 
-    from template_formatting.formatter import Llama3Formatter
-
     # Use Llama tokenizer which exhibits the double BOS problem
     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.1-8B-Instruct")
     formatter = Llama3Formatter()
@@ -689,8 +696,6 @@ def test_vllm_generate_with_llama_tokenizer_avoids_double_bos() -> None:
     from unittest.mock import patch
 
     from transformers import AutoTokenizer
-
-    from template_formatting.formatter import Llama3Formatter
 
     # Create a custom model class that uses Llama tokenizer with Llama3Formatter
     class TestLlamaVLLMModel(VLLMModel):
@@ -763,8 +768,6 @@ def test_vllm_logprobs_with_llama_tokenizer_avoids_double_bos() -> None:
     from unittest.mock import patch
 
     from transformers import AutoTokenizer
-
-    from template_formatting.formatter import Llama3Formatter
 
     # Create a custom model class that uses Llama tokenizer with Llama3Formatter
     class TestLlamaVLLMModel(VLLMModel):
@@ -953,3 +956,78 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
         del judge_model
     except Exception as e:
         pytest.fail(f"{e.__class__.__name__} : {e}")
+
+
+@pytest.mark.vllm
+@pytest.mark.parametrize("kwargs, expected_model, expected_name", LLM_INIT_SOURCE_PARAMS)
+def test_vllm_init_source(mocker: MockerFixture, kwargs: Any, expected_model: str, expected_name: str) -> None:
+    """Test that VLLMModel initializes correctly with different checkpoint source arguments."""
+
+    VLLM_patch = mocker.patch("eval_framework.llm.vllm.LLM")
+    mock_wandb_fs = MagicMock()
+    mock_wandb_fs.__enter__().find_hf_checkpoint_root_from_path_list.return_value = "/download"
+    mocker.patch("eval_framework.utils.file_ops.WandbFs", return_value=mock_wandb_fs)
+
+    # Test with a typical subclass
+    class MyModel(VLLMModel):
+        LLM_NAME = "org/model"
+        DEFAULT_FORMATTER = ConcatFormatter
+
+    model = MyModel(**kwargs)
+    assert VLLM_patch.call_args[1]["model"] == expected_model
+    assert model.name == expected_name
+    assert model.LLM_NAME == expected_model
+
+    # Test with the base class
+    if not kwargs or list(kwargs.keys()) == ["checkpoint_name"]:  # no checkpoint source -> error
+        with pytest.raises(ValueError):
+            VLLMModel(**kwargs)
+    else:
+        base_model = VLLMModel(**kwargs, formatter=ConcatFormatter())
+        assert VLLM_patch.call_args[1]["model"] == expected_model
+        assert base_model.name == expected_name.replace("MyModel", "VLLMModel")
+        assert base_model.LLM_NAME == expected_model
+
+
+@pytest.mark.vllm
+def test_vllm_init_source_multiple_args() -> None:
+    """Test that providing multiple checkpoint source arguments raises an error."""
+    with pytest.raises(ValueError):
+        VLLMModel(checkpoint_path="/ckpt/m", model_name="org/other")
+    with pytest.raises(ValueError):
+        VLLMModel(checkpoint_path="/ckpt/m", artifact_name="art:v0")
+    with pytest.raises(ValueError):
+        VLLMModel(model_name="org/other", artifact_name="art:v0")
+
+
+@pytest.mark.vllm
+@pytest.mark.parametrize("kwargs, expected_formatter_cls", LLM_INIT_FORMATTER_PARAMS)
+def test_vllm_init_formatter(mocker: MockerFixture, kwargs: Any, expected_formatter_cls: type) -> None:
+    tokenizer_mock = mocker.patch("eval_framework.llm.vllm.get_tokenizer")
+    mocker.patch("eval_framework.llm.vllm.LLM")
+
+    # Test with a typical subclass
+    class MyModel(VLLMModel):
+        LLM_NAME = "org/model"
+        DEFAULT_FORMATTER = ConcatFormatter
+
+    model = MyModel(**kwargs)
+    assert isinstance(model._formatter, expected_formatter_cls)
+
+    # Test with the base class
+    if len(kwargs) <= 1:  # no formatter -> error
+        tokenizer_mock.return_value.chat_template = None
+        with pytest.raises(ValueError):
+            VLLMModel(**kwargs)
+    else:
+        base_model = VLLMModel(**kwargs)
+        assert isinstance(base_model._formatter, expected_formatter_cls)
+
+
+@pytest.mark.vllm
+def test_vllm_init_formatter_multiple_args() -> None:
+    """Test that providing multiple formatter arguments raises an error."""
+    with pytest.raises(ValueError):
+        VLLMModel(formatter=IdentityFormatter(), formatter_name="Llama3Formatter")
+    with pytest.raises(ValueError):
+        VLLMModel(formatter=IdentityFormatter(), formatter_kwargs=dict(hf_llm_name="HuggingFaceTB/SmolLM-135M"))
