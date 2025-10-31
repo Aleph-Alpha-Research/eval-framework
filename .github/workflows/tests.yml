@@ -370,7 +370,7 @@ jobs:
               uv run python -c "from eval_framework.llm.openai import OpenAI; print('✓ openai')"
               uv run python -c "import accelerate; print('Accelerate version:', accelerate.__version__)"
 
-              uv run ython -c "from eval_framework.llm.vllm import VLLMModel; print('✓ vllm')"
+              uv run python -c "from eval_framework.llm.vllm import VLLMModel; print('✓ vllm')"
               uv run python -c "from eval_framework.llm.mistral import MistralVLLM; print('✓ mistral')"
 
               # Test task registry (comet required for FloresPlus tasks)
