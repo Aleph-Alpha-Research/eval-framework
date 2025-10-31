@@ -4,7 +4,22 @@ Currently, the framework covers a wide range of pre-training and post-training b
 
 Additional task documentation can be generated with the script `utils/generate-task-docs.py` as documented in [installation.md](installation.md). The documention can thereafter be found in [docs/tasks](tasks/README.md).
 
-## Completion
+## Completion (updated table)
+
+| **Task** | **Capability** | **Benchmarks** | **Long Context** |
+|-|-|-|-|
+|   Logical Reasoning   |   Math   |   `AIME2024`, `GSM8K`, `GSM8K_EU20_DE`, `GSM8K_EU20_FR`, `GSM8KEvalHarness`,`GSM8KReasoning`, `MATH`, `MATH500`, `MATHLvl5`, `TableBench`   |   `InfiniteBench_MathFind`   |
+|   Logical Reasoning   |   Programming   |   `BigCodeBench`, `BigCodeBenchHard`, `BigCodeBenchInstruct`, `BigCodeBenchHardInstruct`, `HumanEval`, `HumanEvalInstruct`, `MBPP`, `MBPP_PROMPT_WITHOUT_TESTS`, `MBPP_SANITIZED`, `MBPP_PROMPT_WITHOUT_TESTS_SANITIZED`   |   `InfiniteBench_CodeRun`   |
+|   Logical Reasoning   |   Puzzle   |   `SPHYR`   |    |
+|   Output Control   |   Structure   |   `IFEval`, `IFEvalDe`, `IFEvalFiSv`, `RenderableStructEval`, `StructEval`   |    |
+|   Text Distillation   |   Aggregation   |    |   `ZERO_SCROLLS_SPACE_DIGEST`   |
+|   Text Distillation   |   Classification   |   `GPQA_COT`, `MMLU`, `MMLU_PRO_COT`, `MMMLU_GERMAN_COT`, `PAWSX`, `TRIVIAQA`   |    |
+|   TextDistillation   |   Closed QA   | `SQUAD`, `SQUAD2` |   `InfiniteBench_EnDia`   `InfiniteBench_EnQA`   |
+|   Text Distilation   |   Extraction   |   `DUC_ABSTRACTIVE`, `DUC_EXTRACTIVE`   |   `InfiniteBench_RetrieveKV2`, `InfiniteBench_RetrieveNumber`, `InfiniteBench_RetrievePassKey1`   |
+|   Text Distillation   |   QA   |    |   `ZERO_SCROLLS_GOV_REPORT`, `ZERO_SCROLLS_MUSIQUE`, `ZERO_SCROLLS_NARRATIVEQA`, `ZERO_SCROLLS_QASPER`, `ZERO_SCROLLS_QMSUM`, `ZERO_SCROLLS_SQUALITY`   |
+|   Text Transformation   |   Translation   |   `Flores200`, `FloresPlus`, `WMT14`, `WMT14_INSTRUCT`, `WMT16, WMT16_INSTRUCT, WMT20, WMT20_INSTRUCT`   |    |
+
+## Completion (old table) TODO: delete table
 
 | Task Name | Tag | Task | Capability | Common Few-Shot Counts | Language |
 |-|-|-|-|-|-|
@@ -21,7 +36,7 @@ Additional task documentation can be generated with the script `utils/generate-t
 | Math Lvl 5 | `Math Lvl 5` | Logical Reasoning | Math | [0, 5, 8] | en |
 | Math 500 | `MATH500` | Logical Reasoning | Math | [0] | en |
 | MBPP | `MBPP` | Logical Reasoning | Programming | [0] | en |
-| MBPP Sanitized | `MBPP_SANITZED` | Logical Reasoning | Programming | [0] | en |
+| MBPP Sanitized | `MBPP_SANITIZED` | Logical Reasoning | Programming | [0] | en |
 | MBPP | `MBPP_PROMPT_WITHOUT_TESTS` | Logical Reasoning | Programming | [0] | en |
 | MBPP | `MBPP_PROMPT_WITHOUT_TESTS_SANITIZED` | Logical Reasoning | Programming | [0] | en |
 | PAWS-X | `PAWS-X` | Text Distillation | Classification | [0, 5] | en |
@@ -34,7 +49,19 @@ Additional task documentation can be generated with the script `utils/generate-t
 | WMT 16 | `WMT16` | Text Translation | Translation | [0, 5] | en, ger |
 | WMT 20 | `WMT20` | Text Translation | Translation | [0, 5] | en, ger, fr |
 
-## Loglikelihoods
+## Loglikelihoods (updated table)
+
+|   **Task**    | **Capability** | **Benchmarks** | **Long Context** |
+|-|-|-|-|
+|   Output Control   |   Bias   |   `WINOGENDER`   |    |
+|   Text Distillation   |   Classification   |   `ARC`,`ARC_DE`, `ARC_EU20_DE`, `ARC_EU20_FR`, `ARC_FI`, `BELEBELE`, `ChemBench`, `FullTextMMLU`, `GPQA`, `INCLUDE`, `MMLU`, `MMLU_DE`,`MMLU_EU20_DE`, `MMLU_EU20_FR`, `MMMLU`, `MMLU_PRO`, `OPENBOOKQA`, `PIQA`, `SCIQ`, `SCIQEvalHarness`, `TRUTHFULQA`, `TRUTHFULQA_EU20_DE, TRUTHFULQA_EU20_FR`   |    |
+|   Text Distillation   |   QA   |    |   `QUALITY`, `ZERO_SCROLLS_QUALITY`   |
+|   Text Generation   |   Open QA   |   `CASEHOLD`   |    |
+|   Logical Reasoning   |   Closed QA   |    |   `InfiniteBench_EnMC`   |
+|   Logical Reasoning   |   Programming   |    |   `InfiniteBench_CodeDebug`   |
+|   Logical Reasoning   |   Reasoning   |   `COPA`, `HELLASWAG, HELLASWAG_EU20_DE, HELLASWAG_EU20_FR`, `WINOGRANDE`, `WINOX_DE`, `WINOX_FR`   |    |
+
+## Loglikelihoods (old table)  TODO: delete table
 
 | Task Name | Tag | Task | Capability | Common Few-Shot Counts | Language |
 |-|-|-|-|-|-|
@@ -54,9 +81,8 @@ Additional task documentation can be generated with the script `utils/generate-t
 | OpenBookQA | `OpenBookQA` | Text Distillation | Classification | [0] | en |
 | SciQ | `SciQ` | Text Distillation | Classification | [0] | en |
 | TruthfulQA | `TruthfulQA` | Text Distillation | Classification | [0, 6] | en |
-| TruthfulQA German | `TruthfulQA German` | Text Distillation | Classification | [0, 6] | en |
-| TruthfulQA Perturbed | `TruthfulQA Perturbed` | Text Distillation | Classification | [0, 6] | en |
-| TruthfulQA Perturbed German | `TruthfulQA Perturbed German` | Text Distillation | Classification | [0, 6] | en |
+| TruthfulQA French | `TRUTHFULQA_EU20_FR` | Text Distillation | Classification | [0, 6] | en |
+| TruthfulQA German | `TRUTHFULQA_EU20_DE` | Text Distillation | Classification | [0, 6] | en |
 | Winogender | `Winogender` | Output Control | Bias | [0, 5] | en |
 | Winogrande | `Winogrande` | Logical Reasoning | Reasoning | [0, 5] | en |
 
@@ -83,6 +109,11 @@ Additional task documentation can be generated with the script `utils/generate-t
 | ZeroSCROLLS MuSiQue            | `ZeroSCROLLS MuSiQue`            | Text Distillation | QA                                               | Wikipedia | not supported | 1749                                         | en           |
 | ZeroSCROLLS SpaceDigest        | `ZeroSCROLLS SpaceDigest`        | Text Distillation | Aggregation                                      | Reviews | not supported | 5481                                         | en           |
 
+# Languages
+
+- Languages in Likelihood tasks: ENG (39), DEU (7), FRA (4), FIN (2), NLD (2), ITA (1), POL (1), RUS (1), SPA (1), SWE (1), UKR (1)
+- Languages in Completion tasks: ENG (20), DEU (5), FRA (5), ARB (1), FIN (1), ITA (1), POR (1), SPA (1) and 44 languages in INCLUDE.
+- Languages in both types of tasks: ENG (59), DEU (12), FRA (9), FIN (3), NLD (2), SPA (2), ARB (1), ITA (1), POL (1), POR (1), RUS (1), SWE (1), UKR (1) and 44 languages in INCLUDE.
 
 # Metrics
 
