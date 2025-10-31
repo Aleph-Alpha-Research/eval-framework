@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - '**/*.md'
+      - '**.md'
   pull_request:
     types: [opened, reopened, synchronize, labeled]
     paths-ignore:
-      - '**/*.md'
+      - '**.md'
   # Manually trigger a workflow for a branch
   workflow_dispatch:
   # Merge queue trigger
@@ -139,7 +139,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        extras: ['', '[transformers]', '[openai]', '[all]']
+        extras: ['', '[determined]', '[api]', '[openai]', '[transformers]', '[accelerate]', '[comet]', '[optional]', '[mistral]', '[all]']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -184,11 +184,31 @@ jobs:
           source isolated_venv/bin/activate
 
           case "${{ matrix.extras }}" in
-            "[transformers]")
-              python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
+            "[determined]")
+              python -c "import determined; print('Determined version:', determined.__version__)"
+              python -c "from eval_framework.context.determined import DeterminedContext; print('✓ determined')"
+              ;;
+            "[api]")
+              python -c "from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel; print('✓ api')"
               ;;
             "[openai]")
               python -c "from eval_framework.llm.openai import OpenAI; print('✓ openai')"
+              ;;
+            "[transformers]")
+              python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
+              ;;
+            "[accelerate]")
+              python -c "import accelerate; print('Accelerate version:', accelerate.__version__)"
+              echo "Running 'accelerate env'..."
+              accelerate env
+              ;;
+            "[comet]")
+              # Test task registry (comet required for FloresPlus tasks)
+              python -c "from eval_framework.tasks.task_names import registered_tasks_iter; print(f'✓ {len(list(registered_tasks_iter()))} tasks loaded, comet extra works')"
+              ;;
+            "[optional]")
+              python -c "from jinja2 import Template; print('Jinja2 OK:', Template('Hello {{ name }}!').render(name='World'))"
+              python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
               ;;
             "[all]")
               python -c "from eval_framework.llm.huggingface import HFLLM"
@@ -204,8 +224,8 @@ jobs:
               ;;
           esac
 
-  test-pip-install-vllm:
-    name: Test pip install eval_framework[vllm] in clean venv (GPU Run)
+  test-pip-install-gpu:
+    name: Test pip install eval_framework in clean venv (GPU Run)
     runs-on: EvalFrameworkGPURunner
     needs: [tag, build, test-pip-install]
     container:
@@ -214,6 +234,10 @@ jobs:
         username: token
         password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
       options: --gpus all
+    strategy:
+      fail-fast: false
+      matrix:
+        extras: ['[mistral]', '[vllm]']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -235,14 +259,36 @@ jobs:
         run: |
           python -m venv isolated_venv
           source isolated_venv/bin/activate
-          uv pip install $(ls dist/*.whl)[vllm]
+          uv pip install $(ls dist/*.whl)${{ matrix.extras }}
           pip show eval-framework
 
-      - name: Test VLLM pip install
-        shell: bash
+      - name: Verify core functionality
         run: |
           source isolated_venv/bin/activate
-          python -c "from eval_framework.llm.vllm import VLLMModel; print('✓ vllm')"
+
+          # Test imports
+          python -c "import eval_framework; print(f'✓ Version: {eval_framework.__version__}')"
+          python -c "from eval_framework.llm.base import BaseLLM; print('✓ BaseLLM')"
+          python -c "from eval_framework.tasks.base import BaseTask; print('✓ BaseTask')"
+          python -c "from template_formatting.formatter import HFFormatter; print('✓ HFFormatter')"
+
+          # Test CLI
+          eval_framework --help > /dev/null && echo "✓ CLI works"
+
+      - name: Verify extras functionality
+        if: matrix.extras != ''
+        run: |
+          source isolated_venv/bin/activate
+
+          case "${{ matrix.extras }}" in
+            "[vllm]")
+              python -c "from eval_framework.llm.vllm import VLLMModel; print('✓ vllm')"
+              ;;
+            "[mistral]")
+              python -c "from eval_framework.llm.mistral import MistralVLLM; print('✓ mistral')"
+              echo "✓ All extras verified"
+              ;;
+          esac
 
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
