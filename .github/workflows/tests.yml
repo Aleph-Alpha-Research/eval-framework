@@ -211,8 +211,11 @@ jobs:
               python -c "import transformers; print('transformers', transformers.__version__, 'OK')"
               ;;
             "[all]")
-              python -c "from eval_framework.llm.huggingface import HFLLM"
-              python -c "from eval_framework.llm.openai import OpenAI"
+              python -c "from eval_framework.context.determined import DeterminedContext; print('✓ determined')"
+              python -c "from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel; print('✓ api')"
+              python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
+              python -c "from eval_framework.llm.openai import OpenAI; print('✓ openai')"
+              python -c "import accelerate; print('Accelerate version:', accelerate.__version__)"
 
               # Skip VLLM import since no GPU in CI
               echo "[INFO] Skipping VLLM import (no CUDA available)"
@@ -237,7 +240,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        extras: ['[mistral]', '[vllm]']
+        extras: ['[mistral]', '[vllm]', '[all]']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -286,8 +289,21 @@ jobs:
               ;;
             "[mistral]")
               python -c "from eval_framework.llm.mistral import MistralVLLM; print('✓ mistral')"
-              echo "✓ All extras verified"
               ;;
+            "[all]")
+              python -c "from eval_framework.context.determined import DeterminedContext; print('✓ determined')"
+              python -c "from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel; print('✓ api')"
+              python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
+              python -c "from eval_framework.llm.openai import OpenAI; print('✓ openai')"
+              python -c "import accelerate; print('Accelerate version:', accelerate.__version__)"
+
+              python -c "from eval_framework.llm.vllm import VLLMModel; print('✓ vllm')"
+              python -c "from eval_framework.llm.mistral import MistralVLLM; print('✓ mistral')"
+
+              # Test task registry (comet required for FloresPlus tasks)
+              python -c "from eval_framework.tasks.task_names import registered_tasks_iter; print(f'✓ {len(list(registered_tasks_iter()))} tasks loaded')"
+
+              echo "✓ All extras verified"
           esac
 
   test-cpu:
