@@ -154,11 +154,15 @@ jobs:
           python -m pip install --upgrade pip build
           python -m build --outdir dist/
 
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+
       - name: Create self-contained venv and install via pip
         run: |
           python -m venv isolated_venv
           source isolated_venv/bin/activate
-          pip install $(ls dist/*.whl)${{ matrix.extras }}
+          uv pip install $(ls dist/*.whl)${{ matrix.extras }}
           pip show eval-framework
 
       - name: Verify core functionality
@@ -222,13 +226,16 @@ jobs:
           python -m pip install --upgrade pip build
           python -m build --outdir dist/
 
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+
       - name: Create self-contained venv with vllm and install via pip
         shell: bash
         run: |
           python -m venv isolated_venv
           source isolated_venv/bin/activate
-          # Install eval_framework with vllm extra and --no-cache-dir to avoid uv cache
-          pip install --no-cache-dir $(ls dist/*.whl)[vllm]
+          uv pip install $(ls dist/*.whl)[vllm]
           pip show eval-framework
 
       - name: Test VLLM pip install
