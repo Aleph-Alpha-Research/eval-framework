@@ -139,7 +139,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        extras: ['', '[determined]', '[api]', '[openai]', '[transformers]', '[accelerate]', '[comet]', '[optional]', '[mistral]', '[all]']
+        extras: ['', '[determined]', '[api]', '[openai]', '[transformers]', '[accelerate]', '[comet]', '[optional]', '[all]']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
