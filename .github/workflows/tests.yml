@@ -171,33 +171,33 @@ jobs:
         if: matrix.extras != ''
         run: |
           case "${{ matrix.extras }}" in
-            "[determined]")
+            "determined")
               uv run python -c "import determined; print('Determined version:', determined.__version__)"
               uv run python -c "from eval_framework.context.determined import DeterminedContext; print('✓ determined')"
               ;;
-            "[api]")
+            "api")
               uv run python -c "from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel; print('✓ api')"
               ;;
-            "[openai]")
+            "openai")
               uv run python -c "from eval_framework.llm.openai import OpenAI; print('✓ openai')"
               ;;
-            "[transformers]")
+            "transformers")
               uv run python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
               ;;
-            "[accelerate]")
+            "accelerate")
               uv run python -c "import accelerate; print('Accelerate version:', accelerate.__version__)"
               echo "Running 'accelerate env'..."
               uv run accelerate env
               ;;
-            "[comet]")
+            "comet")
               # Test task registry (comet required for FloresPlus tasks)
               uv run python -c "from eval_framework.tasks.task_names import registered_tasks_iter; print(f'✓ {len(list(registered_tasks_iter()))} tasks loaded, comet extra works')"
               ;;
-            "[optional]")
+            "optional")
               uv run python -c "from jinja2 import Template; print('Jinja2 OK:', Template('Hello {{ name }}!').render(name='World'))"
               uv run python -c "import transformers; print('transformers', transformers.__version__, 'OK')"
               ;;
-            "[all]")
+            "all")
               uv run python -c "from eval_framework.context.determined import DeterminedContext; print('✓ determined')"
               uv run python -c "from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel; print('✓ api')"
               uv run python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
@@ -357,13 +357,13 @@ jobs:
         if: matrix.extras != ''
         run: |
           case "${{ matrix.extras }}" in
-            "[vllm]")
+            "vllm")
               uv run python -c "from eval_framework.llm.vllm import VLLMModel; print('✓ vllm')"
               ;;
-            "[mistral]")
+            "mistral")
               uv run python -c "from eval_framework.llm.mistral import MistralVLLM; print('✓ mistral')"
               ;;
-            "[all]")
+            "all")
               uv run python -c "from eval_framework.context.determined import DeterminedContext; print('✓ determined')"
               uv run python -c "from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel; print('✓ api')"
               uv run python -c "from eval_framework.llm.huggingface import HFLLM; print('✓ transformers')"
