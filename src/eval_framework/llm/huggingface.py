@@ -90,7 +90,7 @@ class BaseHFLLM(BaseLLM):
         logger.info(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
         self._set_formatter(formatter)
         # set bytes_per_token_scalar for non-standard models
-        self.bytes_per_token_scalar = bytes_per_token / 4 if bytes_per_token is not None else self.BYTES_PER_TOKEN / 4
+        self.bytes_per_token_scalar = 4 / bytes_per_token if bytes_per_token is not None else 4 / self.BYTES_PER_TOKEN
         print(self.bytes_per_token_scalar)
 
     def _set_formatter(self, formatter: BaseFormatter | None = None) -> None:
