@@ -80,6 +80,7 @@ class BaseHFLLM(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
+    BYTES_PER_TOKEN: int = 4 # default for GPT-2 tokenizer, works for all INT32 (4 bytes) token types
 
     def __init__(self, formatter: BaseFormatter | None = None) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -87,6 +88,7 @@ class BaseHFLLM(BaseLLM):
         self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
         logger.info(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
         self._set_formatter(formatter)
+        self.bytes_per_token_scalar = self.BYTES_PER_TOKEN / 4 # turns it into a scalar to be applied to a benchmark's max_tokens attribute
 
     def _set_formatter(self, formatter: BaseFormatter | None = None) -> None:
         # if formatter is being set at initialization time, use it
@@ -162,8 +164,10 @@ class BaseHFLLM(BaseLLM):
 
             # Calculate the maximum number of tokens to generate
             max_tokens_to_generate = min_seq_length - prompt_token_count
+            # If max_tokens is specified, scale it according to bytes_per_token (so that byte-level tokenizers still generate full responses)
+            scaled_max_tokens = max_tokens * self.bytes_per_token_scalar if max_tokens is not None else None
             # If max_tokens is specified, use the smaller of the two
-            max_tokens_to_generate = min(filter(None, [max_tokens_to_generate, max_tokens]))
+            max_tokens_to_generate = min(filter(None, [max_tokens_to_generate, scaled_max_tokens]))
 
             if max_tokens_to_generate < 1:
                 if raise_errors():
