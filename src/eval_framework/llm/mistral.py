@@ -1,3 +1,5 @@
+import math
+
 from functools import partial
 from pathlib import Path
 from typing import Any, Literal, override
