@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class OpenAIModel(BaseLLM):
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
+    BYTES_PER_TOKEN: int = 4 # rule of thumb according to https://platform.openai.com/tokenizer
 
     def __init__(
         self,
@@ -49,6 +50,8 @@ class OpenAIModel(BaseLLM):
 
         # Initialize tiktoken tokenizer for the model
         self._encoding = tiktoken.encoding_for_model(self._model_name)
+        # set bytes_per_token_scalar for non-standard models
+        self.bytes_per_token_scalar = 4 / bytes_per_token if bytes_per_token is not None else 4 / self.BYTES_PER_TOKEN
 
     def _count_tokens(self, text: str) -> int:
         """Helper method to count tokens using tiktoken."""
@@ -78,6 +81,10 @@ class OpenAIModel(BaseLLM):
         """
         results = []
         for single_messages in messages:
+
+            # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
+            scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
+
             if self._formatter is not None:
                 # Use formatter for text completion API
                 prompt = self._formatter.format(single_messages, output_mode="string")
@@ -85,7 +92,7 @@ class OpenAIModel(BaseLLM):
                     model=self._model_name,
                     prompt=prompt,
                     temperature=effective_temperature,
-                    max_tokens=max_tokens,
+                    max_tokens=scaled_max_tokens,
                     stop=stop_sequences,
                 )
 
@@ -121,7 +128,7 @@ class OpenAIModel(BaseLLM):
                     model=self._model_name,
                     messages=chat_messages,
                     temperature=effective_temperature,
-                    max_tokens=max_tokens,
+                    max_tokens=scaled_max_tokens,
                     stop=stop_sequences,
                 )
 
@@ -189,9 +196,13 @@ class OpenAIModel(BaseLLM):
                     ),
                 )
             list_json_messages.append(json_messages)
+
+        # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
+        scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
+
         # Generate completion
         completions = self.generate_from_messages(
-            messages=list_json_messages, stop_sequences=stop_sequences, max_tokens=max_tokens
+            messages=list_json_messages, stop_sequences=stop_sequences, max_tokens=scaled_max_tokens
         )
         responses = []
         for completion in completions:

@@ -81,7 +81,7 @@ class BaseHFLLM(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
-    BYTES_PER_TOKEN: int = 4 # default for GPT-2 tokenizer, works for all INT32 (4 bytes) token types
+    BYTES_PER_TOKEN: int = 4 # rule of thumb according to https://platform.openai.com/tokenizer
 
     def __init__(self, formatter: BaseFormatter | None = None, bytes_per_token: int | None = None) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

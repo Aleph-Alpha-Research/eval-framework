@@ -104,6 +104,7 @@ class BaseVLLMModel(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
+    BYTES_PER_TOKEN: int = 4 # rule of thumb according to https://platform.openai.com/tokenizer
 
     def __init__(
         self,
@@ -115,6 +116,7 @@ class BaseVLLMModel(BaseLLM):
         checkpoint_path: str | Path | None = None,
         checkpoint_name: str | None = None,
         sampling_params: SamplingParams | dict[str, Any] | None = None,
+        bytes_per_token: int | None = None,
         **kwargs: Any,
     ) -> None:
         # Store the max_model_len for later use
@@ -144,6 +146,8 @@ class BaseVLLMModel(BaseLLM):
             f"{RED}[ Model initialized ------------------- {RESET}{self.checkpoint_path or self.LLM_NAME} {RED}]{RESET}"
         )
         self._set_formatter(formatter)
+        # set bytes_per_token_scalar for non-standard models
+        self.bytes_per_token_scalar = 4 / bytes_per_token if bytes_per_token is not None else 4 / self.BYTES_PER_TOKEN
 
     def _process_sampling_params(self, sampling_params: SamplingParams | dict[str, Any] | None) -> SamplingParams:
         processed_sampling_params: SamplingParams | None = None
@@ -229,8 +233,11 @@ class BaseVLLMModel(BaseLLM):
 
             max_tokens_to_generate = self.max_seq_length - prompt_token_count
 
-            if max_tokens is not None:
-                max_tokens_to_generate = min(max_tokens_to_generate, max_tokens)
+            # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
+            scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
+
+            # If max_tokens is specified, use the smaller of the two
+            max_tokens_to_generate = min(filter(None, [max_tokens_to_generate, scaled_max_tokens]))
 
             if max_tokens_to_generate < 1:
                 if raise_errors():
