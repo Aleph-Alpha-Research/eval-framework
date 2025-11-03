@@ -68,7 +68,7 @@ class MistralVLLM(VLLMModel):
             gpu_memory_utilization=gpu_memory_utilization,
             batch_size=batch_size,
             sampling_params=sampling_params,
-            bytes_per_token_scalar=bytes_per_token_scalar,
+            bytes_per_token=bytes_per_token,
             **{**model_args, **kwargs},
         )
 
