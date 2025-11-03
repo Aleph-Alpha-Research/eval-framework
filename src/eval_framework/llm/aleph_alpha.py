@@ -44,7 +44,7 @@ def safe_json_loads(s: str) -> dict:
 class AlephAlphaAPIModel(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
-    BYTES_PER_TOKEN: int = 4 # rule of thumb according to https://platform.openai.com/tokenizer
+    BYTES_PER_TOKEN: int = 4  # rule of thumb according to https://platform.openai.com/tokenizer
 
     def __init__(
         self,

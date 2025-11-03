@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class OpenAIModel(BaseLLM):
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
-    BYTES_PER_TOKEN: int = 4 # rule of thumb according to https://platform.openai.com/tokenizer
+    BYTES_PER_TOKEN: int = 4  # rule of thumb according to https://platform.openai.com/tokenizer
 
     def __init__(
         self,
@@ -83,7 +83,6 @@ class OpenAIModel(BaseLLM):
         """
         results = []
         for single_messages in messages:
-
             # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
             scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
 

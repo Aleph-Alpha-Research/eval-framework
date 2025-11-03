@@ -1,7 +1,7 @@
 import gc
 import logging
-import os
 import math
+import os
 import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
@@ -105,7 +105,7 @@ class BaseVLLMModel(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
-    BYTES_PER_TOKEN: int = 4 # rule of thumb according to https://platform.openai.com/tokenizer
+    BYTES_PER_TOKEN: int = 4  # rule of thumb according to https://platform.openai.com/tokenizer
 
     def __init__(
         self,
