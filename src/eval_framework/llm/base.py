@@ -42,7 +42,7 @@ class BaseLLM(ABC):
 
     def generate_from_samples(
         self,
-        messages: list[Sequence[Message]],
+        samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
