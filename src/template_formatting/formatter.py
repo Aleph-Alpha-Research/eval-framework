@@ -323,6 +323,8 @@ class HFFormatter(BaseFormatter):
                     "continue_final_message": is_prefill,
                 }
             )
+        if "date_string" not in template_kwargs:
+                template_kwargs["date_string"] = "1 Jan 2025"  # hardcoded date for consistency in tests
 
         return self.tokenizer.apply_chat_template(hf_chat, **template_kwargs)
 
