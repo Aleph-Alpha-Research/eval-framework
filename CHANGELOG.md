@@ -34,6 +34,7 @@
 - Fix: W&B integration respects WANDB_ARTIFACT_DIR. In addition, new env var WANDB_CACHE_SKIP controls cache use.
 - Dropped support for S3 storages without proper SSL certificates.
 - Added support for W&B artifacts on local storage which don't need to be downloaded and may be earlier available.
+- Hardcoded a date in template formatting application for consistency in eval results
 
 ## 0.2.2
 
