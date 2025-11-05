@@ -79,6 +79,11 @@ class BaseLLM(ABC):
         max_tokens: int | None = None,
         temperature: float | None = None,
     ) -> list[RawCompletion]:
+        """Generates a model response for each sample.
+
+        Uses 'generate_from_samples' to generate responses if implemented,
+        otherwise falls back to 'generate_from_messages'.
+        """
         try:
             return self.generate_from_samples(samples, stop_sequences, max_tokens, temperature)
         except NotImplementedError:
