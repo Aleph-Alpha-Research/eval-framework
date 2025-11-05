@@ -324,7 +324,10 @@ class HFFormatter(BaseFormatter):
                 }
             )
         if "date_string" not in template_kwargs:
-            template_kwargs["date_string"] = "1 Jan 2025"  # hardcoded date for consistency in tests
+            # some templates are forcing a date_string, harcoding one here for consistency in evaluations, e.g.
+            # https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama4/processing_llama4.py
+            # template_kwargs["date_string"] = "26 Jul 2024"
+            template_kwargs["date_string"] = "unknown"
 
         return self.tokenizer.apply_chat_template(hf_chat, **template_kwargs)
 
