@@ -7,6 +7,8 @@
 - Added `post_process_completion` method to `BaseLLM` class to enable model-specific post-processing of completions before task-specific post-processing is applied.
 - The BASELLM class is equiped with `del` call to clear up resources. VLLM and HF APIs offload the respective models off the gpus. OpenAI class disconnects the client.
 - Refactored `VLLM` and `HFLLM` interfaces in backwards-compatible way so that there are identical (and flexible!) checkpoint and formatter specification options across VLLM and HFLLM. `VLLMRegistryModel`, `HFLLMRegistryModel`, `HFLLM_from_name` are now deprecated.
+- Cleaned up `OpenAIModel` class. Those models can now also be evaluated and not only used as judges. Loglikelihood evaluation requests are now implemented (although only supported by a limited number of OpenAI models). Implemented tests for `OpenAIModel` calls.
+- Implementation of Deepseek model API.
 
 ### Tasks
 
@@ -34,6 +36,8 @@
 - Fix: W&B integration respects WANDB_ARTIFACT_DIR. In addition, new env var WANDB_CACHE_SKIP controls cache use.
 - Dropped support for S3 storages without proper SSL certificates.
 - Added support for W&B artifacts on local storage which don't need to be downloaded and may be earlier available.
+- Added documentation on `SQUAD` and `SQUAD2` benchmark classes
+- Updated documentation on lists of available tasks
 
 ## 0.2.2
 
