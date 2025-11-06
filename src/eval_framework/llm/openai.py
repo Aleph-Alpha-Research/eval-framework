@@ -1,3 +1,4 @@
+import concurrent.futures
 import logging
 import os
 import traceback
@@ -85,7 +86,7 @@ class OpenAIModel(BaseLLM):
         temperature: float | None = None,
     ) -> list[RawCompletion]:
         """
-        Generate completions for a list of message sequences.
+        Generate completions for a list of message sequences concurrently.
 
         Uses text completion API when a formatter is configured, otherwise uses chat completion API.
 
@@ -101,9 +102,7 @@ class OpenAIModel(BaseLLM):
         effective_temperature = temperature if temperature is not None else self._temperature
         assert 0.0 <= effective_temperature <= 2.0, "Temperature must be between 0.0 and 2.0"
 
-        results: list[RawCompletion] = []
-
-        for single_messages in messages:
+        def _process_one(single_messages):
             if self._formatter is not None:
                 # Use formatter and text completion API
                 prompt = self._formatter.format(single_messages, output_mode="string")
@@ -116,19 +115,17 @@ class OpenAIModel(BaseLLM):
                     stop=stop_sequences,
                 )
                 completion = response.choices[0].text
-                results.append(
-                    RawCompletion(
-                        prompt=prompt,
-                        prompt_sequence_positions=self._count_tokens(prompt),
-                        concat_compression=ConcatCompression.calculate(
-                            single_messages, count_tokens=self._count_tokens, completion=completion
-                        ),
-                        completion=completion,
-                        completion_sequence_positions=self._count_tokens(completion),
-                    )
+                return RawCompletion(
+                    prompt=prompt,
+                    prompt_sequence_positions=self._count_tokens(prompt),
+                    concat_compression=ConcatCompression.calculate(
+                        single_messages, count_tokens=self._count_tokens, completion=completion
+                    ),
+                    completion=completion,
+                    completion_sequence_positions=self._count_tokens(completion),
                 )
             else:
-                # Take one chat at a time
+                # Use chat completion API
                 chat_messages = [
                     (
                         ChatCompletionUserMessageParam(role="user", content=m.content)
@@ -147,18 +144,102 @@ class OpenAIModel(BaseLLM):
                 prompt = "\n".join([f"{m.get('role', '')}: {m.get('content', '')}" for m in chat_messages])
                 prompt_tokens = getattr(chat_response.usage, "prompt_tokens", None)
                 completion = chat_response.choices[0].message.content or ""
-                results.append(
-                    RawCompletion(
-                        prompt=prompt,
-                        prompt_sequence_positions=prompt_tokens,
-                        concat_compression=ConcatCompression.calculate(
-                            single_messages, count_tokens=self._count_tokens, completion=completion
-                        ),
-                        completion=completion,
-                        completion_sequence_positions=self._count_tokens(completion),
-                    )
+                return RawCompletion(
+                    prompt=prompt,
+                    prompt_sequence_positions=prompt_tokens,
+                    concat_compression=ConcatCompression.calculate(
+                        single_messages, count_tokens=self._count_tokens, completion=completion
+                    ),
+                    completion=completion,
+                    completion_sequence_positions=self._count_tokens(completion),
                 )
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = list(executor.map(_process_one, messages))
         return results
+
+    # def generate_from_messages_sync(
+    #     self,
+    #     messages: list[Sequence[Message]],
+    #     stop_sequences: list[str] | None = None,
+    #     max_tokens: int | None = None,
+    #     temperature: float | None = None,
+    # ) -> list[RawCompletion]:
+    #     """
+    #     Generate completions for a list of message sequences.
+
+    #     Uses text completion API when a formatter is configured, otherwise uses chat completion API.
+
+    #     Args:
+    #         messages: Sequence of messages.
+    #         stop_sequences: Optional list of stop sequences.
+    #         max_tokens: Optional maximum number of tokens to generate.
+    #         temperature: Sampling temperature.
+
+    #     Returns:
+    #         List of RawCompletion objects containing prompts and completions.
+    #     """
+    #     effective_temperature = temperature if temperature is not None else self._temperature
+    #     assert 0.0 <= effective_temperature <= 2.0, "Temperature must be between 0.0 and 2.0"
+
+    #     results: list[RawCompletion] = []
+
+    #     for single_messages in messages:
+    #         if self._formatter is not None:
+    #             # Use formatter and text completion API
+    #             prompt = self._formatter.format(single_messages, output_mode="string")
+    #             # documentation: https://platform.openai.com/docs/api-reference/completions/create
+    #             response = self._client.completions.create(
+    #                 model=self._model_name,
+    #                 prompt=prompt,
+    #                 temperature=effective_temperature,
+    #                 max_tokens=max_tokens,
+    #                 stop=stop_sequences,
+    #             )
+    #             completion = response.choices[0].text
+    #             results.append(
+    #                 RawCompletion(
+    #                     prompt=prompt,
+    #                     prompt_sequence_positions=self._count_tokens(prompt),
+    #                     concat_compression=ConcatCompression.calculate(
+    #                         single_messages, count_tokens=self._count_tokens, completion=completion
+    #                     ),
+    #                     completion=completion,
+    #                     completion_sequence_positions=self._count_tokens(completion),
+    #                 )
+    #             )
+    #         else:
+    #             # Take one chat at a time
+    #             chat_messages = [
+    #                 (
+    #                     ChatCompletionUserMessageParam(role="user", content=m.content)
+    #                     if m.role is not None and m.role.value.lower() == "user"
+    #                     else ChatCompletionAssistantMessageParam(role="assistant", content=m.content)
+    #                 )
+    #                 for m in single_messages
+    #             ]
+    #             chat_response = self._client.chat.completions.create(
+    #                 model=self._model_name,
+    #                 messages=chat_messages,
+    #                 temperature=effective_temperature,
+    #                 max_tokens=max_tokens,
+    #                 stop=stop_sequences,
+    #             )
+    #             prompt = "\n".join([f"{m.get('role', '')}: {m.get('content', '')}" for m in chat_messages])
+    #             prompt_tokens = getattr(chat_response.usage, "prompt_tokens", None)
+    #             completion = chat_response.choices[0].message.content or ""
+    #             results.append(
+    #                 RawCompletion(
+    #                     prompt=prompt,
+    #                     prompt_sequence_positions=prompt_tokens,
+    #                     concat_compression=ConcatCompression.calculate(
+    #                         single_messages, count_tokens=self._count_tokens, completion=completion
+    #                     ),
+    #                     completion=completion,
+    #                     completion_sequence_positions=self._count_tokens(completion),
+    #                 )
+    #             )
+    #     return results
 
     def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         """

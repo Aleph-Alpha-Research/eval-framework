@@ -7,8 +7,8 @@
 - Added `post_process_completion` method to `BaseLLM` class to enable model-specific post-processing of completions before task-specific post-processing is applied.
 - The BASELLM class is equiped with `del` call to clear up resources. VLLM and HF APIs offload the respective models off the gpus. OpenAI class disconnects the client.
 - Refactored `VLLM` and `HFLLM` interfaces in backwards-compatible way so that there are identical (and flexible!) checkpoint and formatter specification options across VLLM and HFLLM. `VLLMRegistryModel`, `HFLLMRegistryModel`, `HFLLM_from_name` are now deprecated.
-- Cleaned up `OpenAIModel` class. Those models can now also be evaluated and not only used as judges. Loglikelihood evaluation requests are now implemented (although only supported by a limited number of OpenAI models). Implemented tests for `OpenAIModel` calls.
-- Implementation of Deepseek model API.
+- Cleaned up `OpenAIModel` class. Those models can now also be evaluated and not only used as judges. Loglikelihood evaluation requests are now implemented (although only supported by a limited number of OpenAI models). Implemented tests for `OpenAIModel` calls. Added concurrency to completion calls.
+- Added access to Deepseek model API.
 
 ### Tasks
 

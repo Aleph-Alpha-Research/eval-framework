@@ -15,7 +15,7 @@ from template_formatting.formatter import Message, Role
 
 
 @pytest.mark.external_api
-# @pytest.mark.xfail(strict=False, reason="External API models are flaky or not required to always pass.")
+@pytest.mark.xfail(strict=False, reason="External API models are flaky or not required to always pass.")
 # some of the responses are not deterministic and may cause an expected failure in the test (eg. deepseek-reasoner)
 @pytest.mark.parametrize(
     "model_cls,expected_completion,max_tokens",
@@ -49,7 +49,7 @@ def test_openai_completions(model_cls, expected_completion, max_tokens) -> None:
 
 
 @pytest.mark.external_api
-# @pytest.mark.xfail(strict=False, reason="External API models are flaky or not required to always pass.")
+@pytest.mark.xfail(strict=False, reason="External API models are flaky or not required to always pass.")
 @pytest.mark.parametrize(
     "model_cls",
     [
