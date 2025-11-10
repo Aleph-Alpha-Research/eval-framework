@@ -53,8 +53,9 @@ class COPA_IDK(COPA):
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
         return (
-            "Complete the sentence only if you are confident, since mistakes may be penalised, while correct answers receive points. "
-            "It is acceptable to answer with 'I do not know' if you are unsure, and you will receive 0 points."
+            "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
+            "answers receive points. It is acceptable to answer with 'I do not know' if you are unsure, and "
+            "you will receive 0 points."
         )
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
