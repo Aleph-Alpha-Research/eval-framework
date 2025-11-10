@@ -46,6 +46,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.GSM8K_EU20_DE")
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.GSM8K_EU20_FR")
     register_lazy_task("eval_framework.tasks.benchmarks.hellaswag.HELLASWAG")
+    register_lazy_task("eval_framework.tasks.benchmarks.hellaswag.HELLASWAG_DCS")
     register_lazy_task("eval_framework.tasks.benchmarks.hellaswag_de.HELLASWAG_DE")
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.HELLASWAG_EU20_DE")
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.HELLASWAG_EU20_FR")
