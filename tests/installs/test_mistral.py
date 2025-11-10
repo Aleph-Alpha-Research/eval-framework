@@ -5,9 +5,9 @@ from eval_framework.llm.mistral import MistralVLLM
 
 def test_mistral_import() -> None:
     # Mock the __init__ method to avoid actual initialization
-    with patch.object(MistralVLLM, "__init__", lambda self, model_name: None):  # type: ignore
+    with patch.object(MistralVLLM, "__init__", lambda self, model_name: None):
         # Test Mistral VLLM import
-        model = MistralVLLM(model_name="mistral-7b-instruct-v0.1")
+        model = MistralVLLM(model_name="mistral-7b-instruct-v0.1")  # type: ignore
 
         # Check basic expectations
         assert isinstance(model, MistralVLLM)

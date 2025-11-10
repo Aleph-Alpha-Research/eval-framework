@@ -7,7 +7,7 @@ def test_aleph_alpha_import() -> None:
     # Mock the __init__ method to avoid actual initialization
     with patch.object(AlephAlphaAPIModel, "__init__", lambda self, model_name: None):  # type: ignore
         # Test Aleph Alpha API Model import
-        model = AlephAlphaAPIModel(model_name="llama-3-8b-instruct")
+        model = AlephAlphaAPIModel(model_name="llama-3-8b-instruct")  # type: ignore
 
         # Check basic expectations
         assert isinstance(model, AlephAlphaAPIModel)

@@ -5,9 +5,9 @@ from eval_framework.llm.openai import OpenAIModel
 
 def test_openai_import() -> None:
     # Mock the __init__ method to avoid actual initialization
-    with patch.object(OpenAIModel, "__init__", lambda self, model_name: None):  # type: ignore
+    with patch.object(OpenAIModel, "__init__", lambda self, model_name: None):
         # Test OpenAI Model import
-        model = OpenAIModel(model_name="gpt-3.5-turbo")
+        model = OpenAIModel(model_name="gpt-3.5-turbo")  # type: ignore
 
         # Check basic expectations
         assert isinstance(model, OpenAIModel)

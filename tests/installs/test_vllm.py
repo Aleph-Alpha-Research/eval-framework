@@ -5,9 +5,9 @@ from eval_framework.llm.vllm import VLLMModel
 
 def test_vllm_import() -> None:
     # Mock the __init__ method to avoid actual initialization
-    with patch.object(VLLMModel, "__init__", lambda self, model_name: None):  # type: ignore
+    with patch.object(VLLMModel, "__init__", lambda self, model_name: None):
         # Test VLLM Model import
-        model = VLLMModel(model_name="vllm-test-model")
+        model = VLLMModel(model_name="vllm-test-model")  # type: ignore
 
         # Check basic expectations
         assert isinstance(model, VLLMModel)
