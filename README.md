@@ -54,6 +54,11 @@ or with pip
 uv pip install eval_framework[all]
 ```
 
+Tip: ensure python is properly installed with uv:
+```
+uv python install 3.12 --reinstall
+```
+
 We provide custom groups to control optional extras.
 - `flash_attn`: Install `flash_attn` with correct handling of build isolation
 
