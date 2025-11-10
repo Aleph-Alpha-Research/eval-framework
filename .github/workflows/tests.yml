@@ -159,7 +159,7 @@ jobs:
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-pip-install, test-uv-install]
+    needs: [hf-datasets-cache, test-uv-install]
     steps:
       - uses: actions/checkout@v4
 
@@ -182,7 +182,7 @@ jobs:
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-pip-install, test-uv-install]
+    needs: [hf-datasets-cache, test-uv-install]
     steps:
       - uses: actions/checkout@v4
 
@@ -207,7 +207,7 @@ jobs:
   test-docker-gpu:
     name: Run full test suite in Docker Container with GPU
     runs-on: EvalFrameworkGPURunner
-    needs: [tag, test-cpu, test-cpu-slow, test-pip-install-gpu, test-uv-install-gpu]
+    needs: [tag, test-cpu, test-cpu-slow]
     container:
       image: "${{ needs.tag.outputs.image }}"
       credentials:
