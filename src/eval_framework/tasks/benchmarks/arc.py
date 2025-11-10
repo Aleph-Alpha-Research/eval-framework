@@ -48,6 +48,7 @@ class ARC(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {choice}" for choice in item["choices"]["text"]]
 
+
 class ARC_IDK(ARC):
     NAME = "ARC_IDK"
     METRICS = [
@@ -55,7 +56,7 @@ class ARC_IDK(ARC):
         AccuracyNormLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
-        TernaryScore
+        TernaryScore,
     ]
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:

@@ -41,6 +41,7 @@ class COPA(BaseTask[str]):
         choices = [self.convert_choice(item["choice1"]), self.convert_choice(item["choice2"])]
         return choices
 
+
 class COPA_IDK(COPA):
     NAME = "COPA_IDK"
     METRICS = [
@@ -48,7 +49,7 @@ class COPA_IDK(COPA):
         AccuracyNormLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
-        TernaryScore
+        TernaryScore,
     ]
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:

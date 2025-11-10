@@ -49,7 +49,7 @@ class PIQA_IDK(PIQA):
         AccuracyNormLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
-        TernaryScore
+        TernaryScore,
     ]
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:

@@ -147,7 +147,7 @@ class MMLU_IDK(MMLU):
         AccuracyNormLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
-        TernaryScore
+        TernaryScore,
     ]
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:

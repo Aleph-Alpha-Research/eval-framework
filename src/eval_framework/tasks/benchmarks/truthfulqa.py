@@ -105,7 +105,7 @@ class TRUTHFULQA_IDK(TRUTHFULQA):
         AccuracyNormLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
-        TernaryScore
+        TernaryScore,
     ]
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:

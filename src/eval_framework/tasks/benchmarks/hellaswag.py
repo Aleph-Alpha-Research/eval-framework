@@ -46,6 +46,7 @@ class HELLASWAG(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {self._preprocess(ending)}" for ending in item["endings"]]
 
+
 class HELLASWAG_IDK(HELLASWAG):
     NAME = "HellaSwag_IDK"
     METRICS = [
@@ -53,7 +54,7 @@ class HELLASWAG_IDK(HELLASWAG):
         AccuracyNormLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
-        TernaryScore
+        TernaryScore,
     ]
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
