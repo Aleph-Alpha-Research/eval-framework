@@ -4,6 +4,9 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
+from eval_framework.metrics.loglikelihood.distributional_correctness_score import DistributionalCorrectnessScore
+from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
 
 
@@ -37,3 +40,23 @@ class COPA(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         choices = [self.convert_choice(item["choice1"]), self.convert_choice(item["choice2"])]
         return choices
+
+class COPA_DCS(COPA):
+    NAME = "COPA_DCS"
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        ConfidenceWeightedAccuracy,
+        DistributionalCorrectnessScore,
+        TernaryScore
+    ]
+
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+        return (
+            "Complete the sentence only if you are confident, since mistakes may be penalised, while correct answers receive points. "
+            "It is acceptable to answer with 'I do not know' if you are unsure, and you will receive 0 points."
+        )
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        completions = super()._get_possible_completions(item)
+        return (completions or []) + ["I do not know."]

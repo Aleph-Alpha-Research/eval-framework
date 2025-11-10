@@ -32,6 +32,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.casehold.CASEHOLD")
     register_lazy_task("eval_framework.tasks.benchmarks.chembench.ChemBench")
     register_lazy_task("eval_framework.tasks.benchmarks.copa.COPA")
+    register_lazy_task("eval_framework.tasks.benchmarks.copa.COPA_DCS")
     register_lazy_task("eval_framework.tasks.benchmarks.duc.DUC_ABSTRACTIVE")
     register_lazy_task("eval_framework.tasks.benchmarks.duc.DUC_EXTRACTIVE")
     register_lazy_task("eval_framework.tasks.benchmarks.flores200.Flores200")
