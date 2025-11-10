@@ -1036,10 +1036,12 @@ def test_vllm_init_formatter_multiple_args() -> None:
 @pytest.mark.vllm
 @pytest.mark.gpu
 def test_max_tokens_generation() -> None:
-    class Qwen600M(VLLMModel):
-        LLM_NAME = "Qwen/Qwen3-0.6B"
-
-    model = Qwen600M(bytes_per_token=4.0)
+    model = safe_vllm_setup(
+        model_fn=Qwen3_0_6B_VLLM,
+        kwargs={
+            "bytes_per_token": 4.0,
+        },
+    )
 
     messages: list[Message] = [
         Message(role=Role.USER, content="Tell me a long story.\n"),
@@ -1054,7 +1056,12 @@ def test_max_tokens_generation() -> None:
     generated_num_tokens = generation_results[0].completion_sequence_positions
     assert generated_num_tokens == 10
 
-    byte_level_model = Qwen600M(bytes_per_token=1.0)
+    byte_level_model = safe_vllm_setup(
+        model_fn=Qwen3_0_6B_VLLM,
+        kwargs={
+            "bytes_per_token": 1.0,
+        },
+    )
 
     byte_level_model_messages: list[Message] = [
         Message(role=Role.USER, content="Tell me a long story.\n"),
