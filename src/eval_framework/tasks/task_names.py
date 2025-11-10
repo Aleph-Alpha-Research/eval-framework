@@ -96,6 +96,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.tablebench.TableBench")
     register_lazy_task("eval_framework.tasks.benchmarks.triviaqa.TRIVIAQA")
     register_lazy_task("eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA")
+    register_lazy_task("eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA_IDK")
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.TRUTHFULQA_EU20_DE")
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.TRUTHFULQA_EU20_FR")
     register_lazy_task("eval_framework.tasks.benchmarks.winogender.WINOGENDER")
