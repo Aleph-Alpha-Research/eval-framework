@@ -102,3 +102,36 @@ def test_error_on_overly_long_prompt(mock_complete: mock.AsyncMock, mock_evaluat
         cresults[0].raw_completion_error is not None
         and cresults[0].raw_completion_error.error_class == PromptTooLongException.__name__
     )
+
+
+@pytest.mark.external_api
+def test_max_tokens_generation() -> None:
+    model = Llama31_8B_Instruct_API(max_retries=0, bytes_per_token=4.0)
+
+    messages: list[Message] = [
+        Message(role=Role.USER, content="Tell me a long story.\n"),
+        Message(role=Role.ASSISTANT, content="Once upon a time,"),
+    ]
+
+    generation_results: list[RawCompletion] = model.generate_from_messages(
+        messages=[messages], max_tokens=10, temperature=0
+    )
+
+    assert len(generation_results) == 1
+    generated_num_tokens = generation_results[0].completion_sequence_positions
+    assert generated_num_tokens == 10
+
+    byte_level_model = Llama31_8B_Instruct_API(max_retries=0, bytes_per_token=1.0)
+
+    byte_level_model_messages: list[Message] = [
+        Message(role=Role.USER, content="Tell me a long story.\n"),
+        Message(role=Role.ASSISTANT, content="Once upon a time,"),
+    ]
+
+    byte_level_model_generation_results: list[RawCompletion] = byte_level_model.generate_from_messages(
+        messages=[byte_level_model_messages], max_tokens=10, temperature=0
+    )
+
+    assert len(byte_level_model_generation_results) == 1
+    byte_level_model_generated_num_tokens = byte_level_model_generation_results[0].completion_sequence_positions
+    assert byte_level_model_generated_num_tokens == 40
