@@ -3,7 +3,7 @@ import re
 import pytest
 
 from eval_framework.tasks.benchmarks.gpqa import GPQA, GPQA_COT
-from tests.utils import DatasetPatcher
+from tests_eval_framework.utils import DatasetPatcher
 
 
 class TestGPQA:

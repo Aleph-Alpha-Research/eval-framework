@@ -11,7 +11,7 @@ from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MIns
 from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
-from tests.mock_wandb import MockArtifact, MockWandb, MockWandbApi, MockWandbRun
+from tests_eval_framework.mock_wandb import MockArtifact, MockWandb, MockWandbApi, MockWandbRun
 
 
 class MockLLM(BaseLLM):

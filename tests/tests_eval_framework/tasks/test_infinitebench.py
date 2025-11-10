@@ -9,7 +9,7 @@ from eval_framework.tasks.benchmarks.infinitebench import (
     InfiniteBench_RetrieveNumber,
     InfiniteBench_RetrievePassKey1,
 )
-from tests.utils import DatasetPatcher
+from tests_eval_framework.utils import DatasetPatcher
 
 
 class Test_InfiniteBench_CodeRun:

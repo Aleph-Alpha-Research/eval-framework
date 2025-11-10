@@ -9,7 +9,7 @@ from eval_framework.llm.huggingface import HFLLMRegistryModel
 from eval_framework.llm.vllm import VLLMRegistryModel
 from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
-from tests.conftest import MockLLM
+from tests_eval_framework.conftest import MockLLM
 
 
 @pytest.mark.parametrize(

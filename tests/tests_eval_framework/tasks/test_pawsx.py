@@ -1,7 +1,7 @@
 import pytest
 
 from eval_framework.tasks.benchmarks.pawsx import PAWSX
-from tests.utils import DatasetPatcher
+from tests_eval_framework.utils import DatasetPatcher
 
 
 class TestPawsx:
