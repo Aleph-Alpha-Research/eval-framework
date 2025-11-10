@@ -78,6 +78,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.MMLU_EU20_FR")
     register_lazy_task("eval_framework.tasks.benchmarks.mmlu_de.MMLU_DE")
     register_lazy_task("eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO")
+    register_lazy_task("eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO_DCS")
     register_lazy_task("eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO_COT")
     register_lazy_task("eval_framework.tasks.benchmarks.mmlu.MMLU_COT")
     register_lazy_task("eval_framework.tasks.benchmarks.mmmlu.MMMLU")
