@@ -1,5 +1,7 @@
 from unittest.mock import patch
+
 from eval_framework.llm.vllm import VLLMModel
+
 
 def test_vllm_import() -> None:
     # Mock the __init__ method to avoid actual initialization
@@ -11,8 +13,10 @@ def test_vllm_import() -> None:
         assert isinstance(model, VLLMModel)
         assert hasattr(model, "__class__")
 
+
 def main() -> None:
     test_vllm_import()
+
 
 if __name__ == "__main__":
     main()
