@@ -72,17 +72,7 @@ For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usa
 
 ## Benchmark Coverage & Task Categories
 
-### Core Capabilities (hallucinated table?) TODO: delete table
-
-| **Reasoning** | **Knowledge** | **Coding** | **Long Context** |
-|---------------|---------------|------------|------------------|
-| MMLU (57 subjects) | TriviaQA | HumanEval | InfiniteBench |
-| SQuAD v1/v2 | MBPP |
-| ARC | Natural Questions | CodeT5 | ZeroSCROLLS |
-| HellaSwag | QuAC | Programming | QuALITY |
-| Winogrande | COPA | Debugging  |
-
-### Core Capabilities (new table)
+### Core Capabilities
 
 Subset of core capabilities benchmarks coverd by `eval-framework`:
 
@@ -92,16 +82,8 @@ Subset of core capabilities benchmarks coverd by `eval-framework`:
 | Hellaswag | MMLU | GSM8K | HumanEval | StructEval | QUALITY |
 | Winogrande | Openbook QA| MATH-500 | MBPP | | ZeroSCROLLS |
 
-### Languages & Domains (hallucinated table?) TODO: delete table
 
-| **Multilingual** | **Specialized** | **Safety & Bias** | **Efficiency** |
-|------------------|-----------------|-------------------|----------------|
-| FLORES-200 | Winogender | Latency metrics |
-| WMT Translation | Legal (CaseHold) | TruthfulQA | Token counting |
-| Multilingual MMLU | Medical (MedQA) | Stereotype detection | Memory usage |
-| German/Finnish tasks | Scientific (SciQ) | Harmful content | Cost analysis |
-
-### Languages & Domains (new table)
+### Languages & Domains
 
 Subset of language-specific and domain-specific benchmarks coverd by `eval-framework`:
 
