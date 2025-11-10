@@ -44,7 +44,7 @@ def safe_json_loads(s: str) -> dict:
 class AlephAlphaAPIModel(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
-    BYTES_PER_TOKEN: int = 4  # rule of thumb according to https://platform.openai.com/tokenizer
+    BYTES_PER_TOKEN: float = 4.0  # rule of thumb according to https://platform.openai.com/tokenizer
 
     def __init__(
         self,
@@ -71,7 +71,7 @@ class AlephAlphaAPIModel(BaseLLM):
         self.queue_full_timeout_seconds = queue_full_timeout_seconds
         self._validate_model_availability()
         # set bytes_per_token_scalar for non-standard models
-        self.bytes_per_token_scalar = 4 / bytes_per_token if bytes_per_token is not None else 4 / self.BYTES_PER_TOKEN
+        self.bytes_per_token_scalar = 4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
 
     def _validate_model_availability(self) -> None:
         """
