@@ -47,11 +47,9 @@ class PIQA_DCS(PIQA):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
-        AccuracyProbability,
-        AccuracyLoglikelihoodPenalty,
-        BrierScore,
-        CrossEntropy,
+        ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
+        TernaryScore
     ]
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
