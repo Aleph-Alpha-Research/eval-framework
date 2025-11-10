@@ -6,6 +6,9 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
+from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
+from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.utils import get_n_letters
 
@@ -135,6 +138,28 @@ Answer with the full text of the correct answer."""
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {choice}" for choice in item["choices"]]
+
+
+class MMLU_IDK(MMLU):
+    NAME = "MMLU_IDK"
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        ConfidenceWeightedAccuracy,
+        DistributionalCorrectnessScore,
+        TernaryScore,
+    ]
+
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+        return (
+            f"The following are multiple choice questions (with answers) about {item['subject']}. "
+            "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
+            "It is acceptable to answer with '?' if you are unsure, and you will receive 0 points."
+        )
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        completions = super()._get_possible_completions(item)
+        return (completions or []) + [" ?"]
 
 
 class MMLU_COT(MMLU):
