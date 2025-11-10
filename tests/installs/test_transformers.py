@@ -5,7 +5,7 @@ from eval_framework.llm.huggingface import HFLLM
 
 def test_transformers_import() -> None:
     # Mock the __init__ method to avoid actual initialization
-    with patch.object(HFLLM, "__init__", lambda self, model_name: None) as mock_init:  # type: ignore
+    with patch.object(HFLLM, "__init__", lambda self, model_name: None):  # type: ignore
         # Test HuggingFace LLM import
         model = HFLLM(model_name="gpt2")
 
