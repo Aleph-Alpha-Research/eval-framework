@@ -14,6 +14,7 @@
 - `SciQ`: Previously, the benchmark included instructions with context passages that revealed the answer. A new version has been created that removes this context while keeping the original as `SCIQEvalHarness`.
 - `TruthfulQA`: Fixed an indexing error that caused the benchmark to return the first correct item instead of the last. Corrected the ground truth for Accuracy to include all label-1 items, rather than only a single item.
 - `GSM8K`: In line with the convention of naming the recommended default version as the primary benchmark, `GSM8KLlamaVersion` has been renamed to `GSM8K`, and the original `GSM8K` has been renamed to `GSM8KEvalHarness`.
+- Added the following "I don't know" (IDK) task variants: `ARC_IDK`, `COPA_IDK`, `GPQA_IDK`, `HELLASWAG_IDK`, `MMLU_IDK`, `MMLU_PRO_IDK`, `PIQA_IDK`, `OPENBOOKQA_IDK`, `TRUTHFULQA_IDK`, `WINOGENDER_IDK`, and `WINOGRANDE_IDK`.
 
 ### Metrics
 
