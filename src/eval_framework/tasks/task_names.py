@@ -100,6 +100,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.TRUTHFULQA_EU20_DE")
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.TRUTHFULQA_EU20_FR")
     register_lazy_task("eval_framework.tasks.benchmarks.winogender.WINOGENDER")
+    register_lazy_task("eval_framework.tasks.benchmarks.winogender.WINOGENDER_IDK")
     register_lazy_task("eval_framework.tasks.benchmarks.winogrande.WINOGRANDE")
     register_lazy_task("eval_framework.tasks.benchmarks.winox.WINOX_DE")
     register_lazy_task("eval_framework.tasks.benchmarks.winox.WINOX_FR")
