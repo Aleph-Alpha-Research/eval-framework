@@ -148,7 +148,9 @@ class BaseVLLMModel(BaseLLM):
         )
         self._set_formatter(formatter)
         # set bytes_per_token_scalar for non-standard models
-        self.bytes_per_token_scalar = 4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
+        self.bytes_per_token_scalar = (
+            4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
+        )
 
     def _process_sampling_params(self, sampling_params: SamplingParams | dict[str, Any] | None) -> SamplingParams:
         processed_sampling_params: SamplingParams | None = None

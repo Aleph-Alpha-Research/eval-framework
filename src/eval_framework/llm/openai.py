@@ -53,7 +53,9 @@ class OpenAIModel(BaseLLM):
         # Initialize tiktoken tokenizer for the model
         self._encoding = tiktoken.encoding_for_model(self._model_name)
         # set bytes_per_token_scalar for non-standard models
-        self.bytes_per_token_scalar = 4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
+        self.bytes_per_token_scalar = (
+            4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
+        )
 
     def _count_tokens(self, text: str) -> int:
         """Helper method to count tokens using tiktoken."""
