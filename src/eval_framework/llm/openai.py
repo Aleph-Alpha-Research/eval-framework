@@ -24,15 +24,15 @@ class OpenAIModel(BaseLLM):
     LLM wrapper for OpenAI API providing text/chat completions and log-probability evaluation output.
     """
 
+    LLM_NAME: str | None = None
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
-    API_KEY = os.getenv("OPENAI_API_KEY", "")
 
     def __init__(
         self,
-        model_name: str = "gpt-4o",
+        model_name: str | None = None,
         formatter: BaseFormatter | None = None,
         temperature: float | None = None,
-        api_key: str | None = None,
+        api_key: str | None = os.getenv("OPENAI_API_KEY", ""),
         organization: str | None = None,
         base_url: str | None = None,
     ) -> None:
@@ -40,14 +40,15 @@ class OpenAIModel(BaseLLM):
         Initialize the OpenAIModel.
 
         Args:
-            model_name: OpenAI model name (e.g., "gpt-4o", "gpt-3.5-turbo").
+            model_name: OpenAI model name (e.g., "gpt-4o", "gpt-3.5-turbo"). If None, uses LLM_NAME class attribute.
             formatter: Optional message formatter.
             temperature: Sampling temperature used when not passed to generate methods (from 0.0 to 2.0).
             api_key: OpenAI API key (defaults to OPENAI_API_KEY env variable).
             organization: Optional OpenAI organization ID.
             base_url: Optional API base URL for Azure or alternate endpoints.
         """
-        self._model_name = model_name
+        assert model_name is not None or self.LLM_NAME is not None, "A model name must be specified."
+        self._model_name = model_name if model_name else self.LLM_NAME
         logger.info(f"Instantiating OpenAIModel with name: {self._model_name}")
 
         self._formatter = formatter or (self.DEFAULT_FORMATTER() if self.DEFAULT_FORMATTER is not None else None)
@@ -55,7 +56,7 @@ class OpenAIModel(BaseLLM):
         assert 0.0 <= self._temperature <= 2.0, "Temperature must be between 0.0 and 2.0"
 
         self._client = OpenAI(
-            api_key=api_key or self.API_KEY,
+            api_key=api_key,
             organization=organization,
             base_url=base_url,
         )
@@ -250,93 +251,16 @@ class OpenAIModel(BaseLLM):
                 pass
 
 
-class OpenAI_gpt_4o_mini(OpenAIModel):
-    LLM_NAME = "gpt-4o-mini-2024-07-18"
-
-    def __init__(
-        self,
-        formatter: BaseFormatter | None = None,
-        temperature: float | None = None,
-        api_key: str | None = None,
-        organization: str | None = None,
-        base_url: str | None = None,
-    ) -> None:
-        super().__init__(
-            model_name=self.LLM_NAME,
-            formatter=formatter,
-            temperature=temperature,
-            api_key=api_key,
-            organization=organization,
-            base_url=base_url,
-        )
-
-
-class OpenAI_davinci_002(OpenAIModel):
-    LLM_NAME = "davinci-002"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-    def __init__(
-        self,
-        formatter: BaseFormatter | None = None,
-        temperature: float | None = None,
-        api_key: str | None = None,
-        organization: str | None = None,
-        base_url: str | None = None,
-    ) -> None:
-        super().__init__(
-            model_name=self.LLM_NAME,
-            formatter=formatter,
-            temperature=temperature,
-            api_key=api_key,
-            organization=organization,
-            base_url=base_url,
-        )
-
-
-class OpenAI_gpt_4o_mini_with_ConcatFormatter(OpenAI_gpt_4o_mini):
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
-class Deepseek_chat(OpenAIModel):
-    # Deepseek API: https://api-docs.deepseek.com/quick_start/pricing
-    LLM_NAME = "deepseek-chat"  # DeepSeek-V3.2-Exp (Non-thinking Mode)
-    API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
-
-    def __init__(
-        self,
-        formatter: BaseFormatter | None = None,
-        temperature: float | None = None,
-        api_key: str | None = None,
-        organization: str | None = None,
-        base_url: str | None = None,
-    ) -> None:
-        super().__init__(
-            model_name=self.LLM_NAME,
-            formatter=formatter,
-            temperature=temperature,
-            api_key=api_key,
-            organization=organization,
-            base_url="https://api.deepseek.com",
-        )
-
-    def _get_encoder(self) -> Tokenizer:
-        return AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-V3.2-Exp")
-
-    def _count_tokens(self, text: str) -> int:
-        return len(self._encoder.encode(text))
-
-
-class Deepseek_chat_with_formatter(OpenAIModel):
-    LLM_NAME = "deepseek-chat"  # DeepSeek-V3.2-Exp (Non-thinking Mode)
-    API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
-    DEFAULT_FORMATTER = partial(HFFormatter, "deepseek-ai/DeepSeek-V3.2-Exp")
+class DeepseekModel(OpenAIModel):
     """
-        <｜begin▁of▁sentence｜><｜User｜>Question: What color is the night sky?
-        <｜Assistant｜></think>Answer:
+    General Deepseek model wrapper using OpenAI-compatible API for deepseek-chat and deepseek-reasoner models.
+
+    Using the deepseek API: https://api-docs.deepseek.com/quick_start/pricing
     """
 
     def __init__(
         self,
+        model_name: str | None = None,
         formatter: BaseFormatter | None = None,
         temperature: float | None = None,
         api_key: str | None = None,
@@ -344,10 +268,10 @@ class Deepseek_chat_with_formatter(OpenAIModel):
         base_url: str | None = None,
     ) -> None:
         super().__init__(
-            model_name=self.LLM_NAME,
+            model_name=model_name,
             formatter=formatter,
             temperature=temperature,
-            api_key=api_key,
+            api_key=os.getenv("DEEPSEEK_API_KEY", ""),
             organization=organization,
             base_url="https://api.deepseek.com/beta",
         )
@@ -359,8 +283,38 @@ class Deepseek_chat_with_formatter(OpenAIModel):
         return len(self._encoder.encode(text))
 
 
-class Deepseek_reasoner(Deepseek_chat):
+### Model Aliases ###
+
+
+class OpenAI_gpt_4o_mini(OpenAIModel):
+    LLM_NAME = "gpt-4o-mini-2024-07-18"
+
+
+class OpenAI_gpt_4o_mini_with_ConcatFormatter(OpenAIModel):
+    LLM_NAME = "gpt-4o-mini-2024-07-18"
+    DEFAULT_FORMATTER = ConcatFormatter
+
+
+class OpenAI_davinci_002(OpenAIModel):
+    LLM_NAME = "davinci-002"
+    DEFAULT_FORMATTER = ConcatFormatter
+
+
+class Deepseek_reasoner(DeepseekModel):
     LLM_NAME = "deepseek-reasoner"  # DeepSeek-V3.2-Exp (Thinking Mode)
     # multi-round conversations for reasoning model documented here:
     # https://api-docs.deepseek.com/guides/reasoning_model#api-example
     # does not support completion API
+
+
+class Deepseek_chat(DeepseekModel):
+    LLM_NAME = "deepseek-chat"  # DeepSeek-V3.2-Exp (Non-thinking Mode)
+
+
+class Deepseek_chat_with_formatter(DeepseekModel):
+    LLM_NAME = "deepseek-chat"  # DeepSeek-V3.2-Exp (Non-thinking Mode)
+    DEFAULT_FORMATTER = partial(HFFormatter, "deepseek-ai/DeepSeek-V3.2-Exp")
+    """
+        <｜begin▁of▁sentence｜><｜User｜>Question: What color is the night sky?
+        <｜Assistant｜></think>Answer:
+    """
