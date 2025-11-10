@@ -1,4 +1,4 @@
-# COPA IDK
+# COPA_IDK
 
 ````
 NAME = COPA_IDK

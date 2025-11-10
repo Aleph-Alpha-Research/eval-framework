@@ -1,4 +1,4 @@
-# GPQA IDK
+# GPQA_IDK
 
 ````
 NAME = GPQA_IDK

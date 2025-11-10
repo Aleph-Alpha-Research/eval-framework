@@ -1,4 +1,4 @@
-# PIQA IDK
+# PIQA_IDK
 
 ````
 NAME = PIQA_IDK

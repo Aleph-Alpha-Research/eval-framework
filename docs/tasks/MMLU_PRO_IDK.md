@@ -1,4 +1,4 @@
-# MMLU_PRO IDK
+# MMLU_PRO_IDK
 
 ````
 NAME = MMLU_PRO_IDK
