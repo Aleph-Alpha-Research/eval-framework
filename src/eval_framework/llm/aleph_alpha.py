@@ -55,7 +55,7 @@ class AlephAlphaAPIModel(BaseLLM):
         max_async_concurrent_requests: int = 32,
         request_timeout_seconds: int = 30 * 60 + 5,
         queue_full_timeout_seconds: int = 30 * 60 + 5,
-        bytes_per_token: int | None = None,
+        bytes_per_token: float | None = None,
     ) -> None:
         self._formatter: BaseFormatter
         if formatter is None:

@@ -117,7 +117,7 @@ class BaseVLLMModel(BaseLLM):
         checkpoint_path: str | Path | None = None,
         checkpoint_name: str | None = None,
         sampling_params: SamplingParams | dict[str, Any] | None = None,
-        bytes_per_token: int | None = None,
+        bytes_per_token: float | None = None,
         **kwargs: Any,
     ) -> None:
         # Store the max_model_len for later use

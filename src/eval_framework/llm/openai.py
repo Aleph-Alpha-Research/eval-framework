@@ -28,7 +28,7 @@ class OpenAIModel(BaseLLM):
         api_key: str | None = None,
         organization: str | None = None,
         base_url: str | None = None,
-        bytes_per_token: int | None = None,
+        bytes_per_token: float | None = None,
     ) -> None:
         """Initialize OpenAI API client.
         Args:

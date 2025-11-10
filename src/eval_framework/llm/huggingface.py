@@ -83,7 +83,7 @@ class BaseHFLLM(BaseLLM):
     SEQ_LENGTH: int | None = None
     BYTES_PER_TOKEN: float = 4.0  # rule of thumb according to https://platform.openai.com/tokenizer
 
-    def __init__(self, formatter: BaseFormatter | None = None, bytes_per_token: int | None = None) -> None:
+    def __init__(self, formatter: BaseFormatter | None = None, bytes_per_token: float | None = None) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained(self.LLM_NAME)
         self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
