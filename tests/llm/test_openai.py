@@ -1,5 +1,6 @@
 import pytest
 
+from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.openai import (
     Deepseek_chat,
     Deepseek_chat_with_formatter,
@@ -18,7 +19,7 @@ from template_formatting.formatter import Message, Role
 @pytest.mark.xfail(strict=False, reason="External API models are flaky or not required to always pass.")
 # some of the responses are not deterministic and may cause an expected failure in the test (eg. deepseek-reasoner)
 @pytest.mark.parametrize(
-    "model_cls,expected_completion,max_tokens",
+    "model_cls, expected_completion, max_tokens",
     [
         (OpenAI_gpt_4o_mini, "The night sky", 10),  # test chat completions
         (OpenAI_gpt_4o_mini_with_ConcatFormatter, " The night sky", 10),  # test formatted completions
@@ -31,7 +32,7 @@ from template_formatting.formatter import Message, Role
         ),  # using formatter rather than chat templates
     ],
 )
-def test_openai_completions(model_cls, expected_completion, max_tokens) -> None:
+def test_openai_completions(model_cls: type[BaseLLM], expected_completion: str, max_tokens: int) -> None:
     model = model_cls()
 
     messages: list[Message] = [
@@ -56,7 +57,7 @@ def test_openai_completions(model_cls, expected_completion, max_tokens) -> None:
         OpenAI_davinci_002,
     ],
 )
-def test_openai_loglikelihoods(model_cls) -> None:
+def test_openai_loglikelihoods(model_cls: type[BaseLLM]) -> None:
     model = model_cls()
 
     messages: list[Message] = [
@@ -64,7 +65,7 @@ def test_openai_loglikelihoods(model_cls) -> None:
         Message(role=Role.ASSISTANT, content="Answer:"),
     ]
 
-    list_of_samples = [
+    list_of_samples: list[Sample] = [
         Sample(
             id=0,
             subject="no_subject",

@@ -65,6 +65,7 @@ class OpenAIModel(BaseLLM):
         self._encoder = self._get_encoder()
 
     def _get_encoder(self) -> tiktoken.Encoding:
+        assert self._model_name is not None
         return tiktoken.encoding_for_model(self._model_name)
 
     def _count_tokens(self, text: str) -> int:
@@ -100,14 +101,16 @@ class OpenAIModel(BaseLLM):
         Returns:
             List of RawCompletion objects containing prompts and completions.
         """
+
         effective_temperature = temperature if temperature is not None else self._temperature
         assert 0.0 <= effective_temperature <= 2.0, "Temperature must be between 0.0 and 2.0"
 
-        def _process_one(single_messages):
+        def _process_one(single_messages: Sequence[Message]) -> RawCompletion:
             if self._formatter is not None:
                 # Use formatter and text completion API
                 prompt = self._formatter.format(single_messages, output_mode="string")
                 # documentation: https://platform.openai.com/docs/api-reference/completions/create
+                assert self._model_name is not None
                 response = self._client.completions.create(
                     model=self._model_name,
                     prompt=prompt,
@@ -135,6 +138,7 @@ class OpenAIModel(BaseLLM):
                     )
                     for m in single_messages
                 ]
+                assert self._model_name is not None
                 chat_response = self._client.chat.completions.create(
                     model=self._model_name,
                     messages=chat_messages,
