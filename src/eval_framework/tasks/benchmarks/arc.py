@@ -4,6 +4,9 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
+from eval_framework.metrics.loglikelihood.distributional_correctness_score import DistributionalCorrectnessScore
+from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
 from eval_framework.tasks.utils import get_n_letters
 
@@ -44,3 +47,23 @@ class ARC(BaseTask[str]):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {choice}" for choice in item["choices"]["text"]]
+
+class ARC_DCS(ARC):
+    NAME = "ARC_DCS"
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        ConfidenceWeightedAccuracy,
+        DistributionalCorrectnessScore,
+        TernaryScore
+    ]
+
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+        return (
+            "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
+            "It is acceptable to answer with 'I do not know' if you are unsure, and you will receive 0 points."
+        )
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        completions = super()._get_possible_completions(item)
+        return (completions or []) + [" I do not know."]
