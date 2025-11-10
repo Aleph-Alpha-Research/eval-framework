@@ -140,8 +140,8 @@ Answer with the full text of the correct answer."""
         return [f" {choice}" for choice in item["choices"]]
 
 
-class MMLU_DCS(MMLU):
-    NAME = "MMLU_DCS"
+class MMLU_IDK(MMLU):
+    NAME = "MMLU_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

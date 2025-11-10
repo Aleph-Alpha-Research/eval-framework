@@ -46,8 +46,8 @@ class HELLASWAG(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {self._preprocess(ending)}" for ending in item["endings"]]
 
-class HELLASWAG_DCS(HELLASWAG):
-    NAME = "HellaSwag_DCS"
+class HELLASWAG_IDK(HELLASWAG):
+    NAME = "HellaSwag_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

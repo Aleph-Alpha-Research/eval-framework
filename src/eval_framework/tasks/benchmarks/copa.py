@@ -41,8 +41,8 @@ class COPA(BaseTask[str]):
         choices = [self.convert_choice(item["choice1"]), self.convert_choice(item["choice2"])]
         return choices
 
-class COPA_DCS(COPA):
-    NAME = "COPA_DCS"
+class COPA_IDK(COPA):
+    NAME = "COPA_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

@@ -91,8 +91,8 @@ class MMLU_PRO(BaseTask[str]):
         return [f" {key}" for key in self.keys]
 
 
-class MMLU_PRO_DCS(MMLU_PRO):
-    NAME = "MMLU Pro_DCS"
+class MMLU_PRO_IDK(MMLU_PRO):
+    NAME = "MMLU Pro_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

@@ -40,8 +40,8 @@ class OPENBOOKQA(BaseTask[str]):
         return [f" {choice}" for choice in item["choices"]["text"]]
 
 
-class OPENBOOKQA_DCS(OPENBOOKQA):
-    NAME = "OpenBookQA_DCS"
+class OPENBOOKQA_IDK(OPENBOOKQA):
+    NAME = "OpenBookQA_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

@@ -120,8 +120,8 @@ class GPQA(BaseTask[str]):
         return text
 
 
-class GPQA_DCS(GPQA):
-    NAME = "GPQA_DCS"
+class GPQA_IDK(GPQA):
+    NAME = "GPQA_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

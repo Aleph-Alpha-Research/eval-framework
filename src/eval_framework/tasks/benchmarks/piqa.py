@@ -42,8 +42,8 @@ class PIQA(BaseTask[str]):
         return [f" {choice}" for choice in [item["sol1"], item["sol2"]]]
 
 
-class PIQA_DCS(PIQA):
-    NAME = "PIQA_DCS"
+class PIQA_IDK(PIQA):
+    NAME = "PIQA_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
