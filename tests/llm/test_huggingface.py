@@ -242,7 +242,7 @@ def test_hfllm_init_formatter_multiple_args() -> None:
         HFLLM(formatter=IdentityFormatter(), formatter_kwargs=dict(hf_llm_name="HuggingFaceTB/SmolLM-135M"))
 
 
-@pytest.mark.external_api
+@pytest.mark.gpu
 def test_max_tokens_generation() -> None:
     model = SmolLM135M(bytes_per_token=4.0)
 
