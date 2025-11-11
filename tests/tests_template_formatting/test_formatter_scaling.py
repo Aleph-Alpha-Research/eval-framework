@@ -3,10 +3,10 @@ import importlib.util
 
 import pytest
 
-from eval_framework.llm.models import Smollm135MInstruct
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,
+    HFFormatter,
     Llama3Formatter,
     Message,
     Property,
@@ -29,7 +29,7 @@ def llama3_formatter() -> BaseFormatter:
 
 @pytest.fixture()
 def hf_formatter() -> BaseFormatter:
-    return Smollm135MInstruct.DEFAULT_FORMATTER()
+    return HFFormatter("meta-llama/Meta-Llama-3-8B-Instruct")
 
 
 def test_get_grouped_messages_same_property() -> None:
