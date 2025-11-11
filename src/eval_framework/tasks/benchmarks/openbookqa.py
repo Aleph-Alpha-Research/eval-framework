@@ -27,7 +27,10 @@ class OPENBOOKQA(BaseTask[str]):
         self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return f"Fact: {item['fact1'].strip()}\nQuestion: {item['question_stem'].strip()}"
+        question = item["question_stem"].strip()
+        fact = item["fact1"].strip()
+        choices = "".join([f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"])])
+        return f"Fact: {fact}\nComplete: {question}:\n{choices}"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         answer_key = self.num_to_letter.get(item["answerKey"], item["answerKey"])
@@ -36,11 +39,20 @@ class OPENBOOKQA(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {choice}" for choice in item["choices"]["text"]]
 
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
 
-class OPENBOOKQA_CLOSED_BOOK_COMPLETION(OPENBOOKQA):
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return "Answer:"
+
+class OPENBOOKQA_EVAL_HARNESS(OPENBOOKQA):
     """Closed-book version of OpenBookQA — question only, no supporting fact."""
 
     NAME = "OpenBookQA_ClosedBook"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return f"Question: {item['question_stem'].strip()}"
+        question = item["question_stem"].strip()
+        choices = "".join([f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"])])
+        return f"Complete: {question}:\n{choices}"
