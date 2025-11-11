@@ -226,7 +226,10 @@ class BaseVLLMModel(BaseLLM):
         prompt_objs = []
         prompt_info = []
 
-        sampling_params = self._resolve_sampling_params(self.sampling_params, max_tokens, stop_sequences, temperature)
+        # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
+        scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
+
+        sampling_params = self._resolve_sampling_params(self.sampling_params, scaled_max_tokens, stop_sequences, temperature)
 
         for i, single_messages in enumerate(messages):
             output_mode = self.formatter_output_mode
@@ -235,10 +238,7 @@ class BaseVLLMModel(BaseLLM):
             prompt_token_count = len(prompt_obj.tokens)
 
             max_tokens_to_generate = self.max_seq_length - prompt_token_count
-
-            # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
-            scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
-
+            
             # If max_tokens is specified, use the smaller of the two
             max_tokens_to_generate = min(filter(None, [max_tokens_to_generate, scaled_max_tokens]))
 
