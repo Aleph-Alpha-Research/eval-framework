@@ -1,7 +1,7 @@
 import pytest
-from tests_eval_framework.utils import DatasetPatcher
 
 from eval_framework.tasks.benchmarks.arc_fi import ARC_FI
+from tests.tests_eval_framework.utils import DatasetPatcher
 
 
 class TestARC_FI:

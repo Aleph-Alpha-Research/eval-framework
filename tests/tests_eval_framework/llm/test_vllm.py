@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 import torch
 from pytest_mock import MockerFixture
-from tests_eval_framework.llm.test_base import LLM_INIT_FORMATTER_PARAMS, LLM_INIT_SOURCE_PARAMS
 from vllm import SamplingParams
 from vllm.distributed.parallel_state import destroy_distributed_environment, destroy_model_parallel
 
@@ -25,6 +24,7 @@ from template_formatting.formatter import (
     Message,
     Role,
 )
+from tests.tests_eval_framework.llm.test_base import LLM_INIT_FORMATTER_PARAMS, LLM_INIT_SOURCE_PARAMS
 
 
 def clean_up() -> None:

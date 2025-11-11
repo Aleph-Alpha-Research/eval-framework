@@ -2,11 +2,11 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-from tests_eval_framework.conftest import MockLLM
 
 from eval_framework.main import main
 from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
+from tests.tests_eval_framework.conftest import MockLLM
 
 
 @pytest.mark.parametrize("save_intermediate_results", [True, False])

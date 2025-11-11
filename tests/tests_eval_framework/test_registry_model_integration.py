@@ -3,13 +3,13 @@ from unittest.mock import patch
 
 import pytest
 import wandb
-from tests_eval_framework.conftest import MockLLM
 
 from eval_framework import main as main_file
 from eval_framework.llm.huggingface import HFLLMRegistryModel
 from eval_framework.llm.vllm import VLLMRegistryModel
 from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
+from tests.tests_eval_framework.conftest import MockLLM
 
 
 @pytest.mark.parametrize(

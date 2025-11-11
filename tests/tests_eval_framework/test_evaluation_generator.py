@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 import wandb
-from tests_eval_framework.conftest import MockLLM
 
 from eval_framework.evaluation_generator import EvaluationGenerator
 from eval_framework.metrics.base import MetricResult
@@ -13,6 +12,7 @@ from eval_framework.result_processors.result_processor import ResultsFileProcess
 from eval_framework.shared.types import Completion, Error, Loglikelihood
 from eval_framework.tasks.benchmarks.gpqa import GPQA
 from eval_framework.tasks.eval_config import EvalConfig
+from tests.tests_eval_framework.conftest import MockLLM
 
 
 class MockMetric:

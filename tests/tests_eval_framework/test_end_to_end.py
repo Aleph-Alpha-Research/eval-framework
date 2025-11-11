@@ -8,7 +8,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from datasets import disable_caching
-from tests_eval_framework.conftest import MockLLM
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.main import main
@@ -18,6 +17,7 @@ from eval_framework.tasks.benchmarks.wmt import WMT14
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import get_task
 from eval_framework.utils.constants import GREEN, RED, RESET
+from tests.tests_eval_framework.conftest import MockLLM
 
 NUM_FEWSHOT = 2
 NUM_SAMPLES = 10
