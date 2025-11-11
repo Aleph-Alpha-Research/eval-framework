@@ -81,6 +81,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.pawsx.PAWSX")
     register_lazy_task("eval_framework.tasks.benchmarks.piqa.PIQA")
     register_lazy_task("eval_framework.tasks.benchmarks.openbookqa.OPENBOOKQA")
+    register_lazy_task("eval_framework.tasks.benchmarks.openbookqa.OPENBOOKQA_CLOSED_BOOK_COMPLETION")
     register_lazy_task("eval_framework.tasks.benchmarks.sciq.SCIQ")
     register_lazy_task("eval_framework.tasks.benchmarks.sciq.SCIQEvalHarness")
     register_lazy_task("eval_framework.tasks.benchmarks.squad.SQUAD")

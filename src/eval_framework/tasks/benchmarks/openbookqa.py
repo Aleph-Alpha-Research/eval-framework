@@ -17,7 +17,7 @@ class OPENBOOKQA(BaseTask[str]):
     FEWSHOT_SPLIT = "test"  # 500 examples
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
-    SUBJECTS = ["main"]
+    SUBJECTS = ["additional"]
     PERTURBATION_UNMODIFIABLE_WORDS = get_n_letters(4)
     LANGUAGE = Language.ENG
 

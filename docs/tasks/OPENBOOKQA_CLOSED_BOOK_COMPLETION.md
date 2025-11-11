@@ -1,13 +1,13 @@
-# OPENBOOKQA
+# OPENBOOKQA_CLOSED_BOOK_COMPLETION
 
 ````
-NAME = OPENBOOKQA
+NAME = OPENBOOKQA_CLOSED_BOOK_COMPLETION
 DATASET_PATH = allenai/openbookqa
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = test
 RESPONSE_TYPE = LOGLIKELIHOODS
 METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
-SUBJECTS = ['additional']
+SUBJECTS = ['main']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/openbookqa](https://huggingface.co/datasets/allenai/openbookqa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "OPENBOOKQA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "OPENBOOKQA_CLOSED_BOOK_COMPLETION"`.
