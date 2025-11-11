@@ -1040,7 +1040,6 @@ def test_max_tokens_generation() -> None:
         model_fn=Qwen3_0_6B_VLLM,
         kwargs={
             "bytes_per_token": 4.0,
-            "max_model_len": 1024,
         },
     )
 
