@@ -47,6 +47,7 @@ class OPENBOOKQA(BaseTask[str]):
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "Answer:"
 
+
 class OPENBOOKQA_EVAL_HARNESS(OPENBOOKQA):
     """Closed-book version of OpenBookQA — question only, no supporting fact."""
 
