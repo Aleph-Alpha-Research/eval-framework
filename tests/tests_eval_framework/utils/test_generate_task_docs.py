@@ -17,7 +17,7 @@ def test_task_docs_are_up_to_date(tmp_path: Path) -> None:
 
     generate_all_docs(args=args, output_docs_directory=tmp_path)
 
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = Path(__file__).resolve().parents[3]
     repo_docs_path = repo_root / "docs" / "tasks"
 
     generated = sorted(p.name for p in tmp_path.iterdir() if p.suffix == ".md")
