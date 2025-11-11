@@ -27,7 +27,7 @@ class OPENBOOKQA(BaseTask[str]):
         self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return f"{item['question_stem'].strip()}"
+        return f"Fact: {item['fact1'].strip()}\nQuestion: {item['question_stem'].strip()}"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         answer_key = self.num_to_letter.get(item["answerKey"], item["answerKey"])
@@ -35,3 +35,11 @@ class OPENBOOKQA(BaseTask[str]):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {choice}" for choice in item["choices"]["text"]]
+
+class OPENBOOKQA_CLOSED_BOOK_COMPLETION(OPENBOOKQA):
+    """Closed-book version of OpenBookQA — question only, no supporting fact."""
+
+    NAME = "OpenBookQA_ClosedBook"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return f"Question: {item['question_stem'].strip()}"
