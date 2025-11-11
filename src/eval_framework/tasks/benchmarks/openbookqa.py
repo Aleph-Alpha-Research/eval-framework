@@ -36,6 +36,7 @@ class OPENBOOKQA(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {choice}" for choice in item["choices"]["text"]]
 
+
 class OPENBOOKQA_CLOSED_BOOK_COMPLETION(OPENBOOKQA):
     """Closed-book version of OpenBookQA — question only, no supporting fact."""
 
