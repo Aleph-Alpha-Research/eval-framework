@@ -51,7 +51,7 @@ class OPENBOOKQA(BaseTask[str]):
 class OPENBOOKQA_EVAL_HARNESS(OPENBOOKQA):
     """Closed-book version of OpenBookQA — question only, no supporting fact."""
 
-    NAME = "OpenBookQA_ClosedBook"
+    NAME = "OpenBookQAEvalHarness"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question_stem"].strip()
