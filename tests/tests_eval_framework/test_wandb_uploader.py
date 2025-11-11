@@ -6,12 +6,12 @@ from unittest.mock import Mock
 
 import pytest
 import wandb
+from tests_eval_framework.mock_wandb import MockArtifact
 
 from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.result_processors.wandb_uploader import WandbUploader, register_artifact_upload_function
 from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
-from tests_eval_framework.mock_wandb import MockArtifact
 
 
 @pytest.fixture

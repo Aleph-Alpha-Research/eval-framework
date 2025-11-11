@@ -1,9 +1,9 @@
 import re
 
 import pytest
+from tests_eval_framework.utils import DatasetPatcher
 
 from eval_framework.tasks.benchmarks.gpqa import GPQA, GPQA_COT
-from tests_eval_framework.utils import DatasetPatcher
 
 
 class TestGPQA:

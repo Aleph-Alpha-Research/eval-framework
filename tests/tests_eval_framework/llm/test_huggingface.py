@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, Mock
 import pytest
 import torch
 from pytest_mock import MockerFixture
+from tests_eval_framework.llm.test_base import LLM_INIT_FORMATTER_PARAMS, LLM_INIT_SOURCE_PARAMS
 
 from eval_framework.llm.huggingface import HFLLM, SmolLM135M, StopSequenceCriteria
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
@@ -15,7 +16,6 @@ from template_formatting.formatter import (
     Message,
     Role,
 )
-from tests_eval_framework.llm.test_base import LLM_INIT_FORMATTER_PARAMS, LLM_INIT_SOURCE_PARAMS
 
 
 @pytest.mark.gpu

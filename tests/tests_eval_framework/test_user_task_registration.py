@@ -2,11 +2,11 @@ import textwrap
 from pathlib import Path
 
 import pytest
+from tests_eval_framework.tasks.test_registry import temporary_registry
 
 from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import get_task, is_registered, registered_task_names
 from eval_framework.tasks.task_loader import find_all_python_files, load_extra_tasks
-from tests_eval_framework.tasks.test_registry import temporary_registry
 
 TASK1 = """\
 from eval_framework.tasks.base import BaseTask, Language

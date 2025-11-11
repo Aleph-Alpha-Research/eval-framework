@@ -1,10 +1,10 @@
 import pytest
+from tests_eval_framework.utils import assert_hash_string
 
 import eval_framework.tasks.benchmarks.sphyr as sphyr
 from eval_framework.metrics.completion.grid_difference import GridDifference
 from eval_framework.shared.types import Completion
 from template_formatting.formatter import Message, Role
-from tests_eval_framework.utils import assert_hash_string
 
 GRID = """0 0 L L L 0 0 0 0 0
 0 0 0 1 0 0 0 0 0 0

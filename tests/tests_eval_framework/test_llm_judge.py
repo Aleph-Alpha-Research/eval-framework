@@ -1,12 +1,12 @@
 from pathlib import Path
 
 import pytest
+from tests_eval_framework.utils import _almost_equal
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.main import main
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import get_task
-from tests_eval_framework.utils import _almost_equal
 
 NUM_SAMPLES = 1
 

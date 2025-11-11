@@ -1,4 +1,5 @@
 import pytest
+from tests_eval_framework.utils import DatasetPatcher
 
 from eval_framework.tasks.benchmarks.infinitebench import (
     InfiniteBench_CodeRun,
@@ -9,7 +10,6 @@ from eval_framework.tasks.benchmarks.infinitebench import (
     InfiniteBench_RetrieveNumber,
     InfiniteBench_RetrievePassKey1,
 )
-from tests_eval_framework.utils import DatasetPatcher
 
 
 class Test_InfiniteBench_CodeRun:

@@ -1,8 +1,8 @@
 import pytest
+from tests_eval_framework.utils import DatasetPatcher
 
 from eval_framework.tasks.benchmarks.humaneval import HumanEval, HumanEvalInstruct
 from eval_framework.tasks.utils import run_python_code
-from tests_eval_framework.utils import DatasetPatcher
 
 
 class TestHumanEvalCode:

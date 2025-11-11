@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from dateutil import parser
 from huggingface_hub.errors import RevisionNotFoundError
+from tests_eval_framework.conftest import MockLLM
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator
@@ -15,7 +16,6 @@ from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig, PerturbationType
 from eval_framework.tasks.registry import get_task
 from template_formatting.formatter import Message, Role
-from tests_eval_framework.conftest import MockLLM
 
 
 def test_generate_completions_message_handling() -> None:
