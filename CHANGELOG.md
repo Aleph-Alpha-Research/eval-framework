@@ -35,6 +35,9 @@
 - Fix: W&B integration respects WANDB_ARTIFACT_DIR. In addition, new env var WANDB_CACHE_SKIP controls cache use.
 - Dropped support for S3 storages without proper SSL certificates.
 - Added support for W&B artifacts on local storage which don't need to be downloaded and may be earlier available.
+- Fix: `pip install eval_framework[all]` uses uv to fix `ResolveTooDeep` dependency resolver errors.
+- Added a CI workflow to test uv and pip installs (CPU only and GPU for VLLM) and avoid trigger with .md changes.
+- Updated the CI workflow graph to decouple CPU only test and full test suite with GPU: cpu tests dont wait for docker build.
 
 ## 0.2.2
 
