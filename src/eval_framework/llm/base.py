@@ -40,6 +40,29 @@ class BaseLLM(ABC):
         """
         raise NotImplementedError
 
+    def generate_from_samples(
+        self,
+        samples: list[Sample],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> list[RawCompletion]:
+        """
+        stop_sequences and max_tokens are injected by the task if exist. They should be overwritten or
+        extended with the properties of the model. This includes but is not limited to the stop tokens
+        by the evaluated checkpoint (e.g. <|eot_id|> for an instruction finetuned Llama3.1, <|endoftext|>
+        for a pretrained Llama3.1).
+
+        This function is expected to raise errors which are caught and reported when running the eval.
+        Please also make sure to raise an error in case of sequence length issues. We expect to always
+        raise an error if something impedes the expected completion of a task.
+
+        Important! The completion is expected to be detokenized and to NOT contain special tokens.
+
+        Returns: List[RawCompletion]
+        """
+        raise NotImplementedError
+
     @abstractmethod
     def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         """
@@ -56,8 +79,16 @@ class BaseLLM(ABC):
         max_tokens: int | None = None,
         temperature: float | None = None,
     ) -> list[RawCompletion]:
-        messages: list[Sequence[Message]] = [sample.messages for sample in samples]
-        return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
+        """Generates a model response for each sample.
+
+        Uses 'generate_from_samples' to generate responses if implemented,
+        otherwise falls back to 'generate_from_messages'.
+        """
+        try:
+            return self.generate_from_samples(samples, stop_sequences, max_tokens, temperature)
+        except NotImplementedError:
+            messages: list[Sequence[Message]] = [sample.messages for sample in samples]
+            return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
 
     def post_process_completion(self, completion: str, sample: Sample) -> str:
         """

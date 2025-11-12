@@ -9,6 +9,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 import wandb
+from wandb.sdk.artifacts._validators import ARTIFACT_NAME_MAXLEN
 
 from eval_framework.result_processors.base import ResultsUploader
 from eval_framework.tasks.eval_config import EvalConfig
@@ -109,17 +110,20 @@ class WandbUploader(ResultsUploader):
     def _get_artifact_name(self, llm_name: str, config: EvalConfig) -> str:
         llm_name = llm_name.replace("/", "_")  # assuming this has class name and checkpoint name in it
 
-        # As in generate_output_dir() for consistency
+        # As in generate_output_dir() for consistency, though shorter.
         # But we don't include the eval_framework version and timestamp here (-> handled via W&B versioning)
-        fewshot_str = f"fewshot_{config.num_fewshot}" if config.num_fewshot is not None else "fewshot_None"
-        samples_str = f"__samples_{config.num_samples}" if config.num_samples is not None else "__samples_None"
-        tokens_str = f"__tokens_{config.max_tokens}" if config.max_tokens is not None else ""
+        fewshot_str = f"fs{config.num_fewshot}" if config.num_fewshot is not None else ""
+        samples_str = f"s{config.num_samples}" if config.num_samples is not None else ""
+        tokens_str = f"t{config.max_tokens}" if config.max_tokens is not None else ""
         params_str = f"{fewshot_str}{samples_str}{tokens_str}"
 
         config_json = config.model_json_robust_subset_dump()
         config_hash = hashlib.sha256(config_json.encode("utf-8")).hexdigest()[:5]
 
-        return f"{llm_name}__{config.task_name}__{params_str}__{config_hash}"
+        # Respect W&B artifact name length limit
+        eval_name = f"__{config.task_name}__{params_str}_{config_hash}"
+        max_llm_name_len = ARTIFACT_NAME_MAXLEN - len(eval_name)
+        return llm_name[:max_llm_name_len] + eval_name
 
     def _get_alias(self, output_dir: Path) -> str:
         digests = []
