@@ -1,6 +1,6 @@
 # HFLLM Class — Constructor Arguments
 
-`HFLLM` is a high-level wrapper for Hugging Face causal language models within the evaluation framework.  
+`HFLLM` is a high-level wrapper for Hugging Face causal language models within the evaluation framework.
 It extends `BaseHFLLM`, managing model loading (from local checkpoints, HF Hub, or W&B), formatting, and text generation.
 
 ## HFLLM Constructor Argument Reference
@@ -82,8 +82,8 @@ It extends `VLLMModel` → `BaseVLLMModel`, adding model-loading flexibility, ef
 ## Deep Dive: `bytes_per_token`
 
 ### What it is
-`bytes_per_token` is a scalar that adjusts generation limits (`max_tokens`) based on the model’s tokenizer characteristics.  
-Different models tokenize text differently — some produce more tokens per byte, some fewer.  
+`bytes_per_token` is a scalar that adjusts generation limits (`max_tokens`) based on the model’s tokenizer characteristics.
+Different models tokenize text differently — some produce more tokens per byte, some fewer.
 This parameter helps keep **generation length consistent** across models by normalizing the token budget.
 
 ### How it works internally
