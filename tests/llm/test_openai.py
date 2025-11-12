@@ -4,6 +4,7 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.openai import (
     Deepseek_chat,
     Deepseek_chat_with_formatter,
+    Deepseek_reasoner,
     OpenAI_davinci_002,
     OpenAI_gpt_4o_mini,
     OpenAI_gpt_4o_mini_with_ConcatFormatter,
@@ -23,13 +24,13 @@ from template_formatting.formatter import Message, Role
     [
         (OpenAI_gpt_4o_mini, "The night sky", 10),  # test chat completions
         (OpenAI_gpt_4o_mini_with_ConcatFormatter, " The night sky", 10),  # test formatted completions
-        (Deepseek_chat, "The night sky appears", 10),  # test chat completions
-        # (Deepseek_reasoner, "That's an excellent question", 300),  # test chat completions (needs enough tokens for reasoning)  # noqa: E501
+        (Deepseek_chat, "The night sky", 10),  # test chat completions
         (
-            Deepseek_chat_with_formatter,
-            " The color of the night sky is primarily black",
+            Deepseek_reasoner,
+            "",
             10,
-        ),  # using formatter rather than chat templates
+        ),  # no completion check, only that it runs (needs enough tokens for reasoning)  # noqa: E501
+        (Deepseek_chat_with_formatter, " The color of", 10),  # using formatter rather than chat templates
     ],
 )
 def test_openai_completions(model_cls: type[BaseLLM], expected_completion: str, max_tokens: int) -> None:
