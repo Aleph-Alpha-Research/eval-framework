@@ -132,7 +132,7 @@ jobs:
           push: true
           tags: ${{ needs.tag.outputs.image }}
 
-  test-uv-install:
+  test-extras:
     name: Test uv installs (CPU)
     runs-on: ubuntu-latest
     needs: [lint]
@@ -144,22 +144,25 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
 
       - name: Verify install and functionality via uv --exact
         run: |
           if [ "${{ matrix.extras }}" != "" ]; then
-            uv run --exact --extra ${{ matrix.extras }} pytest -q --noconftest tests/installs/test_${{ matrix.extras }}.py
+            echo "Testing extra: ${{ matrix.extras }}"
+            uv run --exact --extra ${{ matrix.extras }} pytest -v --noconftest tests/installs/test_${{ matrix.extras }}.py
           else
-            uv run --exact pytest -q --noconftest tests/installs/test_core.py
+            echo "Testing core install"
+            uv run --exact pytest --noconftest -v tests/installs/test_core.py
           fi
 
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-uv-install]
+    needs: [hf-datasets-cache, test-extras]
     steps:
       - uses: actions/checkout@v4
 
@@ -182,7 +185,7 @@ jobs:
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-uv-install]
+    needs: [hf-datasets-cache, test-extras]
     steps:
       - uses: actions/checkout@v4
 
@@ -222,14 +225,14 @@ jobs:
         run: |
           set -e  # fail fast if any test fails
 
-          echo "🔹 Testing vllm extra"
-          uv run --exact --extra vllm pytest -v -q --noconftest tests/installs/test_vllm.py
+          echo "Testing vllm extra"
+          uv run --exact --extra vllm pytest -v --noconftest tests/installs/test_vllm.py
 
-          echo "🔹 Testing mistral extra"
-          uv run --exact --extra mistral pytest -v -q --noconftest tests/installs/test_mistral.py
+          echo "Testing mistral extra"
+          uv run --exact --extra mistral pytest -v --noconftest tests/installs/test_mistral.py
 
-          echo "🔹 Testing all extras together"
-          uv run --exact --all-extras pytest -v -q --noconftest tests/installs/
+          echo "Testing all extras together"
+          uv run --exact --all-extras pytest -v --noconftest tests/installs/
 
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4

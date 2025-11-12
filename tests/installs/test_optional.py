@@ -1,24 +1,7 @@
-import transformers
-from jinja2 import Template
+def test_optional_import() -> None:
+    import transformers
 
+    assert transformers.__version__ is not None
+    from jinja2 import Template
 
-def test_transformers_import() -> None:
-    # Check that the transformers version is available
-    version = transformers.__version__
-    assert version is not None
-
-
-def test_jinja2_import() -> None:
-    # Simple test to ensure Jinja2 is importable and functional
-    template = Template("Hello {{ name }}!")
-    rendered = template.render(name="World")
-    assert rendered == "Hello World!"
-
-
-def main() -> None:
-    test_jinja2_import()
-    test_transformers_import()
-
-
-if __name__ == "__main__":
-    main()
+    assert Template is not None

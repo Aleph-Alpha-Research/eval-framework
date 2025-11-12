@@ -1,18 +1,10 @@
-from eval_framework.llm.base import BaseLLM
-from eval_framework.tasks.base import BaseTask
-from template_formatting.formatter import BaseFormatter
-
-
 def test_core_import() -> None:
-    # Just instantiate core components to ensure they are importable
+    from eval_framework.llm.base import BaseLLM
+
     assert BaseLLM is not None
-    assert BaseFormatter is not None
+    from eval_framework.tasks.base import BaseTask
+
     assert BaseTask is not None
+    from template_formatting.formatter import BaseFormatter
 
-
-def main() -> None:
-    test_core_import()
-
-
-if __name__ == "__main__":
-    main()
+    assert BaseFormatter is not None
