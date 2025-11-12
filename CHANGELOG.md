@@ -7,6 +7,7 @@
 - Added `post_process_completion` method to `BaseLLM` class to enable model-specific post-processing of completions before task-specific post-processing is applied.
 - The BASELLM class is equiped with `del` call to clear up resources. VLLM and HF APIs offload the respective models off the gpus. OpenAI class disconnects the client.
 - Refactored `VLLM` and `HFLLM` interfaces in backwards-compatible way so that there are identical (and flexible!) checkpoint and formatter specification options across VLLM and HFLLM. `VLLMRegistryModel`, `HFLLMRegistryModel`, `HFLLM_from_name` are now deprecated.
+- Added `generate_from_samples` method in `BaseLLM` which takes precedence over `generate_from_messages` if implemented.
 
 ### Tasks
 
@@ -34,6 +35,9 @@
 - Fix: W&B integration respects WANDB_ARTIFACT_DIR. In addition, new env var WANDB_CACHE_SKIP controls cache use.
 - Dropped support for S3 storages without proper SSL certificates.
 - Added support for W&B artifacts on local storage which don't need to be downloaded and may be earlier available.
+- Fix: `pip install eval_framework[all]` uses uv to fix `ResolveTooDeep` dependency resolver errors.
+- Added a CI workflow to test uv and pip installs (CPU only and GPU for VLLM) and avoid trigger with .md changes.
+- Updated the CI workflow graph to decouple CPU only test and full test suite with GPU: cpu tests dont wait for docker build.
 
 ## 0.2.2
 
