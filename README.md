@@ -39,12 +39,24 @@ There are optional extras available to unlock specific features of the library:
 
 As a short hand, the `all` extra installs all of the above.
 
-For development, you can instead install it directly from the repository. Please first install
- [uv](https://docs.astral.sh/uv/getting-started/installation/)
+We use `uv` to better resolve dependencies when downloading the extras. You can install uv with:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+or by follwing the `uv` [installation docs.](https://docs.astral.sh/uv/getting-started/installation/)
 
-To install the project with all optional extras use
+Now, you can safely install the project with all optional extras:
 ```bash
 uv sync --all-extras
+```
+or with pip
+```bash
+uv pip install eval_framework[all]
+```
+
+Tip: ensure python is properly installed with uv:
+```
+uv python install 3.12 --reinstall
 ```
 
 We provide custom groups to control optional extras.
