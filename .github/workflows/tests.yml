@@ -3,8 +3,12 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
   pull_request:
     types: [opened, reopened, synchronize, labeled]
+    paths-ignore:
+      - '**.md'
   # Manually trigger a workflow for a branch
   workflow_dispatch:
   # Merge queue trigger
@@ -74,6 +78,7 @@ jobs:
         run: uv run --extra=comet python -c "from eval_framework.tasks.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
 
   tag:
+    # Set Docker Tag and Image Name for Docker Build and Push (GPU Runs)
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.set-tag.outputs.tag }}
@@ -101,6 +106,7 @@ jobs:
         echo "Docker image: ${{ steps.set-tag.outputs.image }}"
 
   build:
+    # Build and Push Docker Image (GPU Runs)
     needs: [lint, tag]
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
@@ -126,10 +132,37 @@ jobs:
           push: true
           tags: ${{ needs.tag.outputs.image }}
 
+  test-extras:
+    # Test uv installs (CPU)
+    runs-on: ubuntu-latest
+    needs: [lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        extras: ['', 'determined', 'api', 'openai', 'transformers', 'accelerate', 'comet', 'optional']
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+
+      - name: Verify install and functionality via uv --exact
+        run: |
+          if [ "${{ matrix.extras }}" != "" ]; then
+            echo "Testing extra: ${{ matrix.extras }}"
+            uv run --exact --extra ${{ matrix.extras }} pytest -v --noconftest tests/installs/test_${{ matrix.extras }}.py
+          else
+            echo "Testing core install"
+            uv run --exact pytest --noconftest -v tests/installs/test_core.py
+          fi
+
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache]
+    needs: [hf-datasets-cache, test-extras]
     steps:
       - uses: actions/checkout@v4
 
@@ -152,7 +185,7 @@ jobs:
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [lint, hf-datasets-cache]
+    needs: [hf-datasets-cache, test-extras]
     steps:
       - uses: actions/checkout@v4
 
@@ -175,6 +208,7 @@ jobs:
           uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
   test-docker-gpu:
+    # Run full test suite in Docker Container with GPU
     runs-on: EvalFrameworkGPURunner
     needs: [tag, build, test-cpu, test-cpu-slow]
     container:
@@ -187,6 +221,19 @@ jobs:
       run:
         working-directory: /eval_framework
     steps:
+      - name: Verify GPU installs via uv --exact
+        run: |
+          set -e  # fail fast if any test fails
+
+          echo "Testing vllm extra"
+          uv run --exact --extra vllm pytest -v --noconftest tests/installs/test_vllm.py
+
+          echo "Testing mistral extra"
+          uv run --exact --extra mistral pytest -v --noconftest tests/installs/test_mistral.py
+
+          echo "Testing all extras together"
+          uv run --exact --all-extras pytest -v --noconftest tests/installs/
+
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
