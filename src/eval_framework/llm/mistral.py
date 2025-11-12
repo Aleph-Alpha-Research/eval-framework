@@ -49,7 +49,7 @@ class MistralVLLM(VLLMModel):
         gpu_memory_utilization: float = 0.9,
         batch_size: int = 1,
         sampling_params: SamplingParams | dict[str, Any] | None = None,
-        bytes_per_token: int | None = None,
+        bytes_per_token: float | None = None,
         **kwargs: Any,
     ) -> None:
         model_args = {"tokenizer_mode": "mistral", "config_format": "mistral", "load_format": "mistral"}
