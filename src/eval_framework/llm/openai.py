@@ -38,6 +38,7 @@ class OpenAIModel(BaseLLM):
             api_key: OpenAI API key (defaults to OPENAI_API_KEY env variable)
             organization: Optional organization ID
             base_url: Optional API base URL for Azure or other endpoints
+            bytes_per_token: Optional custom bytes per token scalar for non-standard models
         """
         self._model_name = model_name
         logger.info(f"Using {model_name} as a judge")
