@@ -70,6 +70,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [MMMLU](MMMLU.md)
 - [MMMLU_GERMAN_COT](MMMLU_GERMAN_COT.md)
 - [OPENBOOKQA](OPENBOOKQA.md)
+- [OPENBOOKQA_EVAL_HARNESS](OPENBOOKQA_EVAL_HARNESS.md)
 - [PAWSX](PAWSX.md)
 - [PIQA](PIQA.md)
 - [QUALITY](QUALITY.md)

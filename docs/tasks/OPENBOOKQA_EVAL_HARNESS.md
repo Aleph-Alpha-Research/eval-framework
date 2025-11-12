@@ -1,7 +1,7 @@
-# OPENBOOKQA
+# OPENBOOKQA_EVAL_HARNESS
 
 ````
-NAME = OPENBOOKQA
+NAME = OPENBOOKQA_EVAL_HARNESS
 DATASET_PATH = allenai/openbookqa
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = test
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/openbookqa](https://huggingface.co/datasets/allenai/openbookqa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "OPENBOOKQA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "OPENBOOKQA_EVAL_HARNESS"`.
