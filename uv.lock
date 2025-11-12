@@ -863,6 +863,7 @@ mistral = [
 openai = [
     { name = "openai" },
     { name = "tiktoken" },
+    { name = "transformers" },
 ]
 optional = [
     { name = "jinja2" },
@@ -938,6 +939,7 @@ requires-dist = [
     { name = "torch", marker = "sys_platform == 'linux' and extra == 'vllm'", specifier = ">=2.5,<3", index = "https://download.pytorch.org/whl/cu124" },
     { name = "torch", marker = "sys_platform != 'linux' and extra == 'transformers'", specifier = ">=2.5,<3", index = "https://pypi.org/simple" },
     { name = "torch", marker = "sys_platform != 'linux' and extra == 'vllm'", specifier = ">=2.5,<3", index = "https://pypi.org/simple" },
+    { name = "transformers", marker = "extra == 'openai'", specifier = ">=4.45.2,<5" },
     { name = "transformers", marker = "extra == 'optional'", specifier = ">=4.45.2,<5" },
     { name = "transformers", marker = "extra == 'transformers'", specifier = ">=4.45.2,<5" },
     { name = "unbabel-comet", marker = "extra == 'comet'", specifier = ">=2.2.6,<3" },
