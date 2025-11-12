@@ -270,6 +270,7 @@ class DeepseekModel(OpenAIModel):
         api_key: str | None = None,
         organization: str | None = None,
         base_url: str | None = None,
+        tokenizer_name: str | None = None,
     ) -> None:
         super().__init__(
             model_name=model_name,
@@ -279,9 +280,10 @@ class DeepseekModel(OpenAIModel):
             organization=organization,
             base_url="https://api.deepseek.com/beta",
         )
+        self._tokenizer_name = tokenizer_name if tokenizer_name is not None else "deepseek-ai/DeepSeek-V3.2-Exp"
 
     def _get_encoder(self) -> Tokenizer:
-        return AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-V3.2-Exp")
+        return AutoTokenizer.from_pretrained(self._tokenizer_name)
 
     def _count_tokens(self, text: str) -> int:
         return len(self._encoder.encode(text))
