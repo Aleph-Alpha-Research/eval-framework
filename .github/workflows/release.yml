@@ -104,6 +104,8 @@ jobs:
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
     needs: ["deploy-pypi"]
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout Repository
