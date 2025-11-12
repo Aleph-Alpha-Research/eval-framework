@@ -37,7 +37,7 @@ class OPENBOOKQA(BaseTask[str]):
         return f" {item['choices']['text'][self.keys.index(answer_key)].strip()}"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        return [f" {choice}" for choice in item["choices"]["text"]]
+        return [f" {choice.strip()}" for choice in item["choices"]["text"]]
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
         ground_truth = self._get_ground_truth(item)
