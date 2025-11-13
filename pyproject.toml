@@ -51,7 +51,7 @@ determined = [
 ]
 api = ["aleph-alpha-client>=10,<11"]
 openai = [
-  "openai>=1.62,<2",
+  "openai>=1.62,<2.8",
   "tiktoken>=0.9,<0.10",
   "transformers>=4.45.2,<5",
 ]
@@ -150,6 +150,7 @@ select = [
     "UP", # Auto-upgrading of new Python features
     "I", # Sort imports
 ]
+
 [tool.ruff.lint.isort]
 # https://github.com/astral-sh/ruff-pre-commit/issues/121
 # https://github.com/astral-sh/ruff/issues/10519
