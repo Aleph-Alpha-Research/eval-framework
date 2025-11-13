@@ -54,6 +54,8 @@ class OpenAIModel(BaseLLM):
         # Initialize tiktoken tokenizer for the model
         self._encoding = tiktoken.encoding_for_model(self._model_name)
         # set bytes_per_token_scalar for non-standard models
+        if bytes_per_token is not None and bytes_per_token <= 0:
+            raise ValueError("bytes_per_token must be positive")
         self.bytes_per_token_scalar = (
             4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
         )

@@ -71,6 +71,8 @@ class AlephAlphaAPIModel(BaseLLM):
         self.queue_full_timeout_seconds = queue_full_timeout_seconds
         self._validate_model_availability()
         # set bytes_per_token_scalar for non-standard models
+        if bytes_per_token is not None and bytes_per_token <= 0:
+            raise ValueError("bytes_per_token must be positive")
         self.bytes_per_token_scalar = (
             4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
         )
