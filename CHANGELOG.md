@@ -38,7 +38,8 @@
 - Fix: `pip install eval_framework[all]` uses uv to fix `ResolveTooDeep` dependency resolver errors.
 - Added a CI workflow to test uv and pip installs (CPU only and GPU for VLLM) and avoid trigger with .md changes.
 - Updated the CI workflow graph to decouple CPU only test and full test suite with GPU: cpu tests dont wait for docker build.
-- Changed implementation of OpenBookQA to be openbook (gives facts in prompt). Old version is available as OPENBOOKQA_EVAL_HANRESS task
+- Changed implementation of OpenBookQA to be openbook (gives facts in prompt). Old version is available as task OPENBOOKQA_EVAL_HANRESS
+- Added a class variable "BYTES_PER_TOKEN" that controls token fertility to allow max_tokens in dataset to be model-specific.
 
 ## 0.2.2
 

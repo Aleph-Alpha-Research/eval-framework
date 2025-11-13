@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import math
 import os
 import random
 import re
@@ -43,6 +44,7 @@ def safe_json_loads(s: str) -> dict:
 class AlephAlphaAPIModel(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
+    BYTES_PER_TOKEN: float = 4.0  # rule of thumb according to https://platform.openai.com/tokenizer
 
     def __init__(
         self,
@@ -53,6 +55,7 @@ class AlephAlphaAPIModel(BaseLLM):
         max_async_concurrent_requests: int = 32,
         request_timeout_seconds: int = 30 * 60 + 5,
         queue_full_timeout_seconds: int = 30 * 60 + 5,
+        bytes_per_token: float | None = None,
     ) -> None:
         self._formatter: BaseFormatter
         if formatter is None:
@@ -67,6 +70,12 @@ class AlephAlphaAPIModel(BaseLLM):
         self.request_timeout_seconds = request_timeout_seconds
         self.queue_full_timeout_seconds = queue_full_timeout_seconds
         self._validate_model_availability()
+        # set bytes_per_token_scalar for non-standard models
+        if bytes_per_token is not None and bytes_per_token <= 0:
+            raise ValueError("bytes_per_token must be positive")
+        self.bytes_per_token_scalar = (
+            4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
+        )
 
     def _validate_model_availability(self) -> None:
         """
@@ -250,11 +259,14 @@ class AlephAlphaAPIModel(BaseLLM):
 
         requests = []
 
+        # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
+        scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
+
         for single_messages in messages:
             requests.append(
                 CompletionRequest(
                     prompt=Prompt.from_text(self._formatter.format(single_messages, output_mode="string")),
-                    maximum_tokens=max_tokens,
+                    maximum_tokens=scaled_max_tokens,
                     stop_sequences=stop_sequences,
                     temperature=effective_temperature,
                 )

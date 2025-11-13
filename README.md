@@ -199,6 +199,7 @@ if __name__ == "__main__":
 
 - **Use CLI interface**: See [CLI usage guide](docs/cli_usage.md) for command-line evaluation options
 - **Evaluate HuggingFace models**: Follow our [HuggingFace evaluation guide](docs/evaluate_huggingface_model.md)
+- **Understand model arguments**: Read out [Model Arguments guide](docs/model_arguments.md)
 - **Create custom benchmarks**: Follow our [benchmark creation guide](docs/add_new_benchmark_guide.md)
 - **Scale your evaluations**: Use [Determined AI integration](docs/using_determined.md) for distributed evaluation
 - **Understand your results**: Read our [results interpretation guide](docs/understanding_results_guide.md)
@@ -214,6 +215,7 @@ if __name__ == "__main__":
 
 ### Advanced Usage
 
+- **[Understanding Model Arguments](docs/model_arguments.md)** - Thorough guide on each constructor argument for salient model classes
 - **[Adding New Benchmarks](docs/add_new_benchmark_guide.md)** - Complete guide with practical examples for adding new benchmarks
 - **[Benchmarks and Metrics](docs/benchmarks_and_metrics.md)** - Comprehensive overview of all available benchmarks and evaluation metrics
 - **[Overview of Dataloading](docs/overview_dataloading.md)** - Explanation of dataloading and task/sample/message structure
