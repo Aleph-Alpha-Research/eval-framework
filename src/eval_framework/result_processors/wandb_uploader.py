@@ -12,8 +12,8 @@ import wandb
 
 try:
     from wandb.sdk.artifacts._validators import ARTIFACT_NAME_MAXLEN
-except ImportError:
-    from wandb.sdk.artifacts._validators import NAME_MAXLEN as ARTIFACT_NAME_MAXLEN  # >=v0.23.0
+except ImportError:  # >=v0.23.0
+    from wandb.sdk.artifacts._validators import NAME_MAXLEN as ARTIFACT_NAME_MAXLEN  # type: ignore
 
 from eval_framework.result_processors.base import ResultsUploader
 from eval_framework.tasks.eval_config import EvalConfig
