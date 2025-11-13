@@ -31,6 +31,11 @@ class WMT(BaseTask[str], ABC):
         src_data, ref_data = [[line.rstrip() for line in sacrebleu.smart_open(file)] for file in (src_file, ref_file)]
 
         data_list = [{"source": src, "target": ref, "subject": subject} for src, ref in zip(src_data, ref_data)]
+
+        # Sort data_list before shuffling to ensure deterministic order
+        # This handles any non-determinism from sacrebleu file loading
+        data_list.sort(key=lambda x: (x["source"], x["target"]))
+
         self.rnd = random.Random(RANDOM_SEED)
         self.rnd.shuffle(data_list)
         self.dataset = {"test": data_list}

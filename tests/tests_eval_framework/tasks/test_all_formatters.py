@@ -1,12 +1,28 @@
+"""
+Formatter hash tests for all registered tasks.
+
+Validates that formatters produce consistent output by comparing MD5 hashes.
+Uses full HuggingFace datasets with random seed 42 for deterministic behavior.
+
+Usage:
+    pytest -m formatter_hash
+"""
+
+import random
+import sys
+from collections.abc import Generator
+from typing import Any
+
 import pytest
 
+from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import get_task, registered_task_names
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
-from tests.tests_eval_framework.utils import DatasetPatcher, assert_hash_string
+from tests.tests_eval_framework.utils import assert_hash_string
 
-# Special initialization arguments for specific tasks (can be extended).
-SPECIAL_ARGS = {
-    "ARC": {"num_fewshot": 1},  # Keep existing 1-shot
+# Special initialization arguments for specific tasks
+SPECIAL_ARGS: dict[str, dict[str, Any]] = {
+    "ARC": {"num_fewshot": 1},
     "ARC_DE": {"num_fewshot": 1},
     "ARC_EU20_DE": {"num_fewshot": 1},
     "ARC_EU20_FR": {"num_fewshot": 1},
@@ -40,7 +56,7 @@ SPECIAL_ARGS = {
     "InfiniteBench_MathFind": {"num_fewshot": 0},
     "InfiniteBench_RetrieveKV2": {"num_fewshot": 0},
     "InfiniteBench_RetrieveNumber": {"num_fewshot": 0},
-    "InfiniteBench_RetrievePassKey1": {"num_fewshot": 0},  # was INFINITE_BENCH_RETRIEVE_PASSKEY1
+    "InfiniteBench_RetrievePassKey1": {"num_fewshot": 0},
     "MATH": {"num_fewshot": 1},
     "MATHLvl5": {"num_fewshot": 1},
     "MATH500": {"num_fewshot": 1},
@@ -86,48 +102,119 @@ SPECIAL_ARGS = {
     "WMT20_INSTRUCT": {"num_fewshot": 1},
 }
 
-
 TASKS_TO_TEST = set(registered_task_names())
 
 
-@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-@pytest.mark.parametrize("task_name", list(TASKS_TO_TEST))
-def test_all_tasks_formatter(task_name: str, formatter_cls: type["BaseFormatter"]) -> None:
+@pytest.fixture(scope="session", autouse=True)
+def configure_test_environment() -> Generator[None, None, None]:
     """
-    Test that the formatted sample for each (Task, Formatter) pair is consistent by hashing the output.
+    Configure test environment for deterministic behavior.
+
+    Sets random seeds for reproducible test results.
+    """
+    import random
+
+    import numpy as np
+
+    # Set random seeds for reproducibility
+    random.seed(42)
+    np.random.seed(42)
+
+    # Set HuggingFace datasets seed if available
+    try:
+        import datasets
+
+        datasets.set_random_seed(42)
+    except (ImportError, AttributeError):
+        pass
+
+    print("\nFormatter tests using full HuggingFace datasets (seed=42)", file=sys.stderr)
+    print("", file=sys.stderr)
+
+    yield
+
+
+def _load_sample(task_class: type[BaseTask], args: dict[str, Any]) -> tuple[Any, str]:
+    """
+    Load a sample using full HuggingFace datasets.
 
     Args:
-        task_name: The task enum value, to be tested.
-        formatter_cls: The formatter class to be tested.
+        task_class: The task class to instantiate
+        args: Special arguments for the task
+
+    Returns:
+        Tuple of (sample, task_class_name)
 
     Raises:
-        AssertionError: If the hash of the formatter output does not match expectation.
+        Exception: If sample cannot be loaded even with 0-shot fallback
+    """
+    try:
+        num_fewshot = args.get("num_fewshot", 1)
+        task_instance = task_class.with_overwrite(
+            num_fewshot=num_fewshot,
+            custom_subjects=None,
+            custom_hf_revision=None,
+        )
+
+        original_method = task_instance._sample_fewshot_examples
+
+        def deterministic_fewshot(item: dict) -> list:
+            task_instance.rnd = random.Random(42)  # Fresh seed each time
+            return original_method(item)
+
+        task_instance._sample_fewshot_examples = deterministic_fewshot
+
+        sample = next(iter(task_instance.iterate_samples(1)))
+        return sample, task_class.__name__
+    except Exception as e:
+        # Fallback to 0-shot
+        print(
+            f"Failed to instantiate task {task_class.__name__}: {e}; retrying with 0-shot",
+            file=sys.stderr,
+        )
+        task_instance = task_class.with_overwrite(
+            num_fewshot=0,
+            custom_subjects=None,
+            custom_hf_revision=None,
+        )
+        sample = next(iter(task_instance.iterate_samples(1)))
+        return sample, task_class.__name__
+
+
+@pytest.mark.formatter_hash
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
+@pytest.mark.parametrize("task_name", sorted(TASKS_TO_TEST))
+def test_all_tasks_formatter(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
+    """
+    Test that the formatted sample for each (Task, Formatter) pair is consistent.
+
+    This test validates formatter output by computing and comparing MD5 hashes.
+    Hash mismatches indicate changes in:
+    - Formatter logic
+    - Task prompt construction
+    - Dataset samples
+
+    Args:
+        task_name: The task name to test
+        formatter_cls: The formatter class to test (Llama3Formatter or ConcatFormatter)
+
+    Raises:
+        AssertionError: If the hash of the formatter output does not match the expected value
     """
     task_class = get_task(task_name)
+    args = SPECIAL_ARGS.get(task_class.__name__, {"num_fewshot": 1})
 
-    # instantiate the class with the SPECIAL_ARGS dictionary or 1-shot example and fallback to 0-shot if this fails
+    # Load sample
     try:
-        args = SPECIAL_ARGS.get(task_class.__name__, {"num_fewshot": 1})
-        with DatasetPatcher(task_class, num_samples=2) as task_instance:
-            # Apply any special args to the patched task
-            for key, value in args.items():
-                setattr(task_instance, key, value)
+        sample, task_class_name = _load_sample(task_class, args)
     except Exception as e:
-        print(f"Failed to instantiate task {(task_class.__name__,)}: {e}; retrying with 0-shot")
-        try:
-            with DatasetPatcher(task_class, num_samples=2, num_fewshot=0) as task_instance:
-                pass
-        except Exception as e:
-            pytest.fail(f"Could not instantiate {task_class.__name__}: {e}")
+        pytest.fail(f"Could not instantiate {task_class.__name__}: {e}")
 
+    # Format the sample
     formatter = formatter_cls()
-    try:
-        sample = next(iter(task_instance.iterate_samples(1)))
-    except Exception as e:
-        pytest.fail(f"No samples for {task_class.__name__}: {e}")
-
     formatted_sample = formatter.format(sample.messages, output_mode="string")
 
+    # Build comparison string with possible completions and ground truth
     possible_completions = sample.possible_completions
     ground_truth = sample.ground_truth
 
@@ -138,18 +225,19 @@ def test_all_tasks_formatter(task_name: str, formatter_cls: type["BaseFormatter"
 
     if ground_truth:
         if isinstance(ground_truth, list):
-            ground_truth = "\n".join(f'- "{item}"' for item in ground_truth)
+            ground_truth_str = "\n".join(f'- "{item}"' for item in ground_truth)
         else:
-            ground_truth = f'- "{ground_truth}"'
+            ground_truth_str = f'- "{ground_truth}"'
     else:
-        ground_truth = "None"
+        ground_truth_str = "None"
 
     formatted_sample_with_completions = (
-        f"{formatted_sample}\n\nPossible completion:\n{possible_completions_str}\n\nGround truth:\n{ground_truth}"
+        f"{formatted_sample}\n\nPossible completion:\n{possible_completions_str}\n\nGround truth:\n{ground_truth_str}"
     )
 
+    # Verify hash consistency
     assert_hash_string(
-        task_name=task_class.__name__,
+        task_name=task_class_name,
         suffix_key=formatter_cls.__name__,
         tested_string=formatted_sample_with_completions,
     )
