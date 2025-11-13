@@ -319,6 +319,7 @@ class HFLLM(BaseHFLLM):
         # Explicit name for the `name` property:
         checkpoint_name: str | None = None,
         # HFLLM parameters:
+        bytes_per_token: float | None = None,
         **kwargs: Any,
     ) -> None:
         final_path, possible_name = self._get_final_checkpoint(checkpoint_path, model_name, artifact_name)
@@ -334,6 +335,7 @@ class HFLLM(BaseHFLLM):
 
         super().__init__(
             formatter=final_formatter,
+            bytes_per_token=bytes_per_token,
             **kwargs,
         )
 

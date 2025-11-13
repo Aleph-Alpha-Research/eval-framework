@@ -10,11 +10,11 @@ It extends `BaseHFLLM`, managing model loading (from local checkpoints, HF Hub, 
 | `checkpoint_path` | `str \| Path \| None` | Path to a **local checkpoint directory or model weights**. Used when loading from disk instead of HF Hub. | `None` |
 | `model_name` | `str \| None` | Hugging Face model name (e.g. `"EleutherAI/pythia-410m"`). Used to load from the Hub. | `None` |
 | `artifact_name` | `str \| None` | Weights & Biases artifact name (e.g. `"org/model:latest"`). Used to fetch models from W&B registry. | `None` |
-| `formatter` | `BaseFormatter \| None` | Explicit formatter instance used to convert chat messages into model prompts. Overrides `formatter_name`. | `None` |
+| `formatter` | `BaseFormatter \| None` | Explicit formatter instance used to convert chat messages into model prompts. If not provided, falls back to `DEFAULT_FORMATTER`. |                  `None`                 |
 | `formatter_name` | `str \| None` | Name of a formatter class (e.g. `"ConcatFormatter"`, `"HFFormatter"`). Used when `formatter` is not provided. | `None` |
 | `formatter_kwargs` | `dict[str, Any] \| None` | Keyword arguments for the formatter constructor (used with `formatter_name`). | `None` |
 | `checkpoint_name` | `str \| None` | Custom display/logging name for the checkpoint. If omitted, inferred from model or artifact name. | `None` |
-| `bytes_per_token` | `float \| None` | Used to scale token generation limits based on model tokenizer density, it gets passed to the superclass `BaseHFLLM` through `super().__init__(bytes_per_token=...)`. See [Deep Dive: bytes_per_token](#deep-dive-bytes_per_token). | `None` *(internally defaults to `4.0`)* |
+| `bytes_per_token` | `float \| None` | Used to scale token generation limits based on model tokenizer density. Passed to the parent class `BaseHFLLM`. See [Deep Dive: bytes_per_token](#deep-dive-bytes_per_token). | `None` *(internally defaults to `4.0`)* |
 | `**kwargs` | `Any` | Additional keyword args passed to `BaseHFLLM` / `BaseLLM`. | — |
 
 ---
@@ -48,7 +48,7 @@ It manages model configuration, authentication, and request parameters for the O
 | **Argument**      | **Type**                | **Description**                                                                                                                              |               **Default**               |
 | :---------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------: |
 | `model_name`      | `str`                   | Name of the **OpenAI model** to use (e.g. `"gpt-4o"`, `"gpt-4"`, `"gpt-3.5-turbo"`). Determines which model endpoint to call.                |                `"gpt-4o"`               |
-| `formatter`       | `BaseFormatter \| None` | Explicit formatter instance used to convert chat messages into model prompts. If not provided, defaults to a suitable formatter or template. |                  `None`                 |
+| `formatter`                     | `BaseFormatter \| None` | Explicit formatter instance used to convert chat messages into model prompts. If not provided, falls back to `DEFAULT_FORMATTER`. |                  `None`                 |
 | `temperature`     | `float \| None`         | Sampling temperature controlling output randomness (`0.0–2.0`). Lower = deterministic, higher = creative.                                    |     `None` *(interpreted as `0.0`)*     |
 | `api_key`         | `str \| None`           | OpenAI API key. If not provided, defaults to the `OPENAI_API_KEY` environment variable.                                                      |                  `None`                 |
 | `organization`    | `str \| None`           | Optional OpenAI **organization ID** for multi-org API usage or billing separation.                                                           |                  `None`                 |
@@ -66,7 +66,7 @@ It manages GPU allocation, tokenizer setup, and internal sampling parameter norm
 
 | **Argument**             | **Type**                                   | **Description**                                                                                                                             |          **Default**         |
 | :----------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------: |
-| `formatter`              | `BaseFormatter \| None`                    | Formatter instance used to convert structured messages into model text input.                                                               |            `None`            |
+| `formatter`                     | `BaseFormatter \| None` | Explicit formatter instance used to convert chat messages into model prompts. If not provided, falls back to `DEFAULT_FORMATTER`. |                  `None`                 |
 | `max_model_len`          | `int \| None`                              | Maximum sequence length (token context limit). Used to configure the vLLM engine.                                                           |            `None`            |
 | `tensor_parallel_size`   | `int`                                      | Number of GPUs for tensor-level parallel inference.                                                                                         |              `1`             |
 | `gpu_memory_utilization` | `float`                                    | Fraction of total GPU memory reserved for model weights and KV cache.                                                                       |             `0.9`            |
@@ -74,33 +74,24 @@ It manages GPU allocation, tokenizer setup, and internal sampling parameter norm
 | `checkpoint_path`        | `str \| Path \| None`                      | Local model path or checkpoint directory.                                                                                                   |            `None`            |
 | `checkpoint_name`        | `str \| None`                              | Human-readable identifier for the checkpoint.                                                                                               |            `None`            |
 | `sampling_params`        | `SamplingParams \| dict[str, Any] \| None` | Sampling configuration parameters.                                                                                                          |            `None`            |
-| `bytes_per_token`        | `float \| None`                            | Bytes-per-token scaling factor. If `None`, defaults to `BaseVLLMModel.BYTES_PER_TOKEN` (`4.0`). Negative or zero values raise `ValueError`. | `None` *(defaults to `4.0`)* |
+| `bytes_per_token` | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes_per_token).             | `None` *(internally defaults to `4.0`)* |
 | `**kwargs`               | `Any`                                      | Any remaining parameters forwarded to the `LLM` engine constructor.                                                                         |               —              |
 
 ---
 
 # MistralVLLM — Constructor Arguments
 
-`MistralVLLM` is a specialized subclass of [`VLLMModel`](#vllmmodel) → [`BaseVLLMModel`](#basevllmmodel) designed to run **Mistral** Hugging Face models using the **vLLM** inference backend.
+`MistralVLLM` is a specialized subclass of `VLLMModel` → `BaseVLLMModel` designed to run **Mistral** Hugging Face models using the **vLLM** inference backend.
 It provides flexible model loading (from local files, Hugging Face Hub, or Weights & Biases), GPU-efficient parallelism, and tunable sampling behavior.
 
 ## MistralVLLM Constructor Argument Reference
 
 | **Argument**             | **Type**                                   | **Description**                                                                                                                                                                          |               **Default**               |
 | :----------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------: |
-| `checkpoint_path`        | `str \| Path \| None`                      | Path to a **local checkpoint directory or model weights**. Used when loading from disk instead of Hugging Face Hub. Passed to `super().__init__(checkpoint_path=...)`.                   |                  `None`                 |
 | `model_name`             | `str \| None`                              | Hugging Face model identifier (e.g. `"mistralai/Mistral-7B-v0.1"`). Used if `checkpoint_path` is not provided.                                                                           |                  `None`                 |
 | `artifact_name`          | `str \| None`                              | **Weights & Biases artifact** reference (e.g. `"org/model:latest"`). Used for pulling models from W&B registry.                                                                          |                  `None`                 |
-| `formatter`              | `BaseFormatter \| None`                    | Explicit formatter instance for chat or text-to-text conversions. Overrides `formatter_name`. Forwarded to `BaseVLLMModel`.                                                              |                  `None`                 |
 | `formatter_name`         | `str \| None`                              | Name of a registered formatter class (e.g. `"ConcatFormatter"`, `"HFFormatter"`). Used when `formatter` is not supplied.                                                                 |                  `None`                 |
 | `formatter_kwargs`       | `dict[str, Any] \| None`                   | Keyword arguments passed to the formatter constructor.                                                                                                                                   |                  `None`                 |
-| `checkpoint_name`        | `str \| None`                              | Custom identifier for logging or display. Forwarded to `BaseVLLMModel`. If omitted, inferred from model or artifact name.                                                                |                  `None`                 |
-| `max_model_len`          | `int \| None`                              | Maximum context length (token limit) for the vLLM engine. Passed to `super().__init__(max_model_len=...)`.                                                                               |                  `None`                 |
-| `tensor_parallel_size`   | `int`                                      | Number of GPUs used for tensor parallelism. Passed to `BaseVLLMModel`.                                                                                                                   |                   `1`                   |
-| `gpu_memory_utilization` | `float`                                    | Fraction of available GPU memory allocated to the model. Managed by `BaseVLLMModel` to optimize load balance and prevent OOM errors.                                                     |                  `0.9`                  |
-| `batch_size`             | `int`                                      | Default inference batch size. Passed to `BaseVLLMModel`.                                                                                                                                 |                   `1`                   |
-| `sampling_params`        | `SamplingParams \| dict[str, Any] \| None` | Sampling configuration (e.g. temperature, top-p, top-k). Can be a `SamplingParams` object or a dict. Forwarded to `BaseVLLMModel`.                                                       |                  `None`                 |
-| `bytes_per_token`        | `float \| None`                            | Used to scale token generation limits based on model tokenizer density. Passed to `super().__init__(bytes_per_token=...)`. See [Deep Dive: bytes_per_token](#deep-dive-bytes_per_token). | `None` *(internally defaults to `4.0`)* |
 | `**kwargs`               | `Any`                                      | Additional keyword arguments passed through to `BaseVLLMModel` / `BaseLLM`.                                                                                                              |                    —                    |
 
 ---
