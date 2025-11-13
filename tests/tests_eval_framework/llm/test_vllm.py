@@ -24,7 +24,7 @@ from template_formatting.formatter import (
     Message,
     Role,
 )
-from tests.llm.test_base import LLM_INIT_FORMATTER_PARAMS, LLM_INIT_SOURCE_PARAMS
+from tests.tests_eval_framework.llm.test_base import LLM_INIT_FORMATTER_PARAMS, LLM_INIT_SOURCE_PARAMS
 
 
 def clean_up() -> None:

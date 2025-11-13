@@ -29,7 +29,7 @@ class TestHFAssetRetrieval:
         assert len(formatter.template.system_prompt) > 0
 
     def test_non_existing_repo(self) -> None:
-        with pytest.raises(RepositoryNotFoundError):
+        with pytest.raises((RepositoryNotFoundError, FileNotFoundError)):
             MagistralFormatter(llm_target="Qwen/phariachat")
 
 

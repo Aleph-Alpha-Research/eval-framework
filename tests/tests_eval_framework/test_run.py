@@ -60,7 +60,7 @@ def test_run(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_pa
 def test_run_path(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_path: Path) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
     task_name = "ARC"
-    module = "tests.conftest"
+    module = "tests.tests_eval_framework.conftest"
     llm_name = "SmolLM135M"
     mock_parse_args.return_value = Namespace(
         context="local",
@@ -80,7 +80,7 @@ def test_run_path(mock_create_perturbation_class: Mock, mock_parse_args: Mock, t
         hf_upload_repo="",
         llm_args=[],
         judge_models=Path(__file__).parent / "conftest.py",
-        judge_model_name="tests.conftest.Smollm135MInstruct",
+        judge_model_name="tests.tests_eval_framework.conftest.Smollm135MInstruct",
         judge_model_args={},
         batch_size=2,
         task_subjects=None,
@@ -149,7 +149,7 @@ def test_run_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
 def test_run_path_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
     task_name = "ARC"
-    module = "tests.conftest"
+    module = "tests.tests_eval_framework.conftest"
     llm_name = "SmolLM135M"
     mock_parse_args.return_value = Namespace(
         context="local",

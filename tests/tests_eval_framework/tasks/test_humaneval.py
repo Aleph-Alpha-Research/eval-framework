@@ -2,7 +2,7 @@ import pytest
 
 from eval_framework.tasks.benchmarks.humaneval import HumanEval, HumanEvalInstruct
 from eval_framework.tasks.utils import run_python_code
-from tests.utils import DatasetPatcher
+from tests.tests_eval_framework.utils import DatasetPatcher
 
 
 class TestHumanEvalCode:

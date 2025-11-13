@@ -2,7 +2,7 @@ import pytest
 
 from eval_framework.tasks.registry import get_task, registered_task_names
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
-from tests.utils import DatasetPatcher, assert_hash_string
+from tests.tests_eval_framework.utils import DatasetPatcher, assert_hash_string
 
 # Special initialization arguments for specific tasks (can be extended).
 SPECIAL_ARGS = {

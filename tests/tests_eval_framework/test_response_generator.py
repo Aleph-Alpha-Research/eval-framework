@@ -15,7 +15,7 @@ from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig, PerturbationType
 from eval_framework.tasks.registry import get_task
 from template_formatting.formatter import Message, Role
-from tests.conftest import MockLLM
+from tests.tests_eval_framework.conftest import MockLLM
 
 
 def test_generate_completions_message_handling() -> None:

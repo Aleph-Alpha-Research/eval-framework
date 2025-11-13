@@ -4,7 +4,7 @@ import pytest
 
 from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import register_task
-from tests.tasks.test_registry import temporary_registry
+from tests.tests_eval_framework.tasks.test_registry import temporary_registry
 
 
 @pytest.mark.parametrize(

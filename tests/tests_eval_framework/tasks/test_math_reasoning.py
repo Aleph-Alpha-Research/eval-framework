@@ -1,7 +1,7 @@
 import pytest
 
 from eval_framework.tasks.benchmarks.math_reasoning import MATH
-from tests.utils import DatasetPatcher
+from tests.tests_eval_framework.utils import DatasetPatcher
 
 
 @pytest.fixture()

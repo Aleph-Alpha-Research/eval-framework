@@ -43,6 +43,8 @@
 - Changed implementation of OpenBookQA to be openbook (gives facts in prompt). Old version is available as OPENBOOKQA_EVAL_HANRESS task
 - Added automated Docker image versioning in release workflow. Docker images are now tagged with `v{major}.{minor}.{patch}`, `v{major}.{minor}`, and `latest` on each release for reproducible deployments.
 - Added Docker guide (`docs/docker_guide.md`) for both AA users and external contributors.
+- Added template formatting tests to be run by CI.
+- Restructured tests to "test_eval_framework" and "tests_template_formatting".
 
 ## 0.2.2
 
