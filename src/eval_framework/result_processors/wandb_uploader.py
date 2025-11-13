@@ -9,7 +9,11 @@ from collections.abc import Callable
 from pathlib import Path
 
 import wandb
-from wandb.sdk.artifacts._validators import ARTIFACT_NAME_MAXLEN
+
+try:
+    from wandb.sdk.artifacts._validators import ARTIFACT_NAME_MAXLEN
+except ImportError:  # >=v0.23.0
+    from wandb.sdk.artifacts._validators import NAME_MAXLEN as ARTIFACT_NAME_MAXLEN  # type: ignore
 
 from eval_framework.result_processors.base import ResultsUploader
 from eval_framework.tasks.eval_config import EvalConfig
