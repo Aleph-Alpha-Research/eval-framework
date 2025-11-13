@@ -257,4 +257,4 @@ jobs:
           VLLM_NCCL_SO_PATH: ""
           VLLM_USE_TRITON_FLASH_ATTN: 0
           VLLM_DISABLE_CUSTOM_ALL_REDUCE: 1
-        run: uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "vllm"
+        run: uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 --log-cli-level=INFO -v -m "vllm"
