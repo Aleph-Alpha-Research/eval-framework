@@ -40,6 +40,9 @@
 - Updated the CI workflow graph to decouple CPU only test and full test suite with GPU: cpu tests dont wait for docker build.
 - Changed implementation of OpenBookQA to be openbook (gives facts in prompt). Old version is available as task OPENBOOKQA_EVAL_HANRESS
 - Added a class variable "BYTES_PER_TOKEN" that controls token fertility to allow max_tokens in dataset to be model-specific.
+- Changed implementation of OpenBookQA to be openbook (gives facts in prompt). Old version is available as OPENBOOKQA_EVAL_HANRESS task
+- Added automated Docker image versioning in release workflow. Docker images are now tagged with `v{major}.{minor}.{patch}`, `v{major}.{minor}`, and `latest` on each release for reproducible deployments.
+- Added Docker guide (`docs/docker_guide.md`) for both AA users and external contributors.
 
 ## 0.2.2
 
