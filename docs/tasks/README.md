@@ -78,6 +78,8 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [SCIQ](SCIQ.md)
 - [SCIQEvalHarness](SCIQEvalHarness.md)
 - [SPHYR](SPHYR.md)
+- [SQUAD](SQUAD.md)
+- [SQUAD2](SQUAD2.md)
 - [StructEval](StructEval.md)
 - [TRIVIAQA](TRIVIAQA.md)
 - [TRUTHFULQA](TRUTHFULQA.md)

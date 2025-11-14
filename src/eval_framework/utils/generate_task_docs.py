@@ -12,10 +12,7 @@ from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3
 
 DEFAULT_OUTPUT_DOCS_DIRECTORY = Path("docs/tasks")
 
-EXCLUDED_TASKS = [
-    "SQUAD",  # failing loading the dataset: Feature type 'List' not found
-    "SQUAD2",  # failing loading the dataset: Feature type 'List' not found
-]
+EXCLUDED_TASKS: list[str] = []
 
 
 def parse_args(cli_args: list[str] | None = None) -> argparse.Namespace:
