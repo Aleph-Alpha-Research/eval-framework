@@ -10,7 +10,7 @@ from openai import OpenAI
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import ConcatCompression, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import BaseFormatter, Message, Role
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Message, Role
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +203,58 @@ class OpenAIModel(BaseLLM):
                 logger.info(f"Raw response: {completion.completion}")
                 raise
         return responses
+
+    def __del__(self) -> None:
+        if hasattr(self, "_client"):
+            self._client.close()
+
+
+class OpenAIEmbeddingModel(BaseLLM):
+    def __init__(
+        self,
+        model_name: str = "text-embedding-3-large",
+        formatter: BaseFormatter | None = None,
+        api_key: str | None = None,
+        organization: str | None = None,
+        base_url: str | None = None,
+    ) -> None:
+        """Initialize OpenAI API client.
+        Args:
+            model_name: Name of the OpenAI model to use (e.g., "text-embedding-3-large")
+            formatter: Optional message formatter
+            api_key: OpenAI API key (defaults to OPENAI_API_KEY env variable)
+            organization: Optional organization ID
+            base_url: Optional API base URL for Azure or other endpoints
+        """
+        self._model_name = model_name
+        logger.info(f"Using {model_name} as embedding model")
+        self._formatter = formatter if formatter else ConcatFormatter()
+        self._client = OpenAI(
+            api_key=api_key or os.getenv("OPENAI_API_KEY", ""),
+            organization=organization,
+            base_url=base_url,
+        )
+
+    def generate_from_messages(
+        self,
+        messages: list[Sequence[Message]],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> list[list[float]]:
+        assert (stop_sequences, max_tokens, temperature) == (None, None, None), (
+            "These parameters are not used for embeddings."
+        )
+        embedddings = []
+        for single_messages in messages:
+            prompt = self._formatter.format(single_messages, output_mode="string")
+            response = self._client.embeddings.create(model=self._model_name, input=[prompt])
+            embedding = response.data[0].embedding
+            embedddings.append(embedding)
+        return embedddings
+
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+        raise NotImplementedError("Embedding model cannot return logprobs.")
 
     def __del__(self) -> None:
         if hasattr(self, "_client"):
