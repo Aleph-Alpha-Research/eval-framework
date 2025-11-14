@@ -1,5 +1,6 @@
 import concurrent.futures
 import logging
+import math
 import os
 import traceback
 from collections.abc import Callable, Sequence
@@ -26,6 +27,7 @@ class OpenAIModel(BaseLLM):
 
     LLM_NAME: str | None = None
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
+    BYTES_PER_TOKEN: float = 4.0  # rule of thumb according to https://platform.openai.com/tokenizer
 
     def __init__(
         self,
@@ -35,6 +37,7 @@ class OpenAIModel(BaseLLM):
         api_key: str | None = os.getenv("OPENAI_API_KEY", ""),
         organization: str | None = None,
         base_url: str | None = None,
+        bytes_per_token: float | None = None,
     ) -> None:
         """
         Initialize the OpenAIModel.
@@ -46,6 +49,7 @@ class OpenAIModel(BaseLLM):
             api_key: OpenAI API key (defaults to OPENAI_API_KEY env variable).
             organization: Optional OpenAI organization ID.
             base_url: Optional API base URL for Azure or alternate endpoints.
+            bytes_per_token: Optional custom bytes per token scalar for non-standard models.
         """
         assert model_name is not None or self.LLM_NAME is not None, "A model name must be specified."
         self._model_name = model_name if model_name else self.LLM_NAME
@@ -63,6 +67,13 @@ class OpenAIModel(BaseLLM):
 
         # Initialize tokenizer for the model
         self._encoder = self._get_encoder()
+
+        # set bytes_per_token_scalar for non-standard models
+        if bytes_per_token is not None and bytes_per_token <= 0:
+            raise ValueError("bytes_per_token must be positive")
+        self.bytes_per_token_scalar = (
+            4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
+        )
 
     def _get_encoder(self) -> tiktoken.Encoding:
         assert self._model_name is not None
@@ -106,6 +117,9 @@ class OpenAIModel(BaseLLM):
         assert 0.0 <= effective_temperature <= 2.0, "Temperature must be between 0.0 and 2.0"
 
         def _process_one(single_messages: Sequence[Message]) -> RawCompletion:
+            # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
+            scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
+
             if self._formatter is not None:
                 # Use formatter and text completion API
                 prompt = self._formatter.format(single_messages, output_mode="string")
@@ -115,7 +129,7 @@ class OpenAIModel(BaseLLM):
                     model=self._model_name,
                     prompt=prompt,
                     temperature=effective_temperature,
-                    max_tokens=max_tokens,
+                    max_tokens=scaled_max_tokens,
                     stop=stop_sequences,
                 )
                 completion = response.choices[0].text
@@ -128,6 +142,7 @@ class OpenAIModel(BaseLLM):
                     completion=completion,
                     completion_sequence_positions=self._count_tokens(completion),
                 )
+
             else:
                 # Use chat completion API
                 chat_messages = [
@@ -143,7 +158,7 @@ class OpenAIModel(BaseLLM):
                     model=self._model_name,
                     messages=chat_messages,
                     temperature=effective_temperature,
-                    max_tokens=max_tokens,
+                    max_tokens=scaled_max_tokens,
                     stop=stop_sequences,
                 )
                 prompt = "\n".join([f"{m.get('role', '')}: {m.get('content', '')}" for m in chat_messages])

@@ -9,7 +9,11 @@ from collections.abc import Callable
 from pathlib import Path
 
 import wandb
-from wandb.sdk.artifacts._validators import NAME_MAXLEN
+
+try:
+    from wandb.sdk.artifacts._validators import ARTIFACT_NAME_MAXLEN
+except ImportError:  # >=v0.23.0
+    from wandb.sdk.artifacts._validators import NAME_MAXLEN as ARTIFACT_NAME_MAXLEN  # type: ignore
 
 from eval_framework.result_processors.base import ResultsUploader
 from eval_framework.tasks.eval_config import EvalConfig
@@ -122,7 +126,7 @@ class WandbUploader(ResultsUploader):
 
         # Respect W&B artifact name length limit
         eval_name = f"__{config.task_name}__{params_str}_{config_hash}"
-        max_llm_name_len = NAME_MAXLEN - len(eval_name)
+        max_llm_name_len = ARTIFACT_NAME_MAXLEN - len(eval_name)
         return llm_name[:max_llm_name_len] + eval_name
 
     def _get_alias(self, output_dir: Path) -> str:

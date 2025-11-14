@@ -1,6 +1,23 @@
 # Changelog
 
-## Unreleased: 0.2.3-dev
+## Unreleased: 0.2.4-dev
+
+### Models
+
+- Cleaned up `OpenAIModel` class. Those models can now also be evaluated and not only used as judges. Loglikelihood evaluation requests are now implemented (although only supported by a limited number of OpenAI models). Implemented tests for `OpenAIModel` calls. Added concurrency to completion calls.
+- Added access to Deepseek model API.
+
+### Tasks
+
+### Metrics
+
+
+### General
+
+- Added documentation on `SQUAD` and `SQUAD2` benchmark classes
+- Updated documentation on lists of available tasks
+
+## 0.2.3
 
 ### Models
 
@@ -8,8 +25,6 @@
 - The BASELLM class is equiped with `del` call to clear up resources. VLLM and HF APIs offload the respective models off the gpus. OpenAI class disconnects the client.
 - Refactored `VLLM` and `HFLLM` interfaces in backwards-compatible way so that there are identical (and flexible!) checkpoint and formatter specification options across VLLM and HFLLM. `VLLMRegistryModel`, `HFLLMRegistryModel`, `HFLLM_from_name` are now deprecated.
 - Added `generate_from_samples` method in `BaseLLM` which takes precedence over `generate_from_messages` if implemented.
-- Cleaned up `OpenAIModel` class. Those models can now also be evaluated and not only used as judges. Loglikelihood evaluation requests are now implemented (although only supported by a limited number of OpenAI models). Implemented tests for `OpenAIModel` calls. Added concurrency to completion calls.
-- Added access to Deepseek model API.
 
 ### Tasks
 
@@ -40,8 +55,13 @@
 - Fix: `pip install eval_framework[all]` uses uv to fix `ResolveTooDeep` dependency resolver errors.
 - Added a CI workflow to test uv and pip installs (CPU only and GPU for VLLM) and avoid trigger with .md changes.
 - Updated the CI workflow graph to decouple CPU only test and full test suite with GPU: cpu tests dont wait for docker build.
-- Added documentation on `SQUAD` and `SQUAD2` benchmark classes
-- Updated documentation on lists of available tasks
+- Changed implementation of OpenBookQA to be openbook (gives facts in prompt). Old version is available as task OPENBOOKQA_EVAL_HANRESS
+- Added a class variable "BYTES_PER_TOKEN" that controls token fertility to allow max_tokens in dataset to be model-specific.
+- Changed implementation of OpenBookQA to be openbook (gives facts in prompt). Old version is available as OPENBOOKQA_EVAL_HANRESS task
+- Added automated Docker image versioning in release workflow. Docker images are now tagged with `v{major}.{minor}.{patch}`, `v{major}.{minor}`, and `latest` on each release for reproducible deployments.
+- Added Docker guide (`docs/docker_guide.md`) for both AA users and external contributors.
+- Added template formatting tests to be run by CI.
+- Restructured tests to "test_eval_framework" and "tests_template_formatting".
 
 ## 0.2.2
 

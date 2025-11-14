@@ -1,5 +1,6 @@
 import gc
 import logging
+import math
 import os
 import warnings
 from collections.abc import Callable, Sequence
@@ -80,13 +81,20 @@ class BaseHFLLM(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
+    BYTES_PER_TOKEN: float = 4.0  # rule of thumb according to https://platform.openai.com/tokenizer
 
-    def __init__(self, formatter: BaseFormatter | None = None) -> None:
+    def __init__(self, formatter: BaseFormatter | None = None, bytes_per_token: float | None = None) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained(self.LLM_NAME)
         self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
         logger.info(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
         self._set_formatter(formatter)
+        # set bytes_per_token_scalar for non-standard models
+        if bytes_per_token is not None and bytes_per_token <= 0:
+            raise ValueError("bytes_per_token must be positive")
+        self.bytes_per_token_scalar = (
+            4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
+        )
 
     def _set_formatter(self, formatter: BaseFormatter | None = None) -> None:
         # if formatter is being set at initialization time, use it
@@ -162,8 +170,12 @@ class BaseHFLLM(BaseLLM):
 
             # Calculate the maximum number of tokens to generate
             max_tokens_to_generate = min_seq_length - prompt_token_count
+
+            # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
+            scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
+
             # If max_tokens is specified, use the smaller of the two
-            max_tokens_to_generate = min(filter(None, [max_tokens_to_generate, max_tokens]))
+            max_tokens_to_generate = min(filter(None, [max_tokens_to_generate, scaled_max_tokens]))
 
             if max_tokens_to_generate < 1:
                 if raise_errors():
@@ -307,6 +319,7 @@ class HFLLM(BaseHFLLM):
         # Explicit name for the `name` property:
         checkpoint_name: str | None = None,
         # HFLLM parameters:
+        bytes_per_token: float | None = None,
         **kwargs: Any,
     ) -> None:
         final_path, possible_name = self._get_final_checkpoint(checkpoint_path, model_name, artifact_name)
@@ -322,6 +335,7 @@ class HFLLM(BaseHFLLM):
 
         super().__init__(
             formatter=final_formatter,
+            bytes_per_token=bytes_per_token,
             **kwargs,
         )
 
