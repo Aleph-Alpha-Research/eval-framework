@@ -19,7 +19,6 @@ def judge() -> BaseLLM:
     return Qwen3_0_6B()
 
 
-@pytest.mark.external_api
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "language, instruction, completion",
@@ -40,7 +39,6 @@ def test_format_following_grader(language: Language, instruction: str, completio
     assert output.format_correctness in [0, 1]
 
 
-@pytest.mark.external_api
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "language, instruction, completion",
@@ -73,7 +71,6 @@ def test_instruction_grader(language: Language, instruction: str, completion: st
     assert output.is_safe is True
 
 
-@pytest.mark.external_api
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "language, completion, expected",
@@ -90,7 +87,6 @@ def test_chatbot_style_grader(language: Language, completion: str, expected: boo
     assert output.is_chatbot_style == expected
 
 
-@pytest.mark.external_api
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "language, instruction, completion_1, completion_2, expected",
@@ -121,7 +117,6 @@ def test_comparison_grader(
     assert output.outcome == expected
 
 
-@pytest.mark.external_api
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "language, instruction, completion, expected",
@@ -151,7 +146,6 @@ def test_conciseness_grader(
     assert output.is_concise == expected
 
 
-@pytest.mark.external_api
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "language, completion, expected",
@@ -167,7 +161,6 @@ def test_contains_names_grader(language: Language, completion: str, expected: bo
     assert output.contains_names == expected
 
 
-@pytest.mark.external_api
 @pytest.mark.gpu
 @pytest.mark.parametrize(
     "language, completion, expected",
