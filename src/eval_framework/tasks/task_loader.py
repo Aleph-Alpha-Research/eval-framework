@@ -53,6 +53,7 @@ def load_extra_tasks(module_paths: Sequence[str | os.PathLike]) -> None:
     in the TaskName enum for use by name.
     Provides clear error messages for missing/invalid files or import errors.
     """
+    assert not (isinstance(module_paths, str)), "module_paths must be a sequence of strings / os.PathLike objects"
     for file_path in find_all_python_files(*module_paths):
         user_module = import_file(file_path)
 

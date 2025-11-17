@@ -52,7 +52,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         required=False,
         help=(
-            "Either a full import path for a model (e.g., `eval_framework.huggingface.HFLLM`) or the "
+            "Either a full import path for a model (e.g., `eval_framework.llm.huggingface.HFLLM`) or the "
             "name of a class derived from `eval_framework.llm.base.BaseLLM` that can be found in the "
             "models file. The resulting model is instantiated with the arguments provided via `--llm-args`."
         ),
@@ -219,7 +219,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         required=False,
         help=(
-            "Either a full import path for a judge (e.g., `eval_framework.huggingface.HFLLM`) or the "
+            "Either a full import path for a judge (e.g., `eval_framework.llm.huggingface.HFLLM`) or the "
             "name of a class derived from `eval_framework.llm.base.BaseLLM` that can be found in the "
             "models file. The resulting judge model is instantiated with the arguments provided via "
             "`--judge-model-args`."
