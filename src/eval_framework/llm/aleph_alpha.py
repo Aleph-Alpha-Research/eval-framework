@@ -50,6 +50,7 @@ class AlephAlphaAPIModel(BaseLLM):
         self,
         formatter: BaseFormatter | None = None,
         checkpoint_name: str | None = None,
+        temperature: float | None = None,
         # Please see README.md for tips if adapting the following parameters.
         max_retries: int = 100,
         max_async_concurrent_requests: int = 32,
@@ -65,6 +66,7 @@ class AlephAlphaAPIModel(BaseLLM):
         else:
             self._formatter = formatter
         self._llm_name = checkpoint_name or self.LLM_NAME
+        self._temperature = temperature if temperature is not None else 0.0
         self.max_async_concurrent_requests = max_async_concurrent_requests
         self.max_retries = max_retries
         self.request_timeout_seconds = request_timeout_seconds
@@ -249,13 +251,7 @@ class AlephAlphaAPIModel(BaseLLM):
         max_tokens: int | None = None,
         temperature: float | None = None,
     ) -> list[RawCompletion]:
-        if temperature is None:
-            effective_temperature = 0.0  # Current default, TODO: refactor to use model's default
-            logger.info(
-                f"Using default temperature value: {effective_temperature} as no custom temperature value was provided"
-            )
-        else:
-            effective_temperature = temperature
+        effective_temperature = temperature if temperature is not None else self._temperature
 
         requests = []
 

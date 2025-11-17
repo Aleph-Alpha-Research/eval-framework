@@ -1,6 +1,24 @@
 # Changelog
 
-## 0.2.4
+## Unreleased: 0.2.4-dev
+
+### Models
+
+- Cleaned up `OpenAIModel` class. Those models can now also be evaluated and not only used as judges. Loglikelihood evaluation requests are now implemented (although only supported by a limited number of OpenAI models). Implemented tests for `OpenAIModel` calls. Added concurrency to completion calls
+- Added access to Deepseek model API
+
+### Tasks
+
+### Metrics
+
+### General
+
+- Added documentation on `SQUAD` and `SQUAD2` benchmark classes
+- Updated documentation on lists of available tasks
+- added `.vscode/launch.json`
+- Corrected typo in prompt template for llm judge, and implemented tests to ensure llm prompt keys are always what we expect (no typos)
+
+## 0.2.3
 
 ### Models
 
@@ -22,33 +40,6 @@
 - Added `DistributionalCorrectnessScore`, based on Burns (2025) Measuring Language Model Hallucinations Through Distributional Correctness.
 - Added `TernaryScore`, based on Kalai et al. (2025) Why language models hallucinate. arXiv:2509.04664.
 - `JsonFormat`: added optional `exact_match` score based on whether the generated JSON object equals an expected ground-truth object.
-
-### General
-
-- Corrected typo in prompt template for llm judge, and implemented tests to ensure llm prompt keys are always what we expect (no typos)
-
-## 0.2.3
-
-- Added `WANDB_ADDITIONAL_ARTIFACT_REFERENCES` environment variable to reference custom artifacts in W&B.
-- Added `resource-cleanup` argument to run.py; enabling a smooth transition in GPU workflows between response generation/evaluation.
-- Added `WandbUploader` (for uploading results as W&B artifacts) and refactored `HFUploader` (no change in functionality).
-- Config hashes in output directories now do not consider config elements which are irrelevant to actual results.
-- Fix: WandB initialization does not crash on overly long model names anymore.
-- Fix: "Object of type Role is not JSON serializable" type of errors were fixed.
-- Updated examples in the docs to use the updated args and switched default tests to MMLU for more insightful metrics.
-- Fix: W&B integration respects WANDB_ARTIFACT_DIR. In addition, new env var WANDB_CACHE_SKIP controls cache use.
-- Dropped support for S3 storages without proper SSL certificates.
-- Added support for W&B artifacts on local storage which don't need to be downloaded and may be earlier available.
-- Fix: `pip install eval_framework[all]` uses uv to fix `ResolveTooDeep` dependency resolver errors.
-- Added a CI workflow to test uv and pip installs (CPU only and GPU for VLLM) and avoid trigger with .md changes.
-- Updated the CI workflow graph to decouple CPU only test and full test suite with GPU: cpu tests dont wait for docker build.
-- Changed implementation of OpenBookQA to be openbook (gives facts in prompt). Old version is available as task OPENBOOKQA_EVAL_HANRESS
-- Added a class variable "BYTES_PER_TOKEN" that controls token fertility to allow max_tokens in dataset to be model-specific.
-- Changed implementation of OpenBookQA to be openbook (gives facts in prompt). Old version is available as OPENBOOKQA_EVAL_HANRESS task
-- Added automated Docker image versioning in release workflow. Docker images are now tagged with `v{major}.{minor}.{patch}`, `v{major}.{minor}`, and `latest` on each release for reproducible deployments.
-- Added Docker guide (`docs/docker_guide.md`) for both AA users and external contributors.
-- Added template formatting tests to be run by CI.
-- Restructured tests to "test_eval_framework" and "tests_template_formatting".
 
 ## 0.2.2
 
