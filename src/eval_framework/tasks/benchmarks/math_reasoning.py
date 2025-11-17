@@ -430,6 +430,17 @@ class MATH(MATHReasoning):
     ]
     LANGUAGE = Language.ENG
 
+    # Adapted from https://github.com/openai/simple-evals/blob/main/math_eval.py
+    QUERY_TEMPLATE = """
+    Solve the following math problem step by step. The last line of your response should be of the form Answer: $ANSWER (without quotes) where $ANSWER is the answer to the problem.
+
+    {Question}
+
+    Remember to put your answer in $\\boxed{{answer}}$
+
+    where [answer] is just the final number or expression that solves the problem.
+    """.strip()  # noqa: E501
+
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
         self.stop_sequences = ["\nProblem:", "\nProblem", "\n\nProblem:", "\n\nProblem"]
