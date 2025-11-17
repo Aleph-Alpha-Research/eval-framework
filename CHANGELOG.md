@@ -11,12 +11,12 @@
 
 ### Metrics
 
-
 ### General
 
 - Added documentation on `SQUAD` and `SQUAD2` benchmark classes
 - Updated documentation on lists of available tasks
 - added `.vscode/launch.json`
+- Corrected typo in prompt template key for a MTBench LLM-as-a-judge, and implemented tests to ensure these are always what we expect (no typos)
 
 ## 0.2.3
 

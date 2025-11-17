@@ -5,8 +5,13 @@ import pytest
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.base import MetricResult
-from eval_framework.metrics.llm.llm_judge_mtbench_pair import MTBenchJudgePair, MTBenchJudgePairMetricContext
+from eval_framework.metrics.llm.llm_judge_mtbench_pair import (
+    PAIR_JUDGE_PROMPTS_LIST,
+    MTBenchJudgePair,
+    MTBenchJudgePairMetricContext,
+)
 from eval_framework.metrics.llm.llm_judge_mtbench_single import (
+    SINGLE_JUDGE_PROMPTS_LIST,
     MTBenchJudgeSingle,
     MTBenchJudgeSingleMetricContext,
 )
@@ -128,3 +133,35 @@ def test_llm_judge_mtbench_pair_evaluate_prompt(
     singular_result = result[0]
     assert len(result) == 1
     assert (singular_result.error is not None) == should_error
+
+
+def test_prompt_scenarios_are_covered() -> None:
+    required_scenarios = [
+        ("single_turn", "without_reference"),
+        ("multi_turn", "without_reference"),
+        ("single_turn", "with_reference"),
+        ("multi_turn", "with_reference"),
+    ]
+
+    def check_scenarios_coverage(prompt_sets: list[dict[str, dict[str, str]]], judge_type: str) -> None:
+        covered_scenarios = set()
+
+        for prompt_set in prompt_sets:
+            assert len(prompt_set) > 0, f"Prompt set for {judge_type} is empty."
+
+            for key, prompt_data in prompt_set.items():
+                assert prompt_data.get("prompt_template") is not None, (
+                    f"Prompt template missing for key: {key} in {judge_type}"
+                )
+
+                turn = "multi_turn" if "multi_turn" in key else "single_turn"
+                reference = "with_reference" if "w_reference" in key else "without_reference"
+
+                covered_scenarios.add((turn, reference))
+
+        assert covered_scenarios == set(required_scenarios), (
+            f"Required {judge_type} scenarios not fully covered. Missing: {set(required_scenarios) - covered_scenarios}"
+        )
+
+    check_scenarios_coverage(SINGLE_JUDGE_PROMPTS_LIST, "Single Judge")
+    check_scenarios_coverage(PAIR_JUDGE_PROMPTS_LIST, "Pair Judge")
