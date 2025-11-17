@@ -248,7 +248,8 @@ def parse_args() -> argparse.Namespace:
         help=("Add this flag to remove the output directory after a successful upload to HF or WandB."),
     )
     parser.add_argument(
-        "-v", "--verbosity",
+        "-v",
+        "--verbosity",
         type=int,
         nargs="?",
         default=1,

@@ -31,10 +31,11 @@ from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import create_perturbation_class
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
+from eval_framework.utils.tqdm_handler import get_disable_bar_flag, safe_tqdm_write
 from template_formatting.formatter import Message, Role
-from eval_framework.utils.tqdm_handler import safe_tqdm_write, get_disable_bar_flag
 
 logger = logging.getLogger(__name__)
+
 
 def map_language_to_value(
     language: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None,
@@ -316,7 +317,9 @@ class ResponseGenerator:
             total_num_samples = sum(1 for _ in self.task.iterate_samples(None))
 
         samples_batch: list[Sample] = []
-        with tqdm(total=total_num_samples, desc=f"Processing {self.response_type.value}", disable=get_disable_bar_flag()) as pbar:
+        with tqdm(
+            total=total_num_samples, desc=f"Processing {self.response_type.value}", disable=get_disable_bar_flag()
+        ) as pbar:
             for i, sample in enumerate(self.task.iterate_samples(self.num_samples)):
                 subject = f" - Subject: {sample.subject}"
                 sample_index = i + 1

@@ -1,13 +1,13 @@
 import logging
 import sys
 from pathlib import Path
-from tqdm import tqdm
 
 VERBOSITY_MAP = {
     0: logging.CRITICAL,
     1: logging.INFO,
     2: logging.DEBUG,
 }
+
 
 def setup_logging(
     output_dir: Path | None = None, log_level: int = 1, log_filename: str = "evaluation.log"
@@ -25,7 +25,7 @@ def setup_logging(
     """
     # Map verbosity integer to logging level
     log_level = VERBOSITY_MAP.get(log_level, logging.INFO)
-    
+
     # Basic configuration
     logging.basicConfig(level=log_level)
 

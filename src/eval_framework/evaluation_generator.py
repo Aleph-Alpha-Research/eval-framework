@@ -20,7 +20,7 @@ from eval_framework.tasks.base import ResponseType
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import get_task
 from eval_framework.utils.constants import RED, RESET
-from eval_framework.utils.tqdm_handler import safe_tqdm_write, get_disable_bar_flag
+from eval_framework.utils.tqdm_handler import get_disable_bar_flag, safe_tqdm_write
 
 logger = logging.getLogger(__name__)
 
