@@ -6,6 +6,8 @@ repos:
       - id: pretty-format-json
         args:
           - --autofix
+          - --indent
+          - '4'
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/astral-sh/ruff-pre-commit
