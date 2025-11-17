@@ -483,7 +483,7 @@ class MATH(MATHReasoning):
         return self.QUERY_TEMPLATE.format(Question=item["problem"]) + "\n"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        return f"Answer: {item["solution"]}"
+        return f"Answer: {item['solution']}"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
         return self._extract_answer(item["solution"])
