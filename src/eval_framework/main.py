@@ -73,8 +73,9 @@ def main(
         mode=_wandb_mode(config.wandb_project),
         settings=wandb.Settings(disable_code=True),  # ("wandb-history" artifacts not needed)
     ) as run:
-        if hasattr(llm, "artifact"):
-            wandb.use_artifact(llm.artifact)
+        artifact = getattr(llm, "artifact", None)
+        if artifact is not None:
+            wandb.use_artifact(artifact)
         for additional_artifact in os.getenv("WANDB_ADDITIONAL_ARTIFACT_REFERENCES", "").split(","):
             if additional_artifact.strip():
                 wandb.use_artifact(additional_artifact.strip())
