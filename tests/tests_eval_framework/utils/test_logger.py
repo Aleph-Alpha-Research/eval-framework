@@ -1,7 +1,10 @@
 import logging
 from pathlib import Path
+
 from eval_framework.utils.logging import setup_logging
-from eval_framework.utils.tqdm_handler import safe_tqdm_write, get_disable_bar_flag, logger as tqdm_logger
+from eval_framework.utils.tqdm_handler import get_disable_bar_flag, safe_tqdm_write
+from eval_framework.utils.tqdm_handler import logger as tqdm_logger
+
 
 def test_logging_level(tmp_path: Path) -> None:
     """
@@ -16,6 +19,7 @@ def test_logging_level(tmp_path: Path) -> None:
 
     logger = setup_logging(output_dir=tmp_path, log_level=2)
     assert logger.level == logging.DEBUG
+
 
 def test_tqdm_logging(tmp_path: Path) -> None:
     """
