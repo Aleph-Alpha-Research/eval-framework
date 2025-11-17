@@ -80,14 +80,12 @@ def generate_pair_judge_prompts(response: Completion) -> list[PromptToJudge]:
         prompt_templates = PAIR_JUDGE_PROMPTS
     prompts_to_judge = []
 
-    context = extract_context_metric(response, MTBenchJudgePairMetricContext)
-
     assert context.category is not None, "Category must be provided in the context for MTBenchJudgePairMetricContext"
     assert context.answer is not None, "Answer must be provided in the context for MTBenchJudgePairMetricContext"
 
     # No reference answer needed
     if context.category not in NEED_REF_CATEGORIES:
-        # SINLGE TURN
+        # SINGLE TURN
         if len(response.messages) <= 2:
             # turn 1
             question = response.last_user_instruction
@@ -170,6 +168,11 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
     NAME = "pairwise_judgement"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
+        response_error = response.error
+        if response_error:
+            logger.info(f"Skipped LLM judge as completion already had an error {response_error}")
+            return []
+
         prompts_to_judge: list[PromptToJudge] = generate_pair_judge_prompts(response)
 
         all_metrics = []
