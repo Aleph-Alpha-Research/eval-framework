@@ -86,22 +86,25 @@ For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usa
 
 ### Core Capabilities
 
-| **Reasoning** | **Knowledge** | **Coding** | **Long Context** |
-|---------------|---------------|------------|------------------|
-| MMLU (57 subjects) | TriviaQA | HumanEval | InfiniteBench |
-| SQuAD v1/v2 | MBPP |
-| ARC | Natural Questions | CodeT5 | ZeroSCROLLS |
-| HellaSwag | QuAC | Programming | QuALITY |
-| Winogrande | COPA | Debugging  |
+Subset of core capabilities benchmarks coverd by `eval-framework`:
+
+| **Reasoning** | **Knowledge** | **Math** | **Coding** | **Structured outputs** | **Long Context** |
+|---------------|---------------|----------|------------|------------------------|------------------|
+| COPA | ARC | AIME | BigCodeBench | IFEval | InfiniteBench |
+| Hellaswag | MMLU | GSM8K | HumanEval | StructEval | QUALITY |
+| Winogrande | Openbook QA| MATH-500 | MBPP | | ZeroSCROLLS |
+
 
 ### Languages & Domains
 
-| **Multilingual** | **Specialized** | **Safety & Bias** | **Efficiency** |
+Subset of language-specific and domain-specific benchmarks coverd by `eval-framework`:
+
+| **Multilingual** | **Specialized** | **Safety & Bias** | **Efficiency Metrics** |
 |------------------|-----------------|-------------------|----------------|
-| WMT Translation | Legal (CaseHold) | TruthfulQA | Token counting |
-| FLORES-200 | Winogender | Latency metrics |
-| Multilingual MMLU | Medical (MedQA) | Stereotype detection | Memory usage |
-| German/Finnish tasks | Scientific (SciQ) | Harmful content | Cost analysis |
+| WMT Translation | MMLU | TruthfulQA | Compression ratios |
+| FLORES-200 | Legal (CaseHold) | Winogender | Runtime |
+| Multilingual MMLU | Scientific (SciQ) | | |
+| German/Finnish tasks |  | | |
 
 ### Completion
 

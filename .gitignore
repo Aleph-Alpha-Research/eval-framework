@@ -140,7 +140,7 @@ dmypy.json
 .pytype/
 
 # IDE
-.vscode/
+.vscode/settings.json
 Todo.json
 .idea/
 

@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased: 0.2.4-dev
+
+### Models
+
+- Cleaned up `OpenAIModel` class. Those models can now also be evaluated and not only used as judges. Loglikelihood evaluation requests are now implemented (although only supported by a limited number of OpenAI models). Implemented tests for `OpenAIModel` calls. Added concurrency to completion calls
+- Added access to Deepseek model API
+
+### Tasks
+
+### Metrics
+
+
+### General
+
+- Added documentation on `SQUAD` and `SQUAD2` benchmark classes
+- Updated documentation on lists of available tasks
+- added `.vscode/launch.json`
+
 ## 0.2.3
 
 ### Models

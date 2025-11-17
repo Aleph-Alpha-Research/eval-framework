@@ -1,6 +1,6 @@
 [project]
 name = "eval-framework"
-version = "0.2.3"
+version = "0.2.4-dev"
 description = "Evalulation Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -39,7 +39,7 @@ dependencies = [
   "jsonlines>=4,<5",
   "lxml>=6,<7",
   "python-iso639>=2025.2.18",
-  "wandb>=0.21.1,<1",
+  "wandb>=0.23.0,<1",
   "boto3>=1.40.54,<2",
 ]
 
@@ -51,8 +51,9 @@ determined = [
 ]
 api = ["aleph-alpha-client>=10,<11"]
 openai = [
-  "openai>=1.62,<2",
-  "tiktoken>=0.9,<0.10"
+  "openai>=1.62,<2.8",
+  "tiktoken>=0.9,<0.10",
+  "transformers>=4.45.2,<5",
 ]
 transformers = [
   "transformers>=4.45.2,<5",
@@ -149,6 +150,7 @@ select = [
     "UP", # Auto-upgrading of new Python features
     "I", # Sort imports
 ]
+
 [tool.ruff.lint.isort]
 # https://github.com/astral-sh/ruff-pre-commit/issues/121
 # https://github.com/astral-sh/ruff/issues/10519
