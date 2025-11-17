@@ -5,8 +5,13 @@ import pytest
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.base import MetricResult
-from eval_framework.metrics.llm.llm_judge_mtbench_pair import MTBenchJudgePair, MTBenchJudgePairMetricContext
+from eval_framework.metrics.llm.llm_judge_mtbench_pair import (
+    PAIR_JUDGE_PROMPTS_LIST,
+    MTBenchJudgePair,
+    MTBenchJudgePairMetricContext,
+)
 from eval_framework.metrics.llm.llm_judge_mtbench_single import (
+    SINGLE_JUDGE_PROMPTS_LIST,
     MTBenchJudgeSingle,
     MTBenchJudgeSingleMetricContext,
 )
@@ -128,3 +133,17 @@ def test_llm_judge_mtbench_pair_evaluate_prompt(
     singular_result = result[0]
     assert len(result) == 1
     assert (singular_result.error is not None) == should_error
+
+
+def test_prompt_keys() -> None:
+    single_judge_keys = ["single_assistant_single_turn", "single_assistant_single_turn_w_reference"]
+    for prompt_set in SINGLE_JUDGE_PROMPTS_LIST:
+        for key in prompt_set.keys():
+            assert key in single_judge_keys, f"Unexpected prompt key: {key}"
+            assert prompt_set["prompt_template"] is not None, "Prompt template should not be None"
+
+    multi_judge_keys = ["pair_assistant_single_turn", "pair_assistant_single_turn_w_reference"]
+    for prompt_set in PAIR_JUDGE_PROMPTS_LIST:
+        for key in prompt_set.keys():
+            assert key in multi_judge_keys, f"Unexpected prompt key: {key}"
+            assert prompt_set["prompt_template"] is not None, "Prompt template should not be None"

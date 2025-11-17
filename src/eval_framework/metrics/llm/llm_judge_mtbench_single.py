@@ -55,6 +55,11 @@ SINGLE_JUDGE_PROMPTS_FI = {
 }
 
 NEED_REF_CATEGORIES = ["math", "reasoning", "coding", "arena-hard-200"]
+SINGLE_JUDGE_PROMPTS_LIST = [
+    SINGLE_JUDGE_PROMPTS,
+    SINGLE_JUDGE_PROMPTS_DE,
+    SINGLE_JUDGE_PROMPTS_FI,
+]
 
 
 class PromptToJudge(BaseModel):
