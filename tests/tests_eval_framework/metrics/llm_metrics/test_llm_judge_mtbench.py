@@ -143,22 +143,25 @@ def test_prompt_scenarios_are_covered() -> None:
         ("multi_turn", "with_reference"),
     ]
 
-    def check_scenarios_coverage(prompt_sets, judge_type):
+    def check_scenarios_coverage(prompt_sets: list[dict[str, dict[str, str]]], judge_type: str) -> None:
         covered_scenarios = set()
-        
+
         for prompt_set in prompt_sets:
             assert len(prompt_set) > 0, f"Prompt set for {judge_type} is empty."
-            
+
             for key, prompt_data in prompt_set.items():
-                assert prompt_data.get("prompt_template") is not None, f"Prompt template missing for key: {key} in {judge_type}"
-                
+                assert prompt_data.get("prompt_template") is not None, (
+                    f"Prompt template missing for key: {key} in {judge_type}"
+                )
+
                 turn = "multi_turn" if "multi_turn" in key else "single_turn"
                 reference = "with_reference" if "w_reference" in key else "without_reference"
-                
+
                 covered_scenarios.add((turn, reference))
 
-        assert covered_scenarios == set(required_scenarios), \
+        assert covered_scenarios == set(required_scenarios), (
             f"Required {judge_type} scenarios not fully covered. Missing: {set(required_scenarios) - covered_scenarios}"
+        )
 
     check_scenarios_coverage(SINGLE_JUDGE_PROMPTS_LIST, "Single Judge")
     check_scenarios_coverage(PAIR_JUDGE_PROMPTS_LIST, "Pair Judge")
