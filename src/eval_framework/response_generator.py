@@ -32,9 +32,9 @@ from eval_framework.tasks.perturbation import create_perturbation_class
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
 from template_formatting.formatter import Message, Role
+from eval_framework.utils.tqdm_handler import safe_tqdm_write, get_disable_bar_flag
 
 logger = logging.getLogger(__name__)
-
 
 def map_language_to_value(
     language: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None,
@@ -295,7 +295,7 @@ class ResponseGenerator:
             if len(samples_batch) > 1:
                 log_msg = "Processing batch..."
                 logger.info(log_msg)  # For log files
-                tqdm.write(log_msg)  # For console display with tqdm
+                safe_tqdm_write(log_msg)  # For console display with tqdm
 
             responses_batch = generative_output_function(samples_batch)
             responses.extend(responses_batch)
@@ -316,7 +316,7 @@ class ResponseGenerator:
             total_num_samples = sum(1 for _ in self.task.iterate_samples(None))
 
         samples_batch: list[Sample] = []
-        with tqdm(total=total_num_samples, desc=f"Processing {self.response_type.value}") as pbar:
+        with tqdm(total=total_num_samples, desc=f"Processing {self.response_type.value}", disable=get_disable_bar_flag()) as pbar:
             for i, sample in enumerate(self.task.iterate_samples(self.num_samples)):
                 subject = f" - Subject: {sample.subject}"
                 sample_index = i + 1
@@ -326,13 +326,13 @@ class ResponseGenerator:
                         f"Task: {self.response_type.value}{subject} - Sample: {sample_index} - skipping, already done."
                     )
                     logger.info(log_msg)  # For log files
-                    tqdm.write(log_msg)  # For console display with tqdm
+                    safe_tqdm_write(log_msg)  # For console display with tqdm
                     pbar.update(1)
                     continue
 
                 log_msg = f"Task: {self.response_type.value}{subject} - Sample: {sample_index}/{total_num_samples}"
                 logger.info(log_msg)  # For log files
-                tqdm.write(log_msg)  # For console display with tqdm
+                safe_tqdm_write(log_msg)  # For console display with tqdm
                 pbar.set_postfix_str(f"Sample {sample_index}/{total_num_samples}")
                 pbar.update(1)
 
@@ -345,7 +345,7 @@ class ResponseGenerator:
                 if should_preempt_callable():
                     log_msg = "Preempt"
                     logger.info(log_msg)  # For log files
-                    tqdm.write(log_msg)  # For console display with tqdm
+                    safe_tqdm_write(log_msg)  # For console display with tqdm
                     if not self.save_intermediate_results:
                         self.result_processor.save_responses(responses)
                     return responses, True

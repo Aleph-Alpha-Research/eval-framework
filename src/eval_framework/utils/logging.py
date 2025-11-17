@@ -1,10 +1,16 @@
 import logging
 import sys
 from pathlib import Path
+from tqdm import tqdm
 
+VERBOSITY_MAP = {
+    0: logging.CRITICAL,
+    1: logging.INFO,
+    2: logging.DEBUG,
+}
 
 def setup_logging(
-    output_dir: Path | None = None, log_level: int = logging.INFO, log_filename: str = "evaluation.log"
+    output_dir: Path | None = None, log_level: int = 1, log_filename: str = "evaluation.log"
 ) -> logging.Logger:
     """
     Set up centralized logging configuration for the entire framework.
@@ -17,6 +23,12 @@ def setup_logging(
     Returns:
         Configured root logger
     """
+    # Map verbosity integer to logging level
+    log_level = VERBOSITY_MAP.get(log_level, logging.INFO)
+    
+    # Basic configuration
+    logging.basicConfig(level=log_level)
+
     # Create formatter
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
@@ -45,6 +57,6 @@ def setup_logging(
     else:
         root_logger.info("Logging configured (console only)")
 
-    print(f"Output directory for logs: {output_dir if output_dir else 'None'}")
+    root_logger.info(f"Output directory for logs: {output_dir if output_dir else 'None'}")
 
     return root_logger

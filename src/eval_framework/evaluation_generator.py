@@ -20,6 +20,7 @@ from eval_framework.tasks.base import ResponseType
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import get_task
 from eval_framework.utils.constants import RED, RESET
+from eval_framework.utils.tqdm_handler import safe_tqdm_write, get_disable_bar_flag
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +72,8 @@ class EvaluationGenerator:
                 metric = metric_class()
 
             logger.info(f"Starting calculation of {metric.NAME}")
-            tqdm.write(f"INFO: Calculating {metric.NAME}")
-            for response in tqdm(responses, desc=f"Calculating {metric.NAME}"):
+            safe_tqdm_write(f"INFO: Calculating {metric.NAME}")
+            for response in tqdm(responses, desc=f"Calculating {metric.NAME}", disable=get_disable_bar_flag()):
                 if f"{response.subject}_{response.id}_{metric.__class__.__name__}" in subject_result_id_existing:
                     continue
 
@@ -109,7 +110,7 @@ class EvaluationGenerator:
                         self.result_processor.save_metrics_result(result)
 
             logger.info(f"Completed calculation of {metric.NAME}")
-            tqdm.write(f"INFO: Completed {metric.NAME}")
+            safe_tqdm_write(f"INFO: Completed {metric.NAME}")
 
         if not self.save_intermediate_results:
             self.result_processor.save_metrics_results(results)
