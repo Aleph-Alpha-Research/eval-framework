@@ -11,12 +11,12 @@
 
 ### Metrics
 
-
 ### General
 
 - Added documentation on `SQUAD` and `SQUAD2` benchmark classes
 - Updated documentation on lists of available tasks
-- added `.vscode/launch.json`
+- Added `.vscode/launch.json`
+- Added `llm_judge_prompt` and `llm_judge_response` to MTBENCH metric results
 
 ## 0.2.3
 
