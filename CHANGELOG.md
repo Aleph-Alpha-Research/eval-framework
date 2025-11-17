@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased: 0.2.3-dev
+## Unreleased: 0.2.4-dev
 
 ### Models
 
@@ -22,6 +22,12 @@
 - Added `DistributionalCorrectnessScore`, based on Burns (2025) Measuring Language Model Hallucinations Through Distributional Correctness.
 - Added `TernaryScore`, based on Kalai et al. (2025) Why language models hallucinate. arXiv:2509.04664.
 - `JsonFormat`: added optional `exact_match` score based on whether the generated JSON object equals an expected ground-truth object.
+
+## General
+
+- Added verbosity levels (0 is critical, 1 is info, 2 is debug) for minimal output
+
+## 0.2.3
 
 ### General
 
