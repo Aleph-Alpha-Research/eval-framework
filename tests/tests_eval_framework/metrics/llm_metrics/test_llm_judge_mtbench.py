@@ -135,25 +135,30 @@ def test_llm_judge_mtbench_pair_evaluate_prompt(
     assert (singular_result.error is not None) == should_error
 
 
-def test_prompt_keys() -> None:
-    single_judge_keys = [
-        "single_assistant_single_turn",
-        "single_assistant_multi_turn",
-        "single_assistant_single_turn_w_reference",
-        "single_assistant_multi_turn_w_reference",
+def test_prompt_scenarios_are_covered() -> None:
+    required_scenarios = [
+        ("single_turn", "without_reference"),
+        ("multi_turn", "without_reference"),
+        ("single_turn", "with_reference"),
+        ("multi_turn", "with_reference"),
     ]
-    for prompt_set in SINGLE_JUDGE_PROMPTS_LIST:
-        for key in prompt_set.keys():
-            assert key in single_judge_keys, f"Unexpected prompt key: {key}"
-            assert prompt_set[key]["prompt_template"] is not None, "Prompt template should not be None"
 
-    multi_judge_keys = [
-        "pair_assistant_single_turn",
-        "pair_assistant_multi_turn",
-        "pair_assistant_single_turn_w_reference",
-        "pair_assistant_multi_turn_w_reference",
-    ]
-    for prompt_set in PAIR_JUDGE_PROMPTS_LIST:
-        for key in prompt_set.keys():
-            assert key in multi_judge_keys, f"Unexpected prompt key: {key}"
-            assert prompt_set[key]["prompt_template"] is not None, "Prompt template should not be None"
+    def check_scenarios_coverage(prompt_sets, judge_type):
+        covered_scenarios = set()
+        
+        for prompt_set in prompt_sets:
+            assert len(prompt_set) > 0, f"Prompt set for {judge_type} is empty."
+            
+            for key, prompt_data in prompt_set.items():
+                assert prompt_data.get("prompt_template") is not None, f"Prompt template missing for key: {key} in {judge_type}"
+                
+                turn = "multi_turn" if "multi_turn" in key else "single_turn"
+                reference = "with_reference" if "w_reference" in key else "without_reference"
+                
+                covered_scenarios.add((turn, reference))
+
+        assert covered_scenarios == set(required_scenarios), \
+            f"Required {judge_type} scenarios not fully covered. Missing: {set(required_scenarios) - covered_scenarios}"
+
+    check_scenarios_coverage(SINGLE_JUDGE_PROMPTS_LIST, "Single Judge")
+    check_scenarios_coverage(PAIR_JUDGE_PROMPTS_LIST, "Pair Judge")
