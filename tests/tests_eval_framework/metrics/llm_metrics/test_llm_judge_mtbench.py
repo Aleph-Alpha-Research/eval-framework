@@ -136,14 +136,24 @@ def test_llm_judge_mtbench_pair_evaluate_prompt(
 
 
 def test_prompt_keys() -> None:
-    single_judge_keys = ["single_assistant_single_turn", "single_assistant_single_turn_w_reference"]
+    single_judge_keys = [
+        "single_assistant_single_turn",
+        "single_assistant_multi_turn",
+        "single_assistant_single_turn_w_reference",
+        "single_assistant_multi_turn_w_reference",
+    ]
     for prompt_set in SINGLE_JUDGE_PROMPTS_LIST:
         for key in prompt_set.keys():
             assert key in single_judge_keys, f"Unexpected prompt key: {key}"
-            assert prompt_set["prompt_template"] is not None, "Prompt template should not be None"
+            assert prompt_set[key]["prompt_template"] is not None, "Prompt template should not be None"
 
-    multi_judge_keys = ["pair_assistant_single_turn", "pair_assistant_single_turn_w_reference"]
+    multi_judge_keys = [
+        "pair_assistant_single_turn",
+        "pair_assistant_multi_turn",
+        "pair_assistant_single_turn_w_reference",
+        "pair_assistant_multi_turn_w_reference",
+    ]
     for prompt_set in PAIR_JUDGE_PROMPTS_LIST:
         for key in prompt_set.keys():
             assert key in multi_judge_keys, f"Unexpected prompt key: {key}"
-            assert prompt_set["prompt_template"] is not None, "Prompt template should not be None"
+            assert prompt_set[key]["prompt_template"] is not None, "Prompt template should not be None"
