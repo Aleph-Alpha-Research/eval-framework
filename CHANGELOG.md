@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.3
+## 0.2.4
 
 ### Models
 
@@ -24,6 +24,10 @@
 - `JsonFormat`: added optional `exact_match` score based on whether the generated JSON object equals an expected ground-truth object.
 
 ### General
+
+- Corrected typo in prompt template for llm judge, and implemented tests to ensure llm prompt keys are always what we expect (no typos)
+
+## 0.2.3
 
 - Added `WANDB_ADDITIONAL_ARTIFACT_REFERENCES` environment variable to reference custom artifacts in W&B.
 - Added `resource-cleanup` argument to run.py; enabling a smooth transition in GPU workflows between response generation/evaluation.
