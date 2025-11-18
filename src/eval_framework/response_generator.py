@@ -23,7 +23,6 @@ from eval_framework.shared.types import (
     Completion,
     Error,
     Loglikelihood,
-    RawCompletion,
     RawLoglikelihood,
 )
 from eval_framework.tasks.base import Language, ResponseType, Sample
@@ -31,7 +30,6 @@ from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import create_perturbation_class
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
-from template_formatting.formatter import Message, Role
 
 logger = logging.getLogger(__name__)
 
@@ -96,81 +94,6 @@ class ResponseGenerator:
         stop_sequences = sorted(list(set(stop_sequences_merged))) if stop_sequences_merged else None
         logger.info(f"Set stop_sequences to {stop_sequences}")
         return stop_sequences, max_tokens
-
-    def _generate_completions(
-        self,
-        samples: list[Sample],
-        stop_sequences: list[str] | None = None,
-        max_tokens: int | None = None,
-    ) -> list[Completion]:
-        """
-        Generates completions for the sample.
-        :param sample: sample to generate completions for
-        :param stop_sequences: stop sequences to use in completion generation
-        :param max_tokens: maximum tokens to use in completion generation
-        :return: completion
-        """
-        if stop_sequences is None:
-            stop_sequences = []
-
-        raw_completions: list[RawCompletion]
-        try:
-            raw_completions = self.llm.generate(samples=samples, stop_sequences=stop_sequences, max_tokens=max_tokens)
-        except Exception as e:
-            if raise_errors():
-                raise e
-            logger.info(f"Error: {e.__class__.__name__} {e}")
-            assert len(samples) == 1, "LLMs not handling errors are not supported in batch mode"
-            raw_completions = [
-                RawCompletion(
-                    prompt="",
-                    prompt_sequence_positions=0,
-                    completion="",
-                    completion_sequence_positions=0,
-                    raw_completion_error=Error(
-                        error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc()
-                    ),
-                )
-                for _ in range(len(samples))
-            ]
-
-        completion_list = []
-        for idx, sample in enumerate(samples):
-            raw_completion = raw_completions[idx]
-
-            if sample.messages and sample.messages[-1].role == Role.ASSISTANT:
-                messages = sample.messages[:-1] + [
-                    Message(role=Role.ASSISTANT, content=sample.messages[-1].content + raw_completion.completion)
-                ]
-            else:
-                messages = sample.messages + [Message(role=Role.ASSISTANT, content=raw_completion.completion)]
-
-            try:
-                error = None
-                model_post_processed_completion = self.llm.post_process_completion(raw_completion.completion, sample)
-                completion = self.task.post_process_generated_completion(model_post_processed_completion, sample)
-            except Exception as e:
-                error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
-                completion = ""
-
-            completion_list.append(
-                Completion(
-                    id=sample.id,
-                    subject=sample.subject,
-                    ground_truth=sample.ground_truth,
-                    prompt=raw_completion.prompt,
-                    prompt_sequence_positions=raw_completion.prompt_sequence_positions,
-                    concat_compression=raw_completion.concat_compression,
-                    messages=messages,
-                    completion=completion,
-                    raw_completion=raw_completion.completion,
-                    raw_completion_sequence_positions=raw_completion.completion_sequence_positions,
-                    context=sample.context,
-                    error=raw_completion.raw_completion_error or error,
-                )
-            )
-
-        return completion_list
 
     def _generate_loglikelihoods(self, samples: list[Sample]) -> list[Loglikelihood]:
         """
