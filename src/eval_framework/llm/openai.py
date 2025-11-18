@@ -10,7 +10,7 @@ from openai import OpenAI
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import ConcatCompression, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, Message, Role
+from template_formatting.formatter import BaseFormatter, Message, Role
 
 logger = logging.getLogger(__name__)
 
@@ -226,9 +226,10 @@ class OpenAIEmbeddingModel(BaseLLM):
             organization: Optional organization ID
             base_url: Optional API base URL for Azure or other endpoints
         """
+        if formatter is not None:
+            raise ValueError("Formatter is not supported for embedding model.")
         self._model_name = model_name
         logger.info(f"Using {model_name} as embedding model")
-        self._formatter = formatter if formatter else ConcatFormatter()
         self._client = OpenAI(
             api_key=api_key or os.getenv("OPENAI_API_KEY", ""),
             organization=organization,
@@ -245,13 +246,13 @@ class OpenAIEmbeddingModel(BaseLLM):
         assert (stop_sequences, max_tokens, temperature) == (None, None, None), (
             "These parameters are not used for embeddings."
         )
-        embedddings = []
+        embeddings = []
         for single_messages in messages:
-            prompt = self._formatter.format(single_messages, output_mode="string")
+            prompt = "".join([m.content for m in single_messages])
             response = self._client.embeddings.create(model=self._model_name, input=[prompt])
             embedding = response.data[0].embedding
-            embedddings.append(embedding)
-        return embedddings
+            embeddings.append(embedding)
+        return embeddings
 
     def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         raise NotImplementedError("Embedding model cannot return logprobs.")

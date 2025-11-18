@@ -226,7 +226,9 @@ class ResponseGenerator:
         match self.response_type:
             case ResponseType.COMPLETION:
                 stop_sequences, max_tokens = self._llm_task_param_precedence()
-                return partial(self._generate_completions, stop_sequences=stop_sequences, max_tokens=max_tokens)  # type: ignore[call-arg]
+                return partial(
+                    self.task.generate_completions, self.llm, stop_sequences=stop_sequences, max_tokens=max_tokens
+                )  # type: ignore[call-arg]
             case ResponseType.LOGLIKELIHOODS:
                 return self._generate_loglikelihoods
             case _:

@@ -224,7 +224,6 @@ class EvaluationGenerator:
         aggregated_results = self._aggregate_results(metrics_results)
 
         wandb.log(aggregated_results)
-
         self.result_processor.save_aggregated_results(aggregated_results)
         logger.info(aggregated_results)
         logger.info(f"{RED}[ Evaluation completed and results saved! ]{RESET}")
