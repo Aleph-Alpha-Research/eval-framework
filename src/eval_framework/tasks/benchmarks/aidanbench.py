@@ -96,11 +96,11 @@ class AidanBench(BaseTask[str]):
 
     def _generation_loop(
         self, llm: "BaseLLM", stop_sequences: list[str] | None, max_tokens: int | None, initial_samples: list[Sample]
-    ) -> list[list[Message]]:
-        # TODO(johannes) error handling if the super call returns an error
+    ) -> tuple[list[list[Message]], list[Exception | None]]:
         initial_messages = [s.messages for s in initial_samples]
         samples = [(s, False) for s in initial_samples]  # (sample, is_done)
         message_history = [msg for msg in initial_messages]  # to keep track of all iterative model responses
+        errors = [None for _ in message_history]
         while not all(is_done for _, is_done in samples):
             # iterative generation loop
             not_done_idx = [i for i, (_, is_done) in enumerate(samples) if not is_done]
@@ -111,11 +111,13 @@ class AidanBench(BaseTask[str]):
                 max_tokens=max_tokens,
             )
             new_completion_messages = [c.messages for c in new_completions]
+            new_errors = [c.error for c in new_completions]
 
             new_samples = [s for s in samples]
-            for idx, completion_msgs in zip(not_done_idx, new_completion_messages):
+            for idx, (completion_msgs, error) in zip(not_done_idx, zip(new_completion_messages, new_errors)):
                 old_sample = samples[idx][0]
                 message_history[idx].append(completion_msgs[-1])  # add latest model response to history
+                errors[idx] = error
 
                 assert completion_msgs[0].role == Role.USER and completion_msgs[-1].role == Role.ASSISTANT
                 coherence_score = self._coherence_grader.grade(
@@ -142,7 +144,7 @@ class AidanBench(BaseTask[str]):
                     # Continue generating
                     new_samples[idx] = (new_sample, False)
             samples = new_samples
-        return message_history
+        return message_history, errors
 
     def generate_completions(
         self,
@@ -154,11 +156,12 @@ class AidanBench(BaseTask[str]):
         assert all(len(s.messages) == 1 and s.messages[0].role == Role.USER for s in samples), (
             "Each sample must have exactly one USER message."
         )
-        all_message_histories = self._generation_loop(llm, stop_sequences, max_tokens, samples)
+        all_message_histories, errors = self._generation_loop(llm, stop_sequences, max_tokens, samples)
 
         completion_list = []
         for idx, sample in enumerate(samples):
             messages = all_message_histories[idx]
+            error = errors[idx]
 
             completion_list.append(
                 Completion(
@@ -173,7 +176,7 @@ class AidanBench(BaseTask[str]):
                     raw_completion="".join([msg.content for msg in messages if msg.role == Role.ASSISTANT]),
                     raw_completion_sequence_positions=None,
                     context=sample.context,
-                    error=None,
+                    error=error,
                 )
             )
 
