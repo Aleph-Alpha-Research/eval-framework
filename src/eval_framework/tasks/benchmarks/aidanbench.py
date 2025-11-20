@@ -1,15 +1,19 @@
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
 from eval_framework.llm.openai import OpenAIEmbeddingModel, OpenAIModel
 from eval_framework.metrics.completion.aidanbench import AidanBenchMetric
 from eval_framework.metrics.llm.graders.coherence_grader import CoherenceGrader
+from eval_framework.metrics.llm.graders.language import Language as LLMLanguage
 from eval_framework.shared.types import Completion
-from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.base import NO_SUBJECT, BaseTask, ResponseType, Sample
+from eval_framework.tasks.base import Language as TaskLanguage
 from eval_framework.utils.helpers import pairwise_cosine_similarity
 from template_formatting.formatter import Message, Role
 
 if TYPE_CHECKING:
     from eval_framework.llm.base import BaseLLM
+    from eval_framework.shared.types import Error
 
 
 COHERENCE_THRESHOLD = 15
@@ -26,7 +30,7 @@ class AidanBench(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AidanBenchMetric]
     SUBJECTS = [NO_SUBJECT]
-    LANGUAGE = {NO_SUBJECT: Language.ENG}
+    LANGUAGE = {NO_SUBJECT: TaskLanguage.ENG}
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
@@ -53,18 +57,20 @@ class AidanBench(BaseTask[str]):
     def _calculate_novelty_score(self, messages: list[Message]) -> float:
         assert messages[0].role == Role.USER
         assert all(msg.role != Role.USER for msg in messages[1:]), "Only the first message should be from USER"
-        messages_without_instruction = messages[1:]
-        messages_without_instruction = [[m] for m in messages_without_instruction]  # input format for embedding model
+        messages_without_instruction_ = messages[1:]
+        messages_without_instruction: list[Sequence[Message]] = [
+            [m] for m in messages_without_instruction_
+        ]  # input format for embedding model
         if len(messages_without_instruction) == 1:
             return 1.0  # if there's only one response, it's by definition novel
-        all_embeddings = self._embedding_model.generate_from_messages(messages_without_instruction)
+        all_embeddings = self._embedding_model.generate_embeddings(messages_without_instruction)
         new_embedding = all_embeddings[-1]
         previous_embeddings = all_embeddings[:-1]
         similarities = pairwise_cosine_similarity([new_embedding], previous_embeddings)
         assert len(similarities) == 1
-        similarities = similarities[0]  # "squeeze"
-        assert len(similarities) == len(previous_embeddings)
-        return 1 - max(similarities)
+        similarities_squeezed = similarities[0]  # "squeeze"
+        assert len(similarities_squeezed) == len(previous_embeddings)
+        return 1 - max(similarities_squeezed)
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         return []
@@ -96,11 +102,11 @@ class AidanBench(BaseTask[str]):
 
     def _generation_loop(
         self, llm: "BaseLLM", stop_sequences: list[str] | None, max_tokens: int | None, initial_samples: list[Sample]
-    ) -> tuple[list[list[Message]], list[Exception | None]]:
+    ) -> tuple[list[list[Message]], list["Error" | None]]:
         initial_messages = [s.messages for s in initial_samples]
         samples = [(s, False) for s in initial_samples]  # (sample, is_done)
         message_history = [msg for msg in initial_messages]  # to keep track of all iterative model responses
-        errors = [None for _ in message_history]
+        errors: list[Error | None] = [None for _ in message_history]
         while not all(is_done for _, is_done in samples):
             # iterative generation loop
             not_done_idx = [i for i, (_, is_done) in enumerate(samples) if not is_done]
@@ -110,21 +116,24 @@ class AidanBench(BaseTask[str]):
                 stop_sequences=stop_sequences,
                 max_tokens=max_tokens,
             )
-            new_completion_messages = [c.messages for c in new_completions]
+            new_completion_messages: list[list[Message] | None] = [c.messages for c in new_completions]
             new_errors = [c.error for c in new_completions]
 
             new_samples = [s for s in samples]
-            for idx, (completion_msgs, error) in zip(not_done_idx, zip(new_completion_messages, new_errors)):
+            for idx, completion_msgs, error in zip(not_done_idx, new_completion_messages, new_errors):
                 old_sample = samples[idx][0]
-                message_history[idx].append(completion_msgs[-1])  # add latest model response to history
-                errors[idx] = error
+                if completion_msgs is not None:
+                    message_history[idx].append(completion_msgs[-1])  # add latest model response to history
+                    errors[idx] = error
 
-                assert completion_msgs[0].role == Role.USER and completion_msgs[-1].role == Role.ASSISTANT
-                coherence_score = self._coherence_grader.grade(
-                    instruction=old_sample.messages[0].content,  # only pass initial instruction
-                    completion=completion_msgs[-1].content,
-                    language=Language.ENG,
-                ).coherence_score
+                    assert completion_msgs[0].role == Role.USER and completion_msgs[-1].role == Role.ASSISTANT
+                    coherence_score = self._coherence_grader.grade(
+                        instruction=old_sample.messages[0].content,  # only pass initial instruction
+                        completion=completion_msgs[-1].content,
+                        language=LLMLanguage(iso_639_1="en"),
+                    ).coherence_score
+                else:
+                    coherence_score = 0  # if no completion, treat as non-coherent
 
                 novelty_score = self._calculate_novelty_score(message_history[idx])
 

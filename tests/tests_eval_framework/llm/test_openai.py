@@ -26,7 +26,7 @@ def test_openai_embedding_model():
         [Message(role=Role.USER, content="Different message to test embedding generation.")],
     ]
 
-    embeddings = model.generate_from_messages(messages)
+    embeddings = model.generate_embeddings(messages)
     assert len(embeddings) == len(messages)
 
     cosine_sims = pairwise_cosine_similarity(embeddings, embeddings)

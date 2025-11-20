@@ -300,10 +300,15 @@ class OpenAIEmbeddingModel(BaseLLM):
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
-    ) -> list[list[float]]:
-        assert (stop_sequences, max_tokens, temperature) == (None, None, None), (
-            "These parameters are not used for embeddings."
+    ) -> list[RawCompletion]:
+        raise NotImplementedError(
+            "Embedding model does not support generate_from_messages. Use generate_embeddings instead."
         )
+
+    def generate_embeddings(
+        self,
+        messages: list[Sequence[Message]],
+    ) -> list[list[float]]:
         embeddings = []
         for single_messages in messages:
             prompt = "".join([m.content for m in single_messages])

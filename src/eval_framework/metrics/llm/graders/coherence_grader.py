@@ -6,7 +6,6 @@ from eval_framework.metrics.llm.graders.language import Language
 from eval_framework.metrics.llm.graders.models import (
     GradingOutput,
     PromptTemplate,
-    PromptTemplateWithParseMap,
 )
 
 
@@ -77,7 +76,7 @@ Do not include any additional text in your response.""",  # noqa: E501
     def __init__(
         self,
         grading_model: BaseLLM,
-        prompt_templates: Mapping[Language, PromptTemplateWithParseMap] = PROMPT_TEMPLATES,
+        prompt_templates: Mapping[Language, PromptTemplate] = PROMPT_TEMPLATES,
     ) -> None:
         self._grading_model = grading_model
 
