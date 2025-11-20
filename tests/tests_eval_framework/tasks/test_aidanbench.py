@@ -54,7 +54,7 @@ def test_calculate_novelty_score_multiple_responses(mock_cosine_similarity):
 
     # Mock the embedding model
     mock_embedding_model = Mock()
-    mock_embedding_model.generate_from_messages.return_value = [
+    mock_embedding_model.generate_embeddings.return_value = [
         [0.1, 0.2, 0.3],  # First response embedding
         [0.4, 0.5, 0.6],  # Second response embedding
     ]
@@ -75,8 +75,8 @@ def test_calculate_novelty_score_multiple_responses(mock_cosine_similarity):
     assert abs(novelty - 0.2) < 1e-10
 
     # Verify the embedding model was called correctly
-    mock_embedding_model.generate_from_messages.assert_called_once()
-    call_args = mock_embedding_model.generate_from_messages.call_args[0][0]
+    mock_embedding_model.generate_embeddings.assert_called_once()
+    call_args = mock_embedding_model.generate_embeddings.call_args[0][0]
 
     # Should be called with [[assistant_msg1], [assistant_msg2]]
     assert len(call_args) == 2
@@ -272,7 +272,7 @@ def test_generation_loop_stops_on_low_coherence(mock_cosine_similarity):
 
     # Mock the embedding model (not used when stopping on coherence)
     mock_embedding_model = Mock()
-    mock_embedding_model.generate_from_messages.return_value = [[0.1, 0.2, 0.3]]
+    mock_embedding_model.generate_embeddings.return_value = [[0.1, 0.2, 0.3]]
     task._embedding_model = mock_embedding_model
 
     # Mock cosine similarity (not used in this case)
@@ -318,7 +318,7 @@ def test_generation_loop_stops_on_low_novelty(mock_cosine_similarity):
     task._coherence_grader.grade = Mock(return_value=mock_grader_result)
 
     # Mock the embedding model to return embeddings for novelty calculation
-    task._embedding_model.generate_from_messages = Mock(
+    task._embedding_model.generate_embeddings = Mock(
         return_value=[
             [0.1, 0.2, 0.3],  # First response embedding
             [0.1, 0.21, 0.31],  # Second response embedding (very similar)
@@ -375,7 +375,7 @@ def test_generation_loop_continues_with_high_coherence_and_novelty(mock_cosine_s
     task._coherence_grader.grade = Mock(side_effect=mock_coherence_grade)
 
     # Mock embedding model for novelty calculation
-    task._embedding_model.generate_from_messages = Mock(
+    task._embedding_model.generate_embeddings = Mock(
         return_value=[
             [0.1, 0.2, 0.3],  # Previous response embedding
             [0.7, 0.8, 0.9],  # New response embedding (very different)

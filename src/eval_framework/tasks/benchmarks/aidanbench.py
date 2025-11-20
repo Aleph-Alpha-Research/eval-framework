@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Union
 
 from eval_framework.metrics.completion.aidanbench import AidanBenchMetric
 from eval_framework.metrics.llm.graders.coherence_grader import CoherenceGrader
@@ -36,7 +36,7 @@ class AidanBench(BaseTask[str]):
 
         super().__init__(num_fewshot)
         assert num_fewshot == 0, "AidanBench does not support few-shot prompting."
-        self._coherence_grader = CoherenceGrader(grading_model=OpenAIModel())
+        self._coherence_grader = CoherenceGrader(grading_model=OpenAIModel(model_name="gpt-4o-mini"))
         self._embedding_model = OpenAIEmbeddingModel()
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -103,7 +103,7 @@ class AidanBench(BaseTask[str]):
 
     def _generation_loop(
         self, llm: "BaseLLM", stop_sequences: list[str] | None, max_tokens: int | None, initial_samples: list[Sample]
-    ) -> tuple[list[list[Message]], list["Error" | None]]:
+    ) -> tuple[list[list[Message]], list[Union["Error", None]]]:
         initial_messages = [s.messages for s in initial_samples]
         samples = [(s, False) for s in initial_samples]  # (sample, is_done)
         message_history = [msg for msg in initial_messages]  # to keep track of all iterative model responses
