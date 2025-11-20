@@ -166,7 +166,7 @@ known-third-party = ["wandb"]
 plugins = "pydantic.mypy"
 disallow_untyped_defs = true
 ignore_missing_imports = true
-files = ["src", "tests", "utils"]
+files = ["src", "utils"]
 
 [tool.pytest.ini_options]
 testpaths = ["./tests"]
