@@ -5,6 +5,11 @@ on:
     types: [published]
   workflow_dispatch:
 
+env:
+  REGISTRY: registry.gitlab.aleph-alpha.de
+  REPO_OWNER: research/public-registry
+  IMAGE_NAME: eval_framework
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -92,3 +97,46 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: false
           print-hash: true
+
+  # Deploy Docker images with version tags
+  deploy-docker:
+    if: github.event_name == 'release'
+    runs-on: cpu-runner-8c-32gb-01
+    container: docker:dind
+    needs: ["deploy-pypi"]
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG_NAME#v}
+          MAJOR_MINOR=$(echo $VERSION | cut -d. -f1-2)
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "major_minor=$MAJOR_MINOR" >> $GITHUB_OUTPUT
+
+      - name: Registry Authentication
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: token
+          password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
+
+      - name: Setup Docker BuildX
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and Push Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:v${{ steps.version.outputs.major_minor }}
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:v${{ steps.version.outputs.version }}
