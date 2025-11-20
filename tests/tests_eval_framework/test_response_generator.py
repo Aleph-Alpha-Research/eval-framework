@@ -56,14 +56,14 @@ def test_generate_completions_message_handling() -> None:
     llm.post_process_completion.side_effect = lambda completion, sample: completion
 
     # Execute and assert for case 1
-    completion_with_cue = generator.task.generate_completions([sample_with_cue])[0]
+    completion_with_cue = generator.task.generate_completions(llm, [sample_with_cue])[0]
     assert completion_with_cue.messages == [
         Message(role=Role.USER, content="Hello"),
         Message(role=Role.ASSISTANT, content="Cue: generated text"),
     ]
 
     # Execute and assert for case 2
-    completion_without_cue = generator.task.generate_completions([sample_without_cue])[0]
+    completion_without_cue = generator.task.generate_completions(llm, [sample_without_cue])[0]
     assert completion_without_cue.messages == [
         Message(role=Role.USER, content="Hello"),
         Message(role=Role.ASSISTANT, content="generated text"),
@@ -492,7 +492,7 @@ def test_response_generator_applies_model_then_task_post_processing(tmp_path: Pa
         ]
     )
 
-    completions = generator.task.generate_completions([sample])
+    completions = generator.task.generate_completions(llm, [sample])
 
     assert completions[0].raw_completion == "raw_answer"
     assert completions[0].completion == "TASK[MODEL[raw_answer]]"
