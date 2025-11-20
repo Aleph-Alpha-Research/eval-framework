@@ -1,7 +1,6 @@
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any
 
-from eval_framework.llm.openai import OpenAIEmbeddingModel, OpenAIModel
 from eval_framework.metrics.completion.aidanbench import AidanBenchMetric
 from eval_framework.metrics.llm.graders.coherence_grader import CoherenceGrader
 from eval_framework.metrics.llm.graders.language import Language as LLMLanguage
@@ -33,6 +32,8 @@ class AidanBench(BaseTask[str]):
     LANGUAGE = {NO_SUBJECT: TaskLanguage.ENG}
 
     def __init__(self, num_fewshot: int = 0) -> None:
+        from eval_framework.llm.openai import OpenAIEmbeddingModel, OpenAIModel
+
         super().__init__(num_fewshot)
         assert num_fewshot == 0, "AidanBench does not support few-shot prompting."
         self._coherence_grader = CoherenceGrader(grading_model=OpenAIModel())
