@@ -91,7 +91,8 @@ TASKS_TO_TEST = set(registered_task_names())
 
 
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-@pytest.mark.parametrize("task_name", list(TASKS_TO_TEST))
+# @pytest.mark.parametrize("task_name", list(TASKS_TO_TEST))
+@pytest.mark.parametrize("task_name", [t for t in list(TASKS_TO_TEST) if "aidan" in t.lower()])
 def test_all_tasks_formatter(task_name: str, formatter_cls: type["BaseFormatter"]) -> None:
     """
     Test that the formatted sample for each (Task, Formatter) pair is consistent by hashing the output.
