@@ -17,6 +17,7 @@
 - Added documentation on `SQUAD` and `SQUAD2` benchmark classes
 - Updated documentation on lists of available tasks
 - added `.vscode/launch.json`
+- Modified the Hendrycks Math task to use the same query template as MATH500 to encourage boxed answer formatting.
 
 ## 0.2.3
 
