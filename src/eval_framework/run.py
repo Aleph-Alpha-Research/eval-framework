@@ -247,11 +247,18 @@ def parse_args() -> argparse.Namespace:
         default=False,
         help=("Add this flag to remove the output directory after a successful upload to HF or WandB."),
     )
+    parser.add_argument(
+        "-v",
+        "--verbosity",
+        type=int,
+        nargs="?",
+        default=1,
+        choices=[0, 1, 2],
+        help="Set the logging verbosity level: 0=critical, 1=info, 2=debug",
+    )
 
     llm_args: dict[str, Any] = {}
     args = parser.parse_args()
-
-    print(args)
 
     for arg in args.llm_args:
         if "=" in arg:
@@ -288,7 +295,10 @@ def parse_args() -> argparse.Namespace:
 def run_with_kwargs(kwargs: dict) -> None:
     # Setup logging for the output directory
     output_dir = kwargs.get("output_dir", "results")
-    setup_logging(output_dir)
+    log_level = kwargs.get("verbosity", 1)
+    setup_logging(output_dir, log_level=log_level)
+
+    logger.info(kwargs)
 
     now = datetime.datetime.now()
     logger.info(f"starting time: {now}")
@@ -337,6 +347,7 @@ def run_with_kwargs(kwargs: dict) -> None:
             should_preempt_callable=ctx.should_preempt,
             trial_id=ctx.get_trial_id(),
             resource_cleanup=kwargs.pop("resource_cleanup", False),
+            verbosity=log_level,
         )
 
     logger.info(f"time since start: {datetime.datetime.now() - now}")

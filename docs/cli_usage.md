@@ -108,6 +108,9 @@ Whether to upload results as an artifact to Weights & Biases (default: True). Ne
 **`--description DESCRIPTION`**
 Description of the run. This will be added to the metadata of the run to help with bookkeeping.
 
+**`--verbosity VERBOSITY`**
+Set the logging verbosity level: 0=CRITICAL, 1=INFO, 2=DEBUG.
+
 ### Environment
 
 **`--context {local,determined}`**
