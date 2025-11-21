@@ -1,0 +1,27 @@
+from typing import Any
+
+from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.shared.types import BaseMetricContext, Completion
+
+
+class IFEvalMetricContext(BaseMetricContext):
+    key: int
+    instruction_id_list: list[str]
+    prompt: str
+    additional_kwargs: list[dict[str, Any]]
+
+
+class AidanBenchMetric(BaseMetric[Completion]):
+    NAME = "AidanBench"
+
+    def calculate(self, response: Completion) -> list[MetricResult]:
+        # subtract 2 to not count 1) initial instruction and 2) the latest model response, which caused the stop
+        # i.e. was not (unique && coherent)
+        num_unique_responses = len(response.messages) - 2 if response.messages is not None else 0
+        return [
+            MetricResult(
+                metric_name=f"{self.NAME}/num_responses",
+                value=num_unique_responses,
+                higher_is_better=True,
+            )
+        ]

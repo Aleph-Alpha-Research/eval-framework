@@ -264,6 +264,65 @@ class OpenAIModel(BaseLLM):
 
     def __del__(self) -> None:
         if hasattr(self, "_client"):
+            self._client.close()
+
+
+class OpenAIEmbeddingModel(BaseLLM):
+    def __init__(
+        self,
+        model_name: str = "text-embedding-3-large",
+        formatter: BaseFormatter | None = None,
+        api_key: str | None = None,
+        organization: str | None = None,
+        base_url: str | None = None,
+    ) -> None:
+        """Initialize OpenAI API client.
+        Args:
+            model_name: Name of the OpenAI model to use (e.g., "text-embedding-3-large")
+            formatter: Optional message formatter
+            api_key: OpenAI API key (defaults to OPENAI_API_KEY env variable)
+            organization: Optional organization ID
+            base_url: Optional API base URL for Azure or other endpoints
+        """
+        if formatter is not None:
+            raise ValueError("Formatter is not supported for embedding model.")
+        self._model_name = model_name
+        logger.info(f"Using {model_name} as embedding model")
+        self._client = OpenAI(
+            api_key=api_key or os.getenv("OPENAI_API_KEY", ""),
+            organization=organization,
+            base_url=base_url,
+        )
+
+    def generate_from_messages(
+        self,
+        messages: list[Sequence[Message]],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+    ) -> list[RawCompletion]:
+        raise NotImplementedError(
+            "Embedding model does not support generate_from_messages. Use generate_embeddings instead."
+        )
+
+    def generate_embeddings(
+        self,
+        messages: list[Sequence[Message]],
+    ) -> list[list[float]]:
+        embeddings = []
+        for single_messages in messages:
+            prompt = "".join([m.content for m in single_messages])
+            response = self._client.embeddings.create(model=self._model_name, input=[prompt])
+            embedding = response.data[0].embedding
+            embeddings.append(embedding)
+        return embeddings
+
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+        raise NotImplementedError("Embedding model cannot return logprobs.")
+
+    def __del__(self) -> None:
+        if hasattr(self, "_client"):
+            self._client.close()
             try:
                 self._client.close()
             except Exception:
