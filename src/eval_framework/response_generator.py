@@ -31,7 +31,6 @@ from eval_framework.tasks.perturbation import create_perturbation_class
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag, safe_tqdm_write
-from template_formatting.formatter import Message, Role
 
 logger = logging.getLogger(__name__)
 
