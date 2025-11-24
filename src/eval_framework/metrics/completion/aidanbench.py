@@ -1,14 +1,5 @@
-from typing import Any
-
 from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.shared.types import BaseMetricContext, Completion
-
-
-class IFEvalMetricContext(BaseMetricContext):
-    key: int
-    instruction_id_list: list[str]
-    prompt: str
-    additional_kwargs: list[dict[str, Any]]
+from eval_framework.shared.types import Completion
 
 
 class AidanBenchMetric(BaseMetric[Completion]):
