@@ -113,6 +113,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.sphyr.SPHYR")
     register_lazy_task("eval_framework.tasks.benchmarks.struct_eval.StructEval")
     register_lazy_task("eval_framework.tasks.benchmarks.struct_eval.RenderableStructEval")
+    register_lazy_task("eval_framework.tasks.benchmarks.aidanbench.AidanBench")
 
     try:
         # Importing the companion registers the additional tasks from the module.
