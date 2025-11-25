@@ -15,6 +15,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [ARC_EU20_FR](ARC_EU20_FR.md)
 - [ARC_FI](ARC_FI.md)
 - [AidanBench](AidanBench.md)
+- [AidanBenchOriginal](AidanBenchOriginal.md)
 - [BELEBELE](BELEBELE.md)
 - [BigCodeBench](BigCodeBench.md)
 - [BigCodeBenchHard](BigCodeBenchHard.md)

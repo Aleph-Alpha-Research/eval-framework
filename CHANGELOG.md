@@ -9,7 +9,7 @@
 
 ### Tasks
 
-- Added AidanBench benchmark: Measures creative divergent thinking by counting unique, coherent responses to open-ended questions.
+- Added AidanBench benchmark (measures creative divergent thinking by counting unique, coherent responses to open-ended questions) as well as AidanBenchOriginal (the same, but preserving a typo found in the original implementation).
 
 ### Metrics
 
