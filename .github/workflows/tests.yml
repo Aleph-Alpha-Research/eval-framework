@@ -226,13 +226,13 @@ jobs:
           set -e  # fail fast if any test fails
 
           echo "Testing vllm extra"
-          uv run --exact --extra vllm pytest -v --noconftest tests/installs/test_vllm.py
+          uv run --exact --extra vllm pytest -v --noconftest tests/tests_eval_framework/installs/test_vllm.py
 
           echo "Testing mistral extra"
-          uv run --exact --extra mistral pytest -v --noconftest tests/installs/test_mistral.py
+          uv run --exact --extra mistral pytest -v --noconftest tests/tests_eval_framework/installs/test_mistral.py
 
           echo "Testing all extras together"
-          uv run --exact --all-extras pytest -v --noconftest tests/installs/
+          uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
 
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
