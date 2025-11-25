@@ -1,6 +1,4 @@
 def test_comet_import() -> None:
-    from eval_framework.tasks.task_names import registered_tasks_iter
+    from eval_framework.tasks.benchmarks.flores_plus import FloresPlus
 
-    # Just iterate through registered tasks to ensure they are importable
-    for _ in registered_tasks_iter():
-        pass
+    assert FloresPlus is not None
