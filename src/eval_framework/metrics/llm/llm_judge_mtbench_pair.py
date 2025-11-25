@@ -193,7 +193,6 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
                 higher_is_better=True,
                 llm_judge_prompt=prompt_to_judge.prompt_text,
                 llm_judge_response=f"{output[0].completion}",  # unprocessed AI feedback
-                # llm_judge_response=f"OUTPUT: {output[0].completion}\n\nPARSED OUTPUT: {parsed_output}",
                 error=output[0].raw_completion_error,
             )
         except Exception as e:
