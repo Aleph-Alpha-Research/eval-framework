@@ -286,7 +286,8 @@ def test_generation_loop_stops_on_low_coherence(mock_cosine_similarity):
     ]
     mock_completion.error = None
 
-    with patch.object(task.__class__.__bases__[0], "generate_completions", return_value=[mock_completion]):
+    # Patch the method actually called inside _generation_loop: BaseTask.generate_completions
+    with patch("eval_framework.tasks.base.BaseTask.generate_completions", return_value=[mock_completion]):
         sample = Sample(
             id=1,
             subject="test",
@@ -336,7 +337,8 @@ def test_generation_loop_stops_on_low_novelty(mock_cosine_similarity):
     ]
     mock_completion.error = None
 
-    with patch.object(task.__class__.__bases__[0], "generate_completions", return_value=[mock_completion]):
+    # Patch the method actually called inside _generation_loop: BaseTask.generate_completions
+    with patch("eval_framework.tasks.base.BaseTask.generate_completions", return_value=[mock_completion]):
         sample = Sample(
             id=1,
             subject="test",
@@ -393,7 +395,8 @@ def test_generation_loop_continues_with_high_coherence_and_novelty(mock_cosine_s
     ]
     mock_completion.error = None
 
-    with patch.object(task.__class__.__bases__[0], "generate_completions", return_value=[mock_completion]):
+    # Patch the method actually called inside _generation_loop: BaseTask.generate_completions
+    with patch("eval_framework.tasks.base.BaseTask.generate_completions", return_value=[mock_completion]):
         sample = Sample(
             id=1,
             subject="test",

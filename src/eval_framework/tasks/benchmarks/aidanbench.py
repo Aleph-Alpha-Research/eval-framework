@@ -19,7 +19,7 @@ COHERENCE_THRESHOLD = 15
 NOVELTY_THRESHOLD = 0.15
 
 
-class AidanBench(BaseTask[str]):
+class AidanBenchOriginal(BaseTask[str]):
     """AidanBench (https://openreview.net/pdf?id=fz969ahcvJ)."""
 
     NAME = "AidanBench"
@@ -41,6 +41,8 @@ class AidanBench(BaseTask[str]):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         item_prompt = item["prompt"]
+        # note the extra dot after colon. We take this from the original AidanBench code:
+        # https://github.com/aidanmclaughlin/AidanBench/blob/a6bb3253ff630c82e7adbc81ce7bc7184c5bd881/benchmark/prompts.py#L7  # noqa: E501
         base_prompt = (
             "Answer the following question:.\n"
             "<question>" + item_prompt + "</question>\n"
@@ -191,3 +193,19 @@ class AidanBench(BaseTask[str]):
             )
 
         return completion_list
+
+
+class AidanBench(AidanBenchOriginal):
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        item_prompt = item["prompt"]
+        # We correct the prompt here by removing the extra dot after the colon.
+        base_prompt = (
+            "Answer the following question:\n"
+            "<question>" + item_prompt + "</question>\n"
+            "Provide your answer in <answer></answer> XML tags.\n"
+        )
+        base_prompt += (
+            "Your response should be one direct answer. "
+            "Only provide one answer. DO NOT list multiple answers. Please try to be concise.\n"
+        )
+        return base_prompt
