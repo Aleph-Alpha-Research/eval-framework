@@ -122,15 +122,24 @@ jobs:
           password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
 
       - name: Setup Docker BuildX
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and Push Image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
+
           push: true
           tags: ${{ needs.tag.outputs.image }}
+
+          build-args: BUILDKIT_INLINE_CACHE=1
+
+          cache-from: |
+            type=gha,scope=shared
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:buildcache
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:latest
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
 
   test-extras:
     # Test uv installs (CPU)
@@ -244,8 +253,7 @@ jobs:
         timeout-minutes: 20
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
-
+        run: uv run --all-extras pytest -n auto --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
       - name: Test VLLM
         timeout-minutes: 20
         env:
