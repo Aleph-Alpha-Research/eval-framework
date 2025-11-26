@@ -815,7 +815,7 @@ wheels = [
 
 [[package]]
 name = "eval-framework"
-version = "0.2.4.dev0"
+version = "0.2.5"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
