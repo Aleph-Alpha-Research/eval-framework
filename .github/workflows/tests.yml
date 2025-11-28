@@ -14,6 +14,9 @@ on:
   # Merge queue trigger
   merge_group:
 
+  schedule:
+    - cron: '0 2 * * *'  # Every day at 2 AM UTC
+
 permissions:
   contents: read
 
@@ -83,6 +86,7 @@ jobs:
     outputs:
       tag: ${{ steps.set-tag.outputs.tag }}
       image: ${{ steps.set-tag.outputs.image }}
+      cache_tag: ${{ steps.set-tag.outputs.cache_tag }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -91,23 +95,27 @@ jobs:
       run: |
         if [ "${{ github.ref }}" == "refs/heads/main" ]; then
           TAG='latest'
+          CACHE_TAG='buildcache'  # main uses shared cache
         else
           # head_ref is the correct branch name for PRs
           BRANCH_NAME=${{ github.head_ref || github.ref_name }}
           # Convert slashes with hyphens and ensure valid Docker tag format
           TAG=$(echo "${BRANCH_NAME}" | sed 's/[^a-zA-Z0-9._-]/-/g' | cut -c1-20)
+          CACHE_TAG="cache-${TAG}"  # PR-specific cache tag
         fi
         echo "tag=$TAG" >> $GITHUB_OUTPUT
         echo "image=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
+        echo "cache_tag=$CACHE_TAG" >> $GITHUB_OUTPUT
 
     - name: Output Docker Tag
       run: |
         echo "Docker Tag: ${{ steps.set-tag.outputs.tag }}"
         echo "Docker image: ${{ steps.set-tag.outputs.image }}"
+        echo "Cache Tag: ${{ steps.set-tag.outputs.cache_tag }}"
 
   build:
     # Build and Push Docker Image (GPU Runs)
-    needs: [lint, tag]
+    needs: [tag] #lint, tag]
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
     steps:
@@ -122,15 +130,24 @@ jobs:
           password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
 
       - name: Setup Docker BuildX
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and Push Image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
+
           push: true
           tags: ${{ needs.tag.outputs.image }}
+
+          build-args: BUILDKIT_INLINE_CACHE=1
+
+          cache-from: |
+            type=gha,scope=shared
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:buildcache
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:latest
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
 
   test-extras:
     # Test uv installs (CPU)
