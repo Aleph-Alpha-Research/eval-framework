@@ -8,6 +8,7 @@ import re
 import time
 import traceback
 from collections.abc import Callable, Sequence
+from typing import Literal, Mapping
 
 import aiohttp
 from aleph_alpha_client import (
@@ -56,7 +57,7 @@ class AlephAlphaAPIModel(BaseLLM):
         max_async_concurrent_requests: int = 32,
         request_timeout_seconds: int = 30 * 60 + 5,
         queue_full_timeout_seconds: int = 30 * 60 + 5,
-        bytes_per_token: float | None = None,
+        bytes_per_token: float | None = None
     ) -> None:
         self._formatter: BaseFormatter
         if formatter is None:
@@ -100,8 +101,8 @@ class AlephAlphaAPIModel(BaseLLM):
             raise RuntimeError(f"Model '{self._llm_name}' is not available: {e}")
 
     async def _request_with_backoff(
-        self, client: AsyncClient, request: CompletionRequest | EvaluationRequest, id: int
-    ) -> CompletionResponse | EvaluationResponse:
+        self, client: AsyncClient, request: CompletionRequest, id: int
+    ) -> CompletionResponse :
         """
         Query Aleph-Alpha API with complete. Retry with back-off until it responds.
         """
@@ -112,8 +113,6 @@ class AlephAlphaAPIModel(BaseLLM):
             try:
                 if isinstance(request, CompletionRequest):
                     return await client.complete(request, model=self._llm_name)
-                elif isinstance(request, EvaluationRequest):
-                    return await client.evaluate(request, model=self._llm_name)
                 else:
                     raise ValueError(f"Unsupported request type: {type(request)}")
 
@@ -160,7 +159,11 @@ class AlephAlphaAPIModel(BaseLLM):
         semaphore: asyncio.Semaphore,
         request: CompletionRequest | EvaluationRequest,
         id: int,
-    ) -> RawCompletion | tuple[EvaluationRequest, EvaluationResponse | Error]:
+        return_completion_response: bool = False,
+    ) -> (
+        RawCompletion 
+        | tuple[CompletionRequest, CompletionResponse | Error]
+    ):
         async with semaphore:
             try:
                 response = await self._request_with_backoff(client=client, request=request, id=id)
@@ -183,6 +186,8 @@ class AlephAlphaAPIModel(BaseLLM):
                     error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
 
                 if isinstance(request, CompletionRequest):
+                    if return_completion_response:
+                        return (request, error)
                     assert isinstance(request.prompt.items[0], Text)
                     return RawCompletion(
                         prompt=request.prompt.items[0].text,
@@ -196,7 +201,11 @@ class AlephAlphaAPIModel(BaseLLM):
 
         # Completion responses can directly be converted to RawCompletion
         if isinstance(request, CompletionRequest):
-            assert isinstance(request.prompt.items[0], Text) and isinstance(response, CompletionResponse)
+            assert isinstance(response, CompletionResponse)
+            if return_completion_response:
+                return (request, response)
+
+            assert isinstance(request.prompt.items[0], Text)
             assert len(response.completions) == 1
             prompt = request.prompt.items[0].text
             completion = response.completions[0].completion or ""
@@ -227,8 +236,14 @@ class AlephAlphaAPIModel(BaseLLM):
             return (request, response)
 
     async def _process_requests(
-        self, requests: list[CompletionRequest] | list[EvaluationRequest]
-    ) -> list[RawCompletion | tuple[EvaluationRequest, EvaluationResponse | Error]]:
+        self,
+        requests: list[CompletionRequest],
+        *,
+        return_completion_response: bool = False,
+    ) -> list[
+        RawCompletion
+        | tuple[CompletionRequest, CompletionResponse | Error]
+    ]:
         semaphore = asyncio.Semaphore(self.max_async_concurrent_requests)
         async with AsyncClient(
             host=os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
@@ -238,8 +253,14 @@ class AlephAlphaAPIModel(BaseLLM):
             total_retries=0,  # we have a custom retry policy in _request_with_backoff()
         ) as client:
             tasks = (
-                self._process_request_with_client(client, semaphore, request, i)
-                for i, request in enumerate[CompletionRequest | EvaluationRequest](requests)
+                self._process_request_with_client(
+                    client,
+                    semaphore,
+                    request,
+                    i,
+                    return_completion_response=return_completion_response,
+                )
+                for i, request in enumerate(requests)
             )
             responses = await asyncio.gather(*tasks)  # guarantees order of responses
         return responses
@@ -272,46 +293,86 @@ class AlephAlphaAPIModel(BaseLLM):
         return responses  # type: ignore
 
     def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
-        samples_prompt: list[str] = []
-        evaluation_requests: list[EvaluationRequest] = []
-        results: list[RawLoglikelihood] = []
+        prompts: list[str] = []
+        completion_requests: list[CompletionRequest] = []
 
-        # evaluate all choices independently in flattened list
         for sample in samples:
             prompt: str = self._formatter.format(sample.messages, output_mode="string") if sample.messages else ""
-            samples_prompt.append(prompt)
+            prompts.append(prompt)
             for choice in sample.possible_completions or []:
-                evaluation_requests.append(
-                    EvaluationRequest(prompt=Prompt.from_text(prompt), completion_expected=choice)
+                completion_requests.append(
+                    CompletionRequest(
+                        prompt=Prompt.from_text(prompt + choice),
+                        maximum_tokens=0,
+                        temperature=0.0,
+                        log_probs=0,
+                        echo=True,
+                        tokens=True,
+                    )
                 )
 
-        evaluation_responses = asyncio.run(self._process_requests(evaluation_requests))
-        evaluation_responses_iter = iter(evaluation_responses)
+        completion_responses: list[tuple[CompletionRequest, CompletionResponse | Error]] = []
+        if completion_requests:
+            completion_responses = asyncio.run(
+                self._process_requests(
+                    completion_requests,
+                    return_completion_response=True,
+                )
+            )
+        completion_iter = iter(completion_responses)
 
-        # assemble choices to RawLoglikelihood from a flattened list for all possible choice replies
-        for sample, prompt in zip(samples, samples_prompt, strict=True):
+        results: list[RawLoglikelihood] = []
+        for sample_idx, (sample, prompt) in enumerate(zip(samples, prompts, strict=True)):
             choices_log_probs: dict[str, float] = {}
             choices_sequence_positions: dict[str, int] = {}
             prompt_sequence_positions: int | None = 0
-            error = None
+            prompt_tokens_from_choice: int | None = None
+            error: Error | None = None
 
             for choice in sample.possible_completions or []:
-                request, response = next(evaluation_responses_iter)
+                request, response = next(completion_iter)
+                assert isinstance(request, CompletionRequest)
                 if error is not None:
                     continue
-                if isinstance(response, Error):  # failure for one choice leads to failure of the whole sample
+
+                if isinstance(response, Error):
                     error = response
                     prompt_sequence_positions = None
                     choices_log_probs = {}
                     choices_sequence_positions = {}
                 else:
-                    assert isinstance(request, EvaluationRequest) and isinstance(response, EvaluationResponse)
-                    assert isinstance(request.prompt.items[0], Text)
-                    assert prompt == request.prompt.items[0].text, f"{prompt} != {request.prompt.items[0].text}"
-                    assert choice == request.completion_expected, f"{choice} != {request.completion_expected}"
-                    prompt_sequence_positions = response.num_tokens_prompt_total - response.result["token_count"]
-                    choices_log_probs[choice] = response.result["log_probability"]
-                    choices_sequence_positions[choice] = response.result["token_count"]
+                    try:
+                        logprob, choice_token_count, prompt_token_count = self._extract_choice_logprob_from_completion(
+                            prompt=prompt,
+                            choice=choice,
+                            response=response,
+                        )
+                        choices_log_probs[choice] = logprob
+                        choices_sequence_positions[choice] = choice_token_count
+                        if prompt_tokens_from_choice is None:
+                            prompt_tokens_from_choice = prompt_token_count
+                            prompt_sequence_positions = prompt_token_count
+                        elif prompt_tokens_from_choice != prompt_token_count:
+                            logger.warning(
+                                "Prompt token counts differed between choices for sample %s (%s vs %s). "
+                                "Using latest value.",
+                                sample_idx,
+                                prompt_tokens_from_choice,
+                                prompt_token_count,
+                            )
+                            prompt_tokens_from_choice = prompt_token_count
+                            prompt_sequence_positions = prompt_token_count
+                    except Exception as exc:
+                        if raise_errors():
+                            raise
+                        error = Error(
+                            error_class=exc.__class__.__name__,
+                            message=str(exc),
+                            traceback=traceback.format_exc(),
+                        )
+                        prompt_sequence_positions = None
+                        choices_log_probs = {}
+                        choices_sequence_positions = {}
 
             results.append(
                 RawLoglikelihood(
@@ -325,7 +386,60 @@ class AlephAlphaAPIModel(BaseLLM):
 
         return results
 
+    @staticmethod
+    def _extract_choice_logprob_from_completion(
+        prompt: str, choice: str, response: CompletionResponse
+    ) -> tuple[float, int, int]:
+        if not response.completions:
+            raise ValueError("Completion response did not contain any choices.")
+        completion_result = response.completions[0]
+        if completion_result.log_probs is None:
+            raise ValueError("Completion result did not include log_probs.")
+        if completion_result.completion_tokens is None:
+            raise ValueError("Completion result did not include completion_tokens.")
+
+        tokens = list(completion_result.completion_tokens)
+        log_prob_entries = list(completion_result.log_probs)
+
+        if len(tokens) != len(log_prob_entries):
+            raise ValueError("Mismatch between completion tokens and log_prob entries.")
+
+        combined_text = "".join(tokens)
+        expected_text = prompt + choice
+        if combined_text != expected_text:
+            raise ValueError("Completion tokens differed from prompt + choice text.")
+
+        prompt_token_count = AlephAlphaAPIModel._count_prompt_tokens_from_sequence(tokens, prompt)
+        choice_token_count = len(tokens) - prompt_token_count
+        if choice_token_count < 0:
+            raise ValueError("Choice token count computed as negative.")
+
+        total_logprob = 0.0
+        for entry in log_prob_entries[prompt_token_count:]:
+            assert isinstance(entry, dict)
+            if len(entry) != 1:
+                raise ValueError("Log_probs entry did not contain exactly one key-value pair.")
+            _, value = entry.popitem()
+            assert isinstance(value, float)
+            total_logprob += value
+
+        return total_logprob, choice_token_count, prompt_token_count
+
+    @staticmethod
+    def _count_prompt_tokens_from_sequence(tokens: Sequence[str], prompt: str) -> int:
+        if not prompt:
+            return 0
+        current_text = ""
+        for idx, token in enumerate(tokens):
+            current_text += token
+            if current_text == prompt:
+                return idx + 1
+            if len(current_text) > len(prompt):
+                break
+        raise ValueError("Unable to align completion tokens with prompt text.")
+
 
 class Llama31_8B_Instruct_API(AlephAlphaAPIModel):
     LLM_NAME = "llama-3.1-8b-instruct"
     DEFAULT_FORMATTER = Llama3Formatter
+
