@@ -5,12 +5,11 @@ import pytest
 import torch
 from pytest_mock import MockerFixture
 
-from eval_framework.llm.huggingface import HFLLM, SmolLM135M, StopSequenceCriteria
+from eval_framework.llm.huggingface import HFLLM, Qwen3_0_6B, SmolLM135M, StopSequenceCriteria
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import (
     ConcatFormatter,
-    HFFormatter,
     IdentityFormatter,
     Message,
     Role,
@@ -135,19 +134,15 @@ def test_stop_sequence_criteria(stop_sequences: list[str]) -> None:
 
 @pytest.mark.gpu
 def test_resource_cleanup() -> None:
-    class Qwen8B(HFLLM):
-        LLM_NAME = "Qwen/Qwen3-8B"
-
     try:
-        formatter = HFFormatter("Qwen/Qwen3-8B", chat_template_kwargs={"enable_thinking": True})
-        generator_model = Qwen8B(formatter=formatter)
+        generator_model = Qwen3_0_6B()
         generator_model.generate_from_messages(
             messages=[[Message(role=Role.USER, content="What is capital of Germany ?")]],
             max_tokens=100,
             temperature=0.0,
         )
         del generator_model
-        judge_model = Qwen8B(formatter=formatter)
+        judge_model = Qwen3_0_6B()
         judge_model.generate_from_messages(
             messages=[
                 [
