@@ -89,6 +89,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.piqa.PIQA_IDK")
     register_lazy_task("eval_framework.tasks.benchmarks.openbookqa.OPENBOOKQA")
     register_lazy_task("eval_framework.tasks.benchmarks.openbookqa.OPENBOOKQA_IDK")
+    register_lazy_task("eval_framework.tasks.benchmarks.openbookqa.OPENBOOKQA_EVAL_HARNESS")
     register_lazy_task("eval_framework.tasks.benchmarks.sciq.SCIQ")
     register_lazy_task("eval_framework.tasks.benchmarks.sciq.SCIQEvalHarness")
     register_lazy_task("eval_framework.tasks.benchmarks.squad.SQUAD")
@@ -123,6 +124,8 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.sphyr.SPHYR")
     register_lazy_task("eval_framework.tasks.benchmarks.struct_eval.StructEval")
     register_lazy_task("eval_framework.tasks.benchmarks.struct_eval.RenderableStructEval")
+    register_lazy_task("eval_framework.tasks.benchmarks.aidanbench.AidanBench", extras=["openai"])
+    register_lazy_task("eval_framework.tasks.benchmarks.aidanbench.AidanBenchOriginal", extras=["openai"])
 
     try:
         # Importing the companion registers the additional tasks from the module.

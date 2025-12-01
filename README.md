@@ -39,12 +39,24 @@ There are optional extras available to unlock specific features of the library:
 
 As a short hand, the `all` extra installs all of the above.
 
-For development, you can instead install it directly from the repository. Please first install
- [uv](https://docs.astral.sh/uv/getting-started/installation/)
+We use `uv` to better resolve dependencies when downloading the extras. You can install uv with:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+or by follwing the `uv` [installation docs.](https://docs.astral.sh/uv/getting-started/installation/)
 
-To install the project with all optional extras use
+Now, you can safely install the project with all optional extras:
 ```bash
 uv sync --all-extras
+```
+or with pip
+```bash
+uv pip install eval_framework[all]
+```
+
+Tip: ensure python is properly installed with uv:
+```
+uv python install 3.12 --reinstall
 ```
 
 We provide custom groups to control optional extras.
@@ -74,22 +86,25 @@ For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usa
 
 ### Core Capabilities
 
-| **Reasoning** | **Knowledge** | **Coding** | **Long Context** |
-|---------------|---------------|------------|------------------|
-| MMLU (57 subjects) | TriviaQA | HumanEval | InfiniteBench |
-| SQuAD v1/v2 | MBPP |
-| ARC | Natural Questions | CodeT5 | ZeroSCROLLS |
-| HellaSwag | QuAC | Programming | QuALITY |
-| Winogrande | COPA | Debugging  |
+Subset of core capabilities benchmarks coverd by `eval-framework`:
+
+| **Reasoning** | **Knowledge** | **Math** | **Coding** | **Structured outputs** | **Long Context** |
+|---------------|---------------|----------|------------|------------------------|------------------|
+| COPA | ARC | AIME | BigCodeBench | IFEval | InfiniteBench |
+| Hellaswag | MMLU | GSM8K | HumanEval | StructEval | QUALITY |
+| Winogrande | Openbook QA| MATH-500 | MBPP | | ZeroSCROLLS |
+
 
 ### Languages & Domains
 
-| **Multilingual** | **Specialized** | **Safety & Bias** | **Efficiency** |
+Subset of language-specific and domain-specific benchmarks coverd by `eval-framework`:
+
+| **Multilingual** | **Specialized** | **Safety & Bias** | **Efficiency Metrics** |
 |------------------|-----------------|-------------------|----------------|
-| WMT Translation | Legal (CaseHold) | TruthfulQA | Token counting |
-| FLORES-200 | Winogender | Latency metrics |
-| Multilingual MMLU | Medical (MedQA) | Stereotype detection | Memory usage |
-| German/Finnish tasks | Scientific (SciQ) | Harmful content | Cost analysis |
+| WMT Translation | MMLU | TruthfulQA | Compression ratios |
+| FLORES-200 | Legal (CaseHold) | Winogender | Runtime |
+| Multilingual MMLU | Scientific (SciQ) | | |
+| German/Finnish tasks |  | | |
 
 ### Completion
 
@@ -187,6 +202,7 @@ if __name__ == "__main__":
 
 - **Use CLI interface**: See [CLI usage guide](docs/cli_usage.md) for command-line evaluation options
 - **Evaluate HuggingFace models**: Follow our [HuggingFace evaluation guide](docs/evaluate_huggingface_model.md)
+- **Understand model arguments**: Read out [Model Arguments guide](docs/model_arguments.md)
 - **Create custom benchmarks**: Follow our [benchmark creation guide](docs/add_new_benchmark_guide.md)
 - **Scale your evaluations**: Use [Determined AI integration](docs/using_determined.md) for distributed evaluation
 - **Understand your results**: Read our [results interpretation guide](docs/understanding_results_guide.md)
@@ -202,6 +218,7 @@ if __name__ == "__main__":
 
 ### Advanced Usage
 
+- **[Understanding Model Arguments](docs/model_arguments.md)** - Thorough guide on each constructor argument for salient model classes
 - **[Adding New Benchmarks](docs/add_new_benchmark_guide.md)** - Complete guide with practical examples for adding new benchmarks
 - **[Benchmarks and Metrics](docs/benchmarks_and_metrics.md)** - Comprehensive overview of all available benchmarks and evaluation metrics
 - **[Overview of Dataloading](docs/overview_dataloading.md)** - Explanation of dataloading and task/sample/message structure
