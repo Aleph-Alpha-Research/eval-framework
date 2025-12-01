@@ -2,103 +2,46 @@ name: CI
 
 on:
   push:
-    branches: [main, ci/split-workflows]  # TEMPORARY: Remove ci/split-workflows before merging
+    branches: [main]
     paths-ignore:
-      - '*.detignore'
-      - '**/*.detignore'
-      - '*.example'
-      - '**/*.example'
-      - '*.json'
-      - '**/*.json'
-      - '*.md'
-      - '**/*.md'
-      - '*.png'
-      - '**/*.png'
-      - '*.sample'
-      - '**/*.sample'
-      - '*.TAG'
-      - '**/*.TAG'
-      - '*.yaml'
-      - '**/*.yaml'
-      - '*.yml'
-      - '**/*.yml'
-      - '!/.github/workflows/**'
-      - 'docs/**'
-      - 'LICENSE'
-      - '.gitignore'
-      - 'changelog/**'
+      - '**.md'
   pull_request:
     types: [opened, reopened, synchronize, labeled]
-    branches: [main, ci/split-workflows]  # TEMPORARY: Remove ci/split-workflows before merging
     paths-ignore:
-      - '*.detignore'
-      - '**/*.detignore'
-      - '*.example'
-      - '**/*.example'
-      - '*.json'
-      - '**/*.json'
-      - '*.md'
-      - '**/*.md'
-      - '*.png'
-      - '**/*.png'
-      - '*.sample'
-      - '**/*.sample'
-      - '*.TAG'
-      - '**/*.TAG'
-      - '*.yaml'
-      - '**/*.yaml'
-      - '*.yml'
-      - '**/*.yml'
-      - '!/.github/workflows/**'
-      - 'docs/**'
-      - 'LICENSE'
-      - '.gitignore'
-      - 'changelog/**'
+      - '**.md'
   pull_request_target:
     types: [opened, reopened, synchronize, labeled]
-    branches: [main, ci/split-workflows]  # TEMPORARY: Remove ci/split-workflows before merging
     paths-ignore:
-      - '*.detignore'
-      - '**/*.detignore'
-      - '*.example'
-      - '**/*.example'
-      - '*.json'
-      - '**/*.json'
-      - '*.md'
-      - '**/*.md'
-      - '*.png'
-      - '**/*.png'
-      - '*.sample'
-      - '**/*.sample'
-      - '*.TAG'
-      - '**/*.TAG'
-      - '*.yaml'
-      - '**/*.yaml'
-      - '*.yml'
-      - '**/*.yml'
-      - '!/.github/workflows/**'
-      - 'docs/**'
-      - 'LICENSE'
-      - '.gitignore'
-      - 'changelog/**'
+      - '**.md'
+  # Manually trigger a workflow for a branch
+  workflow_dispatch:
+  # Merge queue trigger
+  merge_group:
 
 permissions:
   contents: read
-  packages: write
   pull-requests: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: eval_framework_public
-  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets
+  REGISTRY: registry.gitlab.aleph-alpha.de
+  REPO_OWNER: research/public-registry
+  IMAGE_NAME: eval_framework
+  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # <- single source of truth
+  UV_LINK_MODE: symlink
+  UV_LOCKED: 1
+  # Authorization context
+  EVENT: ${{ github.event_name }}
+  HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name || 'N/A' }}
+  BASE_REPO: ${{ github.event.pull_request.base.repo.full_name || 'N/A' }}
+  HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}
 
 jobs:
-  # Security check for pull_request_target
-  authorize-fork-pr:
+  # Security check for pull_request_target (fork PRs)
+  authorize:
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
@@ -106,103 +49,115 @@ jobs:
       - name: Check authorization
         id: check
         run: |
-          # For push events, always run
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "Event is push. Running workflow."
-            echo "should_run=true" >> $GITHUB_OUTPUT
-            exit 0
+          echo "Event: $EVENT"
+          echo "Head repo: $HEAD_REPO"
+          echo "Base repo: $BASE_REPO"
+          echo "Has trusted_contributor label: $HAS_LABEL"
+
+          if [[ "$EVENT" == "push" || "$EVENT" == "workflow_dispatch" || "$EVENT" == "merge_group" ]]; then
+            SHOULD_RUN=true
+          elif [[ "$EVENT" == "pull_request" && "$HEAD_REPO" == "$BASE_REPO" ]]; then
+            SHOULD_RUN=true
+          elif [[ "$EVENT" == "pull_request_target" && "$HEAD_REPO" != "$BASE_REPO" && "$HAS_LABEL" == "true" ]]; then
+            SHOULD_RUN=true
+          else
+            SHOULD_RUN=false
           fi
 
-          # For pull_request events, check if it's from a fork
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # GitHub doesn't always populate fork info for pull_request events
-            # So we'll check if the head repo name differs from the base repo name
-            if [[ "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.event.pull_request.base.repo.full_name }}" ]]; then
-              echo "PR is from the same repository. Running workflow."
-              echo "should_run=true" >> $GITHUB_OUTPUT
-              exit 0
-            else
-              echo "PR is from a fork. Skipping pull_request workflow."
-              echo "should_run=false" >> $GITHUB_OUTPUT
-              exit 0
-            fi
-          fi
-
-          # For pull_request_target, check if it's from a fork
-          if [[ "${{ github.event_name }}" == "pull_request_target" ]]; then
-            # Check if PR is from a fork
-            if [[ "${{ github.event.pull_request.head.repo.full_name }}" == "${{ github.event.pull_request.base.repo.full_name }}" ]]; then
-              echo "PR is from the same repository. Skipping pull_request_target workflow."
-              echo "should_run=false" >> $GITHUB_OUTPUT
-              exit 0
-            fi
-
-            # If from fork, check for trusted_contributor label
-            if [[ "${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}" == "true" ]]; then
-              echo "PR is from a fork with 'trusted_contributor' label. Authorized!"
-              echo "should_run=true" >> $GITHUB_OUTPUT
-              exit 0
-            fi
-
-            # Otherwise, don't run
-            echo "PR is from a fork without 'trusted_contributor' label. Skipping."
-            echo "should_run=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
+          echo "Decision: should_run=$SHOULD_RUN"
+          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
 
   lint:
-    runs-on: ubuntu-latest
-    needs: [authorize-fork-pr]
-    if: needs.authorize-fork-pr.outputs.should_run == 'true'
+    runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
+    needs: [authorize]
+    if: needs.authorize.outputs.should_run == 'true'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
         with:
-          github-repo-token: ${{ secrets.TOKEN_AA_GITHUB_REPO_READER }}
+          version: "~=0.8.16"
+
       - name: Run Pre-Commit
-        run: |
-          poetry run pre-commit install
-          poetry run pre-commit run -a
+        run: uvx pre-commit run --all-files
+
+      - name: Dependency check
+        run: ./utils/dependency_check.sh
+
       - name: Run MyPy
-        run: |
-          poetry run mypy src tests utils
+        run: uv run --all-extras mypy
 
   hf-datasets-cache:
-    runs-on: cpu-runner-8c-32gb-01
-    container: derskythe/github-runner-base:ubuntu-noble
-    needs: [authorize-fork-pr]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.authorize-fork-pr.outputs.should_run == 'true'
+    runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
+    needs: [authorize]
+    if: needs.authorize.outputs.should_run == 'true'
     steps:
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
+      - uses: actions/checkout@v4
+        if: github.ref == 'refs/heads/main'
         with:
-          github-repo-token: ${{ secrets.TOKEN_AA_GITHUB_REPO_READER }}
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        if: github.ref == 'refs/heads/main'
+        with:
+          version: "~=0.8.16"
+
       - name: Huggingface datasets cache
         uses: actions/cache@v4
+        if: github.ref == 'refs/heads/main'
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- use shared env
           key: hf-datasets-${{ github.run_id }}
           restore-keys: |
             hf-datasets-
+
       - name: Download datasets
+        if: github.ref == 'refs/heads/main'
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: uv run --extra=comet --extra=openai python -c "from eval_framework.tasks.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
+
+  tag:
+    # Set Docker Tag and Image Name for Docker Build and Push (GPU Runs)
+    runs-on: ubuntu-latest
+    needs: [authorize]
+    if: needs.authorize.outputs.should_run == 'true'
+    outputs:
+      tag: ${{ steps.set-tag.outputs.tag }}
+      image: ${{ steps.set-tag.outputs.image }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set Tag
+        id: set-tag
         run: |
-          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
-          export PATH=$HOME/.local/bin:$PATH
-          poetry run python -c "from eval_framework.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            TAG='latest'
+          else
+            # head_ref is the correct branch name for PRs
+            BRANCH_NAME=${{ github.head_ref || github.ref_name }}
+            # Convert slashes with hyphens and ensure valid Docker tag format
+            TAG=$(echo "${BRANCH_NAME}" | sed 's/[^a-zA-Z0-9._-]/-/g' | cut -c1-20)
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "image=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
+
+      - name: Output Docker Tag
+        run: |
+          echo "Docker Tag: ${{ steps.set-tag.outputs.tag }}"
+          echo "Docker image: ${{ steps.set-tag.outputs.image }}"
 
   build:
-    needs: [authorize-fork-pr, lint]
+    # Build and Push Docker Image (GPU Runs)
+    needs: [authorize, lint, tag]
+    if: needs.authorize.outputs.should_run == 'true'
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
-    if: needs.authorize-fork-pr.outputs.should_run == 'true' && needs.lint.result == 'success'
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: eval_framework_public
-      REPO_OWNER_LC: aleph-alpha-research
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -210,11 +165,11 @@ jobs:
           ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
 
       - name: Registry Authentication
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: token
+          password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
 
       - name: Setup Docker BuildX
         uses: docker/setup-buildx-action@v1
@@ -225,161 +180,138 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ needs.tag.outputs.image }}
+
+  test-extras:
+    # Test uv installs (CPU)
+    runs-on: ubuntu-latest
+    needs: [authorize, lint]
+    if: needs.authorize.outputs.should_run == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        extras: ['', 'determined', 'api', 'openai', 'transformers', 'accelerate', 'comet', 'optional']
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+
+      - name: Verify install and functionality via uv --exact
+        run: |
+          if [ "${{ matrix.extras }}" != "" ]; then
+            echo "Testing extra: ${{ matrix.extras }}"
+            uv run --exact --extra ${{ matrix.extras }} pytest -v --noconftest tests/tests_eval_framework/installs/test_${{ matrix.extras }}.py
+          else
+            echo "Testing core install"
+            uv run --exact pytest --noconftest -v tests/tests_eval_framework/installs/test_core.py
+          fi
 
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [authorize-fork-pr, lint, hf-datasets-cache]
-    if: |
-      always() &&
-      needs.authorize-fork-pr.outputs.should_run == 'true' &&
-      needs.lint.result == 'success' &&
-      (needs.hf-datasets-cache.result == 'success' || needs.hf-datasets-cache.result == 'skipped')
+    needs: [authorize, hf-datasets-cache, test-extras]
+    if: needs.authorize.outputs.should_run == 'true'
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
           key: hf-datasets-
+
       - name: Run tests
-        run: |
-          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
-          export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
-          export PATH=$HOME/.local/bin:$PATH
-          poetry run pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: uv run --all-extras pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
 
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [authorize-fork-pr, lint, hf-datasets-cache]
-    if: |
-      always() &&
-      needs.authorize-fork-pr.outputs.should_run == 'true' &&
-      needs.lint.result == 'success' &&
-      (needs.hf-datasets-cache.result == 'success' || needs.hf-datasets-cache.result == 'skipped')
+    needs: [authorize, hf-datasets-cache, test-extras]
+    if: needs.authorize.outputs.should_run == 'true'
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
-      - name: Setup poetry
-        uses: ./.github/actions/setup-poetry-on-ubuntu
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
           key: hf-datasets-
+
       - name: Run tests
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          export HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }}
-          export HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }}
-          export PATH=$HOME/.local/bin:$PATH
-          poetry run python -c "import nltk; nltk.download('punkt_tab')"
-          poetry run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
+          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
+          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
 
-  test-gpu:
-    needs: [authorize-fork-pr, build, test-cpu, test-cpu-slow]
+  test-docker-gpu:
     runs-on: EvalFrameworkGPURunner
-    if: |
-      always() &&
-      needs.authorize-fork-pr.outputs.should_run == 'true' &&
-      needs.test-cpu.result == 'success' &&
-      needs.test-cpu-slow.result == 'success' &&
-      (needs.build.result == 'success' || (github.event_name != 'push' && needs.build.result == 'skipped'))
+    needs: [authorize, tag, build, test-cpu, test-cpu-slow]
+    if: needs.authorize.outputs.should_run == 'true'
+    container:
+      image: "${{ needs.tag.outputs.image }}"
+      credentials:
+        username: token
+        password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
+      options: --gpus all
+    defaults:
+      run:
+        working-directory: /eval_framework
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
-
-      - name: Normalize repo owner to lowercase
+      - name: Verify GPU installs via uv --exact
         run: |
-          echo "REPO_OWNER_LC=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          set -e  # fail fast if any test fails
+          echo "Testing vllm extra"
+          uv run --exact --extra vllm pytest -v --noconftest tests/tests_eval_framework/installs/test_vllm.py
+
+          echo "Testing mistral extra"
+          uv run --exact --extra mistral pytest -v --noconftest tests/tests_eval_framework/installs/test_mistral.py
+
+          echo "Testing all extras together"
+          uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
 
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
           key: hf-datasets-
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test GPU
+        timeout-minutes: 20
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
 
-      - name: Pull container image
-        run: |
-          docker pull "${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest"
-
-      - name: Run GPU tests inside container with GPU access
-        run: |
-          timeout 20m docker run --rm --gpus all \
-            -v ${{ github.workspace }}:/eval_framework \
-            -w /eval_framework \
-            -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
-            -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
-            bash -c 'poetry run pytest --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"'
-
-  test-gpu-vllm:
-    needs: [authorize-fork-pr, build, test-cpu, test-cpu-slow, test-gpu]
-    runs-on: EvalFrameworkGPURunner
-    if: |
-      always() &&
-      needs.authorize-fork-pr.outputs.should_run == 'true' &&
-      needs.test-cpu.result == 'success' &&
-      needs.test-cpu-slow.result == 'success' &&
-      (needs.build.result == 'success' || (github.event_name != 'push' && needs.build.result == 'skipped')) &&
-      (needs.test-gpu.result == 'success' || needs.test-gpu.result == 'skipped')
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
-
-      - name: Normalize repo owner to lowercase
-        run: |
-          echo "REPO_OWNER_LC=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-
-      - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull container image
-        run: |
-          docker pull "${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest"
-
-      - name: Run GPU tests inside container with GPU access
-        run: |
-          timeout 20m docker run --rm --gpus all \
-            -v ${{ github.workspace }}:/eval_framework \
-            -w /eval_framework \
-            -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
-            -e HF_DATASET_CACHE_DIR=${{ env.HF_DATASET_CACHE_DIR }} \
-            -e VLLM_LOGGING_LEVEL=DEBUG \
-            -e VLLM_WORKER_MULTIPROC_METHOD=spawn \
-            -e VLLM_USE_MODELSCOPE=False \
-            -e VLLM_NCCL_SO_PATH="" \
-            -e VLLM_USE_TRITON_FLASH_ATTN=0 \
-            -e VLLM_DISABLE_CUSTOM_ALL_REDUCE=1 \
-            ${{ env.REGISTRY }}/${{ env.REPO_OWNER_LC }}/${{ env.IMAGE_NAME }}:latest \
-            bash -c 'curl -sSL https://install.python-poetry.org | python3 - && export PATH="$HOME/.local/bin:$PATH" && poetry --version && poetry run pytest --log-cli-level=INFO -v -m "vllm"'
+      - name: Test VLLM
+        timeout-minutes: 20
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+          VLLM_LOGGING_LEVEL: DEBUG
+          VLLM_WORKER_MULTIPROC_METHOD: spawn
+          VLLM_USE_MODELSCOPE: False
+          VLLM_NCCL_SO_PATH: ""
+          VLLM_USE_TRITON_FLASH_ATTN: 0
+          VLLM_DISABLE_CUSTOM_ALL_REDUCE: 1
+        run: pytest --log-cli-level=INFO -v -m "vllm"
