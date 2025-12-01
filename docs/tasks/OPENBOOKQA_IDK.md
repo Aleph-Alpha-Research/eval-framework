@@ -7,7 +7,7 @@ SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = test
 RESPONSE_TYPE = LOGLIKELIHOODS
 METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, ConfidenceWeightedAccuracy, DistributionalCorrectnessScore, TernaryScore]
-SUBJECTS = ['main']
+SUBJECTS = ['additional']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
