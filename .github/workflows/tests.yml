@@ -125,32 +125,30 @@ jobs:
   tag:
     # Set Docker Tag and Image Name for Docker Build and Push (GPU Runs)
     runs-on: ubuntu-latest
-    needs: [authorize]
-    if: needs.authorize.outputs.should_run == 'true'
     outputs:
       tag: ${{ steps.set-tag.outputs.tag }}
       image: ${{ steps.set-tag.outputs.image }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Set Tag
-        id: set-tag
-        run: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-            TAG='latest'
-          else
-            # head_ref is the correct branch name for PRs
-            BRANCH_NAME=${{ github.head_ref || github.ref_name }}
-            # Convert slashes with hyphens and ensure valid Docker tag format
-            TAG=$(echo "${BRANCH_NAME}" | sed 's/[^a-zA-Z0-9._-]/-/g' | cut -c1-20)
-          fi
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "image=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Set Tag
+      id: set-tag
+      run: |
+        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          TAG='latest'
+        else
+          # head_ref is the correct branch name for PRs
+          BRANCH_NAME=${{ github.head_ref || github.ref_name }}
+          # Convert slashes with hyphens and ensure valid Docker tag format
+          TAG=$(echo "${BRANCH_NAME}" | sed 's/[^a-zA-Z0-9._-]/-/g' | cut -c1-20)
+        fi
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "image=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
 
-      - name: Output Docker Tag
-        run: |
-          echo "Docker Tag: ${{ steps.set-tag.outputs.tag }}"
-          echo "Docker image: ${{ steps.set-tag.outputs.image }}"
+    - name: Output Docker Tag
+      run: |
+        echo "Docker Tag: ${{ steps.set-tag.outputs.tag }}"
+        echo "Docker image: ${{ steps.set-tag.outputs.image }}"
 
   build:
     # Build and Push Docker Image (GPU Runs)
