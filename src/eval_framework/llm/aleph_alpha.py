@@ -8,7 +8,6 @@ import re
 import time
 import traceback
 from collections.abc import Callable, Sequence
-from typing import Literal, Mapping
 
 import aiohttp
 from aleph_alpha_client import (
@@ -17,8 +16,6 @@ from aleph_alpha_client import (
     Client,
     CompletionRequest,
     CompletionResponse,
-    EvaluationRequest,
-    EvaluationResponse,
     Prompt,
 )
 from aleph_alpha_client.prompt import Text
@@ -57,7 +54,7 @@ class AlephAlphaAPIModel(BaseLLM):
         max_async_concurrent_requests: int = 32,
         request_timeout_seconds: int = 30 * 60 + 5,
         queue_full_timeout_seconds: int = 30 * 60 + 5,
-        bytes_per_token: float | None = None
+        bytes_per_token: float | None = None,
     ) -> None:
         self._formatter: BaseFormatter
         if formatter is None:
@@ -102,7 +99,7 @@ class AlephAlphaAPIModel(BaseLLM):
 
     async def _request_with_backoff(
         self, client: AsyncClient, request: CompletionRequest, id: int
-    ) -> CompletionResponse :
+    ) -> CompletionResponse:
         """
         Query Aleph-Alpha API with complete. Retry with back-off until it responds.
         """
@@ -157,13 +154,10 @@ class AlephAlphaAPIModel(BaseLLM):
         self,
         client: AsyncClient,
         semaphore: asyncio.Semaphore,
-        request: CompletionRequest | EvaluationRequest,
+        request: CompletionRequest,
         id: int,
         return_completion_response: bool = False,
-    ) -> (
-        RawCompletion 
-        | tuple[CompletionRequest, CompletionResponse | Error]
-    ):
+    ) -> RawCompletion | tuple[CompletionRequest, CompletionResponse | Error]:
         async with semaphore:
             try:
                 response = await self._request_with_backoff(client=client, request=request, id=id)
@@ -185,65 +179,53 @@ class AlephAlphaAPIModel(BaseLLM):
                 else:
                     error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
 
-                if isinstance(request, CompletionRequest):
-                    if return_completion_response:
-                        return (request, error)
-                    assert isinstance(request.prompt.items[0], Text)
-                    return RawCompletion(
-                        prompt=request.prompt.items[0].text,
-                        prompt_sequence_positions=None,
-                        completion="",
-                        completion_sequence_positions=0,
-                        raw_completion_error=error,
-                    )
-                else:
+                if return_completion_response:
                     return (request, error)
+                assert isinstance(request.prompt.items[0], Text)
+                return RawCompletion(
+                    prompt=request.prompt.items[0].text,
+                    prompt_sequence_positions=None,
+                    completion="",
+                    completion_sequence_positions=0,
+                    raw_completion_error=error,
+                )
 
         # Completion responses can directly be converted to RawCompletion
-        if isinstance(request, CompletionRequest):
-            assert isinstance(response, CompletionResponse)
-            if return_completion_response:
-                return (request, response)
-
-            assert isinstance(request.prompt.items[0], Text)
-            assert len(response.completions) == 1
-            prompt = request.prompt.items[0].text
-            completion = response.completions[0].completion or ""
-            prompt_sequence_positions: int | None = None
-            completion_sequence_positions: int | None = None
-
-            # Support workaround in api-worker-transformer's scaling generator to return the correct number of tokens.
-            # These are part of the completion string; those in CompletionResponse are invalid in this case.
-            m = re.match(r"\uf8c9(\d+),(\d+)\uf8c9(.*)", completion, re.DOTALL)
-            if m is not None:
-                num_input_tokens, num_completion_tokens, completion = m.groups()
-                prompt_sequence_positions = int(num_input_tokens)
-                completion_sequence_positions = int(num_completion_tokens)
-            else:
-                prompt_sequence_positions = response.num_tokens_prompt_total if response else None
-                completion_sequence_positions = response.num_tokens_generated if response else None
-
-            return RawCompletion(
-                prompt=prompt,
-                prompt_sequence_positions=prompt_sequence_positions,
-                completion=completion,
-                completion_sequence_positions=completion_sequence_positions,
-            )
-
-        # Evaluation responses must be assembled from individual choice requests later
-        else:
-            assert isinstance(response, EvaluationResponse)
+        assert isinstance(response, CompletionResponse)
+        if return_completion_response:
             return (request, response)
+
+        assert isinstance(request.prompt.items[0], Text)
+        assert len(response.completions) == 1
+        prompt = request.prompt.items[0].text
+        completion = response.completions[0].completion or ""
+        prompt_sequence_positions: int | None = None
+        completion_sequence_positions: int | None = None
+
+        # Support workaround in api-worker-transformer's scaling generator to return the correct number of tokens.
+        # These are part of the completion string; those in CompletionResponse are invalid in this case.
+        m = re.match(r"\uf8c9(\d+),(\d+)\uf8c9(.*)", completion, re.DOTALL)
+        if m is not None:
+            num_input_tokens, num_completion_tokens, completion = m.groups()
+            prompt_sequence_positions = int(num_input_tokens)
+            completion_sequence_positions = int(num_completion_tokens)
+        else:
+            prompt_sequence_positions = response.num_tokens_prompt_total if response else None
+            completion_sequence_positions = response.num_tokens_generated if response else None
+
+        return RawCompletion(
+            prompt=prompt,
+            prompt_sequence_positions=prompt_sequence_positions,
+            completion=completion,
+            completion_sequence_positions=completion_sequence_positions,
+        )
 
     async def _process_requests(
         self,
         requests: list[CompletionRequest],
         *,
         return_completion_response: bool = False,
-    ) -> list[
-        RawCompletion
-        | tuple[CompletionRequest, CompletionResponse | Error]
-    ]:
+    ) -> list[RawCompletion | tuple[CompletionRequest, CompletionResponse | Error]]:
         semaphore = asyncio.Semaphore(self.max_async_concurrent_requests)
         async with AsyncClient(
             host=os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
@@ -440,6 +422,5 @@ class AlephAlphaAPIModel(BaseLLM):
 
 
 class Llama31_8B_Instruct_API(AlephAlphaAPIModel):
-    LLM_NAME = "llama-3.1-8b-instruct"
+    LLM_NAME = "llama-3.3-70b-instruct"
     DEFAULT_FORMATTER = Llama3Formatter
-
