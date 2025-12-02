@@ -308,7 +308,7 @@ class AlephAlphaAPIModel(BaseLLM):
             choices_log_probs: dict[str, float] = {}
             choices_sequence_positions: dict[str, int] = {}
             prompt_sequence_positions: int | None = 0
-            prompt_tokens_from_choice: int | None = None
+            number_of_initial_choices_tokens: int | None = None
             error: Error | None = None
 
             for choice in sample.possible_completions or []:
@@ -324,26 +324,20 @@ class AlephAlphaAPIModel(BaseLLM):
                     choices_sequence_positions = {}
                 else:
                     try:
-                        logprob, choice_token_count, prompt_token_count = self._extract_choice_logprob_from_completion(
+                        logprob, choice_token_count = self._extract_choice_logprob_from_completion(
                             prompt=prompt,
                             choice=choice,
                             response=response,
                         )
                         choices_log_probs[choice] = logprob
                         choices_sequence_positions[choice] = choice_token_count
-                        if prompt_tokens_from_choice is None:
-                            prompt_tokens_from_choice = prompt_token_count
-                            prompt_sequence_positions = prompt_token_count
-                        elif prompt_tokens_from_choice != prompt_token_count:
-                            logger.warning(
-                                "Prompt token counts differed between choices for sample %s (%s vs %s). "
-                                "Using latest value.",
-                                sample_idx,
-                                prompt_tokens_from_choice,
-                                prompt_token_count,
-                            )
-                            prompt_tokens_from_choice = prompt_token_count
-                            prompt_sequence_positions = prompt_token_count
+                        if number_of_initial_choices_tokens is None:
+                            number_of_initial_choices_tokens = choice_token_count
+
+                        self._check_choices_token_count(
+                            sample_idx, choice_token_count, number_of_initial_choices_tokens
+                        )
+
                     except Exception as exc:
                         if raise_errors():
                             raise
@@ -369,9 +363,22 @@ class AlephAlphaAPIModel(BaseLLM):
         return results
 
     @staticmethod
+    def _check_choices_token_count(
+        sample_idx: int, choice_token_count: int, number_of_initial_choices_tokens: int | None
+    ) -> None:
+        if number_of_initial_choices_tokens is not None:
+            if choice_token_count != number_of_initial_choices_tokens:
+                logger.warning(
+                    "Choice token count differed between choices for sample %s (%s vs %s). Using latest value.",
+                    sample_idx,
+                    choice_token_count,
+                    number_of_initial_choices_tokens,
+                )
+
+    @staticmethod
     def _extract_choice_logprob_from_completion(
         prompt: str, choice: str, response: CompletionResponse
-    ) -> tuple[float, int, int]:
+    ) -> tuple[float, int]:
         if not response.completions:
             raise ValueError("Completion response did not contain any choices.")
         completion_result = response.completions[0]
@@ -405,7 +412,7 @@ class AlephAlphaAPIModel(BaseLLM):
             assert isinstance(value, float)
             total_logprob += value
 
-        return total_logprob, choice_token_count, prompt_token_count
+        return total_logprob, choice_token_count
 
     @staticmethod
     def _count_prompt_tokens_from_sequence(tokens: Sequence[str], prompt: str) -> int:
