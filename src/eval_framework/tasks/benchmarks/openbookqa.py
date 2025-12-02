@@ -33,7 +33,7 @@ class OPENBOOKQA(BaseTask[str]):
         question = item["question_stem"].strip()
         fact = item["fact1"].strip()
         choices = "".join([f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"])])
-        return f"Fact: {fact}\nComplete: {question}:\n{choices}"
+        return f"Fact: {fact}\nComplete: {question}:\n{choices}\nAnswer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         answer_key = self.num_to_letter.get(item["answerKey"], item["answerKey"])
@@ -82,4 +82,4 @@ class OPENBOOKQA_EVAL_HARNESS(OPENBOOKQA):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question_stem"].strip()
         choices = "".join([f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"])])
-        return f"Complete: {question}:\n{choices}"
+        return f"Complete: {question}:\n{choices}\nAnswer:"
