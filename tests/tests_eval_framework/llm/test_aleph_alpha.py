@@ -265,6 +265,3 @@ def test_extract_choice_logprob_text_mismatch() -> None:
     # When / Then
     with pytest.raises(ValueError, match="Completion tokens differed"):
         AlephAlphaAPIModel._extract_choice_logprob_from_completion(prompt, choice, cast(Any, response))  # type: ignore
-
-
-test_extract_choice_logprob_success()
