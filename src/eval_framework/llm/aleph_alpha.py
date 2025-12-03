@@ -429,5 +429,5 @@ class AlephAlphaAPIModel(BaseLLM):
 
 
 class Llama31_8B_Instruct_API(AlephAlphaAPIModel):
-    LLM_NAME = "llama-3.3-70b-instruct"
+    LLM_NAME = "llama-3.1-8b-instruct"
     DEFAULT_FORMATTER = Llama3Formatter
