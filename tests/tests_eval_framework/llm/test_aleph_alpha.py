@@ -222,12 +222,11 @@ def test_extract_choice_logprob_success() -> None:
     response = MockCompletionResponse(completions=[completion_result])
 
     # When
-    logprob, choice_tokens, prompt_tokens = AlephAlphaAPIModel._extract_choice_logprob_from_completion(  # type: ignore
+    logprob, choice_tokens = AlephAlphaAPIModel._extract_choice_logprob_from_completion(  # type: ignore
         prompt, choice, cast(Any, response)
     )
 
     # Then
-    assert prompt_tokens == 3
     assert choice_tokens == 1
     assert logprob == pytest.approx(-0.9)  # type: ignore
 
