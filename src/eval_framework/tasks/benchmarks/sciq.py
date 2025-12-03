@@ -4,6 +4,9 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
+from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
+from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
 
 
@@ -44,6 +47,27 @@ class SCIQ(BaseTask[str]):
         return [f" {choice}" for choice in choices]
 
 
+class SCIQ_IDK(SCIQ):
+    NAME = "SciQ_IDK"
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        ConfidenceWeightedAccuracy,
+        DistributionalCorrectnessScore,
+        TernaryScore,
+    ]
+
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+        return (
+            "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
+            "It is acceptable to answer with 'don't know' if you are unsure, and you will receive 0 points."
+        )
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        completions = super()._get_possible_completions(item)
+        return (completions or []) + [" don't know"]
+
+
 class SCIQEvalHarness(SCIQ):
     """Based on
     https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/sciq/sciq.yaml#L8
@@ -63,3 +87,24 @@ class SCIQEvalHarness(SCIQ):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"{item['support'].lstrip()}\nQuestion: {item['question']}\n"
+
+
+class SCIQEvalHarness_IDK(SCIQEvalHarness):
+    NAME = "SciQ Eval Harness_IDK"
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        ConfidenceWeightedAccuracy,
+        DistributionalCorrectnessScore,
+        TernaryScore,
+    ]
+
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+        return (
+            "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
+            "It is acceptable to answer with 'don't know' if you are unsure, and you will receive 0 points."
+        )
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        completions = super()._get_possible_completions(item)
+        return (completions or []) + [" don't know"]
