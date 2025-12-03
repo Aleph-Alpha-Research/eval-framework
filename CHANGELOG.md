@@ -7,6 +7,7 @@
 ### Tasks
 
 - Added 11 "I don't know" (IDK) task variants: `ARC_IDK`, `COPA_IDK`, `GPQA_IDK`, `HELLASWAG_IDK`, `MMLU_IDK`, `MMLU_PRO_IDK`, `PIQA_IDK`, `OPENBOOKQA_IDK`, `TRUTHFULQA_IDK`, `WINOGENDER_IDK`, and `WINOGRANDE_IDK`. Call for automated hashing.
+- Corrected typo in prompt template key for a MTBench LLM-as-a-judge, and implemented tests to ensure these are always what we expect (no typos)
 
 ### Metrics
 
