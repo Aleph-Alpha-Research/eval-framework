@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import traceback
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from enum import Enum
@@ -13,10 +14,12 @@ from huggingface_hub import HfApi
 from huggingface_hub.errors import RevisionNotFoundError
 from pydantic import BaseModel, ConfigDict
 
-from eval_framework.shared.types import BaseMetricContext
+from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
+from eval_framework.tasks.utils import raise_errors
 from template_formatting.formatter import Message, Role
 
 if TYPE_CHECKING:
+    from eval_framework.llm.base import BaseLLM
     from eval_framework.metrics.base import BaseMetric
 
 RANDOM_SEED = 42
@@ -312,3 +315,78 @@ class BaseTask[SubjectType](ABC):
             "metrics": [m.NAME for m in self.METRICS],
             "subjects": [str(s) for s in self.SUBJECTS],
         }
+
+    def generate_completions(
+        self,
+        llm: "BaseLLM",
+        samples: list[Sample],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+    ) -> list[Completion]:
+        """
+        Generates completions for the sample.
+        :param sample: sample to generate completions for
+        :param stop_sequences: stop sequences to use in completion generation
+        :param max_tokens: maximum tokens to use in completion generation
+        :return: completion
+        """
+        if stop_sequences is None:
+            stop_sequences = []
+
+        raw_completions: list[RawCompletion]
+        try:
+            raw_completions = llm.generate(samples=samples, stop_sequences=stop_sequences, max_tokens=max_tokens)
+        except Exception as e:
+            if raise_errors():
+                raise e
+            logger.info(f"Error: {e.__class__.__name__} {e}")
+            assert len(samples) == 1, "LLMs not handling errors are not supported in batch mode"
+            raw_completions = [
+                RawCompletion(
+                    prompt="",
+                    prompt_sequence_positions=0,
+                    completion="",
+                    completion_sequence_positions=0,
+                    raw_completion_error=Error(
+                        error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc()
+                    ),
+                )
+                for _ in range(len(samples))
+            ]
+
+        completion_list = []
+        for idx, sample in enumerate(samples):
+            raw_completion = raw_completions[idx]
+
+            if sample.messages and sample.messages[-1].role == Role.ASSISTANT:
+                messages = sample.messages[:-1] + [
+                    Message(role=Role.ASSISTANT, content=sample.messages[-1].content + raw_completion.completion)
+                ]
+            else:
+                messages = sample.messages + [Message(role=Role.ASSISTANT, content=raw_completion.completion)]
+
+            try:
+                error = None
+                model_post_processed_completion = llm.post_process_completion(raw_completion.completion, sample)
+                completion = self.post_process_generated_completion(model_post_processed_completion, sample)
+            except Exception as e:
+                error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
+                completion = ""
+
+            completion_list.append(
+                Completion(
+                    id=sample.id,
+                    subject=sample.subject,
+                    ground_truth=sample.ground_truth,
+                    prompt=raw_completion.prompt,
+                    prompt_sequence_positions=raw_completion.prompt_sequence_positions,
+                    concat_compression=raw_completion.concat_compression,
+                    messages=messages,
+                    completion=completion,
+                    raw_completion=raw_completion.completion,
+                    raw_completion_sequence_positions=raw_completion.completion_sequence_positions,
+                    context=sample.context,
+                    error=raw_completion.raw_completion_error or error,
+                )
+            )
+        return completion_list
