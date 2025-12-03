@@ -34,8 +34,6 @@ __pycache__/
 dist/
 build/
 
-# Examples (optional - remove if needed in container)
-examples/
 
 # Misc
 .DS_Store
