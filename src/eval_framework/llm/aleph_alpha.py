@@ -32,7 +32,7 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 
-def safe_json_loads(s: str) -> dict:
+def safe_json_loads(s: str) -> dict[str, str]:
     try:
         return json.loads(s)
     except (json.JSONDecodeError, TypeError):
@@ -108,10 +108,7 @@ class AlephAlphaAPIModel(BaseLLM):
 
         while True:
             try:
-                if isinstance(request, CompletionRequest):
-                    return await client.complete(request, model=self._llm_name)
-                else:
-                    raise ValueError(f"Unsupported request type: {type(request)}")
+                return await client.complete(request, model=self._llm_name)
 
             except (TimeoutError, BusyError, RuntimeError, aiohttp.ClientError) as e:
                 status_code: str = safe_json_loads(e.args[1]).get("code", "") if len(e.args) >= 2 else ""
@@ -150,54 +147,84 @@ class AlephAlphaAPIModel(BaseLLM):
 
                 raise e
 
+    def _error_from_exception(self, e: Exception) -> Error:
+        """Convert an exception to an Error object."""
+        if len(e.args) >= 2:
+            status_code: str = safe_json_loads(e.args[1]).get("code", "")
+            if status_code == "PROMPT_TOO_LONG":
+                return Error(
+                    error_class=PromptTooLongException.__name__,
+                    message="Prompt exceeded context size.",
+                    traceback=traceback.format_exc(),
+                )
+            else:
+                return Error(
+                    error_class=status_code or e.__class__.__name__, message=str(e), traceback=traceback.format_exc()
+                )
+        else:
+            return Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
+
     async def _process_request_with_client(
         self,
         client: AsyncClient,
         semaphore: asyncio.Semaphore,
         request: CompletionRequest,
         id: int,
-        return_completion_response: bool = False,
-    ) -> RawCompletion | tuple[CompletionRequest, CompletionResponse | Error]:
+    ) -> tuple[CompletionRequest, CompletionResponse | Error]:
+        """Process a single request, returning the request and either a response or error."""
         async with semaphore:
             try:
                 response = await self._request_with_backoff(client=client, request=request, id=id)
                 logger.info(f"Request {id}: Success")
+                return (request, response)
             except Exception as e:
                 if raise_errors():
                     raise e
                 logger.info(f"Request {id}: Failure: {str(e)[:256]}")
-                if len(e.args) >= 2:
-                    status_code: str = safe_json_loads(e.args[1]).get("code", "")
-                    if status_code == "PROMPT_TOO_LONG":
-                        error = Error(
-                            error_class=PromptTooLongException.__name__,
-                            message="Prompt exceeded context size.",
-                            traceback=traceback.format_exc(),
-                        )
-                    else:
-                        error = Error(error_class=status_code, message=str(e), traceback=traceback.format_exc())
-                else:
-                    error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
+                return (request, self._error_from_exception(e))
 
-                if return_completion_response:
-                    return (request, error)
-                assert isinstance(request.prompt.items[0], Text)
-                return RawCompletion(
-                    prompt=request.prompt.items[0].text,
-                    prompt_sequence_positions=None,
-                    completion="",
-                    completion_sequence_positions=0,
-                    raw_completion_error=error,
+    async def _process_requests(
+        self,
+        requests: list[CompletionRequest],
+    ) -> list[tuple[CompletionRequest, CompletionResponse | Error]]:
+        """Process multiple requests concurrently, returning request/response pairs."""
+        semaphore = asyncio.Semaphore(self.max_async_concurrent_requests)
+        async with AsyncClient(
+            host=os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
+            nice=True,
+            request_timeout_seconds=self.request_timeout_seconds,
+            token=os.getenv("AA_TOKEN", "dummy"),
+            total_retries=0,  # we have a custom retry policy in _request_with_backoff()
+        ) as client:
+            tasks = (
+                self._process_request_with_client(
+                    client,
+                    semaphore,
+                    request,
+                    i,
                 )
+                for i, request in enumerate(requests)
+            )
+            responses = await asyncio.gather(*tasks)  # guarantees order of responses
+        return list(responses)
 
-        # Completion responses can directly be converted to RawCompletion
-        assert isinstance(response, CompletionResponse)
-        if return_completion_response:
-            return (request, response)
-
+    def _response_to_raw_completion(
+        self, request: CompletionRequest, response: CompletionResponse | Error
+    ) -> RawCompletion:
+        """Convert a request/response pair to a RawCompletion."""
         assert isinstance(request.prompt.items[0], Text)
-        assert len(response.completions) == 1
         prompt = request.prompt.items[0].text
+
+        if isinstance(response, Error):
+            return RawCompletion(
+                prompt=prompt,
+                prompt_sequence_positions=None,
+                completion="",
+                completion_sequence_positions=0,
+                raw_completion_error=response,
+            )
+
+        assert len(response.completions) == 1
         completion = response.completions[0].completion or ""
         prompt_sequence_positions: int | None = None
         completion_sequence_positions: int | None = None
@@ -220,33 +247,6 @@ class AlephAlphaAPIModel(BaseLLM):
             completion_sequence_positions=completion_sequence_positions,
         )
 
-    async def _process_requests(
-        self,
-        requests: list[CompletionRequest],
-        *,
-        return_completion_response: bool = False,
-    ) -> list[RawCompletion | tuple[CompletionRequest, CompletionResponse | Error]]:
-        semaphore = asyncio.Semaphore(self.max_async_concurrent_requests)
-        async with AsyncClient(
-            host=os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
-            nice=True,
-            request_timeout_seconds=self.request_timeout_seconds,
-            token=os.getenv("AA_TOKEN", "dummy"),
-            total_retries=0,  # we have a custom retry policy in _request_with_backoff()
-        ) as client:
-            tasks = (
-                self._process_request_with_client(
-                    client,
-                    semaphore,
-                    request,
-                    i,
-                    return_completion_response=return_completion_response,
-                )
-                for i, request in enumerate(requests)
-            )
-            responses = await asyncio.gather(*tasks)  # guarantees order of responses
-        return responses
-
     def generate_from_messages(
         self,
         messages: list[Sequence[Message]],
@@ -256,7 +256,7 @@ class AlephAlphaAPIModel(BaseLLM):
     ) -> list[RawCompletion]:
         effective_temperature = temperature if temperature is not None else self._temperature
 
-        requests = []
+        requests: list[CompletionRequest] = []
 
         # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
         scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
@@ -272,7 +272,7 @@ class AlephAlphaAPIModel(BaseLLM):
             )
 
         responses = asyncio.run(self._process_requests(requests))
-        return responses  # type: ignore
+        return [self._response_to_raw_completion(req, resp) for req, resp in responses]
 
     def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         prompts: list[str] = []
@@ -295,12 +295,7 @@ class AlephAlphaAPIModel(BaseLLM):
 
         completion_responses: list[tuple[CompletionRequest, CompletionResponse | Error]] = []
         if completion_requests:
-            completion_responses = asyncio.run(
-                self._process_requests(
-                    completion_requests,
-                    return_completion_response=True,
-                )
-            )
+            completion_responses = asyncio.run(self._process_requests(completion_requests))
         completion_iter = iter(completion_responses)
 
         results: list[RawLoglikelihood] = []
