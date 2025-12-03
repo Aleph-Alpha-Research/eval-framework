@@ -142,13 +142,20 @@ jobs:
     - name: Set Tag
       id: set-tag
       run: |
-        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+        if [ "${{ github.event_name }}" = "pull_request_target" ]; then
+          # SECURITY: Never use attacker-controlled branch names in pull_request_target
+          TAG="pr-${{ github.event.pull_request.number }}"
+        elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
           TAG='latest'
+        elif [ "${{ github.event_name }}" = "pull_request" ]; then
+          TAG="pr-${{ github.event.pull_request.number }}"
         else
-          # head_ref is the correct branch name for PRs
-          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
-          # Convert slashes with hyphens and ensure valid Docker tag format
+          BRANCH_NAME="${{ github.ref_name }}"
           TAG=$(echo "${BRANCH_NAME}" | sed 's/[^a-zA-Z0-9._-]/-/g' | cut -c1-20)
+          # Prevent collision with protected tags
+          if [ "$TAG" = "latest" ] || [ "$TAG" = "main" ]; then
+            TAG="branch-${TAG}-${{ github.run_id }}"
+          fi
         fi
         echo "tag=$TAG" >> $GITHUB_OUTPUT
         echo "image=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
