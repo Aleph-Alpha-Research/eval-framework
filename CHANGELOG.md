@@ -1,9 +1,9 @@
 # Changelog
 
-## Latest / Unreleased 
+## Main / Unreleased
 
-### Models 
-- Move `aleph_alpha.py` to use `/completions` endpoint instead of `/evaluate`. `/evaluate` was just available for model deployed in the luminous workers and is not supported in vllm. 
+### Models
+- Move `aleph_alpha.py` to use `/completions` endpoint instead of `/evaluate`. `/evaluate` was just available for model deployed in the luminous workers and is not supported in vllm.
 
 ## 0.2.4
 

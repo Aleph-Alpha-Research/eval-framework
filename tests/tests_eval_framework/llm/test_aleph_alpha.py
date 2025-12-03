@@ -1,22 +1,21 @@
 import json
+from typing import Any, NamedTuple, cast
 from unittest import mock
 
 import pytest
 
 import eval_framework.llm.aleph_alpha as aleph_alpha
-from eval_framework.llm.aleph_alpha import Llama31_8B_Instruct_API
+from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel, Llama31_8B_Instruct_API
 from eval_framework.shared.types import PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import Message, Role
 
-from typing import Any, NamedTuple, cast
-
-from eval_framework.llm.aleph_alpha import AlephAlphaAPIModel
 
 # Mocking because of the fluff in the actual implementation
 class MockCompletionResult(NamedTuple):
     completion_tokens: list[str]
     log_probs: list[dict[str, float]] | None
+
 
 class MockCompletionResponse(NamedTuple):
     completions: list[MockCompletionResult]
@@ -150,10 +149,6 @@ def test_max_tokens_generation() -> None:
     assert byte_level_model_generated_num_tokens == 40
 
 
-
-
-
-
 def test_count_prompt_tokens_perfect_match() -> None:
     # Given
     tokens = ["Hello", " ", "world"]
@@ -164,6 +159,7 @@ def test_count_prompt_tokens_perfect_match() -> None:
 
     # Then
     assert count == 3
+
 
 def test_count_prompt_tokens_prefix_match() -> None:
     # Given
@@ -176,6 +172,7 @@ def test_count_prompt_tokens_prefix_match() -> None:
     # Then
     assert count == 3
 
+
 def test_count_prompt_tokens_empty_prompt() -> None:
     # Given
     tokens = ["Hello", " ", "world"]
@@ -186,6 +183,7 @@ def test_count_prompt_tokens_empty_prompt() -> None:
 
     # Then
     assert count == 0
+
 
 def test_count_prompt_tokens_misaligned_tokens() -> None:
     # Given
@@ -198,6 +196,7 @@ def test_count_prompt_tokens_misaligned_tokens() -> None:
     # Then
     assert count == 3
 
+
 def test_count_prompt_tokens_failure() -> None:
     # Given
     tokens = ["Hello", " universe"]
@@ -206,6 +205,7 @@ def test_count_prompt_tokens_failure() -> None:
     # When / Then
     with pytest.raises(ValueError, match="Unable to align completion tokens."):
         AlephAlphaAPIModel._count_prompt_tokens_from_sequence(tokens, prompt)  # type: ignore
+
 
 def test_extract_choice_logprob_success() -> None:
     # Given
@@ -231,6 +231,7 @@ def test_extract_choice_logprob_success() -> None:
     assert choice_tokens == 1
     assert logprob == pytest.approx(-0.9)  # type: ignore
 
+
 def test_extract_choice_logprob_empty_response() -> None:
     # Given
     prompt = "A"
@@ -241,28 +242,24 @@ def test_extract_choice_logprob_empty_response() -> None:
     with pytest.raises(ValueError, match="Completion response did not contain any choices"):
         AlephAlphaAPIModel._extract_choice_logprob_from_completion(prompt, choice, cast(Any, response))  # type: ignore
 
+
 def test_extract_choice_logprob_token_mismatch() -> None:
     # Given
     prompt = "A"
     choice = "B"
-    completion_result = MockCompletionResult(
-        completion_tokens=["A", "B"],
-        log_probs=[{"A": -0.1}] 
-    )
+    completion_result = MockCompletionResult(completion_tokens=["A", "B"], log_probs=[{"A": -0.1}])
     response = MockCompletionResponse(completions=[completion_result])
 
     # When / Then
     with pytest.raises(ValueError, match="Mismatch between completion tokens"):
         AlephAlphaAPIModel._extract_choice_logprob_from_completion(prompt, choice, cast(Any, response))  # type: ignore
 
+
 def test_extract_choice_logprob_text_mismatch() -> None:
     # Given
     prompt = "A"
     choice = "B"
-    completion_result = MockCompletionResult(
-        completion_tokens=["A", "C"],
-        log_probs=[{"A": -0.1}, {"C": -0.2}]
-    )
+    completion_result = MockCompletionResult(completion_tokens=["A", "C"], log_probs=[{"A": -0.1}, {"C": -0.2}])
     response = MockCompletionResponse(completions=[completion_result])
 
     # When / Then
