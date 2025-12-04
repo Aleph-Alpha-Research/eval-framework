@@ -1,3 +1,4 @@
+import hashlib
 import random
 from abc import ABC
 from typing import Any
@@ -36,14 +37,21 @@ class WMT(BaseTask[str], ABC):
         else:
             ref_file = ref_files
 
-        src_data = [line.rstrip() for line in sacrebleu.smart_open(src_file)]
-        ref_data = [line.rstrip() for line in sacrebleu.smart_open(ref_file)]
+        # Read files completely into memory to avoid any streaming/buffering issues
+        with sacrebleu.smart_open(src_file) as f:
+            src_data = [line.rstrip() for line in f]
+        with sacrebleu.smart_open(ref_file) as f:
+            ref_data = [line.rstrip() for line in f]
 
         data_list = [{"source": src, "target": ref, "subject": subject} for src, ref in zip(src_data, ref_data)]
 
-        # Sort data_list before shuffling to ensure deterministic order
-        # Single string key ensures unique ordering even with duplicate source OR target
-        data_list.sort(key=lambda x: f"{x['source']}\x00{x['target']}")
+        # Use MD5 hash as sole sort key - completely independent of any input ordering
+        # This guarantees deterministic order based purely on content
+        def deterministic_sort_key(x: dict[str, Any]) -> str:
+            content = f"{x['source']}\x00{x['target']}"
+            return hashlib.md5(content.encode("utf-8")).hexdigest()
+
+        data_list.sort(key=deterministic_sort_key)
 
         self.rnd = random.Random(RANDOM_SEED)
         self.rnd.shuffle(data_list)
