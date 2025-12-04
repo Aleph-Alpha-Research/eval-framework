@@ -37,21 +37,32 @@ class WMT(BaseTask[str], ABC):
         else:
             ref_file = ref_files
 
-        # Read files completely into memory to avoid any streaming/buffering issues
+        # Read files completely into lists first (not iterating simultaneously)
         with sacrebleu.smart_open(src_file) as f:
             src_data = [line.rstrip() for line in f]
         with sacrebleu.smart_open(ref_file) as f:
             ref_data = [line.rstrip() for line in f]
 
-        data_list = [{"source": src, "target": ref, "subject": subject} for src, ref in zip(src_data, ref_data)]
+        # Ensure both lists have same length
+        assert len(src_data) == len(ref_data), f"Mismatch: {len(src_data)} source vs {len(ref_data)} target lines"
 
-        # Use MD5 hash as sole sort key - completely independent of any input ordering
-        # This guarantees deterministic order based purely on content
-        def deterministic_sort_key(x: dict[str, Any]) -> str:
+        # Create data list and sort by index first to ensure deterministic pairing
+        data_list = [
+            {"source": src, "target": ref, "subject": subject, "index": idx}
+            for idx, (src, ref) in enumerate(zip(src_data, ref_data))
+        ]
+
+        # Sort by index first (ensures deterministic order), then by content hash
+        def deterministic_sort_key(x: dict[str, Any]) -> tuple[int, str]:
             content = f"{x['source']}\x00{x['target']}"
-            return hashlib.md5(content.encode("utf-8")).hexdigest()
+            content_hash = hashlib.md5(content.encode("utf-8")).hexdigest()
+            return (x["index"], content_hash)
 
         data_list.sort(key=deterministic_sort_key)
+        
+        # Remove index before shuffling
+        for item in data_list:
+            del item["index"]
 
         self.rnd = random.Random(RANDOM_SEED)
         self.rnd.shuffle(data_list)

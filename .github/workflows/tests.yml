@@ -30,25 +30,25 @@ env:
   UV_LOCKED: 1
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+  # lint:
+  #   runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v4
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: "~=0.8.16"
+  #     - name: Setup uv
+  #       uses: astral-sh/setup-uv@v6
+  #       with:
+  #         version: "~=0.8.16"
 
-      - name: Run Pre-Commit
-        run: uvx pre-commit run --all-files
+  #     - name: Run Pre-Commit
+  #       run: uvx pre-commit run --all-files
 
-      - name: Dependency check
-        run: ./utils/dependency_check.sh
+  #     - name: Dependency check
+  #       run: ./utils/dependency_check.sh
 
-      - name: Run MyPy
-        run: uv run --all-extras mypy
+  #     - name: Run MyPy
+  #       run: uv run --all-extras mypy
 
   hf-datasets-cache:
     runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
@@ -75,155 +75,156 @@ jobs:
           echo "Updating changed datasets"
           uv run --extra=comet --extra=openai python tests/tests_eval_framework/utils/update_datasets.py update
 
-  tag:
-    # Set Docker Tag and Image Name for Docker Build and Push (GPU Runs)
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.set-tag.outputs.tag }}
-      image: ${{ steps.set-tag.outputs.image }}
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Set Tag
-      id: set-tag
-      run: |
-        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          TAG='latest'
-        else
-          # head_ref is the correct branch name for PRs
-          BRANCH_NAME=${{ github.head_ref || github.ref_name }}
-          # Convert slashes with hyphens and ensure valid Docker tag format
-          TAG=$(echo "${BRANCH_NAME}" | sed 's/[^a-zA-Z0-9._-]/-/g' | cut -c1-20)
-        fi
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
-        echo "image=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
+  # tag:
+  #   # Set Docker Tag and Image Name for Docker Build and Push (GPU Runs)
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     tag: ${{ steps.set-tag.outputs.tag }}
+  #     image: ${{ steps.set-tag.outputs.image }}
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+  #   - name: Set Tag
+  #     id: set-tag
+  #     run: |
+  #       if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+  #         TAG='latest'
+  #       else
+  #         # head_ref is the correct branch name for PRs
+  #         BRANCH_NAME=${{ github.head_ref || github.ref_name }}
+  #         # Convert slashes with hyphens and ensure valid Docker tag format
+  #         TAG=$(echo "${BRANCH_NAME}" | sed 's/[^a-zA-Z0-9._-]/-/g' | cut -c1-20)
+  #       fi
+  #       echo "tag=$TAG" >> $GITHUB_OUTPUT
+  #       echo "image=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
 
-    - name: Output Docker Tag
-      run: |
-        echo "Docker Tag: ${{ steps.set-tag.outputs.tag }}"
-        echo "Docker image: ${{ steps.set-tag.outputs.image }}"
+  #   - name: Output Docker Tag
+  #     run: |
+  #       echo "Docker Tag: ${{ steps.set-tag.outputs.tag }}"
+  #       echo "Docker image: ${{ steps.set-tag.outputs.image }}"
 
-  build:
-    # Build and Push Docker Image (GPU Runs)
-    needs: [lint, tag]
-    runs-on: cpu-runner-8c-32gb-01
-    container: docker:dind
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+  # build:
+  #   # Build and Push Docker Image (GPU Runs)
+  #   needs: [lint, tag]
+  #   runs-on: cpu-runner-8c-32gb-01
+  #   container: docker:dind
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v4
 
-      - name: Registry Authentication
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: token
-          password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
+  #     - name: Registry Authentication
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ${{ env.REGISTRY }}
+  #         username: token
+  #         password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
 
-      - name: Setup Docker BuildX
-        uses: docker/setup-buildx-action@v3
+  #     - name: Setup Docker BuildX
+  #       uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push Image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile
+  #     - name: Build and Push Image
+  #       uses: docker/build-push-action@v6
+  #       with:
+  #         context: .
+  #         file: Dockerfile
 
-          push: true
-          tags: ${{ needs.tag.outputs.image }}
+  #         push: true
+  #         tags: ${{ needs.tag.outputs.image }}
 
-          build-args: BUILDKIT_INLINE_CACHE=1
+  #         build-args: BUILDKIT_INLINE_CACHE=1
 
-          cache-from: |
-            type=gha,scope=shared
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:buildcache
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:latest
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
+  #         cache-from: |
+  #           type=gha,scope=shared
+  #           type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:buildcache
+  #           type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:latest
+  #           type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
 
-  test-extras:
-    # Test uv installs (CPU)
-    runs-on: ubuntu-latest
-    needs: [lint]
-    strategy:
-      fail-fast: false
-      matrix:
-        extras: ['', 'determined', 'api', 'openai', 'transformers', 'accelerate', 'comet', 'optional']
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+  # test-extras:
+  #   # Test uv installs (CPU)
+  #   runs-on: ubuntu-latest
+  #   needs: [lint]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       extras: ['', 'determined', 'api', 'openai', 'transformers', 'accelerate', 'comet', 'optional']
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v4
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: "~=0.8.16"
+  #     - name: Setup uv
+  #       uses: astral-sh/setup-uv@v6
+  #       with:
+  #         version: "~=0.8.16"
 
-      - name: Verify install and functionality via uv --exact
-        run: |
-          if [ "${{ matrix.extras }}" != "" ]; then
-            echo "Testing extra: ${{ matrix.extras }}"
-            uv run --exact --extra ${{ matrix.extras }} pytest -v --noconftest tests/tests_eval_framework/installs/test_${{ matrix.extras }}.py
-          else
-            echo "Testing core install"
-            uv run --exact pytest --noconftest -v tests/tests_eval_framework/installs/test_core.py
-          fi
+  #     - name: Verify install and functionality via uv --exact
+  #       run: |
+  #         if [ "${{ matrix.extras }}" != "" ]; then
+  #           echo "Testing extra: ${{ matrix.extras }}"
+  #           uv run --exact --extra ${{ matrix.extras }} pytest -v --noconftest tests/tests_eval_framework/installs/test_${{ matrix.extras }}.py
+  #         else
+  #           echo "Testing core install"
+  #           uv run --exact pytest --noconftest -v tests/tests_eval_framework/installs/test_core.py
+  #         fi
 
-  test-cpu:
-    runs-on: cpu-runner-8c-32gb-01
-    container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
-    steps:
-      - uses: actions/checkout@v4
+  # test-cpu:
+  #   runs-on: cpu-runner-8c-32gb-01
+  #   container: derskythe/github-runner-base:ubuntu-noble
+  #   needs: [hf-datasets-cache, test-extras]
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: "~=0.8.16"
+  #     - name: Setup uv
+  #       uses: astral-sh/setup-uv@v6
+  #       with:
+  #         version: "~=0.8.16"
 
-      - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-${{ github.run_id }}
-          restore-keys: |
-            hf-datasets-
+  #     - name: Huggingface datasets cache
+  #       uses: actions/cache/restore@v4
+  #       with:
+  #         path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+  #         key: hf-datasets-${{ github.run_id }}
+  #         restore-keys: |
+  #           hf-datasets-
 
-      - name: Run tests
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and not cpu_slow and not external_api and not formatter_hash"
+  #     - name: Run tests
+  #       env:
+  #         HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+  #       run: |
+  #         uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
+  #         uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and not cpu_slow and not external_api and not formatter_hash"
 
-  test-cpu-slow:
-    runs-on: cpu-runner-8c-32gb-01
-    container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
-    steps:
-      - uses: actions/checkout@v4
+  # test-cpu-slow:
+  #   runs-on: cpu-runner-8c-32gb-01
+  #   container: derskythe/github-runner-base:ubuntu-noble
+  #   needs: [hf-datasets-cache, test-extras]
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: "~=0.8.16"
+  #     - name: Setup uv
+  #       uses: astral-sh/setup-uv@v6
+  #       with:
+  #         version: "~=0.8.16"
 
-      - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
-          restore-keys: |
-            hf-datasets-
+  #     - name: Huggingface datasets cache
+  #       uses: actions/cache/restore@v4
+  #       with:
+  #         path: ${{ env.HF_DATASET_CACHE_DIR }}
+  #         key: hf-datasets-${{ github.run_id }}
+  #         restore-keys: |
+  #           hf-datasets-
 
-      - name: Run tests
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api and not formatter_hash"
+  #     - name: Run tests
+  #       env:
+  #         HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+  #       run: |
+  #         uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
+  #         uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api and not formatter_hash"
 
   test-formatter-hash:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+    # needs: [hf-datasets-cache, test-extras]
+    needs: [hf-datasets-cache]
     steps:
       - uses: actions/checkout@v4
 
@@ -247,55 +248,55 @@ jobs:
           uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
           uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "formatter_hash"
 
-  test-docker-gpu:
-    # Run full test suite in Docker Container with GPU
-    runs-on: EvalFrameworkGPURunner
-    needs: [tag, build, test-cpu, test-cpu-slow, test-formatter-hash]
-    container:
-      image: "${{ needs.tag.outputs.image }}"
-      credentials:
-        username: token
-        password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
-      options: --gpus all
-    defaults:
-      run:
-        working-directory: /eval_framework
-    steps:
-      - name: Verify GPU installs via uv --exact
-        run: |
-          set -e  # fail fast if any test fails
+  # test-docker-gpu:
+  #   # Run full test suite in Docker Container with GPU
+  #   runs-on: EvalFrameworkGPURunner
+  #   needs: [tag, build, test-cpu, test-cpu-slow, test-formatter-hash]
+  #   container:
+  #     image: "${{ needs.tag.outputs.image }}"
+  #     credentials:
+  #       username: token
+  #       password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
+  #     options: --gpus all
+  #   defaults:
+  #     run:
+  #       working-directory: /eval_framework
+  #   steps:
+  #     - name: Verify GPU installs via uv --exact
+  #       run: |
+  #         set -e  # fail fast if any test fails
 
-          echo "Testing vllm extra"
-          uv run --exact --extra vllm pytest -v --noconftest tests/tests_eval_framework/installs/test_vllm.py
+  #         echo "Testing vllm extra"
+  #         uv run --exact --extra vllm pytest -v --noconftest tests/tests_eval_framework/installs/test_vllm.py
 
-          echo "Testing mistral extra"
-          uv run --exact --extra mistral pytest -v --noconftest tests/tests_eval_framework/installs/test_mistral.py
+  #         echo "Testing mistral extra"
+  #         uv run --exact --extra mistral pytest -v --noconftest tests/tests_eval_framework/installs/test_mistral.py
 
-          echo "Testing all extras together"
-          uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
+  #         echo "Testing all extras together"
+  #         uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
 
-      - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
-          restore-keys: |
-            hf-datasets-
+  #     - name: Huggingface datasets cache
+  #       uses: actions/cache/restore@v4
+  #       with:
+  #         path: ${{ env.HF_DATASET_CACHE_DIR }}
+  #         key: hf-datasets-${{ github.run_id }}
+  #         restore-keys: |
+  #           hf-datasets-
 
-      - name: Test GPU
-        timeout-minutes: 20
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
+  #     - name: Test GPU
+  #       timeout-minutes: 20
+  #       env:
+  #         HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+  #       run: uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
 
-      - name: Test VLLM
-        timeout-minutes: 20
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-          VLLM_LOGGING_LEVEL: DEBUG
-          VLLM_WORKER_MULTIPROC_METHOD: spawn
-          VLLM_USE_MODELSCOPE: False
-          VLLM_NCCL_SO_PATH: ""
-          VLLM_USE_TRITON_FLASH_ATTN: 0
-          VLLM_DISABLE_CUSTOM_ALL_REDUCE: 1
-        run: pytest --log-cli-level=INFO -v -m "vllm"
+  #     - name: Test VLLM
+  #       timeout-minutes: 20
+  #       env:
+  #         HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+  #         VLLM_LOGGING_LEVEL: DEBUG
+  #         VLLM_WORKER_MULTIPROC_METHOD: spawn
+  #         VLLM_USE_MODELSCOPE: False
+  #         VLLM_NCCL_SO_PATH: ""
+  #         VLLM_USE_TRITON_FLASH_ATTN: 0
+  #         VLLM_DISABLE_CUSTOM_ALL_REDUCE: 1
+  #       run: pytest --log-cli-level=INFO -v -m "vllm"
