@@ -42,8 +42,8 @@ class WMT(BaseTask[str], ABC):
         data_list = [{"source": src, "target": ref, "subject": subject} for src, ref in zip(src_data, ref_data)]
 
         # Sort data_list before shuffling to ensure deterministic order
-        # This handles any non-determinism from sacrebleu file loading
-        data_list.sort(key=lambda x: (x["source"], x["target"]))
+        # Single string key ensures unique ordering even with duplicate source OR target
+        data_list.sort(key=lambda x: f"{x['source']}\x00{x['target']}")
 
         self.rnd = random.Random(RANDOM_SEED)
         self.rnd.shuffle(data_list)
