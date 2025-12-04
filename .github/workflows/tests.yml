@@ -223,8 +223,7 @@ jobs:
   test-formatter-hash:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    # needs: [hf-datasets-cache, test-extras]
-    needs: [hf-datasets-cache]
+    needs: [hf-datasets-cache, test-extras]
     steps:
       - uses: actions/checkout@v4
 
