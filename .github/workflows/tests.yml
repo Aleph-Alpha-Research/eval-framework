@@ -253,7 +253,7 @@ jobs:
         timeout-minutes: 20
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
+        run: uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not vllm"
       - name: Test VLLM
         timeout-minutes: 20
         env:
