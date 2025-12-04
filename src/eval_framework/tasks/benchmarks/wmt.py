@@ -27,8 +27,17 @@ class WMT(BaseTask[str], ABC):
         self.stop_sequences: list[str] = [".\n", " phrase: ", "phrase:", "phrase: ", " phrase:", "\n\n"]
 
     def _load_dataset(self, subject: str | None) -> None:
-        src_file, ref_file, _, _, _ = sacrebleu.download_test_set(test_set=self.DATASET_PATH, langpair=subject)
-        src_data, ref_data = [[line.rstrip() for line in sacrebleu.smart_open(file)] for file in (src_file, ref_file)]
+        src_file, ref_files, _, _, _ = sacrebleu.download_test_set(test_set=self.DATASET_PATH, langpair=subject)
+
+        # ref_files is a list of reference file paths - ensure deterministic order and use first one
+        if isinstance(ref_files, list):
+            ref_files = sorted(ref_files)
+            ref_file = ref_files[0]
+        else:
+            ref_file = ref_files
+
+        src_data = [line.rstrip() for line in sacrebleu.smart_open(src_file)]
+        ref_data = [line.rstrip() for line in sacrebleu.smart_open(ref_file)]
 
         data_list = [{"source": src, "target": ref, "subject": subject} for src, ref in zip(src_data, ref_data)]
 
