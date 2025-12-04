@@ -30,40 +30,48 @@ class WMT(BaseTask[str], ABC):
     def _load_dataset(self, subject: str | None) -> None:
         src_file, ref_files, _, _, _ = sacrebleu.download_test_set(test_set=self.DATASET_PATH, langpair=subject)
 
-        # ref_files is a list of reference file paths - ensure deterministic order and use first one
+        # Handle multiple reference files - use first non-empty one
         if isinstance(ref_files, list):
             ref_files = sorted(ref_files)
-            ref_file = ref_files[0]
-        else:
-            ref_file = ref_files
+            ref_data = None
+            for candidate_ref in ref_files:
+                try:
+                    with sacrebleu.smart_open(candidate_ref) as f:
+                        test_data = [line.rstrip() for line in f]
+                        if test_data:
+                            ref_data = test_data
+                            break
+                except Exception:
+                    continue
 
-        # Read files completely into lists first (not iterating simultaneously)
+            if ref_data is None:
+                raise ValueError(f"No valid reference file found for {self.DATASET_PATH}/{subject}")
+        else:
+            with sacrebleu.smart_open(ref_files) as f:
+                ref_data = [line.rstrip() for line in f]
+
+        # Read source file
         with sacrebleu.smart_open(src_file) as f:
             src_data = [line.rstrip() for line in f]
-        with sacrebleu.smart_open(ref_file) as f:
-            ref_data = [line.rstrip() for line in f]
 
-        # Ensure both lists have same length
-        assert len(src_data) == len(ref_data), f"Mismatch: {len(src_data)} source vs {len(ref_data)} target lines"
+        assert len(src_data) == len(ref_data), f"Mismatch: {len(src_data)} vs {len(ref_data)} lines"
 
-        # Create data list and sort by index first to ensure deterministic pairing
-        data_list = [
-            {"source": src, "target": ref, "subject": subject, "index": idx}
-            for idx, (src, ref) in enumerate(zip(src_data, ref_data))
-        ]
+        # Create indexed pairs for deterministic sorting
+        indexed_pairs = list(enumerate(zip(src_data, ref_data)))
 
-        # Sort by index first (ensures deterministic order), then by content hash
-        def deterministic_sort_key(x: dict[str, Any]) -> tuple[int, str]:
-            content = f"{x['source']}\x00{x['target']}"
+        # Sort by content hash (primary) + original index (tiebreaker)
+        def sort_key(item: tuple[int, tuple[str, str]]) -> tuple[str, int]:
+            idx, (src, ref) = item
+            content = f"{src}\x00{ref}"
             content_hash = hashlib.md5(content.encode("utf-8")).hexdigest()
-            return (x["index"], content_hash)
+            return (content_hash, idx)
 
-        data_list.sort(key=deterministic_sort_key)
-        
-        # Remove index before shuffling
-        for item in data_list:
-            del item["index"]
+        indexed_pairs.sort(key=sort_key)
 
+        # Create final data list
+        data_list = [{"source": src, "target": ref, "subject": subject} for _, (src, ref) in indexed_pairs]
+
+        # Shuffle with fixed seed for reproducibility
         self.rnd = random.Random(RANDOM_SEED)
         self.rnd.shuffle(data_list)
         self.dataset = {"test": data_list}
