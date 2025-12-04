@@ -13,6 +13,7 @@
 ### Metrics
 
 ### General
+- Updated image urls to be absolute so the pypi page can display them correctly
 
 ## 0.2.4
 
