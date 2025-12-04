@@ -14,6 +14,8 @@
 
 ### General
 
+- Added an issue_template to guide contributors to create valuable and standardized issues (mainly for the companion).
+
 ## 0.2.4
 
 ### Models
