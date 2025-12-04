@@ -1,11 +1,3 @@
----
-name: Standard Issue
-about: Create a new issue following the standard guidelines
-title: "[ISSUE TITLE]"
-labels: area/...
-assignees: 
----
-
 ## Issue Checklist
 - [ ] Provide a descriptive title and summary
 - [ ] Add relevant labels (3–5 labels recommended)
