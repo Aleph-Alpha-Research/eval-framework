@@ -1,2 +1,40 @@
+# Virtual environments
 .venv
 *._cache
+
+# Git
+.git
+.gitignore
+
+# GitHub Actions (not needed in container)
+.github
+
+# Documentation (README.md is needed for pyproject.toml)
+docs/
+*.md
+!README.md
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+
+
+# Misc
+.DS_Store
+*.log
