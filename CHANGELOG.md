@@ -13,6 +13,7 @@
 ### Metrics
 
 ### General
+- Updated image urls to be absolute so the pypi page can display them correctly
 
 - Added an issue_template to guide contributors to create valuable and standardized issues (mainly for the companion).
 
