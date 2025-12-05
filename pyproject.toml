@@ -177,6 +177,7 @@ markers = [
     "cpu_slow: runs for a long time (on CPU)",
     "external_api: needs external services for execution",
     "vllm: tests that specifically require vLLM functionality",
+    "formatter_hash: formatter consistency tests using hash comparisons",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning:datasets.utils._dill:",

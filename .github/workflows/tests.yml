@@ -50,28 +50,26 @@ jobs:
     runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
     steps:
       - uses: actions/checkout@v4
-        if: github.ref == 'refs/heads/main'
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v6
-        if: github.ref == 'refs/heads/main'
         with:
           version: "~=0.8.16"
 
-      - name: Huggingface datasets cache
+      - name: Restore and save cache
         uses: actions/cache@v4
-        if: github.ref == 'refs/heads/main'
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- use shared env
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-${{ github.run_id }}
           restore-keys: |
             hf-datasets-
 
-      - name: Download datasets
-        if: github.ref == 'refs/heads/main'
+      - name: Download only updated datasets
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: uv run --extra=comet --extra=openai python -c "from eval_framework.tasks.task_names import make_sure_all_hf_datasets_are_in_cache; make_sure_all_hf_datasets_are_in_cache()"
+        run: |
+          echo "Updating changed datasets"
+          uv run --extra=comet --extra=openai python tests/tests_eval_framework/utils/update_datasets.py update
 
   tag:
     # Set Docker Tag and Image Name for Docker Build and Push (GPU Runs)
@@ -180,12 +178,16 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-
+          key: hf-datasets-${{ github.run_id }}
+          restore-keys: |
+            hf-datasets-
 
       - name: Run tests
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: uv run --all-extras pytest --durations=30 -v -m "not gpu and not cpu_slow and not external_api"
+        run: |
+          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
+          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and not cpu_slow and not external_api and not formatter_hash"
 
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
@@ -202,20 +204,49 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          key: hf-datasets-${{ github.run_id }}
+          restore-keys: |
+            hf-datasets-
 
       - name: Run tests
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"  # otherwise there's a race condition in ntltk
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api"
+          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
+          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api and not formatter_hash"
+
+  test-formatter-hash:
+    runs-on: cpu-runner-8c-32gb-01
+    container: derskythe/github-runner-base:ubuntu-noble
+    needs: [hf-datasets-cache, test-extras]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+
+      - name: Huggingface datasets cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          key: hf-datasets-${{ github.run_id }}
+          restore-keys: |
+            hf-datasets-
+
+      - name: Run formatter hashing tests
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: |
+          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
+          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "formatter_hash"
 
   test-docker-gpu:
     # Run full test suite in Docker Container with GPU
     runs-on: EvalFrameworkGPURunner
-    needs: [tag, build, test-cpu, test-cpu-slow]
+    needs: [tag, build, test-cpu, test-cpu-slow, test-formatter-hash]
     container:
       image: "${{ needs.tag.outputs.image }}"
       credentials:
@@ -242,14 +273,17 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          key: hf-datasets-${{ github.run_id }}
+          restore-keys: |
+            hf-datasets-
 
       - name: Test GPU
         timeout-minutes: 20
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
+
       - name: Test VLLM
         timeout-minutes: 20
         env:
