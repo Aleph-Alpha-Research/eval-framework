@@ -1,0 +1,49 @@
+name: Build & Deploy Sphinx Docs
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup UV
+        uses: astral-sh/uv-action@v1
+
+      - name: Install project & docs dependencies
+        run: |
+          uv sync --all-extras
+          uv run pip install sphinx pallets-sphinx-themes sphinx-autobuild sphinx-rtd-theme
+          uv pip install "sphinx<8"
+
+      - name: Build Sphinx HTML
+        run: uv run make -C docs html
+
+      - name: Upload built docs as artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/_build/html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
