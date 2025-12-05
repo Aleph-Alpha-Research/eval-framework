@@ -1,0 +1,43 @@
+name: Nightly HuggingFace Datasets Cache Rebuild
+
+on:
+  schedule:
+    # Run every night at 2 AM UTC
+    - cron: '0 2 * * *'
+  # Allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets
+  SACREBLEU: /tmp/huggingface_datasets/sacrebleu
+  UV_LINK_MODE: symlink
+  UV_LOCKED: 1
+
+jobs:
+  rebuild-cache:
+    runs-on: cpu-runner-8c-32gb-01
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+
+      - name: Restore existing cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          key: hf-datasets-${{ github.run_id }}
+          restore-keys: |
+            hf-datasets-
+
+      - name: Download ALL datasets (full rebuild)
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: |
+          echo "Rebuilding all datasets cache"
+          uv run --extra=comet --extra=openai python tests/tests_eval_framework/utils/update_datasets.py rebuild

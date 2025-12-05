@@ -1,6 +1,21 @@
 # Changelog
 
-## Unreleased: 0.2.4-dev
+## 0.2.5-dev
+
+### Models
+- Move `aleph_alpha.py` to use `/completions` endpoint instead of `/evaluate`. `/evaluate` was just available for model deployed in the luminous workers and is not supported in vllm.
+
+### Tasks
+
+- Added 11 "I don't know" (IDK) task variants: `ARC_IDK`, `COPA_IDK`, `GPQA_IDK`, `HELLASWAG_IDK`, `MMLU_IDK`, `MMLU_PRO_IDK`, `PIQA_IDK`, `OPENBOOKQA_IDK`, `TRUTHFULQA_IDK`, `WINOGENDER_IDK`, and `WINOGRANDE_IDK`. Call for automated hashing.
+- Corrected typo in prompt template key for a MTBench LLM-as-a-judge, and implemented tests to ensure these are always what we expect (no typos)
+
+### Metrics
+
+### General
+- Updated image urls to be absolute so the pypi page can display them correctly
+
+## 0.2.4
 
 ### Models
 
@@ -9,14 +24,17 @@
 
 ### Tasks
 
-### Metrics
+- Added AidanBench benchmark (measures creative divergent thinking by counting unique, coherent responses to open-ended questions) as well as AidanBenchOriginal (the same, but preserving a typo found in the original implementation).
 
+### Metrics
 
 ### General
 
 - Added documentation on `SQUAD` and `SQUAD2` benchmark classes
 - Updated documentation on lists of available tasks
 - added `.vscode/launch.json`
+- Added verbosity levels (0 is critical, 1 is info, 2 is debug) for minimal output
+- Modified the Hendrycks Math task to use the same query template as MATH500 to encourage boxed answer formatting.
 
 ## 0.2.3
 

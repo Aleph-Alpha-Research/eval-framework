@@ -815,7 +815,7 @@ wheels = [
 
 [[package]]
 name = "eval-framework"
-version = "0.2.4.dev0"
+version = "0.2.4"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
@@ -830,6 +830,7 @@ dependencies = [
     { name = "lxml" },
     { name = "mysql-connector-python" },
     { name = "nltk" },
+    { name = "numpy" },
     { name = "psycopg2-binary" },
     { name = "pycountry" },
     { name = "pydantic" },
@@ -943,6 +944,7 @@ requires-dist = [
     { name = "mistral-common", marker = "extra == 'mistral'", specifier = ">=1.7,<2" },
     { name = "mysql-connector-python", specifier = ">=9.0.0,<10" },
     { name = "nltk", specifier = ">=3.9.1,<4" },
+    { name = "numpy", specifier = ">=1.26.4" },
     { name = "openai", marker = "extra == 'openai'", specifier = ">=1.62,<2.8" },
     { name = "psycopg2-binary", specifier = ">=2.9.9,<3" },
     { name = "pycountry", specifier = ">=24.6.1,<25" },

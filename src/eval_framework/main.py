@@ -29,12 +29,13 @@ def main(
     trial_id: int | None = None,
     *args: Any,
     resource_cleanup: bool = False,
+    verbosity: int = 1,
 ) -> list[Result]:
     """Runs the entire evaluation process: responses generation and evaluation."""
     # Set up centralized logging early
     output_dir = generate_output_dir(llm.name, config)
-    print(f"Output directory for evaluation: {output_dir}")
-    setup_logging(output_dir=output_dir, log_level=logging.INFO, log_filename="evaluation.log")
+    setup_logging(output_dir=output_dir, log_level=verbosity, log_filename="evaluation.log")
+    logger.info(f"Output directory for evaluation: {output_dir}")
 
     logger.info(f"{RED}[ Running full evaluation process ------- ]{RESET}")
     logger.info(f"Evaluating {llm.name} on {config.task_name}")

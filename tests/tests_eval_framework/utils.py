@@ -45,21 +45,43 @@ def assert_hash_string(task_name: str, suffix_key: str, tested_string: str) -> s
     else:
         all_hashes = {}
 
-    print("---")
-    print(f"Tested string:\n---START---{tested_string}---END---")
-    print(f"Hash: {tested_string_hash}")
-    print("---")
-
     if key in all_hashes:
-        assert all_hashes[key] == tested_string_hash, (
-            f"Hash mismatch for key: {key}\nExpected: {all_hashes[key]}\nActual: {tested_string_hash}\n"
-        )
+        expected_hash = all_hashes[key]
+
+        if expected_hash != tested_string_hash:
+            print("\n" + "=" * 80)
+            print(f"HASH MISMATCH for: {key}")
+            print("=" * 80)
+            print(f"\nExpected hash: {expected_hash}")
+            print(f"Actual hash:   {tested_string_hash}")
+            print("\n--- ACTUAL OUTPUT ---")
+            print(tested_string)
+            print("--- END ACTUAL OUTPUT ---")
+            print("\nNote: Expected output is not stored (only hash).")
+            print("=" * 80 + "\n")
+
+            assert False, (
+                f"Hash mismatch for key: {key}\n"
+                f"Expected: {expected_hash}\n"
+                f"Actual:   {tested_string_hash}\n"
+                f"See actual output above."
+            )
     else:
+        print("\n" + "=" * 80)
+        print(f"NEW HASH ENTRY: {key}")
+        print("=" * 80)
+        print(f"Hash: {tested_string_hash}")
+        print("\n--- STRING BEING HASHED ---")
+        print(tested_string)
+        print("--- END ---")
+        print("=" * 80 + "\n")
+
         all_hashes[key] = tested_string_hash
+
         with HASHES_FILE.open("w", encoding="utf-8") as f:
             json.dump(dict(sorted(all_hashes.items())), f, indent=2, ensure_ascii=False)
 
-        assert False, f"Hash for key '{key}' not found in {HASHES_FILE}. It was added for future local runs."
+        assert False, f"Hash for key '{key}' not found in {HASHES_FILE}. It was added for future runs."
 
     return tested_string_hash
 

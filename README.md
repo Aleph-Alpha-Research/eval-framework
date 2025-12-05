@@ -1,7 +1,7 @@
 # Aleph Alpha Eval-Framework
 
 > **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 90+ benchmarks.
-![eval-framework](docs/eval-framework.png "https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/docs/eval-framework.png")
+![eval-framework](docs/eval-framework.png "https://raw.githubusercontent.com/Aleph-Alpha-Research/eval-framework/refs/heads/main/docs/eval-framework.png")
 
 ## Why Choose This Framework?
 
@@ -256,6 +256,6 @@ This project has received funding from the European Union’s Digital Europe Pro
 The contents of this publication are the sole responsibility of the OpenEuroLLM consortium and do not necessarily reflect the opinion of the European Union.
 
 <p align="center">
-  <img src="docs/OELLM_1.png" alt="https://github.com/Aleph-Alpha-Research/eval-framework/raw/main/docs/OELLM_1.png" width="100" style="margin-right: 50px;"/>
-  <img src="docs/OELLM_2.png" alt="https://github.com/Aleph-Alpha-Research/eval-framework/raw/main/docs/OELLM_2.png" width="350"/>
+  <img src="docs/OELLM_1.png" alt="https://raw.githubusercontent.com/Aleph-Alpha-Research/eval-framework/main/docs/OELLM_1.png" width="100" style="margin-right: 50px;"/>
+  <img src="docs/OELLM_2.png" alt="https://raw.githubusercontent.com/Aleph-Alpha-Research/eval-framework/main/docs/OELLM_2.png" width="350"/>
 </p>
