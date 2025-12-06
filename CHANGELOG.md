@@ -14,6 +14,7 @@
 
 ### General
 - Updated image urls to be absolute so the pypi page can display them correctly
+- Added `llm_judge_prompt` and `llm_judge_response` to MTBENCH metric results
 
 ## 0.2.4
 
@@ -32,7 +33,7 @@
 
 - Added documentation on `SQUAD` and `SQUAD2` benchmark classes
 - Updated documentation on lists of available tasks
-- added `.vscode/launch.json`
+- Added `.vscode/launch.json`
 - Added verbosity levels (0 is critical, 1 is info, 2 is debug) for minimal output
 - Modified the Hendrycks Math task to use the same query template as MATH500 to encourage boxed answer formatting.
 

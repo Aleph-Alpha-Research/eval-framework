@@ -17,7 +17,7 @@ class BaseLLMJudgeMetric(BaseMetric[Completion]):
         llm_judge_prompt: str | None = None,
         llm_judge_response: str | None = None,
         code_execution_trace: str | None = None,
-        error: Exception | None = None,
+        error: Error | None = None,
     ) -> MetricResult:
         """Helper method to create MetricResult with consistent structure."""
         return MetricResult(
