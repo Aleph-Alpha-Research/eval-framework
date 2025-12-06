@@ -1,6 +1,6 @@
 [project]
 name = "eval-framework"
-version = "0.2.4-dev"
+version = "0.2.4"
 description = "Evalulation Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -41,6 +41,7 @@ dependencies = [
   "python-iso639>=2025.2.18",
   "wandb>=0.23.0,<1",
   "boto3>=1.40.54,<2",
+  "numpy>=1.26.4",
 ]
 
 [project.optional-dependencies]
@@ -165,7 +166,7 @@ known-third-party = ["wandb"]
 plugins = "pydantic.mypy"
 disallow_untyped_defs = true
 ignore_missing_imports = true
-files = ["src", "tests", "utils"]
+files = ["src", "utils"]
 
 [tool.pytest.ini_options]
 testpaths = ["./tests"]
@@ -176,6 +177,7 @@ markers = [
     "cpu_slow: runs for a long time (on CPU)",
     "external_api: needs external services for execution",
     "vllm: tests that specifically require vLLM functionality",
+    "formatter_hash: formatter consistency tests using hash comparisons",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning:datasets.utils._dill:",

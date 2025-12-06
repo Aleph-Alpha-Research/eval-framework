@@ -35,7 +35,7 @@ SINGLE_JUDGE_PROMPTS_DE = {
         "prompt_template": '[System]\nDu bist ein hilfreicher Assistent.\n\n[Anweisung]\nBitte agieren Sie als unparteiischer Richter und bewerten Sie die Qualität der Antwort, die von einem KI-Assistenten auf die unten angezeigte Nutzerfrage gegeben wurde. Ihre Bewertung sollte Korrektheit und Nützlichkeit berücksichtigen. Ihnen wird eine Referenzantwort und die Antwort des Assistenten gegeben. Beginnen Sie Ihre Bewertung, indem Sie die Antwort des Assistenten mit der Referenzantwort vergleichen. Identifizieren Sie und korrigieren Sie etwaige Fehler. Seien Sie so objektiv wie möglich. Nachdem Sie Ihre Erklärung gegeben haben, müssen Sie die Antwort auf einer Skala von 1 bis 10 bewerten und dabei streng dieses Format einhalten: "[[rating]]", zum Beispiel: "Bewertung: [[5]]".\n\n[Frage]\n{question}\n\n[Der Anfang der Referenzantwort]\n{ref_answer_1}\n[Das Ende der Referenzantwort]\n\n[Der Anfang der Assistentenantwort]\n{answer}\n[Das Ende der Assistentenantwort]'  # noqa: E501
     },
     "single_assistant_multi_turn_w_reference": {
-        "propmt_templte": 'Bitte agieren Sie als unparteiischer Richter und bewerten Sie die Qualität der Antwort, die von einem KI-Assistenten auf die Nutzerfrage gegeben wurde. Ihre Bewertung sollte Korrektheit und Nützlichkeit berücksichtigen. Ihnen wird eine Referenzantwort und die Antwort des Assistenten gegeben. Ihre Bewertung sollte sich auf die Antwort des Assistenten auf die zweite Frage konzentrieren. Beginnen Sie Ihre Bewertung, indem Sie die Antwort des Assistenten mit der Referenzantwort vergleichen. Identifizieren und korrigieren Sie etwaige Fehler. Seien Sie so objektiv wie möglich. Nachdem Sie Ihre Erklärung gegeben haben, müssen Sie die Antwort auf einer Skala von 1 bis 10 bewerten, wobei Sie streng dieses Format einhalten: "[[rating]]", zum Beispiel: "Bewertung: [[5]]".\n\n<|Der Anfang der Referenzantwort|>\n\n### Nutzer:\n{question_1}\n\n### Referenzantwort:\n{ref_answer_1}\n\n### Nutzer:\n{question_2}\n\n### Referenzantwort:\n{ref_answer_2}\n\n<|Das Ende der Referenzantwort|>\n\n\n<|Der Anfang von Assistent A\'s Unterhaltung mit dem Nutzer|>\n\n### Nutzer:\n{question_1}\n\n### Assistent A:\n{answer_1}\n\n### Nutzer:\n{question_2}\n\n### Assistent A:\n{answer_2}\n\n<|Das Ende von Assistent A\'s Unterhaltung mit dem Nutzer|>'  # noqa: E501
+        "prompt_template": 'Bitte agieren Sie als unparteiischer Richter und bewerten Sie die Qualität der Antwort, die von einem KI-Assistenten auf die Nutzerfrage gegeben wurde. Ihre Bewertung sollte Korrektheit und Nützlichkeit berücksichtigen. Ihnen wird eine Referenzantwort und die Antwort des Assistenten gegeben. Ihre Bewertung sollte sich auf die Antwort des Assistenten auf die zweite Frage konzentrieren. Beginnen Sie Ihre Bewertung, indem Sie die Antwort des Assistenten mit der Referenzantwort vergleichen. Identifizieren und korrigieren Sie etwaige Fehler. Seien Sie so objektiv wie möglich. Nachdem Sie Ihre Erklärung gegeben haben, müssen Sie die Antwort auf einer Skala von 1 bis 10 bewerten, wobei Sie streng dieses Format einhalten: "[[rating]]", zum Beispiel: "Bewertung: [[5]]".\n\n<|Der Anfang der Referenzantwort|>\n\n### Nutzer:\n{question_1}\n\n### Referenzantwort:\n{ref_answer_1}\n\n### Nutzer:\n{question_2}\n\n### Referenzantwort:\n{ref_answer_2}\n\n<|Das Ende der Referenzantwort|>\n\n\n<|Der Anfang von Assistent A\'s Unterhaltung mit dem Nutzer|>\n\n### Nutzer:\n{question_1}\n\n### Assistent A:\n{answer_1}\n\n### Nutzer:\n{question_2}\n\n### Assistent A:\n{answer_2}\n\n<|Das Ende von Assistent A\'s Unterhaltung mit dem Nutzer|>'  # noqa: E501
     },
 }
 
@@ -56,6 +56,11 @@ SINGLE_JUDGE_PROMPTS_FI = {
 }
 
 NEED_REF_CATEGORIES = ["math", "reasoning", "coding", "arena-hard-200"]
+SINGLE_JUDGE_PROMPTS_LIST = [
+    SINGLE_JUDGE_PROMPTS,
+    SINGLE_JUDGE_PROMPTS_DE,
+    SINGLE_JUDGE_PROMPTS_FI,
+]
 
 
 class PromptToJudge(BaseModel):

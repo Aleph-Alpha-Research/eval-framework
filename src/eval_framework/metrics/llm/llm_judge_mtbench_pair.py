@@ -56,6 +56,11 @@ PAIR_JUDGE_PROMPTS_FI = {
 
 
 NEED_REF_CATEGORIES = ["math", "reasoning", "coding", "arena-hard-200"]
+PAIR_JUDGE_PROMPTS_LIST = [
+    PAIR_JUDGE_PROMPTS,
+    PAIR_JUDGE_PROMPTS_DE,
+    PAIR_JUDGE_PROMPTS_FI,
+]
 
 
 class PromptToJudge(BaseModel):

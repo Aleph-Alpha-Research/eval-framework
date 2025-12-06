@@ -3,6 +3,7 @@ import pytest
 from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.metrics.llm.graders.chatbot_style_grader import ChatbotStyleGrader
+from eval_framework.metrics.llm.graders.coherence_grader import CoherenceGrader, CoherenceGradingOutput
 from eval_framework.metrics.llm.graders.comparison_grader import ComparisonGrader, MatchOutcome
 from eval_framework.metrics.llm.graders.conciseness_grader import ConcisenessGrader
 from eval_framework.metrics.llm.graders.contains_names_grader import ContainsNamesGrader
@@ -177,3 +178,24 @@ def test_refusal_grader(language: Language, completion: str, expected: bool, jud
     output = refusal_grader.grade(completion, language)
 
     assert output.is_refusal == expected
+
+
+@pytest.mark.external_api
+@pytest.mark.gpu
+@pytest.mark.parametrize(
+    "language, instruction, completion",
+    [
+        (
+            Language("en"),
+            "Mike likes Pizza, Jenny does not.\nWho likes Pizza?",
+            "Only Mike likes Pizza.",
+        ),
+    ],
+)
+def test_coherence_grader(language: Language, instruction: str, completion: str, judge: BaseLLM) -> None:
+    coherence_grader = CoherenceGrader(judge)
+    output = coherence_grader.grade(instruction, completion, language)
+
+    assert isinstance(output, CoherenceGradingOutput)
+    assert isinstance(output.coherence_score, int)
+    assert output.coherence_score >= 0 and output.coherence_score <= 100

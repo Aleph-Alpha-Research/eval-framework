@@ -56,14 +56,14 @@ def test_generate_completions_message_handling() -> None:
     llm.post_process_completion.side_effect = lambda completion, sample: completion
 
     # Execute and assert for case 1
-    completion_with_cue = generator._generate_completions([sample_with_cue])[0]
+    completion_with_cue = generator.task.generate_completions(llm, [sample_with_cue])[0]
     assert completion_with_cue.messages == [
         Message(role=Role.USER, content="Hello"),
         Message(role=Role.ASSISTANT, content="Cue: generated text"),
     ]
 
     # Execute and assert for case 2
-    completion_without_cue = generator._generate_completions([sample_without_cue])[0]
+    completion_without_cue = generator.task.generate_completions(llm, [sample_without_cue])[0]
     assert completion_without_cue.messages == [
         Message(role=Role.USER, content="Hello"),
         Message(role=Role.ASSISTANT, content="generated text"),
@@ -247,7 +247,7 @@ def test_response_generator_llm_token_overloading(
     mock_message = [Message(role=Role.ASSISTANT, content="Hello")]
 
     # don't need to actually run the completion
-    generator._generate_completions = MagicMock(  # type:ignore[method-assign]
+    generator.task.generate_completions = MagicMock(  # type:ignore[method-assign]
         return_value=[
             Completion(
                 id=0,
@@ -269,7 +269,7 @@ def test_response_generator_llm_token_overloading(
     )
     generated = generator.generate(lambda: False)
     # make sure that run complete is called with the precedence values
-    called_stop_sequences, called_max_tokens = generator._generate_completions.call_args[1].values()
+    called_stop_sequences, called_max_tokens = generator.task.generate_completions.call_args[1].values()
 
     assert generated
     assert expected_max_tokens == called_max_tokens
@@ -492,7 +492,7 @@ def test_response_generator_applies_model_then_task_post_processing(tmp_path: Pa
         ]
     )
 
-    completions = generator._generate_completions([sample])
+    completions = generator.task.generate_completions(llm, [sample])
 
     assert completions[0].raw_completion == "raw_answer"
     assert completions[0].completion == "TASK[MODEL[raw_answer]]"
