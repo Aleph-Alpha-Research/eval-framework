@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, reopened, synchronize, labeled]
+    types: [opened, reopened, synchronize, labeled, edited]
   # Manually trigger a workflow for a branch
   workflow_dispatch:
   # Merge queue trigger
