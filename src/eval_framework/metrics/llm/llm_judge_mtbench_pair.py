@@ -1,11 +1,12 @@
 import re
+import traceback
 
 from pydantic import BaseModel
 
 from eval_framework.logger import logger
 from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
-from eval_framework.shared.types import BaseMetricContext, Completion, extract_context_metric
+from eval_framework.shared.types import BaseMetricContext, Completion, Error, extract_context_metric
 from template_formatting.formatter import Message, Role
 
 PAIR_JUDGE_PROMPTS = {
@@ -85,14 +86,12 @@ def generate_pair_judge_prompts(response: Completion) -> list[PromptToJudge]:
         prompt_templates = PAIR_JUDGE_PROMPTS
     prompts_to_judge = []
 
-    context = extract_context_metric(response, MTBenchJudgePairMetricContext)
-
     assert context.category is not None, "Category must be provided in the context for MTBenchJudgePairMetricContext"
     assert context.answer is not None, "Answer must be provided in the context for MTBenchJudgePairMetricContext"
 
     # No reference answer needed
     if context.category not in NEED_REF_CATEGORIES:
-        # SINLGE TURN
+        # SINGLE TURN
         if len(response.messages) <= 2:
             # turn 1
             question = response.last_user_instruction
@@ -175,6 +174,11 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
     NAME = "pairwise_judgement"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
+        response_error = response.error
+        if response_error:
+            logger.info(f"Skipped LLM judge as completion already had an error {response_error}")
+            return []
+
         prompts_to_judge: list[PromptToJudge] = generate_pair_judge_prompts(response)
 
         all_metrics = []
@@ -189,12 +193,20 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
             output = self._llm_judge.generate_from_messages([messages])
             parsed_output = self._output_to_rating(output[0].completion)
             return self._create_metric_result(
-                metric_name=prompt_to_judge.comparison_type, value=parsed_output, higher_is_better=True
+                metric_name=prompt_to_judge.comparison_type,
+                value=parsed_output,
+                higher_is_better=True,
+                llm_judge_prompt=prompt_to_judge.prompt_text,
+                llm_judge_response=f"{output[0].completion}",  # unprocessed AI feedback
+                error=output[0].raw_completion_error,
             )
         except Exception as e:
             logger.info(f"LLM judge failed to generate output for prompt: {prompt_to_judge.prompt_text}. Error: {e}")
             return self._create_metric_result(
-                metric_name=prompt_to_judge.comparison_type, value=None, higher_is_better=True, error=e
+                metric_name=prompt_to_judge.comparison_type,
+                value=None,
+                higher_is_better=True,
+                error=Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc()),
             )
 
     @staticmethod

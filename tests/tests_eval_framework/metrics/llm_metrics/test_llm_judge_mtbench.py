@@ -116,9 +116,12 @@ def test_llm_judge_mtbench_single_evaluate_prompt(
 ) -> None:
     metric = MTBenchJudgeSingle(llm_judge)
     result: list[MetricResult] = metric.calculate(example_completion)
-    singular_result = result[0]
     assert len(result) == 1
+    singular_result = result[0]
     assert (singular_result.error is not None) == should_error
+    if not (should_error):
+        assert singular_result.llm_judge_prompt
+        assert singular_result.llm_judge_response
 
 
 @pytest.mark.parametrize(
@@ -130,9 +133,12 @@ def test_llm_judge_mtbench_pair_evaluate_prompt(
 ) -> None:
     metric = MTBenchJudgePair(llm_judge)
     result: list[MetricResult] = metric.calculate(example_completion)
-    singular_result = result[0]
     assert len(result) == 1
+    singular_result = result[0]
     assert (singular_result.error is not None) == should_error
+    if not (should_error):
+        assert singular_result.llm_judge_prompt
+        assert singular_result.llm_judge_response
 
 
 def test_prompt_scenarios_are_covered() -> None:
