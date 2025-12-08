@@ -1,0 +1,55 @@
+name: Nightly UV Package Cache Rebuild
+
+on:
+  schedule:
+    # Run every night at 2 AM UTC
+    - cron: '0 2 * * *'
+  # Allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  UV_LINK_MODE: symlink
+  UV_LOCKED: 1
+
+jobs:
+  rebuild-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+          enable-cache: true
+
+      - name: Get lock file hash
+        id: lock-hash
+        run: |
+          echo "hash=$(sha256sum uv.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Restore existing UV cache
+        uses: actions/cache@v4
+        id: uv-cache-restore
+        with:
+          path: ~/.cache/uv
+          key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
+          restore-keys: |
+            uv-packages-main-${{ runner.os }}-
+
+      - name: Populate UV cache with all dependencies
+        run: |
+          echo "Rebuilding UV package cache with all dependencies..."
+          uv sync --all-extras --dev
+
+      - name: Save UV package cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}

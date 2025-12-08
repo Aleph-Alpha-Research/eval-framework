@@ -26,8 +26,11 @@ env:
   UV_LOCKED: 1
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
+  uv-cache:
+    # Restore and update UV package cache
+    # PRs: Restore cache only (read-only)
+    # Main: Restore cache, update it, and save it
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -36,6 +39,60 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
+          enable-cache: true
+
+      - name: Get lock file hash
+        id: lock-hash
+        run: |
+          echo "hash=$(sha256sum uv.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Restore existing UV cache
+        uses: actions/cache@v4
+        id: uv-cache-restore
+        with:
+          path: ~/.cache/uv
+          key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
+          restore-keys: |
+            uv-packages-main-${{ runner.os }}-
+
+      - name: Populate UV cache with all dependencies
+        run: |
+          echo "Updating UV package cache with all dependencies..."
+          uv sync --all-extras --dev
+
+      - name: Save UV package cache
+        # Only save on main branch pushes (PRs are read-only)
+        # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
+
+  lint:
+    runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
+    needs: [uv-cache]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+          enable-cache: true
+
+      - name: Get lock file hash
+        id: lock-hash
+        run: |
+          echo "hash=$(sha256sum uv.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Restore UV package cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
+          restore-keys: |
+            uv-packages-main-${{ runner.os }}-
 
       - name: Run Pre-Commit
         run: uvx pre-commit run --all-files
@@ -48,6 +105,7 @@ jobs:
 
   hf-datasets-cache:
     runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
+    needs: [uv-cache]
     steps:
       - uses: actions/checkout@v4
 
@@ -55,8 +113,22 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
+          enable-cache: true
 
-      - name: Restore and save cache
+      - name: Get lock file hash
+        id: lock-hash
+        run: |
+          echo "hash=$(sha256sum uv.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Restore UV package cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
+          restore-keys: |
+            uv-packages-main-${{ runner.os }}-
+
+      - name: Restore and save HF datasets cache
         uses: actions/cache@v4
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
@@ -69,7 +141,8 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
           echo "Updating changed datasets"
-          uv run --extra=comet --extra=openai python tests/tests_eval_framework/utils/update_datasets.py update
+          # Use --exact to install only comet+openai (minimal deps for this job)
+          uv run --exact --extra=comet --extra=openai python tests/tests_eval_framework/utils/update_datasets.py update
 
   tag:
     # Set Docker Tag and Image Name for Docker Build and Push (GPU Runs)
@@ -136,9 +209,9 @@ jobs:
             type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
 
   test-extras:
-    # Test uv installs (CPU)
+    # Test uv installs (CPU) - uses --exact to test minimal installs
     runs-on: ubuntu-latest
-    needs: [lint]
+    needs: [lint, uv-cache]
     strategy:
       fail-fast: false
       matrix:
@@ -151,11 +224,26 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
+          enable-cache: true
+
+      - name: Get lock file hash
+        id: lock-hash
+        run: |
+          echo "hash=$(sha256sum uv.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Restore UV package cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
+          restore-keys: |
+            uv-packages-main-${{ runner.os }}-
 
       - name: Verify install and functionality via uv --exact
         run: |
           if [ "${{ matrix.extras }}" != "" ]; then
             echo "Testing extra: ${{ matrix.extras }}"
+            # --exact creates minimal env with only specified extras (uses cached packages)
             uv run --exact --extra ${{ matrix.extras }} pytest -v --noconftest tests/tests_eval_framework/installs/test_${{ matrix.extras }}.py
           else
             echo "Testing core install"
@@ -173,6 +261,20 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
+          enable-cache: true
+
+      - name: Get lock file hash
+        id: lock-hash
+        run: |
+          echo "hash=$(sha256sum uv.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Restore UV package cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
+          restore-keys: |
+            uv-packages-main-${{ runner.os }}-
 
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
@@ -200,6 +302,20 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
+          enable-cache: true
+
+      - name: Get lock file hash
+        id: lock-hash
+        run: |
+          echo "hash=$(sha256sum uv.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Restore UV package cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
+          restore-keys: |
+            uv-packages-main-${{ runner.os }}-
 
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
@@ -227,6 +343,20 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
+          enable-cache: true
+
+      - name: Get lock file hash
+        id: lock-hash
+        run: |
+          echo "hash=$(sha256sum uv.lock | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Restore UV package cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
+          restore-keys: |
+            uv-packages-main-${{ runner.os }}-
 
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
@@ -295,3 +425,4 @@ jobs:
           VLLM_USE_TRITON_FLASH_ATTN: 0
           VLLM_DISABLE_CUSTOM_ALL_REDUCE: 1
         run: pytest --log-cli-level=INFO -v -m "vllm"
+        
