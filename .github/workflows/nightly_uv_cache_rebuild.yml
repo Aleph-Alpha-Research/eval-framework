@@ -11,6 +11,7 @@ permissions:
   contents: read
 
 env:
+  UV_CACHE_DIR: /tmp/uv_cache  # <- single source of truth for UV cache
   UV_LINK_MODE: symlink
   UV_LOCKED: 1
 
@@ -27,7 +28,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: true
+          enable-cache: false  # We manage cache ourselves
 
       - name: Get lock file hash
         id: lock-hash
@@ -38,7 +39,7 @@ jobs:
         uses: actions/cache@v4
         id: uv-cache-restore
         with:
-          path: ~/.cache/uv
+          path: ${{ env.UV_CACHE_DIR }}
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
           restore-keys: |
             uv-packages-main-${{ runner.os }}-
@@ -49,7 +50,7 @@ jobs:
           uv sync --all-extras --dev
 
       - name: Save UV package cache
-        uses: actions/cache@v4
+        uses: actions/cache/save@v4
         with:
-          path: ~/.cache/uv
+          path: ${{ env.UV_CACHE_DIR }}
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}

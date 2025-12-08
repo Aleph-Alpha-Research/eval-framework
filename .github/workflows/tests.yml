@@ -22,6 +22,7 @@ env:
   REPO_OWNER: research/public-registry
   IMAGE_NAME: eval_framework
   HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # <- single source of truth
+  UV_CACHE_DIR: /tmp/uv_cache  # <- single source of truth for UV cache
   UV_LINK_MODE: symlink
   UV_LOCKED: 1
 
@@ -39,7 +40,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: true
+          enable-cache: false  # We manage cache ourselves
 
       - name: Get lock file hash
         id: lock-hash
@@ -50,7 +51,7 @@ jobs:
         uses: actions/cache@v4
         id: uv-cache-restore
         with:
-          path: ~/.cache/uv
+          path: ${{ env.UV_CACHE_DIR }}
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
           restore-keys: |
             uv-packages-main-${{ runner.os }}-
@@ -62,14 +63,14 @@ jobs:
 
       - name: Save UV package cache
         # Only save on main branch pushes (PRs are read-only)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/cache@v4
+        # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v4
         with:
-          path: ~/.cache/uv
+          path: ${{ env.UV_CACHE_DIR }}
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
 
   lint:
-    runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
+    runs-on: ubuntu-latest
     needs: [uv-cache]
     steps:
       - name: Checkout Repository
@@ -79,7 +80,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: true
+          enable-cache: false  # We manage cache ourselves
 
       - name: Get lock file hash
         id: lock-hash
@@ -89,7 +90,7 @@ jobs:
       - name: Restore UV package cache
         uses: actions/cache/restore@v4
         with:
-          path: ~/.cache/uv
+          path: ${{ env.UV_CACHE_DIR }}
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
           restore-keys: |
             uv-packages-main-${{ runner.os }}-
@@ -113,7 +114,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: true
+          enable-cache: false  # We manage cache ourselves
 
       - name: Get lock file hash
         id: lock-hash
@@ -123,7 +124,7 @@ jobs:
       - name: Restore UV package cache
         uses: actions/cache/restore@v4
         with:
-          path: ~/.cache/uv
+          path: ${{ env.UV_CACHE_DIR }}
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
           restore-keys: |
             uv-packages-main-${{ runner.os }}-
@@ -224,7 +225,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: true
+          enable-cache: false  # We manage cache ourselves
 
       - name: Get lock file hash
         id: lock-hash
@@ -234,7 +235,7 @@ jobs:
       - name: Restore UV package cache
         uses: actions/cache/restore@v4
         with:
-          path: ~/.cache/uv
+          path: ${{ env.UV_CACHE_DIR }}
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
           restore-keys: |
             uv-packages-main-${{ runner.os }}-
@@ -261,7 +262,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: true
+          enable-cache: false  # We manage cache ourselves
 
       - name: Get lock file hash
         id: lock-hash
@@ -271,7 +272,7 @@ jobs:
       - name: Restore UV package cache
         uses: actions/cache/restore@v4
         with:
-          path: ~/.cache/uv
+          path: ${{ env.UV_CACHE_DIR }}
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
           restore-keys: |
             uv-packages-main-${{ runner.os }}-
@@ -279,7 +280,7 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-${{ github.run_id }}
           restore-keys: |
             hf-datasets-
@@ -302,7 +303,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: true
+          enable-cache: false  # We manage cache ourselves
 
       - name: Get lock file hash
         id: lock-hash
@@ -312,7 +313,7 @@ jobs:
       - name: Restore UV package cache
         uses: actions/cache/restore@v4
         with:
-          path: ~/.cache/uv
+          path: ${{ env.UV_CACHE_DIR }}
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
           restore-keys: |
             uv-packages-main-${{ runner.os }}-
@@ -343,7 +344,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: true
+          enable-cache: false  # We manage cache ourselves
 
       - name: Get lock file hash
         id: lock-hash
@@ -353,7 +354,7 @@ jobs:
       - name: Restore UV package cache
         uses: actions/cache/restore@v4
         with:
-          path: ~/.cache/uv
+          path: ${{ env.UV_CACHE_DIR }}
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
           restore-keys: |
             uv-packages-main-${{ runner.os }}-
