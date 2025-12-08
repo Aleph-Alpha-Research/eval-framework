@@ -45,7 +45,7 @@ jobs:
 
       - name: Run MyPy
         run: uv run --all-extras mypy
-  
+
   lint-pr-title:
     runs-on: ubuntu-latest
     steps:
