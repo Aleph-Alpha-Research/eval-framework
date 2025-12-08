@@ -29,6 +29,8 @@ jobs:
 
   lint-pr-title:
     if: github.event_name == 'pull_request'
+    outputs:
+      pr_title_status: ${{ steps.pr-check.outputs.status }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -45,8 +47,10 @@ jobs:
           pip install commitizen
 
       - name: Validate PR Title
+        id: pr-check
         run: |
           cz check --message "${{ github.event.pull_request.title }}"
+        continue-on-error: false # Fail PR if invalid title
 
   lint:
     runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
