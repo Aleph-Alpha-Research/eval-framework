@@ -1,11 +1,12 @@
 import re
+import traceback
 
 from pydantic import BaseModel
 
 from eval_framework.logger import logger
 from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
-from eval_framework.shared.types import BaseMetricContext, Completion, extract_context_metric
+from eval_framework.shared.types import BaseMetricContext, Completion, Error, extract_context_metric
 from template_formatting.formatter import Message, Role
 
 SINGLE_JUDGE_PROMPTS = {
@@ -175,12 +176,20 @@ class MTBenchJudgeSingle(BaseLLMJudgeMetric):
             output = self._llm_judge.generate_from_messages([messages])
             parsed_output = self._output_to_rating(output[0].completion)
             return self._create_metric_result(
-                metric_name=prompt_to_judge.comparison_type, value=parsed_output, higher_is_better=True
+                metric_name=prompt_to_judge.comparison_type,
+                value=parsed_output,
+                higher_is_better=True,
+                llm_judge_prompt=prompt_to_judge.prompt_text,
+                llm_judge_response=f"{output[0].completion}",  # unprocessed AI feedback
+                error=output[0].raw_completion_error,
             )
         except Exception as e:
             logger.info(f"LLM judge failed to generate output for prompt: {prompt_to_judge.prompt_text}. Error: {e}")
             return self._create_metric_result(
-                metric_name=prompt_to_judge.comparison_type, value=None, higher_is_better=True, error=e
+                metric_name=prompt_to_judge.comparison_type,
+                value=None,
+                higher_is_better=True,
+                error=Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc()),
             )
 
     @staticmethod

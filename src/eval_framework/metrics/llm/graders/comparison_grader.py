@@ -37,8 +37,8 @@ class MatchOutcome(str, Enum):
 
 
 class ComparisonGradingOutput(GradingOutput):
-    reasoning: str
-    outcome: MatchOutcome
+    reasoning: str | None
+    outcome: MatchOutcome | None
 
 
 class ComparisonGrader:
