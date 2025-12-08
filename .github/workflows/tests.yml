@@ -50,6 +50,7 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
+    needs: [lint-pr-title]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
