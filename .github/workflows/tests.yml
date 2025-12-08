@@ -40,7 +40,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: false  # We manage cache ourselves
+          enable-cache: false
+
+      - name: Set UV cache directory
+        run: echo "UV_CACHE_DIR=/tmp/uv_cache" >> $GITHUB_ENV
 
       - name: Get lock file hash
         id: lock-hash
@@ -59,7 +62,7 @@ jobs:
       - name: Populate UV cache with all dependencies
         run: |
           echo "Updating UV package cache with all dependencies..."
-          uv sync --all-extras --dev
+          uv sync --all-extras
 
       - name: Save UV package cache
         # Only save on main branch pushes (PRs are read-only)
@@ -70,7 +73,7 @@ jobs:
           key: uv-packages-main-${{ runner.os }}-${{ steps.lock-hash.outputs.hash }}
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
     needs: [uv-cache]
     steps:
       - name: Checkout Repository
@@ -80,7 +83,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: false  # We manage cache ourselves
+          enable-cache: false
+
+      - name: Set UV cache directory
+        run: echo "UV_CACHE_DIR=/tmp/uv_cache" >> $GITHUB_ENV
 
       - name: Get lock file hash
         id: lock-hash
@@ -114,7 +120,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: false  # We manage cache ourselves
+          enable-cache: false
+
+      - name: Set UV cache directory
+        run: echo "UV_CACHE_DIR=/tmp/uv_cache" >> $GITHUB_ENV
 
       - name: Get lock file hash
         id: lock-hash
@@ -225,7 +234,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: false  # We manage cache ourselves
+          enable-cache: false
+
+      - name: Set UV cache directory
+        run: echo "UV_CACHE_DIR=/tmp/uv_cache" >> $GITHUB_ENV
 
       - name: Get lock file hash
         id: lock-hash
@@ -262,7 +274,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: false  # We manage cache ourselves
+          enable-cache: false
+
+      - name: Set UV cache directory
+        run: echo "UV_CACHE_DIR=/tmp/uv_cache" >> $GITHUB_ENV
 
       - name: Get lock file hash
         id: lock-hash
@@ -280,7 +295,7 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
           key: hf-datasets-${{ github.run_id }}
           restore-keys: |
             hf-datasets-
@@ -303,7 +318,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: false  # We manage cache ourselves
+          enable-cache: false
+
+      - name: Set UV cache directory
+        run: echo "UV_CACHE_DIR=/tmp/uv_cache" >> $GITHUB_ENV
 
       - name: Get lock file hash
         id: lock-hash
@@ -344,7 +362,10 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
-          enable-cache: false  # We manage cache ourselves
+          enable-cache: false
+
+      - name: Set UV cache directory
+        run: echo "UV_CACHE_DIR=/tmp/uv_cache" >> $GITHUB_ENV
 
       - name: Get lock file hash
         id: lock-hash
