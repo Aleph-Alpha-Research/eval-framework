@@ -48,7 +48,7 @@ jobs:
 
       - name: Autogenerate API docs
         working-directory: docs
-        run: uv sphinx-apidoc -o api/generated ../src/eval_framework
+        run: uv run sphinx-apidoc -o api/generated ../src/eval_framework
 
       - name: Build Sphinx docs
         working-directory: docs
