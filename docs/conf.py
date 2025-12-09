@@ -1,10 +1,11 @@
 # -- Path setup --------------------------------------------------------------
 import os
 import sys
+
 from pallets_sphinx_themes import ProjectLink
 
 # Add project root and src/ to sys.path
-ROOT = os.path.abspath("..")     # eval-framework/
+ROOT = os.path.abspath("..")  # eval-framework/
 SRC = os.path.join(ROOT, "src")  # eval-framework/src/
 sys.path.insert(0, SRC)
 
@@ -25,8 +26,8 @@ extensions = [
 ]
 
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.md': 'markdown',
+    ".rst": "restructuredtext",
+    ".md": "markdown",
 }
 
 autodoc_typehints = "description"

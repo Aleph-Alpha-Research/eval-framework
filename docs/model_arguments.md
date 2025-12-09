@@ -1,6 +1,6 @@
 # Model Arguments
 
-The Eval-Framework provides a set of model wrapper classes that standardize how LLMs are loaded, formatted, and used for evaluation. Each wrapper manages specific model backends, such as Hugging Face, OpenAI, Aleph Alpha API, or vLLM-based models.  
+The Eval-Framework provides a set of model wrapper classes that standardize how LLMs are loaded, formatted, and used for evaluation. Each wrapper manages specific model backends, such as Hugging Face, OpenAI, Aleph Alpha API, or vLLM-based models.
 
 The following sections describe the **constructor arguments** for each model class, highlighting configuration options, defaults, and their purpose. Understanding these arguments allows you to customize evaluation behavior, token limits, concurrency, and model-specific settings.
 
