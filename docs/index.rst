@@ -67,14 +67,14 @@ Documentation Overview
 ----------------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Getting Started
 
    installation.md
    cli_usage.md
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: User Guides
 
    completion_task_guide.md
@@ -92,7 +92,7 @@ Documentation Overview
    wandb_integration.md
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: API Reference
 
    api/index

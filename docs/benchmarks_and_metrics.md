@@ -109,13 +109,13 @@ Additional task documentation can be generated with the script `utils/generate-t
 | ZeroSCROLLS MuSiQue            | `ZeroSCROLLS MuSiQue`            | Text Distillation | QA                                               | Wikipedia | not supported | 1749                                         | en           |
 | ZeroSCROLLS SpaceDigest        | `ZeroSCROLLS SpaceDigest`        | Text Distillation | Aggregation                                      | Reviews | not supported | 5481                                         | en           |
 
-# Languages
+## Languages
 
 - Languages in Likelihood tasks: ENG (39), DEU (7), FRA (4), FIN (2), NLD (2), ITA (1), POL (1), RUS (1), SPA (1), SWE (1), UKR (1)
 - Languages in Completion tasks: ENG (20), DEU (5), FRA (5), ARB (1), FIN (1), ITA (1), POR (1), SPA (1) and 44 languages in INCLUDE.
 - Languages in both types of tasks: ENG (59), DEU (12), FRA (9), FIN (3), NLD (2), SPA (2), ARB (1), ITA (1), POL (1), POR (1), RUS (1), SWE (1), UKR (1) and 44 languages in INCLUDE.
 
-# Metrics
+## Metrics
 
 | Metrics Type | Metrics                       |
 |-|-------------------------------|
