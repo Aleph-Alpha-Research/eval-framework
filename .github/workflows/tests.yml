@@ -28,7 +28,6 @@ env:
 jobs:
   docs:
     runs-on: ubuntu-latest
-    needs: lint
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
