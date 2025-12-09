@@ -37,18 +37,17 @@ jobs:
         with:
           version: "~=0.8.16"
 
-      - name: Install Python & extras
-        run: |
-          uv python install 3.12 --reinstall
-          uv sync --all-extras
+      - name: Install project with all extras
+        run: uv sync --all-extras
+        working-directory: src
 
       - name: Install Sphinx and extensions
         run: |
-          uv pip install sphinx furo sphinx-autodoc-typehints myst-parser pallets-sphinx-themes peaceiris-actions-gh-pages
+          uv pip install sphinx furo sphinx-autodoc-typehints myst-parser pallets-sphinx-themes
 
       - name: Build Sphinx docs
         working-directory: docs
-        run: uv run sphinx-build -b html . _build/html
+        run: uv run sphinx-build -b html -j auto . _build/html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
