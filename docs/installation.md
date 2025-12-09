@@ -51,7 +51,7 @@ The framework provides a utility script to generate task documentation automatic
 ```bash
 uv run python -m eval_framework.utils.generate_task_docs
 ``` -->
-<!-- 
+<!--
 #### Command-Line Options
 
 | Option                  | Description                                                                       |
