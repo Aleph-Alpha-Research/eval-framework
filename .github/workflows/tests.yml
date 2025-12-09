@@ -52,7 +52,7 @@ jobs:
 
       - name: Deploy with ghp-import
         run: |
-          ghp-import -n -p -f docs/_build/html \
+          uv run ghp-import -n -p -f docs/_build/html \
             -m "Automated docs deploy" \
             -r origin \
             -b gh-pages
