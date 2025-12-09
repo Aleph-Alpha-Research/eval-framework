@@ -39,13 +39,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- HTML output -------------------------------------------------------------
 html_theme = "furo"
 
-# Optional: customize dark/light appearance
-html_theme_options = {
-    "light_logo": "white_logo.png",
-    "dark_logo": "black_logo.png",
-}
-
-html_title = f"Eval-Framework Documentation ({version})"
+html_title = f"v{version}\nEval-Framework Documentation"
 html_static_path = ["_static"]
 html_show_sourcelink = False
 

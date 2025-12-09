@@ -1,4 +1,4 @@
-# Using CLI
+# Using the CLI
 
 The Eval-Framework CLI provides a flexible interface for evaluating LLMs across a wide range of benchmarks. Whether you're running evaluations locally or in a distributed environment, the CLI allows you to configure tasks, models, and metrics with ease.
 

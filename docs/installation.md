@@ -18,7 +18,7 @@ cd eval-framework
 # Install all dependencies
 uv sync --all-extras
 
-# Install flash-attention (requires compilation)
+# Install flash-attention optional extra (requires compilation)
 uv sync --all-extras --group flash-attn
 ```
 
