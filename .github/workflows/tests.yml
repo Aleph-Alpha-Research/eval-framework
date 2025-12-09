@@ -11,7 +11,8 @@ on:
   merge_group:
 
 permissions:
-  contents: read
+  contents: write
+  pages: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -43,17 +44,18 @@ jobs:
 
       - name: Install Sphinx and extensions
         run: |
-          uv pip install sphinx furo sphinx-autodoc-typehints myst-parser pallets-sphinx-themes
+          uv pip install sphinx furo sphinx-autodoc-typehints myst-parser pallets-sphinx-themes ghp-import
 
       - name: Build Sphinx docs
         working-directory: docs
         run: uv run sphinx-build -b html -j auto . _build/html
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GH_PAT }}
-          publish_dir: docs/_build/html
+      - name: Deploy with ghp-import
+        run: |
+          ghp-import -n -p -f docs/_build/html \
+            -m "Automated docs deploy" \
+            -r origin \
+            -b gh-pages
 
   lint:
     runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
