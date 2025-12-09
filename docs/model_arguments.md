@@ -1,9 +1,15 @@
-# HFLLM Class — Constructor Arguments
+# Model Arguments
+
+The Eval-Framework provides a set of model wrapper classes that standardize how LLMs are loaded, formatted, and used for evaluation. Each wrapper manages specific model backends, such as Hugging Face, OpenAI, Aleph Alpha API, or vLLM-based models.  
+
+The following sections describe the **constructor arguments** for each model class, highlighting configuration options, defaults, and their purpose. Understanding these arguments allows you to customize evaluation behavior, token limits, concurrency, and model-specific settings.
+
+## HFLLM Class — Constructor Arguments
 
 `HFLLM` is a high-level wrapper for Hugging Face causal language models within the evaluation framework.
 It extends `BaseHFLLM`, managing model loading (from local checkpoints, HF Hub, or W&B), formatting, and text generation.
 
-## HFLLM Constructor Argument Reference
+### HFLLM Constructor Argument Reference
 
 | **Argument** | **Type** | **Description** | **Default** |
 |:-------------|-----------|-----------------|:------------:|
@@ -19,12 +25,12 @@ It extends `BaseHFLLM`, managing model loading (from local checkpoints, HF Hub, 
 
 ---
 
-# AlephAlphaAPIModel — Constructor Arguments
+## AlephAlphaAPIModel — Constructor Arguments
 
 `AlephAlphaAPIModel` is a wrapper around the Aleph Alpha API, extending `BaseLLM`.
 It handles formatter setup, request concurrency, retry behavior, and timeout management.
 
-## AlephAlphaAPIModel Constructor Argument Reference
+### AlephAlphaAPIModel Constructor Argument Reference
 
 | **Argument**                    | **Type**                | **Description**                                                                                                                   |               **Default**               |
 | :------------------------------ | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------: |
@@ -38,12 +44,12 @@ It handles formatter setup, request concurrency, retry behavior, and timeout man
 
 ---
 
-# OpenAIModel — Constructor Arguments
+## OpenAIModel — Constructor Arguments
 
 `OpenAIModel` is a wrapper for OpenAI’s API models (e.g., GPT-4, GPT-3.5) that integrates with the evaluation framework.
 It manages model configuration, authentication, and request parameters for the OpenAI client.
 
-## OpenAIModel Constructor Argument Reference
+### OpenAIModel Constructor Argument Reference
 
 | **Argument**      | **Type**                | **Description**                                                                                                                              |               **Default**               |
 | :---------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------: |
@@ -57,12 +63,12 @@ It manages model configuration, authentication, and request parameters for the O
 
 ---
 
-# BaseVLLMModel — Constructor Arguments
+## BaseVLLMModel — Constructor Arguments
 
 `BaseVLLMModel` defines the core initialization logic for all vLLM-backed models.
 It manages GPU allocation, tokenizer setup, and internal sampling parameter normalization.
 
-## BaseVLLMModel Constructor Argument Reference
+### BaseVLLMModel Constructor Argument Reference
 
 | **Argument**             | **Type**                                   | **Description**                                                                                                                             |          **Default**         |
 | :----------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------: |
@@ -79,12 +85,12 @@ It manages GPU allocation, tokenizer setup, and internal sampling parameter norm
 
 ---
 
-# MistralVLLM — Constructor Arguments
+## MistralVLLM — Constructor Arguments
 
 `MistralVLLM` is a specialized subclass of `VLLMModel` → `BaseVLLMModel` designed to run **Mistral** Hugging Face models using the **vLLM** inference backend.
 It provides flexible model loading (from local files, Hugging Face Hub, or Weights & Biases), GPU-efficient parallelism, and tunable sampling behavior.
 
-## MistralVLLM Constructor Argument Reference
+### MistralVLLM Constructor Argument Reference
 
 | **Argument**             | **Type**                                   | **Description**                                                                                                                                                                          |               **Default**               |
 | :----------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------: |

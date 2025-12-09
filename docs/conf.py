@@ -1,58 +1,56 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# For the full list of built-in configuration values, see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
-
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-
+# -- Path setup --------------------------------------------------------------
 import os
 import sys
 from pallets_sphinx_themes import ProjectLink
-# point to your package; adjust path if package folder at repo root
-sys.path.insert(0, os.path.abspath('../src/eval_framework/'))
 
-project = 'eval-framework'
-copyright = '2025, Aleph Alpha Research'
-author = 'Aleph Alpha Research'
-version = '0.2.3'
+# Add project root and src/ to sys.path
+ROOT = os.path.abspath("..")     # eval-framework/
+SRC = os.path.join(ROOT, "src")  # eval-framework/src/
+sys.path.insert(0, SRC)
+
+# -- Project information -----------------------------------------------------
+project = "eval-framework"
+author = "Aleph Alpha Research"
+copyright = "2025, Aleph Alpha Research"
+version = "0.2.5"
 
 # -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
-
 extensions = [
-    'sphinx.ext.autodoc',          # generate docs from docstrings
-    'sphinx.ext.napoleon',         # Google / NumPy style docstrings
-    'sphinx.ext.autosummary',      # ← built-in, no pip install needed
-    'sphinx.ext.viewcode',         # link to highlighted source
-    'sphinx_autodoc_typehints',    # show type hints
-    "pallets_sphinx_themes",       # Flask theme
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx_autodoc_typehints",
+    "myst_parser",  # ← add this
 ]
 
-autosummary_generate = True  # turn on sphinx.ext.autosummary
-autodoc_typehints = "description"  # put typehints into descriptions
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+autodoc_typehints = "description"
+autosummary_generate = True
 
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# -- HTML output -------------------------------------------------------------
+html_theme = "furo"
 
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+# Optional: customize dark/light appearance
+html_theme_options = {
+    "light_logo": "white_logo.png",
+    "dark_logo": "black_logo.png",
+}
 
-html_theme = "flask"
-html_theme_options = {"index_sidebar_logo": False}
+html_title = f"Eval-Framework Documentation ({version})"
+html_static_path = ["_static"]
+html_show_sourcelink = False
+
 html_context = {
     "project_links": [
-        ProjectLink("PyPI Releases", "https://pypi.org/project/eval-framework/"),
-        ProjectLink("Source Code", "https://github.com/Aleph-Alpha-Research/eval-framework"),
+        ProjectLink("PyPI", "https://pypi.org/project/eval-framework/"),
+        ProjectLink("GitHub", "https://github.com/Aleph-Alpha-Research/eval-framework"),
     ]
 }
-html_sidebars = {
-    "**": ["project.html", "localtoc.html", "relations.html", "searchbox.html"]
-}
-singlehtml_sidebars = {
-    "**": ["project.html", "localtoc.html"]
-}
-html_static_path = ["_static"]
-html_title = f"Eval-Framework Documentation ({version})"
-html_show_sourcelink = False
