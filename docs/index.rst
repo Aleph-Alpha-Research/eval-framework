@@ -25,13 +25,13 @@ Quick Start
 
 The codebase is compatible with **Python 3.12** and **PyTorch 2.5**. GPU support requires appropriate CUDA dependencies.
 
-Install the library via pip:
+Install the library via uv (recommended):
 
 .. code-block:: bash
 
-    pip install eval_framework
+   uv sync --all-extras
 
-For optional features:
+To select specific optional features, you can install them individually. Available extras are:
 
 - `api` for Aleph Alpha client inference
 - `comet` for COMET metric
@@ -41,20 +41,17 @@ For optional features:
 - `vllm` for VLLM inference
 - `all` installs all extras
 
-Using `uv` to manage dependencies:
+You can install them as follows:
 
 .. code-block:: bash
 
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    uv sync --all-extras
-    uv python install 3.12 --reinstall
-    uv sync --all-extras --group flash_attn
+   uv sync --extra transformers
 
-Run a single benchmark locally:
+Now, you can run a single benchmark locally:
 
 .. code-block:: bash
 
-    eval_framework \
+   uv run eval_framework \
         --models src/eval_framework/llm/models.py \
         --llm-name Smollm135MInstruct \
         --task-name "MMLU" \

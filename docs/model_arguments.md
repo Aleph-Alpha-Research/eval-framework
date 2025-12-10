@@ -20,7 +20,7 @@ It extends `BaseHFLLM`, managing model loading (from local checkpoints, HF Hub, 
 | `formatter_name` | `str \| None` | Name of a formatter class (e.g. `"ConcatFormatter"`, `"HFFormatter"`). Used when `formatter` is not provided. | `None` |
 | `formatter_kwargs` | `dict[str, Any] \| None` | Keyword arguments for the formatter constructor (used with `formatter_name`). | `None` |
 | `checkpoint_name` | `str \| None` | Custom display/logging name for the checkpoint. If omitted, inferred from model or artifact name. | `None` |
-| `bytes_per_token` | `float \| None` | Used to scale token generation limits based on model tokenizer density. Passed to the parent class `BaseHFLLM`. See [Deep Dive: bytes_per_token](#deep-dive-bytes_per_token). | `None` *(internally defaults to `4.0`)* |
+| `bytes_per_token` | `float \| None` | Used to scale token generation limits based on model tokenizer density. Passed to the parent class `BaseHFLLM`. See [Deep Dive: bytes_per_token](#deep-dive-bytes-per-token). | `None` *(internally defaults to `4.0`)* |
 | `**kwargs` | `Any` | Additional keyword args passed to `BaseHFLLM` / `BaseLLM`. | — |
 
 ---
@@ -40,7 +40,7 @@ It handles formatter setup, request concurrency, retry behavior, and timeout man
 | `max_async_concurrent_requests` | `int`                   | Maximum number of concurrent asynchronous API requests allowed. Controls throughput and parallelism.                              |                   `32`                  |
 | `request_timeout_seconds`       | `int`                   | Maximum number of seconds before an API request times out.                                                                        |    `1805` *(30 minutes + 5 seconds)*    |
 | `queue_full_timeout_seconds`    | `int`                   | Maximum number of seconds to wait when the async request queue is full before giving up.                                          |    `1805` *(30 minutes + 5 seconds)*    |
-| `bytes_per_token`               | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes_per_token).  | `None` *(internally defaults to `4.0`)* |
+| `bytes_per_token`               | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes-per-token).  | `None` *(internally defaults to `4.0`)* |
 
 ---
 
@@ -59,7 +59,7 @@ It manages model configuration, authentication, and request parameters for the O
 | `api_key`         | `str \| None`           | OpenAI API key. If not provided, defaults to the `OPENAI_API_KEY` environment variable.                                                      |                  `None`                 |
 | `organization`    | `str \| None`           | Optional OpenAI **organization ID** for multi-org API usage or billing separation.                                                           |                  `None`                 |
 | `base_url`        | `str \| None`           | Custom **API base URL**, e.g., for Azure OpenAI endpoints or local proxies.                                                                  |                  `None`                 |
-| `bytes_per_token` | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes_per_token).             | `None` *(internally defaults to `4.0`)* |
+| `bytes_per_token` | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes-per-token).             | `None` *(internally defaults to `4.0`)* |
 
 ---
 
@@ -80,7 +80,7 @@ It manages GPU allocation, tokenizer setup, and internal sampling parameter norm
 | `checkpoint_path`        | `str \| Path \| None`                      | Local model path or checkpoint directory.                                                                                                   |            `None`            |
 | `checkpoint_name`        | `str \| None`                              | Human-readable identifier for the checkpoint.                                                                                               |            `None`            |
 | `sampling_params`        | `SamplingParams \| dict[str, Any] \| None` | Sampling configuration parameters.                                                                                                          |            `None`            |
-| `bytes_per_token` | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes_per_token).             | `None` *(internally defaults to `4.0`)* |
+| `bytes_per_token` | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes-per-token).             | `None` *(internally defaults to `4.0`)* |
 | `**kwargs`               | `Any`                                      | Any remaining parameters forwarded to the `LLM` engine constructor.                                                                         |               —              |
 
 ---

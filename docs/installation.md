@@ -122,3 +122,36 @@ docker build -f Dockerfile_codebench -t eval-framework-codebench .
 # Determined.ai cluster deployment
 docker build -f Dockerfile_Determined -t eval-framework-determined .
 ```
+
+## PyPI installation
+
+It is also possible to download Eval-Framework through pip:
+
+```bash
+pip install eval-framework
+
+# or with optional extras
+pip install eval-framework[transformers]
+```
+
+However, we recommend using the uv solver to avoid many dependency version issues, so:
+
+```bash
+uv pip install eval-framework
+
+# or with optional extras
+uv pip install eval-framework[transformers]
+```
+
+This allows you to run an evaluation without going through `uv run`:
+
+```bash
+eval_framework \
+    --models src/eval_framework/llm/models.py \
+    --llm-name Smollm135MInstruct \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" "anatomy" \
+    --output-dir ./eval_results \
+    --num-fewshot 5 \
+    --num-samples 10
+```

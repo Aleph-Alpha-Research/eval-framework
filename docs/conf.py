@@ -9,11 +9,21 @@ ROOT = os.path.abspath("..")  # eval-framework/
 SRC = os.path.join(ROOT, "src")  # eval-framework/src/
 sys.path.insert(0, SRC)
 
+
+def get_version_from_json():
+    import json
+
+    version_file = os.path.join(ROOT, ".release-please-manifest.json")
+    with open(version_file) as f:
+        data = json.load(f)
+    return data.get(".", "0.0.0")
+
+
 # -- Project information -----------------------------------------------------
 project = "eval-framework"
 author = "Aleph Alpha Research"
 copyright = "2025, Aleph Alpha Research"
-version = "0.2.5"
+version = get_version_from_json()
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -39,7 +49,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- HTML output -------------------------------------------------------------
 html_theme = "furo"
 
-html_title = f"v{version}\nEval-Framework Documentation"
+html_title = f"Eval-Framework v{version}"
 html_static_path = ["_static"]
 html_show_sourcelink = False
 
