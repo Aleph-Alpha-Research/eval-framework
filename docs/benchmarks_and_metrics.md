@@ -4,7 +4,7 @@ Currently, the framework covers a wide range of pre-training and post-training b
 
 Additional task documentation can be generated with the script `utils/generate-task-docs.py` as documented in [installation.md](installation.md). The documention can thereafter be found in [docs/tasks](tasks/README.md).
 
-## Completion (updated table)
+## Completion
 
 | **Task** | **Capability** | **Benchmarks** | **Long Context** |
 |-|-|-|-|
@@ -19,37 +19,7 @@ Additional task documentation can be generated with the script `utils/generate-t
 |   Text Distillation   |   QA   |    |   `ZERO_SCROLLS_GOV_REPORT`, `ZERO_SCROLLS_MUSIQUE`, `ZERO_SCROLLS_NARRATIVEQA`, `ZERO_SCROLLS_QASPER`, `ZERO_SCROLLS_QMSUM`, `ZERO_SCROLLS_SQUALITY`   |
 |   Text Transformation   |   Translation   |   `Flores200`, `FloresPlus`, `WMT14`, `WMT14_INSTRUCT`, `WMT16, WMT16_INSTRUCT, WMT20, WMT20_INSTRUCT`   |    |
 
-## Completion (old table) TODO: delete table
-
-| Task Name | Tag | Task | Capability | Common Few-Shot Counts | Language |
-|-|-|-|-|-|-|
-| AIME 2024 | `AIME2024` | Logical Reasoning | Math | [0] | en |
-| DUC Abstractive | `DUC_ABSTRACTIVE` | Text Distilation | Extraction | [0, 5] | en |
-| DUC Extractive | `DUC_EXTRACTIVE` | Text Distilation | Extraction | [0, 5] | en |
-| Flores 200 | `FLoRes-200` | Text Transformation | Translation | [0, 5, 8] | en, fin |
-| Graduate School Math 8K | `GSM8K` | Logical Reasoning | Math | [0, 5, 8] | en |
-| Graduate School Math 8K Llama Style Prompt Formatting | `GSM8K Llama Version` | Logical Reasoning | Math | [0, 5, 8] | en |
-| IFEval | `IFEval` | Output Control | Structure | not supported | en |
-| IFEval Finnish & Swedish | `IFEval Finnish & Swedish` | Output Control | Structure | not supported | en |
-| HumanEval | `Human Eval` | Logical Reasoning | Programming | [0] | en |
-| Math | `Math` | Logical Reasoning | Math | [0, 5, 8] | en |
-| Math Lvl 5 | `Math Lvl 5` | Logical Reasoning | Math | [0, 5, 8] | en |
-| Math 500 | `MATH500` | Logical Reasoning | Math | [0] | en |
-| MBPP | `MBPP` | Logical Reasoning | Programming | [0] | en |
-| MBPP Sanitized | `MBPP_SANITIZED` | Logical Reasoning | Programming | [0] | en |
-| MBPP | `MBPP_PROMPT_WITHOUT_TESTS` | Logical Reasoning | Programming | [0] | en |
-| MBPP | `MBPP_PROMPT_WITHOUT_TESTS_SANITIZED` | Logical Reasoning | Programming | [0] | en |
-| PAWS-X | `PAWS-X` | Text Distillation | Classification | [0, 5] | en |
-| SPhyR  | `SPHYR` | Logical Reasoning | Puzzle | [0] | en |
-| SQuAD | `SQuAD` | Text Distillation | Closed QA | [0, 5] | en |
-| SQuAD v2 | `SQuAD2` | Text Distillation | Closed QA | [0, 5] | en |
-| TableBench | `TableBench` | Text Distillation, Logical Reasoning | Classification, Math | [0] | en |
-| TriviaQA | `TriviaQA` | Text Distillation | Classification | [0, 5] | en |
-| WMT 14 | `WMT14` | Text Translation | Translation | [0, 5] | en, fr |
-| WMT 16 | `WMT16` | Text Translation | Translation | [0, 5] | en, ger |
-| WMT 20 | `WMT20` | Text Translation | Translation | [0, 5] | en, ger, fr |
-
-## Loglikelihoods (updated table)
+## Loglikelihoods
 
 |   **Task**    | **Capability** | **Benchmarks** | **Long Context** |
 |-|-|-|-|
@@ -60,31 +30,6 @@ Additional task documentation can be generated with the script `utils/generate-t
 |   Logical Reasoning   |   Closed QA   |    |   `InfiniteBench_EnMC`   |
 |   Logical Reasoning   |   Programming   |    |   `InfiniteBench_CodeDebug`   |
 |   Logical Reasoning   |   Reasoning   |   `COPA`, `HELLASWAG, HELLASWAG_EU20_DE, HELLASWAG_EU20_FR`, `WINOGRANDE`, `WINOX_DE`, `WINOX_FR`   |    |
-
-## Loglikelihoods (old table)  TODO: delete table
-
-| Task Name | Tag | Task | Capability | Common Few-Shot Counts | Language |
-|-|-|-|-|-|-|
-| Abstract Reasoning Challenge | `ARC` | Text Distillation | Classification | [0, 5, 25] | en |
-| Abstract Reasoning Challenge German | `ARC German` | Text Distillation | Classification | [0, 5, 25] | ger |
-| Abstract Reasoning Challenge Finnish | `ARC Finnish` | Text Distillation | Classification | [0, 5, 25] | fin |
-| Casehold | `CaseHold` | Text Generation | Open QA | [0, 5] | en |
-| COPA | `COPA` | Logical Reasoning | Reasoning | [0] | en |
-| GPQA | `GPQA` | Text Distillation | Classification | [0] | en |
-| Hellaswag | `HellaSwag` | Logical Reasoning | Reasoning | [0, 5, 10] | en |
-| Hellaswag German | `HellaSwag German` | Logical Reasoning | Reasoning | [0, 5, 10] | en, ger |
-| MMLU | `MMLU` | Text Distillation | Classification | [0, 5] | en |
-| Full Text MMLU | `Full Text MMLU` | Text Distillation | Classification | [0, 5] | en |
-| MMLU Pro | `MMLU Pro` | Text Distillation | Classification | [0, 5] | en |
-| MMMLU | `MMMLU` | Text Distillation | Classification | [0, 5] | fr, de, es, it, pt, ar |
-| PIQA | `PIQA` | Text Distillation | Classification | [0] | en |
-| OpenBookQA | `OpenBookQA` | Text Distillation | Classification | [0] | en |
-| SciQ | `SciQ` | Text Distillation | Classification | [0] | en |
-| TruthfulQA | `TruthfulQA` | Text Distillation | Classification | [0, 6] | en |
-| TruthfulQA French | `TRUTHFULQA_EU20_FR` | Text Distillation | Classification | [0, 6] | en |
-| TruthfulQA German | `TRUTHFULQA_EU20_DE` | Text Distillation | Classification | [0, 6] | en |
-| Winogender | `Winogender` | Output Control | Bias | [0, 5] | en |
-| Winogrande | `Winogrande` | Logical Reasoning | Reasoning | [0, 5] | en |
 
 ## Long-Context
 
