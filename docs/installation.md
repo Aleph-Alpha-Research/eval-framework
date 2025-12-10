@@ -1,89 +1,125 @@
-# Installation and Dependencies
+# Installation
 
-This guide provides detailed installation instructions and dependency information for the eval-framework.
+This guide provides detailed installation instructions and dependency information for the **eval-framework**.
 
-## Installation Method
-#### Install uv
+### 1. Install `uv`
 
 Follow the official [installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
 
-#### Install Eval Framework
+### 2. Install Eval Framework
+
+Clone the repository and install all dependencies, including optional extras:
 
 ```bash
 # Clone the repository
 git clone https://github.com/Aleph-Alpha-Research/eval-framework/tree/main
 cd eval-framework
 
-# Install all dependencies including optional extras
+# Install all dependencies
 uv sync --all-extras
+```
 
-# Install flash-attention (requires compilation)
+To select specific optional features, you can install them individually. Available extras are:
+
+- `api` for Aleph Alpha client inference
+- `comet` for COMET metric
+- `determined` for distributed evaluation
+- `mistral` for Mistral model inference
+- `transformers` for HuggingFace inference
+- `vllm` for VLLM inference
+- `all` installs all extras
+
+You can install them as follows:
+
+```bash
+   uv sync --extra transformers
+```
+
+Or, you can install group extras like `flash-attn`:
+
+```bash
+# Install flash-attention optional extra (requires compilation)
 uv sync --all-extras --group flash-attn
 ```
 
-There is also a pre-commit hook to help with development:
+### 3. Test Your Installation
+
+```bash
+uv run eval_framework \
+    --models src/eval_framework/llm/models.py \
+    --llm-name Smollm135MInstruct \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" "anatomy" \
+    --output-dir ./eval_results \
+    --num-fewshot 5 \
+    --num-samples 10
 ```
+
+<!-- #### Pre-commit Hooks
+
+To help with development, enable pre-commit hooks:
+
+```bash
 uv tool install pre-commit
 uv run pre-commit install
 ```
 
-#### Generate task documentation
+### 3. Generate Task Documentation
 
-Generate task documentation
+The framework provides a utility script to generate task documentation automatically.
 
-Extra documentation can be automatically generated for all tasks available in `eval-framework` as well as for a
-specified set of extra task modules with the utility script `utils/generate-task-docs.py`. The script supports a few
-command line arguments:
-- `--only-tasks`: a list of task names to generate documentation for. If empty, all tasks will be processed.
-- `--exclude-tasks`: a list of task names to exclude from documentation generation.
-- `--extra-task-modules`: a list of files and folders containing additional task definitions.
-- `--add-prompt-examples`: if set, examples prompts for each of the formatters will be added in the generated docs.
-- `--formatter`: specify which formatter to use for formatting the task samples. If not explicitly specified, default
-formatters will be used.
-
-The generated documentation will be saved in the `docs/tasks` directory, with each task having its own markdown file.
-A [README.md](tasks/README.md) file will also be generated in the `docs/tasks` directory, listing all the tasks and
-linking to their documentation.
-
-Run with:
-```
+```bash
 uv run python -m eval_framework.utils.generate_task_docs
-```
+``` -->
+<!--
+#### Command-Line Options
 
-By default, formatted prompt examples are not included to this documentation file. Those can be added if you run instead:
-```
+| Option                  | Description                                                                       |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| `--only-tasks`          | Comma-separated list of task names to include. If empty, all tasks are processed. |
+| `--exclude-tasks`       | List of task names to exclude.                                                    |
+| `--extra-task-modules`  | Additional files or folders containing task definitions.                          |
+| `--add-prompt-examples` | Include example prompts for each formatter.                                       |
+| `--formatter`           | Specify a formatter to use for task samples. Defaults to framework defaults.      |
+
+> The generated documentation is saved in the `docs/tasks` directory. Each task will have its own markdown file.
+> A `README.md` file listing all tasks and linking to their documentation is also generated.
+
+Example with formatted prompt examples:
+
+```bash
 uv run python -m eval_framework.utils.generate_task_docs --add-prompt-examples
-```
+``` -->
 
 ## Environment Configuration
 
 ### Environment Variables
 
-Create a `.env` file in the project root. Essential environment variables:
+Create a `.env` file in the project root:
 
 ```bash
 # API Keys (if using external models)
-HF_TOKEN="your_huggingface_token"          # For private HF models
-OPENAI_API_KEY="your_openai_key"           # For OpenAI models as judges
-AA_TOKEN="your_aleph_alpha_token"          # For Aleph Alpha API
+HF_TOKEN="your_huggingface_token"        # For private HuggingFace models
+OPENAI_API_KEY="your_openai_key"         # For OpenAI models as judges
+AA_TOKEN="your_aleph_alpha_token"        # For Aleph Alpha API
 
 # Optional: Inference endpoints
 AA_INFERENCE_ENDPOINT="your_inference_url"
 
 # Debug mode
 DEBUG=false
+```
 
 ## Docker Installation
 
-For containerized deployment:
-
 ### Available Dockerfiles
 
-The repository contains multiple Dockerfiles for different use cases:
+| Dockerfile              | Purpose                                     |
+| ----------------------- | ------------------------------------------- |
+| `Dockerfile`            | Main evaluation framework with CUDA support |
+| `Dockerfile_codebench`  | Specialized for BigCodeBench coding tasks   |
+| `Dockerfile_Determined` | For Determined.ai cluster deployments       |
 
-1. **`Dockerfile`** (Main) - General evaluation framework with CUDA support
-2. **`Dockerfile_codebench`** - Specialized for BigCodeBench coding tasks
-3. **`Dockerfile_Determined`** - For Determined.ai cluster deployments
 
 ### Build from Source
 
@@ -91,7 +127,6 @@ The repository contains multiple Dockerfiles for different use cases:
 
 ```bash
 # Build main image (uses Dockerfile)
-# This creates a CUDA-enabled container with Python 3.12, uv, and all framework dependencies
 docker build -t eval-framework .
 
 # Run with GPU support
@@ -101,9 +136,42 @@ docker run -it --gpus all -v $(pwd):/workspace eval-framework
 #### Specialized Builds
 
 ```bash
-# For coding evaluation tasks (BigCodeBench)
+# BigCodeBench coding tasks
 docker build -f Dockerfile_codebench -t eval-framework-codebench .
 
-# For Determined.ai cluster deployment (requires base image)
+# Determined.ai cluster deployment
 docker build -f Dockerfile_Determined -t eval-framework-determined .
+```
+
+## PyPI installation
+
+It is also possible to download Eval-Framework through pip:
+
+```bash
+pip install eval-framework
+
+# or with optional extras
+pip install eval-framework[transformers]
+```
+
+However, we recommend using the uv solver to avoid many dependency version issues, so:
+
+```bash
+uv pip install eval-framework
+
+# or with optional extras
+uv pip install eval-framework[transformers]
+```
+
+This allows you to run an evaluation without going through `uv run`:
+
+```bash
+eval_framework \
+    --models src/eval_framework/llm/models.py \
+    --llm-name Smollm135MInstruct \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" "anatomy" \
+    --output-dir ./eval_results \
+    --num-fewshot 5 \
+    --num-samples 10
 ```

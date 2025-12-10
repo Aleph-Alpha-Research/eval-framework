@@ -168,3 +168,6 @@ eval/
 
 # WandB files and folders
 wandb
+
+# Generated docs
+docs/api/generated

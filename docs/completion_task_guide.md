@@ -288,4 +288,3 @@ All benchmarks are automatically tested for proper prompt formatting across diff
 
 #### Custom Task Tests (Optional)
 If your benchmark has specific logic that needs testing, create a test file in `tests/tasks/` to test it.
-```
