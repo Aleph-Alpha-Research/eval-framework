@@ -17,7 +17,27 @@ cd eval-framework
 
 # Install all dependencies
 uv sync --all-extras
+```
 
+To select specific optional features, you can install them individually. Available extras are:
+
+- `api` for Aleph Alpha client inference
+- `comet` for COMET metric
+- `determined` for distributed evaluation
+- `mistral` for Mistral model inference
+- `transformers` for HuggingFace inference
+- `vllm` for VLLM inference
+- `all` installs all extras
+
+You can install them as follows:
+
+```bash
+   uv sync --extra transformers
+```
+
+Or, you can install group extras like `flash-attn`:
+
+```bash
 # Install flash-attention optional extra (requires compilation)
 uv sync --all-extras --group flash-attn
 ```

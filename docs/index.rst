@@ -29,23 +29,12 @@ Install the library via uv (recommended):
 
 .. code-block:: bash
 
+   # Clone the repository
+   git clone https://github.com/Aleph-Alpha-Research/eval-framework/tree/main
+   cd eval-framework
+
+   # Install all dependencies
    uv sync --all-extras
-
-To select specific optional features, you can install them individually. Available extras are:
-
-- `api` for Aleph Alpha client inference
-- `comet` for COMET metric
-- `determined` for distributed evaluation
-- `mistral` for Mistral model inference
-- `transformers` for HuggingFace inference
-- `vllm` for VLLM inference
-- `all` installs all extras
-
-You can install them as follows:
-
-.. code-block:: bash
-
-   uv sync --extra transformers
 
 Now, you can run a single benchmark locally:
 
