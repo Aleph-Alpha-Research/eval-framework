@@ -66,7 +66,8 @@ class AlephAlphaAPIModel(BaseLLM):
         else:
             self._formatter = formatter
         self._llm_name = checkpoint_name or self.LLM_NAME
-        self._temperature = temperature if temperature is not None else 0.0
+        # If temperature is not provided, fallback to None so that the API itself dictates the default temperature.
+        self._temperature = temperature
         self.max_async_concurrent_requests = max_async_concurrent_requests
         self.max_retries = max_retries
         self.request_timeout_seconds = request_timeout_seconds

@@ -136,3 +136,13 @@ def test_max_tokens_generation() -> None:
     assert len(byte_level_model_generation_results) == 1
     byte_level_model_generated_num_tokens = byte_level_model_generation_results[0].completion_sequence_positions
     assert byte_level_model_generated_num_tokens == 40
+
+
+def test_temperature_fallback_to_none() -> None:
+    # Given no temperature
+
+    # When instantiating the model
+    model = Llama31_8B_Instruct_API()
+
+    # Then the temperature should be None
+    assert model._temperature is None
