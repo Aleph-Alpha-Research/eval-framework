@@ -1,0 +1,245 @@
+eval\_framework.metrics.completion package
+==========================================
+
+Submodules
+----------
+
+eval\_framework.metrics.completion.accuracy\_completion module
+--------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.accuracy_completion
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.aidanbench module
+----------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.aidanbench
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.bleu module
+----------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.bleu
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.chrf module
+----------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.chrf
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.code\_assertion module
+---------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.code_assertion
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.code\_execution\_pass\_at\_one module
+------------------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.code_execution_pass_at_one
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.comet module
+-----------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.comet
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.concordance\_index module
+------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.concordance_index
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.csv\_format module
+-----------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.csv_format
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.cwe\_accuracy module
+-------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.cwe_accuracy
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.exponential\_similarity module
+-----------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.exponential_similarity
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.f1 module
+--------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.f1
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.format\_checker module
+---------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.format_checker
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.grid\_difference module
+----------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.grid_difference
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.ifeval module
+------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.ifeval
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.json\_format module
+------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.json_format
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.language\_checker module
+-----------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.language_checker
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.length\_control module
+---------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.length_control
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.math\_reasoning\_completion module
+---------------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.math_reasoning_completion
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.niah\_accuracy module
+--------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.niah_accuracy
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.placeholder\_checker module
+--------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.placeholder_checker
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.repetition module
+----------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.repetition
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.rouge\_1 module
+--------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.rouge_1
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.rouge\_2 module
+--------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.rouge_2
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.rouge\_geometric\_mean module
+----------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.rouge_geometric_mean
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.rouge\_l module
+--------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.rouge_l
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.struct\_eval\_metrics module
+---------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.struct_eval_metrics
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.ter module
+---------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.ter
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.text\_counter module
+-------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.text_counter
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: eval_framework.metrics.completion
+   :members:
+   :show-inheritance:
+   :undoc-members:
