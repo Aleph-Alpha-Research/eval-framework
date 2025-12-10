@@ -4,7 +4,7 @@ The Eval-Framework CLI provides a flexible interface for evaluating LLMs across 
 
 ## Quick Start
 
-Install the package:
+Install the package through `uv` with all extra dependencies:
 
 ```
 uv sync --all-extras
@@ -13,9 +13,9 @@ uv sync --all-extras
 And execute a single evaluation locally:
 
 ```bash
-eval_framework \
-    --models src/eval_framework/llm/models.py \
+uv run eval_framework \
     --llm-name Smollm135MInstruct \
+    --models src/eval_framework/llm/models.py \
     --task-name "MMLU" \
     --task-subjects "abstract_algebra" "anatomy" \
     --output-dir ./eval_results \
