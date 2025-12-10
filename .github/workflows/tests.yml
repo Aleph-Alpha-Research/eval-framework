@@ -11,8 +11,7 @@ on:
   merge_group:
 
 permissions:
-  contents: write
-  pages: write
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -27,40 +26,6 @@ env:
   UV_LOCKED: 1
 
 jobs:
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: "~=0.8.16"
-
-      - name: Install project with all extras
-        run: uv sync --all-extras
-        working-directory: src
-
-      - name: Install Sphinx and extensions
-        run: |
-          uv pip install sphinx furo sphinx-autodoc-typehints myst-parser pallets-sphinx-themes ghp-import
-
-      - name: Autogenerate API docs
-        working-directory: docs
-        run: uv run sphinx-apidoc -o api/generated ../src/eval_framework
-
-      - name: Build Sphinx docs
-        working-directory: docs
-        run: uv run sphinx-build -b html -j auto . _build/html
-
-      - name: Deploy with ghp-import
-        run: |
-          uv run ghp-import -n -p -f docs/_build/html \
-            -m "Automated docs deploy" \
-            -r origin \
-            -b gh-pages
-
   lint:
     runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
     steps:
