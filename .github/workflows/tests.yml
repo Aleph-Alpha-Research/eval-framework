@@ -40,11 +40,6 @@ env:
   HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'trusted_contributor') }}
 
 jobs:
-  # ============================================================================
-  # SECURITY: This workflow uses pull_request_target for fork PR support.
-  # Fork PRs require 'trusted_contributor' label from maintainers.
-  # Maintainers MUST review fork code before adding the label.
-  # ============================================================================
   authorize:
     runs-on: ubuntu-latest
     outputs:
