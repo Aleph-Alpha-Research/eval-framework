@@ -147,10 +147,12 @@ class MathReasoningCompletion(BaseMetric[Completion]):
         try:
             factored = factor(expression)
             simplified = simplify(factored)
-            signal.alarm(0)  # Disable timeout
             return simplified
         except (SympifyError, TimeoutError):
             return S.NaN
+        finally:
+            # Ensure we never leak a pending alarm into later code paths.
+            signal.alarm(0)
 
     def _any_symb_correct(self, response_list: Iterable[Basic], ground_truth_list: Iterable[Basic]) -> bool:
         """
@@ -207,9 +209,11 @@ class MathReasoningCompletion(BaseMetric[Completion]):
             try:
                 gt_parsed = parse_latex(gt)  # NOTE: parses f(x)=0,\quadf(x)=x-1,\quadf(x)=-x+1 to Eq(f(x), 0) ONLY
                 ground_truths.append(gt_parsed)
-                signal.alarm(0)
             except Exception:
                 ground_truths.append(gt)
+            finally:
+                # Ensure we never leak a pending alarm into later code paths.
+                signal.alarm(0)
         normalized_response = self.normalize_expression(response.completion)
         response_list = self.check_for_equation(normalized_response)
         try:
