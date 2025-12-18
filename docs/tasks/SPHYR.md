@@ -11,9 +11,9 @@ SUBJECTS = ['1_random_cell_easy', '5_random_cell_easy', '10_random_cell_easy', '
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.sphyr](eval_framework.tasks.benchmarks.sphyr)
+- Module: `eval_framework.tasks.benchmarks.sphyr`
 
-- File: [src/eval_framework/tasks/benchmarks/sphyr.py](../../src/eval_framework/tasks/benchmarks/sphyr.py)
+- File: [src/eval_framework/tasks/benchmarks/sphyr.py](../../src/eval_framework/tasks/benchmarks/sphyr.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/sphyr.py)
 
 - Link to dataset: [https://huggingface.co/datasets/philippds/SPhyR](https://huggingface.co/datasets/philippds/SPhyR)
 

@@ -11,9 +11,9 @@ SUBJECTS = ['fi']
 LANGUAGE = <Language.FIN: 'Finnish'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.arc_fi](eval_framework.tasks.benchmarks.arc_fi)
+- Module: `eval_framework.tasks.benchmarks.arc_fi`
 
-- File: [src/eval_framework/tasks/benchmarks/arc_fi.py](../../src/eval_framework/tasks/benchmarks/arc_fi.py)
+- File: [src/eval_framework/tasks/benchmarks/arc_fi.py](../../src/eval_framework/tasks/benchmarks/arc_fi.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/arc_fi.py)
 
 - Link to dataset: [https://huggingface.co/datasets/LumiOpen/arc_challenge_mt](https://huggingface.co/datasets/LumiOpen/arc_challenge_mt)
 

@@ -11,9 +11,9 @@ SUBJECTS = ['engineering', 'physics', 'psychology', 'chemistry', 'biology', 'law
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.mmlu_pro](eval_framework.tasks.benchmarks.mmlu_pro)
+- Module: `eval_framework.tasks.benchmarks.mmlu_pro`
 
-- File: [src/eval_framework/tasks/benchmarks/mmlu_pro.py](../../src/eval_framework/tasks/benchmarks/mmlu_pro.py)
+- File: [src/eval_framework/tasks/benchmarks/mmlu_pro.py](../../src/eval_framework/tasks/benchmarks/mmlu_pro.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/mmlu_pro.py)
 
 - Link to dataset: [https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro](https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro)
 

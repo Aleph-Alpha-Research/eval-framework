@@ -11,9 +11,9 @@ SUBJECTS = ['deu_Latn-eng_Latn', 'deu_Latn-fra_Latn', 'deu_Latn-ita_Latn', 'deu_
 LANGUAGE = {'deu_Latn': <Language.DEU: 'German'>, 'eng_Latn': <Language.ENG: 'English'>, 'fra_Latn': <Language.FRA: 'French'>, 'ita_Latn': <Language.ITA: 'Italian'>, 'nld_Latn': <Language.NLD: 'Dutch'>, 'pol_Latn': <Language.POL: 'Polish'>, 'rus_Cyrl': <Language.RUS: 'Russian'>, 'spa_Latn': <Language.SPA: 'Spanish'>, 'ukr_Cyrl': <Language.UKR: 'Ukrainian'>}
 ````
 
-- Module: [eval_framework.tasks.benchmarks.flores_plus](eval_framework.tasks.benchmarks.flores_plus)
+- Module: `eval_framework.tasks.benchmarks.flores_plus`
 
-- File: [src/eval_framework/tasks/benchmarks/flores_plus.py](../../src/eval_framework/tasks/benchmarks/flores_plus.py)
+- File: [src/eval_framework/tasks/benchmarks/flores_plus.py](../../src/eval_framework/tasks/benchmarks/flores_plus.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/flores_plus.py)
 
 - Link to dataset: [https://huggingface.co/datasets/openlanguagedata/flores_plus](https://huggingface.co/datasets/openlanguagedata/flores_plus)
 

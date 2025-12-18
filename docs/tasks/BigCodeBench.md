@@ -11,9 +11,9 @@ SUBJECTS = ['original', 'calibrated']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.bigcodebench](eval_framework.tasks.benchmarks.bigcodebench)
+- Module: `eval_framework.tasks.benchmarks.bigcodebench`
 
-- File: [src/eval_framework/tasks/benchmarks/bigcodebench.py](../../src/eval_framework/tasks/benchmarks/bigcodebench.py)
+- File: [src/eval_framework/tasks/benchmarks/bigcodebench.py](../../src/eval_framework/tasks/benchmarks/bigcodebench.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/bigcodebench.py)
 
 - Link to dataset: [https://huggingface.co/datasets/bigcode/bigcodebench](https://huggingface.co/datasets/bigcode/bigcodebench)
 

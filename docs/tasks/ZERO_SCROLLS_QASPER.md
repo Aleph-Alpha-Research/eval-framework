@@ -10,9 +10,9 @@ METRICS = [F1]
 SUBJECTS = ['qasper']
 ````
 
-- Module: [eval_framework.tasks.benchmarks.zero_scrolls](eval_framework.tasks.benchmarks.zero_scrolls)
+- Module: `eval_framework.tasks.benchmarks.zero_scrolls`
 
-- File: [src/eval_framework/tasks/benchmarks/zero_scrolls.py](../../src/eval_framework/tasks/benchmarks/zero_scrolls.py)
+- File: [src/eval_framework/tasks/benchmarks/zero_scrolls.py](../../src/eval_framework/tasks/benchmarks/zero_scrolls.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/zero_scrolls.py)
 
 - Link to dataset: [https://huggingface.co/datasets/tau/zero_scrolls](https://huggingface.co/datasets/tau/zero_scrolls)
 

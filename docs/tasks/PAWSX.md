@@ -11,9 +11,9 @@ SUBJECTS = ['en', 'de']
 LANGUAGE = {'en': <Language.ENG: 'English'>, 'de': <Language.DEU: 'German'>}
 ````
 
-- Module: [eval_framework.tasks.benchmarks.pawsx](eval_framework.tasks.benchmarks.pawsx)
+- Module: `eval_framework.tasks.benchmarks.pawsx`
 
-- File: [src/eval_framework/tasks/benchmarks/pawsx.py](../../src/eval_framework/tasks/benchmarks/pawsx.py)
+- File: [src/eval_framework/tasks/benchmarks/pawsx.py](../../src/eval_framework/tasks/benchmarks/pawsx.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/pawsx.py)
 
 - Link to dataset: [https://huggingface.co/datasets/google-research-datasets/paws-x](https://huggingface.co/datasets/google-research-datasets/paws-x)
 

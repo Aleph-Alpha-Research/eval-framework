@@ -11,9 +11,9 @@ SUBJECTS = ['hard', 'easy']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.quality](eval_framework.tasks.benchmarks.quality)
+- Module: `eval_framework.tasks.benchmarks.quality`
 
-- File: [src/eval_framework/tasks/benchmarks/quality.py](../../src/eval_framework/tasks/benchmarks/quality.py)
+- File: [src/eval_framework/tasks/benchmarks/quality.py](../../src/eval_framework/tasks/benchmarks/quality.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/quality.py)
 
 - Link to dataset: [https://huggingface.co/datasets/emozilla/quality](https://huggingface.co/datasets/emozilla/quality)
 

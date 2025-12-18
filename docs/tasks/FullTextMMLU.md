@@ -11,9 +11,9 @@ SUBJECTS = ['abstract_algebra', 'anatomy', 'astronomy', 'business_ethics', 'clin
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.mmlu](eval_framework.tasks.benchmarks.mmlu)
+- Module: `eval_framework.tasks.benchmarks.mmlu`
 
-- File: [src/eval_framework/tasks/benchmarks/mmlu.py](../../src/eval_framework/tasks/benchmarks/mmlu.py)
+- File: [src/eval_framework/tasks/benchmarks/mmlu.py](../../src/eval_framework/tasks/benchmarks/mmlu.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/mmlu.py)
 
 - Link to dataset: [https://huggingface.co/datasets/cais/mmlu](https://huggingface.co/datasets/cais/mmlu)
 

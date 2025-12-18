@@ -14,6 +14,9 @@ DEFAULT_OUTPUT_DOCS_DIRECTORY = Path("docs/tasks")
 
 EXCLUDED_TASKS: list[str] = []
 
+# Base URL for the main repository to ensure links work even in external/companion repos
+REPO_URL = "https://github.com/Aleph-Alpha/eval-framework/blob/main"
+
 
 def parse_args(cli_args: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments for the script."""
@@ -102,9 +105,22 @@ def generate_docs_for_task(
             f.write(f"LANGUAGE = {repr(task.LANGUAGE)}".strip() + "\n")
         f.write("````\n\n")
 
-        f.write(f"- Module: [{task_class.__module__}]({task_class.__module__})\n\n")
-        task_file = re.sub(r".*(eval_framework[^/]*)/", r"src/\1/", inspect.getfile(task_class))
-        f.write(f"- File: [{task_file}](../../{task_file})\n\n")
+        f.write(f"- Module: `{task_class.__module__}`\n\n")
+
+        try:
+            raw_file_path = inspect.getfile(task_class)
+            # Find the package root 'eval_framework' in the path
+            match = re.search(r"eval_framework.*", raw_file_path)
+            if match:
+                # Reconstruct relative path assuming standard 'src' structure
+                task_file = f"src/{match.group(0)}"
+                # Provide a local relative link (for VS Code) and an absolute link (for GitHub/Web)
+                f.write(f"- File: [{task_file}](../../{task_file}) | [View on GitHub]({REPO_URL}/{task_file})\n\n")
+            else:
+                # Fallback for tasks defined outside the main package (e.g., custom local tasks)
+                f.write(f"- File: `{raw_file_path}`\n\n")
+        except Exception:
+            f.write("- File: `Dynamic or Built-in`\n\n")
 
         if http_path:
             f.write(f"- Link to dataset: [{http_path}]({http_path})\n\n")
@@ -149,13 +165,14 @@ def generate_docs_for_task(
             f.write("````\n")
 
 
-def generate_readme_list(output_docs_directory: Path) -> None:
-    """Generate a README file listing all tasks based on the list of files present in the target directory."""
+def generate_readme_list(output_docs_directory: Path, total_tasks: int) -> None:
+    """Generate a README file listing all tasks with total count."""
 
     with open(f"{output_docs_directory}/README.md", "w") as f:
         f.write(
             "# Task documentation\n\n"
             "This directory contains the generated documentation for all benchmark tasks available in the package.\n\n"
+            f"**Total number of tasks: {total_tasks}**\n\n"
             "The documentation can be generated or updated with "
             "`uv run -m eval_framework.utils.generate_task_docs`.\n\n"
             "NOTE: This is an automatically generated file. Any manual modifications will not be preserved when "
@@ -217,7 +234,8 @@ def generate_all_docs(args: argparse.Namespace, output_docs_directory: Path) -> 
                 os.remove(file_path)
             print("---")
 
-    generate_readme_list(output_docs_directory=output_docs_directory)
+    # Pass the total number of processed tasks to the README generator
+    generate_readme_list(output_docs_directory=output_docs_directory, total_tasks=len(filtered_tasks))
 
 
 if __name__ == "__main__":

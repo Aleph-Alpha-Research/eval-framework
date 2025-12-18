@@ -11,9 +11,9 @@ SUBJECTS = ['copa']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.copa](eval_framework.tasks.benchmarks.copa)
+- Module: `eval_framework.tasks.benchmarks.copa`
 
-- File: [src/eval_framework/tasks/benchmarks/copa.py](../../src/eval_framework/tasks/benchmarks/copa.py)
+- File: [src/eval_framework/tasks/benchmarks/copa.py](../../src/eval_framework/tasks/benchmarks/copa.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/copa.py)
 
 - Link to dataset: [https://huggingface.co/datasets/aps/super_glue](https://huggingface.co/datasets/aps/super_glue)
 

@@ -11,9 +11,9 @@ SUBJECTS = ['deu_Latn-eng_Latn', 'deu_Latn-fin_Latn', 'deu_Latn-fra_Latn', 'deu_
 LANGUAGE = {'deu_Latn': <Language.DEU: 'German'>, 'eng_Latn': <Language.ENG: 'English'>, 'fin_Latn': <Language.FIN: 'Finnish'>, 'fra_Latn': <Language.FRA: 'French'>, 'nld_Latn': <Language.NLD: 'Dutch'>}
 ````
 
-- Module: [eval_framework.tasks.benchmarks.flores200](eval_framework.tasks.benchmarks.flores200)
+- Module: `eval_framework.tasks.benchmarks.flores200`
 
-- File: [src/eval_framework/tasks/benchmarks/flores200.py](../../src/eval_framework/tasks/benchmarks/flores200.py)
+- File: [src/eval_framework/tasks/benchmarks/flores200.py](../../src/eval_framework/tasks/benchmarks/flores200.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/flores200.py)
 
 - Link to dataset: [https://huggingface.co/datasets/facebook/flores](https://huggingface.co/datasets/facebook/flores)
 

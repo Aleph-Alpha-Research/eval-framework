@@ -11,9 +11,9 @@ SUBJECTS = ['challenge_DE', 'easy_DE']
 LANGUAGE = <Language.DEU: 'German'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.opengptx_eu20](eval_framework.tasks.benchmarks.opengptx_eu20)
+- Module: `eval_framework.tasks.benchmarks.opengptx_eu20`
 
-- File: [src/eval_framework/tasks/benchmarks/opengptx_eu20.py](../../src/eval_framework/tasks/benchmarks/opengptx_eu20.py)
+- File: [src/eval_framework/tasks/benchmarks/opengptx_eu20.py](../../src/eval_framework/tasks/benchmarks/opengptx_eu20.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/opengptx_eu20.py)
 
 - Link to dataset: [https://huggingface.co/datasets/openGPT-X/arcx](https://huggingface.co/datasets/openGPT-X/arcx)
 

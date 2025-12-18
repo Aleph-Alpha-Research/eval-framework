@@ -11,9 +11,9 @@ SUBJECTS = ['en-fr', 'fr-en']
 LANGUAGE = {'en-fr': (<Language.ENG: 'English'>, <Language.FRA: 'French'>), 'fr-en': (<Language.FRA: 'French'>, <Language.ENG: 'English'>)}
 ````
 
-- Module: [eval_framework.tasks.benchmarks.wmt](eval_framework.tasks.benchmarks.wmt)
+- Module: `eval_framework.tasks.benchmarks.wmt`
 
-- File: [src/eval_framework/tasks/benchmarks/wmt.py](../../src/eval_framework/tasks/benchmarks/wmt.py)
+- File: [src/eval_framework/tasks/benchmarks/wmt.py](../../src/eval_framework/tasks/benchmarks/wmt.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/wmt.py)
 
 - Link to dataset: [https://huggingface.co/datasets/wmt14](https://huggingface.co/datasets/wmt14)
 

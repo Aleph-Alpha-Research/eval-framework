@@ -11,9 +11,9 @@ SUBJECTS = ['no_subject']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.piqa](eval_framework.tasks.benchmarks.piqa)
+- Module: `eval_framework.tasks.benchmarks.piqa`
 
-- File: [src/eval_framework/tasks/benchmarks/piqa.py](../../src/eval_framework/tasks/benchmarks/piqa.py)
+- File: [src/eval_framework/tasks/benchmarks/piqa.py](../../src/eval_framework/tasks/benchmarks/piqa.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/piqa.py)
 
 - Link to dataset: [https://huggingface.co/datasets/ybisk/piqa](https://huggingface.co/datasets/ybisk/piqa)
 

@@ -11,9 +11,9 @@ SUBJECTS = ['Convert Markdown to HTML', 'Convert React to HTML', 'Convert Vue to
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.struct_eval](eval_framework.tasks.benchmarks.struct_eval)
+- Module: `eval_framework.tasks.benchmarks.struct_eval`
 
-- File: [src/eval_framework/tasks/benchmarks/struct_eval.py](../../src/eval_framework/tasks/benchmarks/struct_eval.py)
+- File: [src/eval_framework/tasks/benchmarks/struct_eval.py](../../src/eval_framework/tasks/benchmarks/struct_eval.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/struct_eval.py)
 
 - Link to dataset: [https://huggingface.co/datasets/TIGER-Lab/StructEval](https://huggingface.co/datasets/TIGER-Lab/StructEval)
 

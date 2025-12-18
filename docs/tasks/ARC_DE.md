@@ -11,9 +11,9 @@ SUBJECTS = ['no_subject']
 LANGUAGE = <Language.DEU: 'German'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.arc_de](eval_framework.tasks.benchmarks.arc_de)
+- Module: `eval_framework.tasks.benchmarks.arc_de`
 
-- File: [src/eval_framework/tasks/benchmarks/arc_de.py](../../src/eval_framework/tasks/benchmarks/arc_de.py)
+- File: [src/eval_framework/tasks/benchmarks/arc_de.py](../../src/eval_framework/tasks/benchmarks/arc_de.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/arc_de.py)
 
 - Link to dataset: [https://huggingface.co/datasets/LeoLM/ArcChallenge_de](https://huggingface.co/datasets/LeoLM/ArcChallenge_de)
 
