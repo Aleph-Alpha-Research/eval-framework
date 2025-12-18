@@ -55,8 +55,8 @@ class AlephAlphaAPIModel(BaseLLM):
         request_timeout_seconds: int = 30 * 60 + 5,
         queue_full_timeout_seconds: int = 30 * 60 + 5,
         bytes_per_token: float | None = None,
-        aa_token: str | None = os.getenv("AA_TOKEN", "dummy"),
-        aa_inference_endpoint: str | None = os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
+        token: str = os.getenv("AA_TOKEN", "dummy"),
+        base_url: str = os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
     ) -> None:
         self._formatter: BaseFormatter
         if formatter is None:
@@ -78,8 +78,8 @@ class AlephAlphaAPIModel(BaseLLM):
         self.bytes_per_token_scalar = (
             4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
         )
-        self.aa_token = aa_token
-        self.aa_inference_endpoint = aa_inference_endpoint
+        self.token = token
+        self.base_url = base_url
 
     def _validate_model_availability(self) -> None:
         """
@@ -88,8 +88,8 @@ class AlephAlphaAPIModel(BaseLLM):
         try:
             # 'Client' object does not support the context manager protocol
             client = Client(
-                host=self.aa_inference_endpoint,
-                token=self.aa_token,
+                host=self.base_url,
+                token=self.token,
             )
 
             request = CompletionRequest(
@@ -194,10 +194,10 @@ class AlephAlphaAPIModel(BaseLLM):
         """Process multiple requests concurrently, returning request/response pairs."""
         semaphore = asyncio.Semaphore(self.max_async_concurrent_requests)
         async with AsyncClient(
-            host=self.aa_inference_endpoint,
+            host=self.base_url,
             nice=True,
             request_timeout_seconds=self.request_timeout_seconds,
-            token=self.aa_token,
+            token=self.token,
             total_retries=0,  # we have a custom retry policy in _request_with_backoff()
         ) as client:
             tasks = (
