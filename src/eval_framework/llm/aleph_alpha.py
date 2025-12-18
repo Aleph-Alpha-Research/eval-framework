@@ -71,25 +71,25 @@ class AlephAlphaAPIModel(BaseLLM):
         self.max_retries = max_retries
         self.request_timeout_seconds = request_timeout_seconds
         self.queue_full_timeout_seconds = queue_full_timeout_seconds
-        self._validate_model_availability()
+        self.token = token
+        self.base_url = base_url
+        self._validate_model_availability(base_url, token)
         # set bytes_per_token_scalar for non-standard models
         if bytes_per_token is not None and bytes_per_token <= 0:
             raise ValueError("bytes_per_token must be positive")
         self.bytes_per_token_scalar = (
             4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
         )
-        self.token = token
-        self.base_url = base_url
 
-    def _validate_model_availability(self) -> None:
+    def _validate_model_availability(self, base_url: str, token: str) -> None:
         """
         Validate that the model name is available by making a test request.
         """
         try:
             # 'Client' object does not support the context manager protocol
             client = Client(
-                host=self.base_url,
-                token=self.token,
+                host=base_url,
+                token=token,
             )
 
             request = CompletionRequest(
