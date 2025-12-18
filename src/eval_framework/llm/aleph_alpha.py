@@ -55,6 +55,8 @@ class AlephAlphaAPIModel(BaseLLM):
         request_timeout_seconds: int = 30 * 60 + 5,
         queue_full_timeout_seconds: int = 30 * 60 + 5,
         bytes_per_token: float | None = None,
+        aa_token: str | None = os.getenv("AA_TOKEN", "dummy"),
+        aa_inference_endpoint: str | None = os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
     ) -> None:
         self._formatter: BaseFormatter
         if formatter is None:
@@ -76,6 +78,8 @@ class AlephAlphaAPIModel(BaseLLM):
         self.bytes_per_token_scalar = (
             4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
         )
+        self.aa_token = aa_token
+        self.aa_inference_endpoint = aa_inference_endpoint
 
     def _validate_model_availability(self) -> None:
         """
@@ -84,8 +88,8 @@ class AlephAlphaAPIModel(BaseLLM):
         try:
             # 'Client' object does not support the context manager protocol
             client = Client(
-                host=os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
-                token=os.getenv("AA_TOKEN", "dummy"),
+                host=self.aa_inference_endpoint,
+                token=self.aa_token,
             )
 
             request = CompletionRequest(
@@ -190,10 +194,10 @@ class AlephAlphaAPIModel(BaseLLM):
         """Process multiple requests concurrently, returning request/response pairs."""
         semaphore = asyncio.Semaphore(self.max_async_concurrent_requests)
         async with AsyncClient(
-            host=os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
+            host=self.aa_inference_endpoint,
             nice=True,
             request_timeout_seconds=self.request_timeout_seconds,
-            token=os.getenv("AA_TOKEN", "dummy"),
+            token=self.aa_token,
             total_retries=0,  # we have a custom retry policy in _request_with_backoff()
         ) as client:
             tasks = (
