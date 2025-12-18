@@ -1,3 +1,4 @@
+import random
 from collections.abc import Mapping
 from enum import Enum
 
@@ -22,6 +23,14 @@ class MatchOutcome(str, Enum):
         if self == self.DRAW:
             return (0.5, 0.5)
         return (0, 1)
+
+    def flip(self) -> "MatchOutcome":
+        """Flip the outcome (A_WINS <-> B_WINS, DRAW stays DRAW)."""
+        if self == self.A_WINS:
+            return MatchOutcome.B_WINS
+        if self == self.B_WINS:
+            return MatchOutcome.A_WINS
+        return self  # DRAW stays DRAW
 
     @staticmethod
     def from_rank_literal(rank: int) -> "MatchOutcome":
@@ -122,25 +131,70 @@ Answer 2:
         self._prompt_templates = prompt_templates
 
     def grade(
-        self, instruction: str, completion_1: str, completion_2: str, language: Language
+        self,
+        instruction: str,
+        completion_1: str,
+        completion_2: str,
+        language: Language,
+        randomize_order: bool = False,
+        seed: int | None = None,
     ) -> ComparisonGradingOutput:
+        """Grade two completions by comparing them.
+
+        Args:
+            instruction: The instruction/task that was given.
+            completion_1: The first completion (typically the candidate).
+            completion_2: The second completion (typically the reference).
+            language: The language for the grading prompts.
+            randomize_order: If True, randomly swap the order of completions to eliminate
+                position bias.
+            seed: Optional random seed for reproducibility. If None and randomize_order
+                is True, uses a random swap decision.
+
+        Returns:
+            ComparisonGradingOutput with the outcome corrected for any position swap,
+            so outcome always reflects completion_1 vs completion_2 regardless of
+            presentation order to the judge.
+        """
         prompt_template = language.language_config(self._prompt_templates)
+
+        # Determine whether to swap the order
+        if randomize_order:
+            rng = random.Random(seed)
+            swap_order = rng.choice([True, False])
+        else:
+            swap_order = False
+
+        # Apply the swap if needed
+        if swap_order:
+            actual_answer_1, actual_answer_2 = completion_2, completion_1
+        else:
+            actual_answer_1, actual_answer_2 = completion_1, completion_2
 
         messages = prompt_template.to_messages(
             [],
             [
                 (self.INSTRUCTION_KEY, instruction),
-                (self.ANSWER_1_KEY, completion_1),
-                (self.ANSWER_2_KEY, completion_2),
+                (self.ANSWER_1_KEY, actual_answer_1),
+                (self.ANSWER_2_KEY, actual_answer_2),
             ],
         )
 
         raw_completion = self._grading_model.generate_from_messages([messages])[0]
         loaded_json = parse_json_output(raw_completion.completion)
 
+        # Get the raw outcome from the judge
+        raw_outcome: MatchOutcome | None = prompt_template.parse_map.get(
+            str(loaded_json.get(self.BETTER_ANSWER_KEY, None)), None
+        )
+
+        # Correct the outcome if we swapped the order
+        # If swapped: "Answer 1 is better" means completion_2 is better (B_WINS from completion_1's perspective)
+        final_outcome = raw_outcome.flip() if swap_order and raw_outcome is not None else raw_outcome
+
         return ComparisonGradingOutput(
             reasoning=loaded_json.get(self.REASONING_KEY, None),
-            outcome=prompt_template.parse_map.get(str(loaded_json.get(self.BETTER_ANSWER_KEY, None)), None),
+            outcome=final_outcome,
             judge_prompt=raw_completion.prompt,
             judge_response=raw_completion.completion,
         )

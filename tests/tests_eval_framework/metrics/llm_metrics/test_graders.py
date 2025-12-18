@@ -12,6 +12,25 @@ from eval_framework.metrics.llm.graders.instruction_grader import InstructionGra
 from eval_framework.metrics.llm.graders.language import Language
 from eval_framework.metrics.llm.graders.refusal_grader import RefusalGrader
 
+
+class TestMatchOutcome:
+    """Tests for MatchOutcome enum methods."""
+
+    def test_flip_a_wins_to_b_wins(self) -> None:
+        assert MatchOutcome.A_WINS.flip() == MatchOutcome.B_WINS
+
+    def test_flip_b_wins_to_a_wins(self) -> None:
+        assert MatchOutcome.B_WINS.flip() == MatchOutcome.A_WINS
+
+    def test_flip_draw_stays_draw(self) -> None:
+        assert MatchOutcome.DRAW.flip() == MatchOutcome.DRAW
+
+    def test_flip_is_involutory(self) -> None:
+        """Flipping twice should return to original."""
+        for outcome in MatchOutcome:
+            assert outcome.flip().flip() == outcome
+
+
 # NOTE: Run this tests to make sure redis has the cache in CI
 
 
@@ -112,7 +131,8 @@ def test_comparison_grader(
     language: Language, instruction: str, completion_1: str, completion_2: str, expected: MatchOutcome, judge: BaseLLM
 ) -> None:
     comparison_grader = ComparisonGrader(judge)
-    output = comparison_grader.grade(instruction, completion_1, completion_2, language)
+    # Disable randomization for deterministic test behavior
+    output = comparison_grader.grade(instruction, completion_1, completion_2, language, randomize_order=False)
 
     if expected is not None:
         assert output.reasoning

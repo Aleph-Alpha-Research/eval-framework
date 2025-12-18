@@ -48,6 +48,7 @@ class EvalConfig(BaseConfig):
     llm_args: dict[str, Any] = Field(default_factory=dict)
     llm_judge_class: type[BaseLLM] | None = None
     judge_model_args: dict[str, Any] = Field(default_factory=dict)
+    randomize_judge_order: bool = False
     batch_size: Annotated[int, Field(ge=1)] = 1
     description: str | None = None
     save_intermediate_results: Annotated[bool, BeforeValidator(lambda v: True if v is None else v)] = True

@@ -1,3 +1,4 @@
+import random
 import re
 import traceback
 
@@ -66,6 +67,7 @@ PAIR_JUDGE_PROMPTS_LIST = [
 class PromptToJudge(BaseModel):
     comparison_type: str
     prompt_text: str
+    candidate_is_a: bool = True  # Tracks whether the candidate completion is in position A
 
 
 class MTBenchJudgePairMetricContext(BaseMetricContext):
@@ -74,7 +76,39 @@ class MTBenchJudgePairMetricContext(BaseMetricContext):
     reference: list[str] | str | None
 
 
-def generate_pair_judge_prompts(response: Completion) -> list[PromptToJudge]:
+def _order_answers_for_comparison(candidate: str, reference: str, swap: bool) -> tuple[str, str]:
+    """Order candidate and reference answers for A/B comparison.
+
+    Args:
+        candidate: The candidate completion to evaluate.
+        reference: The reference/baseline completion.
+        swap: If True, swap the order (reference becomes A, candidate becomes B).
+
+    Returns:
+        Tuple of (answer_a, answer_b) in the correct order.
+    """
+    if swap:
+        return reference, candidate
+    return candidate, reference
+
+
+def generate_pair_judge_prompts(
+    response: Completion,
+    randomize_order: bool = False,
+    seed: int | None = None,
+) -> list[PromptToJudge]:
+    """Generate pairwise judge prompts for comparing candidate vs reference completions.
+
+    Args:
+        response: The completion response containing the candidate completion.
+        randomize_order: If True, randomly swap the order of A/B to eliminate position bias.
+        seed: Optional random seed for reproducibility. If None and randomize_order is True,
+            uses the response id as seed for deterministic per-sample randomization.
+
+    Returns:
+        List of PromptToJudge objects with candidate_is_a indicating whether the
+        candidate completion is in position A (True) or position B (False).
+    """
     context = extract_context_metric(response, MTBenchJudgePairMetricContext)
     assert response.messages is not None
 
@@ -89,30 +123,51 @@ def generate_pair_judge_prompts(response: Completion) -> list[PromptToJudge]:
     assert context.category is not None, "Category must be provided in the context for MTBenchJudgePairMetricContext"
     assert context.answer is not None, "Answer must be provided in the context for MTBenchJudgePairMetricContext"
 
+    # Determine whether to swap A/B order for this sample
+    # Use response.id as default seed for deterministic per-sample randomization
+    if randomize_order:
+        rng = random.Random(seed if seed is not None else response.id)
+        swap_order = rng.choice([True, False])
+    else:
+        swap_order = False
+
+    candidate_is_a = not swap_order
+
     # No reference answer needed
     if context.category not in NEED_REF_CATEGORIES:
         # SINGLE TURN
         if len(response.messages) <= 2:
             # turn 1
             question = response.last_user_instruction
-            answer_a = response.completion
-            answer_b = context.answer[0]
+            candidate_answer = response.completion
+            reference_answer = context.answer[0]
+            answer_a, answer_b = _order_answers_for_comparison(candidate_answer, reference_answer, swap_order)
+
             # format prompt
             single_turn_prompt = prompt_templates["pair_assistant_single_turn"]["prompt_template"].format(
                 question=question, answer_a=answer_a, answer_b=answer_b
             )
-            prompts_to_judge.append(PromptToJudge(comparison_type="pairwise_judgement", prompt_text=single_turn_prompt))
+            prompts_to_judge.append(
+                PromptToJudge(
+                    comparison_type="pairwise_judgement",
+                    prompt_text=single_turn_prompt,
+                    candidate_is_a=candidate_is_a,
+                )
+            )
 
         # MULTI TURN
         else:
             # turn 1
             question_1 = response.first_user_instruction
-            answer_a_1 = response.messages[1].content
-            answer_b_1 = context.answer[0]
+            candidate_answer_1 = response.messages[1].content
+            reference_answer_1 = context.answer[0]
             # turn 2
             question_2 = response.last_user_instruction
-            answer_a_2 = response.completion
-            answer_b_2 = context.answer[1]
+            candidate_answer_2 = response.completion
+            reference_answer_2 = context.answer[1]
+            answer_a_1, answer_b_1 = _order_answers_for_comparison(candidate_answer_1, reference_answer_1, swap_order)
+            answer_a_2, answer_b_2 = _order_answers_for_comparison(candidate_answer_2, reference_answer_2, swap_order)
+
             # format prompt
             multi_turn_prompt = prompt_templates["pair_assistant_multi_turn"]["prompt_template"].format(
                 question_1=question_1,
@@ -122,33 +177,50 @@ def generate_pair_judge_prompts(response: Completion) -> list[PromptToJudge]:
                 answer_a_2=answer_a_2,
                 answer_b_2=answer_b_2,
             )
-            prompts_to_judge.append(PromptToJudge(comparison_type="pairwise_judgement", prompt_text=multi_turn_prompt))
+            prompts_to_judge.append(
+                PromptToJudge(
+                    comparison_type="pairwise_judgement",
+                    prompt_text=multi_turn_prompt,
+                    candidate_is_a=candidate_is_a,
+                )
+            )
     # Reference answer needed
     elif context.reference:
         # SINGLE TURN
         if len(response.messages) <= 2 and len(context.reference) >= 1:
             # turn 1
             question = response.last_user_instruction
-            answer_a = response.completion
-            answer_b = context.answer[0]
+            candidate_answer = response.completion
+            reference_answer = context.answer[0]
             ref_answer_1 = context.reference[0]
+            answer_a, answer_b = _order_answers_for_comparison(candidate_answer, reference_answer, swap_order)
+
             # format prompt
             single_turn_prompt = prompt_templates["pair_assistant_single_turn_w_reference"]["prompt_template"].format(
                 question=question, answer_a=answer_a, answer_b=answer_b, ref_answer_1=ref_answer_1
             )
-            prompts_to_judge.append(PromptToJudge(comparison_type="pairwise_judgement", prompt_text=single_turn_prompt))
+            prompts_to_judge.append(
+                PromptToJudge(
+                    comparison_type="pairwise_judgement",
+                    prompt_text=single_turn_prompt,
+                    candidate_is_a=candidate_is_a,
+                )
+            )
         # MULTI TURN
         elif len(context.reference) >= 2:
             # turn 1
             question_1 = response.first_user_instruction
-            answer_a_1 = response.messages[1].content
-            answer_b_1 = context.answer[0]
+            candidate_answer_1 = response.messages[1].content
+            reference_answer_1 = context.answer[0]
             ref_answer_1 = context.reference[0]
             # turn 2
             question_2 = response.last_user_instruction
-            answer_a_2 = response.completion
-            answer_b_2 = context.answer[1]
+            candidate_answer_2 = response.completion
+            reference_answer_2 = context.answer[1]
             ref_answer_2 = context.reference[1]
+            answer_a_1, answer_b_1 = _order_answers_for_comparison(candidate_answer_1, reference_answer_1, swap_order)
+            answer_a_2, answer_b_2 = _order_answers_for_comparison(candidate_answer_2, reference_answer_2, swap_order)
+
             # format prompt
             multi_turn_prompt = prompt_templates["pair_assistant_multi_turn_w_reference"]["prompt_template"].format(
                 question_1=question_1,
@@ -160,7 +232,13 @@ def generate_pair_judge_prompts(response: Completion) -> list[PromptToJudge]:
                 answer_b_2=answer_b_2,
                 ref_answer_2=ref_answer_2,
             )
-            prompts_to_judge.append(PromptToJudge(comparison_type="pairwise_judgement", prompt_text=multi_turn_prompt))
+            prompts_to_judge.append(
+                PromptToJudge(
+                    comparison_type="pairwise_judgement",
+                    prompt_text=multi_turn_prompt,
+                    candidate_is_a=candidate_is_a,
+                )
+            )
     else:
         logger.info(
             f"Warning: No reference answer found for this sample (category: "
@@ -179,7 +257,9 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
             logger.info(f"Skipped LLM judge as completion already had an error {response_error}")
             return []
 
-        prompts_to_judge: list[PromptToJudge] = generate_pair_judge_prompts(response)
+        prompts_to_judge: list[PromptToJudge] = generate_pair_judge_prompts(
+            response, randomize_order=self._randomize_order
+        )
 
         all_metrics = []
         for prompt_to_judge in prompts_to_judge:
@@ -191,7 +271,10 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
     def _evaluate_prompt(self, prompt_to_judge: PromptToJudge, messages: list[Message]) -> MetricResult:
         try:
             output = self._llm_judge.generate_from_messages([messages])
-            parsed_output = self._output_to_rating(output[0].completion)
+            parsed_output = self._output_to_rating(
+                output[0].completion,
+                candidate_is_a=prompt_to_judge.candidate_is_a,
+            )
             return self._create_metric_result(
                 metric_name=prompt_to_judge.comparison_type,
                 value=parsed_output,
@@ -210,12 +293,28 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
             )
 
     @staticmethod
-    def _output_to_rating(output: str) -> float:
+    def _output_to_rating(output: str, candidate_is_a: bool = True) -> float:
+        """Convert judge output to a rating score for the candidate.
+
+        Args:
+            output: The raw output string from the LLM judge containing [[A]], [[B]], or [[C]].
+            candidate_is_a: Whether the candidate completion was in position A.
+                If False (candidate was in position B), the A/B interpretation is flipped.
+
+        Returns:
+            Float score: 1.0 if candidate wins, 0.0 if candidate loses, 0.5 for tie.
+        """
         match = re.search(r"\[\[(.*?)\]\]", output)
-        # A = Win, B = Lose, C = Tie
-        letters = {"A": 1, "B": 0, "C": 0.5}
+        # Raw interpretation: A = position A wins, B = position B wins, C = Tie
         if match:
             value = match.group(1)
-            if value in letters:
-                return letters[value]
-        return 0.5  # Tie
+            if value == "A":
+                # Position A wins - candidate wins if candidate_is_a, else loses
+                return 1.0 if candidate_is_a else 0.0
+            elif value == "B":
+                # Position B wins - candidate wins if NOT candidate_is_a, else loses
+                return 0.0 if candidate_is_a else 1.0
+            elif value == "C":
+                # Tie - always 0.5 regardless of position
+                return 0.5
+        return 0.5  # Default to tie for unparseable output

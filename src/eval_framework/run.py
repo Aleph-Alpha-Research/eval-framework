@@ -78,6 +78,11 @@ def parse_args() -> argparse.Namespace:
         "--num-fewshot", type=int, required=False, default=0, help="The number of fewshot examples to use."
     )
     parser.add_argument("--task-name", type=str, required=False, help="The name of the task to evaluate.")
+    parser.add_argument(
+        "--randomize-judge-order",
+        action="store_true",
+        help="Randomize the order of answers presented to the LLM judge to mitigate position bias.",
+    )
 
     # Perturbation arguments
     parser.add_argument(
