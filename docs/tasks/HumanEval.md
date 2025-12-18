@@ -13,7 +13,7 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Module: `eval_framework.tasks.benchmarks.humaneval`
 
-- File: [src/eval_framework/tasks/benchmarks/humaneval.py](../../src/eval_framework/tasks/benchmarks/humaneval.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/humaneval.py)
+- File: [src/eval_framework/tasks/benchmarks/humaneval.py](../../src/eval_framework/tasks/benchmarks/humaneval.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/humaneval.py)
 
 - Link to dataset: [https://huggingface.co/datasets/openai/openai_humaneval](https://huggingface.co/datasets/openai/openai_humaneval)
 

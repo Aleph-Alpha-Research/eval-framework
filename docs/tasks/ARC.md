@@ -13,7 +13,7 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Module: `eval_framework.tasks.benchmarks.arc`
 
-- File: [src/eval_framework/tasks/benchmarks/arc.py](../../src/eval_framework/tasks/benchmarks/arc.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/arc.py)
+- File: [src/eval_framework/tasks/benchmarks/arc.py](../../src/eval_framework/tasks/benchmarks/arc.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/arc.py)
 
 - Link to dataset: [https://huggingface.co/datasets/ai2_arc](https://huggingface.co/datasets/ai2_arc)
 

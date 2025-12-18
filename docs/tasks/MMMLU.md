@@ -13,7 +13,7 @@ LANGUAGE = {"('FR', 'abstract_algebra')": <Language.FRA: 'French'>, "('FR', 'ana
 
 - Module: `eval_framework.tasks.benchmarks.mmmlu`
 
-- File: [src/eval_framework/tasks/benchmarks/mmmlu.py](../../src/eval_framework/tasks/benchmarks/mmmlu.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/mmmlu.py)
+- File: [src/eval_framework/tasks/benchmarks/mmmlu.py](../../src/eval_framework/tasks/benchmarks/mmmlu.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/mmmlu.py)
 
 - Link to dataset: [https://huggingface.co/datasets/openai/MMMLU](https://huggingface.co/datasets/openai/MMMLU)
 

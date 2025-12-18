@@ -13,7 +13,7 @@ LANGUAGE = {'en-fr': (<Language.ENG: 'English'>, <Language.FRA: 'French'>), 'fr-
 
 - Module: `eval_framework.tasks.benchmarks.wmt`
 
-- File: [src/eval_framework/tasks/benchmarks/wmt.py](../../src/eval_framework/tasks/benchmarks/wmt.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/wmt.py)
+- File: [src/eval_framework/tasks/benchmarks/wmt.py](../../src/eval_framework/tasks/benchmarks/wmt.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/wmt.py)
 
 - Link to dataset: [https://huggingface.co/datasets/wmt14](https://huggingface.co/datasets/wmt14)
 

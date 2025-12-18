@@ -13,7 +13,7 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Module: `eval_framework.tasks.benchmarks.sciq`
 
-- File: [src/eval_framework/tasks/benchmarks/sciq.py](../../src/eval_framework/tasks/benchmarks/sciq.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/sciq.py)
+- File: [src/eval_framework/tasks/benchmarks/sciq.py](../../src/eval_framework/tasks/benchmarks/sciq.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/sciq.py)
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/sciq](https://huggingface.co/datasets/allenai/sciq)
 

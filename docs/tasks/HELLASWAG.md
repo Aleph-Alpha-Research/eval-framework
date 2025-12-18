@@ -13,7 +13,7 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Module: `eval_framework.tasks.benchmarks.hellaswag`
 
-- File: [src/eval_framework/tasks/benchmarks/hellaswag.py](../../src/eval_framework/tasks/benchmarks/hellaswag.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/hellaswag.py)
+- File: [src/eval_framework/tasks/benchmarks/hellaswag.py](../../src/eval_framework/tasks/benchmarks/hellaswag.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/hellaswag.py)
 
 - Link to dataset: [https://huggingface.co/datasets/Rowan/hellaswag](https://huggingface.co/datasets/Rowan/hellaswag)
 

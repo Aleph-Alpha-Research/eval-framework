@@ -13,7 +13,7 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Module: `eval_framework.tasks.benchmarks.belebele`
 
-- File: [src/eval_framework/tasks/benchmarks/belebele.py](../../src/eval_framework/tasks/benchmarks/belebele.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/belebele.py)
+- File: [src/eval_framework/tasks/benchmarks/belebele.py](../../src/eval_framework/tasks/benchmarks/belebele.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/belebele.py)
 
 - Link to dataset: [https://huggingface.co/datasets/facebook/belebele](https://huggingface.co/datasets/facebook/belebele)
 

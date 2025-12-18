@@ -13,7 +13,7 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Module: `eval_framework.tasks.benchmarks.squad`
 
-- File: [src/eval_framework/tasks/benchmarks/squad.py](../../src/eval_framework/tasks/benchmarks/squad.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/squad.py)
+- File: [src/eval_framework/tasks/benchmarks/squad.py](../../src/eval_framework/tasks/benchmarks/squad.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/squad.py)
 
 - Link to dataset: [https://huggingface.co/datasets/rajpurkar/squad](https://huggingface.co/datasets/rajpurkar/squad)
 

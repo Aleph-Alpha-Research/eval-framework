@@ -13,7 +13,7 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Module: `eval_framework.tasks.benchmarks.tablebench`
 
-- File: [src/eval_framework/tasks/benchmarks/tablebench.py](../../src/eval_framework/tasks/benchmarks/tablebench.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/tablebench.py)
+- File: [src/eval_framework/tasks/benchmarks/tablebench.py](../../src/eval_framework/tasks/benchmarks/tablebench.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/tablebench.py)
 
 - Link to dataset: [https://huggingface.co/datasets/Multilingual-Multimodal-NLP/TableBench](https://huggingface.co/datasets/Multilingual-Multimodal-NLP/TableBench)
 

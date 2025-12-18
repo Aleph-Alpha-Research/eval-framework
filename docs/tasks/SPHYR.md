@@ -13,7 +13,7 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Module: `eval_framework.tasks.benchmarks.sphyr`
 
-- File: [src/eval_framework/tasks/benchmarks/sphyr.py](../../src/eval_framework/tasks/benchmarks/sphyr.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/sphyr.py)
+- File: [src/eval_framework/tasks/benchmarks/sphyr.py](../../src/eval_framework/tasks/benchmarks/sphyr.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/sphyr.py)
 
 - Link to dataset: [https://huggingface.co/datasets/philippds/SPhyR](https://huggingface.co/datasets/philippds/SPhyR)
 

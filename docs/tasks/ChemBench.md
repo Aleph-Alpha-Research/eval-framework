@@ -13,7 +13,7 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Module: `eval_framework.tasks.benchmarks.chembench`
 
-- File: [src/eval_framework/tasks/benchmarks/chembench.py](../../src/eval_framework/tasks/benchmarks/chembench.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/chembench.py)
+- File: [src/eval_framework/tasks/benchmarks/chembench.py](../../src/eval_framework/tasks/benchmarks/chembench.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/chembench.py)
 
 - Link to dataset: [https://huggingface.co/datasets/jablonkagroup/ChemBench](https://huggingface.co/datasets/jablonkagroup/ChemBench)
 

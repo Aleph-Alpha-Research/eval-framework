@@ -13,7 +13,7 @@ LANGUAGE = <Language.FRA: 'French'>
 
 - Module: `eval_framework.tasks.benchmarks.winox`
 
-- File: [src/eval_framework/tasks/benchmarks/winox.py](../../src/eval_framework/tasks/benchmarks/winox.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/winox.py)
+- File: [src/eval_framework/tasks/benchmarks/winox.py](../../src/eval_framework/tasks/benchmarks/winox.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/winox.py)
 
 - Link to dataset: [https://huggingface.co/datasets/demelin/wino_x](https://huggingface.co/datasets/demelin/wino_x)
 

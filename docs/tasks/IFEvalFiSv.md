@@ -13,7 +13,7 @@ LANGUAGE = {'fi': <Language.FIN: 'Finnish'>, 'sv': <Language.SWE: 'Swedish'>}
 
 - Module: `eval_framework.tasks.benchmarks.ifeval`
 
-- File: [src/eval_framework/tasks/benchmarks/ifeval.py](../../src/eval_framework/tasks/benchmarks/ifeval.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/ifeval.py)
+- File: [src/eval_framework/tasks/benchmarks/ifeval.py](../../src/eval_framework/tasks/benchmarks/ifeval.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/ifeval.py)
 
 - Link to dataset: [https://huggingface.co/datasets/LumiOpen/ifeval_mt](https://huggingface.co/datasets/LumiOpen/ifeval_mt)
 

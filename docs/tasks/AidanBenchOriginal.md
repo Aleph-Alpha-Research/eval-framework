@@ -13,7 +13,7 @@ LANGUAGE = {'no_subject': <Language.ENG: 'English'>}
 
 - Module: `eval_framework.tasks.benchmarks.aidanbench`
 
-- File: [src/eval_framework/tasks/benchmarks/aidanbench.py](../../src/eval_framework/tasks/benchmarks/aidanbench.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/aidanbench.py)
+- File: [src/eval_framework/tasks/benchmarks/aidanbench.py](../../src/eval_framework/tasks/benchmarks/aidanbench.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/aidanbench.py)
 
 - Link to dataset: [https://huggingface.co/datasets/Aleph-Alpha-Research/aidanbench](https://huggingface.co/datasets/Aleph-Alpha-Research/aidanbench)
 

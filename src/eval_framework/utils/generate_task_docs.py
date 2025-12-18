@@ -15,7 +15,7 @@ DEFAULT_OUTPUT_DOCS_DIRECTORY = Path("docs/tasks")
 EXCLUDED_TASKS: list[str] = []
 
 # Base URL for the main repository to ensure links work even in external/companion repos
-REPO_URL = "https://github.com/Aleph-Alpha/eval-framework/blob/main"
+REPO_URL = "https://github.com/Aleph-Alpha-Research/eval-framework/blob/main"
 
 
 def parse_args(cli_args: list[str] | None = None) -> argparse.Namespace:

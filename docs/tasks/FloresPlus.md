@@ -13,7 +13,7 @@ LANGUAGE = {'deu_Latn': <Language.DEU: 'German'>, 'eng_Latn': <Language.ENG: 'En
 
 - Module: `eval_framework.tasks.benchmarks.flores_plus`
 
-- File: [src/eval_framework/tasks/benchmarks/flores_plus.py](../../src/eval_framework/tasks/benchmarks/flores_plus.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/flores_plus.py)
+- File: [src/eval_framework/tasks/benchmarks/flores_plus.py](../../src/eval_framework/tasks/benchmarks/flores_plus.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/flores_plus.py)
 
 - Link to dataset: [https://huggingface.co/datasets/openlanguagedata/flores_plus](https://huggingface.co/datasets/openlanguagedata/flores_plus)
 

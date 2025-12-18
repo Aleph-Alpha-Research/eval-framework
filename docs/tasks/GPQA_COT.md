@@ -13,7 +13,7 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Module: `eval_framework.tasks.benchmarks.gpqa`
 
-- File: [src/eval_framework/tasks/benchmarks/gpqa.py](../../src/eval_framework/tasks/benchmarks/gpqa.py) | [View on GitHub](https://github.com/Aleph-Alpha/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/gpqa.py)
+- File: [src/eval_framework/tasks/benchmarks/gpqa.py](../../src/eval_framework/tasks/benchmarks/gpqa.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/gpqa.py)
 
 - Link to dataset: [https://huggingface.co/datasets/Idavidrein/gpqa](https://huggingface.co/datasets/Idavidrein/gpqa)
 
