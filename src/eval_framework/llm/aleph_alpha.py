@@ -55,6 +55,8 @@ class AlephAlphaAPIModel(BaseLLM):
         request_timeout_seconds: int = 30 * 60 + 5,
         queue_full_timeout_seconds: int = 30 * 60 + 5,
         bytes_per_token: float | None = None,
+        token: str = os.getenv("AA_TOKEN", "dummy"),
+        base_url: str = os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
     ) -> None:
         self._formatter: BaseFormatter
         if formatter is None:
@@ -69,7 +71,9 @@ class AlephAlphaAPIModel(BaseLLM):
         self.max_retries = max_retries
         self.request_timeout_seconds = request_timeout_seconds
         self.queue_full_timeout_seconds = queue_full_timeout_seconds
-        self._validate_model_availability()
+        self.token = token
+        self.base_url = base_url
+        self._validate_model_availability(base_url, token)
         # set bytes_per_token_scalar for non-standard models
         if bytes_per_token is not None and bytes_per_token <= 0:
             raise ValueError("bytes_per_token must be positive")
@@ -77,15 +81,15 @@ class AlephAlphaAPIModel(BaseLLM):
             4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
         )
 
-    def _validate_model_availability(self) -> None:
+    def _validate_model_availability(self, base_url: str, token: str) -> None:
         """
         Validate that the model name is available by making a test request.
         """
         try:
             # 'Client' object does not support the context manager protocol
             client = Client(
-                host=os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
-                token=os.getenv("AA_TOKEN", "dummy"),
+                host=base_url,
+                token=token,
             )
 
             request = CompletionRequest(
@@ -190,10 +194,10 @@ class AlephAlphaAPIModel(BaseLLM):
         """Process multiple requests concurrently, returning request/response pairs."""
         semaphore = asyncio.Semaphore(self.max_async_concurrent_requests)
         async with AsyncClient(
-            host=os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
+            host=self.base_url,
             nice=True,
             request_timeout_seconds=self.request_timeout_seconds,
-            token=os.getenv("AA_TOKEN", "dummy"),
+            token=self.token,
             total_retries=0,  # we have a custom retry policy in _request_with_backoff()
         ) as client:
             tasks = (
