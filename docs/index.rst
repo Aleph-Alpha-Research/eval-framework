@@ -81,7 +81,7 @@ Documentation Overview
    :maxdepth: 1
    :caption: Contributing Guidelines
 
-   ../CONTRIBUTING.md
+   CONTRIBUTING.md
    testing.md
 
 .. toctree::
