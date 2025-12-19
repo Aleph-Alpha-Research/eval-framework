@@ -22,11 +22,11 @@ name: release-please
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    with:
-      token: ${{ secrets.GH_PAT }}
     steps:
       - id: release
         uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
       - if: ${{ steps.release.outputs.release_created }}
         name: Checkout
         uses: actions/checkout@v6
