@@ -338,6 +338,7 @@ def run_with_kwargs(kwargs: dict) -> None:
         perturbation_type=kwargs["perturbation_type"],
         perturbation_probability=kwargs["perturbation_probability"],
         perturbation_seed=kwargs["perturbation_seed"],
+        randomize_judge_order=kwargs["randomize_judge_order"],
         delete_output_dir_after_upload=kwargs["delete_output_dir_after_upload"],
         # save_logs=kwargs["save_logs"],
     )
