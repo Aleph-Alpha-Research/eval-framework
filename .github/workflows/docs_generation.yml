@@ -30,6 +30,11 @@ jobs:
         run: |
           uv pip install sphinx furo sphinx-autodoc-typehints myst-parser pallets-sphinx-themes ghp-import
 
+      - name: Symlink root files into docs/
+        run: |
+          ln -s ../README.md docs/README.md
+          ln -s ../CONTRIBUTING.md docs/CONTRIBUTING.md
+
       - name: Autogenerate API docs
         working-directory: docs
         run: uv run sphinx-apidoc -o api/generated ../src/eval_framework
