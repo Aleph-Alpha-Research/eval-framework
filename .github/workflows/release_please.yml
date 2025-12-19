@@ -1,0 +1,33 @@
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  # This permission is mandatory for Trusted Publishing
+  # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+  id-token: write
+  contents: write
+  issues: write
+  pull-requests: write
+
+name: release-please
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v4
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Checkout
+        uses: actions/checkout@v6
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Publish to GitLab Package Registry
+        run: |
+          uv build
+          uv publish
