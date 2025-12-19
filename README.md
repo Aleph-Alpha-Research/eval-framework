@@ -28,6 +28,8 @@
 - Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
 - Docker Support: Pre-configured Dockerfiles for local and distributed setups.
 
+For full documentation, visit our [Docs Page](https://aleph-alpha-research.github.io/eval-framework/).
+
 ## Quick Start
 
 The codebase is tested and compatible with Python 3.12 and PyTorch 2.5.
