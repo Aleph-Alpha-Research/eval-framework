@@ -1,24 +1,12 @@
 <!-- Badges -->
 <div align="center">
 
-  <a href="https://github.com/Aleph-Alpha-Research/eval-framework/actions">
-    <img src="https://github.com/Aleph-Alpha-Research/eval-framework/actions/workflows/tests.yml/badge.svg" alt="Build Status">
-  </a>
-  <a href="https://github.com/Aleph-Alpha-Research/eval-framework/releases">
-    <img src="https://img.shields.io/github/v/release/Aleph-Alpha-Research/eval-framework" alt="Version">
-  </a>
-  <a href="https://pypi.org/project/eval-framework/">
-    <img src="https://img.shields.io/pypi/v/eval-framework.svg" alt="PyPI">
-  </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/Aleph-Alpha-Research/eval-framework.svg" alt="License">
-  </a>
-  <a href="https://aleph-alpha-research.github.io/eval-framework/">
-    <img src="https://img.shields.io/badge/docs-online-blue" alt="Docs">
-  </a>
-  <a href="https://github.com/Aleph-Alpha-Research/eval-framework/stargazers">
-    <img src="https://img.shields.io/github/stars/Aleph-Alpha-Research/eval-framework" alt="Stars">
-  </a>
+[![Build Status](https://github.com/Aleph-Alpha-Research/eval-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/Aleph-Alpha-Research/eval-framework/actions)
+[![Version](https://img.shields.io/github/v/release/Aleph-Alpha-Research/eval-framework)](https://github.com/Aleph-Alpha-Research/eval-framework/releases)
+[![PyPI](https://img.shields.io/pypi/v/eval-framework.svg)](https://pypi.org/project/eval-framework/)
+[![License](https://img.shields.io/github/license/Aleph-Alpha-Research/eval-framework.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://aleph-alpha-research.github.io/eval-framework/)
+[![Stars](https://img.shields.io/github/stars/Aleph-Alpha-Research/eval-framework)](https://github.com/Aleph-Alpha-Research/eval-framework/stargazers)
 
 </div>
 
