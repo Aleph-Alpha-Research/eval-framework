@@ -79,6 +79,13 @@ Documentation Overview
 
 .. toctree::
    :maxdepth: 1
+   :caption: Contributing Guidelines
+
+   ../CONTRIBUTING.md
+   testing.md
+
+.. toctree::
+   :maxdepth: 1
    :caption: API Reference
 
    api/index
