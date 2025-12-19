@@ -46,6 +46,8 @@ class WMT(BaseTask[str], ABC):
         hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject)
 
         # Parse the language pair to get source and target language codes
+        if subject is None:
+            raise ValueError("subject is required for WMT dataset")
         src_lang, tgt_lang = subject.split("-")
 
         self.dataset = {}
