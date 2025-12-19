@@ -9,6 +9,7 @@ from eval_framework.metrics.llm.graders.models import (
     PromptTemplateWithParseMap,
     parse_json_output,
 )
+from eval_framework.metrics.llm.utils import order_answers_for_comparison
 
 
 class MatchOutcome(str, Enum):
@@ -166,10 +167,7 @@ Answer 2:
             swap_order = False
 
         # Apply the swap if needed
-        if swap_order:
-            actual_answer_1, actual_answer_2 = completion_2, completion_1
-        else:
-            actual_answer_1, actual_answer_2 = completion_1, completion_2
+        actual_answer_1, actual_answer_2 = order_answers_for_comparison(completion_1, completion_2, swap_order)
 
         messages = prompt_template.to_messages(
             [],

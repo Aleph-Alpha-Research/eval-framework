@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from eval_framework.logger import logger
 from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
+from eval_framework.metrics.llm.utils import order_answers_for_comparison
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, extract_context_metric
 from template_formatting.formatter import Message, Role
 
@@ -76,22 +77,6 @@ class MTBenchJudgePairMetricContext(BaseMetricContext):
     reference: list[str] | str | None
 
 
-def _order_answers_for_comparison(candidate: str, reference: str, swap: bool) -> tuple[str, str]:
-    """Order candidate and reference answers for A/B comparison.
-
-    Args:
-        candidate: The candidate completion to evaluate.
-        reference: The reference/baseline completion.
-        swap: If True, swap the order (reference becomes A, candidate becomes B).
-
-    Returns:
-        Tuple of (answer_a, answer_b) in the correct order.
-    """
-    if swap:
-        return reference, candidate
-    return candidate, reference
-
-
 def generate_pair_judge_prompts(
     response: Completion,
     randomize_order: bool = False,
@@ -141,7 +126,7 @@ def generate_pair_judge_prompts(
             question = response.last_user_instruction
             candidate_answer = response.completion
             reference_answer = context.answer[0]
-            answer_a, answer_b = _order_answers_for_comparison(candidate_answer, reference_answer, swap_order)
+            answer_a, answer_b = order_answers_for_comparison(candidate_answer, reference_answer, swap_order)
 
             # format prompt
             single_turn_prompt = prompt_templates["pair_assistant_single_turn"]["prompt_template"].format(
@@ -165,8 +150,8 @@ def generate_pair_judge_prompts(
             question_2 = response.last_user_instruction
             candidate_answer_2 = response.completion
             reference_answer_2 = context.answer[1]
-            answer_a_1, answer_b_1 = _order_answers_for_comparison(candidate_answer_1, reference_answer_1, swap_order)
-            answer_a_2, answer_b_2 = _order_answers_for_comparison(candidate_answer_2, reference_answer_2, swap_order)
+            answer_a_1, answer_b_1 = order_answers_for_comparison(candidate_answer_1, reference_answer_1, swap_order)
+            answer_a_2, answer_b_2 = order_answers_for_comparison(candidate_answer_2, reference_answer_2, swap_order)
 
             # format prompt
             multi_turn_prompt = prompt_templates["pair_assistant_multi_turn"]["prompt_template"].format(
@@ -193,7 +178,7 @@ def generate_pair_judge_prompts(
             candidate_answer = response.completion
             reference_answer = context.answer[0]
             ref_answer_1 = context.reference[0]
-            answer_a, answer_b = _order_answers_for_comparison(candidate_answer, reference_answer, swap_order)
+            answer_a, answer_b = order_answers_for_comparison(candidate_answer, reference_answer, swap_order)
 
             # format prompt
             single_turn_prompt = prompt_templates["pair_assistant_single_turn_w_reference"]["prompt_template"].format(
@@ -218,8 +203,8 @@ def generate_pair_judge_prompts(
             candidate_answer_2 = response.completion
             reference_answer_2 = context.answer[1]
             ref_answer_2 = context.reference[1]
-            answer_a_1, answer_b_1 = _order_answers_for_comparison(candidate_answer_1, reference_answer_1, swap_order)
-            answer_a_2, answer_b_2 = _order_answers_for_comparison(candidate_answer_2, reference_answer_2, swap_order)
+            answer_a_1, answer_b_1 = order_answers_for_comparison(candidate_answer_1, reference_answer_1, swap_order)
+            answer_a_2, answer_b_2 = order_answers_for_comparison(candidate_answer_2, reference_answer_2, swap_order)
 
             # format prompt
             multi_turn_prompt = prompt_templates["pair_assistant_multi_turn_w_reference"]["prompt_template"].format(
@@ -317,4 +302,5 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
             elif value == "C":
                 # Tie - always 0.5 regardless of position
                 return 0.5
-        return 0.5  # Default to tie for unparseable output
+        logger.warning(f"Could not parse judge output, defaulting to tie: {output[:200]}")
+        return 0.5
