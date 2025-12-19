@@ -126,7 +126,7 @@ class TestWMTPostProcessing:
     def test_post_process_with_stop_sequence(self) -> None:
         """Test that stop sequences are handled correctly."""
         task = WMT16(num_fewshot=0)
-        
+
         # Test various stop sequences
         text_with_stop = "Hello world.\nThis should be cut"
         result = task.post_process_generated_completion(text_with_stop)
@@ -139,7 +139,7 @@ class TestWMTPostProcessing:
     def test_instruct_post_process(self) -> None:
         """Test instruct variant post-processing."""
         task = WMT16_INSTRUCT(num_fewshot=0)
-        
+
         # Test prefix removal
         text_with_prefix = "This is the translation: Hello world"
         result = task.post_process_generated_completion(text_with_prefix)

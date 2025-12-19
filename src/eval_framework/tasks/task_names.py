@@ -222,7 +222,6 @@ def make_sure_all_hf_datasets_are_in_cache(only_datasets: set[str] | None = None
         logger.info(f"Processed {task_name}")
 
 
-
 def update_changed_datasets_only(verbose: bool = True) -> tuple[bool, set[str]]:
     """
     Check for updates and download only changed datasets.

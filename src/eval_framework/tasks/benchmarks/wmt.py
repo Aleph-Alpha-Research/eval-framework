@@ -59,11 +59,13 @@ class WMT(BaseTask[str], ABC):
             data_list = []
             for item in data:
                 translation = item["translation"]
-                data_list.append({
-                    "source": translation[src_lang],
-                    "target": translation[tgt_lang],
-                    "subject": subject,
-                })
+                data_list.append(
+                    {
+                        "source": translation[src_lang],
+                        "target": translation[tgt_lang],
+                        "subject": subject,
+                    }
+                )
 
             if split == self.SAMPLE_SPLIT:
                 self.rnd.shuffle(data_list)
