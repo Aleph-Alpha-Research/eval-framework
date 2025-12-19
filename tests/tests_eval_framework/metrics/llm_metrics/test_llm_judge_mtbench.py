@@ -239,7 +239,7 @@ class TestPairJudgePromptsRandomization:
         """Test that different seeds can produce different orderings."""
         # Try multiple seed pairs to find one that produces different orderings
         found_different = False
-        for seed1, seed2 in [(1, 2), (10, 20), (100, 200), (42, 43)]:
+        for seed1, seed2 in [(1, 2), (10, 20), (100, 200), (42, 43), (0, 999), (7, 12345)]:
             prompts_1 = generate_pair_judge_prompts(single_turn_completion, randomize_order=True, seed=seed1)
             prompts_2 = generate_pair_judge_prompts(single_turn_completion, randomize_order=True, seed=seed2)
             if prompts_1[0].candidate_is_a != prompts_2[0].candidate_is_a:
