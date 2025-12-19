@@ -11,9 +11,9 @@ SUBJECTS = ['abstract_algebra_FR', 'anatomy_FR', 'astronomy_FR', 'business_ethic
 LANGUAGE = <Language.FRA: 'French'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.opengptx_eu20](eval_framework.tasks.benchmarks.opengptx_eu20)
+- Module: `eval_framework.tasks.benchmarks.opengptx_eu20`
 
-- File: [src/eval_framework/tasks/benchmarks/opengptx_eu20.py](../../src/eval_framework/tasks/benchmarks/opengptx_eu20.py)
+- File: [src/eval_framework/tasks/benchmarks/opengptx_eu20.py](../../src/eval_framework/tasks/benchmarks/opengptx_eu20.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/opengptx_eu20.py)
 
 - Link to dataset: [https://huggingface.co/datasets/openGPT-X/mmlux](https://huggingface.co/datasets/openGPT-X/mmlux)
 
