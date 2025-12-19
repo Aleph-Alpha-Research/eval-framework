@@ -1,0 +1,46 @@
+name: Build & Deploy Sphinx Docs
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+
+      - name: Install project with all extras
+        run: uv sync --all-extras
+        working-directory: src
+
+      - name: Install Sphinx and extensions
+        run: |
+          uv pip install sphinx furo sphinx-autodoc-typehints myst-parser pallets-sphinx-themes ghp-import
+
+      - name: Autogenerate API docs
+        working-directory: docs
+        run: uv run sphinx-apidoc -o api/generated ../src/eval_framework
+
+      - name: Build Sphinx docs
+        working-directory: docs
+        run: uv run sphinx-build -b html -j auto . _build/html
+
+      - name: Deploy with ghp-import
+        run: |
+          uv run ghp-import -n -p -f docs/_build/html \
+            -m "Automated docs deploy" \
+            -r origin \
+            -b gh-pages
