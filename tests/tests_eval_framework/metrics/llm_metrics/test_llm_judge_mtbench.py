@@ -235,18 +235,19 @@ class TestPairJudgePromptsRandomization:
         assert prompts_1[0].candidate_is_a == prompts_2[0].candidate_is_a
         assert prompts_1[0].prompt_text == prompts_2[0].prompt_text
 
-    def test_randomize_order_different_seeds_may_differ(self, single_turn_completion: Completion) -> None:
-        """Test that different seeds can produce different orderings."""
-        # Try multiple seed pairs to find one that produces different orderings
-        found_different = False
-        for seed1, seed2 in [(1, 2), (10, 20), (100, 200), (42, 43), (0, 999), (7, 12345)]:
-            prompts_1 = generate_pair_judge_prompts(single_turn_completion, randomize_order=True, seed=seed1)
-            prompts_2 = generate_pair_judge_prompts(single_turn_completion, randomize_order=True, seed=seed2)
-            if prompts_1[0].candidate_is_a != prompts_2[0].candidate_is_a:
-                found_different = True
-                break
+    def test_randomize_order_can_produce_both_outcomes(self, single_turn_completion: Completion) -> None:
+        """Randomization can produce both True and False outcomes."""
+        import random
 
-        assert found_different, "Expected different seeds to produce different orderings"
+        # Find seeds that produce each outcome (deterministic search)
+        seed_for_true = next(i for i in range(100) if not random.Random(i).choice([True, False]))
+        seed_for_false = next(i for i in range(100) if random.Random(i).choice([True, False]))
+
+        prompt_true = generate_pair_judge_prompts(single_turn_completion, randomize_order=True, seed=seed_for_true)
+        prompt_false = generate_pair_judge_prompts(single_turn_completion, randomize_order=True, seed=seed_for_false)
+
+        assert prompt_true[0].candidate_is_a is True
+        assert prompt_false[0].candidate_is_a is False
 
     def test_no_randomization_keeps_candidate_as_a(self, single_turn_completion: Completion) -> None:
         """Test that disabling randomization always puts candidate in position A."""
