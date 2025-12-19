@@ -221,9 +221,6 @@ def make_sure_all_hf_datasets_are_in_cache(only_datasets: set[str] | None = None
                 time.sleep(random.randint(1, 5))
         logger.info(f"Processed {task_name}")
 
-    # Sacrebleu uses its own cache (SACREBLEU env var), separate from HF datasets.
-    # We cache them together to ensure all evaluation data is available.
-    _ensure_sacrebleu_datasets_cached()
 
 
 def update_changed_datasets_only(verbose: bool = True) -> tuple[bool, set[str]]:
@@ -239,9 +236,6 @@ def update_changed_datasets_only(verbose: bool = True) -> tuple[bool, set[str]]:
     all_up_to_date, datasets_to_update = get_datasets_needing_update()
 
     if all_up_to_date:
-        # Even when HF datasets are current, ensure sacrebleu is cached
-        # (it has its own cache and isn't tracked by dataset_commits.json)
-        _ensure_sacrebleu_datasets_cached()
         print("Nothing to update!")
         return False, set()
 
@@ -291,33 +285,6 @@ def save_hf_dataset_commits() -> None:
         json.dump(commits, f, indent=2)
 
     print(f"Saved {len(commits)} dataset commits to {cache_file}")
-
-
-def _ensure_sacrebleu_datasets_cached() -> None:
-    """Pre-download sacrebleu WMT datasets to ensure they're cached.
-
-    Sacrebleu uses its own cache (controlled by SACREBLEU env var).
-    This ensures WMT test sets are downloaded and cached alongside HF datasets.
-    """
-    import sacrebleu
-
-    # WMT datasets used by the framework (from wmt.py)
-    WMT_DATASETS = {
-        "wmt14": ["en-fr", "fr-en"],
-        "wmt16": ["de-en", "en-de"],
-        "wmt20": ["de-en", "de-fr", "en-de", "fr-de"],
-    }
-
-    print("Ensuring sacrebleu WMT datasets are cached...")
-    for test_set, langpairs in WMT_DATASETS.items():
-        for langpair in langpairs:
-            try:
-                sacrebleu.download_test_set(test_set=test_set, langpair=langpair)
-                print(f"  {test_set}/{langpair}: OK")
-            except Exception as e:
-                print(f"  {test_set}/{langpair}: FAILED ({e})")
-
-    print("Sacrebleu datasets cached!")
 
 
 if __name__ == "__main__":
