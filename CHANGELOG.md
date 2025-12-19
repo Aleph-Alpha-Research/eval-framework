@@ -10,6 +10,18 @@
 
 ### General
 
+## 0.2.6
+
+### Models
+
+### Tasks
+
+### Metrics
+
+### General
+
+- For math reasoning completion, added a finally block that ensures that there is no possibility of the timeout signal going off outside of this block, which crashed the process.
+
 ## 0.2.5
 
 ### Models
