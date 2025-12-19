@@ -5,6 +5,7 @@
 [![Version](https://img.shields.io/github/v/release/Aleph-Alpha-Research/eval-framework)](https://github.com/Aleph-Alpha-Research/eval-framework/releases)
 [![PyPI](https://img.shields.io/pypi/v/eval-framework.svg)](https://pypi.org/project/eval-framework/)
 [![License](https://img.shields.io/github/license/Aleph-Alpha-Research/eval-framework.svg)](LICENSE)
+
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://aleph-alpha-research.github.io/eval-framework/)
 [![Stars](https://img.shields.io/github/stars/Aleph-Alpha-Research/eval-framework)](https://github.com/Aleph-Alpha-Research/eval-framework/stargazers)
 
