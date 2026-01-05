@@ -10,6 +10,27 @@
 
 ### General
 
+## [0.2.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.6...v0.2.7) (2026-01-05)
+
+
+### Features
+
+* added automated documentation through CI and Sphinx ([#127](https://github.com/Aleph-Alpha-Research/eval-framework/issues/127)) ([46ef6b3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/46ef6b34e6608fa38573e87d37f1af7e76d935ae))
+* pass AA_TOKEN and AA_INFERENCE_ENDPOINT in the AA model constructor ([#134](https://github.com/Aleph-Alpha-Research/eval-framework/issues/134)) ([93267b6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/93267b60eaf67873277e6d2105900bd890809a55))
+
+
+### Bug Fixes
+
+* add unlabeled to run tests upon removing the autorelease: pending label from the PR ([fbb870c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/fbb870c0e88e707c2f413eaaf9fc21b935a657f4))
+* **docs:** resolve broken source links ([#132](https://github.com/Aleph-Alpha-Research/eval-framework/issues/132)) ([c0e37b2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c0e37b2d32cde341915943bbf3caa45f9d9a6bc5))
+* restored to original setup, manually triggering with labels ([9cb7e55](https://github.com/Aleph-Alpha-Research/eval-framework/commit/9cb7e5510655199b7b02ab1b0ce16f0d0cd1ec0b))
+* update uv lock too ([b444a30](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b444a30dc22071e7771a43d0a540536ac2e1d392))
+
+
+### Documentation
+
+* added documentation for running tests and expected runtimes ([#133](https://github.com/Aleph-Alpha-Research/eval-framework/issues/133)) ([77fd1d3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/77fd1d355f6b6a3c094274d3380cb47e51655971))
+
 ## 0.2.6
 
 ### Models
