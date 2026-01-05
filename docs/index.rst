@@ -1,8 +1,6 @@
 Eval-Framework Documentation
 ============================
 
-Welcome to **Aleph Alpha Eval-Framework v0.2.5**.
-
 A **production-ready framework for evaluating large language models** across 90+ benchmarks, covering reasoning, coding, safety, and long-context tasks. The framework provides flexible model integration, custom benchmarks and metrics, perturbation testing, rich outputs, and statistical analysis. It supports local and distributed evaluations, including Determined AI integration.
 
 .. image:: eval-framework.png

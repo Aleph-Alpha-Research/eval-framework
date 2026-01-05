@@ -6,6 +6,13 @@
             "bump-patch-for-minor-pre-major": true,
             "changelog-path": "CHANGELOG.md",
             "draft": false,
+            "extra-files": [
+                {
+                    "jsonpath": "$.package[?(@.name.value=='eval-framework')].version",
+                    "path": "uv.lock",
+                    "type": "toml"
+                }
+            ],
             "prerelease": false,
             "release-type": "python"
         }
