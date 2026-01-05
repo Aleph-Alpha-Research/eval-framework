@@ -73,6 +73,7 @@ class EvalContext(AbstractContextManager):
         perturbation_type: str | None = None,
         perturbation_probability: float | None = None,
         perturbation_seed: int | None = None,
+        randomize_judge_order: bool = False,
         delete_output_dir_after_upload: bool | None = None,
     ) -> None:
         self.llm_name = llm_name
@@ -96,6 +97,7 @@ class EvalContext(AbstractContextManager):
         self.judge_model_args = judge_model_args if judge_model_args is not None else {}
         self.batch_size = batch_size
         self.description = description
+        self.randomize_judge_order = randomize_judge_order
         self.delete_output_dir_after_upload = delete_output_dir_after_upload
 
         if perturbation_type or perturbation_probability is not None:
