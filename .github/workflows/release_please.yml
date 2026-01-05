@@ -30,15 +30,14 @@ jobs:
         with:
           # Use a GitHub token or personal access token:
           token: ${{ secrets.GITHUB_TOKEN }}
-          target-branch: auto-release-with-docker
-      # - if: ${{ steps.release.outputs.release_created }}
-      - name: Checkout
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Checkout
         uses: actions/checkout@v6
-      # if: ${{ steps.release.outputs.release_created }}
-      - name: Install uv
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Install uv
         uses: astral-sh/setup-uv@v7
-      # if: ${{ steps.release.outputs.release_created }}
-      - name: Publish to GitLab Package Registry
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Publish to GitLab Package Registry
         run: |
           uv build
           uv publish
