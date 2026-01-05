@@ -30,7 +30,7 @@ jobs:
         with:
           # Use a GitHub token or personal access token:
           token: ${{ secrets.GITHUB_TOKEN }}
-          target-branch: <current-branch>on:
+          target-branch: <current-branch>
       # - if: ${{ steps.release.outputs.release_created }}
       - name: Checkout
         uses: actions/checkout@v6
