@@ -63,6 +63,7 @@ class LocalContext(EvalContext):
             judge_model_args=self.judge_model_args,
             batch_size=self.batch_size,
             description=self.description,
+            randomize_judge_order=self.randomize_judge_order,
             delete_output_dir_after_upload=self.delete_output_dir_after_upload,
         )
 
