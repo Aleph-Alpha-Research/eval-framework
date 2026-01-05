@@ -30,8 +30,8 @@ jobs:
         with:
           # Use a GitHub token or personal access token:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - if: ${{ steps.release.outputs.release_created }}
-        name: Checkout
+      # - if: ${{ steps.release.outputs.release_created }}
+      - name: Checkout
         uses: actions/checkout@v6
       - if: ${{ steps.release.outputs.release_created }}
         name: Install uv
