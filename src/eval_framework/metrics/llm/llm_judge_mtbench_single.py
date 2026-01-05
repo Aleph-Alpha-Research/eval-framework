@@ -194,8 +194,17 @@ class MTBenchJudgeSingle(BaseLLMJudgeMetric):
 
     @staticmethod
     def _output_to_rating(output: str) -> float:
+        """Convert judge output to a rating score.
+
+        Args:
+            output: The raw output string from the LLM judge containing [[N]] where N is a number.
+
+        Returns:
+            Float score extracted from the output, or 0 if the output could not be parsed.
+        """
         match = re.search(r"\[\[(\d+)\]\]", output)
 
         if match:
             return float(match.group(1))
+        logger.warning(f"Could not parse judge output, defaulting to 0: {output[:200]}")
         return 0

@@ -153,7 +153,7 @@ def test_name_and_alias(mock_wandb: Mock, sample_config: EvalConfig, sample_outp
 
         assert len(mock_wandb.run._logged_artifacts) == 1
         artifact = mock_wandb.run._logged_artifacts[0]
-        assert artifact.name.split(":")[0] == "test-model__ARC__fs0s10_1e5d9"
+        assert artifact.name.split(":")[0] == "test-model__ARC__fs0s10_6d57e"
         assert "H-03b43ebe7c" in artifact.aliases
 
 
@@ -165,5 +165,5 @@ def test_long_artifact_name(mock_wandb: Mock, sample_config: EvalConfig, sample_
 
         assert len(mock_wandb.run._logged_artifacts) == 1
         artifact = mock_wandb.run._logged_artifacts[0]
-        assert artifact.name.split(":")[0].endswith("__ARC__fs0s10_1e5d9")
+        assert artifact.name.split(":")[0].endswith("__ARC__fs0s10_6d57e")
         assert len(artifact.name.split(":")[0]) <= 255

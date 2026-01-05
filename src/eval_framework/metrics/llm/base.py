@@ -6,8 +6,9 @@ from eval_framework.shared.types import Completion, Error
 
 
 class BaseLLMJudgeMetric(BaseMetric[Completion]):
-    def __init__(self, llm_judge: BaseLLM) -> None:
+    def __init__(self, llm_judge: BaseLLM, randomize_order: bool = False) -> None:
         self._llm_judge = llm_judge
+        self._randomize_order = randomize_order
 
     def _create_metric_result(
         self,
