@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, reopened, synchronize, labeled]
+    types: [opened, reopened, synchronize, labeled, unlabeled, edited]
   # Manually trigger a workflow for a branch
   workflow_dispatch:
   # Merge queue trigger
@@ -26,8 +26,39 @@ env:
   UV_LOCKED: 1
 
 jobs:
+
+  lint-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Skip PR title check (non-PR)
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "Not a PR, skipping PR title check"
+
+      - name: Set up Python
+        if: github.event_name == 'pull_request'
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install commitizen
+        if: github.event_name == 'pull_request'
+        run: |
+          python -m pip install --upgrade pip
+          pip install commitizen
+
+      - name: Validate PR Title (only on PRs)
+        if: github.event_name == 'pull_request'
+        id: pr-check
+        run: |
+          cz check --message "${{ github.event.pull_request.title }}"
+
   lint:
     runs-on: ubuntu-latest # default runner runs out of disk space due to hf cache
+    needs: [lint-pr-title]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

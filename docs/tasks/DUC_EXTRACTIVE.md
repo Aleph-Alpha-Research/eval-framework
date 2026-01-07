@@ -11,9 +11,9 @@ SUBJECTS = ['raw']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.duc](eval_framework.tasks.benchmarks.duc)
+- Module: `eval_framework.tasks.benchmarks.duc`
 
-- File: [src/eval_framework/tasks/benchmarks/duc.py](../../src/eval_framework/tasks/benchmarks/duc.py)
+- File: [src/eval_framework/tasks/benchmarks/duc.py](../../src/eval_framework/tasks/benchmarks/duc.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/duc.py)
 
 - Link to dataset: [https://huggingface.co/datasets/midas/duc2001](https://huggingface.co/datasets/midas/duc2001)
 

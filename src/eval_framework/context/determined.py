@@ -149,6 +149,7 @@ class DeterminedContext(EvalContext):
             wandb_upload_results=self.hparams.wandb_upload_results or self.wandb_upload_results,
             batch_size=self.hparams.task_args.batch_size or self.batch_size,
             description=self.hparams.description or self.description,
+            randomize_judge_order=self.randomize_judge_order,
             delete_output_dir_after_upload=self.hparams.delete_output_dir_after_upload
             or self.delete_output_dir_after_upload,
         )

@@ -11,9 +11,9 @@ SUBJECTS = ['rc.wikipedia.nocontext']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.triviaqa](eval_framework.tasks.benchmarks.triviaqa)
+- Module: `eval_framework.tasks.benchmarks.triviaqa`
 
-- File: [src/eval_framework/tasks/benchmarks/triviaqa.py](../../src/eval_framework/tasks/benchmarks/triviaqa.py)
+- File: [src/eval_framework/tasks/benchmarks/triviaqa.py](../../src/eval_framework/tasks/benchmarks/triviaqa.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/triviaqa.py)
 
 - Link to dataset: [https://huggingface.co/datasets/mandarjoshi/trivia_qa](https://huggingface.co/datasets/mandarjoshi/trivia_qa)
 

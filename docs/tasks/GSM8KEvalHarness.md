@@ -11,9 +11,9 @@ SUBJECTS = ['main']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.gsm8k](eval_framework.tasks.benchmarks.gsm8k)
+- Module: `eval_framework.tasks.benchmarks.gsm8k`
 
-- File: [src/eval_framework/tasks/benchmarks/gsm8k.py](../../src/eval_framework/tasks/benchmarks/gsm8k.py)
+- File: [src/eval_framework/tasks/benchmarks/gsm8k.py](../../src/eval_framework/tasks/benchmarks/gsm8k.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/gsm8k.py)
 
 - Link to dataset: [https://huggingface.co/datasets/gsm8k](https://huggingface.co/datasets/gsm8k)
 

@@ -1,7 +1,21 @@
+<!-- Badges -->
+<div align="center">
+
 # Aleph Alpha Eval-Framework
 
-> **Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 90+ benchmarks.
+**Comprehensive LLM evaluation at scale** - A production-ready framework for evaluating large language models across 90+ benchmarks.
+
+[![Build Status](https://github.com/Aleph-Alpha-Research/eval-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/Aleph-Alpha-Research/eval-framework/actions)
+[![Version](https://img.shields.io/github/v/release/Aleph-Alpha-Research/eval-framework)](https://github.com/Aleph-Alpha-Research/eval-framework/releases)
+[![PyPI](https://img.shields.io/pypi/v/eval-framework.svg)](https://pypi.org/project/eval-framework/)
+[![License](https://img.shields.io/github/license/Aleph-Alpha-Research/eval-framework.svg)](LICENSE)
+
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://aleph-alpha-research.github.io/eval-framework/)
+[![Stars](https://img.shields.io/github/stars/Aleph-Alpha-Research/eval-framework)](https://github.com/Aleph-Alpha-Research/eval-framework/stargazers)
+
 ![eval-framework](docs/eval-framework.png "https://raw.githubusercontent.com/Aleph-Alpha-Research/eval-framework/refs/heads/main/docs/eval-framework.png")
+
+</div>
 
 ## Why Choose This Framework?
 
@@ -19,10 +33,12 @@
 - Statistical Analysis: Includes confidence intervals and significance testing for reliable comparisons.
 - Docker Support: Pre-configured Dockerfiles for local and distributed setups.
 
+For full documentation, visit our [Docs Page](https://aleph-alpha-research.github.io/eval-framework/).
+
 ## Quick Start
 
 The codebase is tested and compatible with Python 3.12 and PyTorch 2.5.
-You will also need the appropriate CUDA dependencies and version installed on your system for GPU support. Detailed installation instructions can be found [here](docs/installation.md).
+You will also need the appropriate CUDA dependencies and version installed on your system for GPU support. Detailed installation instructions can be found [here](https://aleph-alpha-research.github.io/eval-framework/installation.html).
 
 The easiest way to get started is by installing the library via `pip` and use it as an external dependency.
 ```
@@ -80,7 +96,7 @@ eval_framework \
     --num-samples 10
 ```
 
-For more detailed CLI usage instructions, see the [CLI Usage Guide](docs/cli_usage.md).
+For more detailed CLI usage instructions, see the [CLI Usage Guide](https://aleph-alpha-research.github.io/eval-framework/cli_usage.html).
 
 ## Benchmark Coverage & Task Categories
 
@@ -133,7 +149,7 @@ Evaluation metrics include:
 - **LLM Metrics:** Chatbot Style Judge, Instruction Judge
 - **Efficiency Metrics:** Bytes per Sequence Position
 
-For the full list of tasks and metrics, see [Detailed Task Table](docs/benchmarks_and_metrics.md).
+For the full list of tasks and metrics, see [Detailed Task Table](https://aleph-alpha-research.github.io/eval-framework/benchmarks_and_metrics.html).
 
 ## Getting Started
 
@@ -149,9 +165,9 @@ Eval-Framework provides a unified interface for evaluating language models acros
 
 ### Core Components
 
-- **Models**: Defined via [`BaseLLM`](docs/evaluate_huggingface_model.md) interface (HuggingFace, OpenAI, custom APIs)
-- **Tasks**: Inherit from [`BaseTask`](docs/add_new_benchmark_guide.md) (completion, loglikelihood, or LLM-judge based)
-- **Metrics**: Automatic scoring via [`BaseMetric`](docs/benchmarks_and_metrics.md) classes
+- **Models**: Defined via [`BaseLLM`](https://aleph-alpha-research.github.io/eval-framework/evaluate_huggingface_model.html) interface (HuggingFace, OpenAI, custom APIs)
+- **Tasks**: Inherit from [`BaseTask`](https://aleph-alpha-research.github.io/eval-framework/add_new_benchmark_guide.html) (completion, loglikelihood, or LLM-judge based)
+- **Metrics**: Automatic scoring via [`BaseMetric`](https://aleph-alpha-research.github.io/eval-framework/benchmarks_and_metrics.html) classes
 - **Formatters**: Handle prompt construction and model-specific formatting
 - **Results**: Structured outputs with sample-level details and aggregated statistics
 
@@ -196,41 +212,42 @@ if __name__ == "__main__":
     results = main(llm=llm, config=config)
 ```
 
-3. **Review results** - Check `./eval_results/` for detailed outputs and use our [results guide](docs/understanding_results_guide.md) to interpret them
+3. **Review results** - Check `./eval_results/` for detailed outputs and use our [results guide](https://aleph-alpha-research.github.io/eval-framework/understanding_results_guide.html) to interpret them
 
 ### Next Steps
 
-- **Use CLI interface**: See [CLI usage guide](docs/cli_usage.md) for command-line evaluation options
-- **Evaluate HuggingFace models**: Follow our [HuggingFace evaluation guide](docs/evaluate_huggingface_model.md)
-- **Understand model arguments**: Read out [Model Arguments guide](docs/model_arguments.md)
-- **Create custom benchmarks**: Follow our [benchmark creation guide](docs/add_new_benchmark_guide.md)
-- **Scale your evaluations**: Use [Determined AI integration](docs/using_determined.md) for distributed evaluation
-- **Understand your results**: Read our [results interpretation guide](docs/understanding_results_guide.md)
-- **Log results in WandB**: See how [we integrate WandB](docs/wandb_integration.md) for metric and lineage tracking
+- **Use CLI interface**: See [CLI usage guide](https://aleph-alpha-research.github.io/eval-framework/cli_usage.html) for command-line evaluation options
+- **Evaluate HuggingFace models**: Follow our [HuggingFace evaluation guide](https://aleph-alpha-research.github.io/eval-framework/evaluate_huggingface_model.html)
+- **Understand model arguments**: Read out [Model Arguments guide](https://aleph-alpha-research.github.io/eval-framework/model_arguments.html)
+- **Create custom benchmarks**: Follow our [benchmark creation guide](https://aleph-alpha-research.github.io/eval-framework/add_new_benchmark_guide.html)
+- **Scale your evaluations**: Use [Determined AI integration](https://aleph-alpha-research.github.io/eval-framework/using_determined.html) for distributed evaluation
+- **Understand your results**: Read our [results interpretation guide](https://aleph-alpha-research.github.io/eval-framework/understanding_results_guide.html)
+- **Log results in WandB**: See how [we integrate WandB](https://aleph-alpha-research.github.io/eval-framework/wandb_integration.html) for metric and lineage tracking
 
 ## Documentation
 
 ### Getting Started
 
-- **[CLI Usage Guide](docs/cli_usage.md)** - Detailed instructions for using the command-line interface
-- **[Evaluating HuggingFace Models](docs/evaluate_huggingface_model.md)** - Complete guide for evaluating HuggingFace models
-- **[Understanding Results](docs/understanding_results_guide.md)** - How to read and interpret evaluation results
+- **[CLI Usage Guide](https://aleph-alpha-research.github.io/eval-framework/cli_usage.html)** - Detailed instructions for using the command-line interface
+- **[Evaluating HuggingFace Models](https://aleph-alpha-research.github.io/eval-framework/evaluate_huggingface_model.html)** - Complete guide for evaluating HuggingFace models
+- **[Understanding Results](https://aleph-alpha-research.github.io/eval-framework/understanding_results_guide.html)** - How to read and interpret evaluation results
 
 ### Advanced Usage
 
-- **[Understanding Model Arguments](docs/model_arguments.md)** - Thorough guide on each constructor argument for salient model classes
-- **[Adding New Benchmarks](docs/add_new_benchmark_guide.md)** - Complete guide with practical examples for adding new benchmarks
-- **[Benchmarks and Metrics](docs/benchmarks_and_metrics.md)** - Comprehensive overview of all available benchmarks and evaluation metrics
-- **[Overview of Dataloading](docs/overview_dataloading.md)** - Explanation of dataloading and task/sample/message structure
+- **[Understanding Model Arguments](https://aleph-alpha-research.github.io/eval-framework/model_arguments.html)** - Thorough guide on each constructor argument for salient model classes
+- **[Adding New Benchmarks](https://aleph-alpha-research.github.io/eval-framework/add_new_benchmark_guide.html)** - Complete guide with practical examples for adding new benchmarks
+- **[Benchmarks and Metrics](https://aleph-alpha-research.github.io/eval-framework/benchmarks_and_metrics.html)** - Comprehensive overview of all available benchmarks and evaluation metrics
+- **[Overview of Dataloading](https://aleph-alpha-research.github.io/eval-framework/overview_dataloading.html)** - Explanation of dataloading and task/sample/message structure
 
 ### Scaling & Production
 
-- **[Using Determined](docs/using_determined.md)** - Guide for distributed evaluation using Determined AI
-- **[Controlling Upload Results](docs/controlling_upload_results.md)** - How to manage and control the upload of evaluation results
+- **[Using Determined](https://aleph-alpha-research.github.io/eval-framework/using_determined.html)** - Guide for distributed evaluation using Determined AI
+- **[Controlling Upload Results](https://aleph-alpha-research.github.io/eval-framework/controlling_upload_results.html)** - How to manage and control the upload of evaluation results
 
 ### Contributing
 
-- **[Contributing Guide](CONTRIBUTING.md)** - Guide for contributing to this project
+- **[Contributing Guide](https://aleph-alpha-research.github.io/eval-framework/CONTRIBUTING.html)** - Guide for contributing to this project
+- **[Testing](https://aleph-alpha-research.github.io/eval-framework/testing.html)** - Guide for running tests comparable to the CI pipelines
 
 ### Citation
 

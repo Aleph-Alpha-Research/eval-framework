@@ -11,9 +11,9 @@ SUBJECTS = ['no_subject']
 LANGUAGE = {'no_subject': <Language.ENG: 'English'>}
 ````
 
-- Module: [eval_framework.tasks.benchmarks.ifeval](eval_framework.tasks.benchmarks.ifeval)
+- Module: `eval_framework.tasks.benchmarks.ifeval`
 
-- File: [src/eval_framework/tasks/benchmarks/ifeval.py](../../src/eval_framework/tasks/benchmarks/ifeval.py)
+- File: [src/eval_framework/tasks/benchmarks/ifeval.py](../../src/eval_framework/tasks/benchmarks/ifeval.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/ifeval.py)
 
 - Link to dataset: [https://huggingface.co/datasets/google/IFEval](https://huggingface.co/datasets/google/IFEval)
 

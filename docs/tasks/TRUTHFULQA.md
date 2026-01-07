@@ -11,9 +11,9 @@ SUBJECTS = ['mc1', 'mc2']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.truthfulqa](eval_framework.tasks.benchmarks.truthfulqa)
+- Module: `eval_framework.tasks.benchmarks.truthfulqa`
 
-- File: [src/eval_framework/tasks/benchmarks/truthfulqa.py](../../src/eval_framework/tasks/benchmarks/truthfulqa.py)
+- File: [src/eval_framework/tasks/benchmarks/truthfulqa.py](../../src/eval_framework/tasks/benchmarks/truthfulqa.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/truthfulqa.py)
 
 - Link to dataset: [https://huggingface.co/datasets/truthful_qa](https://huggingface.co/datasets/truthful_qa)
 

@@ -11,9 +11,9 @@ SUBJECTS = ['additional']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
-- Module: [eval_framework.tasks.benchmarks.openbookqa](eval_framework.tasks.benchmarks.openbookqa)
+- Module: `eval_framework.tasks.benchmarks.openbookqa`
 
-- File: [src/eval_framework/tasks/benchmarks/openbookqa.py](../../src/eval_framework/tasks/benchmarks/openbookqa.py)
+- File: [src/eval_framework/tasks/benchmarks/openbookqa.py](../../src/eval_framework/tasks/benchmarks/openbookqa.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/openbookqa.py)
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/openbookqa](https://huggingface.co/datasets/allenai/openbookqa)
 

@@ -1,0 +1,89 @@
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: registry.gitlab.aleph-alpha.de
+  REPO_OWNER: research/public-registry
+  IMAGE_NAME: eval_framework
+
+permissions:
+  # This permission is mandatory for Trusted Publishing
+  # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+  id-token: write
+  contents: write
+  issues: write
+  pull-requests: write
+
+name: release-please
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          # Use a GitHub token or personal access token:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Checkout
+        uses: actions/checkout@v6
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Install uv
+        uses: astral-sh/setup-uv@v7
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Publish to GitLab Package Registry
+        run: |
+          uv build
+          uv publish
+
+  # Deploy Docker images with version tags
+  deploy-docker:
+    runs-on: cpu-runner-8c-32gb-01
+    container: docker:dind
+    permissions:
+      contents: read
+    needs: release-please   # <--- this is crucial
+
+    steps:
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${{ needs.release-please.outputs.tag_name }}
+          MAJOR_MINOR=$(echo $VERSION | cut -d. -f1-2)
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "major_minor=$MAJOR_MINOR" >> $GITHUB_OUTPUT
+
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Registry Authentication
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: token
+          password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
+
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Setup Docker BuildX
+        uses: docker/setup-buildx-action@v1
+
+      - if: ${{ steps.release.outputs.release_created }}
+        name: Build and Push Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:v${{ steps.version.outputs.major_minor }}
+            ${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:v${{ steps.version.outputs.version }}
