@@ -27,9 +27,6 @@ jobs:
     steps:
       - id: release
         uses: googleapis/release-please-action@v4
-        with:
-          # Use a GitHub token or personal access token:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - if: ${{ steps.release.outputs.release_created }}
         name: Checkout
         uses: actions/checkout@v6
