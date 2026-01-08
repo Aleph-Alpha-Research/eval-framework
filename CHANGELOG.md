@@ -10,6 +10,27 @@
 
 ### General
 
+## [0.2.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.6...v0.2.7) (2026-01-08)
+
+
+### Features
+
+* add position randomization for LLM pairwise judges ([#135](https://github.com/Aleph-Alpha-Research/eval-framework/issues/135)) ([e4ed3ec](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e4ed3ec96002becb04f3e1115c04a9a975d1f256))
+* added automated documentation through CI and Sphinx ([#127](https://github.com/Aleph-Alpha-Research/eval-framework/issues/127)) ([46ef6b3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/46ef6b34e6608fa38573e87d37f1af7e76d935ae))
+* added badges to github readme to link pypi and docs pages ([#139](https://github.com/Aleph-Alpha-Research/eval-framework/issues/139)) ([778bad2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/778bad2ce6b5ee944dc6bed9ce315bc2d68b144f))
+* pass AA_TOKEN and AA_INFERENCE_ENDPOINT in the AA model constructor ([#134](https://github.com/Aleph-Alpha-Research/eval-framework/issues/134)) ([93267b6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/93267b60eaf67873277e6d2105900bd890809a55))
+
+
+### Bug Fixes
+
+* **docs:** resolve broken source links ([#132](https://github.com/Aleph-Alpha-Research/eval-framework/issues/132)) ([c0e37b2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c0e37b2d32cde341915943bbf3caa45f9d9a6bc5))
+* release-please pushes docker to registry and triggers tests ([#138](https://github.com/Aleph-Alpha-Research/eval-framework/issues/138)) ([d291bb4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d291bb44af2f3576a1a14172c1ab4e7120e0a6d0))
+
+
+### Documentation
+
+* added documentation for running tests and expected runtimes ([#133](https://github.com/Aleph-Alpha-Research/eval-framework/issues/133)) ([77fd1d3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/77fd1d355f6b6a3c094274d3380cb47e51655971))
+
 ## 0.2.6
 
 ### Models
