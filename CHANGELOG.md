@@ -10,7 +10,7 @@
 
 ### General
 
-## [0.2.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.6...v0.2.7) (2026-01-05)
+## [0.2.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.6...v0.2.7) (2026-01-08)
 
 
 ### Features

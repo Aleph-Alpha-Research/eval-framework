@@ -204,10 +204,15 @@ class MathReasoningCompletion(BaseMetric[Completion]):
         timeout = 10
         # latex parse all ingested ground truth values for math reasoning
         for gt in response.ground_truth_list:
+            if gt is None:
+                continue
             signal.signal(signal.SIGALRM, timeout_handler)  # Set timeout signal
             signal.alarm(timeout)  # Set timeout duration
             try:
-                gt_parsed = parse_latex(gt)  # NOTE: parses f(x)=0,\quadf(x)=x-1,\quadf(x)=-x+1 to Eq(f(x), 0) ONLY
+                gt_normalized = self.normalize_expression(gt)
+                gt_parsed = parse_latex(
+                    gt_normalized
+                )  # NOTE: parses f(x)=0,\quadf(x)=x-1,\quadf(x)=-x+1 to Eq(f(x), 0) ONLY
                 ground_truths.append(gt_parsed)
             except Exception:
                 ground_truths.append(gt)
@@ -229,15 +234,11 @@ class MathReasoningCompletion(BaseMetric[Completion]):
                 )
             ]
         else:
-            # fall back to string comparison
-            # ground truth can be list or str, we have str comparisons
-            assert isinstance(response.ground_truth, str)
-            str_is_correct = self._is_str_correct(normalized_response, response.ground_truth)
-            return [
-                MetricResult(
-                    metric_name=self.NAME, value=float(str_is_correct), higher_is_better=True, error=response.error
-                )
+            normalized_ground_truths = [
+                self.normalize_expression(gt) for gt in response.ground_truth_list if gt is not None
             ]
+            res = self._any_str_correct([normalized_response], normalized_ground_truths)
+            return [MetricResult(metric_name=self.NAME, value=float(res), higher_is_better=True, error=response.error)]
 
     def _any_str_correct(self, response_list: list, ground_truths: list) -> bool:
         """
