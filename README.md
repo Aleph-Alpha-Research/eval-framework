@@ -13,7 +13,7 @@
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://aleph-alpha-research.github.io/eval-framework/)
 [![Stars](https://img.shields.io/github/stars/Aleph-Alpha-Research/eval-framework)](https://github.com/Aleph-Alpha-Research/eval-framework/stargazers)
 
-![eval-framework](docs/eval-framework.png "https://raw.githubusercontent.com/Aleph-Alpha-Research/eval-framework/refs/heads/main/docs/eval-framework.png")
+![eval-framework](https://raw.githubusercontent.com/Aleph-Alpha-Research/eval-framework/refs/heads/main/docs/eval-framework.png)
 
 </div>
 
@@ -273,6 +273,6 @@ This project has received funding from the European Union’s Digital Europe Pro
 The contents of this publication are the sole responsibility of the OpenEuroLLM consortium and do not necessarily reflect the opinion of the European Union.
 
 <p align="center">
-  <img src="docs/OELLM_1.png" alt="https://raw.githubusercontent.com/Aleph-Alpha-Research/eval-framework/main/docs/OELLM_1.png" width="100" style="margin-right: 50px;"/>
-  <img src="docs/OELLM_2.png" alt="https://raw.githubusercontent.com/Aleph-Alpha-Research/eval-framework/main/docs/OELLM_2.png" width="350"/>
+  <img src="https://raw.githubusercontent.com/Aleph-Alpha-Research/eval-framework/main/docs/OELLM_1.png" width="100" style="margin-right: 50px;"/>
+  <img src="https://raw.githubusercontent.com/Aleph-Alpha-Research/eval-framework/main/docs/OELLM_2.png" width="350"/>
 </p>
