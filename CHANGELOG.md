@@ -10,6 +10,14 @@
 
 ### General
 
+## [0.2.8](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.7...v0.2.8) (2026-01-09)
+
+
+### Bug Fixes
+
+* normalize math reasoning ([#148](https://github.com/Aleph-Alpha-Research/eval-framework/issues/148)) ([73a8843](https://github.com/Aleph-Alpha-Research/eval-framework/commit/73a88432eaee183ae2274a060e32286bdeda8fa9))
+* removed github token from release-please and update image links ([#147](https://github.com/Aleph-Alpha-Research/eval-framework/issues/147)) ([74d59ea](https://github.com/Aleph-Alpha-Research/eval-framework/commit/74d59ea845aed241035199ac87841786d2d75cf5))
+
 ## [0.2.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.6...v0.2.7) (2026-01-08)
 
 
