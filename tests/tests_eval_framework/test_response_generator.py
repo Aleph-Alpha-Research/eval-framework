@@ -383,6 +383,51 @@ def test_response_generator_metadata_handling(tmp_path: Path) -> None:
     assert total
 
 
+def test_response_generator_repeats_generates_multiple_outputs(tmp_path: Path) -> None:
+    llm = MockLLM()
+    config = EvalConfig(
+        task_name="AIME2024",
+        num_fewshot=0,
+        num_samples=1,
+        llm_class=MockLLM,
+        repeats=3,
+        batch_size=10,
+        save_intermediate_results=False,
+    )
+
+    generator = ResponseGenerator(llm, config, ResultsFileProcessor(tmp_path))
+
+    responses, preempted = generator.generate(lambda: False)
+    assert len(responses) == 3
+    assert all(response.prompt == responses[0].prompt for response in responses)
+
+
+def test_response_generator_repeats_with_intermediate_results_writes_unique_ids(tmp_path: Path) -> None:
+    llm = MockLLM()
+    repeats = 3
+    config = EvalConfig(
+        task_name="AIME2024",
+        num_fewshot=0,
+        num_samples=1,
+        llm_class=MockLLM,
+        repeats=repeats,
+        batch_size=10,
+        save_intermediate_results=True,
+    )
+
+    result_processor = ResultsFileProcessor(tmp_path)
+    generator = ResponseGenerator(llm, config, result_processor)
+
+    responses, preempted = generator.generate(lambda: False)
+    assert not preempted
+    assert len(responses) == repeats
+
+    # Re-loading should not treat the file as corrupted (duplicate (id, subject) pairs).
+    loaded = result_processor.load_responses()
+    assert len(loaded) == repeats
+    assert len({(r.id, r.subject) for r in loaded}) == repeats
+
+
 @patch("eval_framework.response_generator.create_perturbation_class")
 def test_with_wrong_loaded_metadata(mock_create_perturbation_class: Mock, tmp_path: Path) -> None:
     class OtherMockLLM(MockLLM):
