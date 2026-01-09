@@ -185,6 +185,15 @@ wheels = [
 ]
 
 [[package]]
+name = "antlr4-python3-runtime"
+version = "4.11.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a4/1b/59dc12d9816edee8be6a166be7c220910ff18cce2ded9877a08b27396a83/antlr4-python3-runtime-4.11.0.tar.gz", hash = "sha256:6a46d4f6033c8d7e53c8975cee5d83b3ba1b48157f6beb09a4965062dacfe2e0", size = 116951, upload-time = "2022-09-04T19:49:27.321Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/37/f3/2cab1ffe441ffcc4605bf638f524fed86db6699a25d04bbecb5bfdde372b/antlr4_python3_runtime-4.11.0-py3-none-any.whl", hash = "sha256:f523f91387283045f129c343b363a8dda3a07eea62721b8eda95f2d8b817b656", size = 144189, upload-time = "2022-09-04T19:49:25.198Z" },
+]
+
+[[package]]
 name = "anyio"
 version = "4.11.0"
 source = { registry = "https://pypi.org/simple" }
@@ -818,6 +827,7 @@ name = "eval-framework"
 version = "0.2.7"
 source = { editable = "." }
 dependencies = [
+    { name = "antlr4-python3-runtime" },
     { name = "boto3" },
     { name = "datasets" },
     { name = "google-crc32c" },
@@ -926,6 +936,7 @@ requires-dist = [
     { name = "accelerate", marker = "extra == 'accelerate'" },
     { name = "accelerate", marker = "extra == 'transformers'", specifier = ">=0.30.0,<1" },
     { name = "aleph-alpha-client", marker = "extra == 'api'", specifier = ">=10,<11" },
+    { name = "antlr4-python3-runtime", specifier = "==4.11.0" },
     { name = "boto3", specifier = ">=1.40.54,<2" },
     { name = "datasets", specifier = ">=2.19.1,<4" },
     { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38,<0.39" },
