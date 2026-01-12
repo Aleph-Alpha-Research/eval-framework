@@ -77,6 +77,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--num-fewshot", type=int, required=False, default=0, help="The number of fewshot examples to use."
     )
+    parser.add_argument(
+        "--repeats",
+        type=int,
+        required=False,
+        default=1,
+        help="The number of times to repeat each sample in the evaluation.",
+    )
     parser.add_argument("--task-name", type=str, required=False, help="The name of the task to evaluate.")
     parser.add_argument(
         "--randomize-judge-order",

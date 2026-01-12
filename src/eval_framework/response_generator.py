@@ -1,10 +1,9 @@
 import logging
 import time
 import traceback
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterable
 from datetime import UTC, datetime
 from functools import partial
-from typing import Any
 
 from eval_framework.tasks.registry import get_task
 
@@ -13,6 +12,8 @@ try:
 except ImportError:
     get_cluster_info = None  # type: ignore[assignment]
 
+
+from typing import Any
 
 from tqdm import tqdm
 
@@ -236,19 +237,6 @@ class ResponseGenerator:
         samples_batch_size = self.config.batch_size
         repeats = self.config.repeats
 
-        def _repeat_samples() -> Iterator[Sample]:
-            """Flatten repeats into a single stream of Samples.
-
-            After expansion origional sample indices do not point to the same sample anymore. They
-            Original sample can be recovered by `original_index = expanded_index // repeats`.
-            """
-            for sample in self.task.iterate_samples(self.num_samples):
-                base_id = sample.id * repeats
-                for repeat_idx in range(repeats):
-                    repeated_sample = sample.model_copy()
-                    repeated_sample.id = base_id + repeat_idx
-                    yield repeated_sample
-
         # Calculate total samples for progress bar - use num_samples or iterate to count
         if self.num_samples is None:
             # Count samples by iterating (this might be expensive for large datasets)
@@ -260,7 +248,8 @@ class ResponseGenerator:
         with tqdm(
             total=total_num_samples, desc=f"Processing {self.response_type.value}", disable=get_disable_bar_flag()
         ) as pbar:
-            for i, sample in enumerate(_repeat_samples()):
+            samples = self.task.iterate_samples(self.num_samples)
+            for i, sample in enumerate(repeat_samples(samples, repeats)):
                 subject = f" - Subject: {sample.subject}"
                 sample_index = i + 1
 
@@ -365,3 +354,17 @@ class ResponseGenerator:
         logger.info("Completions generated and saved.")
 
         return responses, preempted
+
+
+def repeat_samples(samples: Iterable[Sample], repeats: int) -> Iterable[Sample]:
+    """Flatten repeats into a single stream of samples.
+
+    After expansion original sample indices do not point to the same sample anymore. They
+    Original sample can be recovered by `original_index = expanded_index // repeats`.
+    """
+    for sample in samples:
+        base_id = sample.id * repeats
+        for repeat_idx in range(repeats):
+            repeated_sample = sample.model_copy()
+            repeated_sample.id = base_id + repeat_idx
+            yield repeated_sample
