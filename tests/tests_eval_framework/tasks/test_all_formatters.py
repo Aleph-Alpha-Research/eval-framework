@@ -201,10 +201,6 @@ def test_all_tasks_formatter(task_name: str, formatter_cls: type[BaseFormatter])
     Raises:
         AssertionError: If the hash of the formatter output does not match the expected value
     """
-    # Skip WMT tasks - sacrebleu file loading has non-determinism
-    if "WMT" in task_name:
-        pytest.skip(f"Skipping {task_name}: WMT tasks use sacrebleu with non-deterministic file loading")
-
     task_class = get_task(task_name)
     args = SPECIAL_ARGS.get(task_class.__name__, {"num_fewshot": 1})
 
