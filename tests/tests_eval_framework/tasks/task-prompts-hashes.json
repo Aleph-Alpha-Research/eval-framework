@@ -1,6 +1,8 @@
 {
     "AIME2024.ConcatFormatter": "fad4d191e9cfc6962c823354e42af067",
     "AIME2024.Llama3Formatter": "dc85310e539af50c6195be6c8031eb28",
+    "AIME2025.ConcatFormatter": "d170270a2228726db6ccd1ce759ff505",
+    "AIME2025.Llama3Formatter": "97584b8496d5215245b5a9ac850adfdf",
     "ARC.ConcatFormatter": "bd30651bf7141f65afcfa89cb449fe80",
     "ARC.Llama3Formatter": "0027b1a525b202c4bd3809d6be54f8fa",
     "ARC_DE.ConcatFormatter": "bb58420112447c9e7f6b3b92cd3adc9f",

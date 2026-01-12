@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 109**
+**Total number of tasks: 110**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -11,6 +11,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 ## List of tasks
 
 - [AIME2024](AIME2024.md)
+- [AIME2025](AIME2025.md)
 - [ARC](ARC.md)
 - [ARC_DE](ARC_DE.md)
 - [ARC_EU20_DE](ARC_EU20_DE.md)
