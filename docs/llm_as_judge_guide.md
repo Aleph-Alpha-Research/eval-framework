@@ -249,7 +249,7 @@ class YourBenchmark(BaseTask[str]):
     RESPONSE_TYPE: ResponseType                  # COMPLETION or LOGLIKELIHOODS
     METRICS: list[type[BaseMetric]]              # Metrics to compute
     SUBJECTS: list[str]                          # Subjects/categories
-    
+
     # Optional attributes
     LANGUAGE: Language | None = Language.ENG     # Primary language
     HF_REVISION: str | None = None               # Dataset version pin
@@ -326,10 +326,10 @@ from template_formatting.formatter import Message, Role
 
 class CustomJudgeMetric(BaseLLMJudgeMetric):
     NAME = "Custom Judge Metric"
-    
+
     def __init__(self, llm_judge: BaseLLM, randomize_order: bool = False):
         super().__init__(llm_judge, randomize_order)
-    
+
     def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error is not None:
             return [MetricResult(
@@ -338,7 +338,7 @@ class CustomJudgeMetric(BaseLLMJudgeMetric):
                 higher_is_better=True,
                 error=response.error,
             )]
-        
+
         # Create judge prompt
         judge_prompt = f"""Evaluate the following response for quality.
 
@@ -348,11 +348,11 @@ Response: {response.sanitized_completion}
 
 Rate the quality on a scale of 1-5, where 5 is excellent.
 Respond with ONLY a JSON object: {{"score": <number>, "reasoning": "<explanation>"}}"""
-        
+
         # Get judge response
         messages = [Message(role=Role.USER, content=judge_prompt)]
         output = self._llm_judge.generate_from_messages([messages])
-        
+
         # Parse result (implement your parsing logic)
         import json
         try:
@@ -360,7 +360,7 @@ Respond with ONLY a JSON object: {{"score": <number>, "reasoning": "<explanation
             score = parsed.get("score", 3) / 5.0  # Normalize to 0-1
         except:
             score = None
-        
+
         return [MetricResult(
             metric_name=self.NAME,
             value=score,
@@ -393,10 +393,10 @@ class CustomGradingOutput(GradingOutput):
 class CustomGrader:
     RESPONSE_KEY = "response"
     CRITERIA_KEY = "criteria"
-    
+
     PROMPT_TEMPLATES = {
         Language("en"): PromptTemplate(
-            system_prompt="""You are an expert evaluator. Assess the given response 
+            system_prompt="""You are an expert evaluator. Assess the given response
 based on the specified criteria.
 
 Provide your evaluation as JSON:
@@ -412,7 +412,7 @@ Provide your evaluation as JSON:
 {{{CRITERIA_KEY}}}""",
         ),
     }
-    
+
     def __init__(
         self,
         grading_model: BaseLLM,
@@ -420,7 +420,7 @@ Provide your evaluation as JSON:
     ):
         self._grading_model = grading_model
         self._prompt_templates = prompt_templates
-    
+
     def grade(
         self,
         response: str,
@@ -431,7 +431,7 @@ Provide your evaluation as JSON:
             prompt_template = language.language_config(self._prompt_templates)
         except:
             prompt_template = Language("en").language_config(self._prompt_templates)
-        
+
         messages = prompt_template.to_messages(
             [],  # system key-value pairs
             [    # user key-value pairs
@@ -439,10 +439,10 @@ Provide your evaluation as JSON:
                 (self.CRITERIA_KEY, criteria),
             ],
         )
-        
+
         raw_completion = self._grading_model.generate_from_messages([messages])[0]
         loaded_json = parse_json_output(raw_completion.completion)
-        
+
         return CustomGradingOutput(
             quality_score=loaded_json.get("quality_score"),
             has_errors=loaded_json.get("has_errors"),
@@ -457,11 +457,11 @@ Provide your evaluation as JSON:
 ```python
 class CustomGraderMetric(BaseLLMJudgeMetric):
     NAME = "Custom Grader Metric"
-    
+
     def __init__(self, llm_judge: BaseLLM, randomize_order: bool = False):
         super().__init__(llm_judge, randomize_order)
         self._grader = CustomGrader(llm_judge)
-    
+
     def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error is not None:
             return [self._create_metric_result(
@@ -470,15 +470,15 @@ class CustomGraderMetric(BaseLLMJudgeMetric):
                 value=None,
                 error=response.error,
             )]
-        
+
         language = Language(response.get_instruction_language())
-        
+
         grading = self._grader.grade(
             response=response.sanitized_completion,
             criteria="Evaluate for accuracy, clarity, and completeness.",
             language=language,
         )
-        
+
         return [self._create_metric_result(
             metric_name=self.NAME,
             higher_is_better=True,
@@ -588,4 +588,3 @@ from eval_framework.llm.openai import OpenAIModel, OpenAI_gpt_4o_mini, Deepseek_
 from eval_framework.llm.vllm import VLLM
 from eval_framework.llm.huggingface import HFLLM
 ```
-
