@@ -1,6 +1,6 @@
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.base import MetricResult
-from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric, safe_metric_calculation
 from eval_framework.metrics.llm.graders.language import Language
 from eval_framework.metrics.llm.graders.long_context_grader import LongContextGrader
 from eval_framework.shared.types import Completion
@@ -13,10 +13,8 @@ class LLMJudgeCompletionAccuracy(BaseLLMJudgeMetric):
         super().__init__(llm_judge)
         self._grader = LongContextGrader(llm_judge)
 
+    @safe_metric_calculation
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         assert isinstance(response.ground_truth, str)
 
         language = Language(response.get_instruction_language())
@@ -34,6 +32,5 @@ class LLMJudgeCompletionAccuracy(BaseLLMJudgeMetric):
                 higher_is_better=True,
                 llm_judge_prompt=grading.judge_prompt,
                 llm_judge_response=grading.judge_response,
-                error=response.error,
             )
         ]
