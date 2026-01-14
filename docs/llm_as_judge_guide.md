@@ -56,7 +56,7 @@ The LLM judge system follows a layered architecture:
 
 ## Available LLM Judge Metrics
 
-The framework provides a comprehensive set of pre-built LLM judge metrics:
+The framework provides a comprehensive set of pre-built LLM judge metrics. The metric which is used in a given benchmark task is specified in the task implementation class with `METRICS = [...]`.
 
 ### Quality & Style Metrics
 
@@ -155,13 +155,13 @@ config = EvalConfig(
     task_name="YourTaskName",
     llm_class=MyModel,
     llm_judge_class=OpenAI_gpt_4o_mini,  # Judge model class
-    judge_model_args={                    # Judge model arguments
+    judge_model_args={                   # Judge model arguments
         "api_key": "your-api-key",
-        "temperature": 0.0,               # Lower temperature for consistent judging
+        "temperature": 0.0,              # Lower temperature for consistent judging
     },
     output_dir=Path("./eval_results"),
     num_samples=100,
-    randomize_judge_order=True,           # Mitigate position bias
+    randomize_judge_order=True,          # Mitigate position bias
 )
 
 # Run evaluation
@@ -246,7 +246,7 @@ class YourBenchmark(BaseTask[str]):
     SAMPLE_SPLIT: str = "test"                   # Split for evaluation samples
     FEWSHOT_SPLIT: str = "train"                 # Split for few-shot examples
     RESPONSE_TYPE: ResponseType                  # COMPLETION or LOGLIKELIHOODS
-    METRICS: list[type[BaseMetric]]              # Metrics to compute
+    METRICS: list[type[BaseMetric]]              # List of metrics to compute
     SUBJECTS: list[str]                          # Subjects/categories
 
     # Optional attributes
@@ -544,7 +544,7 @@ results = main(llm=llm, config=config)
 
 ### Notes on LLM Judge Tasks
 
-1. **Judge Configuration Required**: When running a task with LLM judge metrics, you must configure the judge model or you'll get:
+1. **Judge Configuration**: When running a task with LLM judge metrics, you must configure the judge model or you'll get:
    ```
    AssertionError: The LLM Judge must be defined for this evaluation task.
    ```
@@ -554,7 +554,7 @@ results = main(llm=llm, config=config)
    - `LLMJudgeSqlMetricContext` - SQL evaluation
    - `MTBenchJudgePairMetricContext` - Pairwise comparison
 
-3. **Language Support**: Check that your chosen metrics support the languages in your dataset.
+3. **Language Support**: Check that your chosen metrics is compatible with the languages in your dataset.
 
 ---
 
