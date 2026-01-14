@@ -111,6 +111,7 @@ class DeterminedContext(EvalContext):
             "judge_model_name",
             "judge_model_args",
             "perturbation_config",
+            "repeats",
         ]:
             val_cli = getattr(self, name, None)
             val_hparams = getattr(self.hparams.task_args, name, None)

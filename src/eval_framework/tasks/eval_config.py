@@ -56,7 +56,7 @@ class EvalConfig(BaseConfig):
     delete_output_dir_after_upload: Annotated[bool, BeforeValidator(lambda v: False if v is None else v)] = False
     # how many times to repeat a single sample
     # can be used to reduce variance of tasks with low number of samples, e.g. AIME24
-    repeats: Annotated[int, Field(ge=1)] = 1
+    repeats: Annotated[int, BeforeValidator(lambda v: 1 if v is None else v), Field(ge=1)] = 1
     # Adding a new member? Remember to update KEYS_UNRELATED_TO_RESULTS if it doesn't impact eval results.
 
     @property

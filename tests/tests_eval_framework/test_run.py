@@ -45,6 +45,7 @@ def test_run(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_pa
         resource_cleanup=True,
         delete_output_dir_after_upload=False,
         randomize_judge_order=False,
+        repeats=1,
     )
 
     mock_create_perturbation_class.side_effect = lambda x, _: x  # don't spin up docker here just for the test
@@ -93,6 +94,7 @@ def test_run_path(mock_create_perturbation_class: Mock, mock_parse_args: Mock, t
         save_logs=True,
         delete_output_dir_after_upload=False,
         randomize_judge_order=False,
+        repeats=1,
     )
 
     mock_create_perturbation_class.side_effect = lambda x, _: x  # don't spin up docker here just for the test
@@ -139,6 +141,7 @@ def test_run_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
         save_logs=True,
         delete_output_dir_after_upload=False,
         randomize_judge_order=False,
+        repeats=1,
     )
 
     run()
@@ -184,6 +187,7 @@ def test_run_path_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
         save_logs=True,
         delete_output_dir_after_upload=False,
         randomize_judge_order=False,
+        repeats=1,
     )
 
     run()

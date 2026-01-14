@@ -107,6 +107,7 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         assert ctx.config.perturbation_config is not None
         assert ctx.config.perturbation_config.type == PerturbationType.UPPERCASE
         assert ctx.config.perturbation_config.probability == 0.1  # default
+        assert ctx.config.repeats == 1
     mock_get_cluster_info_minimal.assert_called()
 
 
@@ -131,6 +132,7 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         batch_size=1,  # overriden by hparams
         description="d",  # overriden by hparams
         perturbation_type="uppercase",  # overriden by hparams
+        repeats=100,
     ) as ctx:
         assert ctx is not None
         assert ctx.config is not None
@@ -154,6 +156,7 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         assert ctx.config.perturbation_config.type == PerturbationType.EDITOR
         assert ctx.config.perturbation_config.probability == 0.1  # default
         assert ctx.config.perturbation_config.seed == 123
+        assert ctx.config.repeats == 100
     mock_get_cluster_info_maximal.assert_called()
 
 
@@ -172,6 +175,7 @@ def test_local_context() -> None:
         judge_model_args={},
         judge_models_path=models_path,
         batch_size=1,
+        repeats=1,
     ) as ctx:
         assert ctx is not None
         assert ctx.config is not None
@@ -185,6 +189,7 @@ def test_local_context() -> None:
         assert ctx.config.llm_judge_class is not None
         assert ctx.config.llm_judge_class.__name__ == Llama31_8B_Instruct_API.__name__
         assert ctx.config.judge_model_args is not None
+        assert ctx.config.repeats == 1
 
 
 def test_import_models(tmp_path: Path) -> None:

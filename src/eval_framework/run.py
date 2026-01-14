@@ -326,6 +326,7 @@ def run_with_kwargs(kwargs: dict) -> None:
         num_samples=kwargs["num_samples"],
         max_tokens=kwargs["max_tokens"],
         num_fewshot=kwargs["num_fewshot"],
+        repeats=kwargs["repeats"],
         task_name=kwargs["task_name"],
         task_subjects=kwargs["task_subjects"],
         hf_revision=kwargs["hf_revision"],
