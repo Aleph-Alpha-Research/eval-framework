@@ -355,6 +355,25 @@ class AIME2024(MATHReasoning):
         return item["answer"].lstrip("0")  # valid answers in this dataset range from 0-999 and have leading zeros
 
 
+class AIME2025(AIME2024):
+    """AIME 2025 dataset: https://huggingface.co/datasets/math-ai/aime25
+
+    This dataset contains a single test split of 30 questions.
+    Data contains
+    problem | answer | id
+
+    pass@1 evaluation
+    """
+
+    NAME = "AIME2025"
+    DATASET_PATH = "math-ai/aime25"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "test"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+        return item["answer"]
+
+
 class MATH500(MATHReasoning):
     """MATH500 dataset: https://huggingface.co/datasets/HuggingFaceH4/MATH-500
 
