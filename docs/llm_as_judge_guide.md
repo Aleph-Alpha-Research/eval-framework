@@ -10,9 +10,8 @@ This guide provides comprehensive documentation for using LLM-as-a-judge evaluat
   - [CLI Configuration](#cli-configuration)
   - [Python API Configuration](#python-api-configuration)
 - [Adding a New Benchmark with LLM Judges](#adding-a-new-benchmark-with-llm-judges)
-- [Understanding Results](#understanding-results)
-- [Best Practices](#best-practices)
-- [Troubleshooting](#troubleshooting)
+- [Advanced: Using LLM Judges for Generation Control](#advanced-using-llm-judges-for-generation-control)
+- [Appendix](#appendix)
 
 
 ---
@@ -556,6 +555,16 @@ results = main(llm=llm, config=config)
    - `MTBenchJudgePairMetricContext` - Pairwise comparison
 
 3. **Language Support**: Check that your chosen metrics support the languages in your dataset.
+
+---
+
+## Advanced: Using LLM Judges for Generation Control
+
+Some tasks use LLM judge graders not for evaluation, but to control the generation process itself.
+
+**Example:** [AidanBench](https://openreview.net/pdf?id=fz969ahcvJ) uses `CoherenceGrader` during iterative generation to decide when to stop. The grader checks each new response for coherence, and stops generating when quality drops below a threshold. The final metric simply counts how many coherent responses were generated.
+
+For implementation details, see [`src/eval_framework/tasks/benchmarks/aidanbench.py`](../src/eval_framework/tasks/benchmarks/aidanbench.py).
 
 ---
 
