@@ -1,10 +1,9 @@
 import logging
 import time
 import traceback
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from datetime import UTC, datetime
 from functools import partial
-from typing import Any
 
 from eval_framework.tasks.registry import get_task
 
@@ -13,6 +12,8 @@ try:
 except ImportError:
     get_cluster_info = None  # type: ignore[assignment]
 
+
+from typing import Any
 
 from tqdm import tqdm
 
@@ -234,18 +235,21 @@ class ResponseGenerator:
         # If samples_batch_size = 1, samples are run sequentially; in any case, we return here after finishing each
         # individual batch to honor preemption requests and save cached results.
         samples_batch_size = self.config.batch_size
+        repeats = self.config.repeats
 
         # Calculate total samples for progress bar - use num_samples or iterate to count
-        total_num_samples = self.num_samples
-        if total_num_samples is None:
+        if self.num_samples is None:
             # Count samples by iterating (this might be expensive for large datasets)
-            total_num_samples = sum(1 for _ in self.task.iterate_samples(None))
+            total_num_samples = sum(1 for _ in self.task.iterate_samples(None)) * repeats
+        else:
+            total_num_samples = self.num_samples * repeats
 
         samples_batch: list[Sample] = []
         with tqdm(
             total=total_num_samples, desc=f"Processing {self.response_type.value}", disable=get_disable_bar_flag()
         ) as pbar:
-            for i, sample in enumerate(self.task.iterate_samples(self.num_samples)):
+            samples = self.task.iterate_samples(self.num_samples)
+            for i, sample in enumerate(repeat_samples(samples, repeats)):
                 subject = f" - Subject: {sample.subject}"
                 sample_index = i + 1
 
@@ -330,6 +334,7 @@ class ResponseGenerator:
             "llm_name",
             "llm_args",
             "perturbation_config",
+            "repeats",
         ]
         for key in keys:
             if loaded_metadata[key] != current_metadata[key]:
@@ -349,3 +354,17 @@ class ResponseGenerator:
         logger.info("Completions generated and saved.")
 
         return responses, preempted
+
+
+def repeat_samples(samples: Iterable[Sample], repeats: int) -> Iterable[Sample]:
+    """Flatten repeats into a single stream of samples.
+
+    After expansion original sample indices do not point to the same sample anymore. They
+    Original sample can be recovered by `original_index = expanded_index // repeats`.
+    """
+    for sample in samples:
+        base_id = sample.id * repeats
+        for repeat_idx in range(repeats):
+            repeated_sample = sample.model_copy()
+            repeated_sample.id = base_id + repeat_idx
+            yield repeated_sample

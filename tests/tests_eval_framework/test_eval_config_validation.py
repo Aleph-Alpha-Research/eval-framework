@@ -276,6 +276,18 @@ class TestEvalConfigLLMArgsValidation:
         assert config.llm_args["double_quote_string"] == "world"
         assert isinstance(config.llm_args["double_quote_string"], str)
 
+    def test_repeats_none_falls_back_to_one(self) -> None:
+        config_data = {
+            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_args": {},
+            "task_name": "MMLU",
+            "repeats": None,
+        }
+
+        config = EvalConfig(**config_data)
+
+        assert config.repeats == 1
+
 
 class TestEvalConfigJudgeModelArgsValidation:
     """Test the judge_model_args validation (which still uses the old approach)."""

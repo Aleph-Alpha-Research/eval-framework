@@ -31,6 +31,7 @@ class TaskArgs(BaseModel):
     task_subjects: list[str] | None = None
     hf_revision: str | None = None
     perturbation_config: PerturbationConfig | None = None
+    repeats: int | None = None
 
 
 class Hyperparameters(BaseModel):
@@ -110,6 +111,7 @@ class DeterminedContext(EvalContext):
             "judge_model_name",
             "judge_model_args",
             "perturbation_config",
+            "repeats",
         ]:
             val_cli = getattr(self, name, None)
             val_hparams = getattr(self.hparams.task_args, name, None)
@@ -152,6 +154,7 @@ class DeterminedContext(EvalContext):
             randomize_judge_order=self.randomize_judge_order,
             delete_output_dir_after_upload=self.hparams.delete_output_dir_after_upload
             or self.delete_output_dir_after_upload,
+            repeats=self.hparams.task_args.repeats or self.repeats,
         )
 
         return self

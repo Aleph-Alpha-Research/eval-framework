@@ -75,6 +75,7 @@ class EvalContext(AbstractContextManager):
         perturbation_seed: int | None = None,
         randomize_judge_order: bool = False,
         delete_output_dir_after_upload: bool | None = None,
+        repeats: int | None = None,
     ) -> None:
         self.llm_name = llm_name
         self.models_path = models_path
@@ -99,7 +100,7 @@ class EvalContext(AbstractContextManager):
         self.description = description
         self.randomize_judge_order = randomize_judge_order
         self.delete_output_dir_after_upload = delete_output_dir_after_upload
-
+        self.repeats = repeats
         if perturbation_type or perturbation_probability is not None:
             perturbation = {
                 "type": perturbation_type,
