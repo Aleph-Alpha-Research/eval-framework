@@ -10,6 +10,19 @@
 
 ### General
 
+## [0.2.9](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.8...v0.2.9) (2026-01-15)
+
+
+### Features
+
+* add `repeats` to eval-config ([#150](https://github.com/Aleph-Alpha-Research/eval-framework/issues/150)) ([cb9f860](https://github.com/Aleph-Alpha-Research/eval-framework/commit/cb9f86038f24963199fd5682acc25becb92a0a02))
+* add AIME25 benchmark task ([#152](https://github.com/Aleph-Alpha-Research/eval-framework/issues/152)) ([3ef01fc](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3ef01fc1bfa374242e55d5e7c9c6d5d30a379c09))
+
+
+### Bug Fixes
+
+* docker push on release has one too many 'v's in the tag name ([#153](https://github.com/Aleph-Alpha-Research/eval-framework/issues/153)) ([99e6096](https://github.com/Aleph-Alpha-Research/eval-framework/commit/99e6096e82873e527332fd5c9f386d2d950976d1))
+
 ## [0.2.8](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.7...v0.2.8) (2026-01-09)
 
 
