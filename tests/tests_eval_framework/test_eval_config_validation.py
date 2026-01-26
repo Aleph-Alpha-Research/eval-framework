@@ -150,7 +150,6 @@ class TestEvalConfigLLMArgsValidation:
                     "seed": "None",
                 },
                 "model_config": {
-                    "trust_remote_code": "True",
                     "gpu_memory_utilization": "0.8",
                     "max_model_len": "2048",
                     "nested_config": {
@@ -180,8 +179,6 @@ class TestEvalConfigLLMArgsValidation:
 
         # Test model_config conversion
         mc = config.llm_args["model_config"]
-        assert mc["trust_remote_code"] is True
-        assert isinstance(mc["trust_remote_code"], bool)
         assert mc["gpu_memory_utilization"] == 0.8
         assert isinstance(mc["gpu_memory_utilization"], float)
         assert mc["max_model_len"] == 2048

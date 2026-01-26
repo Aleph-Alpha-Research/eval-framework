@@ -66,7 +66,6 @@ class Flores200(BaseTask[str]):
                 split=kwargs.get("split"),
                 data_files=None,  # Let it auto-discover parquet files
                 revision=self.HF_REVISION,
-                trust_remote_code=False,  # Disable the loading script!
                 cache_dir=cache_dir,
                 download_config=download_config,
             )
@@ -79,7 +78,6 @@ class Flores200(BaseTask[str]):
             dataset = load_dataset(
                 **kwargs,
                 revision=self.HF_REVISION,
-                trust_remote_code=True,
                 cache_dir=cache_dir,
                 download_config=download_config,
             )
