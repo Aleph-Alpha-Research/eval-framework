@@ -73,6 +73,7 @@ We welcome several types of contributions:
 
 5. **Create a Pull Request**: Go to GitHub, navigate to your fork, and create a Pull Request from your branch to the original repository's main branch. Fill in the PR description and submit.
 
+6. **Ensure your PR title is inline with [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)** so that release-please can auto-log changes to main since the last release.
 
 ## Reporting Issues
 
@@ -103,6 +104,17 @@ When requesting features:
 
 The `eval_framework` package follows [semantic versioning specification](https://semver.org/). That is, starting with the first `1.0.0` release we
 aim for backwards-compatible changes within minor version changes and compatibility-breaking changes only within major version.
+
+### Automated Release
+
+We use [release-please](https://github.com/googleapis/release-please) to automate our package releases.
+Automatically, release-please will create a PR that logs changes committed after the last release and updates it for each merge. To release, the contributor must merge the release-please PR to main. This will take care of running [release-please.yml](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/workflows/release_please.yml), pushing to PyPI and GitLab. However, tests will not automatically run on the release-please PR. Please follow these steps to release:
+
+1. Add a tag to the PR: this will trigger CI tests
+2. Approve the PR
+3. Merge the PR
+
+### Manual Release
 
 To launch a new release, please follow these steps:
 
