@@ -67,6 +67,7 @@ Documentation Overview
    controlling_upload_results.md
    docker_guide.md
    evaluate_huggingface_model.md
+   llm_as_judge_guide.md
    loglikelihood_task_guide.md
    model_arguments.md
    overview_dataloading.md
