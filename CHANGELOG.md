@@ -10,6 +10,13 @@
 
 ### General
 
+## [0.2.10](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.9...v0.2.10) (2026-01-27)
+
+
+### Bug Fixes
+
+* prefix dataset paths with hf user id for all tasks that did not have it before ([#160](https://github.com/Aleph-Alpha-Research/eval-framework/issues/160)) ([d5dc178](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d5dc1787325dfeb0cf83e461cf9a81956be7a0ec))
+
 ## [0.2.9](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.8...v0.2.9) (2026-01-15)
 
 
