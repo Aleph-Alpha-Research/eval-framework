@@ -48,7 +48,7 @@ class DUC(BaseTask[str], ABC):
 
 class DUC_EXTRACTIVE(DUC):
     NAME = "DUC Extractive"
-    SUBJECTS: list[str] = ["raw"]
+    SUBJECTS: list[str] = ["default"]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["extractive_keyphrases"]
@@ -62,7 +62,7 @@ class DUC_EXTRACTIVE(DUC):
 
 class DUC_ABSTRACTIVE(DUC):
     NAME = "DUC Abstractive"
-    SUBJECTS: list[str] = ["raw"]
+    SUBJECTS: list[str] = ["default"]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["abstractive_keyphrases"]
