@@ -12,7 +12,7 @@ class DUC(BaseTask[str], ABC):
     """https://huggingface.co/datasets/midas/duc2001"""
 
     DATASET_PATH: str = "midas/duc2001"
-    HF_REVISION:str="77d6dedcbce421695a12f24c8802e8847a129d92"
+    HF_REVISION: str = "77d6dedcbce421695a12f24c8802e8847a129d92"
     SAMPLE_SPLIT: str = "test"
     FEWSHOT_SPLIT: str = "test"
     RESPONSE_TYPE: ResponseType = ResponseType.COMPLETION
