@@ -17,7 +17,7 @@ class DUC(BaseTask[str], ABC):
     FEWSHOT_SPLIT: str = "test"
     RESPONSE_TYPE: ResponseType = ResponseType.COMPLETION
     METRICS: list[type[BaseMetric]] = [AccuracyCompletion]
-    SUBJECTS: list[str] = ["generation"]
+    SUBJECTS: list[str] = ["default"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Text", "Keyphrase"]
     LANGUAGE = Language.ENG
 
@@ -48,10 +48,15 @@ class DUC(BaseTask[str], ABC):
 
 class DUC_EXTRACTIVE(DUC):
     NAME = "DUC Extractive"
-    SUBJECTS: list[str] = ["generation"]
+    SUBJECTS: list[str] = ["default"]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["extractive_keyphrases"]
+
+    def _load_dataset(self, subject: str) -> None:
+        # Explicitly ignore cached dataset to avoid schema conflicts
+        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject, download_mode="force_redownload")
+        self.dataset = self._shuffle_splits(hf_dataset=hf_dataset)
 
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str:
         return (
@@ -62,14 +67,15 @@ class DUC_EXTRACTIVE(DUC):
 
 class DUC_ABSTRACTIVE(DUC):
     NAME = "DUC Abstractive"
-    SUBJECTS: list[str] = ["generation"]
+    SUBJECTS: list[str] = ["default"]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["abstractive_keyphrases"]
 
     def _load_dataset(self, subject: str) -> None:
         # not all samples have abstractive keyphrases
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject)
+        # Explicitly ignore cached dataset to avoid schema conflicts
+        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject, download_mode="force_redownload")
         self.dataset = {}
 
         for split, data in hf_dataset.items():
