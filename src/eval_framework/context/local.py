@@ -65,6 +65,7 @@ class LocalContext(EvalContext):
             description=self.description,
             randomize_judge_order=self.randomize_judge_order,
             delete_output_dir_after_upload=self.delete_output_dir_after_upload,
+            repeats=self.repeats,
         )
 
         return self

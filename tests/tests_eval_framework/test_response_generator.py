@@ -6,7 +6,7 @@ from dateutil import parser
 from huggingface_hub.errors import RevisionNotFoundError
 
 from eval_framework.llm.base import BaseLLM
-from eval_framework.response_generator import ResponseGenerator
+from eval_framework.response_generator import ResponseGenerator, repeat_samples
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, RawCompletion
 from eval_framework.tasks.base import Sample
@@ -381,6 +381,71 @@ def test_response_generator_metadata_handling(tmp_path: Path) -> None:
     assert start < end
     assert reference
     assert total
+
+
+def test_response_generator_repeats_generates_multiple_outputs(tmp_path: Path) -> None:
+    llm = MockLLM()
+    config = EvalConfig(
+        task_name="AIME2024",
+        num_fewshot=0,
+        num_samples=1,
+        llm_class=MockLLM,
+        repeats=3,
+        batch_size=10,
+        save_intermediate_results=False,
+    )
+
+    generator = ResponseGenerator(llm, config, ResultsFileProcessor(tmp_path))
+
+    responses, preempted = generator.generate(lambda: False)
+    assert len(responses) == 3
+    assert all(response.prompt == responses[0].prompt for response in responses)
+
+
+def test_response_generator_repeats_with_intermediate_results_writes_unique_ids(tmp_path: Path) -> None:
+    llm = MockLLM()
+    repeats = 3
+    config = EvalConfig(
+        task_name="AIME2024",
+        num_fewshot=0,
+        num_samples=1,
+        llm_class=MockLLM,
+        repeats=repeats,
+        batch_size=10,
+        save_intermediate_results=True,
+    )
+
+    result_processor = ResultsFileProcessor(tmp_path)
+    generator = ResponseGenerator(llm, config, result_processor)
+
+    responses, preempted = generator.generate(lambda: False)
+    assert not preempted
+    assert len(responses) == repeats
+
+    # Re-loading should not treat the file as corrupted (duplicate (id, subject) pairs).
+    loaded = result_processor.load_responses()
+    assert len(loaded) == repeats
+    assert len({(r.id, r.subject) for r in loaded}) == repeats
+
+
+def test_repeat_samples() -> None:
+    samples = [
+        Sample(
+            id=0,
+            subject="foo",
+            ground_truth="bar",
+            messages=[Message(role=Role.USER, content="baz")],
+            possible_completions=None,
+        )
+    ]
+    repeated = list(repeat_samples(samples, 3))
+    assert len(repeated) == 3
+    assert [r.id for r in repeated] == [0, 1, 2]
+    for other in repeated[1:]:
+        assert other.subject == repeated[0].subject
+        assert other.ground_truth == repeated[0].ground_truth
+        assert other.messages == repeated[0].messages
+        assert other.possible_completions == repeated[0].possible_completions
 
 
 @patch("eval_framework.response_generator.create_perturbation_class")

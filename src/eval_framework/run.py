@@ -77,6 +77,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--num-fewshot", type=int, required=False, default=0, help="The number of fewshot examples to use."
     )
+    parser.add_argument(
+        "--repeats",
+        type=int,
+        required=False,
+        default=1,
+        help="The number of times to repeat each sample in the evaluation.",
+    )
     parser.add_argument("--task-name", type=str, required=False, help="The name of the task to evaluate.")
     parser.add_argument(
         "--randomize-judge-order",
@@ -319,6 +326,7 @@ def run_with_kwargs(kwargs: dict) -> None:
         num_samples=kwargs["num_samples"],
         max_tokens=kwargs["max_tokens"],
         num_fewshot=kwargs["num_fewshot"],
+        repeats=kwargs["repeats"],
         task_name=kwargs["task_name"],
         task_subjects=kwargs["task_subjects"],
         hf_revision=kwargs["hf_revision"],

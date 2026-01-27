@@ -13,10 +13,10 @@ ANSWER_STR_TO_NUM = {"1": 0, "2": 1}
 
 
 class WINOGRANDE(BaseTask[str]):
-    """WINOGRANDE dataset: https://huggingface.co/datasets/winogrande"""
+    """WINOGRANDE dataset: https://huggingface.co/datasets/allenai/winogrande"""
 
     NAME = "Winogrande"
-    DATASET_PATH = "winogrande"
+    DATASET_PATH = "allenai/winogrande"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
