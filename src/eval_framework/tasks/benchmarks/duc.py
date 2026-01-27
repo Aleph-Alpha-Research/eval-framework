@@ -17,7 +17,7 @@ class DUC(BaseTask[str], ABC):
     FEWSHOT_SPLIT: str = "test"
     RESPONSE_TYPE: ResponseType = ResponseType.COMPLETION
     METRICS: list[type[BaseMetric]] = [AccuracyCompletion]
-    SUBJECTS: list[str] = ["raw"]
+    SUBJECTS: list[str] = ["default"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Text", "Keyphrase"]
     LANGUAGE = Language.ENG
 
