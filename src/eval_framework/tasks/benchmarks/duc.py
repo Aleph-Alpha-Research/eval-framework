@@ -54,7 +54,7 @@ class DUC_EXTRACTIVE(DUC):
         return item["extractive_keyphrases"]
 
     def _load_dataset(self, subject: str) -> None:
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject)
+        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject, data_files="raw/test/0000.parquet")
         self.dataset = self._shuffle_splits(hf_dataset=hf_dataset)
 
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str:
@@ -72,7 +72,7 @@ class DUC_ABSTRACTIVE(DUC):
         return item["abstractive_keyphrases"]
 
     def _load_dataset(self, subject: str) -> None:
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject)
+        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject, data_files="raw/test/0000.parquet")
         self.dataset = {}
 
         for split, data in hf_dataset.items():
