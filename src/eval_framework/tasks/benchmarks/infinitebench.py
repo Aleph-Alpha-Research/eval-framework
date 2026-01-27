@@ -39,9 +39,7 @@ class InfiniteBench(BaseTask[str], ABC):
             }
         )
         try:
-            return load_dataset(
-                **kwargs, cache_dir=cache_dir, download_config=download_config, features=ft
-            )
+            return load_dataset(**kwargs, cache_dir=cache_dir, download_config=download_config, features=ft)
         except Exception:
             return load_dataset(
                 **kwargs,
