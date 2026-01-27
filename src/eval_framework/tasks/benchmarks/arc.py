@@ -15,7 +15,7 @@ class ARC(BaseTask[str]):
     """ARC dataset: https://huggingface.co/datasets/allenai/ai2_arc"""
 
     NAME = "ARC"
-    DATASET_PATH = "ai2_arc"
+    DATASET_PATH = "allenai/ai2_arc"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS

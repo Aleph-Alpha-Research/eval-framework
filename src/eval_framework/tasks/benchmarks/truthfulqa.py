@@ -38,7 +38,7 @@ class TRUTHFULQA(BaseTask[str]):
     """TRUTHFULQA dataset: https://huggingface.co/datasets/truthfulqa/truthful_qa"""
 
     NAME = "TruthfulQA"
-    DATASET_PATH = "truthful_qa"
+    DATASET_PATH = "truthfulqa/truthful_qa"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = ""
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS

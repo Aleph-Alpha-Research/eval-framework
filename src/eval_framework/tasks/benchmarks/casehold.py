@@ -9,8 +9,10 @@ from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Languag
 
 
 class CASEHOLD(BaseTask[str]):
+    """CASEHOLD dataset: https://huggingface.co/datasets/coastalcph/lex_glue"""
+
     NAME = "CaseHold"
-    DATASET_PATH = "lex_glue"
+    DATASET_PATH = "coastalcph/lex_glue"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
