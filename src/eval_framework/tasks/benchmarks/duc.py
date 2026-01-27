@@ -17,7 +17,7 @@ class DUC(BaseTask[str], ABC):
     FEWSHOT_SPLIT: str = "test"
     RESPONSE_TYPE: ResponseType = ResponseType.COMPLETION
     METRICS: list[type[BaseMetric]] = [AccuracyCompletion]
-    SUBJECTS: list[str] = ["default"]
+    SUBJECTS: list[str] = ["generation"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Text", "Keyphrase"]
     LANGUAGE = Language.ENG
 
@@ -48,7 +48,7 @@ class DUC(BaseTask[str], ABC):
 
 class DUC_EXTRACTIVE(DUC):
     NAME = "DUC Extractive"
-    SUBJECTS: list[str] = ["default"]
+    SUBJECTS: list[str] = ["generation"]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["extractive_keyphrases"]
@@ -62,7 +62,7 @@ class DUC_EXTRACTIVE(DUC):
 
 class DUC_ABSTRACTIVE(DUC):
     NAME = "DUC Abstractive"
-    SUBJECTS: list[str] = ["default"]
+    SUBJECTS: list[str] = ["generation"]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["abstractive_keyphrases"]
