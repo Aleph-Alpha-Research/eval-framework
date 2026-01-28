@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Generator, Sequence
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -112,21 +113,22 @@ class BaseLLM(ABC):
         """
         pass
 
+    @contextmanager
     def _get_final_checkpoint(
         self, checkpoint_path: str | Path | None = None, model_name: str | None = None, artifact_name: str | None = None
-    ) -> tuple[str | Path | None, str | None]:
+    ) -> Generator[tuple[str | Path | None, str | None], None, None]:
         if (num_provided := sum(x is not None for x in [checkpoint_path, model_name, artifact_name])) == 0:
             if not getattr(self, "LLM_NAME", ""):
                 raise ValueError("Either LLM_NAME, checkpoint_path, model_name, or artifact_name must be provided.")
-            return None, None  # no argument given, so will use the LLM_NAME of the class
+            yield None, None  # no argument given, so will use the LLM_NAME of the class
         elif num_provided > 1:
             raise ValueError("At most one of `checkpoint_path`, `model_name`, or `artifact_name` must be provided.")
 
         elif checkpoint_path is not None:
-            return checkpoint_path, str(checkpoint_path)
+            yield checkpoint_path, str(checkpoint_path)
 
         elif model_name is not None:
-            return model_name, model_name
+            yield model_name, model_name
 
         else:
             from eval_framework.utils.file_ops import WandbFs
@@ -139,7 +141,7 @@ class BaseLLM(ABC):
                 file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
                 if file_root is None:
                     raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_base}:{version}")
-                return file_root, artifact_name
+                yield file_root, artifact_name
 
     def _get_final_formatter(
         self,
