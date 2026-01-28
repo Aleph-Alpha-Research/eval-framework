@@ -13,8 +13,8 @@ class DUC(BaseTask[str], ABC):
 
     DATASET_PATH: str = "midas/duc2001"
     HF_REVISION: str = "77d6dedcbce421695a12f24c8802e8847a129d92"
-    SAMPLE_SPLIT: str = "test"
-    FEWSHOT_SPLIT: str = "test"
+    SAMPLE_SPLIT: str = "train"
+    FEWSHOT_SPLIT: str = "train"
     RESPONSE_TYPE: ResponseType = ResponseType.COMPLETION
     METRICS: list[type[BaseMetric]] = [AccuracyCompletion]
     SUBJECTS: list[str] = ["default"]
