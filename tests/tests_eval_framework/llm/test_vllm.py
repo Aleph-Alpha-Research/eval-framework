@@ -965,8 +965,7 @@ def test_vllm_init_source(mocker: MockerFixture, kwargs: Any, expected_model: st
 
     VLLM_patch = mocker.patch("eval_framework.llm.vllm.LLM")
     mock_wandb_fs = MagicMock()
-    mock_wandb_fs.__enter__ = MagicMock(return_value=mock_wandb_fs)  # __enter__ returns self
-    mock_wandb_fs.find_hf_checkpoint_root_from_path_list.return_value = "/download"
+    mock_wandb_fs.__enter__().find_hf_checkpoint_root_from_path_list.return_value = "/download"
     mocker.patch("eval_framework.utils.file_ops.WandbFs", return_value=mock_wandb_fs)
 
     # Test with a typical subclass

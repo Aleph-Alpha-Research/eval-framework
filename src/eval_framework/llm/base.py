@@ -111,12 +111,9 @@ class BaseLLM(ABC):
 
     def __del__(self) -> None:
         """
-        Method for custom resource cleanup (particularly GPUs and temp directories)
+        Method for custom resource cleanup (particularly GPUs)
         """
-        # Clean up WandbFs temp directory if artifact was downloaded
-        if hasattr(self, "_wandb_fs") and self._wandb_fs is not None:
-            self._wandb_fs.__exit__(None, None, None)
-            self._wandb_fs = None
+        pass
 
     def _get_final_checkpoint(
         self, checkpoint_path: str | Path | None = None, model_name: str | None = None, artifact_name: str | None = None
@@ -139,18 +136,13 @@ class BaseLLM(ABC):
 
             assert artifact_name is not None
             artifact_base, version = artifact_name.split(":", 1) if ":" in artifact_name else (artifact_name, "latest")
-            # Store WandbFs on self to prevent cleanup until model is destroyed.
-            # The temp directory is cleaned up in __del__ when the model goes out of scope.
-            self._wandb_fs = WandbFs()
-            self._wandb_fs.__enter__()
-            self.artifact = self._wandb_fs.get_artifact(artifact_base, version)  # self.artifact being read in main()
-            self._wandb_fs.download_artifact(self.artifact)
-            file_root = self._wandb_fs.find_hf_checkpoint_root_from_path_list()
-            if file_root is None:
-                self._wandb_fs.__exit__(None, None, None)
-                self._wandb_fs = None
-                raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_base}:{version}")
-            return file_root, artifact_name
+            with WandbFs() as wandb_fs:
+                self.artifact = wandb_fs.get_artifact(artifact_base, version)  # self.artifact being read in main()
+                wandb_fs.download_artifact(self.artifact)
+                file_root = wandb_fs.find_hf_checkpoint_root_from_path_list()
+                if file_root is None:
+                    raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_base}:{version}")
+                return file_root, artifact_name
 
     def _get_final_formatter(
         self,
