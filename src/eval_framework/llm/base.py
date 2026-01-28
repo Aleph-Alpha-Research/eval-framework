@@ -5,13 +5,10 @@ from typing import Any
 
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from eval_framework.utils.file_ops import WandbFs
 from template_formatting.formatter import BaseFormatter, Message
 
 
 class BaseLLM(ABC):
-    _wandb_fs: "WandbFs | None" = None
-
     @property
     def name(self) -> str:
         """
