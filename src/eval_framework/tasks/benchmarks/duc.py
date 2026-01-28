@@ -34,6 +34,10 @@ class DUC(BaseTask[str], ABC):
         completion_text = completion_text.strip()
         return completion_text
 
+    def _load_dataset(self, subject: str) -> None:
+        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject, data_files="raw/test/0000.parquet")
+        self.dataset = self._shuffle_splits(hf_dataset=hf_dataset)
+
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         instruction_text = " ".join(item["document"])
         instruction_text = re.sub(r"\s+([.,!?;:])", r"\1", instruction_text)
@@ -52,10 +56,6 @@ class DUC_EXTRACTIVE(DUC):
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["extractive_keyphrases"]
-
-    def _load_dataset(self, subject: str) -> None:
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject, data_files="raw/test/0000.parquet")
-        self.dataset = self._shuffle_splits(hf_dataset=hf_dataset)
 
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str:
         return (
