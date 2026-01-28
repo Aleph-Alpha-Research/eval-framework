@@ -2,7 +2,7 @@
 
 ````
 NAME = CASEHOLD
-DATASET_PATH = lex_glue
+DATASET_PATH = coastalcph/lex_glue
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = train
 RESPONSE_TYPE = LOGLIKELIHOODS
@@ -15,6 +15,6 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - File: [src/eval_framework/tasks/benchmarks/casehold.py](../../src/eval_framework/tasks/benchmarks/casehold.py) | [View on GitHub](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/src/eval_framework/tasks/benchmarks/casehold.py)
 
-- Link to dataset: [https://huggingface.co/datasets/lex_glue](https://huggingface.co/datasets/lex_glue)
+- Link to dataset: [https://huggingface.co/datasets/coastalcph/lex_glue](https://huggingface.co/datasets/coastalcph/lex_glue)
 
 More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "CASEHOLD"`.
