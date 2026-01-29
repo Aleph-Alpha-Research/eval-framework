@@ -25,6 +25,7 @@ class Flores200(BaseTask[str]):
 
     NAME = "FLoRes-200"
     DATASET_PATH = "facebook/flores"
+    HF_REVISION = "fd7d8f42fccb9dbc35830053a8c705a2627124ce"
     SAMPLE_SPLIT = "devtest"
     FEWSHOT_SPLIT = "dev"
     RESPONSE_TYPE = ResponseType.COMPLETION
@@ -66,7 +67,7 @@ class Flores200(BaseTask[str]):
                 split=kwargs.get("split"),
                 data_files=None,  # Let it auto-discover parquet files
                 revision=self.HF_REVISION,
-                cache_dir=cache_dir,
+                # cache_dir=cache_dir,
                 download_config=download_config,
             )
 
