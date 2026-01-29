@@ -138,10 +138,10 @@ class BaseVLLMModel(BaseLLM):
 
         self.batch_size = batch_size
 
+        self.model = LLM(**model_args, device=device)
+
         self._tokenizer: None | VLLMTokenizerAPI = None
         _ = self.tokenizer  # make sure tokenizer is initialized
-
-        self.model = LLM(**model_args, device=device)
 
         self.sampling_params: SamplingParams = self._process_sampling_params(sampling_params)
 
