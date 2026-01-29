@@ -137,9 +137,9 @@ class BaseVLLMModel(BaseLLM):
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
         self.batch_size = batch_size
-        self._tokenizer: None | VLLMTokenizerAPI = None
 
         self.model = LLM(**model_args, device=device)
+        self.tokenizer = VLLMTokenizer(target_mdl=self.checkpoint_path or self.LLM_NAME)
 
         self.sampling_params: SamplingParams = self._process_sampling_params(sampling_params)
 
@@ -179,12 +179,6 @@ class BaseVLLMModel(BaseLLM):
         logger.info(
             f"{RED}[ Using default formatter --------------------- {RESET}{self._formatter.__class__.__name__} {RED}]{RESET}"  # noqa: E501
         )
-
-    @property
-    def tokenizer(self) -> VLLMTokenizerAPI:
-        if self._tokenizer is None:
-            self._tokenizer = VLLMTokenizer(target_mdl=self.checkpoint_path or self.LLM_NAME)
-        return self._tokenizer
 
     def count_tokens(self, text: str, /) -> int:
         return len(self.tokenizer.encode_plain_text(text).tokens)
