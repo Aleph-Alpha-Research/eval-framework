@@ -10,6 +10,13 @@
 
 ### General
 
+## [0.2.11](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.10...v0.2.11) (2026-01-29)
+
+
+### Bug Fixes
+
+* Downloaded w&b artifacts are deleted too early ([#163](https://github.com/Aleph-Alpha-Research/eval-framework/issues/163)) ([157d757](https://github.com/Aleph-Alpha-Research/eval-framework/commit/157d7576330396f7d10731c431892f7e303cf757))
+
 ## [0.2.10](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.9...v0.2.10) (2026-01-27)
 
 
