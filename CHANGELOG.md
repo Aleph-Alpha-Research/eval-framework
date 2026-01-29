@@ -12,7 +12,7 @@
 
 ### Bug Fixes
 
-* fix too early temporary directory removal when loading models from W&B and make sure tokenizer is initialized in the constructor.
+* fix too early temporary directory removal and lazy tokenizer initialization when loading VLLM models from W&B.
 
 ## [0.2.10](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.9...v0.2.10) (2026-01-27)
 
