@@ -137,6 +137,8 @@ class BaseVLLMModel(BaseLLM):
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
         self.batch_size = batch_size
+
+        self._tokenizer: None | VLLMTokenizerAPI = None
         _ = self.tokenizer  # make sure tokenizer is initialized
 
         self.model = LLM(**model_args, device=device)
