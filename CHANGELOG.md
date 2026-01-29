@@ -10,6 +10,10 @@
 
 ### General
 
+### Bug Fixes
+
+* fix too early temporary directory removal when loading models from W&B and make sure tokenizer is initialized in the constructor.
+
 ## [0.2.10](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.9...v0.2.10) (2026-01-27)
 
 
