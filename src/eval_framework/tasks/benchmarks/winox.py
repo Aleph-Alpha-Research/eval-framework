@@ -62,7 +62,6 @@ class WINOX(WINOGRANDE):
         cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
         download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
 
-
         dataset = load_dataset(
             kwargs.get("path", self.DATASET_PATH),
             name=kwargs.get("name"),
@@ -74,7 +73,6 @@ class WINOX(WINOGRANDE):
         )
 
         return dataset
-
 
 
 class WINOX_DE(WINOX):

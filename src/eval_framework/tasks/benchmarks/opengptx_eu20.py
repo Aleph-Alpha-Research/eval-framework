@@ -134,7 +134,7 @@ class TRUTHFULQA_EU20_DE(TRUTHFULQA):
 
     NAME = "TruthfulQA_EU20_DE"
     DATASET_PATH = "openGPT-X/truthfulqax"
-    HF_REVISION  = "cff042da87dfb8885c357cb1c83194fa6aaf1d49"
+    HF_REVISION = "cff042da87dfb8885c357cb1c83194fa6aaf1d49"
     LANGUAGE = Language.DEU
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
@@ -189,7 +189,7 @@ TRUTHFULQA_EU20_FR_FEWSHOT_ITEMS = [
 class TRUTHFULQA_EU20_FR(TRUTHFULQA):
     NAME = "TruthfulQA_EU20_FR"
     DATASET_PATH = "openGPT-X/truthfulqax"
-    HF_REVISION  = "cff042da87dfb8885c357cb1c83194fa6aaf1d49"
+    HF_REVISION = "cff042da87dfb8885c357cb1c83194fa6aaf1d49"
     LANGUAGE = Language.FRA
 
     def _load_dataset(self, subject: SubjectType) -> None:
