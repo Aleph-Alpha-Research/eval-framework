@@ -199,6 +199,7 @@ class AlephAlphaAPIModel(BaseLLM):
             request_timeout_seconds=self.request_timeout_seconds,
             token=self.token,
             total_retries=0,  # we have a custom retry policy in _request_with_backoff()
+            limit=self.max_async_concurrent_requests,
         ) as client:
             tasks = (
                 self._process_request_with_client(
