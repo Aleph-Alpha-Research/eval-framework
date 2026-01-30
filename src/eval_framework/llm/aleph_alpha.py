@@ -171,28 +171,25 @@ class AlephAlphaAPIModel(BaseLLM):
     async def _process_request_with_client(
         self,
         client: AsyncClient,
-        semaphore: asyncio.Semaphore,
         request: CompletionRequest,
         id: int,
     ) -> tuple[CompletionRequest, CompletionResponse | Error]:
         """Process a single request, returning the request and either a response or error."""
-        async with semaphore:
-            try:
-                response = await self._request_with_backoff(client=client, request=request, id=id)
-                logger.info(f"Request {id}: Success")
-                return (request, response)
-            except Exception as e:
-                if raise_errors():
-                    raise e
-                logger.info(f"Request {id}: Failure: {str(e)[:256]}")
-                return (request, self._error_from_exception(e))
+        try:
+            response = await self._request_with_backoff(client=client, request=request, id=id)
+            logger.info(f"Request {id}: Success")
+            return (request, response)
+        except Exception as e:
+            if raise_errors():
+                raise e
+            logger.info(f"Request {id}: Failure: {str(e)[:256]}")
+            return (request, self._error_from_exception(e))
 
     async def _process_requests(
         self,
         requests: list[CompletionRequest],
     ) -> list[tuple[CompletionRequest, CompletionResponse | Error]]:
         """Process multiple requests concurrently, returning request/response pairs."""
-        semaphore = asyncio.Semaphore(self.max_async_concurrent_requests)
         async with AsyncClient(
             host=self.base_url,
             nice=True,
@@ -204,7 +201,6 @@ class AlephAlphaAPIModel(BaseLLM):
             tasks = (
                 self._process_request_with_client(
                     client,
-                    semaphore,
                     request,
                     i,
                 )
