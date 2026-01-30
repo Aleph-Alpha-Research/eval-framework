@@ -75,7 +75,6 @@ class SQUAD2(BaseTask[str]):
         return load_dataset(
             **kwargs,
             revision=self.HF_REVISION,
-            trust_remote_code=True,
             cache_dir=cache_dir,
             download_config=download_config,
         )

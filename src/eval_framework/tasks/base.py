@@ -171,7 +171,6 @@ class BaseTask[SubjectType](ABC):
             return load_dataset(
                 **kwargs,
                 revision=self.HF_REVISION,
-                trust_remote_code=True,
                 cache_dir=cache_dir,
                 download_config=download_config,
             )
@@ -179,7 +178,6 @@ class BaseTask[SubjectType](ABC):
             return load_dataset(
                 **kwargs,
                 revision=self.HF_REVISION,
-                trust_remote_code=True,
                 cache_dir=f"{Path.home()}/.cache/eval-framework",
             )
 

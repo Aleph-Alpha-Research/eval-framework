@@ -73,6 +73,7 @@ class MMLU_DE(BaseTask[str]):
 
     NAME = "MMLU_DE"
     DATASET_PATH = "LeoLM/MMLU_de"
+    HF_REVISION = "11433b408001dd26444c7e666cc536e0b8907ca5"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
