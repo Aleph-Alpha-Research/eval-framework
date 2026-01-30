@@ -27,6 +27,7 @@ class ARC_EU20_DE(ARC):
 
     NAME = "ARC_EU20_DE"
     DATASET_PATH = "openGPT-X/arcx"
+    HF_REVISION = "e4c31fa077b82832cc21e614832701603a8ad319"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     SUBJECTS = ["challenge_DE", "easy_DE"]
@@ -36,6 +37,7 @@ class ARC_EU20_DE(ARC):
 class ARC_EU20_FR(ARC):
     NAME = "ARC_EU20_FR"
     DATASET_PATH = "openGPT-X/arcx"
+    HF_REVISION = "e4c31fa077b82832cc21e614832701603a8ad319"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     SUBJECTS = ["challenge_FR", "easy_FR"]
@@ -51,6 +53,7 @@ class GSM8K_EU20_DE(GSM8KEvalHarness):
     """  # noqa: E501
 
     NAME = "GSM8K_EU20_DE"
+    HF_REVISION = "3ed0f81d31a9013e05d16644aabcc36db50078a9"
     DATASET_PATH = "openGPT-X/gsm8kx"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -60,6 +63,7 @@ class GSM8K_EU20_DE(GSM8KEvalHarness):
 
 class GSM8K_EU20_FR(GSM8KEvalHarness):
     NAME = "GSM8K_EU20_FR"
+    HF_REVISION = "3ed0f81d31a9013e05d16644aabcc36db50078a9"
     DATASET_PATH = "openGPT-X/gsm8kx"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -77,6 +81,7 @@ class HELLASWAG_EU20_DE(HELLASWAG):
 
     NAME = "HellaSwag_EU20_DE"
     DATASET_PATH = "openGPT-X/hellaswagx"
+    HF_REVISION = "7c30407f4f11fa4fada74bd4384ed0fe572ae8f2"
     SAMPLE_SPLIT = "train"
     FEWSHOT_SPLIT = "validation"
     SUBJECTS = ["DE"]
@@ -86,6 +91,7 @@ class HELLASWAG_EU20_DE(HELLASWAG):
 class HELLASWAG_EU20_FR(HELLASWAG):
     NAME = "HellaSwag_EU20_FR"
     DATASET_PATH = "openGPT-X/hellaswagx"
+    HF_REVISION = "7c30407f4f11fa4fada74bd4384ed0fe572ae8f2"
     SAMPLE_SPLIT = "train"
     FEWSHOT_SPLIT = "validation"
     SUBJECTS = ["FR"]
@@ -128,6 +134,7 @@ class TRUTHFULQA_EU20_DE(TRUTHFULQA):
 
     NAME = "TruthfulQA_EU20_DE"
     DATASET_PATH = "openGPT-X/truthfulqax"
+    HF_REVISION  = "cff042da87dfb8885c357cb1c83194fa6aaf1d49"
     LANGUAGE = Language.DEU
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
@@ -182,6 +189,7 @@ TRUTHFULQA_EU20_FR_FEWSHOT_ITEMS = [
 class TRUTHFULQA_EU20_FR(TRUTHFULQA):
     NAME = "TruthfulQA_EU20_FR"
     DATASET_PATH = "openGPT-X/truthfulqax"
+    HF_REVISION  = "cff042da87dfb8885c357cb1c83194fa6aaf1d49"
     LANGUAGE = Language.FRA
 
     def _load_dataset(self, subject: SubjectType) -> None:
@@ -214,6 +222,7 @@ class MMLU_EU20_DE(MMLU):
 
     NAME = "MMLU_EU20_DE"
     DATASET_PATH = "openGPT-X/mmlux"
+    HF_REVISION = "6412d5d5d03a7b31d02f4ba34b787c2e7939a800"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "dev"  # one could merge dev and validation to have a larger pool of fewshot examples
     SUBJECTS = [i + "_DE" for i in MMLU_SUBJECTS]
@@ -321,6 +330,7 @@ MMLU_SUBJECTS_TRANSLATION_FR = {
 class MMLU_EU20_FR(MMLU):
     NAME = "MMLU_EU20_FR"
     DATASET_PATH = "openGPT-X/mmlux"
+    HF_REVISION = "6412d5d5d03a7b31d02f4ba34b787c2e7939a800"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "dev"
     SUBJECTS = [i + "_FR" for i in MMLU_SUBJECTS]

@@ -1,7 +1,13 @@
-from typing import Any
+import os
 
+from typing import Any
+from pathlib import Path
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.benchmarks.winogrande import WINOGRANDE
+
+from datasets import DownloadConfig, load_dataset
+from huggingface_hub import HfApi
+from huggingface_hub.errors import RevisionNotFoundError
 
 ANSWER_STR_TO_NUM = {"1": 0, "2": 1}
 
@@ -19,6 +25,7 @@ class WINOX(WINOGRANDE):
     """
 
     DATASET_PATH = "demelin/wino_x"
+    HF_REVISION = "7d82697fd52ac8b03e62aadfddc61077320f21e7"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
     LANGUAGE_SHORT_CODE = ""
@@ -41,6 +48,33 @@ class WINOX(WINOGRANDE):
             for choice in [item[f"option1_{self.LANGUAGE_SHORT_CODE}"], item[f"option2_{self.LANGUAGE_SHORT_CODE}"]]
         ]
         return choices
+
+    def _load_hf_dataset(self, **kwargs: Any) -> Any:
+        """Override to handle FLORES-200 encoding issues by using parquet files."""
+        # Check if the HF_REVISION is valid before loading the dataset
+        if self.HF_REVISION:
+            try:
+                _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=self.HF_REVISION, timeout=100.0)
+            except Exception as e:
+                if isinstance(e, RevisionNotFoundError):
+                    raise e
+
+        cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
+        download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
+
+
+        dataset = load_dataset(
+            kwargs.get("path", self.DATASET_PATH),
+            name=kwargs.get("name"),
+            split=kwargs.get("split"),
+            data_files=None,  # Let it auto-discover parquet files
+            revision=self.HF_REVISION,
+            # cache_dir=cache_dir,
+            download_config=download_config,
+        )
+
+        return dataset
+
 
 
 class WINOX_DE(WINOX):

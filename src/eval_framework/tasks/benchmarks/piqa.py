@@ -15,6 +15,7 @@ class PIQA(BaseTask[str]):
 
     NAME = "PIQA"
     DATASET_PATH = "ybisk/piqa"
+    HF_REVISION = "6b3aceb3276e5ab7e51895d73151a718690af38c"
     SAMPLE_SPLIT = "validation"  # 1838 examples (same split as lm-eval)
     FEWSHOT_SPLIT = "test"  # 3084 examples
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
