@@ -1,13 +1,13 @@
 import os
-
-from typing import Any
 from pathlib import Path
-from eval_framework.tasks.base import Language
-from eval_framework.tasks.benchmarks.winogrande import WINOGRANDE
+from typing import Any
 
 from datasets import DownloadConfig, load_dataset
 from huggingface_hub import HfApi
 from huggingface_hub.errors import RevisionNotFoundError
+
+from eval_framework.tasks.base import Language
+from eval_framework.tasks.benchmarks.winogrande import WINOGRANDE
 
 ANSWER_STR_TO_NUM = {"1": 0, "2": 1}
 
