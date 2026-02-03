@@ -137,9 +137,11 @@ class BaseVLLMModel(BaseLLM):
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
         self.batch_size = batch_size
-        self._tokenizer: None | VLLMTokenizerAPI = None
 
         self.model = LLM(**model_args, device=device)
+
+        self._tokenizer: None | VLLMTokenizerAPI = None
+        _ = self.tokenizer  # make sure tokenizer is initialized
 
         self.sampling_params: SamplingParams = self._process_sampling_params(sampling_params)
 
@@ -481,28 +483,27 @@ class VLLMModel(BaseVLLMModel):
         sampling_params: SamplingParams | dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> None:
-        final_path, possible_name = self._get_final_checkpoint(checkpoint_path, model_name, artifact_name)
+        with self._get_final_checkpoint(checkpoint_path, model_name, artifact_name) as (final_path, possible_name):
+            if final_path:
+                self.LLM_NAME = str(final_path)
 
-        if final_path:
-            self.LLM_NAME = str(final_path)
+            final_name = checkpoint_name
+            if final_name is None and possible_name is not None:
+                final_name = possible_name.replace("/", "_").replace(":", "_").strip("_")  # sanitize pathname
 
-        final_name = checkpoint_name
-        if final_name is None and possible_name is not None:
-            final_name = possible_name.replace("/", "_").replace(":", "_").strip("_")  # sanitize pathname
+            final_formatter = self._get_final_formatter(formatter, formatter_name, formatter_kwargs)
 
-        final_formatter = self._get_final_formatter(formatter, formatter_name, formatter_kwargs)
-
-        super().__init__(
-            formatter=final_formatter,
-            checkpoint_path=final_path,
-            checkpoint_name=final_name,
-            max_model_len=max_model_len,
-            tensor_parallel_size=tensor_parallel_size,
-            gpu_memory_utilization=gpu_memory_utilization,
-            batch_size=batch_size,
-            sampling_params=sampling_params,
-            **kwargs,
-        )
+            super().__init__(
+                formatter=final_formatter,
+                checkpoint_path=final_path,
+                checkpoint_name=final_name,
+                max_model_len=max_model_len,
+                tensor_parallel_size=tensor_parallel_size,
+                gpu_memory_utilization=gpu_memory_utilization,
+                batch_size=batch_size,
+                sampling_params=sampling_params,
+                **kwargs,
+            )
 
 
 class VLLMRegistryModel(VLLMModel):  # deprecated

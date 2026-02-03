@@ -10,6 +10,17 @@
 
 ### General
 
+### Bug Fixes
+
+## [0.2.11](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.10...v0.2.11) (2026-01-30)
+
+
+### Bug Fixes
+
+* Downloaded w&b artifacts are deleted too early ([#163](https://github.com/Aleph-Alpha-Research/eval-framework/issues/163)) ([157d757](https://github.com/Aleph-Alpha-Research/eval-framework/commit/157d7576330396f7d10731c431892f7e303cf757))
+* use aleph-alpha-client concurrency limit and allow &gt;100 concurrent requests ([#166](https://github.com/Aleph-Alpha-Research/eval-framework/issues/166)) ([73b7d97](https://github.com/Aleph-Alpha-Research/eval-framework/commit/73b7d97670fccc82039914ed56cbafa434bb1aba))
+* VLLM tokenizer lazy initialization didn't work with W&B ([#165](https://github.com/Aleph-Alpha-Research/eval-framework/issues/165)) ([f38de79](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f38de79a809f0a05e37f1c074569050965c40a7c))
+
 ## [0.2.10](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.9...v0.2.10) (2026-01-27)
 
 

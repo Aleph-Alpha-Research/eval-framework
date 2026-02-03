@@ -857,48 +857,6 @@ def test_tokenizer_single_initialization(
             )
 
 
-@pytest.mark.parametrize(
-    "model_class_and_name", [(VLLMModel, "gpt2"), (MistralVLLM, "mistralai/Ministral-8B-Instruct-2410")]
-)
-def test_tokenizer_initialization_performance(
-    model_class_and_name: tuple[type[VLLMModel], str],
-) -> None:
-    """
-    Test that accessing the tokenizer property multiple times is fast after the first access,
-    which confirms that the tokenizer is being cached properly.
-
-    This test uses a real tokenizer to measure actual performance improvement.
-    """
-
-    # Create a simple subclass of VLLMModel for testing with a real model name
-    base_model_cls, base_model_name = model_class_and_name
-
-    class TestVLLMModel(base_model_cls):  # type: ignore
-        LLM_NAME = base_model_name
-        DEFAULT_FORMATTER = ConcatFormatter
-
-    # Only mock the LLM to avoid loading the actual model weights
-    with patch("eval_framework.llm.vllm.LLM"):
-        # Create the model with real tokenizer but mocked LLM and measure first access
-        # (which should be slow as it is the real tokenizer initialization)
-        model = TestVLLMModel(max_model_len=128)
-        start_time = time.time()
-        _ = model.tokenizer
-        first_access_time = time.time() - start_time
-
-        # Now without resetting, access should be much faster (cached)
-        start_time = time.time()
-        _ = model.tokenizer
-        cached_access_time = time.time() - start_time
-
-        # The cached access should be significantly faster than initialization
-        # In practice, it should be almost instantaneous
-        assert cached_access_time < first_access_time / 10, (
-            f"Cached tokenizer access should be much faster than initialization "
-            f"(first init: {first_access_time:.6f}s, cached access: {cached_access_time:.6f}s)"
-        )
-
-
 @pytest.mark.vllm
 @pytest.mark.gpu
 @pytest.mark.parametrize(
@@ -962,7 +920,7 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
 @pytest.mark.parametrize("kwargs, expected_model, expected_name", LLM_INIT_SOURCE_PARAMS)
 def test_vllm_init_source(mocker: MockerFixture, kwargs: Any, expected_model: str, expected_name: str) -> None:
     """Test that VLLMModel initializes correctly with different checkpoint source arguments."""
-
+    mocker.patch("eval_framework.llm.vllm.get_tokenizer")
     VLLM_patch = mocker.patch("eval_framework.llm.vllm.LLM")
     mock_wandb_fs = MagicMock()
     mock_wandb_fs.__enter__().find_hf_checkpoint_root_from_path_list.return_value = "/download"

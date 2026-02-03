@@ -130,7 +130,7 @@ wheels = [
 
 [[package]]
 name = "aleph-alpha-client"
-version = "10.6.2"
+version = "11.5.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiodns" },
@@ -138,6 +138,7 @@ dependencies = [
     { name = "aiohttp-retry" },
     { name = "packaging" },
     { name = "pillow" },
+    { name = "pydantic" },
     { name = "python-liquid" },
     { name = "requests" },
     { name = "tokenizers" },
@@ -145,9 +146,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/da/dd/78e053a9de63e69131bb6cf4ae866dce4bb1c4174bb49d47604830a1ae77/aleph_alpha_client-10.6.2.tar.gz", hash = "sha256:bbf3f8063f585a54af7889539bbd392fa2b7c08e5430ca8c4ffcb89fb54665c5", size = 49224, upload-time = "2025-07-22T07:13:45.398Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/09/6e/77d8264bbf774b343c4c6b3f7b40e06b9e63a02e3010d73f77236f1ee0bb/aleph_alpha_client-11.5.1.tar.gz", hash = "sha256:5899c6478bae9dfb7c4a5379fe90ae580be56f5b346fd21e968995485ce5cd7b", size = 53874, upload-time = "2026-01-30T09:04:46.619Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/45/1466127692035d1f371629ec18a6ddbf9b31522b83a29aaded0c6a2ab2d0/aleph_alpha_client-10.6.2-py3-none-any.whl", hash = "sha256:4186c7d9f7d614d83f7d9c9ab374d512d3727cb3fd3e2e09d0bc41dae0035771", size = 42120, upload-time = "2025-07-22T07:13:44.075Z" },
+    { url = "https://files.pythonhosted.org/packages/0c/03/a2591e54b01f8646b02cee190d3bc3dcfbd073960f6b38824e30d45cb408/aleph_alpha_client-11.5.1-py3-none-any.whl", hash = "sha256:5a7dc5c74e34161bf94cfb1a146cd1d101b8bd7da30d33b835dd85c3d6f73e76", size = 45606, upload-time = "2026-01-30T09:04:45.18Z" },
 ]
 
 [[package]]
@@ -825,7 +826,7 @@ wheels = [
 
 [[package]]
 name = "eval-framework"
-version = "0.2.10"
+version = "0.2.11"
 source = { editable = "." }
 dependencies = [
     { name = "antlr4-python3-runtime" },
@@ -936,7 +937,7 @@ flash-attn = [
 requires-dist = [
     { name = "accelerate", marker = "extra == 'accelerate'" },
     { name = "accelerate", marker = "extra == 'transformers'", specifier = ">=0.30.0,<1" },
-    { name = "aleph-alpha-client", marker = "extra == 'api'", specifier = ">=10,<11" },
+    { name = "aleph-alpha-client", marker = "extra == 'api'", specifier = ">=11.5.1" },
     { name = "antlr4-python3-runtime", specifier = "==4.11.0" },
     { name = "boto3", specifier = ">=1.40.54,<2" },
     { name = "datasets", specifier = ">=4.0.0" },

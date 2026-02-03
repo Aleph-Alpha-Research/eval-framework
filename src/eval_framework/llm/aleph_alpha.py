@@ -3,16 +3,12 @@ import json
 import logging
 import math
 import os
-import random
 import re
-import time
 import traceback
 from collections.abc import Callable, Sequence
 
-import aiohttp
 from aleph_alpha_client import (
     AsyncClient,
-    BusyError,
     Client,
     CompletionRequest,
     CompletionResponse,
@@ -53,7 +49,6 @@ class AlephAlphaAPIModel(BaseLLM):
         max_retries: int = 100,
         max_async_concurrent_requests: int = 32,
         request_timeout_seconds: int = 30 * 60 + 5,
-        queue_full_timeout_seconds: int = 30 * 60 + 5,
         bytes_per_token: float | None = None,
         token: str = os.getenv("AA_TOKEN", "dummy"),
         base_url: str = os.getenv("AA_INFERENCE_ENDPOINT", "dummy_endpoint"),
@@ -70,7 +65,6 @@ class AlephAlphaAPIModel(BaseLLM):
         self.max_async_concurrent_requests = max_async_concurrent_requests
         self.max_retries = max_retries
         self.request_timeout_seconds = request_timeout_seconds
-        self.queue_full_timeout_seconds = queue_full_timeout_seconds
         self.token = token
         self.base_url = base_url
         self._validate_model_availability(base_url, token)
@@ -101,56 +95,6 @@ class AlephAlphaAPIModel(BaseLLM):
         except Exception as e:
             raise RuntimeError(f"Model '{self._llm_name}' is not available: {e}")
 
-    async def _request_with_backoff(
-        self, client: AsyncClient, request: CompletionRequest, id: int
-    ) -> CompletionResponse:
-        """
-        Query Aleph-Alpha API with complete. Retry with back-off until it responds.
-        """
-        num_attempts = 0
-        start_time: float | None = None
-
-        while True:
-            try:
-                return await client.complete(request, model=self._llm_name)
-
-            except (TimeoutError, BusyError, RuntimeError, aiohttp.ClientError) as e:
-                status_code: str = safe_json_loads(e.args[1]).get("code", "") if len(e.args) >= 2 else ""
-                str_e = str(e)
-                if status_code == "QUEUE_FULL":
-                    # Worker not available or missed a heartbeat (inference longer than scheduler's
-                    # API_MODEL_AVAILABLE_TIMEOUT_DURATION_MILLIS) or the scheduler is overloaded.
-                    if start_time is None:
-                        start_time = time.time()
-                    elapsed = time.time() - start_time
-                    if elapsed <= self.queue_full_timeout_seconds:
-                        logger.info(
-                            f"Request {id}: {status_code or str_e[:256]} - retrying: attempt"
-                            f" {num_attempts}/{self.max_retries}, elapsed {elapsed:.1f} sec"
-                        )
-                        # don't count as retry (request returns immediately, so just wait a bit not to DoS the server)
-                        await asyncio.sleep(random.randint(5, 30))
-                        continue
-
-                elif (
-                    status_code == "TIMEOUT_TASK"
-                    or isinstance(e, TimeoutError)
-                    or "502 Bad Gateway" in str_e
-                    or "504 Gateway Time-out" in str_e
-                    or isinstance(e, aiohttp.ClientError)
-                ):
-                    # client timeout, either because task too long in a queue or inference too long
-                    # (scheduler's API_CLIENT_TIMEOUT_DURATION_MILLIS). Retrying for the "inference too long"
-                    # case makes no sense but we unfortunately don't know which case has happened.
-                    num_attempts += 1
-                    start_time = None
-                    if num_attempts < self.max_retries:
-                        logger.info(f"Request {id}: TIMEOUT_TASK - retrying: attempt {num_attempts}/{self.max_retries}")
-                        await asyncio.sleep(random.randint(5, 30))
-                        continue
-
-                raise e
-
     def _error_from_exception(self, e: Exception) -> Error:
         """Convert an exception to an Error object."""
         if len(e.args) >= 2:
@@ -171,39 +115,36 @@ class AlephAlphaAPIModel(BaseLLM):
     async def _process_request_with_client(
         self,
         client: AsyncClient,
-        semaphore: asyncio.Semaphore,
         request: CompletionRequest,
         id: int,
     ) -> tuple[CompletionRequest, CompletionResponse | Error]:
         """Process a single request, returning the request and either a response or error."""
-        async with semaphore:
-            try:
-                response = await self._request_with_backoff(client=client, request=request, id=id)
-                logger.info(f"Request {id}: Success")
-                return (request, response)
-            except Exception as e:
-                if raise_errors():
-                    raise e
-                logger.info(f"Request {id}: Failure: {str(e)[:256]}")
-                return (request, self._error_from_exception(e))
+        try:
+            response = await client.complete(request, model=self._llm_name)
+            logger.info(f"Request {id}: Success")
+            return (request, response)
+        except Exception as e:
+            if raise_errors():
+                raise e
+            logger.info(f"Request {id}: Failure: {str(e)[:256]}")
+            return (request, self._error_from_exception(e))
 
     async def _process_requests(
         self,
         requests: list[CompletionRequest],
     ) -> list[tuple[CompletionRequest, CompletionResponse | Error]]:
         """Process multiple requests concurrently, returning request/response pairs."""
-        semaphore = asyncio.Semaphore(self.max_async_concurrent_requests)
         async with AsyncClient(
             host=self.base_url,
             nice=True,
             request_timeout_seconds=self.request_timeout_seconds,
             token=self.token,
-            total_retries=0,  # we have a custom retry policy in _request_with_backoff()
+            total_retries=self.max_retries,
+            limit=self.max_async_concurrent_requests,
         ) as client:
             tasks = (
                 self._process_request_with_client(
                     client,
-                    semaphore,
                     request,
                     i,
                 )
