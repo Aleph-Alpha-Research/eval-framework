@@ -68,7 +68,7 @@ class WINOX(WINOGRANDE):
             split=kwargs.get("split"),
             data_files=None,  # Let it auto-discover parquet files
             revision=self.HF_REVISION,
-            # cache_dir=cache_dir,
+            cache_dir=cache_dir,
             download_config=download_config,
         )
 
