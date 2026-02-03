@@ -16,6 +16,7 @@ from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
 from eval_framework.tasks.benchmarks.wmt import WMT14
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import get_task
+from eval_framework.tasks.task_names import TaskNameEnum
 from eval_framework.utils.constants import GREEN, RED, RESET
 from tests.tests_eval_framework.conftest import MockLLM
 
@@ -120,8 +121,8 @@ def pytest_generate_tests(metafunc: Any) -> None:
         ids = [setup[1] for setup in experiment_setups]
 
         # if you need to test all tasks, uncomment the following lines
-        # task_names = [task.value for task in TaskName]
-        # ids = [task.name for task in TaskName]
+        task_names = [task.value for task in TaskNameEnum]
+        ids = [task.name for task in TaskNameEnum]
 
         metafunc.parametrize("full_task_name", task_names, ids=ids)
 

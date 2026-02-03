@@ -39,13 +39,10 @@ class InfiniteBench(BaseTask[str], ABC):
             }
         )
         try:
-            return load_dataset(
-                **kwargs, trust_remote_code=True, cache_dir=cache_dir, download_config=download_config, features=ft
-            )
+            return load_dataset(**kwargs, cache_dir=cache_dir, download_config=download_config, features=ft)
         except Exception:
             return load_dataset(
                 **kwargs,
-                trust_remote_code=True,
                 cache_dir=f"{Path.home()}/.cache/eval-framework",
                 features=ft,
             )

@@ -3,11 +3,11 @@
 ````
 NAME = DUC_EXTRACTIVE
 DATASET_PATH = midas/duc2001
-SAMPLE_SPLIT = test
-FEWSHOT_SPLIT = test
+SAMPLE_SPLIT = train
+FEWSHOT_SPLIT = train
 RESPONSE_TYPE = COMPLETION
 METRICS = [AccuracyCompletion]
-SUBJECTS = ['raw']
+SUBJECTS = ['default']
 LANGUAGE = <Language.ENG: 'English'>
 ````
 
