@@ -153,6 +153,15 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.qasper_yesno.QASPERYesNo")
     register_lazy_task("eval_framework.tasks.benchmarks.qasper_yesno.QASPERYesNoMC")
     register_lazy_task("eval_framework.tasks.benchmarks.popqa.PopQA")
+    register_lazy_task("eval_framework.tasks.benchmarks.mt_mbpp.MTMBPP")
+    register_lazy_task("eval_framework.tasks.benchmarks.social_iqa.SocialIQACloze")
+    register_lazy_task("eval_framework.tasks.benchmarks.social_iqa.SocialIQAMC")
+    register_lazy_task("eval_framework.tasks.benchmarks.medmcqa.MedMCQACloze")
+    register_lazy_task("eval_framework.tasks.benchmarks.medmcqa.MedMCQAMC")
+    register_lazy_task("eval_framework.tasks.benchmarks.medqa.MedQACloze")
+    register_lazy_task("eval_framework.tasks.benchmarks.medqa.MedQAMC")
+    register_lazy_task("eval_framework.tasks.benchmarks.sciriff.SciRIFFYesNo")
+    register_lazy_task("eval_framework.tasks.benchmarks.sciriff.SciRIFFYesNoMC")
 
     try:
         # Importing the companion registers the additional tasks from the module.

@@ -13,9 +13,14 @@ from eval_framework.tasks.benchmarks.naturalqs_open import (
 )
 from eval_framework.tasks.benchmarks.paloma import GenericPaloma
 from eval_framework.tasks.benchmarks.popqa import PopQA
+from eval_framework.tasks.benchmarks.medmcqa import MedMCQACloze, MedMCQAMC
+from eval_framework.tasks.benchmarks.medqa import MedQACloze, MedQAMC
+from eval_framework.tasks.benchmarks.mt_mbpp import MTMBPP
 from eval_framework.tasks.benchmarks.qasper_yesno import QASPERYesNo, QASPERYesNoMC
+from eval_framework.tasks.benchmarks.sciriff import SciRIFFYesNo, SciRIFFYesNoMC
 from eval_framework.tasks.benchmarks.simpleqa import SimpleQACompletion
 from eval_framework.tasks.benchmarks.simpletom import SimpleToMMC
+from eval_framework.tasks.benchmarks.social_iqa import SocialIQACloze, SocialIQAMC
 from eval_framework.tasks.benchmarks.tydiqa import TyDiQASecondaryTask
 
 
@@ -98,4 +103,28 @@ def test_qasper_yesno_tasks_smoke() -> None:
 
 def test_popqa_smoke() -> None:
     _smoke_test_task(PopQA)
+
+
+def test_mt_mbpp_smoke() -> None:
+    _smoke_test_task(MTMBPP)
+
+
+def test_social_iqa_tasks_smoke() -> None:
+    _smoke_test_task(SocialIQACloze)
+    _smoke_test_task(SocialIQAMC)
+
+
+def test_medmcqa_tasks_smoke() -> None:
+    _smoke_test_task(MedMCQACloze)
+    _smoke_test_task(MedMCQAMC)
+
+
+def test_medqa_tasks_smoke() -> None:
+    _smoke_test_task(MedQACloze)
+    _smoke_test_task(MedQAMC)
+
+
+def test_sciriff_tasks_smoke() -> None:
+    _smoke_test_task(SciRIFFYesNo)
+    _smoke_test_task(SciRIFFYesNoMC)
 
