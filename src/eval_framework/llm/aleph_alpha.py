@@ -45,6 +45,7 @@ class AlephAlphaAPIModel(BaseLLM):
         formatter: BaseFormatter | None = None,
         checkpoint_name: str | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
         # Please see README.md for tips if adapting the following parameters.
         max_retries: int = 100,
         max_async_concurrent_requests: int = 32,
@@ -62,6 +63,7 @@ class AlephAlphaAPIModel(BaseLLM):
             self._formatter = formatter
         self._llm_name = checkpoint_name or self.LLM_NAME
         self._temperature = temperature if temperature is not None else 0.0
+        self._top_p = top_p if top_p is not None else 0.0
         self.max_async_concurrent_requests = max_async_concurrent_requests
         self.max_retries = max_retries
         self.request_timeout_seconds = request_timeout_seconds
@@ -213,6 +215,7 @@ class AlephAlphaAPIModel(BaseLLM):
                     maximum_tokens=scaled_max_tokens,
                     stop_sequences=stop_sequences,
                     temperature=effective_temperature,
+                    top_p=self._top_p,
                 )
             )
 
