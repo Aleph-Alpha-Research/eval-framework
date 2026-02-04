@@ -4,7 +4,14 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
+from eval_framework.metrics.completion.math_minerva_completion import MathMinervaCompletion
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
+from eval_framework.metrics.completion.minerva_math_utils import (
+    extract_answers,
+    last_boxed_only_string,
+    normalize_final_answer,
+    remove_boxed,
+)
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 
 
@@ -506,6 +513,74 @@ class MATH(MATHReasoning):
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
         return self._extract_answer(item["solution"])
+
+
+class MATHMinerva(MATHReasoning):
+    """
+    MATH with Minerva-style prompt and scoring (OLMES minerva_math parity).
+    Prompt: "Problem:\\n" + problem + "\\n\\n" + "Solution:"
+    Gold: normalize_final_answer(remove_boxed(last_boxed_only_string(solution)))
+    Metrics: Exact Match, Exact Match (Flex) via MathMinervaCompletion.
+    """
+
+    NAME = "MATHMinerva"
+    DATASET_PATH = "EleutherAI/hendrycks_math"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "train"
+    RESPONSE_TYPE = ResponseType.COMPLETION
+    METRICS = [MathMinervaCompletion]
+    SUBJECTS = [
+        "algebra",
+        "counting_and_probability",
+        "geometry",
+        "intermediate_algebra",
+        "number_theory",
+        "prealgebra",
+        "precalculus",
+    ]
+    LANGUAGE = Language.ENG
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.stop_sequences = ["Problem:", "\n\n"]
+        self.max_tokens = 1024
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return "Problem:\n" + item["problem"] + "\n\n" + "Solution:"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+        solution = item["solution"]
+        boxed = last_boxed_only_string(solution)
+        if boxed is None:
+            return None
+        try:
+            unboxed = remove_boxed(boxed)
+            return normalize_final_answer(unboxed)
+        except AssertionError:
+            return None
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return " " + item["solution"]
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        """Primary answer for storage; metric uses raw_completion for exact_match_flex."""
+        candidates = extract_answers(completion_text, use_cot=True, cot_style="minerva")
+        return candidates[0] if candidates else "[no_answer]"
+
+
+class MATH500Minerva(MATHMinerva):
+    """
+    MATH-500 with Minerva-style prompt and scoring (OLMES minerva_math_500 parity).
+    """
+
+    NAME = "MATH500Minerva"
+    DATASET_PATH = "HuggingFaceH4/MATH-500"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "test"
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        assert num_fewshot == 0, "MATH500Minerva evaluation does not include few shot"
+        super().__init__(num_fewshot)
 
 
 class MATHLvl5(MATH):

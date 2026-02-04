@@ -6,6 +6,7 @@ from eval_framework.tasks.benchmarks.csqa import CommonsenseQACloze, Commonsense
 from eval_framework.tasks.benchmarks.drop import DropRC, DropMC
 from eval_framework.tasks.benchmarks.jeopardy import JeopardyCompletion, JeopardyMC
 from eval_framework.tasks.benchmarks.lab_bench import LabBenchCloze, LabBenchMC
+from eval_framework.tasks.benchmarks.math_reasoning import MATH500Minerva, MATHMinerva
 from eval_framework.tasks.benchmarks.naturalqs_open import (
     NaturalQsOpen,
     NaturalQsOpenCloze,
@@ -107,6 +108,11 @@ def test_popqa_smoke() -> None:
 
 def test_mt_mbpp_smoke() -> None:
     _smoke_test_task(MTMBPP)
+
+
+def test_math_minerva_tasks_smoke() -> None:
+    _smoke_test_task(MATHMinerva)
+    _smoke_test_task(MATH500Minerva)
 
 
 def test_social_iqa_tasks_smoke() -> None:

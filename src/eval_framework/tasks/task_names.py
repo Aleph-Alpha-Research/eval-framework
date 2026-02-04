@@ -69,6 +69,8 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATH")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHLvl5")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATH500")
+    register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHMinerva")
+    register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATH500Minerva")
     register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPP")
     register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPP_SANITIZED")
     register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPP_PROMPT_WITHOUT_TESTS")
