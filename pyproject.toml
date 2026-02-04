@@ -1,6 +1,6 @@
 [project]
 name = "eval-framework"
-version = "0.2.11"
+version = "0.2.12"
 description = "Evalulation Framework"
 readme = "README.md"
 license = { file = "LICENSE" }

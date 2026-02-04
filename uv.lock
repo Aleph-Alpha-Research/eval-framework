@@ -826,7 +826,7 @@ wheels = [
 
 [[package]]
 name = "eval-framework"
-version = "0.2.11"
+version = "0.2.12"
 source = { editable = "." }
 dependencies = [
     { name = "antlr4-python3-runtime" },
