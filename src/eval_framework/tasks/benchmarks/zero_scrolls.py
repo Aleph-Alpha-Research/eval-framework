@@ -1,6 +1,7 @@
 import re
 from typing import Any
 
+from eval_framework.metrics.completion.concordance_index import ConcordanceIndex
 from eval_framework.metrics.completion.exponential_similarity import ExponentialSimilarity
 from eval_framework.metrics.completion.f1 import F1
 from eval_framework.metrics.completion.rouge_geometric_mean import ROUGE_GEOMETRIC_MEAN
@@ -16,7 +17,7 @@ class ZERO_SCROLLS_QUALITY(BaseTask[str]):
 
     NAME = "ZeroSCROLLS QuALITY"
     DATASET_PATH = "tau/zero_scrolls"
-    HF_REVISION = "3ee203cfad81b1a4fab8f2351c12679fbe95b179"
+    HF_REVISION = "dc63b23022752816989b0666a366c0b0195ccc4b"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
@@ -49,7 +50,7 @@ class ZERO_SCROLLS_COMPLETION(BaseTask[str]):
     """ZeroSCROLLS dataset: https://huggingface.co/datasets/tau/zero_scrolls"""
 
     DATASET_PATH = "tau/zero_scrolls"
-    HF_REVISION = "3ee203cfad81b1a4fab8f2351c12679fbe95b179"
+    HF_REVISION = "dc63b23022752816989b0666a366c0b0195ccc4b"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.COMPLETION
@@ -197,3 +198,55 @@ class ZERO_SCROLLS_SPACE_DIGEST(ZERO_SCROLLS_COMPLETION):
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return self.post_process_generated_completion(item["output"])
+
+
+class ZERO_SCROLLS_SUMM_SCREEN_FD(ZERO_SCROLLS_COMPLETION):
+    NAME = "ZeroSCROLLS SummScreenFD"
+    METRICS = [ROUGE_GEOMETRIC_MEAN]
+    SUBJECTS = ["summ_screen_fd"]
+    PERTURBATION_UNMODIFIABLE_WORDS = ["Summary"]
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        assert num_fewshot == 0, "ZeroSCROLLS SummScreenFD only supports zero fewshot examples"
+        super().__init__(num_fewshot)
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        query_end_index = item["query_end_index"]
+        return f"{item['input'][:query_end_index]}Summary:"
+
+
+class ZERO_SCROLLS_BOOK_SUM_SORT(ZERO_SCROLLS_COMPLETION):
+    NAME = "ZeroSCROLLS BookSumSort"
+    METRICS = [ConcordanceIndex]
+    SUBJECTS = ["book_sum_sort"]
+    PERTURBATION_UNMODIFIABLE_WORDS = ["Summary", "IDs", "in", "Correct", "Order"]
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        assert num_fewshot == 0, "ZeroSCROLLS BookSumSort only supports zero fewshot examples"
+        super().__init__(num_fewshot)
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        text = completion_text.strip()
+        ids = []
+
+        # Split into lines and try to find patterns like "1. 6"
+        lines = text.splitlines()
+        matched_lines = 0
+
+        for line in lines:
+            match = re.match(r"\s*\d+\.\s*(\d+)", line)
+            if match:
+                ids.append(match.group(1))
+                matched_lines += 1
+
+        if matched_lines == 0:
+            # Fallback: remove brackets and grab all numbers
+            text = re.sub(r"[\[\]\(\)\{\}]", "", text)
+            numbers = re.findall(r"\b\d+\b", text)
+            ids = numbers
+
+        return f"[{', '.join(ids)}]"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        query_end_index = item["query_end_index"]
+        return f"{item['input'][:query_end_index]}Summary IDs in Correct Order:"

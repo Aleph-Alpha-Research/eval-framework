@@ -100,6 +100,7 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "WMT14_INSTRUCT": {"num_fewshot": 1},
     "WMT16_INSTRUCT": {"num_fewshot": 1},
     "WMT20_INSTRUCT": {"num_fewshot": 1},
+    "ZERO_SCROLLS_SUMM_SCREEN_FD": {"num_fewshot": 0},
 }
 
 TASKS_TO_TEST = set(registered_task_names())
