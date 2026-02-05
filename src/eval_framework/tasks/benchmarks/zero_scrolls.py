@@ -1,7 +1,6 @@
 import re
 from typing import Any
 
-from eval_framework.metrics.completion.concordance_index import ConcordanceIndex
 from eval_framework.metrics.completion.exponential_similarity import ExponentialSimilarity
 from eval_framework.metrics.completion.f1 import F1
 from eval_framework.metrics.completion.rouge_geometric_mean import ROUGE_GEOMETRIC_MEAN
