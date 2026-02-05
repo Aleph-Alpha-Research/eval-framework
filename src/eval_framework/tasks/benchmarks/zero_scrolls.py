@@ -16,7 +16,7 @@ class ZERO_SCROLLS_QUALITY(BaseTask[str]):
 
     NAME = "ZeroSCROLLS QuALITY"
     DATASET_PATH = "tau/zero_scrolls"
-    HF_REVISION = "58fcf756e68486f1d5c618965d02ed52c95d67dc"
+    HF_REVISION = "dc63b23022752816989b0666a366c0b0195ccc4b"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
@@ -49,7 +49,7 @@ class ZERO_SCROLLS_COMPLETION(BaseTask[str]):
     """ZeroSCROLLS dataset: https://huggingface.co/datasets/tau/zero_scrolls"""
 
     DATASET_PATH = "tau/zero_scrolls"
-    HF_REVISION = "3ee203cfad81b1a4fab8f2351c12679fbe95b179"
+    HF_REVISION = "dc63b23022752816989b0666a366c0b0195ccc4b"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.COMPLETION
