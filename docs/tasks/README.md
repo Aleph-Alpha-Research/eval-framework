@@ -21,6 +21,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [AidanBench](AidanBench.md)
 - [AidanBenchOriginal](AidanBenchOriginal.md)
 - [BELEBELE](BELEBELE.md)
+- [BalancedCOPA](BalancedCOPA.md)
 - [BigCodeBench](BigCodeBench.md)
 - [BigCodeBenchHard](BigCodeBenchHard.md)
 - [BigCodeBenchHardInstruct](BigCodeBenchHardInstruct.md)
