@@ -27,7 +27,7 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "ARC_EU20_DE": {"num_fewshot": 1},
     "ARC_EU20_FR": {"num_fewshot": 1},
     "ARC_FI": {"num_fewshot": 1},
-    "BalancedCopa": {"num_fewshot": 1},
+    "BalancedCOPA": {"num_fewshot": 1},
     "BigCodeBench": {"num_fewshot": 1},
     "BigCodeBenchInstruct": {"num_fewshot": 1},
     "BigCodeBenchHard": {"num_fewshot": 1},
