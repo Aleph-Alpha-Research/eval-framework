@@ -106,7 +106,7 @@ Subset of core capabilities benchmarks coverd by `eval-framework`:
 
 | **Reasoning** | **Knowledge** | **Math** | **Coding** | **Structured outputs** | **Long Context** |
 |---------------|---------------|----------|------------|------------------------|------------------|
-| COPA | ARC | AIME | BigCodeBench | IFEval | InfiniteBench |
+| COPA, BalancedCOPA | ARC | AIME | BigCodeBench | IFEval | InfiniteBench |
 | Hellaswag | MMLU | GSM8K | HumanEval | StructEval | QUALITY |
 | Winogrande | Openbook QA| MATH-500 | MBPP | | ZeroSCROLLS |
 
