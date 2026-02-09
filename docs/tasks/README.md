@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 111**
+**Total number of tasks: 112**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
