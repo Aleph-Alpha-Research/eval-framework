@@ -35,6 +35,8 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "CASEHOLD": {"num_fewshot": 1},
     "ChemBench": {"num_fewshot": 1},
     "COPA": {"num_fewshot": 1},
+    "COPAEvalHarness": {"num_fewshot": 1},
+    "COPA_IDKEvalHarness": {"num_fewshot": 1},
     "DUC_ABSTRACTIVE": {"num_fewshot": 1},
     "DUC_EXTRACTIVE": {"num_fewshot": 1},
     "Flores200": {"num_fewshot": 1},

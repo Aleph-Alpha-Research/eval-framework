@@ -10,10 +10,12 @@ from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
 
 
-class COPA(BaseTask[str]):
-    """COPA dataset: https://huggingface.co/datasets/aps/super_glue"""
+class COPAEvalHarness(BaseTask[str]):
+    """COPA dataset: https://huggingface.co/datasets/aps/super_glue
+    This version uses samples from the validation split as evaluation examples (same as lm-eval-harness).
+    """
 
-    NAME = "COPA"
+    NAME = "COPAEvalHarness"
     DATASET_PATH = "aps/super_glue"
     SAMPLE_SPLIT = "validation"  # 100 examples (same split as lm-eval)
     FEWSHOT_SPLIT = "test"  # 500 examples
@@ -42,8 +44,19 @@ class COPA(BaseTask[str]):
         return choices
 
 
-class COPA_IDK(COPA):
-    NAME = "COPA_IDK"
+class COPA(COPAEvalHarness):
+    """This differs from the original COPA task in that it uses the test split for evaluation and the validation split
+    for few-shot examples. This is because the labels of the test split are not available in the original COPA dataset
+    but are available now.
+    """
+
+    NAME = "COPA"
+    SAMPLE_SPLIT = "test"  # 500 examples
+    FEWSHOT_SPLIT = "validation"  # 100 examples
+
+
+class COPA_IDKEvalHarness(COPAEvalHarness):
+    NAME = "COPA_IDKEvalHarness"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
@@ -62,3 +75,9 @@ class COPA_IDK(COPA):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         completions = super()._get_possible_completions(item)
         return (completions or []) + ["I do not know."]
+
+
+class COPA_IDK(COPA_IDKEvalHarness):
+    NAME = "COPA_IDK"
+    SAMPLE_SPLIT = "test"  # 500 examples
+    FEWSHOT_SPLIT = "validation"  # 100 examples
