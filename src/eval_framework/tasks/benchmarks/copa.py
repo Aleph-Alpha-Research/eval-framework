@@ -45,9 +45,10 @@ class COPAEvalHarness(BaseTask[str]):
 
 
 class COPA(COPAEvalHarness):
-    """This differs from the original COPA task in that it uses the test split for evaluation and the validation split
-    for few-shot examples. This is because the labels of the test split are not available in the original COPA dataset
-    but are available now.
+    """
+    Unlike the original COPA task, this version uses the test split for evaluation and the validation split for
+    few-shot examples. Previously, the test split labels were unavailable in the original dataset, but they are
+    now accessible, allowing this configuration.
     """
 
     NAME = "COPA"
