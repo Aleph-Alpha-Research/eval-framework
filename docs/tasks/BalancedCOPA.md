@@ -4,7 +4,7 @@
 NAME = BalancedCOPA
 DATASET_PATH = pkavumba/balanced-copa
 SAMPLE_SPLIT = test
-FEWSHOT_SPLIT = test
+FEWSHOT_SPLIT = validation
 RESPONSE_TYPE = LOGLIKELIHOODS
 METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
 SUBJECTS = ['no_subject']
