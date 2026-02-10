@@ -294,11 +294,15 @@ class BaseTask[SubjectType](ABC):
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         if self.FEWSHOT_SPLIT == self.SAMPLE_SPLIT:
+            # If the fewshot and sample splits are the same, we risk including the current eval item
+            # as a fewshot example (leaking the answer). To prevent this, sample one extra example,
+            # remove the current item if present, and truncate back to num_fewshot.
             fewshot_examples = self.rnd.sample(self.dataset[self.FEWSHOT_SPLIT], self.num_fewshot + 1)
             fewshot_examples = [example for example in fewshot_examples if example != item]
             fewshot_examples = fewshot_examples[: self.num_fewshot]
             return fewshot_examples
         else:
+            # Separate splits: no risk of leaking the current item, sample directly.
             return self.rnd.sample(self.dataset[self.FEWSHOT_SPLIT], self.num_fewshot)
 
     def _get_context(self, item: dict[str, Any]) -> BaseMetricContext | list[BaseMetricContext] | None:
