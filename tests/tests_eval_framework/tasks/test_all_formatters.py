@@ -37,6 +37,7 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "DUC_ABSTRACTIVE": {"num_fewshot": 1},
     "DUC_EXTRACTIVE": {"num_fewshot": 1},
     "Flores200": {"num_fewshot": 1},
+    "GlobalMMLU": {"num_fewshot": 1},
     "GPQA": {"num_fewshot": 1},
     "GPQA_COT": {"num_fewshot": 1},
     "GSM8K": {"num_fewshot": 1},

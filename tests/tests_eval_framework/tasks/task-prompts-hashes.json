@@ -63,6 +63,8 @@
     "GSM8K_EU20_DE.Llama3Formatter": "f5655b3237c50b1d32ce10ad03f77d24",
     "GSM8K_EU20_FR.ConcatFormatter": "e56d469b6ebc06e644f6981a13bedeff",
     "GSM8K_EU20_FR.Llama3Formatter": "4820c26bdd8126569ab5faead091c5b2",
+    "GlobalMMLU.ConcatFormatter": "1aacc6c4298bae241019439689d2d9b9",
+    "GlobalMMLU.Llama3Formatter": "83963120a2e565d1504eb59712954974",
     "GridDifference.EXTRACTED_GRID": "c3463fc837dbf31c6d20e4c6a135f14f",
     "HELLASWAG.ConcatFormatter": "c8f069fff818335c99bb92288a237d92",
     "HELLASWAG.Llama3Formatter": "75fc2b5e4e6161a1bb8b8050cbb716d2",
