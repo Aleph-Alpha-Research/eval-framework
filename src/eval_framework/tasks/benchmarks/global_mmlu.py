@@ -1,15 +1,13 @@
-import re
+import random
+from itertools import product
 from typing import Any
 
-from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
-from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
-from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
-from eval_framework.metrics.loglikelihood.ternary import TernaryScore
-from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType
+from eval_framework.tasks.benchmarks.mmlu import MMLU_SUBJECTS
 from eval_framework.tasks.utils import get_n_letters
 
 GLOBAL_MMLU_LANGUAGES = ["fr", "de", "es", "it", "pt", "ar"]
@@ -58,7 +56,6 @@ GLOBAL_MMLU_LANGUAGES_UNSUPPORTED = [
     "zh",
 ]
 
-MMMLU_LANGS = ["fr", "de", "es", "it", "pt", "ar"]
 MMLU_SUBJECTS_DE = {
     "abstract_algebra": "Abstrakte Algebra",
     "anatomy": "Anatomie",
@@ -460,10 +457,10 @@ LANGUAGE_NAME_MAP = {
 }
 
 
-class GloablMMLU(BaseTask[str]):
+class GlobalMMLU(BaseTask[tuple[str, str]]):
     """
     MMLU dataset: https://huggingface.co/datasets/CohereLabs/Global-MMLU
-    
+
     Currently, we only support prompting in French, German, Spanish, Italian,
     Portugese, and Arabic.
 
@@ -471,13 +468,13 @@ class GloablMMLU(BaseTask[str]):
     https://github.com/aisingapore/SEA-HELM/blob/main/seahelm_tasks/knowledge/global_mmlu/abstract_algebra/config.yaml
     """
 
-    NAME = "GloablMMLU"
+    NAME = "GlobalMMLU"
     DATASET_PATH = "CohereLabs/Global-MMLU"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "dev"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
-    SUBJECTS = list(product(GLOBAL_MMLU_SUBJECTS, MMLU_SUBJECTS))
+    SUBJECTS = list(product(GLOBAL_MMLU_LANGUAGES, MMLU_SUBJECTS))
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"] + get_n_letters(4)
     LANGUAGE = {
         str((lang_code.split("_")[0], subject)): LANGUAGE_NAME_MAP[lang_code]
@@ -508,12 +505,14 @@ class GloablMMLU(BaseTask[str]):
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
         language_key = item["subject"][0]
-        subject = LANGUAGE_SUBJECTS_MAP[language_key][item["subject"]]
+        subject = LANGUAGE_SUBJECTS_MAP[language_key][item["subject"][1]]
         return f"{LANGUAGE_INITIAL_PROMPT_TEXT_MAP[language_key]} {subject}."
+
+    OPTION_KEYS = {"A": "option_a", "B": "option_b", "C": "option_c", "D": "option_d"}
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "".join([f"{key}. {item[key]}\n" for key in self.keys])
+        choices = "".join([f"{key}. {item[self.OPTION_KEYS[key]]}\n" for key in self.keys])
         language_key = item["subject"][0]
         return f"{LANGUAGE_QUESTION_TEXT_MAP[language_key]}: {question}\n{choices}"
 
