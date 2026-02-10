@@ -17,6 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/pkavumba/balanced-copa](https://huggingface.co/datasets/pkavumba/balanced-copa)
 
-- `test` has 500 samples
-
 More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "BalancedCOPA"`.
