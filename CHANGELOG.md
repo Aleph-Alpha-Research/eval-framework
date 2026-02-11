@@ -6,8 +6,6 @@
 
 ### Tasks
 
-- Added `BalancedCOPA` benchmark task (balanced variant of COPA from `pkavumba/balanced-copa` on HuggingFace)
-
 ### Metrics
 
 ### General

@@ -37,6 +37,8 @@ class BalancedCOPA(COPA):
         # We split the train data into train and validation splits so that
         # the validation split matches the validation split of the original COPA dataset.
         # These magic numbers of the ids below were arrived at after manual inspection of the dataset.
+        # Numbers 401-500 correspond to the validation split of the original COPA dataset.
+        # Numbers 1401-1500 correspond to the mirrored version of the val split.
         # The sanity of this version is maintained by the HF_REVISION above.
         dataset["validation"], dataset["train"] = split_dataset_by_id_ranges(
             dataset["train"], "id", [(401, 500), (1401, 1500)]
