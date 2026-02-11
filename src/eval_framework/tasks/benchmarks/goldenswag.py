@@ -1,4 +1,3 @@
-import re
 from typing import Any
 
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
@@ -8,10 +7,10 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
 from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
-from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
 
 
-class GOLDENSWAG(BaseTask[str]):
+class GOLDENSWAG(HELLASWAG):
     """GoldenSwag dataset: https://huggingface.co/datasets/PleIAs/GoldenSwag
     available data set sections: validation"""
 
@@ -19,32 +18,6 @@ class GOLDENSWAG(BaseTask[str]):
     DATASET_PATH = "PleIAs/GoldenSwag"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
-    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
-    SUBJECTS = [NO_SUBJECT]
-    LANGUAGE = Language.ENG
-
-    @staticmethod
-    def _preprocess(prompt: str) -> str:
-        # remove bracketed text
-        prompt = prompt.strip()  # remove leading and trailing whitespace
-        prompt = prompt.replace(" [title]", ". ")  # replace [title] with . as it marks end of title
-        prompt = re.sub("\\[.*?\\]", "", prompt)  # remove remaining bracketed text
-        prompt = prompt.replace("  ", " ")  # remove extra spaces
-        return prompt
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        subject = self._preprocess(item["activity_label"])
-        question = self._preprocess(item["ctx_a"] + " " + item["ctx_b"].capitalize()).strip()
-        return f"{subject}: {question}"
-
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        ground_truth_index = int(item["label"] if item["label"] != "" else 0)
-        choices = [self._preprocess(ending) for ending in item["endings"]]
-        return f" {choices[ground_truth_index]}"
-
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        return [f" {self._preprocess(ending)}" for ending in item["endings"]]
 
 
 class GOLDENSWAG_IDK(GOLDENSWAG):
