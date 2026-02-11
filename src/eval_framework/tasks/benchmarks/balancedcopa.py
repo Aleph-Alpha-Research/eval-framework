@@ -1,4 +1,4 @@
-from datasets import Dataset
+from datasets import Dataset, DatasetDict
 
 from eval_framework.tasks.base import NO_SUBJECT, SubjectType
 from eval_framework.tasks.benchmarks.copa import COPA
@@ -33,7 +33,7 @@ class BalancedCOPA(COPA):
     HF_REVISION = "813bd03cd6e07d9bd8d7333896ad5d40abb95ea9"
     SUBJECTS = ["no_subject"]
 
-    def _split_dataset_into_train_and_val(self, dataset) -> None:
+    def _split_dataset_into_train_and_val(self, dataset: DatasetDict) -> DatasetDict:
         # We split the train data into train and validation splits so that
         # the validation split matches the validation split of the original COPA dataset.
         # These magic numbers of the ids below were arrived at after manual inspection of the dataset.
