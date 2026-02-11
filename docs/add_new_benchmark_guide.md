@@ -5,10 +5,12 @@ This guide provides comprehensive instructions for adding new benchmarks to the 
 ## Overview
 
 The eval-framework supports two response types:
+
 1. **Completion Tasks** - Generate text completions (e.g., math problems, code generation)
 2. **Loglikelihood Tasks** - Multiple choice questions where the model ranks answer options
 
 For detailed information about implementing each task type, please refer to:
+
 - [Completion Task Guide](completion_task_guide.md) - Comprehensive guide for text generation tasks
 - [Loglikelihood Task Guide](loglikelihood_task_guide.md) - Detailed guide for multiple choice tasks
 
@@ -95,7 +97,6 @@ def post_process_generated_completion(self, completion_text: str, sample: Sample
 
 This section provides a complete reference for all configurations available when creating benchmarks.
 
-
 ### Response Types
 
 The response type determines how your model interacts with the task and what type of output is expected.
@@ -113,7 +114,6 @@ RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
 ### All Available Metrics
 
 Metrics define how your task's outputs are evaluated and scored. Choose metrics that align with your response type and evaluation goals.
-
 
 #### Completion Metrics
 
@@ -175,7 +175,6 @@ from eval_framework.metrics.loglikelihood.probability_mass import ProbabilityMas
 
 These metrics use another LLM to evaluate generated outputs, useful for complex or subjective tasks:
 
-
 ```python
 from eval_framework.metrics.llm.llm_judge_chatbot_style import LLMJudgeChatbotStyle
 # Classifies whether a text generation model's response follows a chatbot-style format by evaluating characteristics like friendly introductions, verbose language, follow-up questions, and conversational fluff, returning a boolean classification with reasoning. (English and German)
@@ -220,7 +219,6 @@ from eval_framework.metrics.llm.llm_judge_world_knowledge import LLMJudgeWorldKn
 # Evaluates whether a summary contains information that goes beyond the reference text (also known as "world knowledge"), returning a boolean classification with detailed reasoning for the assessment. (English, French and German)
 
 ```
-
 
 ## Implementation Examples and Patterns
 
@@ -267,7 +265,6 @@ class GeographyQATask(BaseTask[str]):
         return self.rnd.sample(self.dataset[self.FEWSHOT_SPLIT], self.num_fewshot)
 ```
 
-
 ### Add to Task Registry
 
 Add a registration call for your new benchmark to `register_all_tasks` in `src/eval_framework/tasks/task_names.py`:
@@ -280,32 +277,66 @@ The task will now be available through `get_task("GeographyQA")`.
 
 ### Testing your benchmark
 
-All tasks automatically go through formatting tests to ensure proper prompt generation. However, if your benchmark has specific functionality that needs testing, create a dedicated test file.
+All tasks automatically go through formatting tests to ensure proper prompt generation. The formatting test lives in `tests/tests_eval_framework/tasks/test_all_formatters.py` and runs all registered tasks automatically.
 
 #### Automatic Formatting Tests
-All benchmarks are automatically tested for proper prompt formatting across different chat templates. No additional setup required.
+
+All benchmarks are automatically tested for proper prompt formatting across different chat templates. If your new task needs non-default initialization arguments (for example, a specific `num_fewshot`), add an entry for your task to `SPECIAL_ARGS` in `tests/tests_eval_framework/tasks/test_all_formatters.py`.
+
+The expected formatter outputs are tracked as hashes in `tests/tests_eval_framework/tasks/task-prompts-hashes.json`.
+
+When you add a new task:
+
+1. Run the formatter hash test once for your task to generate/check hashes.
+2. If your task hash is new, it will be added to `task-prompts-hashes.json`.
+3. Commit the updated JSON file together with your task changes.
+
+Run the formatter hash test only for your newly created task (replace `YourTaskName`):
+
+```bash
+uv run pytest tests/tests_eval_framework/tasks/test_all_formatters.py -m formatter_hash -k "YourTaskName"
+```
 
 #### Custom Task Tests (Optional)
+
 If your benchmark has specific logic that needs testing, create a test file in `tests/tasks/` to test it.
+
+### Update benchmark documentation
+
+After adding a benchmark, you also need to update task documentation:
+
+1. Manually add the new benchmark name(s) to `docs/benchmarks_and_metrics.md` (including `*_IDK` variants if your benchmark has them).
+2. Regenerate the task docs:
+
+```bash
+uv run -m eval_framework.utils.generate_task_docs
+```
+
+This updates `docs/tasks/README.md` and creates per-task documentation files for new tasks in `docs/tasks/`.
 
 ## Benchmark Examples by Task Type
 
 Study these existing benchmarks in the codebase for more complex patterns:
 
 #### Simple Classification Tasks
+
 - **ARC** (`src/eval_framework/tasks/arc.py`): Multiple choice with loglikelihoods
 - **MMLU** (`src/eval_framework/tasks/mmlu.py`): Multi-subject classification with enum subjects
 
 #### Reasoning Tasks
+
 - **GSM8K** (`src/eval_framework/tasks/gsm8k.py`): Math reasoning with answer extraction patterns
 
 #### Code Generation
+
 - **HumanEval** (`src/eval_framework/tasks/human_eval.py`): Code completion with execution validation
 - **MBPP** (`src/eval_framework/tasks/mbpp.py`): Code generation with comprehensive test validation
 
 #### Long Context Tasks
+
 - **InfiniteBench** (`src/eval_framework/tasks/infinite_bench_tasks.py`): Long context reasoning tasks
 
 #### Custom Format Tasks
+
 - **IFEval** (`src/eval_framework/tasks/ifeval.py`): Instruction following with format validation
 - **JSON/CSV Tasks:** Custom format validation examples
