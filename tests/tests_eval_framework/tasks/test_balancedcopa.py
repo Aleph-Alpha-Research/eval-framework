@@ -4,7 +4,7 @@ from datasets import Dataset
 from eval_framework.tasks.benchmarks.balancedcopa import split_dataset_by_id_ranges
 
 
-@pytest.fixture()
+@pytest.fixture
 def dummy_dataset() -> Dataset:
     return Dataset.from_dict(
         {
