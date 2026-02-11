@@ -21,6 +21,8 @@
     "AidanBenchOriginal.Llama3Formatter": "d35a4220630561fb7d5fc37505a9c5ae",
     "BELEBELE.ConcatFormatter": "48a8a96f81e40a5d048c659c39a7c057",
     "BELEBELE.Llama3Formatter": "d480b274d31b98374a2a50f9e2b21020",
+    "BalancedCOPA.ConcatFormatter": "e14b133bc4171ecef1ef38e580288330",
+    "BalancedCOPA.Llama3Formatter": "cac943a3d68d61fc4e395aa56cafe662",
     "BigCodeBench.ConcatFormatter": "ffb185747678c5aac4740a41ea6e4916",
     "BigCodeBench.Llama3Formatter": "1aec6f2dd610f3e773012849b11924a6",
     "BigCodeBenchHard.ConcatFormatter": "7d41fc547fe3cf86269a754965495605",

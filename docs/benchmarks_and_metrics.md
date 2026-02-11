@@ -29,7 +29,7 @@ Additional task documentation can be generated with the script `utils/generate-t
 |   Text Generation   |   Open QA   |   `CASEHOLD`   |    |
 |   Logical Reasoning   |   Closed QA   |    |   `InfiniteBench_EnMC`   |
 |   Logical Reasoning   |   Programming   |    |   `InfiniteBench_CodeDebug`   |
-|   Logical Reasoning   |   Reasoning   |   `COPA`, `COPA_IDK`, `COPAEvalHarness`, `COPA_IDKEvalHarness`, `HELLASWAG, HELLASWAG_EU20_DE, HELLASWAG_EU20_FR`, `WINOGRANDE`, `WINOX_DE`, `WINOX_FR`   |    |
+|   Logical Reasoning   |   Reasoning   |   `BalancedCOPA`, `COPA`, `COPA_IDK`, `COPAEvalHarness`, `COPA_IDKEvalHarness`, `HELLASWAG, HELLASWAG_EU20_DE, HELLASWAG_EU20_FR`, `WINOGRANDE`, `WINOX_DE`, `WINOX_FR`   |    |
 
 ## Long-Context
 
