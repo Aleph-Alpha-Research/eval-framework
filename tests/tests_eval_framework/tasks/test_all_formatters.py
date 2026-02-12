@@ -43,6 +43,8 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "GlobalMMLU": {"num_fewshot": 1},
     "GPQA": {"num_fewshot": 1},
     "GPQA_COT": {"num_fewshot": 1},
+    "GOLDENSWAG": {"num_fewshot": 1},
+    "GOLDENSWAG_IDK": {"num_fewshot": 1},
     "GSM8K": {"num_fewshot": 1},
     "GSM8KEvalHarness": {"num_fewshot": 1},
     "GSM8KReasoning": {"num_fewshot": 0},

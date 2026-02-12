@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 114**
+**Total number of tasks: 116**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -37,6 +37,8 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [Flores200](Flores200.md)
 - [FloresPlus](FloresPlus.md)
 - [FullTextMMLU](FullTextMMLU.md)
+- [GOLDENSWAG](GOLDENSWAG.md)
+- [GOLDENSWAG_IDK](GOLDENSWAG_IDK.md)
 - [GPQA](GPQA.md)
 - [GPQA_COT](GPQA_COT.md)
 - [GPQA_IDK](GPQA_IDK.md)
