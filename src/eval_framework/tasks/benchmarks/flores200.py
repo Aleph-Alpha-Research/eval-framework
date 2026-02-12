@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import pycountry
-from datasets import DownloadConfig, load_dataset
+from datasets import DatasetDict, DownloadConfig, load_dataset
 from huggingface_hub import HfApi
 from huggingface_hub.errors import RevisionNotFoundError
 
@@ -44,12 +44,16 @@ class Flores200(BaseTask[str]):
         super().__init__(num_fewshot)
         self.stop_sequences = ["\n"]
 
-    def _load_hf_dataset(self, **kwargs: Any) -> Any:
-        """Override to handle FLORES-200 encoding issues by using parquet files."""
-        # Check if the HF_REVISION is valid before loading the dataset
+    def _load_hf_dataset_for_subject(self, subject: SubjectType) -> DatasetDict:
+        """Load FLORES-200 parquet files for a specific language pair.
+
+        The datasets library (4.x) no longer supports loading scripts, so we load
+        parquet files directly via hf:// URIs pinned to the specific revision.
+        """
+
         if self.HF_REVISION:
             try:
-                _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=self.HF_REVISION, timeout=100.0)
+                _ = HfApi().dataset_info(repo_id=self.DATASET_PATH, revision=self.HF_REVISION, timeout=100.0)
             except Exception as e:
                 if isinstance(e, RevisionNotFoundError):
                     raise e
@@ -57,40 +61,26 @@ class Flores200(BaseTask[str]):
         cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
         download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
 
-        # First, try to load using parquet files to bypass the problematic loading script
-        try:
-            # Try loading without the loading script by using data_files
-            # This forces the dataset library to use the parquet files directly
-            dataset = load_dataset(
-                kwargs.get("path", self.DATASET_PATH),
-                name=kwargs.get("name"),
-                split=kwargs.get("split"),
-                data_files=None,  # Let it auto-discover parquet files
-                revision=self.HF_REVISION,
-                cache_dir=cache_dir,
-                download_config=download_config,
-            )
+        # Reference for loading parquet files: https://docs.pola.rs/user-guide/io/hugging-face/#path-format
+        base_uri = f"hf://datasets/{self.DATASET_PATH}@{self.HF_REVISION}/{subject}"
+        data_files = {
+            self.FEWSHOT_SPLIT: f"{base_uri}/{self.FEWSHOT_SPLIT}.parquet",
+            self.SAMPLE_SPLIT: f"{base_uri}/{self.SAMPLE_SPLIT}.parquet",
+        }
 
-            return dataset
-
-        except Exception:
-            # If parquet loading fails, try the original method
-            # Try the original loading with the loading script
-            dataset = load_dataset(
-                **kwargs,
-                revision=self.HF_REVISION,
-                cache_dir=cache_dir,
-                download_config=download_config,
-            )
-            return dataset
+        return load_dataset(
+            "parquet",
+            data_files=data_files,
+            cache_dir=cache_dir,
+            download_config=download_config,
+        )
 
     def _load_dataset(self, subject: SubjectType) -> None:
         # Store the subject (language pair) for use in other methods
         self.subject = subject
 
-        # For FLORES, we need to load the dataset once with all languages
-        # The subject (e.g., "eng_Latn-deu_Latn") determines which fields we use
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name="all")
+        # Load parquet files for each subject
+        hf_dataset = self._load_hf_dataset_for_subject(subject)
         self.dataset = {}
 
         self.rnd = random.Random(RANDOM_SEED)
