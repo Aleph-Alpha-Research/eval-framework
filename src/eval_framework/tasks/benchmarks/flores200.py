@@ -47,10 +47,10 @@ class Flores200(BaseTask[str]):
     def _load_hf_dataset_for_subject(self, subject: SubjectType) -> DatasetDict:
         """Load FLORES-200 parquet files for a specific language pair.
 
-        The datasets library (4.x) no longer supports loading scripts, so we load
+        The datasets library removed supports for loading scripts, so we load
         parquet files directly via hf:// URIs pinned to the specific revision.
         """
-
+        # Check if the HF_REVISION is valid before loading the dataset
         if self.HF_REVISION:
             try:
                 _ = HfApi().dataset_info(repo_id=self.DATASET_PATH, revision=self.HF_REVISION, timeout=100.0)
