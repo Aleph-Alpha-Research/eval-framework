@@ -279,6 +279,10 @@ The task will now be available through `get_task("GeographyQA")`.
 
 All tasks automatically go through formatting tests to ensure proper prompt generation. The formatting test lives in `tests/tests_eval_framework/tasks/test_all_formatters.py` and runs all registered tasks automatically.
 
+> [!TIP]
+> CI runs this test across all registered tasks, but during development you can target only your task, for example:
+> `uv run pytest tests/tests_eval_framework/tasks/test_all_formatters.py -k "YourTaskName"`
+
 #### Automatic Formatting Tests
 
 All benchmarks are automatically tested for proper prompt formatting across different chat templates. If your new task needs non-default initialization arguments (for example, a specific `num_fewshot`), add an entry for your task to `SPECIAL_ARGS` in `tests/tests_eval_framework/tasks/test_all_formatters.py`.
