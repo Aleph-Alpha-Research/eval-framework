@@ -3,8 +3,8 @@
 ````
 NAME = COPA_IDK
 DATASET_PATH = aps/super_glue
-SAMPLE_SPLIT = validation
-FEWSHOT_SPLIT = test
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = validation
 RESPONSE_TYPE = LOGLIKELIHOODS
 METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, ConfidenceWeightedAccuracy, DistributionalCorrectnessScore, TernaryScore]
 SUBJECTS = ['copa']
