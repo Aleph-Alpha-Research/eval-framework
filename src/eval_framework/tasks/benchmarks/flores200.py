@@ -61,8 +61,8 @@ class Flores200(BaseTask[str]):
         cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
         download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
 
-        # Reference for loading parquet files: https://docs.pola.rs/user-guide/io/hugging-face/#path-format
-        base_uri = f"hf://datasets/{self.DATASET_PATH}@{self.HF_REVISION}/{subject}"
+        # Reference for loading parquet files: https://huggingface.co/docs/datasets/en/loading#parquet
+        base_uri = f"https://huggingface.co/datasets/{self.DATASET_PATH}/resolve/{self.HF_REVISION}/{subject}"
         data_files = {
             self.FEWSHOT_SPLIT: f"{base_uri}/{self.FEWSHOT_SPLIT}.parquet",
             self.SAMPLE_SPLIT: f"{base_uri}/{self.SAMPLE_SPLIT}.parquet",
