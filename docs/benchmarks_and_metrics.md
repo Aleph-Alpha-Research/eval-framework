@@ -62,38 +62,42 @@ Additional task documentation can be generated with the script `utils/generate-t
 
 ## Metrics
 
-| Metrics Type          | Metrics                           |
-| --------------------- | --------------------------------- |
-| Completion Metrics    | Accuracy                          |
-|                       | Bleu                              |
-|                       | Chrf                              |
-|                       | Ter                               |
-|                       | F1                                |
-|                       | Rouge 1                           |
-|                       | Rouge 2                           |
-|                       | Rouge-L                           |
-|                       | Code Assertion                    |
-|                       | Language Checker                  |
-|                       | Length Checker                    |
-|                       | Math Reasoning                    |
-|                       | Placeholder Checker               |
-|                       | Text Counter                      |
-|                       | CSV Format                        |
-|                       | JSON Format                       |
-|                       | Postscript Format                 |
-|                       | Custom IFEval Checker             |
-|                       | Custom CWE Checker                |
-|                       | Custom NIAH Checker               |
-|                       | Custom Grid Comparison Checker    |
-|                       | Repetition Checker                |
-| Loglikelihood Metrics | Accuracy Loglikelihood            |
-|                       | Normalized Accuracy Loglikelihood |
-|                       | Probability Mass                  |
-| LLM Metrics           | Chatbot Style Judge               |
-|                       | Completion Accuracy Judge         |
-|                       | Conciseness Judge                 |
-|                       | Contains Names Judge              |
-|                       | Instruction Judge                 |
-|                       | SQL Format                        |
-|                       | World Knowledge Judge             |
-| Efficiency Metrics    | Bytes per Sequence Position       |
+| Metrics Type           | Metrics                           |
+| ---------------------- | --------------------------------- |
+| Completion Metrics     | Accuracy                          |
+|                        | Bleu                              |
+|                        | Chrf                              |
+|                        | Ter                               |
+|                        | F1                                |
+|                        | Rouge 1                           |
+|                        | Rouge 2                           |
+|                        | Rouge-L                           |
+|                        | Code Assertion                    |
+|                        | Language Checker                  |
+|                        | Length Checker                    |
+|                        | Math Reasoning                    |
+|                        | Placeholder Checker               |
+|                        | Text Counter                      |
+|                        | CSV Format                        |
+|                        | JSON Format                       |
+|                        | Postscript Format                 |
+|                        | Custom IFEval Checker             |
+|                        | Custom CWE Checker                |
+|                        | Custom NIAH Checker               |
+|                        | Custom Grid Comparison Checker    |
+|                        | Repetition Checker                |
+| Loglikelihood Metrics  | Accuracy Loglikelihood            |
+|                        | Accuracy Normalized Loglikelihood |
+|                        | Confidence-weighted Accuracy      |
+|                        | Probability Mass                  |
+|                        | Probability Mass Normalized       |
+| (IDK-Specific Metrics) | Distributional Correctness Score  |
+|                        | Ternary Score                     |
+| LLM Metrics            | Chatbot Style Judge               |
+|                        | Completion Accuracy Judge         |
+|                        | Conciseness Judge                 |
+|                        | Contains Names Judge              |
+|                        | Instruction Judge                 |
+|                        | SQL Format                        |
+|                        | World Knowledge Judge             |
+| Efficiency Metrics     | Bytes per Sequence Position       |
