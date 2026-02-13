@@ -101,21 +101,6 @@ class ZERO_SCROLLS_SQUALITY(ZERO_SCROLLS_COMPLETION):
         return f"{item['input'][:query_end_index]}\n\nAnswer:"
 
 
-class ZERO_SCROLLS_QASPER(ZERO_SCROLLS_COMPLETION):
-    NAME = "ZeroSCROLLS Qasper"
-    METRICS = [F1]
-    SUBJECTS = ["qasper"]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Answer"]
-
-    def __init__(self, num_fewshot: int = 0) -> None:
-        assert num_fewshot == 0, "ZeroSCROLLS Qasper only supports zero fewshot examples"
-        super().__init__(num_fewshot)
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        query_end_index = item["query_end_index"]
-        return f"{item['input'][:query_end_index]}\n\nAnswer:"
-
-
 class ZERO_SCROLLS_NARRATIVEQA(ZERO_SCROLLS_COMPLETION):
     NAME = "ZeroSCROLLS NarrativeQA"
     METRICS = [F1]

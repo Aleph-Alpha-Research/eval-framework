@@ -16,7 +16,7 @@ Additional task documentation can be generated with the script `utils/generate-t
 |   Text Distillation   |   Classification   |   `GPQA_COT`, `MMLU`, `MMLU_PRO_COT`, `MMMLU_GERMAN_COT`, `PAWSX`, `TRIVIAQA`   |    |
 |   TextDistillation   |   Closed QA   | `SQUAD`, `SQUAD2` |   `InfiniteBench_EnDia`   `InfiniteBench_EnQA`   |
 |   Text Distilation   |   Extraction   |   `DUC_ABSTRACTIVE`, `DUC_EXTRACTIVE`   |   `InfiniteBench_RetrieveKV2`, `InfiniteBench_RetrieveNumber`, `InfiniteBench_RetrievePassKey1`   |
-|   Text Distillation   |   QA   |    |   `ZERO_SCROLLS_GOV_REPORT`, `ZERO_SCROLLS_MUSIQUE`, `ZERO_SCROLLS_NARRATIVEQA`, `ZERO_SCROLLS_QASPER`, `ZERO_SCROLLS_QMSUM`, `ZERO_SCROLLS_SQUALITY`   |
+|   Text Distillation   |   QA   |    |   `ZERO_SCROLLS_GOV_REPORT`, `ZERO_SCROLLS_MUSIQUE`, `ZERO_SCROLLS_NARRATIVEQA`, `ZERO_SCROLLS_QMSUM`, `ZERO_SCROLLS_SQUALITY`   |
 |   Text Transformation   |   Translation   |   `Flores200`, `FloresPlus`, `WMT14`, `WMT14_INSTRUCT`, `WMT16, WMT16_INSTRUCT, WMT20, WMT20_INSTRUCT`   |    |
 
 ## Loglikelihoods
