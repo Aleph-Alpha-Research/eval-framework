@@ -12,6 +12,23 @@
 
 ### Bug Fixes
 
+## [0.2.13](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.12...v0.2.13) (2026-02-13)
+
+
+### Features
+
+* add Global MMLU task ([#174](https://github.com/Aleph-Alpha-Research/eval-framework/issues/174)) ([0d0b227](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0d0b22789b7817e120831cf688f0dd2aca84c1d8))
+* add GoldenSwag task ([#175](https://github.com/Aleph-Alpha-Research/eval-framework/issues/175)) ([a05e032](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a05e0325e09c2ea0e5bf20284fff4428c7d126ab))
+* BalancedCOPA dataset ([#177](https://github.com/Aleph-Alpha-Research/eval-framework/issues/177)) ([25161aa](https://github.com/Aleph-Alpha-Research/eval-framework/commit/25161aaab9acbc549997227cefa181414a368799))
+* Change to more complete revision of ZeroScrolls dataset ([#171](https://github.com/Aleph-Alpha-Research/eval-framework/issues/171)) ([a4e117e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a4e117eaf4c4fc3ad8bfbffb9b5aaf737ed78dbe))
+* COPA uses appropriate dataset splits  ([#176](https://github.com/Aleph-Alpha-Research/eval-framework/issues/176)) ([55ebe44](https://github.com/Aleph-Alpha-Research/eval-framework/commit/55ebe446789e47e834f03bb62d49a3095c692026))
+
+
+### Bug Fixes
+
+* Change to more complete revision of zeroscrolls ([#173](https://github.com/Aleph-Alpha-Research/eval-framework/issues/173)) ([a84286e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a84286ea0f1d446b548087eb306ffbaeb06bd0e6))
+* Flores200 data reading issue ([#179](https://github.com/Aleph-Alpha-Research/eval-framework/issues/179)) ([9bf3155](https://github.com/Aleph-Alpha-Research/eval-framework/commit/9bf31551cce821fccf229e936aa8beb79046fcc7))
+
 ## [0.2.12](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.11...v0.2.12) (2026-02-04)
 
 
