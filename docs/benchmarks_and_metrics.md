@@ -64,36 +64,69 @@ Additional task documentation can be generated with the script `utils/generate-t
 
 | Metrics Type | Metrics                       |
 |-|-------------------------------|
-| Completion Metrics | Accuracy
+| Completion Metrics | Accuracy Completion
+|| AidanBench                    |
+|| **Text Similarity**
 || Bleu                          |
+|| Linewise BLEU                 |
+|| Response to Original BLEU     |
 || Chrf                          |
+|| Linewise chrF                 |
+|| COMET                         |
 || Ter                           |
+|| Linewise TER                  |
 || F1                            |
 || Rouge 1                       |
 || Rouge 2                       |
 || Rouge-L                       |
+|| Rouge-Geometric-Mean          |
+|| Exponential Similarity        |
+|| **Code Evaluation**
 || Code Assertion                |
+|| Code Execution Pass@1         |
+|| **Language & Format**
 || Language Checker              |
-|| Length Checker                |
-|| Math Reasoning                |
-|| Placeholder Checker           |
-|| Text Counter                  |
+|| German Completion Check       |
+|| Language Consistency          |
+|| Language Consistency Raw      |
 || CSV Format                    |
 || JSON Format                   |
 || Postscript Format             |
+|| **Text Statistics & Control**
+|| Length Checker                |
+|| Word Count                    |
+|| Sentence Count                |
+|| Paragraph Count               |
+|| Response to Original Length Ratio |
+|| Text Counter                  |
+|| Word Repetition               |
+|| Placeholder Checker           |
+|| **Task-Specific**
+|| Math Reasoning                |
+|| Concordance Index             |
 || Custom IFEval Checker         |
 || Custom CWE Checker            |
 || Custom NIAH Checker           |
 || Custom Grid Comparison Checker |
-|| Repetition Checker            |
+|| StructMetric                  |
+|| RenderableStructMetric        |
 | Loglikelihood Metrics | Accuracy Loglikelihood        |
-|| Normalized Accuracy Loglikelihood |
+|| Accuracy Normalized Loglikelihood |
+|| Confidence-weighted Accuracy  |
+|| Distributional Correctness Score |
 || Probability Mass              |
-| LLM Metrics | Chatbot Style Judge           |
-|| Completion Accuracy Judge
-|| Conciseness Judge
-|| Contains Names Judge
-|| Instruction Judge
-|| SQL Format
-|| World Knowledge Judge
+|| Probability Mass Normalized   |
+|| Ternary Score                 |
+| LLM Judge Metrics | Chatbot Style                 |
+|| Coherence                     |
+|| Completion Accuracy           |
+|| Conciseness                   |
+|| Avoids Names                  |
+|| Format Correctness            |
+|| Instruction Following         |
+|| Pairwise Judgement (MTBench)  |
+|| Single Judgement (MTBench)    |
+|| Refusal Classifier            |
+|| SQL Quality                   |
+|| World Knowledge               |
 | Efficiency Metrics | Bytes per Sequence Position   |
