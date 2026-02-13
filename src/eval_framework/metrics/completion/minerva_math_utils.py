@@ -342,17 +342,13 @@ def extract_answers(
         if len(all_answers) == 0:
             dollars = [m.start() for m in re.finditer(r"\$", raw)]
             if len(dollars) > 1:
-                all_answers.append(
-                    normalize_final_answer(raw[dollars[-2] + 1 : dollars[-1]])
-                )
+                all_answers.append(normalize_final_answer(raw[dollars[-2] + 1 : dollars[-1]]))
         if len(all_answers) == 0:
             all_answers.append(normalize_final_answer(raw))
     else:
         all_answers.append(normalize_final_answer(raw))
         dollars = [m.start() for m in re.finditer(r"\$", raw)]
         if len(dollars) > 1:
-            all_answers.append(
-                normalize_final_answer(raw[dollars[0] + 1 : dollars[1]])
-            )
+            all_answers.append(normalize_final_answer(raw[dollars[0] + 1 : dollars[1]]))
 
     return all_answers

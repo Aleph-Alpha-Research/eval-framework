@@ -57,7 +57,7 @@ class MedQAMC(MedQACloze):
         labels = get_n_letters(5)
         label = labels[int(item.get("answer_idx", 0))]
         return f" {label}"
-    
+
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
         labels = get_n_letters(5)
         return [f" {label}" for label in labels]

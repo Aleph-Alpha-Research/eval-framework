@@ -16,11 +16,13 @@ def _flatten_validated_answers(validated_answers: dict[str, Any]) -> list[dict[s
     n = max(len(num_list), len(date_list), len(spans_list))
     out = []
     for i in range(n):
-        out.append({
-            "number": num_list[i] if i < len(num_list) else "",
-            "date": date_list[i] if i < len(date_list) else {"day": "", "month": "", "year": ""},
-            "spans": spans_list[i] if i < len(spans_list) else [],
-        })
+        out.append(
+            {
+                "number": num_list[i] if i < len(num_list) else "",
+                "date": date_list[i] if i < len(date_list) else {"day": "", "month": "", "year": ""},
+                "spans": spans_list[i] if i < len(spans_list) else [],
+            }
+        )
     return out
 
 
@@ -66,7 +68,10 @@ def _tuple_to_display(tup: tuple[str, ...]) -> str:
 
 
 class DropRC(BaseTask[str]):
-    """Original DROP (EleutherAI/drop): passage, question, answer + validated_answers. Parsed answers used as choices for rank-choice."""
+    """Original DROP (EleutherAI/drop): passage, question, answer + validated_answers.
+
+    Parsed answers used as choices for rank-choice.
+    """
 
     NAME = "DropRC"
     DATASET_PATH = "EleutherAI/drop"
@@ -136,7 +141,7 @@ class DropMC(BaseTask[str]):
         question = item.get("question_original", "")
         texts = item.get("choices", {}).get("text", [])
         labels = item.get("choices", {}).get("label", self.keys[: len(texts)])
-        options = "\n".join(f"{l}. {t}" for l, t in zip(labels, texts))
+        options = "\n".join(f"{label}. {t}" for label, t in zip(labels, texts))
         return f"Passage: {passage}\nQuestion: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -148,4 +153,4 @@ class DropMC(BaseTask[str]):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         labels = item.get("choices", {}).get("label", [])
-        return [f" {l}" for l in labels]
+        return [f" {label}" for label in labels]

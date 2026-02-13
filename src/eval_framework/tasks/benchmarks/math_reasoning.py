@@ -571,12 +571,14 @@ class MATHMinerva(MATHReasoning):
 class MATH500Minerva(MATHMinerva):
     """
     MATH-500 with Minerva-style prompt and scoring (OLMES minerva_math_500 parity).
+    Uses HuggingFaceH4/MATH-500 which has a single 'default' config (no subject splits).
     """
 
     NAME = "MATH500Minerva"
     DATASET_PATH = "HuggingFaceH4/MATH-500"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
+    SUBJECTS = [NO_SUBJECT]
 
     def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "MATH500Minerva evaluation does not include few shot"

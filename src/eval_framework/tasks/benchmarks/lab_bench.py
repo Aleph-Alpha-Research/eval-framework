@@ -1,25 +1,15 @@
 import random
 from typing import Any
 
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
 from eval_framework.tasks.utils import get_n_letters
-from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 
-
-LAB_BENCH_SUBSETS = [
-    "CloningScenarios",
-    "DbQA",
-    "FigQA",
-    "LitQA2",
-    "ProtocolQA",
-    "SeqQA",
-    "SuppQA",
-    "TableQA"
-]
+LAB_BENCH_SUBSETS = ["CloningScenarios", "DbQA", "FigQA", "LitQA2", "ProtocolQA", "SeqQA", "SuppQA", "TableQA"]
 
 
 class LabBenchCloze(BaseTask[str]):
@@ -62,7 +52,7 @@ class LabBenchMC(LabBenchCloze):
         rng.shuffle(order)
         shuffled_choices = [choices[i] for i in order]
         labels = get_n_letters(len(choices))
-        options = "\n".join(f"{l}. {c}" for l, c in zip(labels, shuffled_choices))
+        options = "\n".join(f"{label}. {c}" for label, c in zip(labels, shuffled_choices))
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -78,4 +68,4 @@ class LabBenchMC(LabBenchCloze):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         choices = list(item.get("distractors", [])) + [item.get("ideal", "")]
         labels = get_n_letters(len(choices))
-        return [f" {l}" for l in labels]
+        return [f" {label}" for label in labels]

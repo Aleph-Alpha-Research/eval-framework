@@ -49,4 +49,3 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
                 error=response.error,
             )
         ]
-

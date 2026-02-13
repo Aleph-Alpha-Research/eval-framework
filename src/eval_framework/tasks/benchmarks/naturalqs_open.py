@@ -6,8 +6,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
-from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
-from eval_framework.tasks.utils import get_n_letters
+from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
 
 
 class NaturalQsOpen(BaseTask[str]):
@@ -74,7 +73,7 @@ class NaturalQsOpenMC(NaturalQsOpenCloze):
         question = item.get("question", "")
         texts = item.get("choices", {}).get("text", [])
         labels = item.get("choices", {}).get("label", [])
-        options = "\n".join(f"{l}. {t}" for l, t in zip(labels, texts))
+        options = "\n".join(f"{label}. {t}" for label, t in zip(labels, texts))
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -84,4 +83,4 @@ class NaturalQsOpenMC(NaturalQsOpenCloze):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         labels = item.get("choices", {}).get("label", [])
-        return [f" {l}" for l in labels]
+        return [f" {label}" for label in labels]

@@ -5,7 +5,6 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyNormLoglikelihood,
 )
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
-from eval_framework.tasks.utils import get_n_letters
 
 
 class CommonsenseQACloze(BaseTask[str]):
@@ -55,11 +54,9 @@ class CommonsenseQAMC(CommonsenseQACloze):
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        labels = item["choices"]["label"]
         correct_label = item["answerKey"]
         return f" {correct_label}"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         labels = item["choices"]["label"]
         return [f" {label}" for label in labels]
-
