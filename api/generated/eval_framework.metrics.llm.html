@@ -1,0 +1,1491 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="eval_framework.metrics.loglikelihood package" href="eval_framework.metrics.loglikelihood.html"><link rel="prev" title="eval_framework.metrics.efficiency package" href="eval_framework.metrics.efficiency.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>eval_framework.metrics.llm package - Eval-Framework v0.2.12</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">Eval-Framework v0.2.12</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">Eval-Framework v0.2.12</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli_usage.html">Using the CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../completion_task_guide.html">Creating Completion Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../add_new_benchmark_guide.html">How to Add a New Benchmark to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../benchmarks_and_metrics.html">Included Benchmark Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../controlling_upload_results.html">Controlling HuggingFace Upload Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker_guide.html">Docker Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../evaluate_huggingface_model.html">How to Evaluate HuggingFace Models with Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../loglikelihood_task_guide.html">Creating Loglikelihood Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model_arguments.html">Model Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../overview_dataloading.html">Overview Dataloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../understanding_results_guide.html">Understanding Evaluation Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../using_determined.html">Using Determined</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utilities.html">Utils in <code class="docutils literal notranslate"><span class="pre">eval-framework</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../wandb_integration.html">Weights and Biases Integration with Eval-Framework</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../CONTRIBUTING.html">Contributing to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="modules.html">eval_framework</a><input aria-label="Toggle navigation of eval_framework" checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3 current has-children"><a class="reference internal" href="eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l4 current has-children"><a class="reference internal" href="eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" checked="" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l5 current current-page"><a class="current reference internal" href="#">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="eval-framework-metrics-llm-package">
+<h1>eval_framework.metrics.llm package<a class="headerlink" href="#eval-framework-metrics-llm-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-eval_framework.metrics.llm.base">
+<span id="eval-framework-metrics-llm-base-module"></span><h2>eval_framework.metrics.llm.base module<a class="headerlink" href="#module-eval_framework.metrics.llm.base" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.base.BaseLLMJudgeMetric">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.base.</span></span><span class="sig-name descname"><span class="pre">BaseLLMJudgeMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomize_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/base.html#BaseLLMJudgeMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.BaseMetric" title="eval_framework.metrics.base.BaseMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetric</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Completion</span></code>]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p></li>
+<li><p><strong>randomize_order</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_chatbot_style">
+<span id="eval-framework-metrics-llm-llm-judge-chatbot-style-module"></span><h2>eval_framework.metrics.llm.llm_judge_chatbot_style module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_chatbot_style" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_chatbot_style.LLMJudgeChatbotStyle">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_chatbot_style.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeChatbotStyle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_chatbot_style.html#LLMJudgeChatbotStyle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_chatbot_style.LLMJudgeChatbotStyle" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_chatbot_style.LLMJudgeChatbotStyle.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Chatbot</span> <span class="pre">Style'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_chatbot_style.LLMJudgeChatbotStyle.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_chatbot_style.LLMJudgeChatbotStyle.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_chatbot_style.html#LLMJudgeChatbotStyle.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_chatbot_style.LLMJudgeChatbotStyle.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_coherence">
+<span id="eval-framework-metrics-llm-llm-judge-coherence-module"></span><h2>eval_framework.metrics.llm.llm_judge_coherence module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_coherence" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_coherence.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeCoherence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_coherence.html#LLMJudgeCoherence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence.KEYS">
+<span class="sig-name descname"><span class="pre">KEYS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['coherence_score']</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence.KEYS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Coherence'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_coherence.html#LLMJudgeCoherence.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_completion_accuracy">
+<span id="eval-framework-metrics-llm-llm-judge-completion-accuracy-module"></span><h2>eval_framework.metrics.llm.llm_judge_completion_accuracy module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_completion_accuracy" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_completion_accuracy.LLMJudgeCompletionAccuracy">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_completion_accuracy.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeCompletionAccuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_completion_accuracy.html#LLMJudgeCompletionAccuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_completion_accuracy.LLMJudgeCompletionAccuracy" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_completion_accuracy.LLMJudgeCompletionAccuracy.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Judge</span> <span class="pre">Completion</span> <span class="pre">Accuracy'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_completion_accuracy.LLMJudgeCompletionAccuracy.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_completion_accuracy.LLMJudgeCompletionAccuracy.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_completion_accuracy.html#LLMJudgeCompletionAccuracy.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_completion_accuracy.LLMJudgeCompletionAccuracy.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_conciseness">
+<span id="eval-framework-metrics-llm-llm-judge-conciseness-module"></span><h2>eval_framework.metrics.llm.llm_judge_conciseness module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_conciseness" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_conciseness.LLMJudgeConciseness">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_conciseness.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeConciseness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_conciseness.html#LLMJudgeConciseness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_conciseness.LLMJudgeConciseness" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_conciseness.LLMJudgeConciseness.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Conciseness'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_conciseness.LLMJudgeConciseness.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_conciseness.LLMJudgeConciseness.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_conciseness.html#LLMJudgeConciseness.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_conciseness.LLMJudgeConciseness.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_contains_names">
+<span id="eval-framework-metrics-llm-llm-judge-contains-names-module"></span><h2>eval_framework.metrics.llm.llm_judge_contains_names module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_contains_names" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_contains_names.LLMJudgeAvoidsNames">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_contains_names.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeAvoidsNames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_contains_names.html#LLMJudgeAvoidsNames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_contains_names.LLMJudgeAvoidsNames" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_contains_names.LLMJudgeAvoidsNames.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Avoids</span> <span class="pre">Names'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_contains_names.LLMJudgeAvoidsNames.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_contains_names.LLMJudgeAvoidsNames.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_contains_names.html#LLMJudgeAvoidsNames.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_contains_names.LLMJudgeAvoidsNames.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_format_correctness">
+<span id="eval-framework-metrics-llm-llm-judge-format-correctness-module"></span><h2>eval_framework.metrics.llm.llm_judge_format_correctness module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_format_correctness" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectness">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_format_correctness.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeFormatCorrectness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_format_correctness.html#LLMJudgeFormatCorrectness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectness" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectness.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Format</span> <span class="pre">Correctness'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectness.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectness.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_format_correctness.html#LLMJudgeFormatCorrectness.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectness.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectnessContext">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_format_correctness.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeFormatCorrectnessContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_format_correctness.html#LLMJudgeFormatCorrectnessContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectnessContext" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetricContext</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>language</strong> (<em>str</em>)</p></li>
+<li><p><strong>extra_data</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectnessContext.language">
+<span class="sig-name descname"><span class="pre">language</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectnessContext.language" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectnessContext.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'allow'}</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectnessContext.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_instruction">
+<span id="eval-framework-metrics-llm-llm-judge-instruction-module"></span><h2>eval_framework.metrics.llm.llm_judge_instruction module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_instruction" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_instruction.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeInstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_instruction.html#LLMJudgeInstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction.KEYS">
+<span class="sig-name descname"><span class="pre">KEYS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['quality',</span> <span class="pre">'is_following_instruction',</span> <span class="pre">'has_correct_grammar_and_spelling',</span> <span class="pre">'is_context_consistent',</span> <span class="pre">'is_not_repeating',</span> <span class="pre">'is_trustworthy',</span> <span class="pre">'is_safe']</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction.KEYS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Instruction</span> <span class="pre">Following'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_instruction.html#LLMJudgeInstruction.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_mtbench_pair">
+<span id="eval-framework-metrics-llm-llm-judge-mtbench-pair-module"></span><h2>eval_framework.metrics.llm.llm_judge_mtbench_pair module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_mtbench_pair" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePair">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_mtbench_pair.</span></span><span class="sig-name descname"><span class="pre">MTBenchJudgePair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomize_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_mtbench_pair.html#MTBenchJudgePair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePair" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p></li>
+<li><p><strong>randomize_order</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePair.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pairwise_judgement'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePair.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePair.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_mtbench_pair.html#MTBenchJudgePair.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePair.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_mtbench_pair.</span></span><span class="sig-name descname"><span class="pre">MTBenchJudgePairMetricContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_mtbench_pair.html#MTBenchJudgePairMetricContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetricContext</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>category</strong> (<em>str</em>)</p></li>
+<li><p><strong>answer</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>str</em>)</p></li>
+<li><p><strong>reference</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>extra_data</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.answer">
+<span class="sig-name descname"><span class="pre">answer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.answer" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.category">
+<span class="sig-name descname"><span class="pre">category</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.category" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'allow'}</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.reference">
+<span class="sig-name descname"><span class="pre">reference</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.reference" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_mtbench_pair.</span></span><span class="sig-name descname"><span class="pre">PromptToJudge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_mtbench_pair.html#PromptToJudge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comparison_type</strong> (<em>str</em>)</p></li>
+<li><p><strong>prompt_text</strong> (<em>str</em>)</p></li>
+<li><p><strong>candidate_is_a</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.candidate_is_a">
+<span class="sig-name descname"><span class="pre">candidate_is_a</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.candidate_is_a" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.comparison_type">
+<span class="sig-name descname"><span class="pre">comparison_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.comparison_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.prompt_text">
+<span class="sig-name descname"><span class="pre">prompt_text</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.prompt_text" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_pair.generate_pair_judge_prompts">
+<span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_mtbench_pair.</span></span><span class="sig-name descname"><span class="pre">generate_pair_judge_prompts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomize_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_mtbench_pair.html#generate_pair_judge_prompts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.generate_pair_judge_prompts" title="Link to this definition">¶</a></dt>
+<dd><p>Generate pairwise judge prompts for comparing candidate vs reference completions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>response</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Completion</span></code></span>) – The completion response containing the candidate completion.</p></li>
+<li><p><strong>randomize_order</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If True, randomly swap the order of A/B to eliminate position bias.</p></li>
+<li><p><strong>seed</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Optional random seed for reproducibility. If None and randomize_order is True,
+uses the response id as seed for deterministic per-sample randomization.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge" title="eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge"><code class="xref py py-class docutils literal notranslate"><span class="pre">PromptToJudge</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of PromptToJudge objects with candidate_is_a indicating whether the
+candidate completion is in position A (True) or position B (False).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_mtbench_single">
+<span id="eval-framework-metrics-llm-llm-judge-mtbench-single-module"></span><h2>eval_framework.metrics.llm.llm_judge_mtbench_single module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_mtbench_single" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingle">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_mtbench_single.</span></span><span class="sig-name descname"><span class="pre">MTBenchJudgeSingle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomize_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_mtbench_single.html#MTBenchJudgeSingle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingle" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p></li>
+<li><p><strong>randomize_order</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingle.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'single_judgement'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingle.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingle.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_mtbench_single.html#MTBenchJudgeSingle.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingle.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_mtbench_single.</span></span><span class="sig-name descname"><span class="pre">MTBenchJudgeSingleMetricContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_mtbench_single.html#MTBenchJudgeSingleMetricContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMetricContext</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>category</strong> (<em>str</em>)</p></li>
+<li><p><strong>reference</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>extra_data</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext.category">
+<span class="sig-name descname"><span class="pre">category</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext.category" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'allow'}</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext.reference">
+<span class="sig-name descname"><span class="pre">reference</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext.reference" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_mtbench_single.</span></span><span class="sig-name descname"><span class="pre">PromptToJudge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_mtbench_single.html#PromptToJudge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comparison_type</strong> (<em>str</em>)</p></li>
+<li><p><strong>prompt_text</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge.comparison_type">
+<span class="sig-name descname"><span class="pre">comparison_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge.comparison_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge.prompt_text">
+<span class="sig-name descname"><span class="pre">prompt_text</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge.prompt_text" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_mtbench_single.generate_single_judge_prompts">
+<span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_mtbench_single.</span></span><span class="sig-name descname"><span class="pre">generate_single_judge_prompts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_mtbench_single.html#generate_single_judge_prompts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.generate_single_judge_prompts" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge" title="eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge"><code class="xref py py-class docutils literal notranslate"><span class="pre">PromptToJudge</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_refusal">
+<span id="eval-framework-metrics-llm-llm-judge-refusal-module"></span><h2>eval_framework.metrics.llm.llm_judge_refusal module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_refusal" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_refusal.LLMJudgeRefusal">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_refusal.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeRefusal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_refusal.html#LLMJudgeRefusal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_refusal.LLMJudgeRefusal" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_refusal.LLMJudgeRefusal.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'refusal_classifier'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_refusal.LLMJudgeRefusal.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_refusal.LLMJudgeRefusal.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_refusal.html#LLMJudgeRefusal.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_refusal.LLMJudgeRefusal.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_sql">
+<span id="eval-framework-metrics-llm-llm-judge-sql-module"></span><h2>eval_framework.metrics.llm.llm_judge_sql module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_sql" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_sql.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeSql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#LLMJudgeSql"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SQL</span> <span class="pre">Quality'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#LLMJudgeSql.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.connect_to_mysql">
+<span class="sig-name descname"><span class="pre">connect_to_mysql</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#LLMJudgeSql.connect_to_mysql"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.connect_to_mysql" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">PooledMySQLConnection</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">MySQLConnectionAbstract</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.connect_to_postgres">
+<span class="sig-name descname"><span class="pre">connect_to_postgres</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#LLMJudgeSql.connect_to_postgres"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.connect_to_postgres" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">connection</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query">
+<span class="sig-name descname"><span class="pre">validate_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dialect</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_db_statements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sql_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#LLMJudgeSql.validate_query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult" title="eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SqlValidationResult</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>dialect</strong> (<a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects" title="eval_framework.metrics.llm.llm_judge_sql.SqlDialects"><em>SqlDialects</em></a>)</p></li>
+<li><p><strong>create_db_statements</strong> (<em>str</em>)</p></li>
+<li><p><strong>sql_query</strong> (<em>str</em>)</p></li>
+<li><p><strong>db_schema</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query_mysql">
+<span class="sig-name descname"><span class="pre">validate_query_mysql</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">create_db_statements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sql_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#LLMJudgeSql.validate_query_mysql"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query_mysql" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult" title="eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SqlValidationResult</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>create_db_statements</strong> (<em>str</em>)</p></li>
+<li><p><strong>sql_query</strong> (<em>str</em>)</p></li>
+<li><p><strong>db_schema</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query_postgres">
+<span class="sig-name descname"><span class="pre">validate_query_postgres</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">create_db_statements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sql_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#LLMJudgeSql.validate_query_postgres"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query_postgres" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult" title="eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SqlValidationResult</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>create_db_statements</strong> (<em>str</em>)</p></li>
+<li><p><strong>sql_query</strong> (<em>str</em>)</p></li>
+<li><p><strong>db_schema</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query_sqlite">
+<span class="sig-name descname"><span class="pre">validate_query_sqlite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">create_db_statements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sql_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#LLMJudgeSql.validate_query_sqlite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query_sqlite" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult" title="eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SqlValidationResult</span></code></a></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>create_db_statements</strong> (<em>str</em>)</p></li>
+<li><p><strong>sql_query</strong> (<em>str</em>)</p></li>
+<li><p><strong>db_schema</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_sql.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeSqlMetricContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#LLMJudgeSqlMetricContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LanguageMetricContext</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>language</strong> (<em>str</em>)</p></li>
+<li><p><strong>dialect</strong> (<em>str</em>)</p></li>
+<li><p><strong>db_schema</strong> (<em>str</em>)</p></li>
+<li><p><strong>extra_data</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext.db_schema">
+<span class="sig-name descname"><span class="pre">db_schema</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext.db_schema" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext.dialect">
+<span class="sig-name descname"><span class="pre">dialect</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext.dialect" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'allow'}</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlDialects">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_sql.</span></span><span class="sig-name descname"><span class="pre">SqlDialects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#SqlDialects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlDialects.mysql">
+<span class="sig-name descname"><span class="pre">mysql</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'mysql'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects.mysql" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlDialects.postgres">
+<span class="sig-name descname"><span class="pre">postgres</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'postgresql'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects.postgres" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlDialects.sqlite">
+<span class="sig-name descname"><span class="pre">sqlite</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sqlite'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects.sqlite" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlDialects.standard_sql">
+<span class="sig-name descname"><span class="pre">standard_sql</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'standard_sql'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects.standard_sql" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_sql.</span></span><span class="sig-name descname"><span class="pre">SqlOutputComparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#SqlOutputComparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matches_results_count</strong> (<em>bool</em>)</p></li>
+<li><p><strong>matches_column_count</strong> (<em>bool</em>)</p></li>
+<li><p><strong>results_equal</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.matches_column_count">
+<span class="sig-name descname"><span class="pre">matches_column_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.matches_column_count" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.matches_results_count">
+<span class="sig-name descname"><span class="pre">matches_results_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.matches_results_count" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.results_equal">
+<span class="sig-name descname"><span class="pre">results_equal</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.results_equal" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_sql.</span></span><span class="sig-name descname"><span class="pre">SqlValidationResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#SqlValidationResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>success</strong> (<em>bool</em>)</p></li>
+<li><p><strong>schema_error</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>query_error</strong> (<em>str</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>results</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.query_error">
+<span class="sig-name descname"><span class="pre">query_error</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.query_error" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.results">
+<span class="sig-name descname"><span class="pre">results</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.results" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.schema_error">
+<span class="sig-name descname"><span class="pre">schema_error</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.schema_error" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.success">
+<span class="sig-name descname"><span class="pre">success</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.success" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.count_result_columns">
+<span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_sql.</span></span><span class="sig-name descname"><span class="pre">count_result_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#count_result_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.count_result_columns" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>result</strong> (<em>list</em><em>[</em><em>Any</em><em>]</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.extract_query_from_completions">
+<span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_sql.</span></span><span class="sig-name descname"><span class="pre">extract_query_from_completions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">completion</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#extract_query_from_completions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.extract_query_from_completions" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>completion</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.is_create_table_statement">
+<span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_sql.</span></span><span class="sig-name descname"><span class="pre">is_create_table_statement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statement</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#is_create_table_statement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.is_create_table_statement" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>statement</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_sql.separate_statements">
+<span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_sql.</span></span><span class="sig-name descname"><span class="pre">separate_statements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statements</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_sql.html#separate_statements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_sql.separate_statements" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>statements</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.llm_judge_world_knowledge">
+<span id="eval-framework-metrics-llm-llm-judge-world-knowledge-module"></span><h2>eval_framework.metrics.llm.llm_judge_world_knowledge module<a class="headerlink" href="#module-eval_framework.metrics.llm.llm_judge_world_knowledge" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_world_knowledge.LLMJudgeWorldKnowledge">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.llm_judge_world_knowledge.</span></span><span class="sig-name descname"><span class="pre">LLMJudgeWorldKnowledge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">llm_judge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_world_knowledge.html#LLMJudgeWorldKnowledge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_world_knowledge.LLMJudgeWorldKnowledge" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric" title="eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>llm_judge</strong> (<a class="reference internal" href="eval_framework.llm.html#eval_framework.llm.base.BaseLLM" title="eval_framework.llm.base.BaseLLM"><em>BaseLLM</em></a>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_world_knowledge.LLMJudgeWorldKnowledge.NAME">
+<span class="sig-name descname"><span class="pre">NAME</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'World</span> <span class="pre">Knowledge'</span></span><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_world_knowledge.LLMJudgeWorldKnowledge.NAME" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.llm_judge_world_knowledge.LLMJudgeWorldKnowledge.calculate">
+<span class="sig-name descname"><span class="pre">calculate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/llm_judge_world_knowledge.html#LLMJudgeWorldKnowledge.calculate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.llm_judge_world_knowledge.LLMJudgeWorldKnowledge.calculate" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="eval_framework.metrics.html#eval_framework.metrics.base.MetricResult" title="eval_framework.metrics.base.MetricResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricResult</span></code></a>]</span></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>response</strong> (<em>Completion</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm.utils">
+<span id="eval-framework-metrics-llm-utils-module"></span><h2>eval_framework.metrics.llm.utils module<a class="headerlink" href="#module-eval_framework.metrics.llm.utils" title="Link to this heading">¶</a></h2>
+<p>Utility functions for LLM-based metrics.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="eval_framework.metrics.llm.utils.order_answers_for_comparison">
+<span class="sig-prename descclassname"><span class="pre">eval_framework.metrics.llm.utils.</span></span><span class="sig-name descname"><span class="pre">order_answers_for_comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">candidate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swap</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/eval_framework/metrics/llm/utils.html#order_answers_for_comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#eval_framework.metrics.llm.utils.order_answers_for_comparison" title="Link to this definition">¶</a></dt>
+<dd><p>Order candidate and reference answers for A/B comparison.</p>
+<p>This function is used to mitigate position bias in LLM-as-judge evaluations
+by optionally swapping the order in which answers are presented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>candidate</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The candidate completion to evaluate.</p></li>
+<li><p><strong>reference</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The reference/baseline completion.</p></li>
+<li><p><strong>swap</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If True, swap the order (reference becomes A, candidate becomes B).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple of (answer_a, answer_b) in the correct order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-eval_framework.metrics.llm">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-eval_framework.metrics.llm" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="eval_framework.metrics.loglikelihood.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">eval_framework.metrics.loglikelihood package</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="eval_framework.metrics.efficiency.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">eval_framework.metrics.efficiency package</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Aleph Alpha Research
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">eval_framework.metrics.llm package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.base">eval_framework.metrics.llm.base module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.base.BaseLLMJudgeMetric"><code class="docutils literal notranslate"><span class="pre">BaseLLMJudgeMetric</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_chatbot_style">eval_framework.metrics.llm.llm_judge_chatbot_style module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_chatbot_style.LLMJudgeChatbotStyle"><code class="docutils literal notranslate"><span class="pre">LLMJudgeChatbotStyle</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_chatbot_style.LLMJudgeChatbotStyle.NAME"><code class="docutils literal notranslate"><span class="pre">LLMJudgeChatbotStyle.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_chatbot_style.LLMJudgeChatbotStyle.calculate"><code class="docutils literal notranslate"><span class="pre">LLMJudgeChatbotStyle.calculate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_coherence">eval_framework.metrics.llm.llm_judge_coherence module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence"><code class="docutils literal notranslate"><span class="pre">LLMJudgeCoherence</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence.KEYS"><code class="docutils literal notranslate"><span class="pre">LLMJudgeCoherence.KEYS</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence.NAME"><code class="docutils literal notranslate"><span class="pre">LLMJudgeCoherence.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_coherence.LLMJudgeCoherence.calculate"><code class="docutils literal notranslate"><span class="pre">LLMJudgeCoherence.calculate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_completion_accuracy">eval_framework.metrics.llm.llm_judge_completion_accuracy module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_completion_accuracy.LLMJudgeCompletionAccuracy"><code class="docutils literal notranslate"><span class="pre">LLMJudgeCompletionAccuracy</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_completion_accuracy.LLMJudgeCompletionAccuracy.NAME"><code class="docutils literal notranslate"><span class="pre">LLMJudgeCompletionAccuracy.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_completion_accuracy.LLMJudgeCompletionAccuracy.calculate"><code class="docutils literal notranslate"><span class="pre">LLMJudgeCompletionAccuracy.calculate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_conciseness">eval_framework.metrics.llm.llm_judge_conciseness module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_conciseness.LLMJudgeConciseness"><code class="docutils literal notranslate"><span class="pre">LLMJudgeConciseness</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_conciseness.LLMJudgeConciseness.NAME"><code class="docutils literal notranslate"><span class="pre">LLMJudgeConciseness.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_conciseness.LLMJudgeConciseness.calculate"><code class="docutils literal notranslate"><span class="pre">LLMJudgeConciseness.calculate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_contains_names">eval_framework.metrics.llm.llm_judge_contains_names module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_contains_names.LLMJudgeAvoidsNames"><code class="docutils literal notranslate"><span class="pre">LLMJudgeAvoidsNames</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_contains_names.LLMJudgeAvoidsNames.NAME"><code class="docutils literal notranslate"><span class="pre">LLMJudgeAvoidsNames.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_contains_names.LLMJudgeAvoidsNames.calculate"><code class="docutils literal notranslate"><span class="pre">LLMJudgeAvoidsNames.calculate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_format_correctness">eval_framework.metrics.llm.llm_judge_format_correctness module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectness"><code class="docutils literal notranslate"><span class="pre">LLMJudgeFormatCorrectness</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectness.NAME"><code class="docutils literal notranslate"><span class="pre">LLMJudgeFormatCorrectness.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectness.calculate"><code class="docutils literal notranslate"><span class="pre">LLMJudgeFormatCorrectness.calculate()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectnessContext"><code class="docutils literal notranslate"><span class="pre">LLMJudgeFormatCorrectnessContext</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectnessContext.language"><code class="docutils literal notranslate"><span class="pre">LLMJudgeFormatCorrectnessContext.language</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_format_correctness.LLMJudgeFormatCorrectnessContext.model_config"><code class="docutils literal notranslate"><span class="pre">LLMJudgeFormatCorrectnessContext.model_config</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_instruction">eval_framework.metrics.llm.llm_judge_instruction module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction"><code class="docutils literal notranslate"><span class="pre">LLMJudgeInstruction</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction.KEYS"><code class="docutils literal notranslate"><span class="pre">LLMJudgeInstruction.KEYS</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction.NAME"><code class="docutils literal notranslate"><span class="pre">LLMJudgeInstruction.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_instruction.LLMJudgeInstruction.calculate"><code class="docutils literal notranslate"><span class="pre">LLMJudgeInstruction.calculate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_mtbench_pair">eval_framework.metrics.llm.llm_judge_mtbench_pair module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePair"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgePair</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePair.NAME"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgePair.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePair.calculate"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgePair.calculate()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgePairMetricContext</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.answer"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgePairMetricContext.answer</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.category"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgePairMetricContext.category</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.model_config"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgePairMetricContext.model_config</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.MTBenchJudgePairMetricContext.reference"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgePairMetricContext.reference</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge"><code class="docutils literal notranslate"><span class="pre">PromptToJudge</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.candidate_is_a"><code class="docutils literal notranslate"><span class="pre">PromptToJudge.candidate_is_a</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.comparison_type"><code class="docutils literal notranslate"><span class="pre">PromptToJudge.comparison_type</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.model_config"><code class="docutils literal notranslate"><span class="pre">PromptToJudge.model_config</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.PromptToJudge.prompt_text"><code class="docutils literal notranslate"><span class="pre">PromptToJudge.prompt_text</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_pair.generate_pair_judge_prompts"><code class="docutils literal notranslate"><span class="pre">generate_pair_judge_prompts()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_mtbench_single">eval_framework.metrics.llm.llm_judge_mtbench_single module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingle"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgeSingle</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingle.NAME"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgeSingle.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingle.calculate"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgeSingle.calculate()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgeSingleMetricContext</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext.category"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgeSingleMetricContext.category</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext.model_config"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgeSingleMetricContext.model_config</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.MTBenchJudgeSingleMetricContext.reference"><code class="docutils literal notranslate"><span class="pre">MTBenchJudgeSingleMetricContext.reference</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge"><code class="docutils literal notranslate"><span class="pre">PromptToJudge</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge.comparison_type"><code class="docutils literal notranslate"><span class="pre">PromptToJudge.comparison_type</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge.model_config"><code class="docutils literal notranslate"><span class="pre">PromptToJudge.model_config</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.PromptToJudge.prompt_text"><code class="docutils literal notranslate"><span class="pre">PromptToJudge.prompt_text</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_mtbench_single.generate_single_judge_prompts"><code class="docutils literal notranslate"><span class="pre">generate_single_judge_prompts()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_refusal">eval_framework.metrics.llm.llm_judge_refusal module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_refusal.LLMJudgeRefusal"><code class="docutils literal notranslate"><span class="pre">LLMJudgeRefusal</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_refusal.LLMJudgeRefusal.NAME"><code class="docutils literal notranslate"><span class="pre">LLMJudgeRefusal.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_refusal.LLMJudgeRefusal.calculate"><code class="docutils literal notranslate"><span class="pre">LLMJudgeRefusal.calculate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_sql">eval_framework.metrics.llm.llm_judge_sql module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSql</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.NAME"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSql.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.calculate"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSql.calculate()</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.connect_to_mysql"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSql.connect_to_mysql()</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.connect_to_postgres"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSql.connect_to_postgres()</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSql.validate_query()</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query_mysql"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSql.validate_query_mysql()</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query_postgres"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSql.validate_query_postgres()</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSql.validate_query_sqlite"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSql.validate_query_sqlite()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSqlMetricContext</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext.db_schema"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSqlMetricContext.db_schema</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext.dialect"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSqlMetricContext.dialect</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.LLMJudgeSqlMetricContext.model_config"><code class="docutils literal notranslate"><span class="pre">LLMJudgeSqlMetricContext.model_config</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects"><code class="docutils literal notranslate"><span class="pre">SqlDialects</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects.mysql"><code class="docutils literal notranslate"><span class="pre">SqlDialects.mysql</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects.postgres"><code class="docutils literal notranslate"><span class="pre">SqlDialects.postgres</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects.sqlite"><code class="docutils literal notranslate"><span class="pre">SqlDialects.sqlite</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlDialects.standard_sql"><code class="docutils literal notranslate"><span class="pre">SqlDialects.standard_sql</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison"><code class="docutils literal notranslate"><span class="pre">SqlOutputComparison</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.matches_column_count"><code class="docutils literal notranslate"><span class="pre">SqlOutputComparison.matches_column_count</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.matches_results_count"><code class="docutils literal notranslate"><span class="pre">SqlOutputComparison.matches_results_count</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.model_config"><code class="docutils literal notranslate"><span class="pre">SqlOutputComparison.model_config</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlOutputComparison.results_equal"><code class="docutils literal notranslate"><span class="pre">SqlOutputComparison.results_equal</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult"><code class="docutils literal notranslate"><span class="pre">SqlValidationResult</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.model_config"><code class="docutils literal notranslate"><span class="pre">SqlValidationResult.model_config</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.query_error"><code class="docutils literal notranslate"><span class="pre">SqlValidationResult.query_error</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.results"><code class="docutils literal notranslate"><span class="pre">SqlValidationResult.results</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.schema_error"><code class="docutils literal notranslate"><span class="pre">SqlValidationResult.schema_error</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.SqlValidationResult.success"><code class="docutils literal notranslate"><span class="pre">SqlValidationResult.success</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.count_result_columns"><code class="docutils literal notranslate"><span class="pre">count_result_columns()</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.extract_query_from_completions"><code class="docutils literal notranslate"><span class="pre">extract_query_from_completions()</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.is_create_table_statement"><code class="docutils literal notranslate"><span class="pre">is_create_table_statement()</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_sql.separate_statements"><code class="docutils literal notranslate"><span class="pre">separate_statements()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.llm_judge_world_knowledge">eval_framework.metrics.llm.llm_judge_world_knowledge module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_world_knowledge.LLMJudgeWorldKnowledge"><code class="docutils literal notranslate"><span class="pre">LLMJudgeWorldKnowledge</span></code></a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_world_knowledge.LLMJudgeWorldKnowledge.NAME"><code class="docutils literal notranslate"><span class="pre">LLMJudgeWorldKnowledge.NAME</span></code></a></li>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.llm_judge_world_knowledge.LLMJudgeWorldKnowledge.calculate"><code class="docutils literal notranslate"><span class="pre">LLMJudgeWorldKnowledge.calculate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm.utils">eval_framework.metrics.llm.utils module</a><ul>
+<li><a class="reference internal" href="#eval_framework.metrics.llm.utils.order_answers_for_comparison"><code class="docutils literal notranslate"><span class="pre">order_answers_for_comparison()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-eval_framework.metrics.llm">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

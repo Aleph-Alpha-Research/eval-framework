@@ -1,0 +1,740 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>eval_framework.llm.aleph_alpha - Eval-Framework v0.2.12</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">Eval-Framework v0.2.12</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <span class="sidebar-brand-text">Eval-Framework v0.2.12</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli_usage.html">Using the CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../completion_task_guide.html">Creating Completion Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../add_new_benchmark_guide.html">How to Add a New Benchmark to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmarks_and_metrics.html">Included Benchmark Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controlling_upload_results.html">Controlling HuggingFace Upload Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docker_guide.html">Docker Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../evaluate_huggingface_model.html">How to Evaluate HuggingFace Models with Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../loglikelihood_task_guide.html">Creating Loglikelihood Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_arguments.html">Model Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview_dataloading.html">Overview Dataloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../understanding_results_guide.html">Understanding Evaluation Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../using_determined.html">Using Determined</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utils in <code class="docutils literal notranslate"><span class="pre">eval-framework</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../wandb_integration.html">Weights and Biases Integration with Eval-Framework</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTING.html">Contributing to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/modules.html">eval_framework</a><input aria-label="Toggle navigation of eval_framework" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for eval_framework.llm.aleph_alpha</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">aleph_alpha_client</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AsyncClient</span><span class="p">,</span>
+    <span class="n">Client</span><span class="p">,</span>
+    <span class="n">CompletionRequest</span><span class="p">,</span>
+    <span class="n">CompletionResponse</span><span class="p">,</span>
+    <span class="n">Prompt</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">aleph_alpha_client.prompt</span><span class="w"> </span><span class="kn">import</span> <span class="n">Text</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.llm.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseLLM</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.shared.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Error</span><span class="p">,</span> <span class="n">PromptTooLongException</span><span class="p">,</span> <span class="n">RawCompletion</span><span class="p">,</span> <span class="n">RawLoglikelihood</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sample</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">raise_errors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">template_formatting.formatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseFormatter</span><span class="p">,</span> <span class="n">Llama3Formatter</span><span class="p">,</span> <span class="n">Message</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="safe_json_loads">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.llm.html#eval_framework.llm.aleph_alpha.safe_json_loads">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">safe_json_loads</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span></div>
+
+
+
+<div class="viewcode-block" id="AlephAlphaAPIModel">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.llm.html#eval_framework.llm.aleph_alpha.AlephAlphaAPIModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AlephAlphaAPIModel</span><span class="p">(</span><span class="n">BaseLLM</span><span class="p">):</span>
+    <span class="n">LLM_NAME</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">DEFAULT_FORMATTER</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">BaseFormatter</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">BYTES_PER_TOKEN</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span>  <span class="c1"># rule of thumb according to https://platform.openai.com/tokenizer</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">formatter</span><span class="p">:</span> <span class="n">BaseFormatter</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">checkpoint_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">top_p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># Please see README.md for tips if adapting the following parameters.</span>
+        <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">max_async_concurrent_requests</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="n">request_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">bytes_per_token</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;AA_TOKEN&quot;</span><span class="p">,</span> <span class="s2">&quot;dummy&quot;</span><span class="p">),</span>
+        <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;AA_INFERENCE_ENDPOINT&quot;</span><span class="p">,</span> <span class="s2">&quot;dummy_endpoint&quot;</span><span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_formatter</span><span class="p">:</span> <span class="n">BaseFormatter</span>
+        <span class="k">if</span> <span class="n">formatter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_FORMATTER</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either formatter or default formatter must be specified&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_FORMATTER</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_formatter</span> <span class="o">=</span> <span class="n">formatter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_llm_name</span> <span class="o">=</span> <span class="n">checkpoint_name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">LLM_NAME</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="n">temperature</span> <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_top_p</span> <span class="o">=</span> <span class="n">top_p</span> <span class="k">if</span> <span class="n">top_p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_async_concurrent_requests</span> <span class="o">=</span> <span class="n">max_async_concurrent_requests</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span> <span class="o">=</span> <span class="n">max_retries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request_timeout_seconds</span> <span class="o">=</span> <span class="n">request_timeout_seconds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="n">token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="n">base_url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_model_availability</span><span class="p">(</span><span class="n">base_url</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span>
+        <span class="c1"># set bytes_per_token_scalar for non-standard models</span>
+        <span class="k">if</span> <span class="n">bytes_per_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bytes_per_token</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;bytes_per_token must be positive&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytes_per_token_scalar</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">4.0</span> <span class="o">/</span> <span class="n">bytes_per_token</span> <span class="k">if</span> <span class="n">bytes_per_token</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">4.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">BYTES_PER_TOKEN</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_model_availability</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate that the model name is available by making a test request.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># &#39;Client&#39; object does not support the context manager protocol</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span>
+                <span class="n">host</span><span class="o">=</span><span class="n">base_url</span><span class="p">,</span>
+                <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">request</span> <span class="o">=</span> <span class="n">CompletionRequest</span><span class="p">(</span>
+                <span class="n">prompt</span><span class="o">=</span><span class="n">Prompt</span><span class="o">.</span><span class="n">from_text</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="n">maximum_tokens</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">client</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_llm_name</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_llm_name</span><span class="si">}</span><span class="s2">&#39; available and loaded.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_llm_name</span><span class="si">}</span><span class="s2">&#39; is not available: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_error_from_exception</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Error</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert an exception to an Error object.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">status_code</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">safe_json_loads</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;code&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status_code</span> <span class="o">==</span> <span class="s2">&quot;PROMPT_TOO_LONG&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Error</span><span class="p">(</span>
+                    <span class="n">error_class</span><span class="o">=</span><span class="n">PromptTooLongException</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                    <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Prompt exceeded context size.&quot;</span><span class="p">,</span>
+                    <span class="n">traceback</span><span class="o">=</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(),</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Error</span><span class="p">(</span>
+                    <span class="n">error_class</span><span class="o">=</span><span class="n">status_code</span> <span class="ow">or</span> <span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">traceback</span><span class="o">=</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Error</span><span class="p">(</span><span class="n">error_class</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">traceback</span><span class="o">=</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_process_request_with_client</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">client</span><span class="p">:</span> <span class="n">AsyncClient</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">:</span> <span class="n">CompletionRequest</span><span class="p">,</span>
+        <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">CompletionRequest</span><span class="p">,</span> <span class="n">CompletionResponse</span> <span class="o">|</span> <span class="n">Error</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a single request, returning the request and either a response or error.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_llm_name</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Request </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">: Success&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">raise_errors</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">e</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Request </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2">: Failure: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="mi">256</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_error_from_exception</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_process_requests</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">requests</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CompletionRequest</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">CompletionRequest</span><span class="p">,</span> <span class="n">CompletionResponse</span> <span class="o">|</span> <span class="n">Error</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process multiple requests concurrently, returning request/response pairs.&quot;&quot;&quot;</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">AsyncClient</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="p">,</span>
+            <span class="n">nice</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">request_timeout_seconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request_timeout_seconds</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
+            <span class="n">total_retries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_async_concurrent_requests</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+            <span class="n">tasks</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_process_request_with_client</span><span class="p">(</span>
+                    <span class="n">client</span><span class="p">,</span>
+                    <span class="n">request</span><span class="p">,</span>
+                    <span class="n">i</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">request</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">requests</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">responses</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>  <span class="c1"># guarantees order of responses</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">responses</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_response_to_raw_completion</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">CompletionRequest</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">CompletionResponse</span> <span class="o">|</span> <span class="n">Error</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RawCompletion</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a request/response pair to a RawCompletion.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Text</span><span class="p">)</span>
+        <span class="n">prompt</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">prompt</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">Error</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">RawCompletion</span><span class="p">(</span>
+                <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+                <span class="n">prompt_sequence_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">completion</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">completion_sequence_positions</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">raw_completion_error</span><span class="o">=</span><span class="n">response</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">completions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">completion</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">completions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">completion</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">prompt_sequence_positions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">completion_sequence_positions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Support workaround in api-worker-transformer&#39;s scaling generator to return the correct number of tokens.</span>
+        <span class="c1"># These are part of the completion string; those in CompletionResponse are invalid in this case.</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\uf8c9(\d+),(\d+)\uf8c9(.*)&quot;</span><span class="p">,</span> <span class="n">completion</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_input_tokens</span><span class="p">,</span> <span class="n">num_completion_tokens</span><span class="p">,</span> <span class="n">completion</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+            <span class="n">prompt_sequence_positions</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_input_tokens</span><span class="p">)</span>
+            <span class="n">completion_sequence_positions</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_completion_tokens</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prompt_sequence_positions</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">num_tokens_prompt_total</span> <span class="k">if</span> <span class="n">response</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">completion_sequence_positions</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">num_tokens_generated</span> <span class="k">if</span> <span class="n">response</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">RawCompletion</span><span class="p">(</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+            <span class="n">prompt_sequence_positions</span><span class="o">=</span><span class="n">prompt_sequence_positions</span><span class="p">,</span>
+            <span class="n">completion</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
+            <span class="n">completion_sequence_positions</span><span class="o">=</span><span class="n">completion_sequence_positions</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="AlephAlphaAPIModel.generate_from_messages">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.llm.html#eval_framework.llm.aleph_alpha.AlephAlphaAPIModel.generate_from_messages">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_from_messages</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">messages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Message</span><span class="p">]],</span>
+        <span class="n">stop_sequences</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">RawCompletion</span><span class="p">]:</span>
+        <span class="n">effective_temperature</span> <span class="o">=</span> <span class="n">temperature</span> <span class="k">if</span> <span class="n">temperature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span>
+
+        <span class="n">requests</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CompletionRequest</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses</span>
+        <span class="n">scaled_max_tokens</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">max_tokens</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytes_per_token_scalar</span><span class="p">)</span> <span class="k">if</span> <span class="n">max_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">single_messages</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+            <span class="n">requests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">CompletionRequest</span><span class="p">(</span>
+                    <span class="n">prompt</span><span class="o">=</span><span class="n">Prompt</span><span class="o">.</span><span class="n">from_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">single_messages</span><span class="p">,</span> <span class="n">output_mode</span><span class="o">=</span><span class="s2">&quot;string&quot;</span><span class="p">)),</span>
+                    <span class="n">maximum_tokens</span><span class="o">=</span><span class="n">scaled_max_tokens</span><span class="p">,</span>
+                    <span class="n">stop_sequences</span><span class="o">=</span><span class="n">stop_sequences</span><span class="p">,</span>
+                    <span class="n">temperature</span><span class="o">=</span><span class="n">effective_temperature</span><span class="p">,</span>
+                    <span class="n">top_p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_top_p</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">responses</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_process_requests</span><span class="p">(</span><span class="n">requests</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_response_to_raw_completion</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">)</span> <span class="k">for</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="AlephAlphaAPIModel.logprobs">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.llm.html#eval_framework.llm.aleph_alpha.AlephAlphaAPIModel.logprobs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">logprobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samples</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Sample</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">RawLoglikelihood</span><span class="p">]:</span>
+        <span class="n">prompts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">completion_requests</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CompletionRequest</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+            <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">messages</span><span class="p">,</span> <span class="n">output_mode</span><span class="o">=</span><span class="s2">&quot;string&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">messages</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">prompts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">possible_completions</span> <span class="ow">or</span> <span class="p">[]:</span>
+                <span class="n">completion_requests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">CompletionRequest</span><span class="p">(</span>
+                        <span class="n">prompt</span><span class="o">=</span><span class="n">Prompt</span><span class="o">.</span><span class="n">from_text</span><span class="p">(</span><span class="n">prompt</span> <span class="o">+</span> <span class="n">choice</span><span class="p">),</span>
+                        <span class="n">maximum_tokens</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">temperature</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                        <span class="n">log_probs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">echo</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="n">completion_responses</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">CompletionRequest</span><span class="p">,</span> <span class="n">CompletionResponse</span> <span class="o">|</span> <span class="n">Error</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">completion_requests</span><span class="p">:</span>
+            <span class="n">completion_responses</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_process_requests</span><span class="p">(</span><span class="n">completion_requests</span><span class="p">))</span>
+        <span class="n">completion_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">completion_responses</span><span class="p">)</span>
+
+        <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">RawLoglikelihood</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sample_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">prompt</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">prompts</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
+            <span class="n">choices_log_probs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">choices_sequence_positions</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">prompt_sequence_positions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">number_of_initial_choices_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">error</span><span class="p">:</span> <span class="n">Error</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">possible_completions</span> <span class="ow">or</span> <span class="p">[]:</span>
+                <span class="n">request</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">completion_iter</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">CompletionRequest</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">Error</span><span class="p">):</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="n">response</span>
+                    <span class="n">prompt_sequence_positions</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">choices_log_probs</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">choices_sequence_positions</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logprob</span><span class="p">,</span> <span class="n">choice_token_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_choice_logprob_from_completion</span><span class="p">(</span>
+                            <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+                            <span class="n">choice</span><span class="o">=</span><span class="n">choice</span><span class="p">,</span>
+                            <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="n">choices_log_probs</span><span class="p">[</span><span class="n">choice</span><span class="p">]</span> <span class="o">=</span> <span class="n">logprob</span>
+                        <span class="n">choices_sequence_positions</span><span class="p">[</span><span class="n">choice</span><span class="p">]</span> <span class="o">=</span> <span class="n">choice_token_count</span>
+                        <span class="k">if</span> <span class="n">number_of_initial_choices_tokens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">number_of_initial_choices_tokens</span> <span class="o">=</span> <span class="n">choice_token_count</span>
+
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_check_choices_token_count</span><span class="p">(</span>
+                            <span class="n">sample_idx</span><span class="p">,</span> <span class="n">choice_token_count</span><span class="p">,</span> <span class="n">number_of_initial_choices_tokens</span>
+                        <span class="p">)</span>
+
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">raise_errors</span><span class="p">():</span>
+                            <span class="k">raise</span>
+                        <span class="n">error</span> <span class="o">=</span> <span class="n">Error</span><span class="p">(</span>
+                            <span class="n">error_class</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                            <span class="n">message</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
+                            <span class="n">traceback</span><span class="o">=</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(),</span>
+                        <span class="p">)</span>
+                        <span class="n">prompt_sequence_positions</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">choices_log_probs</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="n">choices_sequence_positions</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">RawLoglikelihood</span><span class="p">(</span>
+                    <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+                    <span class="n">prompt_sequence_positions</span><span class="o">=</span><span class="n">prompt_sequence_positions</span><span class="p">,</span>
+                    <span class="n">loglikelihoods</span><span class="o">=</span><span class="n">choices_log_probs</span><span class="p">,</span>
+                    <span class="n">loglikelihoods_sequence_positions</span><span class="o">=</span><span class="n">choices_sequence_positions</span><span class="p">,</span>
+                    <span class="n">raw_loglikelihood_error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">results</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_choices_token_count</span><span class="p">(</span>
+        <span class="n">sample_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">choice_token_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">number_of_initial_choices_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">number_of_initial_choices_tokens</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">choice_token_count</span> <span class="o">!=</span> <span class="n">number_of_initial_choices_tokens</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Choice token count differed between choices for sample </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2"> vs </span><span class="si">%s</span><span class="s2">). Using latest value.&quot;</span><span class="p">,</span>
+                    <span class="n">sample_idx</span><span class="p">,</span>
+                    <span class="n">choice_token_count</span><span class="p">,</span>
+                    <span class="n">number_of_initial_choices_tokens</span><span class="p">,</span>
+                <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_choice_logprob_from_completion</span><span class="p">(</span>
+        <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">choice</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">CompletionResponse</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="o">.</span><span class="n">completions</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Completion response did not contain any choices.&quot;</span><span class="p">)</span>
+        <span class="n">completion_result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">completions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">completion_result</span><span class="o">.</span><span class="n">log_probs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Completion result did not include log_probs.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">completion_result</span><span class="o">.</span><span class="n">completion_tokens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Completion result did not include completion_tokens.&quot;</span><span class="p">)</span>
+
+        <span class="n">tokens</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">completion_result</span><span class="o">.</span><span class="n">completion_tokens</span><span class="p">)</span>
+        <span class="n">log_prob_entries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">completion_result</span><span class="o">.</span><span class="n">log_probs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">log_prob_entries</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mismatch between completion tokens and log_prob entries.&quot;</span><span class="p">)</span>
+
+        <span class="n">combined_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+        <span class="n">expected_text</span> <span class="o">=</span> <span class="n">prompt</span> <span class="o">+</span> <span class="n">choice</span>
+        <span class="k">if</span> <span class="n">combined_text</span> <span class="o">!=</span> <span class="n">expected_text</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Completion tokens differed from prompt + choice text.&quot;</span><span class="p">)</span>
+
+        <span class="n">prompt_token_count</span> <span class="o">=</span> <span class="n">AlephAlphaAPIModel</span><span class="o">.</span><span class="n">_count_prompt_tokens_from_sequence</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">prompt</span><span class="p">)</span>
+        <span class="n">choice_token_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">-</span> <span class="n">prompt_token_count</span>
+        <span class="k">if</span> <span class="n">choice_token_count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Choice token count computed as negative.&quot;</span><span class="p">)</span>
+
+        <span class="n">total_logprob</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">log_prob_entries</span><span class="p">[</span><span class="n">prompt_token_count</span><span class="p">:]:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Log_probs entry did not contain exactly one key-value pair.&quot;</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+            <span class="n">total_logprob</span> <span class="o">+=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="n">total_logprob</span><span class="p">,</span> <span class="n">choice_token_count</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_count_prompt_tokens_from_sequence</span><span class="p">(</span><span class="n">tokens</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">prompt</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">current_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">token</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+            <span class="n">current_text</span> <span class="o">+=</span> <span class="n">token</span>
+            <span class="k">if</span> <span class="n">current_text</span> <span class="o">==</span> <span class="n">prompt</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">prompt</span><span class="p">):</span>
+                <span class="k">break</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unable to align completion tokens with prompt text.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Llama31_8B_Instruct_API">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.llm.html#eval_framework.llm.aleph_alpha.Llama31_8B_Instruct_API">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Llama31_8B_Instruct_API</span><span class="p">(</span><span class="n">AlephAlphaAPIModel</span><span class="p">):</span>
+    <span class="n">LLM_NAME</span> <span class="o">=</span> <span class="s2">&quot;llama-3.1-8b-instruct&quot;</span>
+    <span class="n">DEFAULT_FORMATTER</span> <span class="o">=</span> <span class="n">Llama3Formatter</span></div>
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Aleph Alpha Research
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

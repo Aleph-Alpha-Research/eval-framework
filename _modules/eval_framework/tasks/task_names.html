@@ -1,0 +1,698 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>eval_framework.tasks.task_names - Eval-Framework v0.2.12</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">Eval-Framework v0.2.12</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <span class="sidebar-brand-text">Eval-Framework v0.2.12</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli_usage.html">Using the CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../completion_task_guide.html">Creating Completion Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../add_new_benchmark_guide.html">How to Add a New Benchmark to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmarks_and_metrics.html">Included Benchmark Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controlling_upload_results.html">Controlling HuggingFace Upload Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docker_guide.html">Docker Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../evaluate_huggingface_model.html">How to Evaluate HuggingFace Models with Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../loglikelihood_task_guide.html">Creating Loglikelihood Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_arguments.html">Model Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview_dataloading.html">Overview Dataloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../understanding_results_guide.html">Understanding Evaluation Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../using_determined.html">Using Determined</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utils in <code class="docutils literal notranslate"><span class="pre">eval-framework</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../wandb_integration.html">Weights and Biases Integration with Eval-Framework</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTING.html">Contributing to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/modules.html">eval_framework</a><input aria-label="Toggle navigation of eval_framework" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for eval_framework.tasks.task_names</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseTask</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_lazy_task</span><span class="p">,</span> <span class="n">registered_tasks_iter</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TaskNameEnum">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.tasks.html#eval_framework.tasks.task_names.TaskNameEnum">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TaskNameEnum</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseTask</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">value</span></div>
+
+
+
+<div class="viewcode-block" id="register_all_tasks">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.tasks.html#eval_framework.tasks.task_names.register_all_tasks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_all_tasks</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register all the benchmark tasks with the eval framework.&quot;&quot;&quot;</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.math_reasoning.AIME2024&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.math_reasoning.AIME2025&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.arc.ARC&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.arc.ARC_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.arc_de.ARC_DE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.opengptx_eu20.ARC_EU20_DE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.opengptx_eu20.ARC_EU20_FR&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.arc_fi.ARC_FI&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.balancedcopa.BalancedCOPA&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.belebele.BELEBELE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.bigcodebench.BigCodeBench&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.bigcodebench.BigCodeBenchInstruct&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.bigcodebench.BigCodeBenchHard&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.bigcodebench.BigCodeBenchHardInstruct&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.casehold.CASEHOLD&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.chembench.ChemBench&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.copa.COPAEvalHarness&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.copa.COPA&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.copa.COPA_IDKEvalHarness&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.copa.COPA_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.duc.DUC_ABSTRACTIVE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.duc.DUC_EXTRACTIVE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.flores200.Flores200&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.flores_plus.FloresPlus&quot;</span><span class="p">,</span> <span class="n">extras</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;comet&quot;</span><span class="p">])</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.goldenswag.GOLDENSWAG&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.goldenswag.GOLDENSWAG_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.gpqa.GPQA&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.gpqa.GPQA_COT&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.gpqa.GPQA_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.gsm8k.GSM8K&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.gsm8k.GSM8KEvalHarness&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.math_reasoning.GSM8KReasoning&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.opengptx_eu20.GSM8K_EU20_DE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.opengptx_eu20.GSM8K_EU20_FR&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.hellaswag.HELLASWAG&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.hellaswag.HELLASWAG_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.hellaswag_de.HELLASWAG_DE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.opengptx_eu20.HELLASWAG_EU20_DE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.opengptx_eu20.HELLASWAG_EU20_FR&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.humaneval.HumanEval&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.humaneval.HumanEvalInstruct&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.ifeval.IFEval&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.ifeval.IFEvalDe&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.ifeval.IFEvalFiSv&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.include.INCLUDE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.infinitebench.InfiniteBench_CodeDebug&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.infinitebench.InfiniteBench_CodeRun&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.infinitebench.InfiniteBench_EnDia&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.infinitebench.InfiniteBench_EnMC&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.infinitebench.InfiniteBench_EnQA&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.infinitebench.InfiniteBench_MathFind&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.infinitebench.InfiniteBench_RetrieveKV2&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.infinitebench.InfiniteBench_RetrieveNumber&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.infinitebench.InfiniteBench_RetrievePassKey1&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.math_reasoning.MATH&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.math_reasoning.MATHLvl5&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.math_reasoning.MATH500&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mbpp.MBPP&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mbpp.MBPP_SANITIZED&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mbpp.MBPP_PROMPT_WITHOUT_TESTS&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mbpp.MBPP_PROMPT_WITHOUT_TESTS_SANITIZED&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mmlu.MMLU&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mmlu.MMLU_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mmlu.FullTextMMLU&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.opengptx_eu20.MMLU_EU20_DE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.opengptx_eu20.MMLU_EU20_FR&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mmlu_de.MMLU_DE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO_COT&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mmlu.MMLU_COT&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mmmlu.MMMLU&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.mmmlu.MMMLU_GERMAN_COT&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.global_mmlu.GlobalMMLU&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.pawsx.PAWSX&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.piqa.PIQA&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.piqa.PIQA_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.openbookqa.OPENBOOKQA&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.openbookqa.OPENBOOKQA_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.openbookqa.OPENBOOKQA_EVAL_HARNESS&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.sciq.SCIQ&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.sciq.SCIQEvalHarness&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.squad.SQUAD&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.squad.SQUAD2&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.tablebench.TableBench&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.triviaqa.TRIVIAQA&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.opengptx_eu20.TRUTHFULQA_EU20_DE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.opengptx_eu20.TRUTHFULQA_EU20_FR&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.winogender.WINOGENDER&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.winogender.WINOGENDER_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.winogrande.WINOGRANDE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.winogrande.WINOGRANDE_IDK&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.winox.WINOX_DE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.winox.WINOX_FR&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.wmt.WMT14&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.wmt.WMT16&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.wmt.WMT20&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.wmt.WMT14_INSTRUCT&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.wmt.WMT16_INSTRUCT&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.wmt.WMT20_INSTRUCT&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_QUALITY&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_SQUALITY&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_QMSUM&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_QASPER&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_GOV_REPORT&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_NARRATIVEQA&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_MUSIQUE&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_SPACE_DIGEST&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.quality.QUALITY&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.sphyr.SPHYR&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.struct_eval.StructEval&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.struct_eval.RenderableStructEval&quot;</span><span class="p">)</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.aidanbench.AidanBench&quot;</span><span class="p">,</span> <span class="n">extras</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;openai&quot;</span><span class="p">])</span>
+    <span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.aidanbench.AidanBenchOriginal&quot;</span><span class="p">,</span> <span class="n">extras</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;openai&quot;</span><span class="p">])</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Importing the companion registers the additional tasks from the module.</span>
+        <span class="c1"># This is mostly for convenience for internal use-cases</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">eval_framework_companion</span>  <span class="c1"># noqa</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="get_datasets_needing_update">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.tasks.html#eval_framework.tasks.task_names.get_datasets_needing_update">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_datasets_needing_update</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check which HuggingFace datasets need updating by comparing</span>
+<span class="sd">    current HF Hub commits with cached commits in dataset_commits.json.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple of (all_up_to_date, set_of_dataset_paths_needing_update)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">HfApi</span>
+
+    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;HF_DATASET_CACHE_DIR&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.cache&quot;</span> <span class="o">/</span> <span class="s2">&quot;huggingface&quot;</span> <span class="o">/</span> <span class="s2">&quot;datasets&quot;</span><span class="p">)))</span>
+    <span class="n">cache_file</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="o">/</span> <span class="s2">&quot;dataset_commits.json&quot;</span>
+
+    <span class="n">api</span> <span class="o">=</span> <span class="n">HfApi</span><span class="p">()</span>
+    <span class="n">current_commits</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">datasets_needing_update</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking HuggingFace dataset versions...&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_class</span> <span class="ow">in</span> <span class="n">registered_tasks_iter</span><span class="p">():</span>
+        <span class="n">dataset_path</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">task_class</span><span class="p">,</span> <span class="s2">&quot;DATASET_PATH&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dataset_path</span> <span class="ow">and</span> <span class="n">dataset_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_commits</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">info</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">dataset_info</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">info</span><span class="o">.</span><span class="n">sha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;No SHA for </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">current_commits</span><span class="p">[</span><span class="n">dataset_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">sha</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">sha</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">: SKIPPED (not on HF Hub, uses external source)&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>  <span class="c1"># Don&#39;t add to current_commits at all</span>
+
+    <span class="c1"># No cache file = need to download everything</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cache_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">No cached commits found - full download needed&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">current_commits</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">cached_commits</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="c1"># Compare each dataset&#39;s current commit with cached commit</span>
+    <span class="k">for</span> <span class="n">dataset_path</span><span class="p">,</span> <span class="n">current_sha</span> <span class="ow">in</span> <span class="n">current_commits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">cached_sha</span> <span class="o">=</span> <span class="n">cached_commits</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cached_sha</span> <span class="o">!=</span> <span class="n">current_sha</span><span class="p">:</span>
+            <span class="n">cached_short</span> <span class="o">=</span> <span class="n">cached_sha</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span> <span class="k">if</span> <span class="n">cached_sha</span> <span class="k">else</span> <span class="s2">&quot;NEW&quot;</span>
+            <span class="n">current_short</span> <span class="o">=</span> <span class="n">current_sha</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span> <span class="k">if</span> <span class="n">current_sha</span> <span class="o">!=</span> <span class="s2">&quot;error&quot;</span> <span class="k">else</span> <span class="s2">&quot;ERROR&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  UPDATE NEEDED: </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">cached_short</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">current_short</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">datasets_needing_update</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">datasets_needing_update</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">datasets_needing_update</span><span class="p">)</span><span class="si">}</span><span class="s2"> dataset(s) need updating&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">datasets_needing_update</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">All datasets are up to date!&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="make_sure_all_hf_datasets_are_in_cache">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.tasks.html#eval_framework.tasks.task_names.make_sure_all_hf_datasets_are_in_cache">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_sure_all_hf_datasets_are_in_cache</span><span class="p">(</span><span class="n">only_datasets</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download datasets to cache.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        only_datasets: If provided, only process tasks using these dataset paths.</span>
+<span class="sd">                       If None, process all tasks.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_class</span> <span class="ow">in</span> <span class="n">registered_tasks_iter</span><span class="p">():</span>
+        <span class="n">dataset_path</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">task_class</span><span class="p">,</span> <span class="s2">&quot;DATASET_PATH&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># Skip if filtering is enabled and this dataset isn&#39;t in the update list</span>
+        <span class="k">if</span> <span class="n">only_datasets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dataset_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">only_datasets</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping </span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2"> - dataset </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2"> is up to date&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">task</span> <span class="o">=</span> <span class="n">task_class</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">iterate_samples</span><span class="p">(</span><span class="n">num_samples</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="k">pass</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2"> Will retry loading </span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2"> in a few seconds, attempt #</span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processed </span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Sacrebleu uses its own cache (SACREBLEU env var), separate from HF datasets.</span>
+    <span class="c1"># We cache them together to ensure all evaluation data is available.</span>
+    <span class="n">_ensure_sacrebleu_datasets_cached</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="update_changed_datasets_only">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.tasks.html#eval_framework.tasks.task_names.update_changed_datasets_only">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_changed_datasets_only</span><span class="p">(</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check for updates and download only changed datasets.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        verbose: If True, print detailed summary of updated datasets.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple of (updates_were_made, set_of_updated_dataset_paths).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">all_up_to_date</span><span class="p">,</span> <span class="n">datasets_to_update</span> <span class="o">=</span> <span class="n">get_datasets_needing_update</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">all_up_to_date</span><span class="p">:</span>
+        <span class="c1"># Even when HF datasets are current, ensure sacrebleu is cached</span>
+        <span class="c1"># (it has its own cache and isn&#39;t tracked by dataset_commits.json)</span>
+        <span class="n">_ensure_sacrebleu_datasets_cached</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing to update!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Downloading </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">datasets_to_update</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated dataset(s)...&quot;</span><span class="p">)</span>
+    <span class="n">make_sure_all_hf_datasets_are_in_cache</span><span class="p">(</span><span class="n">only_datasets</span><span class="o">=</span><span class="n">datasets_to_update</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DATASETS UPDATED:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dataset_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">datasets_to_update</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ✓ </span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">datasets_to_update</span><span class="p">)</span><span class="si">}</span><span class="s2"> dataset(s) updated&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">datasets_to_update</span></div>
+
+
+
+<div class="viewcode-block" id="save_hf_dataset_commits">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.tasks.html#eval_framework.tasks.task_names.save_hf_dataset_commits">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_hf_dataset_commits</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save current HuggingFace dataset commits after download.&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">huggingface_hub</span><span class="w"> </span><span class="kn">import</span> <span class="n">HfApi</span>
+
+    <span class="n">api</span> <span class="o">=</span> <span class="n">HfApi</span><span class="p">()</span>
+    <span class="n">commits</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saving dataset commit hashes...&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_class</span> <span class="ow">in</span> <span class="n">registered_tasks_iter</span><span class="p">():</span>
+        <span class="n">dataset_path</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">task_class</span><span class="p">,</span> <span class="s2">&quot;DATASET_PATH&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dataset_path</span> <span class="ow">and</span> <span class="n">dataset_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">commits</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">info</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">dataset_info</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+                <span class="n">commits</span><span class="p">[</span><span class="n">dataset_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">sha</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;HF_DATASET_CACHE_DIR&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.cache&quot;</span> <span class="o">/</span> <span class="s2">&quot;huggingface&quot;</span> <span class="o">/</span> <span class="s2">&quot;datasets&quot;</span><span class="p">)))</span>
+    <span class="n">cache_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cache_file</span> <span class="o">=</span> <span class="n">cache_dir</span> <span class="o">/</span> <span class="s2">&quot;dataset_commits.json&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">commits</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">commits</span><span class="p">)</span><span class="si">}</span><span class="s2"> dataset commits to </span><span class="si">{</span><span class="n">cache_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ensure_sacrebleu_datasets_cached</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pre-download sacrebleu WMT datasets to ensure they&#39;re cached.</span>
+
+<span class="sd">    Sacrebleu uses its own cache (controlled by SACREBLEU env var).</span>
+<span class="sd">    This ensures WMT test sets are downloaded and cached alongside HF datasets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">sacrebleu</span>
+
+    <span class="c1"># WMT datasets used by the framework (from wmt.py)</span>
+    <span class="n">WMT_DATASETS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;wmt14&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;en-fr&quot;</span><span class="p">,</span> <span class="s2">&quot;fr-en&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;wmt16&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;de-en&quot;</span><span class="p">,</span> <span class="s2">&quot;en-de&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;wmt20&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;de-en&quot;</span><span class="p">,</span> <span class="s2">&quot;de-fr&quot;</span><span class="p">,</span> <span class="s2">&quot;en-de&quot;</span><span class="p">,</span> <span class="s2">&quot;fr-de&quot;</span><span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ensuring sacrebleu WMT datasets are cached...&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">test_set</span><span class="p">,</span> <span class="n">langpairs</span> <span class="ow">in</span> <span class="n">WMT_DATASETS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">langpair</span> <span class="ow">in</span> <span class="n">langpairs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sacrebleu</span><span class="o">.</span><span class="n">download_test_set</span><span class="p">(</span><span class="n">test_set</span><span class="o">=</span><span class="n">test_set</span><span class="p">,</span> <span class="n">langpair</span><span class="o">=</span><span class="n">langpair</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">test_set</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">langpair</span><span class="si">}</span><span class="s2">: OK&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">test_set</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">langpair</span><span class="si">}</span><span class="s2">: FAILED (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sacrebleu datasets cached!&quot;</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">registered_tasks_iter</span><span class="p">()))</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Aleph Alpha Research
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

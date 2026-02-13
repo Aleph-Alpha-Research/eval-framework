@@ -1,0 +1,887 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>eval_framework.tasks.benchmarks.mmmlu - Eval-Framework v0.2.12</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">Eval-Framework v0.2.12</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <span class="sidebar-brand-text">Eval-Framework v0.2.12</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli_usage.html">Using the CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../completion_task_guide.html">Creating Completion Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../add_new_benchmark_guide.html">How to Add a New Benchmark to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks_and_metrics.html">Included Benchmark Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../controlling_upload_results.html">Controlling HuggingFace Upload Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../docker_guide.html">Docker Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../evaluate_huggingface_model.html">How to Evaluate HuggingFace Models with Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../loglikelihood_task_guide.html">Creating Loglikelihood Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_arguments.html">Model Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../overview_dataloading.html">Overview Dataloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../understanding_results_guide.html">Understanding Evaluation Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../using_determined.html">Using Determined</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../utilities.html">Utils in <code class="docutils literal notranslate"><span class="pre">eval-framework</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../wandb_integration.html">Weights and Biases Integration with Eval-Framework</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../CONTRIBUTING.html">Contributing to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../api/generated/eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../api/generated/modules.html">eval_framework</a><input aria-label="Toggle navigation of eval_framework" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../api/generated/eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../../api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for eval_framework.tasks.benchmarks.mmmlu</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.accuracy_completion</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccuracyCompletion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.language_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">GermanCompletionChecker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.loglikelihood.accuracy_loglikelihood</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AccuracyLoglikelihood</span><span class="p">,</span>
+    <span class="n">AccuracyNormLoglikelihood</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">RANDOM_SEED</span><span class="p">,</span> <span class="n">BaseTask</span><span class="p">,</span> <span class="n">Language</span><span class="p">,</span> <span class="n">ResponseType</span><span class="p">,</span> <span class="n">Sample</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.benchmarks.mmlu</span><span class="w"> </span><span class="kn">import</span> <span class="n">MMLU_SUBJECTS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_n_letters</span>
+
+<span class="n">MMMLU_LANGS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;FR_FR&quot;</span><span class="p">,</span> <span class="s2">&quot;DE_DE&quot;</span><span class="p">,</span> <span class="s2">&quot;ES_LA&quot;</span><span class="p">,</span> <span class="s2">&quot;IT_IT&quot;</span><span class="p">,</span> <span class="s2">&quot;PT_BR&quot;</span><span class="p">,</span> <span class="s2">&quot;AR_XY&quot;</span><span class="p">]</span>
+<span class="n">MMLU_SUBJECTS_DE</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;abstract_algebra&quot;</span><span class="p">:</span> <span class="s2">&quot;Abstrakte Algebra&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;anatomy&quot;</span><span class="p">:</span> <span class="s2">&quot;Anatomie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;astronomy&quot;</span><span class="p">:</span> <span class="s2">&quot;Astronomie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;business_ethics&quot;</span><span class="p">:</span> <span class="s2">&quot;Wirtschaftsethik&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;clinical_knowledge&quot;</span><span class="p">:</span> <span class="s2">&quot;Klinisches Wissen&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;Biologie (Universität)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;Chemie (Universität)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;Informatik (Universität)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Mathematik (Universität)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;Medizin (Universität)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Physik (Universität)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;computer_security&quot;</span><span class="p">:</span> <span class="s2">&quot;IT-Sicherheit&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;conceptual_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Konzeptuelle Physik&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;econometrics&quot;</span><span class="p">:</span> <span class="s2">&quot;Ökonometrie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;electrical_engineering&quot;</span><span class="p">:</span> <span class="s2">&quot;Elektrotechnik&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;elementary_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Elementarmathematik&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;formal_logic&quot;</span><span class="p">:</span> <span class="s2">&quot;Formale Logik&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;global_facts&quot;</span><span class="p">:</span> <span class="s2">&quot;Weltwissen&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;Biologie (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;Chemie (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;Informatik (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_european_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Europäische Geschichte (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_geography&quot;</span><span class="p">:</span> <span class="s2">&quot;Geografie (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_government_and_politics&quot;</span><span class="p">:</span> <span class="s2">&quot;Politik und Regierung (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_macroeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;Makroökonomie (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Mathematik (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_microeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;Mikroökonomie (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Physik (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;Psychologie (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_statistics&quot;</span><span class="p">:</span> <span class="s2">&quot;Statistik (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_us_history&quot;</span><span class="p">:</span> <span class="s2">&quot;US-Geschichte (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_world_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Weltgeschichte (Gymnasium)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_aging&quot;</span><span class="p">:</span> <span class="s2">&quot;Altern des Menschen&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_sexuality&quot;</span><span class="p">:</span> <span class="s2">&quot;Menschliche Sexualität&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;international_law&quot;</span><span class="p">:</span> <span class="s2">&quot;Völkerrecht&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;jurisprudence&quot;</span><span class="p">:</span> <span class="s2">&quot;Rechtswissenschaft&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;logical_fallacies&quot;</span><span class="p">:</span> <span class="s2">&quot;Logische Fehlschlüsse&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;machine_learning&quot;</span><span class="p">:</span> <span class="s2">&quot;Maschinelles Lernen&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;management&quot;</span><span class="p">:</span> <span class="s2">&quot;Management&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;marketing&quot;</span><span class="p">:</span> <span class="s2">&quot;Marketing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;medical_genetics&quot;</span><span class="p">:</span> <span class="s2">&quot;Medizinische Genetik&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;miscellaneous&quot;</span><span class="p">:</span> <span class="s2">&quot;Verschiedenes&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_disputes&quot;</span><span class="p">:</span> <span class="s2">&quot;Moralische Streitfragen&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_scenarios&quot;</span><span class="p">:</span> <span class="s2">&quot;Moralische Szenarien&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nutrition&quot;</span><span class="p">:</span> <span class="s2">&quot;Ernährung&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;philosophy&quot;</span><span class="p">:</span> <span class="s2">&quot;Philosophie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prehistory&quot;</span><span class="p">:</span> <span class="s2">&quot;Urgeschichte&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_accounting&quot;</span><span class="p">:</span> <span class="s2">&quot;Berufsbezogene Buchhaltung&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_law&quot;</span><span class="p">:</span> <span class="s2">&quot;Berufsbezogenes Recht&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;Berufsbezogene Medizin&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;Berufsbezogene Psychologie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;public_relations&quot;</span><span class="p">:</span> <span class="s2">&quot;Öffentlichkeitsarbeit&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;security_studies&quot;</span><span class="p">:</span> <span class="s2">&quot;Sicherheitsstudien&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sociology&quot;</span><span class="p">:</span> <span class="s2">&quot;Soziologie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;us_foreign_policy&quot;</span><span class="p">:</span> <span class="s2">&quot;US-Außenpolitik&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;virology&quot;</span><span class="p">:</span> <span class="s2">&quot;Virologie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;world_religions&quot;</span><span class="p">:</span> <span class="s2">&quot;Weltreligionen&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">MMLU_SUBJECTS_FR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;abstract_algebra&quot;</span><span class="p">:</span> <span class="s2">&quot;Algèbre Abstraite&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;anatomy&quot;</span><span class="p">:</span> <span class="s2">&quot;Anatomie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;astronomy&quot;</span><span class="p">:</span> <span class="s2">&quot;Astronomie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;business_ethics&quot;</span><span class="p">:</span> <span class="s2">&quot;Éthique des Affaires&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;clinical_knowledge&quot;</span><span class="p">:</span> <span class="s2">&quot;Connaissances Cliniques&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;Biologie Universitaire&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;Chimie Universitaire&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;Informatique Universitaire&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Mathématiques Universitaires&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;Médecine Universitaire&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Physique Universitaire&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;computer_security&quot;</span><span class="p">:</span> <span class="s2">&quot;Sécurité Informatique&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;conceptual_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Physique Conceptuelle&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;econometrics&quot;</span><span class="p">:</span> <span class="s2">&quot;Économétrie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;electrical_engineering&quot;</span><span class="p">:</span> <span class="s2">&quot;Génie Électrique&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;elementary_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Mathématiques Élémentaires&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;formal_logic&quot;</span><span class="p">:</span> <span class="s2">&quot;Logique Formelle&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;global_facts&quot;</span><span class="p">:</span> <span class="s2">&quot;Faits Mondiaux&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;Biologie au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;Chimie au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;Informatique au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_european_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Histoire Européenne au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_geography&quot;</span><span class="p">:</span> <span class="s2">&quot;Géographie au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_government_and_politics&quot;</span><span class="p">:</span> <span class="s2">&quot;Gouvernement et Politique au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_macroeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;Macroéconomie au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Mathématiques au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_microeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;Microéconomie au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Physique au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;Psychologie au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_statistics&quot;</span><span class="p">:</span> <span class="s2">&quot;Statistiques au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_us_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Histoire des États-Unis au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_world_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Histoire Mondiale au Lycée&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_aging&quot;</span><span class="p">:</span> <span class="s2">&quot;Vieillissement Humain&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_sexuality&quot;</span><span class="p">:</span> <span class="s2">&quot;Sexualité Humaine&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;international_law&quot;</span><span class="p">:</span> <span class="s2">&quot;Droit International&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;jurisprudence&quot;</span><span class="p">:</span> <span class="s2">&quot;Jurisprudence&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;logical_fallacies&quot;</span><span class="p">:</span> <span class="s2">&quot;Fautes de Logique&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;machine_learning&quot;</span><span class="p">:</span> <span class="s2">&quot;Apprentissage Automatique&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;management&quot;</span><span class="p">:</span> <span class="s2">&quot;Gestion&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;marketing&quot;</span><span class="p">:</span> <span class="s2">&quot;Marketing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;medical_genetics&quot;</span><span class="p">:</span> <span class="s2">&quot;Génétique Médicale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;miscellaneous&quot;</span><span class="p">:</span> <span class="s2">&quot;Divers&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_disputes&quot;</span><span class="p">:</span> <span class="s2">&quot;Conflits Moraux&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_scenarios&quot;</span><span class="p">:</span> <span class="s2">&quot;Scénarios Moraux&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nutrition&quot;</span><span class="p">:</span> <span class="s2">&quot;Nutrition&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;philosophy&quot;</span><span class="p">:</span> <span class="s2">&quot;Philosophie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prehistory&quot;</span><span class="p">:</span> <span class="s2">&quot;Préhistoire&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_accounting&quot;</span><span class="p">:</span> <span class="s2">&quot;Comptabilité Professionnelle&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_law&quot;</span><span class="p">:</span> <span class="s2">&quot;Droit Professionnel&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;Médecine Professionnelle&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;Psychologie Professionnelle&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;public_relations&quot;</span><span class="p">:</span> <span class="s2">&quot;Relations Publiques&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;security_studies&quot;</span><span class="p">:</span> <span class="s2">&quot;Études de Sécurité&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sociology&quot;</span><span class="p">:</span> <span class="s2">&quot;Sociologie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;us_foreign_policy&quot;</span><span class="p">:</span> <span class="s2">&quot;Politique Étrangère des États-Unis&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;virology&quot;</span><span class="p">:</span> <span class="s2">&quot;Virologie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;world_religions&quot;</span><span class="p">:</span> <span class="s2">&quot;Religions du Monde&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">MMLU_SUBJECTS_ES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;abstract_algebra&quot;</span><span class="p">:</span> <span class="s2">&quot;Álgebra Abstracta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;anatomy&quot;</span><span class="p">:</span> <span class="s2">&quot;Anatomía&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;astronomy&quot;</span><span class="p">:</span> <span class="s2">&quot;Astronomía&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;business_ethics&quot;</span><span class="p">:</span> <span class="s2">&quot;Ética Empresarial&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;clinical_knowledge&quot;</span><span class="p">:</span> <span class="s2">&quot;Conocimientos Clínicos&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;Biología Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;Química Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;Informática Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Matemáticas Universitarias&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;Medicina Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Física Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;computer_security&quot;</span><span class="p">:</span> <span class="s2">&quot;Seguridad Informática&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;conceptual_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Física Conceptual&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;econometrics&quot;</span><span class="p">:</span> <span class="s2">&quot;Econometría&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;electrical_engineering&quot;</span><span class="p">:</span> <span class="s2">&quot;Ingeniería Eléctrica&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;elementary_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Matemáticas Elementales&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;formal_logic&quot;</span><span class="p">:</span> <span class="s2">&quot;Lógica Formal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;global_facts&quot;</span><span class="p">:</span> <span class="s2">&quot;Datos Globales&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;Biología de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;Química de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;Informática de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_european_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Historia Europea de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_geography&quot;</span><span class="p">:</span> <span class="s2">&quot;Geografía de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_government_and_politics&quot;</span><span class="p">:</span> <span class="s2">&quot;Gobierno y Política de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_macroeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;Macroeconomía de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Matemáticas de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_microeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;Microeconomía de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Física de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;Psicología de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_statistics&quot;</span><span class="p">:</span> <span class="s2">&quot;Estadística de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_us_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Historia de EE. UU. de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_world_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Historia Mundial de Secundaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_aging&quot;</span><span class="p">:</span> <span class="s2">&quot;Envejecimiento Humano&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_sexuality&quot;</span><span class="p">:</span> <span class="s2">&quot;Sexualidad Humana&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;international_law&quot;</span><span class="p">:</span> <span class="s2">&quot;Derecho Internacional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;jurisprudence&quot;</span><span class="p">:</span> <span class="s2">&quot;Jurisprudencia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;logical_fallacies&quot;</span><span class="p">:</span> <span class="s2">&quot;Falacias Lógicas&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;machine_learning&quot;</span><span class="p">:</span> <span class="s2">&quot;Aprendizaje Automático&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;management&quot;</span><span class="p">:</span> <span class="s2">&quot;Administración&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;marketing&quot;</span><span class="p">:</span> <span class="s2">&quot;Mercadotecnia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;medical_genetics&quot;</span><span class="p">:</span> <span class="s2">&quot;Genética Médica&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;miscellaneous&quot;</span><span class="p">:</span> <span class="s2">&quot;Misceláneos&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_disputes&quot;</span><span class="p">:</span> <span class="s2">&quot;Disputas Morales&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_scenarios&quot;</span><span class="p">:</span> <span class="s2">&quot;Escenarios Morales&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nutrition&quot;</span><span class="p">:</span> <span class="s2">&quot;Nutrición&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;philosophy&quot;</span><span class="p">:</span> <span class="s2">&quot;Filosofía&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prehistory&quot;</span><span class="p">:</span> <span class="s2">&quot;Prehistoria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_accounting&quot;</span><span class="p">:</span> <span class="s2">&quot;Contabilidad Profesional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_law&quot;</span><span class="p">:</span> <span class="s2">&quot;Derecho Profesional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;Medicina Profesional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;Psicología Profesional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;public_relations&quot;</span><span class="p">:</span> <span class="s2">&quot;Relaciones Públicas&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;security_studies&quot;</span><span class="p">:</span> <span class="s2">&quot;Estudios de Seguridad&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sociology&quot;</span><span class="p">:</span> <span class="s2">&quot;Sociología&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;us_foreign_policy&quot;</span><span class="p">:</span> <span class="s2">&quot;Política Exterior de EE. UU.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;virology&quot;</span><span class="p">:</span> <span class="s2">&quot;Virología&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;world_religions&quot;</span><span class="p">:</span> <span class="s2">&quot;Religiones del Mundo&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">MMLU_SUBJECTS_IT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;abstract_algebra&quot;</span><span class="p">:</span> <span class="s2">&quot;Algebra Astratta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;anatomy&quot;</span><span class="p">:</span> <span class="s2">&quot;Anatomia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;astronomy&quot;</span><span class="p">:</span> <span class="s2">&quot;Astronomia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;business_ethics&quot;</span><span class="p">:</span> <span class="s2">&quot;Etica Aziendale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;clinical_knowledge&quot;</span><span class="p">:</span> <span class="s2">&quot;Conoscenza Clinica&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;Biologia Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;Chimica Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;Informatica Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Matematica Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;Medicina Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Fisica Universitaria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;computer_security&quot;</span><span class="p">:</span> <span class="s2">&quot;Sicurezza Informatica&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;conceptual_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Fisica Concettuale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;econometrics&quot;</span><span class="p">:</span> <span class="s2">&quot;Econometria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;electrical_engineering&quot;</span><span class="p">:</span> <span class="s2">&quot;Ingegneria Elettrica&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;elementary_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Matematica Elementare&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;formal_logic&quot;</span><span class="p">:</span> <span class="s2">&quot;Logica Formale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;global_facts&quot;</span><span class="p">:</span> <span class="s2">&quot;Fatti Globali&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;Biologia Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;Chimica Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;Informatica Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_european_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Storia Europea Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_geography&quot;</span><span class="p">:</span> <span class="s2">&quot;Geografia Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_government_and_politics&quot;</span><span class="p">:</span> <span class="s2">&quot;Governo e Politica Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_macroeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;Macroeconomia Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Matematica Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_microeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;Microeconomia Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Fisica Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;Psicologia Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_statistics&quot;</span><span class="p">:</span> <span class="s2">&quot;Statistica Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_us_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Storia Americana Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_world_history&quot;</span><span class="p">:</span> <span class="s2">&quot;Storia Mondiale Liceale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_aging&quot;</span><span class="p">:</span> <span class="s2">&quot;Invecchiamento Umano&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_sexuality&quot;</span><span class="p">:</span> <span class="s2">&quot;Sessualità Umana&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;international_law&quot;</span><span class="p">:</span> <span class="s2">&quot;Diritto Internazionale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;jurisprudence&quot;</span><span class="p">:</span> <span class="s2">&quot;Giurisprudenza&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;logical_fallacies&quot;</span><span class="p">:</span> <span class="s2">&quot;Fallacie Logiche&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;machine_learning&quot;</span><span class="p">:</span> <span class="s2">&quot;Apprendimento Automatico&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;management&quot;</span><span class="p">:</span> <span class="s2">&quot;Gestione&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;marketing&quot;</span><span class="p">:</span> <span class="s2">&quot;Marketing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;medical_genetics&quot;</span><span class="p">:</span> <span class="s2">&quot;Genetica Medica&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;miscellaneous&quot;</span><span class="p">:</span> <span class="s2">&quot;Varie&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_disputes&quot;</span><span class="p">:</span> <span class="s2">&quot;Controversie Morali&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_scenarios&quot;</span><span class="p">:</span> <span class="s2">&quot;Scenari Morali&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nutrition&quot;</span><span class="p">:</span> <span class="s2">&quot;Nutrizione&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;philosophy&quot;</span><span class="p">:</span> <span class="s2">&quot;Filosofia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prehistory&quot;</span><span class="p">:</span> <span class="s2">&quot;Preistoria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_accounting&quot;</span><span class="p">:</span> <span class="s2">&quot;Contabilità Professionale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_law&quot;</span><span class="p">:</span> <span class="s2">&quot;Diritto Professionale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;Medicina Professionale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;Psicologia Professionale&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;public_relations&quot;</span><span class="p">:</span> <span class="s2">&quot;Relazioni Pubbliche&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;security_studies&quot;</span><span class="p">:</span> <span class="s2">&quot;Studi sulla Sicurezza&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sociology&quot;</span><span class="p">:</span> <span class="s2">&quot;Sociologia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;us_foreign_policy&quot;</span><span class="p">:</span> <span class="s2">&quot;Politica Estera degli Stati Uniti&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;virology&quot;</span><span class="p">:</span> <span class="s2">&quot;Virologia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;world_religions&quot;</span><span class="p">:</span> <span class="s2">&quot;Religioni del Mondo&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">MMLU_SUBJECTS_PT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;abstract_algebra&quot;</span><span class="p">:</span> <span class="s2">&quot;Álgebra Abstrata&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;anatomy&quot;</span><span class="p">:</span> <span class="s2">&quot;Anatomia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;astronomy&quot;</span><span class="p">:</span> <span class="s2">&quot;Astronomia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;business_ethics&quot;</span><span class="p">:</span> <span class="s2">&quot;Ética Empresarial&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;clinical_knowledge&quot;</span><span class="p">:</span> <span class="s2">&quot;Conhecimento Clínico&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;Biologia Universitária&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;Química Universitária&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;Ciência da Computação Universitária&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Matemática Universitária&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;Medicina Universitária&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Física Universitária&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;computer_security&quot;</span><span class="p">:</span> <span class="s2">&quot;Segurança da Computação&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;conceptual_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Física Conceitual&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;econometrics&quot;</span><span class="p">:</span> <span class="s2">&quot;Econometria&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;electrical_engineering&quot;</span><span class="p">:</span> <span class="s2">&quot;Engenharia Elétrica&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;elementary_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Matemática Elementar&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;formal_logic&quot;</span><span class="p">:</span> <span class="s2">&quot;Lógica Formal&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;global_facts&quot;</span><span class="p">:</span> <span class="s2">&quot;Fatos Globais&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;Biologia do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;Química do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;Ciência da Computação do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_european_history&quot;</span><span class="p">:</span> <span class="s2">&quot;História Europeia do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_geography&quot;</span><span class="p">:</span> <span class="s2">&quot;Geografia do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_government_and_politics&quot;</span><span class="p">:</span> <span class="s2">&quot;Governo e Política do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_macroeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;Macroeconomia do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;Matemática do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_microeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;Microeconomia do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;Física do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;Psicologia do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_statistics&quot;</span><span class="p">:</span> <span class="s2">&quot;Estatística do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_us_history&quot;</span><span class="p">:</span> <span class="s2">&quot;História dos EUA do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_world_history&quot;</span><span class="p">:</span> <span class="s2">&quot;História Mundial do Ensino Médio&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_aging&quot;</span><span class="p">:</span> <span class="s2">&quot;Envelhecimento Humano&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_sexuality&quot;</span><span class="p">:</span> <span class="s2">&quot;Sexualidade Humana&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;international_law&quot;</span><span class="p">:</span> <span class="s2">&quot;Direito Internacional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;jurisprudence&quot;</span><span class="p">:</span> <span class="s2">&quot;Jurisprudência&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;logical_fallacies&quot;</span><span class="p">:</span> <span class="s2">&quot;Falácias Lógicas&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;machine_learning&quot;</span><span class="p">:</span> <span class="s2">&quot;Aprendizado de Máquina&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;management&quot;</span><span class="p">:</span> <span class="s2">&quot;Administração&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;marketing&quot;</span><span class="p">:</span> <span class="s2">&quot;Marketing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;medical_genetics&quot;</span><span class="p">:</span> <span class="s2">&quot;Genética Médica&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;miscellaneous&quot;</span><span class="p">:</span> <span class="s2">&quot;Diversos&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_disputes&quot;</span><span class="p">:</span> <span class="s2">&quot;Disputas Morais&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_scenarios&quot;</span><span class="p">:</span> <span class="s2">&quot;Cenários Morais&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nutrition&quot;</span><span class="p">:</span> <span class="s2">&quot;Nutrição&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;philosophy&quot;</span><span class="p">:</span> <span class="s2">&quot;Filosofia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prehistory&quot;</span><span class="p">:</span> <span class="s2">&quot;Pré-História&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_accounting&quot;</span><span class="p">:</span> <span class="s2">&quot;Contabilidade Profissional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_law&quot;</span><span class="p">:</span> <span class="s2">&quot;Direito Profissional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;Medicina Profissional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;Psicologia Profissional&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;public_relations&quot;</span><span class="p">:</span> <span class="s2">&quot;Relações Públicas&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;security_studies&quot;</span><span class="p">:</span> <span class="s2">&quot;Estudos de Segurança&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sociology&quot;</span><span class="p">:</span> <span class="s2">&quot;Sociologia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;us_foreign_policy&quot;</span><span class="p">:</span> <span class="s2">&quot;Política Externa dos EUA&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;virology&quot;</span><span class="p">:</span> <span class="s2">&quot;Virologia&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;world_religions&quot;</span><span class="p">:</span> <span class="s2">&quot;Religiões Mundiais&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">MMLU_SUBJECTS_AR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;abstract_algebra&quot;</span><span class="p">:</span> <span class="s2">&quot;الجبر المجرد&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;anatomy&quot;</span><span class="p">:</span> <span class="s2">&quot;علم التشريح&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;astronomy&quot;</span><span class="p">:</span> <span class="s2">&quot;علم الفلك&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;business_ethics&quot;</span><span class="p">:</span> <span class="s2">&quot;أخلاقيات الأعمال&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;clinical_knowledge&quot;</span><span class="p">:</span> <span class="s2">&quot;المعرفة السريرية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;أحياء جامعية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;كيمياء جامعية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;علوم الحاسوب الجامعية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;رياضيات جامعية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;طب جامعي&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;college_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;فيزياء جامعية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;computer_security&quot;</span><span class="p">:</span> <span class="s2">&quot;أمن الحاسوب&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;conceptual_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;الفيزياء المفاهيمية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;econometrics&quot;</span><span class="p">:</span> <span class="s2">&quot;الاقتصاد القياسي&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;electrical_engineering&quot;</span><span class="p">:</span> <span class="s2">&quot;الهندسة الكهربائية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;elementary_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;الرياضيات الابتدائية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;formal_logic&quot;</span><span class="p">:</span> <span class="s2">&quot;المنطق الصوري&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;global_facts&quot;</span><span class="p">:</span> <span class="s2">&quot;حقائق عالمية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_biology&quot;</span><span class="p">:</span> <span class="s2">&quot;أحياء ثانوية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;كيمياء ثانوية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_computer_science&quot;</span><span class="p">:</span> <span class="s2">&quot;علوم الحاسوب الثانوية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_european_history&quot;</span><span class="p">:</span> <span class="s2">&quot;تاريخ أوروبا الثانوي&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_geography&quot;</span><span class="p">:</span> <span class="s2">&quot;جغرافيا ثانوية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_government_and_politics&quot;</span><span class="p">:</span> <span class="s2">&quot;الحكومة والسياسة الثانوية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_macroeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;الاقتصاد الكلي الثانوي&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_mathematics&quot;</span><span class="p">:</span> <span class="s2">&quot;رياضيات ثانوية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_microeconomics&quot;</span><span class="p">:</span> <span class="s2">&quot;الاقتصاد الجزئي الثانوي&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_physics&quot;</span><span class="p">:</span> <span class="s2">&quot;فيزياء ثانوية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;علم النفس الثانوي&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_statistics&quot;</span><span class="p">:</span> <span class="s2">&quot;الإحصاء الثانوي&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_us_history&quot;</span><span class="p">:</span> <span class="s2">&quot;تاريخ الولايات المتحدة الثانوي&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;high_school_world_history&quot;</span><span class="p">:</span> <span class="s2">&quot;تاريخ العالم الثانوي&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_aging&quot;</span><span class="p">:</span> <span class="s2">&quot;شيخوخة الإنسان&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;human_sexuality&quot;</span><span class="p">:</span> <span class="s2">&quot;الجنس البشري&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;international_law&quot;</span><span class="p">:</span> <span class="s2">&quot;القانون الدولي&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;jurisprudence&quot;</span><span class="p">:</span> <span class="s2">&quot;الفقه القانوني&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;logical_fallacies&quot;</span><span class="p">:</span> <span class="s2">&quot;المغالطات المنطقية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;machine_learning&quot;</span><span class="p">:</span> <span class="s2">&quot;تعلم الآلة&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;management&quot;</span><span class="p">:</span> <span class="s2">&quot;الإدارة&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;marketing&quot;</span><span class="p">:</span> <span class="s2">&quot;التسويق&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;medical_genetics&quot;</span><span class="p">:</span> <span class="s2">&quot;الوراثة الطبية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;miscellaneous&quot;</span><span class="p">:</span> <span class="s2">&quot;متفرقات&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_disputes&quot;</span><span class="p">:</span> <span class="s2">&quot;الخلافات الأخلاقية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moral_scenarios&quot;</span><span class="p">:</span> <span class="s2">&quot;السيناريوهات الأخلاقية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nutrition&quot;</span><span class="p">:</span> <span class="s2">&quot;التغذية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;philosophy&quot;</span><span class="p">:</span> <span class="s2">&quot;الفلسفة&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;prehistory&quot;</span><span class="p">:</span> <span class="s2">&quot;ما قبل التاريخ&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_accounting&quot;</span><span class="p">:</span> <span class="s2">&quot;المحاسبة المهنية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_law&quot;</span><span class="p">:</span> <span class="s2">&quot;القانون المهني&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_medicine&quot;</span><span class="p">:</span> <span class="s2">&quot;الطب المهني&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;professional_psychology&quot;</span><span class="p">:</span> <span class="s2">&quot;علم النفس المهني&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;public_relations&quot;</span><span class="p">:</span> <span class="s2">&quot;العلاقات العامة&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;security_studies&quot;</span><span class="p">:</span> <span class="s2">&quot;دراسات الأمن&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sociology&quot;</span><span class="p">:</span> <span class="s2">&quot;علم الاجتماع&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;us_foreign_policy&quot;</span><span class="p">:</span> <span class="s2">&quot;السياسة الخارجية الأمريكية&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;virology&quot;</span><span class="p">:</span> <span class="s2">&quot;علم الفيروسات&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;world_religions&quot;</span><span class="p">:</span> <span class="s2">&quot;الديانات العالمية&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">LANGUAGE_SUBJECTS_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;FR_FR&quot;</span><span class="p">:</span> <span class="n">MMLU_SUBJECTS_FR</span><span class="p">,</span>
+    <span class="s2">&quot;DE_DE&quot;</span><span class="p">:</span> <span class="n">MMLU_SUBJECTS_DE</span><span class="p">,</span>
+    <span class="s2">&quot;ES_LA&quot;</span><span class="p">:</span> <span class="n">MMLU_SUBJECTS_ES</span><span class="p">,</span>
+    <span class="s2">&quot;IT_IT&quot;</span><span class="p">:</span> <span class="n">MMLU_SUBJECTS_IT</span><span class="p">,</span>
+    <span class="s2">&quot;PT_BR&quot;</span><span class="p">:</span> <span class="n">MMLU_SUBJECTS_PT</span><span class="p">,</span>
+    <span class="s2">&quot;AR_XY&quot;</span><span class="p">:</span> <span class="n">MMLU_SUBJECTS_AR</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">LANGUAGE_INITIAL_PROMPT_TEXT_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;FR_FR&quot;</span><span class="p">:</span> <span class="s2">&quot;Les questions suivantes sont des questions à choix multiples (avec réponses) sur&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DE_DE&quot;</span><span class="p">:</span> <span class="s2">&quot;Die folgenden sind Multiple-Choice-Fragen (mit Antworten) über&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ES_LA&quot;</span><span class="p">:</span> <span class="s2">&quot;Las siguientes son preguntas de opción múltiple (con respuestas) sobre&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;IT_IT&quot;</span><span class="p">:</span> <span class="s2">&quot;Le seguenti sono domande a scelta multipla (con risposte) su&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PT_BR&quot;</span><span class="p">:</span> <span class="s2">&quot;As seguintes são perguntas de múltipla escolha (com respostas) sobre&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AR_XY&quot;</span><span class="p">:</span> <span class="s2">&quot;فيما يلي أسئلة اختيار من متعدد (مع الإجابات) حول&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">LANGUAGE_QUESTION_TEXT_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;FR_FR&quot;</span><span class="p">:</span> <span class="s2">&quot;Question&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DE_DE&quot;</span><span class="p">:</span> <span class="s2">&quot;Frage&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ES_LA&quot;</span><span class="p">:</span> <span class="s2">&quot;Pregunta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;IT_IT&quot;</span><span class="p">:</span> <span class="s2">&quot;Domanda&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PT_BR&quot;</span><span class="p">:</span> <span class="s2">&quot;Pergunta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AR_XY&quot;</span><span class="p">:</span> <span class="s2">&quot;السؤال&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">LANGUAGE_ANSWER_TEXT_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;FR_FR&quot;</span><span class="p">:</span> <span class="s2">&quot;Réponse&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DE_DE&quot;</span><span class="p">:</span> <span class="s2">&quot;Antwort&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ES_LA&quot;</span><span class="p">:</span> <span class="s2">&quot;Respuesta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;IT_IT&quot;</span><span class="p">:</span> <span class="s2">&quot;Risposta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PT_BR&quot;</span><span class="p">:</span> <span class="s2">&quot;Resposta&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AR_XY&quot;</span><span class="p">:</span> <span class="s2">&quot;الإجابة&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">LANGUAGE_NAME_MAP</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;FR_FR&quot;</span><span class="p">:</span> <span class="n">Language</span><span class="o">.</span><span class="n">FRA</span><span class="p">,</span>
+    <span class="s2">&quot;DE_DE&quot;</span><span class="p">:</span> <span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">,</span>
+    <span class="s2">&quot;ES_LA&quot;</span><span class="p">:</span> <span class="n">Language</span><span class="o">.</span><span class="n">SPA</span><span class="p">,</span>
+    <span class="s2">&quot;IT_IT&quot;</span><span class="p">:</span> <span class="n">Language</span><span class="o">.</span><span class="n">ITA</span><span class="p">,</span>
+    <span class="s2">&quot;PT_BR&quot;</span><span class="p">:</span> <span class="n">Language</span><span class="o">.</span><span class="n">POR</span><span class="p">,</span>
+    <span class="s2">&quot;AR_XY&quot;</span><span class="p">:</span> <span class="n">Language</span><span class="o">.</span><span class="n">ARB</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="MMMLU">
+<a class="viewcode-back" href="../../../../api/generated/eval_framework.tasks.benchmarks.html#eval_framework.tasks.benchmarks.mmmlu.MMMLU">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MMMLU</span><span class="p">(</span><span class="n">BaseTask</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;MMMLU dataset: https://huggingface.co/datasets/openai/MMMLU&quot;&quot;&quot;</span>
+
+    <span class="n">NAME</span> <span class="o">=</span> <span class="s2">&quot;MMMLU&quot;</span>
+    <span class="n">DATASET_PATH</span> <span class="o">=</span> <span class="s2">&quot;openai/MMMLU&quot;</span>
+    <span class="n">SAMPLE_SPLIT</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+    <span class="n">FEWSHOT_SPLIT</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+    <span class="n">RESPONSE_TYPE</span> <span class="o">=</span> <span class="n">ResponseType</span><span class="o">.</span><span class="n">LOGLIKELIHOODS</span>
+    <span class="n">METRICS</span> <span class="o">=</span> <span class="p">[</span><span class="n">AccuracyLoglikelihood</span><span class="p">,</span> <span class="n">AccuracyNormLoglikelihood</span><span class="p">]</span>
+    <span class="n">SUBJECTS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="n">MMMLU_LANGS</span><span class="p">,</span> <span class="n">MMLU_SUBJECTS</span><span class="p">))</span>
+    <span class="n">PERTURBATION_UNMODIFIABLE_WORDS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Question&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">get_n_letters</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">LANGUAGE</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nb">str</span><span class="p">((</span><span class="n">lang_code</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">subject</span><span class="p">)):</span> <span class="n">LANGUAGE_NAME_MAP</span><span class="p">[</span><span class="n">lang_code</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">lang_code</span><span class="p">,</span> <span class="n">subjects</span> <span class="ow">in</span> <span class="n">LANGUAGE_SUBJECTS_MAP</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="n">subjects</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_fewshot</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">num_fewshot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keys</span> <span class="o">=</span> <span class="n">get_n_letters</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subject</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lang</span><span class="p">,</span> <span class="n">current_subject</span> <span class="o">=</span> <span class="n">subject</span>
+        <span class="n">hf_dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_hf_dataset</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">DATASET_PATH</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">lang</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rnd</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">(</span><span class="n">RANDOM_SEED</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">split</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">hf_dataset</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Subject&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">current_subject</span><span class="p">)</span>
+            <span class="n">data_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">split</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">SAMPLE_SPLIT</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rnd</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">SAMPLE_SPLIT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FEWSHOT_SPLIT</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">split</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_list</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_initial_prompt_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">language_key</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;subject&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="n">LANGUAGE_SUBJECTS_MAP</span><span class="p">[</span><span class="n">language_key</span><span class="p">][</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;Subject&quot;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">LANGUAGE_INITIAL_PROMPT_TEXT_MAP</span><span class="p">[</span><span class="n">language_key</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_instruction_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">question</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Question&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">])</span>
+        <span class="n">language_key</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;subject&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">LANGUAGE_QUESTION_TEXT_MAP</span><span class="p">[</span><span class="n">language_key</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">question</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">choices</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_fewshot_target_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">ground_truth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ground_truth</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">ground_truth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_cue_text</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}{</span><span class="n">ground_truth</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_cue_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">language_key</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;subject&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">LANGUAGE_ANSWER_TEXT_MAP</span><span class="p">[</span><span class="n">language_key</span><span class="p">]</span><span class="si">}</span><span class="s2">:&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_ground_truth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;Answer&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_possible_completions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="MMMLU_GERMAN_COT">
+<a class="viewcode-back" href="../../../../api/generated/eval_framework.tasks.benchmarks.html#eval_framework.tasks.benchmarks.mmmlu.MMMLU_GERMAN_COT">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MMMLU_GERMAN_COT</span><span class="p">(</span><span class="n">MMMLU</span><span class="p">):</span>
+    <span class="n">NAME</span> <span class="o">=</span> <span class="s2">&quot;MMMLU_GERMAN_COT&quot;</span>
+    <span class="n">RESPONSE_TYPE</span> <span class="o">=</span> <span class="n">ResponseType</span><span class="o">.</span><span class="n">COMPLETION</span>
+    <span class="n">METRICS</span> <span class="o">=</span> <span class="p">[</span><span class="n">AccuracyCompletion</span><span class="p">,</span> <span class="n">GermanCompletionChecker</span><span class="p">]</span>
+    <span class="n">SUBJECTS</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;DE_DE&quot;</span><span class="p">,</span> <span class="n">subject</span><span class="p">)</span> <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="n">MMLU_SUBJECTS</span><span class="p">]</span>
+    <span class="n">PERTURBATION_UNMODIFIABLE_WORDS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Frage&quot;</span><span class="p">,</span> <span class="s2">&quot;Question&quot;</span><span class="p">,</span> <span class="s2">&quot;Answer&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">get_n_letters</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">LANGUAGE</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="n">Language</span><span class="o">.</span><span class="n">DEU</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">([</span><span class="s2">&quot;de&quot;</span><span class="p">],</span> <span class="n">MMLU_SUBJECTS</span><span class="p">))}</span>
+
+    <span class="n">ANS_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Daher lautet die Antwort: ([ABCD])&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_fewshot</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">num_fewshot</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Fewshot is not supported for MMMLU_GERMAN_COT&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">num_fewshot</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_sequences</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Frage:&quot;</span><span class="p">,</span> <span class="s2">&quot;Question:&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_answer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completion</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ANS_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">completion</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">match_str</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">match_str</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;[invalid]&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_cue_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_ground_truth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Answer&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="MMMLU_GERMAN_COT.post_process_generated_completion">
+<a class="viewcode-back" href="../../../../api/generated/eval_framework.tasks.benchmarks.html#eval_framework.tasks.benchmarks.mmmlu.MMMLU_GERMAN_COT.post_process_generated_completion">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process_generated_completion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completion_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span> <span class="n">Sample</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">stop_sequence</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_sequences</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">stop_sequence</span> <span class="ow">in</span> <span class="n">completion_text</span><span class="p">:</span>
+                <span class="n">completion_text</span> <span class="o">=</span> <span class="n">completion_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">stop_sequence</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_answer</span><span class="p">(</span><span class="n">completion_text</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_instruction_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">question</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;Question&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">])</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Frage: </span><span class="si">{</span><span class="n">question</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">choices</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_initial_prompt_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Die folgende Frage ist eine Multiple-Choice-Frage zum Thema </span><span class="si">{</span><span class="n">MMLU_SUBJECTS_DE</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]]</span><span class="si">}</span><span class="s2">. &quot;</span>
+            <span class="s1">&#39;Fasse deine Argumentation zusammen und schließe mit dem Satz: &quot;Daher lautet die Antwort: X&quot; &#39;</span>
+            <span class="s2">&quot;ab, wobei X eine der Antworten A, B, C oder D ist. Benutze ausschließlich Deutsch.&quot;</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Aleph Alpha Research
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

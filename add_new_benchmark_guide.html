@@ -1,0 +1,742 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Included Benchmark Tasks" href="benchmarks_and_metrics.html"><link rel="prev" title="Creating Completion Tasks" href="completion_task_guide.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>How to Add a New Benchmark to Eval Framework - Eval-Framework v0.2.12</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Eval-Framework v0.2.12</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <span class="sidebar-brand-text">Eval-Framework v0.2.12</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_usage.html">Using the CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guides</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="completion_task_guide.html">Creating Completion Tasks</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">How to Add a New Benchmark to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks_and_metrics.html">Included Benchmark Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controlling_upload_results.html">Controlling HuggingFace Upload Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker_guide.html">Docker Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evaluate_huggingface_model.html">How to Evaluate HuggingFace Models with Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loglikelihood_task_guide.html">Creating Loglikelihood Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_arguments.html">Model Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview_dataloading.html">Overview Dataloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="understanding_results_guide.html">Understanding Evaluation Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="using_determined.html">Using Determined</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utils in <code class="docutils literal notranslate"><span class="pre">eval-framework</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="wandb_integration.html">Weights and Biases Integration with Eval-Framework</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="CONTRIBUTING.html">Contributing to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/generated/eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/generated/modules.html">eval_framework</a><input aria-label="Toggle navigation of eval_framework" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/generated/eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="api/generated/eval_framework.tasks.html">eval_framework.tasks package</a><input aria-label="Toggle navigation of eval_framework.tasks package" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="api/generated/eval_framework.tasks.benchmarks.html">eval_framework.tasks.benchmarks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="how-to-add-a-new-benchmark-to-eval-framework">
+<h1>How to Add a New Benchmark to Eval Framework<a class="headerlink" href="#how-to-add-a-new-benchmark-to-eval-framework" title="Link to this heading">¶</a></h1>
+<p>This guide provides comprehensive instructions for adding new benchmarks to the eval-framework, including all possible configuration options and attributes.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>The eval-framework supports two response types:</p>
+<ol class="arabic simple">
+<li><p><strong>Completion Tasks</strong> - Generate text completions (e.g., math problems, code generation)</p></li>
+<li><p><strong>Loglikelihood Tasks</strong> - Multiple choice questions where the model ranks answer options</p></li>
+</ol>
+<p>For detailed information about implementing each task type, please refer to:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="completion_task_guide.html"><span class="std std-doc">Completion Task Guide</span></a> - Comprehensive guide for text generation tasks</p></li>
+<li><p><a class="reference internal" href="loglikelihood_task_guide.html"><span class="std std-doc">Loglikelihood Task Guide</span></a> - Detailed guide for multiple choice tasks</p></li>
+</ul>
+</section>
+<section id="understanding-the-base-task-structure">
+<h2>Understanding the Base Task Structure<a class="headerlink" href="#understanding-the-base-task-structure" title="Link to this heading">¶</a></h2>
+<p>All benchmarks inherit from <code class="docutils literal notranslate"><span class="pre">BaseTask[SubjectType]</span></code> and must implement several required methods and class attributes.</p>
+<section id="required-class-attributes">
+<h3>Required Class Attributes<a class="headerlink" href="#required-class-attributes" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">YourBenchmark</span><span class="p">(</span><span class="n">BaseTask</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>  <span class="c1"># or BaseTask[Enum] for multiple subjects</span>
+    <span class="c1"># === CORE CONFIGURATION ===</span>
+    <span class="n">NAME</span><span class="p">:</span> <span class="nb">str</span>                           <span class="c1"># Display name for the benchmark</span>
+    <span class="n">DATASET_PATH</span><span class="p">:</span> <span class="nb">str</span>                   <span class="c1"># HuggingFace dataset path or local path</span>
+    <span class="n">SAMPLE_SPLIT</span><span class="p">:</span> <span class="nb">str</span>                   <span class="c1"># Dataset split for evaluation samples</span>
+    <span class="n">FEWSHOT_SPLIT</span><span class="p">:</span> <span class="nb">str</span>                  <span class="c1"># Dataset split for few-shot examples</span>
+    <span class="n">RESPONSE_TYPE</span><span class="p">:</span> <span class="n">ResponseType</span>         <span class="c1"># COMPLETION or LOGLIKELIHOODS</span>
+    <span class="n">METRICS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">BaseMetric</span><span class="p">]]</span>     <span class="c1"># List of metric classes to compute</span>
+    <span class="n">SUBJECTS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SubjectType</span><span class="p">]</span>         <span class="c1"># List of subjects/categories to evaluate</span>
+
+    <span class="c1"># === OPTIONAL CONFIGURATION ===</span>
+    <span class="n">HF_REVISION</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1"># Git revision for reproducibility</span>
+    <span class="n">PERTURBATION_UNMODIFIABLE_WORDS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Words to protect from perturbation</span>
+    <span class="n">LANGUAGE</span><span class="p">:</span> <span class="n">Language</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Language</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Language</span><span class="p">,</span> <span class="n">Language</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Language(s) tested</span>
+</pre></div>
+</div>
+</section>
+<section id="required-methods-to-implement">
+<h3>Required Methods to Implement<a class="headerlink" href="#required-methods-to-implement" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_instruction_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate the instruction/question text for a sample.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_ground_truth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the correct answer(s) from a dataset item.&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="optional-methods-to-override">
+<h3>Optional Methods to Override<a class="headerlink" href="#optional-methods-to-override" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">_get_initial_prompt_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Text to prepend to the first message.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_system_prompt_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;System message content.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_cue_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Text to append as assistant cue (e.g., &#39;Answer:&#39;).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_possible_completions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;For loglikelihood tasks: list of answer choices.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_fewshot_target_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Target text for few-shot examples.&quot;&quot;&quot;</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ground_truth</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">target</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">BaseMetricContext</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseMetricContext</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Additional parameters for evaluation metrics.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sample_fewshot_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom few-shot sampling logic.&quot;&quot;&quot;</span>
+    <span class="c1"># Default implementation samples randomly from FEWSHOT_SPLIT</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">subject</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Sample</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create one or more samples from a dataset item.&quot;&quot;&quot;</span>
+    <span class="c1"># Default creates single sample - override for multi-sample items</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">post_process_generated_completion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completion_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sample</span><span class="p">:</span> <span class="n">Sample</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Post-process model completions (e.g., extract final answer).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">completion_text</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="response-types-metrics-and-configuration-attributes-reference">
+<h2>Response Types, Metrics, and Configuration Attributes Reference<a class="headerlink" href="#response-types-metrics-and-configuration-attributes-reference" title="Link to this heading">¶</a></h2>
+<p>This section provides a complete reference for all configurations available when creating benchmarks.</p>
+<section id="response-types">
+<h3>Response Types<a class="headerlink" href="#response-types" title="Link to this heading">¶</a></h3>
+<p>The response type determines how your model interacts with the task and what type of output is expected.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.models.sample</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResponseType</span>
+
+<span class="c1"># For text generation tasks</span>
+<span class="n">RESPONSE_TYPE</span> <span class="o">=</span> <span class="n">ResponseType</span><span class="o">.</span><span class="n">COMPLETION</span>
+
+<span class="c1"># For multiple choice tasks</span>
+<span class="n">RESPONSE_TYPE</span> <span class="o">=</span> <span class="n">ResponseType</span><span class="o">.</span><span class="n">LOGLIKELIHOODS</span>
+</pre></div>
+</div>
+</section>
+<section id="all-available-metrics">
+<h3>All Available Metrics<a class="headerlink" href="#all-available-metrics" title="Link to this heading">¶</a></h3>
+<p>Metrics define how your task’s outputs are evaluated and scored. Choose metrics that align with your response type and evaluation goals.</p>
+<section id="completion-metrics">
+<h4>Completion Metrics<a class="headerlink" href="#completion-metrics" title="Link to this heading">¶</a></h4>
+<p>These metrics work with generated text outputs from COMPLETION tasks:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Accuracy metrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.accuracy_completion</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccuracyCompletion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.math_reasoning_completion</span><span class="w"> </span><span class="kn">import</span> <span class="n">MathReasoningCompletion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.cwe_accuracy</span><span class="w"> </span><span class="kn">import</span> <span class="n">CWEAccuracy</span>
+
+<span class="c1"># Translation and similarity metrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.bleu</span><span class="w"> </span><span class="kn">import</span> <span class="n">BLEU</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.chrf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CHRF</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.ter</span><span class="w"> </span><span class="kn">import</span> <span class="n">TER</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.rouge_1</span><span class="w"> </span><span class="kn">import</span> <span class="n">ROUGE_1</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.rouge_2</span><span class="w"> </span><span class="kn">import</span> <span class="n">ROUGE_2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.rouge_l</span><span class="w"> </span><span class="kn">import</span> <span class="n">ROUGE_L</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.rouge_geometric_mean</span><span class="w"> </span><span class="kn">import</span> <span class="n">ROUGE_GEOMETRIC_MEAN</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.f1</span><span class="w"> </span><span class="kn">import</span> <span class="n">F1</span>
+
+<span class="c1"># Code evaluation metrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.code_assertion</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeCompletionAssertion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.code_execution_pass_at_one</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodeExecutionPassAtOne</span>
+
+<span class="c1"># Format validation metrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.json_format</span><span class="w"> </span><span class="kn">import</span> <span class="n">JsonFormat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.csv_format</span><span class="w"> </span><span class="kn">import</span> <span class="n">CSVFormat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.format_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckJsonFormat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.format_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">CheckPostScriptFormat</span>
+
+
+<span class="c1"># Specialized metrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.ifeval</span><span class="w"> </span><span class="kn">import</span> <span class="n">IFEvalMetric</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.language_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">LanguageChecker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.length_control</span><span class="w"> </span><span class="kn">import</span> <span class="n">LengthControl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.niah_accuracy</span><span class="w"> </span><span class="kn">import</span> <span class="n">NIAHAccuracy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.text_counter</span><span class="w"> </span><span class="kn">import</span> <span class="n">WordCounter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.text_counter</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParagraphCounter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.text_counter</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResponseToOriginalLengthRatio</span>
+
+</pre></div>
+</div>
+</section>
+<section id="loglikelihood-metrics">
+<h4>Loglikelihood Metrics<a class="headerlink" href="#loglikelihood-metrics" title="Link to this heading">¶</a></h4>
+<p>These metrics work with probability rankings from LOGLIKELIHOODS tasks:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Standard accuracy metrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.loglikelihood.accuracy_loglikelihood</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccuracyLoglikelihood</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.loglikelihood.accuracy_loglikelihood</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccuracyNormLoglikelihood</span>
+
+<span class="c1"># Probability metrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.loglikelihood.probability_mass</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProbabilityMass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.loglikelihood.probability_mass</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProbabilityMassNorm</span>
+</pre></div>
+</div>
+</section>
+<section id="llm-judge-metrics">
+<h4>LLM Judge Metrics<a class="headerlink" href="#llm-judge-metrics" title="Link to this heading">¶</a></h4>
+<p>These metrics use another LLM to evaluate generated outputs, useful for complex or subjective tasks:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_chatbot_style</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMJudgeChatbotStyle</span>
+<span class="c1"># Classifies whether a text generation model&#39;s response follows a chatbot-style format by evaluating characteristics like friendly introductions, verbose language, follow-up questions, and conversational fluff, returning a boolean classification with reasoning. (English and German)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_completion_accuracy</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMJudgeCompletionAccuracy</span>
+<span class="c1"># Evaluates whether a text generation model&#39;s response matches the target response by assessing if the generation addresses the question correctly and provides the right information, returning a boolean classification. (English)</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_conciseness</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMJudgeConciseness</span>
+<span class="c1"># Assesses if the model&#39;s response is concise by evaluating whether it is brief and to the point without unnecessary details or elaboration, returning a boolean classification with reasoning. (English and German)</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_contains_names</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMJudgeAvoidsNames</span>
+<span class="c1"># Checks whether the model text generation contains names of individuals, returning a boolean classification. (English, French and German)</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_format_correctness</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMJudgeFormatCorrectness</span>
+<span class="c1"># Evaluates the correctness and quality of models&#39; outputs by checking if they comply with format specifications stated in the prompt, returning a detailed assessment with format correctness status (1 for correct, 0 for incorrect) and reasoning. (English)</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_instruction</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMJudgeInstruction</span>
+<span class="c1"># Evaluates how well the response from a text generation model fulfills the requirements of a given user instruction on a fixed set of criteria, where the user cannot ask follow-up questions to the model. (English, Finnish and German)</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_mtbench_pair</span><span class="w"> </span><span class="kn">import</span> <span class="n">MTBenchJudgePair</span>
+<span class="c1"># Evaluates the quality of two AI assistant responses by acting as an impartial judge, comparing factors like helpfulness, relevance, accuracy, and depth to determine which assistant provides a better answer (A wins, B wins, or tie). (English, Finnish and German)</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_mtbench_single</span><span class="w"> </span><span class="kn">import</span> <span class="n">MTBenchJudgeSingle</span>
+<span class="c1"># Evaluates a single AI assistant response on a 1-10 scale, considering factors like helpfulness, relevance, accuracy, depth, creativity, and detail level to provide an objective quality rating. (English, Finnish and German)</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_refusal</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMJudgeRefusal</span>
+<span class="c1"># Assesses whether the assistant&#39;s response is a refusal to answer the question. (English)</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMJudgeSql</span>
+<span class="c1"># Evaluates SQL query quality against specified requirements, rating efficiency and accuracy on an A-F scale and providing detailed reasoning for the grade assigned. (English and German)</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.llm.llm_judge_world_knowledge</span><span class="w"> </span><span class="kn">import</span> <span class="n">LLMJudgeWorldKnowledge</span>
+<span class="c1"># Evaluates whether a summary contains information that goes beyond the reference text (also known as &quot;world knowledge&quot;), returning a boolean classification with detailed reasoning for the assessment. (English, French and German)</span>
+
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="implementation-examples-and-patterns">
+<h2>Implementation Examples and Patterns<a class="headerlink" href="#implementation-examples-and-patterns" title="Link to this heading">¶</a></h2>
+<section id="practical-example-geographyqatask">
+<h3>Practical Example: GeographyQATask<a class="headerlink" href="#practical-example-geographyqatask" title="Link to this heading">¶</a></h3>
+<p>Practical example of creating a geography question-answering benchmark.</p>
+<p><strong>Dataset Structure:</strong> Each item looks like <code class="docutils literal notranslate"><span class="pre">{&quot;country&quot;:</span> <span class="pre">&quot;Germany&quot;,</span> <span class="pre">&quot;capital&quot;:</span> <span class="pre">&quot;Berlin&quot;}</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseTask</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.models.sample</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResponseType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.accuracy_completion</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccuracyCompletion</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">GeographyQATask</span><span class="p">(</span><span class="n">BaseTask</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="c1"># Required class attributes</span>
+    <span class="n">NAME</span> <span class="o">=</span> <span class="s2">&quot;GeographyQA&quot;</span>
+    <span class="n">DATASET_PATH</span> <span class="o">=</span> <span class="s2">&quot;example/geography_qa&quot;</span>
+    <span class="n">SAMPLE_SPLIT</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+    <span class="n">FEWSHOT_SPLIT</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span>
+    <span class="n">RESPONSE_TYPE</span> <span class="o">=</span> <span class="n">ResponseType</span><span class="o">.</span><span class="n">COMPLETION</span>
+    <span class="n">METRICS</span> <span class="o">=</span> <span class="p">[</span><span class="n">AccuracyCompletion</span><span class="p">]</span>
+    <span class="n">SUBJECTS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Europe&quot;</span><span class="p">,</span> <span class="s2">&quot;Asia&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_instruction_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Format the question from the dataset item.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Q: What&#39;s the capital of </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;country&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">?&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_ground_truth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract the correct answer from the dataset item.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;A: </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;capital&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_system_prompt_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Provide context about the task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;Answer the geography questions accurately.&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_cue_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start the model&#39;s response with &#39;A:&#39;.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;A:&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_sample_fewshot_examples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample random examples from the training split.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rnd</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">FEWSHOT_SPLIT</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_fewshot</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="add-to-task-registry">
+<h3>Add to Task Registry<a class="headerlink" href="#add-to-task-registry" title="Link to this heading">¶</a></h3>
+<p>Add a registration call for your new benchmark to <code class="docutils literal notranslate"><span class="pre">register_all_tasks</span></code> in <code class="docutils literal notranslate"><span class="pre">src/eval_framework/tasks/task_names.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">register_lazy_task</span><span class="p">(</span><span class="s2">&quot;eval_framework.tasks.benchmarks.geographyqa.GeographyQA&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The task will now be available through <code class="docutils literal notranslate"><span class="pre">get_task(&quot;GeographyQA&quot;)</span></code>.</p>
+</section>
+<section id="testing-your-benchmark">
+<h3>Testing your benchmark<a class="headerlink" href="#testing-your-benchmark" title="Link to this heading">¶</a></h3>
+<p>All tasks automatically go through formatting tests to ensure proper prompt generation. However, if your benchmark has specific functionality that needs testing, create a dedicated test file.</p>
+<section id="automatic-formatting-tests">
+<h4>Automatic Formatting Tests<a class="headerlink" href="#automatic-formatting-tests" title="Link to this heading">¶</a></h4>
+<p>All benchmarks are automatically tested for proper prompt formatting across different chat templates. No additional setup required.</p>
+</section>
+<section id="custom-task-tests-optional">
+<h4>Custom Task Tests (Optional)<a class="headerlink" href="#custom-task-tests-optional" title="Link to this heading">¶</a></h4>
+<p>If your benchmark has specific logic that needs testing, create a test file in <code class="docutils literal notranslate"><span class="pre">tests/tasks/</span></code> to test it.</p>
+</section>
+</section>
+</section>
+<section id="benchmark-examples-by-task-type">
+<h2>Benchmark Examples by Task Type<a class="headerlink" href="#benchmark-examples-by-task-type" title="Link to this heading">¶</a></h2>
+<p>Study these existing benchmarks in the codebase for more complex patterns:</p>
+<section id="simple-classification-tasks">
+<h3>Simple Classification Tasks<a class="headerlink" href="#simple-classification-tasks" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>ARC</strong> (<code class="docutils literal notranslate"><span class="pre">src/eval_framework/tasks/arc.py</span></code>): Multiple choice with loglikelihoods</p></li>
+<li><p><strong>MMLU</strong> (<code class="docutils literal notranslate"><span class="pre">src/eval_framework/tasks/mmlu.py</span></code>): Multi-subject classification with enum subjects</p></li>
+</ul>
+</section>
+<section id="reasoning-tasks">
+<h3>Reasoning Tasks<a class="headerlink" href="#reasoning-tasks" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>GSM8K</strong> (<code class="docutils literal notranslate"><span class="pre">src/eval_framework/tasks/gsm8k.py</span></code>): Math reasoning with answer extraction patterns</p></li>
+</ul>
+</section>
+<section id="code-generation">
+<h3>Code Generation<a class="headerlink" href="#code-generation" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>HumanEval</strong> (<code class="docutils literal notranslate"><span class="pre">src/eval_framework/tasks/human_eval.py</span></code>): Code completion with execution validation</p></li>
+<li><p><strong>MBPP</strong> (<code class="docutils literal notranslate"><span class="pre">src/eval_framework/tasks/mbpp.py</span></code>): Code generation with comprehensive test validation</p></li>
+</ul>
+</section>
+<section id="long-context-tasks">
+<h3>Long Context Tasks<a class="headerlink" href="#long-context-tasks" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>InfiniteBench</strong> (<code class="docutils literal notranslate"><span class="pre">src/eval_framework/tasks/infinite_bench_tasks.py</span></code>): Long context reasoning tasks</p></li>
+</ul>
+</section>
+<section id="custom-format-tasks">
+<h3>Custom Format Tasks<a class="headerlink" href="#custom-format-tasks" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>IFEval</strong> (<code class="docutils literal notranslate"><span class="pre">src/eval_framework/tasks/ifeval.py</span></code>): Instruction following with format validation</p></li>
+<li><p><strong>JSON/CSV Tasks:</strong> Custom format validation examples</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="benchmarks_and_metrics.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Included Benchmark Tasks</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="completion_task_guide.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Creating Completion Tasks</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Aleph Alpha Research
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">How to Add a New Benchmark to Eval Framework</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#understanding-the-base-task-structure">Understanding the Base Task Structure</a><ul>
+<li><a class="reference internal" href="#required-class-attributes">Required Class Attributes</a></li>
+<li><a class="reference internal" href="#required-methods-to-implement">Required Methods to Implement</a></li>
+<li><a class="reference internal" href="#optional-methods-to-override">Optional Methods to Override</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#response-types-metrics-and-configuration-attributes-reference">Response Types, Metrics, and Configuration Attributes Reference</a><ul>
+<li><a class="reference internal" href="#response-types">Response Types</a></li>
+<li><a class="reference internal" href="#all-available-metrics">All Available Metrics</a><ul>
+<li><a class="reference internal" href="#completion-metrics">Completion Metrics</a></li>
+<li><a class="reference internal" href="#loglikelihood-metrics">Loglikelihood Metrics</a></li>
+<li><a class="reference internal" href="#llm-judge-metrics">LLM Judge Metrics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#implementation-examples-and-patterns">Implementation Examples and Patterns</a><ul>
+<li><a class="reference internal" href="#practical-example-geographyqatask">Practical Example: GeographyQATask</a></li>
+<li><a class="reference internal" href="#add-to-task-registry">Add to Task Registry</a></li>
+<li><a class="reference internal" href="#testing-your-benchmark">Testing your benchmark</a><ul>
+<li><a class="reference internal" href="#automatic-formatting-tests">Automatic Formatting Tests</a></li>
+<li><a class="reference internal" href="#custom-task-tests-optional">Custom Task Tests (Optional)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#benchmark-examples-by-task-type">Benchmark Examples by Task Type</a><ul>
+<li><a class="reference internal" href="#simple-classification-tasks">Simple Classification Tasks</a></li>
+<li><a class="reference internal" href="#reasoning-tasks">Reasoning Tasks</a></li>
+<li><a class="reference internal" href="#code-generation">Code Generation</a></li>
+<li><a class="reference internal" href="#long-context-tasks">Long Context Tasks</a></li>
+<li><a class="reference internal" href="#custom-format-tasks">Custom Format Tasks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
