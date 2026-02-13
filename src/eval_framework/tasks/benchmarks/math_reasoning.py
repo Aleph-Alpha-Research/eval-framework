@@ -6,6 +6,7 @@ from eval_framework.metrics.completion.accuracy_completion import AccuracyComple
 from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
 from eval_framework.metrics.completion.math_minerva_completion import MathMinervaCompletion
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.metrics.completion.minerva_math_utils import (
     extract_answers,
     last_boxed_only_string,
@@ -583,6 +584,62 @@ class MATH500Minerva(MATHMinerva):
     def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "MATH500Minerva evaluation does not include few shot"
         super().__init__(num_fewshot)
+
+
+class MATHMinervaBPB(MATHReasoning):
+    """
+    MATH (Hendrycks) with Minerva-style prompt, evaluated via loglikelihood of the
+    gold answer string (bits-per-byte).
+    Same prompt as MATHMinerva; scores P(normalized_gold_answer | prompt).
+    """
+
+    NAME = "MATHMinervaBPB"
+    DATASET_PATH = "EleutherAI/hendrycks_math"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "train"
+    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
+    METRICS = [BitsPerByteLoglikelihood]
+    SUBJECTS = [
+        "algebra",
+        "counting_and_probability",
+        "geometry",
+        "intermediate_algebra",
+        "number_theory",
+        "prealgebra",
+        "precalculus",
+    ]
+    LANGUAGE = Language.ENG
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return "Problem:\n" + item["problem"] + "\n\n" + "Solution:"
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return ""
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        normalized = self._normalized_gold_from_solution(item["solution"])
+        if normalized is None:
+            return None
+        return " " + normalized
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        normalized = self._normalized_gold_from_solution(item["solution"])
+        if normalized is None:
+            return None
+        return [" " + normalized]
+
+    def _normalized_gold_from_solution(self, solution: str) -> str | None:
+        boxed = last_boxed_only_string(solution)
+        if boxed is None:
+            return None
+        try:
+            unboxed = remove_boxed(boxed)
+            return normalize_final_answer(unboxed)
+        except AssertionError:
+            return None
 
 
 class MATHLvl5(MATH):

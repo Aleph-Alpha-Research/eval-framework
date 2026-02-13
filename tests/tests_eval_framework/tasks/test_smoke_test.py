@@ -1,7 +1,7 @@
 from eval_framework.tasks.benchmarks.csqa import CommonsenseQACloze, CommonsenseQAMC
 from eval_framework.tasks.benchmarks.drop import DropMC, DropRC
 from eval_framework.tasks.benchmarks.lab_bench import LabBenchCloze, LabBenchMC
-from eval_framework.tasks.benchmarks.math_reasoning import MATH500Minerva, MATHMinerva
+from eval_framework.tasks.benchmarks.math_reasoning import MATH500Minerva, MATHMinerva, MATHMinervaBPB
 from eval_framework.tasks.benchmarks.medqa import MedQACloze, MedQAMC
 from eval_framework.tasks.benchmarks.naturalqs_open import (
     NaturalQsOpen,
@@ -44,6 +44,7 @@ def test_naturalqs_open_tasks_smoke() -> None:
 
 def test_math_minerva_tasks_smoke() -> None:
     _smoke_test_task(MATHMinerva)
+    _smoke_test_task(MATHMinervaBPB)
     _smoke_test_task(MATH500Minerva)
 
 

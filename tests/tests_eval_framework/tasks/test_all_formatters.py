@@ -58,6 +58,7 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "InfiniteBench_RetrieveNumber": {"num_fewshot": 0},
     "InfiniteBench_RetrievePassKey1": {"num_fewshot": 0},
     "MATH": {"num_fewshot": 1},
+    "MATHMinervaBPB": {"num_fewshot": 0},
     "MATH500Minerva": {"num_fewshot": 0},
     "MATHLvl5": {"num_fewshot": 1},
     "MATH500": {"num_fewshot": 1},
