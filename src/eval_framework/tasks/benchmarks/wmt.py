@@ -3,7 +3,6 @@ from abc import ABC
 from typing import Any
 
 import pycountry
-import sacrebleu
 
 from eval_framework.metrics.completion.bleu import LINEWISE_BLEU
 from eval_framework.metrics.completion.chrf import LINEWISE_CHRF
@@ -12,7 +11,10 @@ from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseT
 
 
 class WMT(BaseTask[str], ABC):
-    """WMT dataset:"""
+    """WMT dataset: https://huggingface.co/datasets/wmt
+
+    Uses HuggingFace datasets for deterministic data loading.
+    """
 
     NAME = "WMT"
     DATASET_PATH = ""
@@ -27,13 +29,50 @@ class WMT(BaseTask[str], ABC):
         self.stop_sequences: list[str] = [".\n", " phrase: ", "phrase:", "phrase: ", " phrase:", "\n\n"]
 
     def _load_dataset(self, subject: str | None) -> None:
-        src_file, ref_file, _, _, _ = sacrebleu.download_test_set(test_set=self.DATASET_PATH, langpair=subject)
-        src_data, ref_data = [[line.rstrip() for line in sacrebleu.smart_open(file)] for file in (src_file, ref_file)]
+        """Load WMT dataset from HuggingFace.
 
-        data_list = [{"source": src, "target": ref, "subject": subject} for src, ref in zip(src_data, ref_data)]
+        The HuggingFace WMT datasets use the structure:
+        {
+            "translation": {
+                "src_lang": "Source text",
+                "tgt_lang": "Target text"
+            }
+        }
+
+        Args:
+            subject: Language pair in format "src-tgt" (e.g., "de-en", "en-fr")
+        """
+        # Load from HuggingFace - subject is the language pair like "de-en"
+        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject)
+
+        # Parse the language pair to get source and target language codes
+        if subject is None:
+            raise ValueError("subject is required for WMT dataset")
+        src_lang, tgt_lang = subject.split("-")
+
+        self.dataset = {}
         self.rnd = random.Random(RANDOM_SEED)
-        self.rnd.shuffle(data_list)
-        self.dataset = {"test": data_list}
+
+        for split, data in hf_dataset.items():
+            if split not in [self.SAMPLE_SPLIT, self.FEWSHOT_SPLIT]:
+                continue
+
+            # Transform HuggingFace format to expected format
+            data_list = []
+            for item in data:
+                translation = item["translation"]
+                data_list.append(
+                    {
+                        "source": translation[src_lang],
+                        "target": translation[tgt_lang],
+                        "subject": subject,
+                    }
+                )
+
+            if split == self.SAMPLE_SPLIT:
+                self.rnd.shuffle(data_list)
+
+            self.dataset[split] = data_list
 
     def _code_to_language(self, code: str) -> str:
         # key is alpha_2 or alpha_3 depending on the code length
@@ -69,8 +108,8 @@ class WMT(BaseTask[str], ABC):
 
 class WMT14(WMT):
     NAME = "WMT14"
-    DATASET_PATH = "wmt14"
-    SUBJECTS = ["en-fr", "fr-en"]
+    DATASET_PATH = "wmt/wmt14"
+    SUBJECTS = ["fr-en", "en-fr"]
     LANGUAGE = {
         "en-fr": (Language["ENG"], Language["FRA"]),
         "fr-en": (Language["FRA"], Language["ENG"]),
@@ -79,7 +118,7 @@ class WMT14(WMT):
 
 class WMT16(WMT):
     NAME = "WMT16"
-    DATASET_PATH = "wmt16"
+    DATASET_PATH = "wmt/wmt16"
     SUBJECTS = ["de-en", "en-de"]
     LANGUAGE = {
         "de-en": (Language["DEU"], Language["ENG"]),
@@ -89,7 +128,7 @@ class WMT16(WMT):
 
 class WMT20(WMT):
     NAME = "WMT20"
-    DATASET_PATH = "wmt20"
+    DATASET_PATH = "wmt/wmt20"
     SUBJECTS = ["de-en", "de-fr", "en-de", "fr-de"]
     LANGUAGE = {
         "de-en": (Language["DEU"], Language["ENG"]),
@@ -130,8 +169,8 @@ class WMT_INSTRUCT(WMT):
 
 class WMT14_INSTRUCT(WMT_INSTRUCT):
     NAME = "WMT14 Instruct"
-    DATASET_PATH = "wmt14"
-    SUBJECTS = ["en-fr", "fr-en"]
+    DATASET_PATH = "wmt/wmt14"
+    SUBJECTS = ["fr-en", "en-fr"]
     LANGUAGE = {
         "en-fr": (Language["ENG"], Language["FRA"]),
         "fr-en": (Language["FRA"], Language["ENG"]),
@@ -140,7 +179,7 @@ class WMT14_INSTRUCT(WMT_INSTRUCT):
 
 class WMT16_INSTRUCT(WMT_INSTRUCT):
     NAME = "WMT16 Instruct"
-    DATASET_PATH = "wmt16"
+    DATASET_PATH = "wmt/wmt16"
     SUBJECTS = ["de-en", "en-de"]
     LANGUAGE = {
         "de-en": (Language["DEU"], Language["ENG"]),
@@ -150,7 +189,7 @@ class WMT16_INSTRUCT(WMT_INSTRUCT):
 
 class WMT20_INSTRUCT(WMT_INSTRUCT):
     NAME = "WMT20 Instruct"
-    DATASET_PATH = "wmt20"
+    DATASET_PATH = "wmt/wmt20"
     SUBJECTS = ["de-en", "de-fr", "en-de", "fr-de"]
     LANGUAGE = {
         "de-en": (Language["DEU"], Language["ENG"]),
