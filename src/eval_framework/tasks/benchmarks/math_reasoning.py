@@ -6,13 +6,13 @@ from eval_framework.metrics.completion.accuracy_completion import AccuracyComple
 from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
 from eval_framework.metrics.completion.math_minerva_completion import MathMinervaCompletion
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
-from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.metrics.completion.minerva_math_utils import (
     extract_answers,
     last_boxed_only_string,
     normalize_final_answer,
     remove_boxed,
 )
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 
 
