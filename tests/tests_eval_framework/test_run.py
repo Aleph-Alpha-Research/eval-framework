@@ -7,7 +7,6 @@ from unittest.mock import Mock, patch
 
 from eval_framework.context.local import _load_model as _load_model_orig
 from eval_framework.run import run
-
 from tests.tests_eval_framework.conftest import MockLLM
 
 

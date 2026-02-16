@@ -1,3 +1,5 @@
+import pytest
+
 from eval_framework.tasks.benchmarks.csqa import CommonsenseQACloze, CommonsenseQAMC
 from eval_framework.tasks.benchmarks.drop import DropMC, DropRC
 from eval_framework.tasks.benchmarks.lab_bench import LabBenchCloze, LabBenchMC
@@ -8,8 +10,6 @@ from eval_framework.tasks.benchmarks.naturalqs_open import (
     NaturalQsOpenCloze,
     NaturalQsOpenMC,
 )
-import pytest
-
 from eval_framework.tasks.benchmarks.social_iqa import SocialIQACloze, SocialIQAMC
 
 
@@ -56,9 +56,7 @@ def test_social_iqa_tasks_smoke() -> None:
         _smoke_test_task(SocialIQAMC)
     except RuntimeError as e:
         if "no longer supported" in str(e) or "loading script" in str(e).lower():
-            pytest.skip(
-                "allenai/social_i_qa uses a dataset loading script not supported by this datasets version"
-            )
+            pytest.skip("allenai/social_i_qa uses a dataset loading script not supported by this datasets version")
         raise
 
 

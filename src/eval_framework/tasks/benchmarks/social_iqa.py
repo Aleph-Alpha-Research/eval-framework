@@ -29,12 +29,10 @@ SOCIAL_I_QA_ZIP_SUBDIR = "socialiqa-train-dev"
 def _load_social_i_qa_parquet() -> DatasetDict:
     """Load social_i_qa from parquet (Hub parquet branch or explicit parquet URLs).
 
-    Load parquet files directly so we do not depend on dataset loading scripts, which 
+    Load parquet files directly so we do not depend on dataset loading scripts, which
     are no longer supported in datasets 4.x.
     """
-    cache_dir: str = os.environ.get(
-        "HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets"
-    )
+    cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
     download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
 
     try:
@@ -70,9 +68,7 @@ def _load_social_i_qa_direct() -> DatasetDict:
     logic from the dataset loading script: download zip, read jsonl + label files,
     and build train/validation splits with the expected schema.
     """
-    cache_dir = Path(
-        os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
-    )
+    cache_dir = Path(os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets"))
     extract_dir = cache_dir / "social_i_qa_direct" / SOCIAL_I_QA_ZIP_SUBDIR
     zip_path = cache_dir / "social_i_qa_direct" / "socialiqa-train-dev.zip"
 
@@ -90,14 +86,16 @@ def _load_social_i_qa_direct() -> DatasetDict:
         with open(jsonl_path, encoding="utf-8") as f:
             for idx, line in enumerate(f):
                 data = json.loads(line)
-                rows.append({
-                    "context": data["context"],
-                    "question": data["question"],
-                    "answerA": data["answerA"],
-                    "answerB": data["answerB"],
-                    "answerC": data["answerC"],
-                    "label": labels[idx],
-                })
+                rows.append(
+                    {
+                        "context": data["context"],
+                        "question": data["question"],
+                        "answerA": data["answerA"],
+                        "answerB": data["answerB"],
+                        "answerC": data["answerC"],
+                        "label": labels[idx],
+                    }
+                )
         return rows
 
     train_data = _read_split(
@@ -109,10 +107,12 @@ def _load_social_i_qa_direct() -> DatasetDict:
         extract_dir / "dev-labels.lst",
     )
 
-    return DatasetDict({
-        "train": Dataset.from_list(train_data),
-        "validation": Dataset.from_list(validation_data),
-    })
+    return DatasetDict(
+        {
+            "train": Dataset.from_list(train_data),
+            "validation": Dataset.from_list(validation_data),
+        }
+    )
 
 
 def _load_social_i_qa() -> DatasetDict:
