@@ -76,6 +76,7 @@ def test_task_custom_subjects(
         assert result == expected_value
 
 
+@temporary_registry
 def test_base_task() -> None:
     class MyTask1(BaseTask):
         NAME = "MyTask1"

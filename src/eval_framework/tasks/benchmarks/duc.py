@@ -12,11 +12,12 @@ class DUC(BaseTask[str], ABC):
     """https://huggingface.co/datasets/midas/duc2001"""
 
     DATASET_PATH: str = "midas/duc2001"
-    SAMPLE_SPLIT: str = "test"
-    FEWSHOT_SPLIT: str = "test"
+    HF_REVISION: str = "77d6dedcbce421695a12f24c8802e8847a129d92"
+    SAMPLE_SPLIT: str = "train"
+    FEWSHOT_SPLIT: str = "train"
     RESPONSE_TYPE: ResponseType = ResponseType.COMPLETION
     METRICS: list[type[BaseMetric]] = [AccuracyCompletion]
-    SUBJECTS: list[str] = ["raw"]
+    SUBJECTS: list[str] = ["default"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Text", "Keyphrase"]
     LANGUAGE = Language.ENG
 
@@ -33,6 +34,10 @@ class DUC(BaseTask[str], ABC):
         completion_text = completion_text.strip()
         return completion_text
 
+    def _load_dataset(self, subject: str) -> None:
+        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject, data_files="raw/test/0000.parquet")
+        self.dataset = self._shuffle_splits(hf_dataset=hf_dataset)
+
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         instruction_text = " ".join(item["document"])
         instruction_text = re.sub(r"\s+([.,!?;:])", r"\1", instruction_text)
@@ -47,7 +52,7 @@ class DUC(BaseTask[str], ABC):
 
 class DUC_EXTRACTIVE(DUC):
     NAME = "DUC Extractive"
-    SUBJECTS: list[str] = ["raw"]
+    SUBJECTS: list[str] = ["default"]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["extractive_keyphrases"]
@@ -61,14 +66,13 @@ class DUC_EXTRACTIVE(DUC):
 
 class DUC_ABSTRACTIVE(DUC):
     NAME = "DUC Abstractive"
-    SUBJECTS: list[str] = ["raw"]
+    SUBJECTS: list[str] = ["default"]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["abstractive_keyphrases"]
 
     def _load_dataset(self, subject: str) -> None:
-        # not all samples have abstractive keyphrases
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject)
+        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=subject, data_files="raw/test/0000.parquet")
         self.dataset = {}
 
         for split, data in hf_dataset.items():

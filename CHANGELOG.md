@@ -10,6 +10,25 @@
 
 ### General
 
+### Bug Fixes
+
+## [0.2.12](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.11...v0.2.12) (2026-02-04)
+
+
+### Features
+
+* add "top_p" param to AlephAlphaAPIModel ([#168](https://github.com/Aleph-Alpha-Research/eval-framework/issues/168)) ([e52c927](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e52c927f293dccce22e5115a4e299e33af6247b1))
+* Bump datasets to &gt;=4.0.0 and remove all `trust_remote_code` references. ([#158](https://github.com/Aleph-Alpha-Research/eval-framework/issues/158)) ([c383806](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c38380641302c542bf9222f8a823e13f6df28232))
+
+## [0.2.11](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.10...v0.2.11) (2026-01-30)
+
+
+### Bug Fixes
+
+* Downloaded w&b artifacts are deleted too early ([#163](https://github.com/Aleph-Alpha-Research/eval-framework/issues/163)) ([157d757](https://github.com/Aleph-Alpha-Research/eval-framework/commit/157d7576330396f7d10731c431892f7e303cf757))
+* use aleph-alpha-client concurrency limit and allow &gt;100 concurrent requests ([#166](https://github.com/Aleph-Alpha-Research/eval-framework/issues/166)) ([73b7d97](https://github.com/Aleph-Alpha-Research/eval-framework/commit/73b7d97670fccc82039914ed56cbafa434bb1aba))
+* VLLM tokenizer lazy initialization didn't work with W&B ([#165](https://github.com/Aleph-Alpha-Research/eval-framework/issues/165)) ([f38de79](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f38de79a809f0a05e37f1c074569050965c40a7c))
+
 ## [0.2.10](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.9...v0.2.10) (2026-01-27)
 
 

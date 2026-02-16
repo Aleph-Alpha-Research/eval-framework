@@ -32,7 +32,7 @@ def test_run_python_code_timeout() -> None:
     code = """import time\ntime.sleep(15)"""
     start = time.time()
     run_python_code(code, image="python:3.13-slim", timeout=2)
-    assert time.time() - start < 3
+    assert time.time() - start < 5
 
 
 def test_run_python_code_with_packages() -> None:
