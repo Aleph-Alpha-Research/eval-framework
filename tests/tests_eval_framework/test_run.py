@@ -5,12 +5,31 @@ from argparse import Namespace
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+from eval_framework.context.local import _load_model as _load_model_orig
 from eval_framework.run import run
+
+from tests.tests_eval_framework.conftest import MockLLM
+
+
+def _load_model_mock(llm_name: str, models_path, *, info: str = ""):
+    """Return MockLLM for SmolLM135M/Smollm135MInstruct to avoid downloading real models.
+    Use a subclass with the same __name__ as the requested class so output paths match
+    the test assertions (which use llm_name, i.e. the class name)."""
+    clazz = _load_model_orig(llm_name, models_path, info=info)
+    if clazz.__name__ in ("SmolLM135M", "Smollm135MInstruct"):
+        return type(clazz.__name__, (MockLLM,), {})
+    return clazz
 
 
 @patch("argparse.ArgumentParser.parse_args")
+@patch("eval_framework.context.local._load_model", side_effect=_load_model_mock)
 @patch("eval_framework.response_generator.create_perturbation_class")
-def test_run(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_path: Path) -> None:
+def test_run(
+    mock_create_perturbation_class: Mock,
+    _mock_load_model: Mock,
+    mock_parse_args: Mock,
+    tmp_path: Path,
+) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
     task_name = "ARC"
     llm_name = "SmolLM135M"
@@ -58,8 +77,14 @@ def test_run(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_pa
 
 
 @patch("argparse.ArgumentParser.parse_args")
+@patch("eval_framework.context.local._load_model", side_effect=_load_model_mock)
 @patch("eval_framework.response_generator.create_perturbation_class")
-def test_run_path(mock_create_perturbation_class: Mock, mock_parse_args: Mock, tmp_path: Path) -> None:
+def test_run_path(
+    mock_create_perturbation_class: Mock,
+    _mock_load_model: Mock,
+    mock_parse_args: Mock,
+    tmp_path: Path,
+) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
     task_name = "ARC"
     module = "tests.tests_eval_framework.conftest"
