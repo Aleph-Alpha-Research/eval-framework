@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 116**
+**Total number of tasks: 131**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -32,8 +32,12 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [COPA_IDK](COPA_IDK.md)
 - [COPA_IDKEvalHarness](COPA_IDKEvalHarness.md)
 - [ChemBench](ChemBench.md)
+- [CommonsenseQACloze](CommonsenseQACloze.md)
+- [CommonsenseQAMC](CommonsenseQAMC.md)
 - [DUC_ABSTRACTIVE](DUC_ABSTRACTIVE.md)
 - [DUC_EXTRACTIVE](DUC_EXTRACTIVE.md)
+- [DropMC](DropMC.md)
+- [DropRC](DropRC.md)
 - [Flores200](Flores200.md)
 - [FloresPlus](FloresPlus.md)
 - [FullTextMMLU](FullTextMMLU.md)
@@ -68,9 +72,14 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [InfiniteBench_RetrieveKV2](InfiniteBench_RetrieveKV2.md)
 - [InfiniteBench_RetrieveNumber](InfiniteBench_RetrieveNumber.md)
 - [InfiniteBench_RetrievePassKey1](InfiniteBench_RetrievePassKey1.md)
+- [LabBenchCloze](LabBenchCloze.md)
+- [LabBenchMC](LabBenchMC.md)
 - [MATH](MATH.md)
 - [MATH500](MATH500.md)
+- [MATH500Minerva](MATH500Minerva.md)
 - [MATHLvl5](MATHLvl5.md)
+- [MATHMinerva](MATHMinerva.md)
+- [MATHMinervaBPB](MATHMinervaBPB.md)
 - [MBPP](MBPP.md)
 - [MBPP_PROMPT_WITHOUT_TESTS](MBPP_PROMPT_WITHOUT_TESTS.md)
 - [MBPP_PROMPT_WITHOUT_TESTS_SANITIZED](MBPP_PROMPT_WITHOUT_TESTS_SANITIZED.md)
@@ -86,6 +95,11 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [MMLU_PRO_IDK](MMLU_PRO_IDK.md)
 - [MMMLU](MMMLU.md)
 - [MMMLU_GERMAN_COT](MMMLU_GERMAN_COT.md)
+- [MedQACloze](MedQACloze.md)
+- [MedQAMC](MedQAMC.md)
+- [NaturalQsOpen](NaturalQsOpen.md)
+- [NaturalQsOpenCloze](NaturalQsOpenCloze.md)
+- [NaturalQsOpenMC](NaturalQsOpenMC.md)
 - [OPENBOOKQA](OPENBOOKQA.md)
 - [OPENBOOKQA_EVAL_HARNESS](OPENBOOKQA_EVAL_HARNESS.md)
 - [OPENBOOKQA_IDK](OPENBOOKQA_IDK.md)
@@ -99,6 +113,8 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [SPHYR](SPHYR.md)
 - [SQUAD](SQUAD.md)
 - [SQUAD2](SQUAD2.md)
+- [SocialIQACloze](SocialIQACloze.md)
+- [SocialIQAMC](SocialIQAMC.md)
 - [StructEval](StructEval.md)
 - [TRIVIAQA](TRIVIAQA.md)
 - [TRUTHFULQA](TRUTHFULQA.md)
