@@ -1,12 +1,12 @@
-# MATHMinerva
+# MATHMinervaEvalHarness
 
 ````
-NAME = MATHMinerva
+NAME = MATHMinervaEvalHarness
 DATASET_PATH = EleutherAI/hendrycks_math
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = train
 RESPONSE_TYPE = COMPLETION
-METRICS = [MathMinervaCompletionRelaxed]
+METRICS = [MathMinervaCompletion]
 SUBJECTS = ['algebra', 'counting_and_probability', 'geometry', 'intermediate_algebra', 'number_theory', 'prealgebra', 'precalculus']
 LANGUAGE = <Language.ENG: 'English'>
 ````
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/EleutherAI/hendrycks_math](https://huggingface.co/datasets/EleutherAI/hendrycks_math)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "MATHMinerva"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "MATHMinervaEvalHarness"`.

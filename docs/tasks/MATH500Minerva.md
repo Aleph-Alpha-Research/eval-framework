@@ -6,7 +6,7 @@ DATASET_PATH = HuggingFaceH4/MATH-500
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = test
 RESPONSE_TYPE = COMPLETION
-METRICS = [MathMinervaCompletion]
+METRICS = [MathMinervaCompletionRelaxed]
 SUBJECTS = ['no_subject']
 LANGUAGE = <Language.ENG: 'English'>
 ````
