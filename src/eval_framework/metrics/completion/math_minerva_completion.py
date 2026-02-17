@@ -24,12 +24,14 @@ class MathMinervaCompletion(BaseMetric[Completion]):
         self,
         use_cot: bool = True,
         cot_style: str = "minerva",
+        relaxed: bool = False,
     ) -> None:
         self.use_cot = use_cot
         self.cot_style = cot_style
+        self.relaxed = relaxed
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
+        if response.error:
             return [
                 MetricResult(
                     metric_name="Exact Match",
@@ -48,14 +50,14 @@ class MathMinervaCompletion(BaseMetric[Completion]):
         gold = response.ground_truth
         if isinstance(gold, list):
             gold = gold[0] if gold else None
-        if gold is None:
+        if not gold:
             return [
                 MetricResult(metric_name="Exact Match", value=0.0, higher_is_better=True),
                 MetricResult(metric_name="Exact Match (Flex)", value=0.0, higher_is_better=True),
             ]
 
         raw = response.raw_completion or response.completion
-        all_candidates = extract_answers(raw, use_cot=self.use_cot, cot_style=self.cot_style)
+        all_candidates = extract_answers(raw, use_cot=self.use_cot, cot_style=self.cot_style, relaxed=self.relaxed)
 
         exact_match = 0.0
         if all_candidates:

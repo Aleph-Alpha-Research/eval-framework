@@ -14,16 +14,14 @@ def _flatten_validated_answers(validated_answers: dict[str, Any]) -> list[dict[s
     date_list = validated_answers.get("date") or []
     spans_list = validated_answers.get("spans") or []
     n = max(len(num_list), len(date_list), len(spans_list))
-    out = []
-    for i in range(n):
-        out.append(
-            {
-                "number": num_list[i] if i < len(num_list) else "",
-                "date": date_list[i] if i < len(date_list) else {"day": "", "month": "", "year": ""},
-                "spans": spans_list[i] if i < len(spans_list) else [],
-            }
-        )
-    return out
+    return [
+        {
+            "number": num_list[i] if i < len(num_list) else "",
+            "date": date_list[i] if i < len(date_list) else {"day": "", "month": "", "year": ""},
+            "spans": spans_list[i] if i < len(spans_list) else [],
+        }
+        for i in range(n)
+    ]
 
 
 def _parse_answer(answer: dict[str, Any]) -> tuple[str, ...]:
@@ -60,11 +58,7 @@ def _get_answers(doc: dict[str, Any]) -> list[tuple[str, ...]]:
 
 def _tuple_to_display(tup: tuple[str, ...]) -> str:
     """Single string for loglikelihood prompt (space-prefixed for cue)."""
-    if not tup:
-        return ""
-    if len(tup) == 1:
-        return str(tup[0])
-    return ", ".join(str(x) for x in tup)
+    return ", ".join(str(x) for x in tup) if tup else ""
 
 
 class DropRC(BaseTask[str]):

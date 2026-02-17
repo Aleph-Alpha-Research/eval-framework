@@ -23,33 +23,39 @@ def _smoke_test_task(task_cls) -> None:
         assert sample.messages
 
 
+@pytest.mark.cpu_slow
 def test_csqa_tasks_smoke() -> None:
     _smoke_test_task(CommonsenseQACloze)
     _smoke_test_task(CommonsenseQAMC)
 
 
+@pytest.mark.cpu_slow
 def test_drop_tasks_smoke() -> None:
     _smoke_test_task(DropRC)
     _smoke_test_task(DropMC)
 
 
+@pytest.mark.cpu_slow
 def test_lab_bench_tasks_smoke() -> None:
     _smoke_test_task(LabBenchCloze)
     _smoke_test_task(LabBenchMC)
 
 
+@pytest.mark.cpu_slow
 def test_naturalqs_open_tasks_smoke() -> None:
     _smoke_test_task(NaturalQsOpen)
     _smoke_test_task(NaturalQsOpenCloze)
     _smoke_test_task(NaturalQsOpenMC)
 
 
+@pytest.mark.cpu_slow
 def test_math_minerva_tasks_smoke() -> None:
     _smoke_test_task(MATHMinerva)
     _smoke_test_task(MATHMinervaBPB)
     _smoke_test_task(MATH500Minerva)
 
 
+@pytest.mark.cpu_slow
 def test_social_iqa_tasks_smoke() -> None:
     try:
         _smoke_test_task(SocialIQACloze)
@@ -60,6 +66,7 @@ def test_social_iqa_tasks_smoke() -> None:
         raise
 
 
+@pytest.mark.cpu_slow
 def test_medqa_tasks_smoke() -> None:
     _smoke_test_task(MedQACloze)
     _smoke_test_task(MedQAMC)

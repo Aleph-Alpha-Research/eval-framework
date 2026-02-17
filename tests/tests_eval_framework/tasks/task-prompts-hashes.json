@@ -140,6 +140,8 @@
     "MATHMinerva.Llama3Formatter": "799242fbfec4c0742ec6af280ac45342",
     "MATHMinervaBPB.ConcatFormatter": "2624938d1976d92266a64b6d735cc096",
     "MATHMinervaBPB.Llama3Formatter": "3835016020dfd00a5125890a0542fca0",
+    "MATHMinervaEvalHarness.ConcatFormatter": "44854feb4ce0835f908217570777fcde",
+    "MATHMinervaEvalHarness.Llama3Formatter": "fe79ac3a345d7a03a532a619047c4dfd",
     "MBPP.ConcatFormatter": "47d4cc9ce93b26daab05e7af058ea3e7",
     "MBPP.Llama3Formatter": "259ba4fc8290421f3e0b0c19e220896e",
     "MBPP_PROMPT_WITHOUT_TESTS.ConcatFormatter": "af6320d664b273bde43c7cecfafa2f99",

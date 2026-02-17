@@ -80,10 +80,10 @@ def _load_social_i_qa_direct() -> DatasetDict:
             zf.extractall(zip_path.parent)
 
     def _read_split(jsonl_path: Path, label_path: Path) -> list[dict[str, Any]]:
-        with open(label_path, encoding="utf-8") as f:
+        with label_path.open(encoding="utf-8") as f:
             labels = [line.strip() for line in f]
         rows = []
-        with open(jsonl_path, encoding="utf-8") as f:
+        with jsonl_path.open(encoding="utf-8") as f:
             for idx, line in enumerate(f):
                 data = json.loads(line)
                 rows.append(

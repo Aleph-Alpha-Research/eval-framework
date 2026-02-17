@@ -110,13 +110,33 @@ def remove_boxed(s: str) -> str:
     return s[len(left) : -1]
 
 
-def get_unnormalized_answer(text: str) -> str:
-    """Extract answer from Minerva 'Final Answer: The final answer is ... I hope it is correct.'"""
+def get_unnormalized_answer(text: str, relaxed: bool = False) -> str:
+    """Extract answer from Minerva 'Final Answer: The final answer is ... I hope it is correct.'
+
+    When relaxed=False, pattern matches lm-evaluation-harness (lm_eval.tasks.minerva_math.utils)
+    for parity: exact capitalization, no flexible whitespace.
+    When relaxed=True, accepts any capitalisation of:
+      "Final Answer: The answer is " / "Final Answer: The final answer is "
+      "The Final Answer: The answer is " / "The Final Answer: The final answer is "
+    with flexible whitespace; no suffix required (optional suffixes are stripped when present).
+    """
+    if relaxed:
+        # Case-insensitive; optional "The " prefix; "answer" or "final answer" before "is"
+        match = re.search(
+            r"(?i)(?:the\s+)?final\s+answer\s*:\s*the\s+(?:final\s+)?answer\s+is\s*(.*)",
+            text,
+            re.DOTALL,
+        )
+        if match:
+            raw = match.group(1).strip()
+            # Strip common optional suffix phrases (e.g. ". I hope it is correct.") when present
+            raw = re.sub(r"\.?\s*i\s+hope\s+it\s+is\s+correct\.?\s*$", "", raw, flags=re.IGNORECASE).strip()
+            return raw
+        return INVALID_ANSWER
     text = text + END_SEQ
     match = re.search(
         r"Final Answer: The final answer is(.*?). I hope it is correct.",
         text,
-        re.DOTALL,
     )
     if match:
         return match.group(1).strip()
@@ -319,17 +339,19 @@ def extract_answers(
     raw_answer: str,
     use_cot: bool = True,
     cot_style: str = "minerva",
+    relaxed: bool = False,
 ) -> list[str]:
     """
     Extract multiple candidate answers from model output (for exact_match and exact_match_flex).
     Returns list of normalized strings; first is primary for exact_match.
+    When relaxed=True, final-answer string matching is more lenient (whitespace/case).
     """
     raw = raw_answer if isinstance(raw_answer, str) else str(raw_answer)
     all_answers: list[str] = []
 
     if use_cot:
         if cot_style == "minerva":
-            minerva_answer = normalize_final_answer(get_unnormalized_answer(raw))
+            minerva_answer = normalize_final_answer(get_unnormalized_answer(raw, relaxed=relaxed))
             if minerva_answer and minerva_answer != INVALID_ANSWER:
                 all_answers.append(minerva_answer)
         boxed = last_boxed_only_string(raw)

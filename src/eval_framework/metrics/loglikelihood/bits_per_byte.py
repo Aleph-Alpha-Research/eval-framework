@@ -15,7 +15,7 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
     NAME = "BitsPerByte"
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        if response.error is not None:
+        if response.error:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=False, error=response.error)]
 
         ground_truth_list = response.ground_truth_list

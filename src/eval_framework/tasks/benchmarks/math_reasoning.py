@@ -516,15 +516,16 @@ class MATH(MATHReasoning):
         return self._extract_answer(item["solution"])
 
 
-class MATHMinerva(MATHReasoning):
+class MATHMinervaEvalHarness(MATHReasoning):
     """
-    MATH with Minerva-style prompt and scoring (OLMES minerva_math parity).
+    MATH with Minerva-style prompt and scoring (lm-evaluation-harness / oe_eval parity).
+    Uses strict final-answer string matching: "Final Answer: The final answer is ... I hope it is correct."
     Prompt: "Problem:\\n" + problem + "\\n\\n" + "Solution:"
     Gold: normalize_final_answer(remove_boxed(last_boxed_only_string(solution)))
     Metrics: Exact Match, Exact Match (Flex) via MathMinervaCompletion.
     """
 
-    NAME = "MATHMinerva"
+    NAME = "MATHMinervaEvalHarness"
     DATASET_PATH = "EleutherAI/hendrycks_math"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -556,16 +557,32 @@ class MATHMinerva(MATHReasoning):
             return None
         try:
             unboxed = remove_boxed(boxed)
-            return normalize_final_answer(unboxed)
         except AssertionError:
             return None
+        return normalize_final_answer(unboxed)
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
         return " " + item["solution"]
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
-        """Primary answer for storage; metric uses raw_completion for exact_match_flex."""
-        candidates = extract_answers(completion_text, use_cot=True, cot_style="minerva")
+        """Primary answer for storage; metric uses raw_completion for exact_match_flex (strict matching)."""
+        candidates = extract_answers(completion_text, use_cot=True, cot_style="minerva", relaxed=False)
+        return candidates[0] if candidates else "[no_answer]"
+
+
+class MATHMinerva(MATHMinervaEvalHarness):
+    """
+    MATH with Minerva-style prompt and relaxed final-answer string matching.
+    Same as MATHMinervaEvalHarness but allows flexible whitespace and case for variations of
+    "(The )Final Answer: The (final )answer is ...( I hope it is correct.)", where parentheses are optional.
+    """
+
+    NAME = "MATHMinerva"
+    METRICS = [MathMinervaCompletion(relaxed=True)]
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        """Primary answer for storage; uses relaxed final-answer extraction."""
+        candidates = extract_answers(completion_text, use_cot=True, cot_style="minerva", relaxed=True)
         return candidates[0] if candidates else "[no_answer]"
 
 
@@ -637,9 +654,9 @@ class MATHMinervaBPB(MATHReasoning):
             return None
         try:
             unboxed = remove_boxed(boxed)
-            return normalize_final_answer(unboxed)
         except AssertionError:
             return None
+        return normalize_final_answer(unboxed)
 
 
 class MATHLvl5(MATH):

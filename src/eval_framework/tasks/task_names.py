@@ -74,6 +74,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATH")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHLvl5")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATH500")
+    register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHMinervaEvalHarness")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHMinerva")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHMinervaBPB")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATH500Minerva")
