@@ -8,7 +8,7 @@ Additional task documentation can be generated with the script `utils/generate-t
 
 | **Task** | **Capability** | **Benchmarks** | **Long Context** |
 |-|-|-|-|
-|   Logical Reasoning   |   Math   |   `AIME2024`, `GSM8K`, `GSM8K_EU20_DE`, `GSM8K_EU20_FR`, `GSM8KEvalHarness`,`GSM8KReasoning`, `MATH`, `MATH500`, `MATHLvl5`, `TableBench`   |   `InfiniteBench_MathFind`   |
+|   Logical Reasoning   |   Math   |   `AIME2024`, `AIME2025`, `GSM8K`, `GSM8K_EU20_DE`, `GSM8K_EU20_FR`, `GSM8KEvalHarness`, `GSM8KReasoning`, `MATH`, `MATH500`, `MATH500Minerva`, `MATHLvl5`, `MATHMinerva`, `MATHMinervaBPB`, `MATHMinervaEvalHarness`, `TableBench`   |   `InfiniteBench_MathFind`   |
 |   Logical Reasoning   |   Programming   |   `BigCodeBench`, `BigCodeBenchHard`, `BigCodeBenchInstruct`, `BigCodeBenchHardInstruct`, `HumanEval`, `HumanEvalInstruct`, `MBPP`, `MBPP_PROMPT_WITHOUT_TESTS`, `MBPP_SANITIZED`, `MBPP_PROMPT_WITHOUT_TESTS_SANITIZED`   |   `InfiniteBench_CodeRun`   |
 |   Logical Reasoning   |   Puzzle   |   `SPHYR`   |    |
 |   Output Control   |   Structure   |   `IFEval`, `IFEvalDe`, `IFEvalFiSv`, `RenderableStructEval`, `StructEval`   |    |
@@ -24,8 +24,8 @@ Additional task documentation can be generated with the script `utils/generate-t
 |   **Task**    | **Capability** | **Benchmarks** | **Long Context** |
 |-|-|-|-|
 |   Output Control   |   Bias   |   `WINOGENDER`   |    |
-|   Text Distillation   |   Classification   |   `ARC`,`ARC_DE`, `ARC_EU20_DE`, `ARC_EU20_FR`, `ARC_FI`, `BELEBELE`, `ChemBench`, `FullTextMMLU`, `GPQA`, `INCLUDE`, `MMLU`, `MMLU_DE`,`MMLU_EU20_DE`, `MMLU_EU20_FR`, `MMMLU`, `MMLU_PRO`, `OPENBOOKQA`, `PIQA`, `SCIQ`, `SCIQEvalHarness`, `TRUTHFULQA`, `TRUTHFULQA_EU20_DE, TRUTHFULQA_EU20_FR`   |    |
-|   Text Distillation   |   QA   |    |   `QUALITY`, `ZERO_SCROLLS_QUALITY`   |
+|   Text Distillation   |   Classification   |   `ARC`, `ARC_DE`, `ARC_EU20_DE`, `ARC_EU20_FR`, `ARC_FI`, `BELEBELE`, `ChemBench`, `CommonsenseQACloze`, `CommonsenseQAMC`, `FullTextMMLU`, `GPQA`, `INCLUDE`, `MMLU`, `MMLU_DE`, `MMLU_EU20_DE`, `MMLU_EU20_FR`, `MMMLU`, `MMLU_PRO`, `OPENBOOKQA`, `PIQA`, `SCIQ`, `SCIQEvalHarness`, `SocialIQACloze`, `SocialIQAMC`, `TRUTHFULQA`, `TRUTHFULQA_EU20_DE`, `TRUTHFULQA_EU20_FR`   |    |
+|   Text Distillation   |   QA   |   `DropMC`, `DropRC`, `LabBenchCloze`, `LabBenchMC`, `MedQACloze`, `MedQAMC`, `NaturalQsOpen`, `NaturalQsOpenCloze`, `NaturalQsOpenMC`   |   `QUALITY`, `ZERO_SCROLLS_QUALITY`   |
 |   Text Generation   |   Open QA   |   `CASEHOLD`   |    |
 |   Logical Reasoning   |   Closed QA   |    |   `InfiniteBench_EnMC`   |
 |   Logical Reasoning   |   Programming   |    |   `InfiniteBench_CodeDebug`   |
