@@ -4,7 +4,10 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
-from eval_framework.metrics.completion.math_minerva_completion import MathMinervaCompletion
+from eval_framework.metrics.completion.math_minerva_completion import (
+    MathMinervaCompletion,
+    MathMinervaCompletionRelaxed,
+)
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
 from eval_framework.metrics.completion.minerva_math_utils import (
     extract_answers,
@@ -578,7 +581,7 @@ class MATHMinerva(MATHMinervaEvalHarness):
     """
 
     NAME = "MATHMinerva"
-    METRICS = [MathMinervaCompletion(relaxed=True)]
+    METRICS = [MathMinervaCompletionRelaxed]
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         """Primary answer for storage; uses relaxed final-answer extraction."""

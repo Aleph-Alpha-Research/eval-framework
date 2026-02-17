@@ -67,10 +67,9 @@ class MathMinervaCompletion(BaseMetric[Completion]):
 
         exact_match_flex = 0.0
         for candidate in all_candidates:
-            if exact_match_flex == 1.0:
-                break
             if is_equiv_minerva(candidate, gold) or is_equiv_hendrycks(candidate, gold):
                 exact_match_flex = 1.0
+                break
 
         return [
             MetricResult(metric_name="Exact Match", value=exact_match, higher_is_better=True),
@@ -80,3 +79,15 @@ class MathMinervaCompletion(BaseMetric[Completion]):
                 higher_is_better=True,
             ),
         ]
+
+
+class MathMinervaCompletionRelaxed(MathMinervaCompletion):
+    """MathMinervaCompletion with relaxed=True by default (flexible final-answer matching)."""
+
+    def __init__(
+        self,
+        use_cot: bool = True,
+        cot_style: str = "minerva",
+        relaxed: bool = True,
+    ) -> None:
+        super().__init__(use_cot=use_cot, cot_style=cot_style, relaxed=relaxed)
