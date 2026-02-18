@@ -1,7 +1,7 @@
-# LabBenchCloze
+# LabBenchMC_OLMES
 
 ````
-NAME = LabBenchCloze
+NAME = LabBenchMC_OLMES
 DATASET_PATH = futurehouse/lab-bench
 SAMPLE_SPLIT = train
 FEWSHOT_SPLIT = train
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/futurehouse/lab-bench](https://huggingface.co/datasets/futurehouse/lab-bench)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "LabBenchCloze"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "LabBenchMC_OLMES"`.

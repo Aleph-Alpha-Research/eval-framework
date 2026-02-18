@@ -6,7 +6,7 @@ DATASET_PATH = futurehouse/lab-bench
 SAMPLE_SPLIT = train
 FEWSHOT_SPLIT = train
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, AccuracyCompletion]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, AccuracyCompletion, BitsPerByteLoglikelihood]
 SUBJECTS = ['CloningScenarios', 'DbQA', 'FigQA', 'LitQA2', 'ProtocolQA', 'SeqQA', 'SuppQA', 'TableQA']
 LANGUAGE = <Language.ENG: 'English'>
 ````

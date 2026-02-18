@@ -1,7 +1,7 @@
-# ARC
+# ARC_OLMES
 
 ````
-NAME = ARC
+NAME = ARC_OLMES
 DATASET_PATH = allenai/ai2_arc
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = train
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/ai2_arc](https://huggingface.co/datasets/allenai/ai2_arc)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "ARC"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "ARC_OLMES"`.

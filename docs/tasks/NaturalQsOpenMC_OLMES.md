@@ -1,7 +1,7 @@
-# NaturalQsOpenCloze
+# NaturalQsOpenMC_OLMES
 
 ````
-NAME = NaturalQsOpenCloze
+NAME = NaturalQsOpenMC_OLMES
 DATASET_PATH = allenai/nq-gen2mc
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = validation
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/nq-gen2mc](https://huggingface.co/datasets/allenai/nq-gen2mc)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "NaturalQsOpenCloze"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "NaturalQsOpenMC_OLMES"`.

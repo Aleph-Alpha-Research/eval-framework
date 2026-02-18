@@ -1,12 +1,12 @@
-# SCIQ
+# SCIQEvalHarness_IDK
 
 ````
-NAME = SCIQ
+NAME = SCIQEvalHarness_IDK
 DATASET_PATH = allenai/sciq
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = test
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, ConfidenceWeightedAccuracy, DistributionalCorrectnessScore, TernaryScore]
 SUBJECTS = ['no_subject']
 LANGUAGE = <Language.ENG: 'English'>
 ````
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/sciq](https://huggingface.co/datasets/allenai/sciq)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "SCIQ"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "SCIQEvalHarness_IDK"`.

@@ -1,7 +1,7 @@
-# WINOGRANDE
+# WINOGRANDE_OLMES
 
 ````
-NAME = WINOGRANDE
+NAME = WINOGRANDE_OLMES
 DATASET_PATH = allenai/winogrande
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = train
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/winogrande](https://huggingface.co/datasets/allenai/winogrande)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "WINOGRANDE"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "WINOGRANDE_OLMES"`.

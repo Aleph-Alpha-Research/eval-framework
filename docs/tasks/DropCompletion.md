@@ -1,12 +1,12 @@
-# DropRC
+# DropCompletion
 
 ````
-NAME = DropRC
+NAME = DropCompletion
 DATASET_PATH = EleutherAI/drop
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = validation
-RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+RESPONSE_TYPE = COMPLETION
+METRICS = [DropF1ExactMatch]
 SUBJECTS = ['no_subject']
 LANGUAGE = <Language.ENG: 'English'>
 ````
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/EleutherAI/drop](https://huggingface.co/datasets/EleutherAI/drop)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "DropRC"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "DropCompletion"`.

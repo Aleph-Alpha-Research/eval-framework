@@ -6,7 +6,7 @@ DATASET_PATH = openGPT-X/hellaswagx
 SAMPLE_SPLIT = train
 FEWSHOT_SPLIT = validation
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['DE']
 LANGUAGE = <Language.DEU: 'German'>
 ````

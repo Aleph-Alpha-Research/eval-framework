@@ -1,7 +1,7 @@
-# MedQAMC
+# MedQAMC_OLMES
 
 ````
-NAME = MedQAMC
+NAME = MedQAMC_OLMES
 DATASET_PATH = davidheineman/medqa-en
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = dev
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/davidheineman/medqa-en](https://huggingface.co/datasets/davidheineman/medqa-en)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "MedQAMC"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "MedQAMC_OLMES"`.

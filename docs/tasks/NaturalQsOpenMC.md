@@ -6,7 +6,7 @@ DATASET_PATH = allenai/nq-gen2mc
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = validation
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['no_subject']
 LANGUAGE = <Language.ENG: 'English'>
 ````

@@ -1,7 +1,7 @@
-# PIQA
+# PIQA_OLMES
 
 ````
-NAME = PIQA
+NAME = PIQA_OLMES
 DATASET_PATH = ybisk/piqa
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = test
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/ybisk/piqa](https://huggingface.co/datasets/ybisk/piqa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "PIQA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "PIQA_OLMES"`.

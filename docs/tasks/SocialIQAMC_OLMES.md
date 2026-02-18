@@ -1,7 +1,7 @@
-# SocialIQAMC
+# SocialIQAMC_OLMES
 
 ````
-NAME = SocialIQAMC
+NAME = SocialIQAMC_OLMES
 DATASET_PATH = allenai/social_i_qa
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = train
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/social_i_qa](https://huggingface.co/datasets/allenai/social_i_qa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "SocialIQAMC"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "SocialIQAMC_OLMES"`.

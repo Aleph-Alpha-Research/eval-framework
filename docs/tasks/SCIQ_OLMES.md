@@ -1,7 +1,7 @@
-# SCIQ
+# SCIQ_OLMES
 
 ````
-NAME = SCIQ
+NAME = SCIQ_OLMES
 DATASET_PATH = allenai/sciq
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = test
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/allenai/sciq](https://huggingface.co/datasets/allenai/sciq)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "SCIQ"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "SCIQ_OLMES"`.
