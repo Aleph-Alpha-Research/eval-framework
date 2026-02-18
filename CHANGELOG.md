@@ -19,6 +19,7 @@
 
 * add "top_p" param to AlephAlphaAPIModel ([#168](https://github.com/Aleph-Alpha-Research/eval-framework/issues/168)) ([e52c927](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e52c927f293dccce22e5115a4e299e33af6247b1))
 * Bump datasets to &gt;=4.0.0 and remove all `trust_remote_code` references. ([#158](https://github.com/Aleph-Alpha-Research/eval-framework/issues/158)) ([c383806](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c38380641302c542bf9222f8a823e13f6df28232))
+* Add aggregated metrics that include errors as 0 (instead of skipping them). ([#181](https://github.com/Aleph-Alpha-Research/eval-framework/pull/181))
 
 ## [0.2.11](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.10...v0.2.11) (2026-01-30)
 
