@@ -10,7 +10,14 @@ from typing import Any
 
 import torch
 from tokenizers import Tokenizer
-from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, StoppingCriteriaList
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    StoppingCriteria,
+    StoppingCriteriaList,
+)
+from transformers.models.gpt2 import GPT2Tokenizer
+from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import (
@@ -83,9 +90,13 @@ class BaseHFLLM(BaseLLM):
     SEQ_LENGTH: int | None = None
     BYTES_PER_TOKEN: float = 4.0  # rule of thumb according to https://platform.openai.com/tokenizer
 
+    def _load_tokenizer(self) -> PreTrainedTokenizerBase:
+        """Load the tokenizer. Override in subclasses to use a specific tokenizer class."""
+        return AutoTokenizer.from_pretrained(self.LLM_NAME)
+
     def __init__(self, formatter: BaseFormatter | None = None, bytes_per_token: float | None = None) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.tokenizer = AutoTokenizer.from_pretrained(self.LLM_NAME)
+        self.tokenizer = self._load_tokenizer()
         self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
         logger.info(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
         self._set_formatter(formatter)
@@ -403,13 +414,23 @@ class Pythia410m(HFLLM):
 
 
 class SmolLM135M(HFLLM):
+    """SmolLM-135M uses a GPT2-style tokenizer; AutoTokenizer can incorrectly select LlamaTokenizer."""
+
     LLM_NAME = "HuggingFaceTB/SmolLM-135M"
     DEFAULT_FORMATTER = ConcatFormatter
 
+    def _load_tokenizer(self) -> PreTrainedTokenizerBase:
+        return GPT2Tokenizer.from_pretrained(self.LLM_NAME)
+
 
 class Smollm135MInstruct(HFLLM):
+    """SmolLM-135M-Instruct uses a GPT2-style tokenizer; AutoTokenizer can incorrectly select LlamaTokenizer."""
+
     LLM_NAME = "HuggingFaceTB/SmolLM-135M-Instruct"
     DEFAULT_FORMATTER = partial(HFFormatter, LLM_NAME)
+
+    def _load_tokenizer(self) -> PreTrainedTokenizerBase:
+        return GPT2Tokenizer.from_pretrained(self.LLM_NAME)
 
 
 class Qwen3_0_6B(HFLLM):
