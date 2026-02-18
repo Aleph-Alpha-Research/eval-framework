@@ -1,9 +1,8 @@
 """DROP completion metrics: F1 and exact match."""
 
+from eval_framework.external.drop_process_results import process_results
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import BaseMetricContext, Completion, extract_context_metric
-
-from eval_framework.external.drop_process_results import process_results
 
 
 class DropMetricContext(BaseMetricContext):

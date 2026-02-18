@@ -15,7 +15,7 @@ _ARTICLES = re.compile(r"\b(a|an|the)\b", re.UNICODE)
 def _linear_sum_assignment(cost_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Solve the linear sum assignment problem (minimize cost) using the Hungarian algorithm.
 
-    Pure NumPy implementation. Returns (row_ind, col_ind) with row_ind sorted,
+    Pure NumPy implementation to avoid scipy dependency. Returns (row_ind, col_ind) with row_ind sorted,
     matching scipy.optimize.linear_sum_assignment API for rectangular matrices.
     """
     cost = np.atleast_2d(np.asarray(cost_matrix, dtype=np.float64))
@@ -112,7 +112,7 @@ def _linear_sum_assignment(cost_matrix: np.ndarray) -> tuple[np.ndarray, np.ndar
                     if pj is None:
                         break
                     path.append((ji, pj))
-                for (pi, pj) in path:
+                for pi, pj in path:
                     star[pi, pj] = 1 - star[pi, pj]
                 prime[:] = 0
                 row_covered[:] = False
@@ -167,7 +167,7 @@ def get_metrics(predicted: list | str, gold: tuple | list) -> tuple[float, float
 
 
 def _answer_to_bags(answer: list | tuple | str) -> tuple[list[str], list[set]]:
-    if isinstance(answer, (list, tuple)):
+    if isinstance(answer, list | tuple):
         raw_spans = list(answer)
     else:
         raw_spans = [answer]
