@@ -55,6 +55,7 @@ def _smoke_test_task(task_cls) -> None:
 
 
 @pytest.mark.cpu_slow
+@pytest.mark.slow_download
 def test_csqa_tasks_smoke() -> None:
     _smoke_test_task(CommonsenseQACloze)
     _smoke_test_task(CommonsenseQAFullTextCloze)
@@ -71,6 +72,7 @@ def test_drop_tasks_smoke() -> None:
 
 
 @pytest.mark.cpu_slow
+@pytest.mark.slow_download
 def test_lab_bench_tasks_smoke() -> None:
     _smoke_test_task(LabBenchCloze)
     _smoke_test_task(LabBenchMC)
@@ -86,6 +88,7 @@ def test_naturalqs_open_tasks_smoke() -> None:
 
 
 @pytest.mark.cpu_slow
+@pytest.mark.slow_download
 def test_math_minerva_tasks_smoke() -> None:
     _smoke_test_task(MATHMinervaEvalHarness)
     _smoke_test_task(MATHMinerva)
@@ -113,6 +116,7 @@ def test_medqa_tasks_smoke() -> None:
 
 
 @pytest.mark.cpu_slow
+@pytest.mark.slow_download
 def test_olmes_variants_smoke() -> None:
     for task_cls in (
         ARC_OLMES,
@@ -148,6 +152,7 @@ def test_goldenswag_tasks_smoke() -> None:
 
 
 @pytest.mark.cpu_slow
+@pytest.mark.slow_download
 def test_global_mmlu_smoke() -> None:
     _smoke_test_task(GlobalMMLU)
 

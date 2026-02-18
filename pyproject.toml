@@ -179,6 +179,7 @@ addopts = "-p 'no:legacypath' --doctest-modules"
 markers = [
     "gpu: needs a GPU runner, otherwise test can not be run",
     "cpu_slow: runs for a long time (on CPU)",
+    "slow_download: smoke tests that download large datasets (>15s); excluded from CI, run manually with -m slow_download",
     "external_api: needs external services for execution",
     "vllm: tests that specifically require vLLM functionality",
     "formatter_hash: formatter consistency tests using hash comparisons",
