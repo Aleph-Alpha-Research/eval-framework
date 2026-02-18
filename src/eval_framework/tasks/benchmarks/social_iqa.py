@@ -17,6 +17,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
 from eval_framework.tasks.utils import get_n_letters
 
@@ -154,7 +155,7 @@ class SocialIQACloze(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
@@ -181,18 +182,18 @@ class SocialIQACloze(BaseTask[str]):
         return [f" {c}" for c in choices]
 
 
-class SocialIQAMC(SocialIQACloze):
+class SocialIQAMC_OLMES(SocialIQACloze):
     """
-    Social IQA multiple choice: loglikelihood over A/B/C.
+    Social IQA multiple choice (OLMES/oe_eval style): loglikelihood over " A"/" B"/" C".
+    Uses space-prefixed labels in prompt (" A.", " B.", " C.") for tokenization parity with oe_eval.
     """
 
-    NAME = "SocialIQAMC"
+    NAME = "SocialIQAMC_OLMES"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query = _social_iqa_context_question(item)
         choices = [item["answerA"], item["answerB"], item["answerC"]]
         labels = get_n_letters(len(choices))
-        # Match oe_eval label_format " A." for tokenization
         options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices))
         return f"Question: {query}\n{options}\n"
 
@@ -202,4 +203,28 @@ class SocialIQAMC(SocialIQACloze):
         return f" {labels[idx]}"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        return [" A", " B", " C"]
+        return [f" {label}" for label in get_n_letters(3)]
+
+
+class SocialIQAMC(SocialIQAMC_OLMES):
+    """
+    Social IQA multiple choice: loglikelihood over A/B/C.
+    Labels in prompt and completions have no leading space ("A.", "B.", "C." and "A", "B", "C").
+    """
+
+    NAME = "SocialIQAMC"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        query = _social_iqa_context_question(item)
+        choices = [item["answerA"], item["answerB"], item["answerC"]]
+        labels = get_n_letters(len(choices))
+        options = "\n".join(f"{label}. {choice}" for label, choice in zip(labels, choices))
+        return f"Question: {query}\n{options}\n"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        idx = int(item["label"]) - 1
+        labels = get_n_letters(3)
+        return labels[idx]
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        return [label for label in get_n_letters(3)]

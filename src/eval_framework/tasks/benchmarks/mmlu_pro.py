@@ -91,6 +91,19 @@ class MMLU_PRO(BaseTask[str]):
         return [f" {key}" for key in self.keys]
 
 
+class MMLU_PRO_OLMES(MMLU_PRO):
+    """
+    MMLU Pro with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
+    """
+
+    NAME = "MMLU Pro_OLMES"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        instruction_text = item["question"].strip() + "\n"
+        instruction_text += "".join([f" {key}. {choice}\n" for key, choice in zip(self.keys, item["options"])])
+        return instruction_text
+
+
 class MMLU_PRO_IDK(MMLU_PRO):
     NAME = "MMLU Pro_IDK"
     METRICS = [

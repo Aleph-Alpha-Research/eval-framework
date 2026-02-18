@@ -52,8 +52,18 @@ class MathMinervaCompletion(BaseMetric[Completion]):
             gold = gold[0] if gold else None
         if not gold:
             return [
-                MetricResult(metric_name="Exact Match", value=0.0, higher_is_better=True),
-                MetricResult(metric_name="Exact Match (Flex)", value=0.0, higher_is_better=True),
+                MetricResult(
+                    metric_name="Exact Match",
+                    value=None,
+                    higher_is_better=True,
+                    error="No ground truth available",
+                ),
+                MetricResult(
+                    metric_name="Exact Match (Flex)",
+                    value=None,
+                    higher_is_better=True,
+                    error="No ground truth available",
+                ),
             ]
 
         raw = response.raw_completion or response.completion
@@ -65,11 +75,11 @@ class MathMinervaCompletion(BaseMetric[Completion]):
             if is_equiv_minerva(primary, gold):
                 exact_match = 1.0
 
-        exact_match_flex = 0.0
-        for candidate in all_candidates:
-            if is_equiv_minerva(candidate, gold) or is_equiv_hendrycks(candidate, gold):
-                exact_match_flex = 1.0
-                break
+        exact_match_flex = float(
+            any(
+                is_equiv_minerva(candidate, gold) or is_equiv_hendrycks(candidate, gold) for candidate in all_candidates
+            )
+        )
 
         return [
             MetricResult(metric_name="Exact Match", value=exact_match, higher_is_better=True),

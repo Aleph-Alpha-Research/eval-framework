@@ -32,12 +32,25 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
                 break
 
         if log_p_x is None or answer_text is None:
-            # If we can't associate a loglikelihood with a ground-truth answer, skip.
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=False, error=response.error)]
+            return [
+                MetricResult(
+                    metric_name=self.NAME,
+                    value=None,
+                    higher_is_better=False,
+                    error=response.error or "No ground-truth answer found in loglikelihoods",
+                )
+            ]
 
         num_bytes = len(answer_text.encode("utf-8"))
         if num_bytes == 0:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=False, error=response.error)]
+            return [
+                MetricResult(
+                    metric_name=self.NAME,
+                    value=None,
+                    higher_is_better=False,
+                    error=response.error or "Ground-truth answer has zero UTF-8 bytes",
+                )
+            ]
 
         bits_per_byte = -log_p_x / (num_bytes * math.log(2))
 

@@ -8,6 +8,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
+from eval_framework.tasks.utils import get_n_letters
 
 
 class COPAEvalHarness(BaseTask[str]):
@@ -42,6 +43,33 @@ class COPAEvalHarness(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         choices = [self.convert_choice(item["choice1"]), self.convert_choice(item["choice2"])]
         return choices
+
+
+class COPA_OLMES(COPAEvalHarness):
+    """
+    COPA multiple choice (OLMES/oe_eval style): prompt shows premise + connector and options with
+    space-prefixed labels (" A.", " B."); loglikelihood over " A"/" B".
+    """
+
+    NAME = "COPA_OLMES"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        connector = {
+            "cause": "because",
+            "effect": "therefore",
+        }[item["question"]]
+        premise = item["premise"].strip()[:-1] + f" {connector}"
+        choices = [self.convert_choice(item["choice1"]), self.convert_choice(item["choice2"])]
+        labels = get_n_letters(len(choices))
+        options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices))
+        return f"{premise}\n{options}\n"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        labels = get_n_letters(2)
+        return f" {labels[item['label']]}"
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        return [f" {label}" for label in get_n_letters(2)]
 
 
 class COPA(COPAEvalHarness):

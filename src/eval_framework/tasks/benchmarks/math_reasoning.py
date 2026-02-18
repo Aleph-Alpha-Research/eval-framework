@@ -11,12 +11,21 @@ from eval_framework.metrics.completion.math_minerva_completion import (
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
 from eval_framework.metrics.completion.minerva_math_utils import (
     extract_answers,
-    last_boxed_only_string,
-    normalize_final_answer,
-    remove_boxed,
+    normalized_gold_from_solution,
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
+
+# Hendrycks MATH subject splits (shared by MATH, MATHMinervaEvalHarness, MATHMinervaBPB)
+MATH_SUBJECTS = [
+    "algebra",
+    "counting_and_probability",
+    "geometry",
+    "intermediate_algebra",
+    "number_theory",
+    "prealgebra",
+    "precalculus",
+]
 
 
 class MATHReasoning(BaseTask[str]):
@@ -449,15 +458,7 @@ class MATH(MATHReasoning):
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [MathReasoningCompletion, LanguageRawConsistencyChecker]
-    SUBJECTS = [
-        "algebra",
-        "counting_and_probability",
-        "geometry",
-        "intermediate_algebra",
-        "number_theory",
-        "prealgebra",
-        "precalculus",
-    ]
+    SUBJECTS = MATH_SUBJECTS
     LANGUAGE = Language.ENG
 
     # Adapted from OpenAI's math_eval.py (c) 2024 OpenAI – MIT License – https://github.com/openai/simple-evals/blob/main/math_eval.py
@@ -524,7 +525,7 @@ class MATHMinervaEvalHarness(MATHReasoning):
     MATH with Minerva-style prompt and scoring (lm-evaluation-harness / oe_eval parity).
     Uses strict final-answer string matching: "Final Answer: The final answer is ... I hope it is correct."
     Prompt: "Problem:\\n" + problem + "\\n\\n" + "Solution:"
-    Gold: normalize_final_answer(remove_boxed(last_boxed_only_string(solution)))
+    Gold: normalized_gold_from_solution(solution)
     Metrics: Exact Match, Exact Match (Flex) via MathMinervaCompletion.
     """
 
@@ -534,15 +535,7 @@ class MATHMinervaEvalHarness(MATHReasoning):
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [MathMinervaCompletion]
-    SUBJECTS = [
-        "algebra",
-        "counting_and_probability",
-        "geometry",
-        "intermediate_algebra",
-        "number_theory",
-        "prealgebra",
-        "precalculus",
-    ]
+    SUBJECTS = MATH_SUBJECTS
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -554,15 +547,7 @@ class MATHMinervaEvalHarness(MATHReasoning):
         return "Problem:\n" + item["problem"] + "\n\n" + "Solution:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
-        solution = item["solution"]
-        boxed = last_boxed_only_string(solution)
-        if boxed is None:
-            return None
-        try:
-            unboxed = remove_boxed(boxed)
-        except AssertionError:
-            return None
-        return normalize_final_answer(unboxed)
+        return normalized_gold_from_solution(item["solution"])
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
         return " " + item["solution"]
@@ -619,19 +604,8 @@ class MATHMinervaBPB(MATHReasoning):
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [BitsPerByteLoglikelihood]
-    SUBJECTS = [
-        "algebra",
-        "counting_and_probability",
-        "geometry",
-        "intermediate_algebra",
-        "number_theory",
-        "prealgebra",
-        "precalculus",
-    ]
+    SUBJECTS = MATH_SUBJECTS
     LANGUAGE = Language.ENG
-
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return "Problem:\n" + item["problem"] + "\n\n" + "Solution:"
@@ -652,14 +626,7 @@ class MATHMinervaBPB(MATHReasoning):
         return [" " + normalized]
 
     def _normalized_gold_from_solution(self, solution: str) -> str | None:
-        boxed = last_boxed_only_string(solution)
-        if boxed is None:
-            return None
-        try:
-            unboxed = remove_boxed(boxed)
-        except AssertionError:
-            return None
-        return normalize_final_answer(unboxed)
+        return normalized_gold_from_solution(solution)
 
 
 class MATHLvl5(MATH):

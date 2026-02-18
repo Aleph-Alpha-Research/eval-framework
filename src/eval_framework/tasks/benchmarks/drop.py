@@ -1,9 +1,11 @@
 from typing import Any
 
+from eval_framework.metrics.completion.drop_completion import DropF1ExactMatch, DropMetricContext
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
 from eval_framework.tasks.utils import get_n_letters
 
@@ -61,25 +63,26 @@ def _tuple_to_display(tup: tuple[str, ...]) -> str:
     return ", ".join(str(x) for x in tup) if tup else ""
 
 
-class DropRC(BaseTask[str]):
-    """Original DROP (EleutherAI/drop): passage, question, answer + validated_answers.
+class DropCompletion(BaseTask[str]):
+    """DROP completion benchmark (EleutherAI/drop): passage, question, model generates answer.
 
-    Parsed answers used as choices for rank-choice.
+    Uses DROP F1 and exact match. Stop at new paragraph or repeated prefixes.
     """
 
-    NAME = "DropRC"
+    NAME = "DropCompletion"
     DATASET_PATH = "EleutherAI/drop"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
-    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+    RESPONSE_TYPE = ResponseType.COMPLETION
+    METRICS = [DropF1ExactMatch]
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Passage"]
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
-        self.keys = get_n_letters(5)
+        self.stop_sequences = ["Passage:", "Question:", "\n\n"]
+        self.max_tokens = 50
 
     def _load_dataset(self, subject: str) -> None:
         hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH)
@@ -106,11 +109,11 @@ class DropRC(BaseTask[str]):
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "Answer:"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_context(self, item: dict[str, Any]) -> DropMetricContext | None:
         answers = item.get("parsed_answers") or []
         if not answers:
             return None
-        return [f" {_tuple_to_display(t)}" for t in answers]
+        return DropMetricContext(answer_tuples=[list(a) for a in answers])
 
 
 class DropMC(BaseTask[str]):
@@ -139,12 +142,66 @@ class DropMC(BaseTask[str]):
         return f"Passage: {passage}\nQuestion: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        key = item.get("answerKey", "A")
+        key = item.get("answerKey")
+        if key is None:
+            return None
         return f" {key}"
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        labels = item.get("choices", {}).get("label", [])
+        return [f" {label}" for label in labels]
+
+
+class DropMC_OLMES(DropMC):
+    """
+    DropMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
+    """
+
+    NAME = "DropMC_OLMES"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        passage = (item.get("passage_original") or "").strip()
+        question = item.get("question_original", "")
+        texts = item.get("choices", {}).get("text", [])
+        labels = item.get("choices", {}).get("label", self.keys[: len(texts)])
+        options = "\n".join(f" {label}. {t}" for label, t in zip(labels, texts))
+        return f"Passage: {passage}\nQuestion: {question}\n{options}\n"
+
+
+class DropCloze(BaseTask[str]):
+    """Cloze variant: loglikelihood ranking over full choice texts (allenai/drop-gen2mc).
+
+    Same dataset as DropMC; options not shown in prompt; model scores full text of each choice.
+    Includes BitsPerByte on the correct choice.
+    """
+
+    NAME = "DropCloze"
+    DATASET_PATH = "allenai/drop-gen2mc"
+    SAMPLE_SPLIT = "validation"
+    FEWSHOT_SPLIT = "validation"
+    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    SUBJECTS = [NO_SUBJECT]
+    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Passage"]
+    LANGUAGE = Language.ENG
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        passage = (item.get("passage_original") or "").strip()
+        question = item.get("question_original", "")
+        return f"Passage: {passage}\nQuestion: {question}\n"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        texts = item.get("choices", {}).get("text", [])
+        labels = item.get("choices", {}).get("label", [])
+        key = item.get("answerKey")
+        if key is None or key not in labels:
+            return None
+        idx = labels.index(key)
+        return f" {texts[idx]}"
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "Answer:"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        labels = item.get("choices", {}).get("label", [])
-        return [f" {label}" for label in labels]
+        texts = item.get("choices", {}).get("text", [])
+        return [f" {t}" for t in texts]

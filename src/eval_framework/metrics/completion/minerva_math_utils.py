@@ -118,7 +118,7 @@ def get_unnormalized_answer(text: str, relaxed: bool = False) -> str:
     When relaxed=True, accepts any capitalisation of:
       "Final Answer: The answer is " / "Final Answer: The final answer is "
       "The Final Answer: The answer is " / "The Final Answer: The final answer is "
-    with flexible whitespace; no suffix required (optional suffixes are stripped when present).
+    with flexible whitespace; no suffix required but "I hope it is correct." is stripped when present).
     """
     if relaxed:
         # Case-insensitive; optional "The " prefix; "answer" or "final answer" before "is"
@@ -129,7 +129,7 @@ def get_unnormalized_answer(text: str, relaxed: bool = False) -> str:
         )
         if match:
             raw = match.group(1).strip()
-            # Strip common optional suffix phrases (e.g. ". I hope it is correct.") when present
+            # Strip the optional "I hope it is correct." phrase when present
             raw = re.sub(r"\.?\s*i\s+hope\s+it\s+is\s+correct\.?\s*$", "", raw, flags=re.IGNORECASE).strip()
             return raw
         return INVALID_ANSWER
@@ -143,6 +143,31 @@ def get_unnormalized_answer(text: str, relaxed: bool = False) -> str:
     return INVALID_ANSWER
 
 
+def normalized_gold_from_solution(solution: str) -> str | None:
+    """Extract and normalize the gold answer from a solution string (last \\boxed{...})."""
+    boxed = last_boxed_only_string(solution)
+    if boxed is None:
+        return None
+    try:
+        unboxed = remove_boxed(boxed)
+    except AssertionError:
+        return None
+    return normalize_final_answer(unboxed)
+
+
+def _normalize_latex_core(s: str) -> str:
+    """Shared LaTeX normalization (equation extraction, \\text/\\boxed unwrap, frac/sqrt fix, $ strip)."""
+    s = re.sub(r"(.*?)(\$)(.*?)(\$)(.*)", r"$\3$", s)
+    s = re.sub(r"(\\text\{)(.*?)(\})", r"\2", s)
+    s = re.sub(r"(\\textbf\{)(.*?)(\})", r"\2", s)
+    s = re.sub(r"(\\overline\{)(.*?)(\})", r"\2", s)
+    s = re.sub(r"(\\boxed\{)(.*)(\})", r"\2", s)
+    s = re.sub(r"(frac)([^{])(.)", r"frac{\2}{\3}", s)
+    s = re.sub(r"(sqrt)([^{])", r"sqrt{\2}", s)
+    s = s.replace("$", "")
+    return s
+
+
 def normalize_final_answer(final_answer: str) -> str:
     """
     Normalize a final answer (appendix D of Lewkowycz et al. 2022).
@@ -152,14 +177,7 @@ def normalize_final_answer(final_answer: str) -> str:
         final_answer = final_answer.replace(before, after)
     for expr in REMOVED_EXPRESSIONS:
         final_answer = final_answer.replace(expr, "")
-    final_answer = re.sub(r"(.*?)(\$)(.*?)(\$)(.*)", r"$\3$", final_answer)
-    final_answer = re.sub(r"(\\text\{)(.*?)(\})", r"\2", final_answer)
-    final_answer = re.sub(r"(\\textbf\{)(.*?)(\})", r"\2", final_answer)
-    final_answer = re.sub(r"(\\overline\{)(.*?)(\})", r"\2", final_answer)
-    final_answer = re.sub(r"(\\boxed\{)(.*)(\})", r"\2", final_answer)
-    final_answer = re.sub(r"(frac)([^{])(.)", r"frac{\2}{\3}", final_answer)
-    final_answer = re.sub(r"(sqrt)([^{])", r"sqrt{\2}", final_answer)
-    final_answer = final_answer.replace("$", "")
+    final_answer = _normalize_latex_core(final_answer)
     if final_answer.replace(",", "").isdigit():
         final_answer = final_answer.replace(",", "")
     return final_answer

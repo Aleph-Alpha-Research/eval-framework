@@ -6,7 +6,9 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.utils import get_n_letters
 
 
 class NaturalQsOpen(BaseTask[str]):
@@ -41,13 +43,10 @@ class NaturalQsOpenCloze(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
     LANGUAGE = Language.ENG
-
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"Question: {item.get('question', '')}\n"
@@ -69,18 +68,33 @@ class NaturalQsOpenCloze(BaseTask[str]):
 class NaturalQsOpenMC(NaturalQsOpenCloze):
     NAME = "NaturalQsOpenMC"
 
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.keys = get_n_letters(4)
+
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item.get("question", "")
         texts = item.get("choices", {}).get("text", [])
-        labels = item.get("choices", {}).get("label", [])
-        options = "\n".join(f"{label}. {t}" for label, t in zip(labels, texts))
+        options = "\n".join(f" {key}. {t}" for key, t in zip(self.keys, texts))
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        labels = item.get("choices", {}).get("label", [])
-        gold_idx = labels.index(item.get("answerKey", ""))
-        return f" {labels[gold_idx]}"
+        gold_idx = self.keys.index(item.get("answerKey", ""))
+        return f" {self.keys[gold_idx]}"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        labels = item.get("choices", {}).get("label", [])
-        return [f" {label}" for label in labels]
+        return [f" {key}" for key in self.keys]
+
+
+class NaturalQsOpenMC_OLMES(NaturalQsOpenMC):
+    """
+    NaturalQsOpenMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
+    """
+
+    NAME = "NaturalQsOpenMC_OLMES"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        question = item.get("question", "")
+        texts = item.get("choices", {}).get("text", [])
+        options = "\n".join(f" {key}. {t}" for key, t in zip(self.keys, texts))
+        return f"Question: {question}\n{options}\n"
