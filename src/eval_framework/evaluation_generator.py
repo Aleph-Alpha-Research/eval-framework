@@ -137,13 +137,14 @@ class EvaluationGenerator:
             mask = data_subset["error"].isnull()
             data_subset_error_free = data_subset.loc[mask, ["subject", "key", "value"]]
 
-            aggregated_results[f"ErrorFreeRatio {metric}"] = float(len(data_subset_error_free) / total_count)
+            error_free_ratio = float(len(data_subset_error_free) / total_count)
+            aggregated_results[f"ErrorFreeRatio {metric}"] = error_free_ratio
 
             # aggregate by key and subject first to have equal weights for all key / subject combinations
             key_subject_mean = data_subset_error_free.groupby(["key", "subject"]).mean()
             aggregated_results[f"Average {metric}"] = float(key_subject_mean[["value"]].mean()["value"])
 
-            if aggregated_results[f"ErrorFreeRatio {metric}"] < 1.0:
+            if error_free_ratio < 1.0:
                 # Treat error samples (with value=None) as 0 for the "including errors" average
                 data_subset_with_errors = data_subset[["key", "subject", "value", "error"]].copy()
                 # Only fill value with 0 where there's an error (not for all None values)
