@@ -103,7 +103,7 @@ class COPA_IDKEvalHarness(COPAEvalHarness):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         completions = super()._get_possible_completions(item)
-        return (completions or []) + ["I do not know."]
+        return (completions or []) + [" I do not know."]
 
 
 class COPA_IDK(COPA_IDKEvalHarness):

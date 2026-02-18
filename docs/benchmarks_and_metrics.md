@@ -24,7 +24,7 @@ Additional task documentation can be generated with the script `utils/generate-t
 |   **Task**    | **Capability** | **Benchmarks** | **Long Context** |
 |-|-|-|-|
 |   Output Control   |   Bias   |   `WINOGENDER`   |    |
-|   Text Distillation   |   Classification   |   `ARC`, `ARC_DE`, `ARC_EU20_DE`, `ARC_EU20_FR`, `ARC_FI`, `BELEBELE`, `ChemBench`, `CommonsenseQACloze`, `CommonsenseQAMC`, `FullTextMMLU`, `GPQA`, `INCLUDE`, `MMLU`, `MMLU_DE`, `MMLU_EU20_DE`, `MMLU_EU20_FR`, `MMMLU`, `MMLU_PRO`, `OPENBOOKQA`, `PIQA`, `SCIQ`, `SCIQEvalHarness`, `SocialIQACloze`, `SocialIQAMC`, `SocialIQAMC_OLMES`, `TRUTHFULQA`, `TRUTHFULQA_EU20_DE`, `TRUTHFULQA_EU20_FR`   |    |
+|   Text Distillation   |   Classification   |   `ARC`, `ARC_DE`, `ARC_EU20_DE`, `ARC_EU20_FR`, `ARC_FI`, `BELEBELE`, `ChemBench`, `CommonsenseQACloze`, `CommonsenseQAMC`, `CommonsenseQAFullTextCloze`, `FullTextMMLU`, `GlobalMMLU`, `GPQA`, `INCLUDE`, `MMLU`, `MMLU_DE`, `MMLU_EU20_DE`, `MMLU_EU20_FR`, `MMMLU`, `MMLU_PRO`, `OPENBOOKQA`, `PIQA`, `SCIQ`, `SCIQEvalHarness`, `SocialIQACloze`, `SocialIQAMC`, `SocialIQAMC_OLMES`, `TRUTHFULQA`, `TRUTHFULQA_EU20_DE`, `TRUTHFULQA_EU20_FR`   |    |
 |   Text Distillation   |   QA   |   `DropCloze`, `DropMC`, `LabBenchCloze`, `LabBenchMC`, `MedQACloze`, `MedQAMC`, `NaturalQsOpen`, `NaturalQsOpenCloze`, `NaturalQsOpenMC`   |   `QUALITY`, `ZERO_SCROLLS_QUALITY`   |
 |   Text Generation   |   Open QA   |   `CASEHOLD`   |    |
 |   Logical Reasoning   |   Closed QA   |    |   `InfiniteBench_EnMC`   |

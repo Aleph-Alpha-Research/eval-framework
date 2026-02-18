@@ -208,8 +208,9 @@ class SocialIQAMC_OLMES(SocialIQACloze):
 
 class SocialIQAMC(SocialIQAMC_OLMES):
     """
-    Social IQA multiple choice: loglikelihood over A/B/C.
-    Labels in prompt and completions have no leading space ("A.", "B.", "C." and "A", "B", "C").
+    Social IQA multiple choice: loglikelihood over " A"/" B"/" C".
+    Labels in prompt have no leading space ("A.", "B.", "C."); possible completions use a
+    prefixed space (" A", " B", " C") for tokenization consistency.
     """
 
     NAME = "SocialIQAMC"
@@ -224,7 +225,7 @@ class SocialIQAMC(SocialIQAMC_OLMES):
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         idx = int(item["label"]) - 1
         labels = get_n_letters(3)
-        return labels[idx]
+        return f" {labels[idx]}"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        return [label for label in get_n_letters(3)]
+        return [f" {label}" for label in get_n_letters(3)]
