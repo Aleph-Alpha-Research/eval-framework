@@ -142,6 +142,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_QUALITY")
     register_lazy_task("eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_SQUALITY")
     register_lazy_task("eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_QMSUM")
+    register_lazy_task("eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_QASPER")
     register_lazy_task("eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_GOV_REPORT")
     register_lazy_task("eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_NARRATIVEQA")
     register_lazy_task("eval_framework.tasks.benchmarks.zero_scrolls.ZERO_SCROLLS_MUSIQUE")
