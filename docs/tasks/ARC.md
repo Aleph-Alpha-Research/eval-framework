@@ -6,7 +6,7 @@ DATASET_PATH = allenai/ai2_arc
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = train
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['ARC-Easy', 'ARC-Challenge']
 LANGUAGE = <Language.ENG: 'English'>
 ````

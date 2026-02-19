@@ -10,6 +10,7 @@ from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessSc
 from eval_framework.metrics.loglikelihood.probability_mass import ProbabilityMass, ProbabilityMassNorm
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
+from eval_framework.tasks.utils import get_n_letters
 
 # fewshot examples from Appendix E in https://arxiv.org/pdf/2109.07958
 FEWSHOT_ITEMS = [
@@ -93,6 +94,36 @@ class TRUTHFULQA(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         choices = item[self.target_identifier]["choices"]
         return [f" {choice}" for choice in choices]
+
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+        return self.FEWSHOT_ITEMS[: self.num_fewshot]
+
+
+class TRUTHFULQA_OLMES(TRUTHFULQA):
+    """
+    TruthfulQA multiple choice (OLMES/oe_eval style): prompt shows question and options with
+    space-prefixed labels (" A.", " B.", ...); loglikelihood over " A"/" B"/ etc.
+    """
+
+    NAME = "TruthfulQA_OLMES"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        question = item["question"]
+        choices = item[self.target_identifier]["choices"]
+        labels = get_n_letters(len(choices))
+        options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices))
+        return f"Q: {question}\n{options}\n"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+        labels_arr = item[self.target_identifier]["labels"]
+        choices = item[self.target_identifier]["choices"]
+        letters = get_n_letters(len(choices))
+        return [f" {letters[i]}" for i, label in enumerate(labels_arr) if label == 1]
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        choices = item[self.target_identifier]["choices"]
+        letters = get_n_letters(len(choices))
+        return [f" {letter}" for letter in letters]
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         return self.FEWSHOT_ITEMS[: self.num_fewshot]

@@ -6,7 +6,7 @@ DATASET_PATH = allenai/winogrande
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = train
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['winogrande_xl']
 LANGUAGE = <Language.ENG: 'English'>
 ````

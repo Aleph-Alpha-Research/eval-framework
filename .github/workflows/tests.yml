@@ -245,7 +245,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
           uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not external_api and not formatter_hash"
+          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not slow_download and not external_api and not formatter_hash"
 
   test-formatter-hash:
     runs-on: cpu-runner-8c-32gb-01

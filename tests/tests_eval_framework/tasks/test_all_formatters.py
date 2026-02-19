@@ -64,6 +64,9 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "InfiniteBench_RetrieveNumber": {"num_fewshot": 0},
     "InfiniteBench_RetrievePassKey1": {"num_fewshot": 0},
     "MATH": {"num_fewshot": 1},
+    "MATHMinervaBPB": {"num_fewshot": 0},
+    "MATHMinervaEvalHarness": {"num_fewshot": 0},
+    "MATH500Minerva": {"num_fewshot": 0},
     "MATHLvl5": {"num_fewshot": 1},
     "MATH500": {"num_fewshot": 1},
     "MBPP": {"num_fewshot": 1},
@@ -210,6 +213,10 @@ def test_all_tasks_formatter(task_name: str, formatter_cls: type[BaseFormatter])
     # Skip WMT tasks - sacrebleu file loading has non-determinism
     if "WMT" in task_name:
         pytest.skip(f"Skipping {task_name}: WMT tasks use sacrebleu with non-deterministic file loading")
+
+    # Skip GPQA_OLMES - uses gated HuggingFace dataset (Idavidrein/gpqa), hashes cannot be computed without auth
+    if task_name == "GPQA_OLMES":
+        pytest.skip(f"Skipping {task_name}: gated dataset, hashes not in task-prompts-hashes.json")
 
     task_class = get_task(task_name)
     args = SPECIAL_ARGS.get(task_class.__name__, {"num_fewshot": 1})

@@ -6,6 +6,7 @@ from typing import Any
 from eval_framework.metrics.completion.code_assertion import (
     CodeCompletionAssertion,
 )
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 
@@ -117,6 +118,27 @@ class MBPP(BaseTask[str]):
         mbpp_ground_truth = str(sample.ground_truth)
         code = self._code_expander(extracted_code, mbpp_ground_truth)
         return code
+
+
+class MBPPBPB(MBPP):
+    """
+    MBPP variant that scores loglikelihood of the gold reference code.
+    Reports bits-per-byte on the reference solution.
+    """
+
+    NAME = "MBPP BPB"
+    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
+    METRICS = [BitsPerByteLoglikelihood]
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        code = item.get("code")
+        if not code:
+            return None
+        return " " + code
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        gt = self._get_ground_truth(item)
+        return [gt] if gt else None
 
 
 class MBPP_SANITIZED(MBPP):

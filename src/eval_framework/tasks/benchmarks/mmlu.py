@@ -6,6 +6,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
@@ -117,10 +118,24 @@ class MMLU(BaseTask[str]):
         return [f" {key}" for key in self.keys]
 
 
+class MMLU_OLMES(MMLU):
+    """
+    MMLU with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
+    """
+
+    NAME = "MMLU_OLMES"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        question = item["question"].strip()
+        choices = "".join([f" {key}. {choice}\n" for key, choice in zip(self.keys, item["choices"])])
+        return f"Question: {question}\n{choices}"
+
+
 class FullTextMMLU(MMLU):
     """MMLU dataset but where the model is expected to replicate choice text, rather than just the key."""
 
     NAME = "Full Text MMLU"
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "answers"] + get_n_letters(4)
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:

@@ -8,14 +8,14 @@ Additional task documentation can be generated with the script `utils/generate-t
 
 | **Task** | **Capability** | **Benchmarks** | **Long Context** |
 |-|-|-|-|
-|   Logical Reasoning   |   Math   |   `AIME2024`, `GSM8K`, `GSM8K_EU20_DE`, `GSM8K_EU20_FR`, `GSM8KEvalHarness`,`GSM8KReasoning`, `MATH`, `MATH500`, `MATHLvl5`, `TableBench`   |   `InfiniteBench_MathFind`   |
+|   Logical Reasoning   |   Math   |   `AIME2024`, `AIME2025`, `GSM8K`, `GSM8K_EU20_DE`, `GSM8K_EU20_FR`, `GSM8KEvalHarness`, `GSM8KReasoning`, `MATH`, `MATH500`, `MATH500Minerva`, `MATHLvl5`, `MATHMinerva`, `MATHMinervaBPB`, `MATHMinervaEvalHarness`, `TableBench`   |   `InfiniteBench_MathFind`   |
 |   Logical Reasoning   |   Programming   |   `BigCodeBench`, `BigCodeBenchHard`, `BigCodeBenchInstruct`, `BigCodeBenchHardInstruct`, `HumanEval`, `HumanEvalInstruct`, `MBPP`, `MBPP_PROMPT_WITHOUT_TESTS`, `MBPP_SANITIZED`, `MBPP_PROMPT_WITHOUT_TESTS_SANITIZED`   |   `InfiniteBench_CodeRun`   |
 |   Logical Reasoning   |   Puzzle   |   `SPHYR`   |    |
 |   Output Control   |   Structure   |   `IFEval`, `IFEvalDe`, `IFEvalFiSv`, `RenderableStructEval`, `StructEval`   |    |
 |   Text Distillation   |   Aggregation   |    |   `ZERO_SCROLLS_SPACE_DIGEST`   |
 |   Text Distillation   |   Classification   |   `GPQA_COT`, `MMLU`, `MMLU_PRO_COT`, `MMMLU_GERMAN_COT`, `PAWSX`, `TRIVIAQA`   |    |
-|   TextDistillation   |   Closed QA   | `SQUAD`, `SQUAD2` |   `InfiniteBench_EnDia`   `InfiniteBench_EnQA`   |
-|   Text Distilation   |   Extraction   |   `DUC_ABSTRACTIVE`, `DUC_EXTRACTIVE`   |   `InfiniteBench_RetrieveKV2`, `InfiniteBench_RetrieveNumber`, `InfiniteBench_RetrievePassKey1`   |
+|   Text Distillation   |   Closed QA   | `SQUAD`, `SQUAD2`, `DropCompletion` |   `InfiniteBench_EnDia`, `InfiniteBench_EnQA`   |
+|   Text Distillation   |   Extraction   |   `DUC_ABSTRACTIVE`, `DUC_EXTRACTIVE`   |   `InfiniteBench_RetrieveKV2`, `InfiniteBench_RetrieveNumber`, `InfiniteBench_RetrievePassKey1`   |
 |   Text Distillation   |   QA   |    |   `ZERO_SCROLLS_GOV_REPORT`, `ZERO_SCROLLS_MUSIQUE`, `ZERO_SCROLLS_NARRATIVEQA`, `ZERO_SCROLLS_QASPER`, `ZERO_SCROLLS_QMSUM`, `ZERO_SCROLLS_SQUALITY`   |
 |   Text Transformation   |   Translation   |   `Flores200`, `FloresPlus`, `WMT14`, `WMT14_INSTRUCT`, `WMT16, WMT16_INSTRUCT, WMT20, WMT20_INSTRUCT`   |    |
 
@@ -24,8 +24,8 @@ Additional task documentation can be generated with the script `utils/generate-t
 |   **Task**    | **Capability** | **Benchmarks** | **Long Context** |
 |-|-|-|-|
 |   Output Control   |   Bias   |   `WINOGENDER`   |    |
-|   Text Distillation   |   Classification   |   `ARC`,`ARC_DE`, `ARC_EU20_DE`, `ARC_EU20_FR`, `ARC_FI`, `BELEBELE`, `ChemBench`, `FullTextMMLU`, `GPQA`, `INCLUDE`, `MMLU`, `MMLU_DE`,`MMLU_EU20_DE`, `MMLU_EU20_FR`, `MMMLU`, `MMLU_PRO`, `OPENBOOKQA`, `PIQA`, `SCIQ`, `SCIQEvalHarness`, `TRUTHFULQA`, `TRUTHFULQA_EU20_DE, TRUTHFULQA_EU20_FR`   |    |
-|   Text Distillation   |   QA   |    |   `QUALITY`, `ZERO_SCROLLS_QUALITY`   |
+|   Text Distillation   |   Classification   |   `ARC`, `ARC_DE`, `ARC_EU20_DE`, `ARC_EU20_FR`, `ARC_FI`, `BELEBELE`, `ChemBench`, `CommonsenseQACloze`, `CommonsenseQAMC`, `CommonsenseQAFullTextCloze`, `FullTextMMLU`, `GlobalMMLU`, `GPQA`, `INCLUDE`, `MMLU`, `MMLU_DE`, `MMLU_EU20_DE`, `MMLU_EU20_FR`, `MMMLU`, `MMLU_PRO`, `OPENBOOKQA`, `PIQA`, `SCIQ`, `SCIQEvalHarness`, `SocialIQACloze`, `SocialIQAMC`, `SocialIQAMC_OLMES`, `TRUTHFULQA`, `TRUTHFULQA_EU20_DE`, `TRUTHFULQA_EU20_FR`   |    |
+|   Text Distillation   |   QA   |   `DropCloze`, `DropMC`, `LabBenchCloze`, `LabBenchMC`, `MedQACloze`, `MedQAMC`, `NaturalQsOpen`, `NaturalQsOpenCloze`, `NaturalQsOpenMC`   |   `QUALITY`, `ZERO_SCROLLS_QUALITY`   |
 |   Text Generation   |   Open QA   |   `CASEHOLD`   |    |
 |   Logical Reasoning   |   Closed QA   |    |   `InfiniteBench_EnMC`   |
 |   Logical Reasoning   |   Programming   |    |   `InfiniteBench_CodeDebug`   |
@@ -48,7 +48,6 @@ Additional task documentation can be generated with the script `utils/generate-t
 | QuALITY                        | `QuALITY`                        | Text Distillation | QA                                               | Literature, Misc | not supported | 4248                                         | en           |
 | ZeroSCROLLS GovReport          | `ZeroSCROLLS GovReport`          | Text Distillation | QA                                               | Government | not supported | 7273                                         | en           |
 | ZeroSCROLLS SQuALITY           | `ZeroSCROLLS SQuALITY`           | Text Distillation | QB-Summ?                                         | Literature | not supported | 4971                                         | en           |
-| ZeroSCROLLS Qasper             | `ZeroSCROLLS Qasper`             | Text Distillation | QA                                               | Science | not supported | 3531                                         | en           |
 | ZeroSCROLLS NarrativeQA        | `ZeroSCROLLS NarrativeQA`        | Text Distillation | QA                                               | Literature, Film | not supported | 49384                                        | en           |
 | ZeroSCROLLS QuALITY            | `ZeroSCROLLS QuALITY`            | Text Distillation | QA                                               | Literature, Misc | not supported | 4248                                         | en           |
 | ZeroSCROLLS MuSiQue            | `ZeroSCROLLS MuSiQue`            | Text Distillation | QA                                               | Wikipedia | not supported | 1749                                         | en           |
@@ -88,6 +87,7 @@ Additional task documentation can be generated with the script `utils/generate-t
 || Repetition Checker            |
 | Loglikelihood Metrics | Accuracy Loglikelihood        |
 || Normalized Accuracy Loglikelihood |
+|| BitsPerByte                      |
 || Probability Mass              |
 | LLM Metrics | Chatbot Style Judge           |
 || Completion Accuracy Judge

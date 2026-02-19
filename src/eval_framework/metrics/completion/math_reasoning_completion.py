@@ -8,6 +8,7 @@ from sympy.parsing.latex import parse_latex
 from sympy.parsing.latex.errors import LaTeXParsingError
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.completion.minerva_math_utils import _normalize_latex_core
 from eval_framework.shared.types import Completion
 
 
@@ -110,14 +111,7 @@ class MathReasoningCompletion(BaseMetric[Completion]):
         for expr in self.REMOVED_EXPRESSIONS_FORMAT:
             # Safely remove formatting expressions
             final_answer = final_answer.replace(expr, "")
-        final_answer = re.sub(r"(.*?)(\$)(.*?)(\$)(.*)", r"$\3$", final_answer)
-        final_answer = re.sub(r"(\\text\{)(.*?)(\})", r"\2", final_answer)
-        final_answer = re.sub(r"(\\textbf\{)(.*?)(\})", r"\2", final_answer)
-        final_answer = re.sub(r"(\\overline\{)(.*?)(\})", r"\2", final_answer)
-        final_answer = re.sub(r"(\\boxed\{)(.*)(\})", r"\2", final_answer)
-        final_answer = re.sub(r"(frac)([^{])(.)", r"frac{\2}{\3}", final_answer)
-        final_answer = re.sub(r"(sqrt)([^{])", r"sqrt{\2}", final_answer)
-        final_answer = final_answer.replace("$", "")
+        final_answer = _normalize_latex_core(final_answer)
         # Only strip commas if it's a single numeric value with optional commas (like "1,000")
         if re.fullmatch(r"\d{1,3}(,\d{3})*", final_answer):
             final_answer = final_answer.replace(",", "")
