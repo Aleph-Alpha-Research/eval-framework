@@ -39,7 +39,6 @@ It handles formatter setup, request concurrency, retry behavior, and timeout man
 | `max_retries`                   | `int`                   | Maximum number of retry attempts for failed API requests (e.g. network errors, rate limits).                                      |                  `100`                  |
 | `max_async_concurrent_requests` | `int`                   | Maximum number of concurrent asynchronous API requests allowed. Controls throughput and parallelism.                              |                   `32`                  |
 | `request_timeout_seconds`       | `int`                   | Maximum number of seconds before an API request times out.                                                                        |    `1805` *(30 minutes + 5 seconds)*    |
-| `queue_full_timeout_seconds`    | `int`                   | Maximum number of seconds to wait when the async request queue is full before giving up.                                          |    `1805` *(30 minutes + 5 seconds)*    |
 | `bytes_per_token`               | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes-per-token).  | `None` *(internally defaults to `4.0`)* |
 
 ---

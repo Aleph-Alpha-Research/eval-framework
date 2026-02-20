@@ -1,6 +1,7 @@
 from typing import Any
 
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
 
@@ -75,6 +76,27 @@ class HumanEval(BaseTask[str]):
         )
 
         return formatted_code
+
+
+class HumanEvalBPB(HumanEval):
+    """
+    HumanEval variant that scores loglikelihood of the gold canonical solution.
+    Reports bits-per-byte on the reference completion.
+    """
+
+    NAME = "Human Eval BPB"
+    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
+    METRICS = [BitsPerByteLoglikelihood]
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return ""
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        return " " + item["canonical_solution"]
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        gt = self._get_ground_truth(item)
+        return [gt] if gt else None
 
 
 class HumanEvalInstruct(HumanEval):

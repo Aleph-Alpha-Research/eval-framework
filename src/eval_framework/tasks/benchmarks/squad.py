@@ -10,6 +10,7 @@ from huggingface_hub.errors import RevisionNotFoundError
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
 
 
@@ -75,7 +76,6 @@ class SQUAD2(BaseTask[str]):
         return load_dataset(
             **kwargs,
             revision=self.HF_REVISION,
-            trust_remote_code=True,
             cache_dir=cache_dir,
             download_config=download_config,
         )
@@ -183,6 +183,31 @@ class SQUAD2(BaseTask[str]):
         assert target is not None
         assert isinstance(target, str)
         return target
+
+
+class SQUAD2BPB(SQUAD2):
+    """
+    SQuAD2 variant that scores loglikelihood of the gold answer text.
+    Reports bits-per-byte on the reference answer (first acceptable answer).
+    """
+
+    NAME = "SQuAD2 BPB"
+    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
+    METRICS = [BitsPerByteLoglikelihood]
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+        text_ = item["answers"]["text"]
+        if text_:
+            return [f" {text_[0]}"]
+        return [f" {self.UNANSWERABLE_STR}"]
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        return self._get_ground_truth(item)
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        gt_list = self._get_ground_truth(item)
+        assert gt_list
+        return gt_list[0]
 
 
 class SQUAD(SQUAD2):

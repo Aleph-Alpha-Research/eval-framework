@@ -188,10 +188,15 @@ def test_aggregate_results(tmp_path: Path) -> None:
 
     assert aggregated_results == {
         "Average metric1": 2.0,  # mean of all key-subject pairs (3.0, 4.0, 1.0, 0.0)
+        "Average metric1 (including Errors)": 1.8125,  # errors treated as 0: (2.25, 1.0, 4.0, 0.0)
         "Average metric1 - key1": 3.5,  # mean of means of subjects (3.0 and 4.0)
+        "Average metric1 (including Errors) - key1": 3.125,  # errors as 0: (2.25, 4.0)
         "Average metric1 - key2": 0.5,
+        "Average metric1 (including Errors) - key2": 0.5,  # errors as 0: (1.0, 0.0)
         "Average metric1 - subject1": 2.0,  # mean of means of keys (3.0 and 1.0)
+        "Average metric1 (including Errors) - subject1": 1.625,  # errors as 0: (2.25, 1.0)
         "Average metric1 - subject2": 2.0,
+        "Average metric1 (including Errors) - subject2": 2.0,  # errors as 0: (4.0, 0.0)
         "Average metric2": 3.0,  # NaNs are skipped in the mean calculation
         "Average metric2 - subject1": 3.0,
         "Average metric2 - subject2": None,  # NaN appears

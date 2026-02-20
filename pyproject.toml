@@ -1,6 +1,6 @@
 [project]
 name = "eval-framework"
-version = "0.2.9"
+version = "0.2.12"
 description = "Evalulation Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -21,7 +21,7 @@ dependencies = [
   "pyyaml>=6.0.1,<7",
   "xmltodict>=0.13.0,<0.16",
   "pydantic>=2.7,<3",
-  "datasets>=2.19.1,<4", # dataset v4 has breaking changes we'd need to adapt to
+  "datasets>=4.0.0,<5",
   "sacrebleu>=2.4.3,<3",
   "pycountry>=24.6.1,<25",
   "nltk>=3.9.1,<4",
@@ -53,10 +53,10 @@ determined = [
   "determined>=0.38,<0.39",
   "tensorboard==2.19.0"
 ]
-api = ["aleph-alpha-client>=10,<11"]
+api = ["aleph-alpha-client>=11.5.1"]
 openai = [
-  "openai>=1.62,<2.8",
-  "tiktoken>=0.9,<0.10",
+  "openai>=1.62,<3",
+  "tiktoken>=0.9,<1",
   "transformers>=4.45.2,<5",
 ]
 transformers = [
@@ -105,6 +105,7 @@ dev = [
   "types-requests>=2.32.0.20250328,<3",
   "plotly>=5.24.1,<6",
   "ruff>=0.12.8",
+  "scipy>=1.14.0,<2",  # for tests comparing our Hungarian implementation to scipy
 ]
 flash-attn = [
   "flash-attn>=2.7.2.post1,<2.8",
@@ -178,6 +179,7 @@ addopts = "-p 'no:legacypath' --doctest-modules"
 markers = [
     "gpu: needs a GPU runner, otherwise test can not be run",
     "cpu_slow: runs for a long time (on CPU)",
+    "slow_download: smoke tests that download large datasets (>15s); excluded from CI, run manually with -m slow_download",
     "external_api: needs external services for execution",
     "vllm: tests that specifically require vLLM functionality",
     "formatter_hash: formatter consistency tests using hash comparisons",

@@ -27,6 +27,7 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "ARC_EU20_DE": {"num_fewshot": 1},
     "ARC_EU20_FR": {"num_fewshot": 1},
     "ARC_FI": {"num_fewshot": 1},
+    "BalancedCOPA": {"num_fewshot": 1},
     "BigCodeBench": {"num_fewshot": 1},
     "BigCodeBenchInstruct": {"num_fewshot": 1},
     "BigCodeBenchHard": {"num_fewshot": 1},
@@ -34,11 +35,16 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "CASEHOLD": {"num_fewshot": 1},
     "ChemBench": {"num_fewshot": 1},
     "COPA": {"num_fewshot": 1},
+    "COPAEvalHarness": {"num_fewshot": 1},
+    "COPA_IDKEvalHarness": {"num_fewshot": 1},
     "DUC_ABSTRACTIVE": {"num_fewshot": 1},
     "DUC_EXTRACTIVE": {"num_fewshot": 1},
     "Flores200": {"num_fewshot": 1},
+    "GlobalMMLU": {"num_fewshot": 1},
     "GPQA": {"num_fewshot": 1},
     "GPQA_COT": {"num_fewshot": 1},
+    "GOLDENSWAG": {"num_fewshot": 1},
+    "GOLDENSWAG_IDK": {"num_fewshot": 1},
     "GSM8K": {"num_fewshot": 1},
     "GSM8KEvalHarness": {"num_fewshot": 1},
     "GSM8KReasoning": {"num_fewshot": 0},
@@ -58,6 +64,9 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "InfiniteBench_RetrieveNumber": {"num_fewshot": 0},
     "InfiniteBench_RetrievePassKey1": {"num_fewshot": 0},
     "MATH": {"num_fewshot": 1},
+    "MATHMinervaBPB": {"num_fewshot": 0},
+    "MATHMinervaEvalHarness": {"num_fewshot": 0},
+    "MATH500Minerva": {"num_fewshot": 0},
     "MATHLvl5": {"num_fewshot": 1},
     "MATH500": {"num_fewshot": 1},
     "MBPP": {"num_fewshot": 1},
@@ -204,6 +213,10 @@ def test_all_tasks_formatter(task_name: str, formatter_cls: type[BaseFormatter])
     # Skip WMT tasks - sacrebleu file loading has non-determinism
     if "WMT" in task_name:
         pytest.skip(f"Skipping {task_name}: WMT tasks use sacrebleu with non-deterministic file loading")
+
+    # Skip GPQA_OLMES - uses gated HuggingFace dataset (Idavidrein/gpqa), hashes cannot be computed without auth
+    if task_name == "GPQA_OLMES":
+        pytest.skip(f"Skipping {task_name}: gated dataset, hashes not in task-prompts-hashes.json")
 
     task_class = get_task(task_name)
     args = SPECIAL_ARGS.get(task_class.__name__, {"num_fewshot": 1})

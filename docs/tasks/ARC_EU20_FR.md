@@ -6,7 +6,7 @@ DATASET_PATH = openGPT-X/arcx
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = train
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['challenge_FR', 'easy_FR']
 LANGUAGE = <Language.FRA: 'French'>
 ````

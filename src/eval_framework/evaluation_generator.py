@@ -134,15 +134,26 @@ class EvaluationGenerator:
             # filter and count errors
             total_count = len(data_subset)
 
-            mask = data["error"].isnull()
+            mask = data_subset["error"].isnull()
             data_subset_error_free = data_subset.loc[mask, ["subject", "key", "value"]]
-            # data_subset_error_free = data_subset[data_subset["error"].isnull()][["subject", "key", "value"]]
 
-            aggregated_results[f"ErrorFreeRatio {metric}"] = float(len(data_subset_error_free) / total_count)
+            error_free_ratio = float(len(data_subset_error_free) / total_count)
+            aggregated_results[f"ErrorFreeRatio {metric}"] = error_free_ratio
 
             # aggregate by key and subject first to have equal weights for all key / subject combinations
             key_subject_mean = data_subset_error_free.groupby(["key", "subject"]).mean()
             aggregated_results[f"Average {metric}"] = float(key_subject_mean[["value"]].mean()["value"])
+
+            if error_free_ratio < 1.0:
+                # Treat error samples (with value=None) as 0 for the "including errors" average
+                data_subset_with_errors = data_subset[["key", "subject", "value", "error"]].copy()
+                # Only fill value with 0 where there's an error (not for all None values)
+                error_mask = data_subset_with_errors["error"].notna()
+                data_subset_with_errors.loc[error_mask, "value"] = data_subset_with_errors.loc[
+                    error_mask, "value"
+                ].fillna(0.0)
+                key_subject_mean_with_errors = data_subset_with_errors.groupby(["key", "subject"])["value"].mean()
+                aggregated_results[f"Average {metric} (including Errors)"] = float(key_subject_mean_with_errors.mean())
 
             std_err_mean_sum_of_squares = 0.0
             std_err_mean_total_num_samples = 0.0
@@ -156,13 +167,28 @@ class EvaluationGenerator:
                         # group = data_subset[data[column] == name][["subject", "key", "value", "error"]]
                         group_total_count = len(group)
                         group_error_free = group[group["error"].isnull()][["subject", "key", "value"]]
-                        aggregated_results[f"ErrorFreeRatio {metric} - {name[0]}"] = float(
-                            len(group_error_free) / group_total_count
-                        )
+                        group_error_free_ratio = float(len(group_error_free) / group_total_count)
+                        aggregated_results[f"ErrorFreeRatio {metric} - {name[0]}"] = group_error_free_ratio
 
                         group_key_subject_mean = group_error_free.groupby(["key", "subject"]).mean()
                         value = float(group_key_subject_mean[["value"]].mean()["value"])
                         aggregated_results[f"Average {metric} - {name[0]}"] = value if not math.isnan(value) else None
+
+                        if group_error_free_ratio < 1.0:
+                            # Treat error samples (with value=None) as 0 for the "including errors" average
+                            group_with_errors = group[["key", "subject", "value", "error"]].copy()
+                            # Only fill value with 0 where there's an error (not for all None values)
+                            error_mask = group_with_errors["error"].notna()
+                            group_with_errors.loc[error_mask, "value"] = group_with_errors.loc[
+                                error_mask, "value"
+                            ].fillna(0.0)
+                            group_key_subject_mean_with_errors = group_with_errors.groupby(["key", "subject"])[
+                                "value"
+                            ].mean()
+                            value_with_errors = float(group_key_subject_mean_with_errors.mean())
+                            aggregated_results[f"Average {metric} (including Errors) - {name[0]}"] = (
+                                value_with_errors if not math.isnan(value_with_errors) else None
+                            )
 
                         if not ("SequencePositions" in metric or "Bytes" in metric):
                             # calculate standard error for selected  metrics

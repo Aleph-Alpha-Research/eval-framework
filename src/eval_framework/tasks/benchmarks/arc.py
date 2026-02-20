@@ -4,6 +4,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
@@ -19,14 +20,13 @@ class ARC(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = ["ARC-Easy", "ARC-Challenge"]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"] + get_n_letters(5)
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
-
         self.keys = get_n_letters(5)  # needs to be 5 because there is one sample with 5 answer possibilities
         self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}
 
@@ -47,6 +47,32 @@ class ARC(BaseTask[str]):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {choice}" for choice in item["choices"]["text"]]
+
+
+class ARC_OLMES(ARC):
+    """
+    ARC with OLMES-style prompt: options shown with space-prefixed labels (" A.", " B.", ...);
+    loglikelihood over " A"/" B"/ etc.
+    """
+
+    NAME = "ARC_OLMES"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        question = item["question"]
+        texts = item["choices"]["text"]
+        labels = get_n_letters(len(texts))
+        options = "\n".join(f" {label}. {t}" for label, t in zip(labels, texts))
+        return f"Question: {question}\n{options}\n"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        answer_key = self.num_to_letter.get(item["answerKey"], item["answerKey"])
+        idx = self.keys.index(answer_key) if answer_key in self.keys else 0
+        labels = get_n_letters(len(item["choices"]["text"]))
+        return f" {labels[idx]}"
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        n = len(item["choices"]["text"])
+        return [f" {label}" for label in get_n_letters(n)]
 
 
 class ARC_IDK(ARC):
