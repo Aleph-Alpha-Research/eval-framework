@@ -82,6 +82,7 @@ class CommonsenseQAMC_OLMES(CommonsenseQAMC):
     """
 
     NAME = "CommonsenseQAMC_OLMES"
+    FEWSHOT_SPLIT = "train"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
