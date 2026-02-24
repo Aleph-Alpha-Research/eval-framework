@@ -4,7 +4,7 @@
 NAME = CommonsenseQAMC_OLMES
 DATASET_PATH = tau/commonsense_qa
 SAMPLE_SPLIT = validation
-FEWSHOT_SPLIT = validation
+FEWSHOT_SPLIT = train
 RESPONSE_TYPE = LOGLIKELIHOODS
 METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
 SUBJECTS = ['no_subject']

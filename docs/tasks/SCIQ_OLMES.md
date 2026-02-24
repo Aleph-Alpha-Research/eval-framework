@@ -4,7 +4,7 @@
 NAME = SCIQ_OLMES
 DATASET_PATH = allenai/sciq
 SAMPLE_SPLIT = validation
-FEWSHOT_SPLIT = test
+FEWSHOT_SPLIT = train
 RESPONSE_TYPE = LOGLIKELIHOODS
 METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['no_subject']
