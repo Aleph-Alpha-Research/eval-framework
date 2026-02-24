@@ -75,6 +75,7 @@ class MedQAMC_OLMES(MedQAMC):
     """
 
     NAME = "MedQAMC_OLMES"
+    FEWSHOT_SPLIT = "train"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
