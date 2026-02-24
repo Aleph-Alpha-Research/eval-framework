@@ -70,6 +70,7 @@ class SCIQ_OLMES(SCIQ):
     """
 
     NAME = "SciQ_OLMES"
+    FEWSHOT_SPLIT = "train"
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
