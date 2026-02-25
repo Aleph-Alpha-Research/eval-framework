@@ -155,7 +155,11 @@ class SocialIQACloze(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
@@ -173,6 +177,11 @@ class SocialIQACloze(BaseTask[str]):
         idx = int(item["label"]) - 1
         choices = [item["answerA"], item["answerB"], item["answerC"]]
         return f" {choices[idx]}"
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "Answer:"
