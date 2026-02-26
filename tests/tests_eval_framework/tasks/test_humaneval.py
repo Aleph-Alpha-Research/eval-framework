@@ -32,10 +32,12 @@ class TestHumanEvalOLMES:
 
     def test_code_is_executed(self, human_eval_olmes_task: HumanEval_OLMES) -> None:
         assert len(human_eval_olmes_task.SUBJECTS) > 0
-        human_eval_olmes_task._load_dataset(human_eval_olmes_task.SUBJECTS[0])
+        subject = human_eval_olmes_task.SUBJECTS[0]
+        human_eval_olmes_task._load_dataset(subject)
         i = 0
         for i, item in enumerate(human_eval_olmes_task.dataset[human_eval_olmes_task.SAMPLE_SPLIT][:10]):
-            sample = human_eval_olmes_task._create_samples(item, i, human_eval_olmes_task.SUBJECTS[0])[0]
+            item["subject"] = subject
+            sample = human_eval_olmes_task._create_samples(item, i, subject)[0]
             formatted_code = human_eval_olmes_task.post_process_generated_completion(item["canonical_solution"], sample)
             assert run_python_code(formatted_code).endswith("True")
             formatted_code = human_eval_olmes_task.post_process_generated_completion("", sample)
