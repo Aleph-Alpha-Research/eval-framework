@@ -215,6 +215,11 @@ def test_all_tasks_formatter(task_name: str, formatter_cls: type[BaseFormatter])
     if "WMT" in task_name:
         pytest.skip(f"Skipping {task_name}: WMT tasks use sacrebleu with non-deterministic file loading")
 
+    # TODO: BigCodeBench dataset/splits appear to yield non-deterministic samples (e.g. order or sample
+    # selection varies across runs), so formatter output hashes are not stable for these tasks.
+    if task_name in ("BigCodeBenchHard", "BigCodeBenchHardInstruct", "BigCodeBenchInstruct"):
+        pytest.skip(f"Skipping {task_name}: non-deterministic dataset/sample selection, hashes not stable")
+
     # Skip GPQA_OLMES - uses gated HuggingFace dataset (Idavidrein/gpqa), hashes cannot be computed without auth
     if task_name == "GPQA_OLMES":
         pytest.skip(f"Skipping {task_name}: gated dataset, hashes not in task-prompts-hashes.json")
