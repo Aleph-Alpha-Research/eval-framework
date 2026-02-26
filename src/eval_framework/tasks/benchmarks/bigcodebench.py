@@ -1,3 +1,4 @@
+import logging
 import random
 import re
 from typing import Any
@@ -20,6 +21,8 @@ from eval_framework.tasks.utils import (
     _parse_unittest_output,
     unittest_merge_snippets,
 )
+
+logger = logging.getLogger(__name__)
 
 PROMPT_INSTRUCTION = (
     "Please provide a self-contained Python script, without tests or example usage, that solves the following "
@@ -46,9 +49,13 @@ class BigCodeBench(BaseTask[str]):
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
-        # Only the base BigCodeBench class disallows fewshot; subclasses (e.g. BigCodeBench_OLMES) may use it.
         if self.__class__ is BigCodeBench and num_fewshot != 0:
-            raise ValueError("Fewshot is not supported for BigCodeBench; use BigCodeBench_OLMES for 3-shot.")
+            logger.warning(
+                "Fewshot is not supported for BigCodeBench (got num_fewshot=%d); "
+                "setting to 0. Use BigCodeBench_OLMES for 3-shot.",
+                num_fewshot,
+            )
+            num_fewshot = 0
         # NOTE : this serializer should be the same class as initialized in the metric
         self.serializer = CallableSerializer()
         super().__init__(num_fewshot)
@@ -130,7 +137,8 @@ class BigCodeBench_OLMES(BigCodeBench):
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
         # Match oe_eval doc_to_target for complete: canonical_solution + "\\n```"
         target = item["canonical_solution"]
-        assert target is not None and isinstance(target, str)
+        if not isinstance(target, str):
+            raise ValueError(f"Expected canonical_solution to be a non-None str, got {type(target)}")
         return target + "\n```"
 
 
