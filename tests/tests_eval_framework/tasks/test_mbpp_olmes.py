@@ -77,9 +77,12 @@ class TestMBPP_OLMES:
     def test_code_execution_with_canonical_solution(self, task: MBPP_OLMES) -> None:
         task._load_dataset(task.SUBJECTS[0])
         for i, item in enumerate(task.dataset[task.SAMPLE_SPLIT][:5]):
-            item["subject"] = task.SUBJECTS[0]
-            sample = task._create_samples(item, i, task.SUBJECTS[0])[0]
-            code = task.post_process_generated_completion(item["code"], sample)
+            # Verify that canonical code + test asserts execute correctly.
+            # We call _code_expander directly because in real usage the LLM
+            # engine truncates output at stop sequences (e.g. \n#) before it
+            # reaches post_process, and canonical solutions may contain those
+            # sequences (comments, asserts) that would corrupt the test.
+            code = MBPP_OLMES._code_expander(item["code"] + "\n", str(item["test_list"]))
             result = run_python_code(code)
             assert result.endswith("True"), f"Item {i} failed: {result}"
 

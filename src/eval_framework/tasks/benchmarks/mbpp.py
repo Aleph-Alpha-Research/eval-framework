@@ -302,6 +302,7 @@ class MBPP_OLMES(MBPP):
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         assert sample is not None
+        assert self.stop_sequences is not None
 
         for stop_seq in self.stop_sequences:
             if stop_seq in completion_text:
