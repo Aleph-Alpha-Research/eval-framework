@@ -134,11 +134,12 @@ class BaseVLLMModel(BaseLLM):
             **kwargs,
         }
 
-        device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-
         self.batch_size = batch_size
 
-        self.model = LLM(**model_args, device=device)
+        if "VLLM_TARGET_DEVICE" not in os.environ and not torch.cuda.is_available():
+            os.environ["VLLM_TARGET_DEVICE"] = "cpu"
+
+        self.model = LLM(**model_args)
 
         self._tokenizer: None | VLLMTokenizerAPI = None
         _ = self.tokenizer  # make sure tokenizer is initialized
