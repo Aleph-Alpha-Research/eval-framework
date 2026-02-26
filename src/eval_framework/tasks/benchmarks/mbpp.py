@@ -212,3 +212,102 @@ class MBPP_PROMPT_WITHOUT_TESTS(MBPP):
 class MBPP_PROMPT_WITHOUT_TESTS_SANITIZED(MBPP_PROMPT_WITHOUT_TESTS):
     NAME = "MBPP_PROMPT_WITHOUT_TESTS_SANITIZED"
     SUBJECTS = ["sanitized"]
+
+
+_OLMES_FEWSHOT_EXAMPLES: list[dict[str, Any]] = [
+    {
+        "text": "Write a function to find the similar elements from the given two tuple lists.",
+        "code": (
+            "def similar_elements(test_tup1, test_tup2):\n"
+            "  res = tuple(set(test_tup1) & set(test_tup2))\n  return (res)"
+        ),
+        "test_list": [
+            "assert similar_elements((3, 4, 5, 6),(5, 7, 4, 10)) == (4, 5)",
+            "assert similar_elements((1, 2, 3, 4),(5, 4, 3, 7)) == (3, 4)",
+            "assert similar_elements((11, 12, 14, 13),(17, 15, 14, 13)) == (13, 14)",
+        ],
+    },
+    {
+        "text": "Write a python function to identify non-prime numbers.",
+        "code": (
+            "import math\ndef is_not_prime(n):\n    result = False\n"
+            "    for i in range(2,int(math.sqrt(n)) + 1):\n"
+            "        if n % i == 0:\n            result = True\n    return result"
+        ),
+        "test_list": [
+            "assert is_not_prime(2) == False",
+            "assert is_not_prime(10) == True",
+            "assert is_not_prime(35) == True",
+        ],
+    },
+    {
+        "text": (
+            "Write a function to find the largest integers from a given list of numbers using heap queue algorithm."
+        ),
+        "code": (
+            "import heapq as hq\ndef heap_queue_largest(nums,n):\n"
+            "  largest_nums = hq.nlargest(n, nums)\n  return largest_nums"
+        ),
+        "test_list": [
+            "assert heap_queue_largest( [25, 35, 22, 85, 14, 65, 75, 22, 58],3)==[85, 75, 65] ",
+            "assert heap_queue_largest( [25, 35, 22, 85, 14, 65, 75, 22, 58],2)==[85, 75] ",
+            "assert heap_queue_largest( [25, 35, 22, 85, 14, 65, 75, 22, 58],5)==[85, 75, 65, 58, 35]",
+        ],
+    },
+]
+
+
+class MBPP_OLMES(MBPP):
+    """
+    MBPP OLMES variant replicating oe_eval's ``mbpp:3shot::olmo3:n32:v2``.
+
+    Uses the EvalPlus prompt format with 3 hardcoded fewshot examples from the
+    original MBPP "prompt" split (matching oe_eval's ordering). Each prompt
+    shows one test case (the first) instead of all.
+
+    Recommended EvalConfig settings for full replication::
+
+        split: test
+        num_fewshot: 3 (hardcoded, prompt split)
+        metric: pass_at_1
+        temperature: 0.6
+        top_p: 0.6
+        repeats: 32
+    """
+
+    NAME = "MBPP_OLMES"
+    FEWSHOT_SPLIT = "test"
+
+    def __init__(self, num_fewshot: int = 3) -> None:
+        super().__init__(num_fewshot)
+        assert num_fewshot == 3, "MBPP_OLMES requires exactly 3 fewshot examples"
+        self.stop_sequences = ["```", '\n"""', "\nassert", "\n#"]
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        text = item["text"] if "text" in item else item["prompt"]
+        test = item["test_list"][0]
+        return (
+            "Please provide a self-contained Python script that solves the following problem"
+            f" in a markdown code block:\n```\n{text.strip()}\n{test}\n```\n"
+        )
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return "Here is the completed function:\n\n```python\n"
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return item["code"] + "\n"
+
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+        return list(_OLMES_FEWSHOT_EXAMPLES)
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        assert sample is not None
+
+        for stop_seq in self.stop_sequences:
+            if stop_seq in completion_text:
+                completion_text = completion_text.split(stop_seq)[0]
+
+        extracted_code = completion_text + "\n"
+        mbpp_ground_truth = str(sample.ground_truth)
+        code = self._code_expander(extracted_code, mbpp_ground_truth)
+        return code
