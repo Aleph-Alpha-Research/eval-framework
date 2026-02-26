@@ -198,6 +198,7 @@ class SocialIQAMC_OLMES(SocialIQACloze):
     """
 
     NAME = "SocialIQAMC_OLMES"
+    SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query = _social_iqa_context_question(item)
