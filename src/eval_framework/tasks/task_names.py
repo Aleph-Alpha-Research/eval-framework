@@ -29,6 +29,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.balancedcopa.BalancedCOPA")
     register_lazy_task("eval_framework.tasks.benchmarks.belebele.BELEBELE")
     register_lazy_task("eval_framework.tasks.benchmarks.bigcodebench.BigCodeBench")
+    register_lazy_task("eval_framework.tasks.benchmarks.bigcodebench.BigCodeBench_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.bigcodebench.BigCodeBenchInstruct")
     register_lazy_task("eval_framework.tasks.benchmarks.bigcodebench.BigCodeBenchHard")
     register_lazy_task("eval_framework.tasks.benchmarks.bigcodebench.BigCodeBenchHardInstruct")

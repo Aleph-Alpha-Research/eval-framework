@@ -33,6 +33,8 @@
     "BigCodeBenchHardInstruct.Llama3Formatter": "bef24f74de73b36f2c27922be00fea6a",
     "BigCodeBenchInstruct.ConcatFormatter": "3bbb8fc3b861554ed690adea050dc5f8",
     "BigCodeBenchInstruct.Llama3Formatter": "dedf24bb58cb54a6ad91a2d94709e8b4",
+    "BigCodeBench_OLMES.ConcatFormatter": "dde6a54a75277965501ebfa56dcf412b",
+    "BigCodeBench_OLMES.Llama3Formatter": "e9be50705fd96fbf7bb772b4f89456ca",
     "CASEHOLD.ConcatFormatter": "aecdc3d7aa4e882fcf139ec7389b218b",
     "CASEHOLD.Llama3Formatter": "645c5f44971a336b8102791c76f17fbe",
     "COPA.ConcatFormatter": "1bfae4fe2db839f84ec9cd49fcf3714c",
