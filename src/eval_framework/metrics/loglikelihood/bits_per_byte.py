@@ -41,6 +41,7 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
                     or Error(
                         error_class="ValueError",
                         message="No ground-truth answer found in loglikelihoods",
+                        traceback="",
                     ),
                 )
             ]
@@ -56,6 +57,7 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
                     or Error(
                         error_class="ValueError",
                         message="Ground-truth answer has zero UTF-8 bytes",
+                        traceback="",
                     ),
                 )
             ]
