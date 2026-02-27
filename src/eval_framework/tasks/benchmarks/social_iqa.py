@@ -224,6 +224,7 @@ class SocialIQAMC(SocialIQAMC_OLMES):
     """
 
     NAME = "SocialIQAMC"
+    SAMPLE_SPLIT = "validation"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query = _social_iqa_context_question(item)
