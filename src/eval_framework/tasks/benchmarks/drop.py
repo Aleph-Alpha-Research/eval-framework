@@ -87,7 +87,7 @@ class DropCompletion(BaseTask[str]):
     def _load_dataset(self, subject: str) -> None:
         hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH)
 
-        def process(docs):
+        def process(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
             result = []
             for doc in docs:
                 parsed = _get_answers(doc)
