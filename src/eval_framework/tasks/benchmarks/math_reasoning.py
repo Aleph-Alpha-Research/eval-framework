@@ -4,8 +4,28 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
+from eval_framework.metrics.completion.math_minerva_completion import (
+    MathMinervaCompletion,
+    MathMinervaCompletionRelaxed,
+)
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
+from eval_framework.metrics.completion.minerva_math_utils import (
+    extract_answers,
+    normalized_gold_from_solution,
+)
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
+
+# Hendrycks MATH subject splits (shared by MATH, MATHMinervaEvalHarness, MATHMinervaBPB)
+MATH_SUBJECTS = [
+    "algebra",
+    "counting_and_probability",
+    "geometry",
+    "intermediate_algebra",
+    "number_theory",
+    "prealgebra",
+    "precalculus",
+]
 
 
 class MATHReasoning(BaseTask[str]):
@@ -438,15 +458,7 @@ class MATH(MATHReasoning):
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [MathReasoningCompletion, LanguageRawConsistencyChecker]
-    SUBJECTS = [
-        "algebra",
-        "counting_and_probability",
-        "geometry",
-        "intermediate_algebra",
-        "number_theory",
-        "prealgebra",
-        "precalculus",
-    ]
+    SUBJECTS = MATH_SUBJECTS
     LANGUAGE = Language.ENG
 
     # Adapted from OpenAI's math_eval.py (c) 2024 OpenAI – MIT License – https://github.com/openai/simple-evals/blob/main/math_eval.py
@@ -506,6 +518,115 @@ class MATH(MATHReasoning):
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
         return self._extract_answer(item["solution"])
+
+
+class MATHMinervaEvalHarness(MATHReasoning):
+    """
+    MATH with Minerva-style prompt and scoring (lm-evaluation-harness / oe_eval parity).
+    Uses strict final-answer string matching: "Final Answer: The final answer is ... I hope it is correct."
+    Prompt: "Problem:\\n" + problem + "\\n\\n" + "Solution:"
+    Gold: normalized_gold_from_solution(solution)
+    Metrics: Exact Match, Exact Match (Flex) via MathMinervaCompletion.
+    """
+
+    NAME = "MATHMinervaEvalHarness"
+    DATASET_PATH = "EleutherAI/hendrycks_math"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "train"
+    RESPONSE_TYPE = ResponseType.COMPLETION
+    METRICS = [MathMinervaCompletion]
+    SUBJECTS = MATH_SUBJECTS
+    LANGUAGE = Language.ENG
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.stop_sequences = ["Problem:", "\n\n"]
+        self.max_tokens = 1024
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return "Problem:\n" + item["problem"] + "\n\n" + "Solution:"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+        return normalized_gold_from_solution(item["solution"])
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return " " + item["solution"]
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        """Primary answer for storage; metric uses raw_completion for exact_match_flex (strict matching)."""
+        candidates = extract_answers(completion_text, use_cot=True, cot_style="minerva", relaxed=False)
+        return candidates[0] if candidates else "[no_answer]"
+
+
+class MATHMinerva(MATHMinervaEvalHarness):
+    """
+    MATH with Minerva-style prompt and relaxed final-answer string matching.
+    Same as MATHMinervaEvalHarness but allows flexible whitespace and case for variations of
+    "(The )Final Answer: The (final )answer is ...( I hope it is correct.)", where parentheses are optional.
+    """
+
+    NAME = "MATHMinerva"
+    METRICS = [MathMinervaCompletionRelaxed]
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        """Primary answer for storage; uses relaxed final-answer extraction."""
+        candidates = extract_answers(completion_text, use_cot=True, cot_style="minerva", relaxed=True)
+        return candidates[0] if candidates else "[no_answer]"
+
+
+class MATH500Minerva(MATHMinerva):
+    """
+    MATH-500 with Minerva-style prompt and scoring (OLMES minerva_math_500 parity).
+    Uses HuggingFaceH4/MATH-500 which has a single 'default' config (no subject splits).
+    """
+
+    NAME = "MATH500Minerva"
+    DATASET_PATH = "HuggingFaceH4/MATH-500"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "test"
+    SUBJECTS = [NO_SUBJECT]
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        assert num_fewshot == 0, "MATH500Minerva evaluation does not include few shot"
+        super().__init__(num_fewshot)
+
+
+class MATHMinervaBPB(MATHReasoning):
+    """
+    MATH (Hendrycks) with Minerva-style prompt, evaluated via loglikelihood of the
+    gold answer string (bits-per-byte).
+    Same prompt as MATHMinerva; scores P(normalized_gold_answer | prompt).
+    """
+
+    NAME = "MATHMinervaBPB"
+    DATASET_PATH = "EleutherAI/hendrycks_math"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "train"
+    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
+    METRICS = [BitsPerByteLoglikelihood]
+    SUBJECTS = MATH_SUBJECTS
+    LANGUAGE = Language.ENG
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return "Problem:\n" + item["problem"] + "\n\n" + "Solution:"
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return ""
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        normalized = self._normalized_gold_from_solution(item["solution"])
+        if normalized is None:
+            return None
+        return " " + normalized
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        normalized = self._normalized_gold_from_solution(item["solution"])
+        if normalized is None:
+            return None
+        return [" " + normalized]
+
+    def _normalized_gold_from_solution(self, solution: str) -> str | None:
+        return normalized_gold_from_solution(solution)
 
 
 class MATHLvl5(MATH):

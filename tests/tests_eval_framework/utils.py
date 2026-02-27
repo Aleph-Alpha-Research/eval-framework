@@ -79,7 +79,7 @@ def assert_hash_string(task_name: str, suffix_key: str, tested_string: str) -> s
         all_hashes[key] = tested_string_hash
 
         with HASHES_FILE.open("w", encoding="utf-8") as f:
-            json.dump(dict(sorted(all_hashes.items())), f, indent=2, ensure_ascii=False)
+            json.dump(dict(sorted(all_hashes.items())), f, indent=4, ensure_ascii=False)
 
         assert False, f"Hash for key '{key}' not found in {HASHES_FILE}. It was added for future runs."
 

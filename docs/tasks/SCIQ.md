@@ -6,7 +6,7 @@ DATASET_PATH = allenai/sciq
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = test
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['no_subject']
 LANGUAGE = <Language.ENG: 'English'>
 ````

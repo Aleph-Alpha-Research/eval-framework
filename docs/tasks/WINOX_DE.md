@@ -6,7 +6,7 @@ DATASET_PATH = demelin/wino_x
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = test
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['lm_en_de']
 LANGUAGE = <Language.DEU: 'German'>
 ````

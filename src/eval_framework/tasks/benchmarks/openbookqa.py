@@ -74,6 +74,29 @@ class OPENBOOKQA_IDK(OPENBOOKQA):
         return "Answer:"
 
 
+class OPENBOOKQA_OLMES(OPENBOOKQA):
+    """
+    OpenBookQA with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
+    """
+
+    NAME = "OpenBookQA_OLMES"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        question = item["question_stem"].strip()
+        fact = item["fact1"].strip()
+        choices = item["choices"]["text"]
+        options = "\n".join(f" {key}. {choice.strip()}" for key, choice in zip(self.keys, choices))
+        return f"Fact: {fact}\nComplete: {question}:\n{options}\n"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        answer_key = self.num_to_letter.get(item["answerKey"], item["answerKey"])
+        idx = self.keys.index(answer_key) if answer_key in self.keys else 0
+        return f" {self.keys[idx]}"
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        return [f" {key}" for key in self.keys]
+
+
 class OPENBOOKQA_EVAL_HARNESS(OPENBOOKQA):
     """Closed-book version of OpenBookQA — question only, no supporting fact."""
 
@@ -83,3 +106,25 @@ class OPENBOOKQA_EVAL_HARNESS(OPENBOOKQA):
         question = item["question_stem"].strip()
         choices = "".join([f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"])])
         return f"Complete: {question}:\n{choices}\nAnswer:"
+
+
+class OPENBOOKQA_EVAL_HARNESS_OLMES(OPENBOOKQA_EVAL_HARNESS):
+    """
+    OpenBookQA Eval Harness with OLMES-style prompt: space before each label (" A.", " B.", ...).
+    """
+
+    NAME = "OpenBookQAEvalHarness_OLMES"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        question = item["question_stem"].strip()
+        choices = item["choices"]["text"]
+        options = "\n".join(f" {key}. {choice.strip()}" for key, choice in zip(self.keys, choices))
+        return f"Complete: {question}:\n{options}\n"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        answer_key = self.num_to_letter.get(item["answerKey"], item["answerKey"])
+        idx = self.keys.index(answer_key) if answer_key in self.keys else 0
+        return f" {self.keys[idx]}"
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        return [f" {key}" for key in self.keys]

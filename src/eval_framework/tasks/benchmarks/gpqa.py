@@ -120,6 +120,33 @@ class GPQA(BaseTask[str]):
         return text
 
 
+class GPQA_OLMES(GPQA):
+    """
+    GPQA multiple choice (OLMES/oe_eval style): prompt shows options with space-prefixed labels
+    (" A.", " B.", " C.", " D."); loglikelihood over " A"/" B"/" C"/" D".
+    """
+
+    NAME = "GPQA_OLMES"
+
+    def _get_possible_completions_marked(self, item: dict[str, Any]) -> tuple[list[str], int]:
+        choices = [self._preprocess(item[f"Incorrect Answer {x}"]) for x in range(1, 4)]
+        correct_answer = self._preprocess(item["Correct Answer"])
+        hash_object = hashlib.sha256(f"{choices} {correct_answer}".encode())
+        self.rnd_choice_shuffle.seed(int(hash_object.hexdigest(), 16))
+        self.rnd_choice_shuffle.shuffle(choices)
+        correct_answer_position = self.rnd_choice_shuffle.randint(0, 3)
+        choices.insert(correct_answer_position, correct_answer)
+        choices = [f" {label}. {choice}" for label, choice in zip(self.keys, choices)]
+        return choices, correct_answer_position
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        _, correct_answer_position = self._get_possible_completions_marked(item)
+        return f" {self.keys[correct_answer_position]}"
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        return [f" {x}" for x in self.keys]
+
+
 class GPQA_IDK(GPQA):
     NAME = "GPQA_IDK"
     METRICS = [
