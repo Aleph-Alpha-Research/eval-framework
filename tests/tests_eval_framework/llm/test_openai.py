@@ -1,4 +1,5 @@
 import pytest
+from pytest_mock import MockerFixture
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.openai import (
@@ -9,6 +10,7 @@ from eval_framework.llm.openai import (
     OpenAI_gpt_4o_mini,
     OpenAI_gpt_4o_mini_with_ConcatFormatter,
     OpenAIEmbeddingModel,
+    OpenAIModel,
 )
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
@@ -114,3 +116,27 @@ def test_openai_loglikelihoods(model_cls: type[BaseLLM]) -> None:
     assert set(results[0].loglikelihoods_sequence_positions.keys()) == {" red", " blue", " black", " white"}
     assert set(results[1].loglikelihoods.keys()) == {" foo", " bar"}
     assert set(results[1].loglikelihoods_sequence_positions.keys()) == {" foo", " bar"}
+
+
+def _make_chat_response(mocker: MockerFixture, content: str = "test") -> object:
+    response = mocker.MagicMock()
+    response.choices[0].message.content = content
+    response.usage.prompt_tokens = 5
+    return response
+
+
+def test_openai_chat_api_top_p_generate_from_messages(mocker: MockerFixture) -> None:
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    mock_client.chat.completions.create.return_value = _make_chat_response(mocker)
+
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18", top_p=0.85)
+    _MESSAGES = [[Message(role=Role.USER, content="Hello")]]
+
+    model.generate_from_messages(_MESSAGES)
+    call_kwargs = mock_client.chat.completions.create.call_args.kwargs
+    assert call_kwargs["top_p"] == 0.85
+
+    model.generate_from_messages(_MESSAGES, top_p=0.75)
+    call_kwargs = mock_client.chat.completions.create.call_args.kwargs
+    assert call_kwargs["top_p"] == 0.75

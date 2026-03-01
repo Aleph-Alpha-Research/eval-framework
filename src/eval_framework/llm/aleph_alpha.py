@@ -200,11 +200,12 @@ class AlephAlphaAPIModel(BaseLLM):
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
     ) -> list[RawCompletion]:
         effective_temperature = temperature if temperature is not None else self._temperature
 
         requests: list[CompletionRequest] = []
-
+        effective_top_p = top_p if top_p is not None else self._top_p
         # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
         scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
 
@@ -215,7 +216,7 @@ class AlephAlphaAPIModel(BaseLLM):
                     maximum_tokens=scaled_max_tokens,
                     stop_sequences=stop_sequences,
                     temperature=effective_temperature,
-                    top_p=self._top_p,
+                    top_p=effective_top_p,
                 )
             )
 

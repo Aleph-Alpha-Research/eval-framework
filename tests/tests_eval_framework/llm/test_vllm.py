@@ -372,6 +372,22 @@ def test_resolve_params_logs_default_temperature_usage(caplog: pytest.LogCapture
 
 
 @pytest.mark.vllm
+def test_resolve_params_top_p() -> None:
+    sampling_params = SamplingParams(temperature=0.6, top_p=0.9)
+
+    result = VLLMModel._resolve_sampling_params(sampling_params, 50, ["STOP"], 0.8, top_p=0.5)
+
+    assert result.top_p == 0.5
+    assert result is sampling_params
+
+    result = VLLMModel._resolve_sampling_params(sampling_params, 50, ["STOP"], 0.8, top_p=None)
+    assert result.top_p == 0.9  # original value preserved
+
+    result = VLLMModel._resolve_sampling_params(sampling_params, 15, None, 0.9, top_p=0.4)
+    assert result.top_p == 0.4
+
+
+@pytest.mark.vllm
 @pytest.mark.gpu
 def test_dict_sampling_params_conversion() -> None:
     params_dict = {"temperature": 0.8, "top_p": 0.95, "max_tokens": 150}

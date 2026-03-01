@@ -134,11 +134,12 @@ class BaseVLLMModel(BaseLLM):
             **kwargs,
         }
 
-        device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-
         self.batch_size = batch_size
 
-        self.model = LLM(**model_args, device=device)
+        if "VLLM_TARGET_DEVICE" not in os.environ and not torch.cuda.is_available():
+            os.environ["VLLM_TARGET_DEVICE"] = "cpu"
+
+        self.model = LLM(**model_args)
 
         self._tokenizer: None | VLLMTokenizerAPI = None
         _ = self.tokenizer  # make sure tokenizer is initialized
@@ -225,6 +226,7 @@ class BaseVLLMModel(BaseLLM):
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
     ) -> list[RawCompletion]:
         raw_completions: list[RawCompletion | None] = [None] * len(messages)
         prompt_objs = []
@@ -234,7 +236,7 @@ class BaseVLLMModel(BaseLLM):
         scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
 
         sampling_params = self._resolve_sampling_params(
-            self.sampling_params, scaled_max_tokens, stop_sequences, temperature
+            self.sampling_params, scaled_max_tokens, stop_sequences, temperature, top_p
         )
 
         for i, single_messages in enumerate(messages):
@@ -294,6 +296,7 @@ class BaseVLLMModel(BaseLLM):
         max_tokens: int | None,
         stop_sequences: list[str] | None,
         temperature: float | None,
+        top_p: float | None = None,
     ) -> SamplingParams:
         sampling_params.max_tokens = max_tokens
         sampling_params.stop = stop_sequences
@@ -306,6 +309,13 @@ class BaseVLLMModel(BaseLLM):
             logger.info(
                 f"Using sampling params temperature value: {sampling_params.temperature} "
                 f"as no custom temperature value was provided"
+            )
+        if top_p is not None:
+            logger.warning(f"Overriding sampling params top_p {sampling_params.top_p} with custom value {top_p}")
+            sampling_params.top_p = top_p
+        else:
+            logger.info(
+                f"Using sampling params top_p value: {sampling_params.top_p} as no custom top_p value was provided"
             )
         return sampling_params
 
