@@ -314,6 +314,7 @@ class OpenAIEmbeddingModel(BaseLLM):
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
     ) -> list[RawCompletion]:
         raise NotImplementedError(
             "Embedding model does not support generate_from_messages. Use generate_embeddings instead."
