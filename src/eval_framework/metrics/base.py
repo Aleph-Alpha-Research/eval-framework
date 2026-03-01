@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from typing import Any
 
+import pandas as pd
 from pydantic import BaseModel, ConfigDict
 
+from eval_framework.metrics.aggregators.aggregators import Aggregator, IdentifierMean
 from eval_framework.shared.types import Error
 
 
@@ -28,6 +31,10 @@ class classproperty:
 class BaseMetric[Response](ABC):
     NAME: str
     KEYS: list[str] | None = None
+    # The aggregator determines how to aggregate the results of a metrics for a single
+    # sample over multiple runs (LLM calls). We default to averaging and thus making
+    # macro averaging the overall computatiion default.
+    AGGREGATORS: list[Aggregator] = []
 
     @classproperty
     def NAMES(cls) -> list[str]:

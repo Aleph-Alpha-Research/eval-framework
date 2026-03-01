@@ -241,6 +241,58 @@ class EvaluationGenerator:
                 aggregated_results["Average Bytes"] / aggregated_results["Average SequencePositions"]
             )
 
+        return {**aggregated_results, **self._aggregate_results_with_aggregators(results)}
+
+    def _aggregate_results_with_aggregators(self, results: list[Result]) -> dict[str, float | None]:
+        data = pd.DataFrame([r.model_dump() for r in results])
+        if len(data) == 0:
+            return {}
+        data = data.fillna({"key": ""})
+        aggregated_results: dict[str, float | None] = {}
+        data = data.loc[data.error.isnull()]
+
+        for metric_name, metric_group in data.groupby("metric_name"):
+            current_metric = None
+            # The logic to figure out which metric class is circuitous. Each metric "class"
+            # can implement any number of metrics with different names and there is no easy way to
+            # may from a metric name (which is what we have here) to the actual metric class.
+            # If this fails to do the .item() due to multiple unique values, something has gone seriously wrong.
+            current_metric_class = metric_group["metric_class_name"].unique().item()
+
+            # now loop over the self.metrics list and find the metric class that matches the current_metric_class
+            for metric_class in self.metrics:
+                if metric_class.__name__ == current_metric_class:
+                    current_metric = metric_class
+                    break
+
+            if current_metric is None:
+                raise ValueError(f"Metric {metric_name} not found in metrics list")
+
+            for aggregator in current_metric.AGGREGATORS:
+                aggregated_results[f"{aggregator.name} {metric_name}"] = (
+                    aggregator(metric_group, ["prompt"])
+                    .groupby(["key", "subject"])
+                    .agg({"value": "mean"})["value"]
+                    .mean()
+                    .item()
+                )
+
+        for (key, subject, metric_name), ksm_group in data.groupby(["key", "subject", "metric_name"]):
+            current_metric_class = metric_group["metric_class_name"].unique().item()
+
+            # now loop over the self.metrics list and find the metric class that matches the current_metric_class
+            for metric_class in self.metrics:
+                if metric_class.__name__ == current_metric_class:
+                    current_metric = metric_class
+                    break
+            for aggregator in current_metric.AGGREGATORS:
+                save_string = (
+                    f"{aggregator.name} {metric_name} - {subject}"
+                    if not key
+                    else f"{aggregator.name} {metric_name} - {key} - {subject}"
+                )
+                aggregated_results[save_string] = aggregator(metric_group, ["prompt"])["value"].mean().mean().item()
+
         return aggregated_results
 
     def run_eval(self) -> list[Result]:
