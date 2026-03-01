@@ -311,14 +311,11 @@ class BaseVLLMModel(BaseLLM):
                 f"as no custom temperature value was provided"
             )
         if top_p is not None:
-            logger.warning(
-                f"Overriding sampling params top_p {sampling_params.top_p} with custom value {top_p}"
-            )
+            logger.warning(f"Overriding sampling params top_p {sampling_params.top_p} with custom value {top_p}")
             sampling_params.top_p = top_p
         else:
             logger.info(
-                f"Using sampling params top_p value: {sampling_params.top_p} "
-                f"as no custom top_p value was provided"
+                f"Using sampling params top_p value: {sampling_params.top_p} as no custom top_p value was provided"
             )
         return sampling_params
 
