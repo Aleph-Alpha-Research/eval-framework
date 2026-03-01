@@ -34,6 +34,7 @@ class OpenAIModel(BaseLLM):
         model_name: str | None = None,
         formatter: BaseFormatter | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
         api_key: str | None = os.getenv("OPENAI_API_KEY", ""),
         organization: str | None = None,
         base_url: str | None = None,
@@ -46,6 +47,7 @@ class OpenAIModel(BaseLLM):
             model_name: OpenAI model name (e.g., "gpt-4o", "gpt-3.5-turbo"). If None, uses LLM_NAME class attribute.
             formatter: Optional message formatter.
             temperature: Sampling temperature used when not passed to generate methods (from 0.0 to 2.0).
+            top_p: Nucleus sampling probability mass (from 0.0 to 1.0). If None, the API default is used.
             api_key: OpenAI API key (defaults to OPENAI_API_KEY env variable).
             organization: Optional OpenAI organization ID.
             base_url: Optional API base URL for Azure or alternate endpoints.
@@ -58,6 +60,10 @@ class OpenAIModel(BaseLLM):
         self._formatter = formatter or (self.DEFAULT_FORMATTER() if self.DEFAULT_FORMATTER is not None else None)
         self._temperature = temperature if temperature is not None else 0.0
         assert 0.0 <= self._temperature <= 2.0, "Temperature must be between 0.0 and 2.0"
+
+        if top_p is not None:
+            assert 0.0 <= top_p <= 1.0, "top_p must be between 0.0 and 1.0"
+        self._top_p = top_p
 
         self._client = OpenAI(
             api_key=api_key,
@@ -97,6 +103,7 @@ class OpenAIModel(BaseLLM):
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
     ) -> list[RawCompletion]:
         """
         Generate completions for a list of message sequences concurrently.
@@ -108,6 +115,7 @@ class OpenAIModel(BaseLLM):
             stop_sequences: Optional list of stop sequences.
             max_tokens: Optional maximum number of tokens to generate.
             temperature: Sampling temperature.
+            top_p: Nucleus sampling probability mass (0.0 to 1.0). Overrides instance default if provided.
 
         Returns:
             List of RawCompletion objects containing prompts and completions.
@@ -115,6 +123,10 @@ class OpenAIModel(BaseLLM):
 
         effective_temperature = temperature if temperature is not None else self._temperature
         assert 0.0 <= effective_temperature <= 2.0, "Temperature must be between 0.0 and 2.0"
+
+        effective_top_p = top_p if top_p is not None else self._top_p
+        if effective_top_p is not None:
+            assert 0.0 <= effective_top_p <= 1.0, "top_p must be between 0.0 and 1.0"
 
         def _process_one(single_messages: Sequence[Message]) -> RawCompletion:
             # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
@@ -129,6 +141,7 @@ class OpenAIModel(BaseLLM):
                     model=self._model_name,
                     prompt=prompt,
                     temperature=effective_temperature,
+                    top_p=effective_top_p,
                     max_tokens=scaled_max_tokens,
                     stop=stop_sequences,
                 )
@@ -158,6 +171,7 @@ class OpenAIModel(BaseLLM):
                     model=self._model_name,
                     messages=chat_messages,
                     temperature=effective_temperature,
+                    top_p=effective_top_p,
                     max_tokens=scaled_max_tokens,
                     stop=stop_sequences,
                 )
