@@ -251,25 +251,22 @@ class EvaluationGenerator:
         aggregated_results: dict[str, float | None] = {}
         data = data.loc[data.error.isnull()]
 
-        for metric_name, metric_group in data.groupby("metric_name"):
+        for (metric_name, current_metric_class), metric_group in data.groupby(["metric_name", "metric_class_name"]):
+            # The reason we groupby over both metric_name and metric_class_name is because we want to aggregate
+            # results for a single metric. Two metric classes can implement the same metric name. We want to separate
+            # those cases. We cannot group over only metric_class_name because each metric class can implement
+            # multiple metrics with different names.
             current_metric = None
-            # The logic to figure out which metric class is circuitous. Each metric "class"
-            # can implement any number of metrics with different names and there is no easy way to
-            # may from a metric name (which is what we have here) to the actual metric class.
-            # If this fails to do the .item() due to multiple unique values, something has gone seriously wrong.
-            current_metric_class = metric_group["metric_class_name"].unique().item()
-
             # now loop over the self.metrics list and find the metric class that matches the current_metric_class
             for metric_class in self.metrics:
                 if metric_class.__name__ == current_metric_class:
                     current_metric = metric_class
                     break
-
             if current_metric is None:
                 raise ValueError(f"Metric {metric_name} not found in metrics list")
 
             for aggregator in current_metric.AGGREGATORS:
-                aggregated_results[f"{aggregator.name} {metric_name}"] = (
+                aggregated_results[f"{aggregator.name} {current_metric_class}.{metric_name}"] = (
                     aggregator(metric_group, ["prompt"])
                     .groupby(["key", "subject"])
                     .agg({"value": "mean"})["value"]
