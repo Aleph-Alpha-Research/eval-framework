@@ -394,6 +394,25 @@ class AIME2025(AIME2024):
         return item["answer"]
 
 
+class AIME2026(AIME2024):
+    """AIME 2026 dataset: https://huggingface.co/datasets/math-ai/aime26
+
+    This dataset contains a single test split of 30 questions.
+    Data contains
+    problem | answer | id
+
+    pass@1 evaluation
+    """
+
+    NAME = "AIME2026"
+    DATASET_PATH = "math-ai/aime26"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "test"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+        return item["answer"]
+
+
 class MATH500(MATHReasoning):
     """MATH500 dataset: https://huggingface.co/datasets/HuggingFaceH4/MATH-500
 
