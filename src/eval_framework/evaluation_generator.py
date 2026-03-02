@@ -276,12 +276,16 @@ class EvaluationGenerator:
 
         for (key, subject, metric_name), ksm_group in data.groupby(["key", "subject", "metric_name"]):
             current_metric_class = metric_group["metric_class_name"].unique().item()
-
+            current_metric = None
             # now loop over the self.metrics list and find the metric class that matches the current_metric_class
             for metric_class in self.metrics:
                 if metric_class.__name__ == current_metric_class:
                     current_metric = metric_class
                     break
+
+            if current_metric is None:
+                raise ValueError(f"Metric {metric_name} not found in metrics list. This should never happen.")
+
             for aggregator in current_metric.AGGREGATORS:
                 save_string = (
                     f"{aggregator.name} {metric_name} - {subject}"

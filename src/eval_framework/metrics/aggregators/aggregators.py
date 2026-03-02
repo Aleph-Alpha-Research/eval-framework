@@ -1,4 +1,4 @@
-from typing import Protocol
+from typing import Any, Protocol
 
 import numpy as np
 import pandas as pd
@@ -6,7 +6,9 @@ from scipy.special import comb
 
 
 class Aggregator(Protocol):
-    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs) -> pd.DataFrame:
+    name: str
+
+    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame:
         pass
 
 
@@ -21,7 +23,7 @@ class PassAtK(Aggregator):
         self.k = k
         self.name = f"Pass@{k}"
 
-    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs) -> pd.DataFrame:
+    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame:
         other_cols = [c for c in response_df.columns if c not in identifier_columns and c != "value"]
         agg_dict = {"value": ["sum", "count"], **{c: "first" for c in other_cols}}
         agg = response_df.groupby(identifier_columns).agg(agg_dict)
@@ -36,10 +38,10 @@ class PassAtK(Aggregator):
 
 
 class IdentifierMean(Aggregator):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = "Macro-Averaging"
 
-    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs) -> pd.DataFrame:
+    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame:
         agg_dict = {
             "value": "mean",
         }
@@ -49,8 +51,8 @@ class IdentifierMean(Aggregator):
 
 
 class Identity(Aggregator):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = "Identity"
 
-    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs) -> pd.DataFrame:
+    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame:
         return response_df
