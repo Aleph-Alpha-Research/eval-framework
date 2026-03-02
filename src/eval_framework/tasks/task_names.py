@@ -62,6 +62,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.HELLASWAG_EU20_FR")
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEval")
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEvalBPB")
+    register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEval_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEvalInstruct")
     register_lazy_task("eval_framework.tasks.benchmarks.ifeval.IFEval")
     register_lazy_task("eval_framework.tasks.benchmarks.ifeval.IFEvalDe")

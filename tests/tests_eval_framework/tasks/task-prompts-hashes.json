@@ -110,6 +110,8 @@
     "HumanEvalBPB.Llama3Formatter": "57f5a23f0cf320ea2c675c178e9f5bad",
     "HumanEvalInstruct.ConcatFormatter": "100e994d25219d93daa3ace8a8beb730",
     "HumanEvalInstruct.Llama3Formatter": "0c1c4e07c9ecd0445257118bc5cecc09",
+    "HumanEval_OLMES.ConcatFormatter": "43d5d2b350304df54708165cf30e4009",
+    "HumanEval_OLMES.Llama3Formatter": "0595b2b93a403ceb3cfef74baa4dd7bf",
     "IFEval.ConcatFormatter": "b517d9d281cd8d5db2ea72b47bd44314",
     "IFEval.Llama3Formatter": "7739c2862af662f2b146f4eae61ac208",
     "IFEvalDe.ConcatFormatter": "798e567efa346a45b42deff904a40b22",

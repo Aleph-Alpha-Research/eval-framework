@@ -55,6 +55,7 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "HELLASWAG_DE": {"num_fewshot": 1},
     "HELLASWAG_EU20_DE": {"num_fewshot": 1},
     "HELLASWAG_EU20_FR": {"num_fewshot": 1},
+    "HumanEval_OLMES": {"num_fewshot": 3},
     "InfiniteBench_CodeDebug": {"num_fewshot": 0},
     "InfiniteBench_CodeRun": {"num_fewshot": 0},
     "InfiniteBench_EnDia": {"num_fewshot": 0},

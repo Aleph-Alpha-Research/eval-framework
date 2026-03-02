@@ -68,6 +68,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [HumanEval](HumanEval.md)
 - [HumanEvalBPB](HumanEvalBPB.md)
 - [HumanEvalInstruct](HumanEvalInstruct.md)
+- [HumanEval_OLMES](HumanEval_OLMES.md)
 - [IFEval](IFEval.md)
 - [IFEvalDe](IFEvalDe.md)
 - [IFEvalFiSv](IFEvalFiSv.md)
