@@ -380,9 +380,11 @@ def test_resolve_params_top_p() -> None:
     assert result.top_p == 0.5
     assert result is sampling_params
 
-    result = VLLMModel._resolve_sampling_params(sampling_params, 50, ["STOP"], 0.8, top_p=None)
+    sampling_params = SamplingParams(temperature=0.6, top_p=0.9)
+    result = VLLMModel._resolve_sampling_params(sampling_params, 50, ["STOP"], None, top_p=None)
     assert result.top_p == 0.9  # original value preserved
 
+    sampling_params = SamplingParams(temperature=0.6, top_p=0.9)
     result = VLLMModel._resolve_sampling_params(sampling_params, 15, None, 0.9, top_p=0.4)
     assert result.top_p == 0.4
 
