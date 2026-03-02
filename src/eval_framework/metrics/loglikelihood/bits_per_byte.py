@@ -1,7 +1,7 @@
 import math
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.shared.types import Loglikelihood
+from eval_framework.shared.types import Error, Loglikelihood
 
 
 class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
@@ -37,7 +37,12 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
                     metric_name=self.NAME,
                     value=None,
                     higher_is_better=False,
-                    error=response.error or "No ground-truth answer found in loglikelihoods",
+                    error=response.error
+                    or Error(
+                        error_class="ValueError",
+                        message="No ground-truth answer found in loglikelihoods",
+                        traceback="",
+                    ),
                 )
             ]
 
@@ -48,7 +53,12 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
                     metric_name=self.NAME,
                     value=None,
                     higher_is_better=False,
-                    error=response.error or "Ground-truth answer has zero UTF-8 bytes",
+                    error=response.error
+                    or Error(
+                        error_class="ValueError",
+                        message="Ground-truth answer has zero UTF-8 bytes",
+                        traceback="",
+                    ),
                 )
             ]
 

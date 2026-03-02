@@ -82,6 +82,8 @@ class CommonsenseQAMC_OLMES(CommonsenseQAMC):
     """
 
     NAME = "CommonsenseQAMC_OLMES"
+    SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
+    FEWSHOT_SPLIT = "train"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]

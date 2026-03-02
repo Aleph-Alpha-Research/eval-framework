@@ -3,8 +3,8 @@
 ````
 NAME = PIQA_OLMES
 DATASET_PATH = ybisk/piqa
-SAMPLE_SPLIT = validation
-FEWSHOT_SPLIT = test
+SAMPLE_SPLIT = train
+FEWSHOT_SPLIT = train
 RESPONSE_TYPE = LOGLIKELIHOODS
 METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['no_subject']
