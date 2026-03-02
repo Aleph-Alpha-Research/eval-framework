@@ -241,7 +241,7 @@ class EvaluationGenerator:
                 aggregated_results["Average Bytes"] / aggregated_results["Average SequencePositions"]
             )
 
-        return {**aggregated_results, **self._aggregate_results_with_aggregators(results)}
+        return aggregated_results
 
     def _aggregate_results_with_aggregators(self, results: list[Result]) -> dict[str, float | None]:
         data = pd.DataFrame([r.model_dump() for r in results])
@@ -305,6 +305,8 @@ class EvaluationGenerator:
 
         metrics_results = self._run_metric_calculators(responses)
         aggregated_results = self._aggregate_results(metrics_results)
+        results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results)
+        aggregated_results.update(results_with_aggregators)
 
         wandb.log(aggregated_results)
         self.result_processor.save_aggregated_results(aggregated_results)
