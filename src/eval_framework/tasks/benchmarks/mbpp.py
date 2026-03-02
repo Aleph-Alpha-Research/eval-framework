@@ -105,9 +105,7 @@ class MBPP(BaseTask[str]):
     def _get_context(self, item: dict[str, Any]) -> MBPPMetricContext:
         return MBPPMetricContext(tests_code="\n".join(item["test_list"]))
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
-        assert sample is not None
-
+    def post_process_generated_completion(self, completion_text: str, sample: Sample) -> str:  # type: ignore[override]
         if BEGIN in completion_text:
             completion_text = completion_text.split(f"{BEGIN}\n")[1]
 
@@ -193,9 +191,7 @@ class MBPP_PROMPT_WITHOUT_TESTS(MBPP):
             return postfix
         return f"{postfix.strip()}:"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
-        assert sample is not None
-
+    def post_process_generated_completion(self, completion_text: str, sample: Sample) -> str:  # type: ignore[override]
         if BEGIN in completion_text:
             completion_text = completion_text.split(BEGIN)[1]
 
@@ -300,8 +296,7 @@ class MBPP_OLMES(MBPP):
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         return list(_OLMES_FEWSHOT_EXAMPLES)
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
-        assert sample is not None
+    def post_process_generated_completion(self, completion_text: str, sample: Sample) -> str:  # type: ignore[override]
         assert self.stop_sequences is not None
 
         for stop_seq in self.stop_sequences:

@@ -74,11 +74,11 @@ def generate_docs_for_task(
     try:
         num_fewshot = 1
         task = task_class(num_fewshot=num_fewshot)
-    except Exception:
+    except (TypeError, ValueError, AssertionError):
         try:
             num_fewshot = 0
             task = task_class(num_fewshot=num_fewshot)
-        except Exception:
+        except (TypeError, ValueError, AssertionError):
             try:
                 task = task_class()
                 num_fewshot = task.num_fewshot
