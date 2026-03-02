@@ -120,9 +120,7 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
         output = ""
         exit_code = -1
 
-        with tempfile.NamedTemporaryFile(
-            suffix=f".{cfg.file_ext}", mode="w", delete=False
-        ) as tmp:
+        with tempfile.NamedTemporaryFile(suffix=f".{cfg.file_ext}", mode="w", delete=False) as tmp:
             tmp.write(full_code)
             tmp_path = tmp.name
 

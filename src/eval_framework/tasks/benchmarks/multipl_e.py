@@ -1,13 +1,12 @@
-"""MultiPL-E HumanEval OLMES: translations of HumanEval into 6 programming languages.
+"""MultiPL-E: translations of HumanEval and MBPP into 6 programming languages.
 
-Corresponds to ``multipl_e_humaneval:6lang::olmo3:n32:v2`` in oe_eval, which expands into
-one task per language:
-  - multipl_e_humaneval:cpp::olmo3:n32:v2
-  - multipl_e_humaneval:java::olmo3:n32:v2
-  - multipl_e_humaneval:js::olmo3:n32:v2
-  - multipl_e_humaneval:php::olmo3:n32:v2
-  - multipl_e_humaneval:rs::olmo3:n32:v2
-  - multipl_e_humaneval:sh::olmo3:n32:v2
+Corresponds to the following OLMES task suites:
+
+  multipl_e_humaneval:6lang::olmo3:n32:v2 (one task per language):
+    multipl_e_humaneval:{cpp,java,js,php,rs,sh}::olmo3:n32:v2
+
+  multipl_e_mbpp:6lang::olmo3:n32:v2 (one task per language):
+    multipl_e_mbpp:{cpp,java,js,php,rs,sh}::olmo3:n32:v2
 
 Recommended EvalConfig settings for full OLMES replication:
   repeats: 32
@@ -33,13 +32,15 @@ MULTIPL_E_STOP_TOKENS: dict[str, list[str]] = {
 }
 
 
-class _BaseMPLEHumanEval_OLMES(BaseTask[str]):
-    """Abstract base for MultiPL-E HumanEval OLMES per-language tasks.
+class _BaseMPLE_OLMES(BaseTask[str]):
+    """Abstract base for all MultiPL-E OLMES per-language tasks.
 
     Subclasses must define:
       - NAME (str): human-readable task name
       - MULTIPL_E_LANGUAGE (str): language code used in the HF dataset config
         and stop-token lookup (e.g. "cpp", "java", "js", "php", "rs", "sh")
+      - MULTIPL_E_DATASET_PREFIX (str): HF dataset config prefix,
+        either "humaneval" or "mbpp"
     """
 
     DATASET_PATH = "nuprl/MultiPL-E"
@@ -51,11 +52,11 @@ class _BaseMPLEHumanEval_OLMES(BaseTask[str]):
     LANGUAGE = None
 
     MULTIPL_E_LANGUAGE: str  # overridden by each language subclass
+    MULTIPL_E_DATASET_PREFIX: str  # "humaneval" or "mbpp"
 
     def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, (
-            "MultiPL-E HumanEval OLMES does not support few-shot prompting "
-            "(there are no gold examples for MultiPL-E)."
+            "MultiPL-E does not support few-shot prompting (there are no gold examples for MultiPL-E)."
         )
         super().__init__(num_fewshot)
         self.stop_sequences: list[str] = MULTIPL_E_STOP_TOKENS[self.MULTIPL_E_LANGUAGE]
@@ -64,7 +65,7 @@ class _BaseMPLEHumanEval_OLMES(BaseTask[str]):
     def _load_dataset(self, subject: str) -> None:
         hf_dataset = self._load_hf_dataset(
             path=self.DATASET_PATH,
-            name=f"humaneval-{self.MULTIPL_E_LANGUAGE}",
+            name=f"{self.MULTIPL_E_DATASET_PREFIX}-{self.MULTIPL_E_LANGUAGE}",
         )
         self.dataset = self._shuffle_splits(hf_dataset)
 
@@ -91,6 +92,10 @@ class _BaseMPLEHumanEval_OLMES(BaseTask[str]):
             if stop_seq in completion_text:
                 completion_text = completion_text.split(stop_seq)[0]
         return completion_text
+
+
+class _BaseMPLEHumanEval_OLMES(_BaseMPLE_OLMES):
+    MULTIPL_E_DATASET_PREFIX = "humaneval"
 
 
 class MultiPLEHumanEvalCpp_OLMES(_BaseMPLEHumanEval_OLMES):
@@ -156,4 +161,74 @@ class MultiPLEHumanEvalSh_OLMES(_BaseMPLEHumanEval_OLMES):
     """
 
     NAME = "MultiPL-E HumanEval Bash OLMES"
+    MULTIPL_E_LANGUAGE = "sh"
+
+
+class _BaseMPLEMBPP_OLMES(_BaseMPLE_OLMES):
+    MULTIPL_E_DATASET_PREFIX = "mbpp"
+
+
+class MultiPLEMBPPCpp_OLMES(_BaseMPLEMBPP_OLMES):
+    """MultiPL-E MBPP in C++ — OLMES variant (nuprl/MultiPL-E, mbpp-cpp, test split).
+
+    Corresponds to ``multipl_e_mbpp:cpp::olmo3:n32:v2`` in oe_eval.
+    Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
+    """
+
+    NAME = "MultiPL-E MBPP C++ OLMES"
+    MULTIPL_E_LANGUAGE = "cpp"
+
+
+class MultiPLEMBPPJava_OLMES(_BaseMPLEMBPP_OLMES):
+    """MultiPL-E MBPP in Java — OLMES variant (nuprl/MultiPL-E, mbpp-java, test split).
+
+    Corresponds to ``multipl_e_mbpp:java::olmo3:n32:v2`` in oe_eval.
+    Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
+    """
+
+    NAME = "MultiPL-E MBPP Java OLMES"
+    MULTIPL_E_LANGUAGE = "java"
+
+
+class MultiPLEMBPPJs_OLMES(_BaseMPLEMBPP_OLMES):
+    """MultiPL-E MBPP in JavaScript — OLMES variant (nuprl/MultiPL-E, mbpp-js, test split).
+
+    Corresponds to ``multipl_e_mbpp:js::olmo3:n32:v2`` in oe_eval.
+    Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
+    """
+
+    NAME = "MultiPL-E MBPP JS OLMES"
+    MULTIPL_E_LANGUAGE = "js"
+
+
+class MultiPLEMBPPPhp_OLMES(_BaseMPLEMBPP_OLMES):
+    """MultiPL-E MBPP in PHP — OLMES variant (nuprl/MultiPL-E, mbpp-php, test split).
+
+    Corresponds to ``multipl_e_mbpp:php::olmo3:n32:v2`` in oe_eval.
+    Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
+    """
+
+    NAME = "MultiPL-E MBPP PHP OLMES"
+    MULTIPL_E_LANGUAGE = "php"
+
+
+class MultiPLEMBPPRs_OLMES(_BaseMPLEMBPP_OLMES):
+    """MultiPL-E MBPP in Rust — OLMES variant (nuprl/MultiPL-E, mbpp-rs, test split).
+
+    Corresponds to ``multipl_e_mbpp:rs::olmo3:n32:v2`` in oe_eval.
+    Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
+    """
+
+    NAME = "MultiPL-E MBPP Rust OLMES"
+    MULTIPL_E_LANGUAGE = "rs"
+
+
+class MultiPLEMBPPSh_OLMES(_BaseMPLEMBPP_OLMES):
+    """MultiPL-E MBPP in Bash — OLMES variant (nuprl/MultiPL-E, mbpp-sh, test split).
+
+    Corresponds to ``multipl_e_mbpp:sh::olmo3:n32:v2`` in oe_eval.
+    Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
+    """
+
+    NAME = "MultiPL-E MBPP Bash OLMES"
     MULTIPL_E_LANGUAGE = "sh"
