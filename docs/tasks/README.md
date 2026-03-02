@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 157**
+**Total number of tasks: 158**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -67,6 +67,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [HumanEval](HumanEval.md)
 - [HumanEvalBPB](HumanEvalBPB.md)
 - [HumanEvalInstruct](HumanEvalInstruct.md)
+- [HumanEval_OLMES](HumanEval_OLMES.md)
 - [IFEval](IFEval.md)
 - [IFEvalDe](IFEvalDe.md)
 - [IFEvalFiSv](IFEvalFiSv.md)

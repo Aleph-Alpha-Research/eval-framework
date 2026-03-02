@@ -99,6 +99,28 @@ class HumanEvalBPB(HumanEval):
         return [gt] if gt else None
 
 
+class HumanEval_OLMES(HumanEval):
+    """HumanEval OLMES variant replicating codex_humaneval:3shot::olmo3:n32:v2 from oe_eval.
+
+    Recommended EvalConfig settings for full replication:
+        repeats: 32
+        llm_args: {sampling_params: {temperature: 0.6, top_p: 0.6}}
+    """
+
+    NAME = "Human Eval OLMES"
+
+    def __init__(self, num_fewshot: int = 3) -> None:
+        super().__init__(num_fewshot)
+        self.stop_sequences = ["\nclass", "\nif", "\nprint", "\n#", "\n```", "\n```\n\n", "<|eot_id|>"]
+        self.max_tokens = 1024
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return "```python\n" + item["prompt"]
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return item["canonical_solution"] + "```"
+
+
 class HumanEvalInstruct(HumanEval):
     # See https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/humaneval/humaneval_instruct.yaml
     NAME = "Human Eval Instruct"
