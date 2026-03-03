@@ -86,7 +86,7 @@ class _BaseMPLE_OLMES(BaseTask[str]):
             language=item["language"],
         )
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         """Apply language-specific stop sequences to trim the model's raw continuation."""
         for stop_seq in self.stop_sequences:
             if stop_seq in completion_text:
