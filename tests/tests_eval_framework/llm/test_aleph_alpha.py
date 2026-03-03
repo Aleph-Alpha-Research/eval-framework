@@ -264,3 +264,14 @@ def test_extract_choice_logprob_text_mismatch() -> None:
     # When / Then
     with pytest.raises(ValueError, match="Completion tokens differed"):
         AlephAlphaAPIModel._extract_choice_logprob_from_completion(prompt, choice, cast(Any, response))  # type: ignore
+
+
+@mock.patch.object(aleph_alpha.AlephAlphaAPIModel, "_validate_model_availability")
+def test_generate_from_messages_validates_temperature_and_top_p(mock_validate: mock.MagicMock) -> None:
+    model = Llama31_8B_Instruct_API()
+    with pytest.raises(ValueError, match="temperature"):
+        model.generate_from_messages([], temperature=3.0)
+        model.generate_from_messages([], temperature=-0.5)
+    with pytest.raises(ValueError, match="top_p"):
+        model.generate_from_messages([], top_p=1.5)
+        model.generate_from_messages([], top_p=-1.0)

@@ -140,3 +140,14 @@ def test_openai_chat_api_top_p_generate_from_messages(mocker: MockerFixture) -> 
     model.generate_from_messages(_MESSAGES, top_p=0.75)
     call_kwargs = mock_client.chat.completions.create.call_args.kwargs
     assert call_kwargs["top_p"] == 0.75
+
+
+def test_generate_from_messages_validates_temperature_and_top_p(mocker: MockerFixture) -> None:
+    mocker.patch("eval_framework.llm.openai.OpenAI")
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18")
+    with pytest.raises(AssertionError, match="[Tt]emperature"):
+        model.generate_from_messages([], temperature=3.0)
+        model.generate_from_messages([], temperature=-0.5)
+    with pytest.raises(AssertionError, match="top_p"):
+        model.generate_from_messages([], top_p=1.5)
+        model.generate_from_messages([], top_p=-1.0)
