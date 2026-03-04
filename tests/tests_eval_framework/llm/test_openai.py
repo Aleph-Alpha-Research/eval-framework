@@ -147,7 +147,9 @@ def test_generate_from_messages_validates_temperature_and_top_p(mocker: MockerFi
     model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18")
     with pytest.raises(AssertionError, match="[Tt]emperature"):
         model.generate_from_messages([], temperature=3.0)
+    with pytest.raises(AssertionError, match="[Tt]emperature"):
         model.generate_from_messages([], temperature=-0.5)
     with pytest.raises(AssertionError, match="top_p"):
         model.generate_from_messages([], top_p=1.5)
+    with pytest.raises(AssertionError, match="top_p"):
         model.generate_from_messages([], top_p=-1.0)
