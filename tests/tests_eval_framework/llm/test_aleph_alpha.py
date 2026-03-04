@@ -271,7 +271,9 @@ def test_generate_from_messages_validates_temperature_and_top_p(mock_validate: m
     model = Llama31_8B_Instruct_API()
     with pytest.raises(ValueError, match="temperature"):
         model.generate_from_messages([], temperature=3.0)
+    with pytest.raises(ValueError, match="temperature"):
         model.generate_from_messages([], temperature=-0.5)
     with pytest.raises(ValueError, match="top_p"):
         model.generate_from_messages([], top_p=1.5)
+    with pytest.raises(ValueError, match="top_p"):
         model.generate_from_messages([], top_p=-1.0)
