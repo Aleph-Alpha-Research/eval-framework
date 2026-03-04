@@ -46,6 +46,7 @@ class MockLLM(BaseLLM):
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
     ) -> list[RawCompletion]:
         self.generate_counter += 1
         return [
