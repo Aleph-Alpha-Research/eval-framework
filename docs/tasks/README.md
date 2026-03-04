@@ -12,6 +12,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 
 - [AIME2024](AIME2024.md)
 - [AIME2025](AIME2025.md)
+- [AIME2026](AIME2026.md)
 - [ARC](ARC.md)
 - [ARC_DE](ARC_DE.md)
 - [ARC_EU20_DE](ARC_EU20_DE.md)

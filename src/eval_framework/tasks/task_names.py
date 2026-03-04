@@ -19,6 +19,7 @@ def register_all_tasks() -> None:
     """Register all the benchmark tasks with the eval framework."""
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.AIME2024")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.AIME2025")
+    register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.AIME2026")
     register_lazy_task("eval_framework.tasks.benchmarks.arc.ARC")
     register_lazy_task("eval_framework.tasks.benchmarks.arc.ARC_IDK")
     register_lazy_task("eval_framework.tasks.benchmarks.arc.ARC_OLMES")
