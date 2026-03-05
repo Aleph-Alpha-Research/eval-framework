@@ -379,9 +379,9 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
     # Second loop: aggregator applied to full metric_group → per-prompt means [0.5, 1.0, 1.0, 0.5]
     #   .mean().mean() = 0.75 for every (key, subject) combination
     assert aggregated == {
-        "Macro-Averaging MockIdentifierMeanMetric.ExactMatch": 0.75,
-        "Macro-Averaging ExactMatch - key1 - subject1": 0.75,
-        "Macro-Averaging ExactMatch - key2 - subject1": 0.75,
-        "Macro-Averaging ExactMatch - key1 - subject2": 0.75,
-        "Macro-Averaging ExactMatch - key2 - subject2": 0.75,
+        "IdentifierMean MockIdentifierMeanMetric.ExactMatch": 0.75,
+        "IdentifierMean ExactMatch - key1 - subject1": 0.75,
+        "IdentifierMean ExactMatch - key2 - subject1": 0.75,
+        "IdentifierMean ExactMatch - key1 - subject2": 0.75,
+        "IdentifierMean ExactMatch - key2 - subject2": 0.75,
     }
