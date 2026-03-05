@@ -8,8 +8,7 @@ from scipy.special import comb
 class Aggregator(Protocol):
     name: str
 
-    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame:
-        pass
+    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame: ...
 
 
 def closed_form_passatk(n: int, c: int, k: int) -> float:
@@ -61,7 +60,7 @@ class IdentifierMean(Aggregator):
     """Computes the mean of the ``value`` column per problem group."""
 
     def __init__(self) -> None:
-        self.name = "Macro-Averaging"
+        self.name = "IdentifierMean"
 
     def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame:
         agg_dict = {
