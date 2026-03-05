@@ -57,7 +57,7 @@ Additional task documentation can be generated with the script `utils/generate-t
 =======
 | **Task** | **Capability** | **Benchmarks** | **Long Context** |
 |-|-|-|-|
-|   Logical Reasoning   |   Math   |   `AIME2024`, `AIME2025`, `GSM8K`, `GSM8K_EU20_DE`, `GSM8K_EU20_FR`, `GSM8KEvalHarness`, `GSM8KReasoning`, `MATH`, `MATH500`, `MATH500Minerva`, `MATHLvl5`, `MATHMinerva`, `MATHMinervaBPB`, `MATHMinervaEvalHarness`, `TableBench`   |   `InfiniteBench_MathFind`   |
+|   Logical Reasoning   |   Math   |   `AIME2024`, `AIME2025`, `AIME2026`, `GSM8K`, `GSM8K_EU20_DE`, `GSM8K_EU20_FR`, `GSM8KEvalHarness`, `GSM8KReasoning`, `MATH`, `MATH500`, `MATH500Minerva`, `MATHLvl5`, `MATHMinerva`, `MATHMinervaBPB`, `MATHMinervaEvalHarness`, `TableBench`   |   `InfiniteBench_MathFind`   |
 |   Logical Reasoning   |   Programming   |   `BigCodeBench`, `BigCodeBenchHard`, `BigCodeBenchInstruct`, `BigCodeBenchHardInstruct`, `HumanEval`, `HumanEvalInstruct`, `MBPP`, `MBPP_PROMPT_WITHOUT_TESTS`, `MBPP_SANITIZED`, `MBPP_PROMPT_WITHOUT_TESTS_SANITIZED`   |   `InfiniteBench_CodeRun`   |
 |   Logical Reasoning   |   Puzzle   |   `SPHYR`   |    |
 |   Output Control   |   Structure   |   `IFEval`, `IFEvalDe`, `IFEvalFiSv`, `RenderableStructEval`, `StructEval`   |    |

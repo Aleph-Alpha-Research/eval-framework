@@ -19,6 +19,7 @@ def register_all_tasks() -> None:
     """Register all the benchmark tasks with the eval framework."""
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.AIME2024")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.AIME2025")
+    register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.AIME2026")
     register_lazy_task("eval_framework.tasks.benchmarks.arc.ARC")
     register_lazy_task("eval_framework.tasks.benchmarks.arc.ARC_IDK")
     register_lazy_task("eval_framework.tasks.benchmarks.arc.ARC_OLMES")
@@ -61,6 +62,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.HELLASWAG_EU20_FR")
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEval")
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEvalBPB")
+    register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEval_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEvalInstruct")
     register_lazy_task("eval_framework.tasks.benchmarks.ifeval.IFEval")
     register_lazy_task("eval_framework.tasks.benchmarks.ifeval.IFEvalDe")
