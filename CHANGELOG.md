@@ -12,6 +12,15 @@
 
 ### Bug Fixes
 
+## [0.2.14](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.13...v0.2.14) (2026-03-06)
+
+
+### Features
+
+* Add the OLMES variant of the MBPP task ([#186](https://github.com/Aleph-Alpha-Research/eval-framework/issues/186)) ([9ac4d75](https://github.com/Aleph-Alpha-Research/eval-framework/commit/9ac4d7578af269a61b1b92240502ff4a8aeba879))
+* adding AIME2026 ([#188](https://github.com/Aleph-Alpha-Research/eval-framework/issues/188)) ([e75686c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e75686c652d233116d14646807aa89db60b3a7d5))
+* Nucleus sampling for OpenAI, vLLM LLMs ([#187](https://github.com/Aleph-Alpha-Research/eval-framework/issues/187)) ([894e628](https://github.com/Aleph-Alpha-Research/eval-framework/commit/894e628dc6f2a39be253cb3807f5799464b71a89))
+
 ## [0.2.13](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.12...v0.2.13) (2026-02-26)
 
 
