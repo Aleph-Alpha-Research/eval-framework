@@ -74,6 +74,7 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "MBPP_SANITIZED": {"num_fewshot": 1},
     "MBPP_PROMPT_WITHOUT_TESTS": {"num_fewshot": 1},
     "MBPP_PROMPT_WITHOUT_TESTS_SANITIZED": {"num_fewshot": 1},
+    "MBPP_OLMES": {"num_fewshot": 3},
     "MMLU": {"num_fewshot": 1},
     "FullTextMMLU": {"num_fewshot": 1},
     "MMLU_EU20_DE": {"num_fewshot": 1},
