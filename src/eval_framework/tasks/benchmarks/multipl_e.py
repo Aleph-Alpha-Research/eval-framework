@@ -24,7 +24,7 @@ from eval_framework.tasks.base import NO_SUBJECT, BaseTask, ResponseType, Sample
 
 MULTIPL_E_STOP_TOKENS: dict[str, list[str]] = {
     "cpp": ["\n}"],
-    "java": ["\n }\n}"],
+    "java": ["\n }\n", "}\n}", "}\n\n"],
     "js": ["\nfunction ", "\n/*", "\n//", "\nconsole.log"],
     "php": ["\nfunction", "\n?>", "\n//", "\n#"],
     "rs": ["\n}"],
