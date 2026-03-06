@@ -51,12 +51,7 @@ def run_python_code(
     with SandboxSession(lang="python", image=image, keep_template=True, commit_container=False) as session:
         for host_file, docker_file in input_files or []:
             session.copy_to_runtime(host_file, docker_file)
-
-        if timeout > 0:  # hack-add timeout from coreutils to the command executed
-            session.orig_execute_command = session.execute_command
-            session.execute_command = lambda command: session.orig_execute_command(f"timeout {timeout} {command}")
-
-        return session.run(code, libraries=packages).text.strip()
+        return session.run(code, libraries=packages, timeout=timeout).stdout.strip()
 
 
 def unittest_merge_snippets(code: str, test_code: str) -> str:

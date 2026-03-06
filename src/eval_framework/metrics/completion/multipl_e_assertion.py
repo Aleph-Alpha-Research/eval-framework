@@ -1,11 +1,10 @@
 import os
 import tempfile
 import traceback
-import types
+import uuid
 from typing import Any, NamedTuple
 
 from llm_sandbox import SandboxSession
-from llm_sandbox.base import ConsoleOutput
 from llm_sandbox.const import SupportedLanguage
 from pydantic import Field
 
@@ -38,8 +37,8 @@ _CUSTOM_LANG_MAP: dict[str, _CustomLangConfig] = {
     "rs": _CustomLangConfig(
         image="rust:1.82-slim",  # https://hub.docker.com/_/rust
         file_ext="rs",
-        # rustc writes the binary next to the source; then we run it.
-        commands=["rustc {code_file} -o /tmp/a.out", "/tmp/a.out"],
+        # rustc writes the binary into the same UUID dir as the source; then we run it.
+        commands=["rustc {code_file} -o {container_dir}/a.out", "{container_dir}/a.out"],
     ),
     "sh": _CustomLangConfig(
         image="bash:5.2",  # https://hub.docker.com/_/bash
@@ -49,26 +48,26 @@ _CUSTOM_LANG_MAP: dict[str, _CustomLangConfig] = {
 }
 
 
-def multiple_execute_command(self, command: str | None, workdir: str | None = None) -> ConsoleOutput:  # type: ignore
-    if not command:
-        raise ValueError("Command cannot be empty")
+# def multiple_execute_command(self, command: str | None, workdir: str | None = None) -> ConsoleOutput:  # type: ignore
+#     if not command:
+#         raise ValueError("Command cannot be empty")
 
-    if not self.container:
-        raise RuntimeError("Session is not open. Please call open() method before executing commands.")
+#     if not self.container:
+#         raise RuntimeError("Session is not open. Please call open() method before executing commands.")
 
-    if self.verbose:
-        print(f"Executing command: {command}")
+#     if self.verbose:
+#         print(f"Executing command: {command}")
 
-    if workdir:
-        exit_code, exec_log = self.container.exec_run(command, stream=False, tty=True, workdir=workdir)
-    else:
-        exit_code, exec_log = self.container.exec_run(command, stream=False, tty=True)
+#     if workdir:
+#         exit_code, exec_log = self.container.exec_run(command, stream=False, tty=True, workdir=workdir)
+#     else:
+#         exit_code, exec_log = self.container.exec_run(command, stream=False, tty=True)
 
-    output = exec_log.decode("utf-8", errors="replace") if exec_log else ""
-    if self.verbose:
-        print("Output:", end=" ")
+#     output = exec_log.decode("utf-8", errors="replace") if exec_log else ""
+#     if self.verbose:
+#         print("Output:", end=" ")
 
-    return ConsoleOutput(text=output, exit_code=exit_code)
+#     return ConsoleOutput(text=output, exit_code=exit_code)
 
 
 class MultiPLEMetricContext(BaseMetricContext):
@@ -129,14 +128,8 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
     def _execute_via_sandbox_run(full_code: str, sandbox_lang: str, timeout: int) -> tuple[bool, str]:
         """Use llm-sandbox's native session.run() for cpp, java, js."""
         with SandboxSession(lang=sandbox_lang, keep_template=True, commit_container=False) as session:
-            session.execute_command = types.MethodType(multiple_execute_command, session)
-            if timeout > 0:  # hack-add timeout from coreutils to the command executed
-                session.orig_execute_command = session.execute_command
-                session.execute_command = lambda command: session.orig_execute_command(f"timeout {timeout} {command}")
-            result: Any = session.run(full_code)
-        output: str = getattr(result, "text", "") or ""
-        exit_code: int = getattr(result, "exit_code", -1)
-        return exit_code == 0, output
+            result: Any = session.run(full_code, timeout=timeout)
+        return result.success(), result.stdout
 
     @staticmethod
     def _execute_via_custom_image(full_code: str, cfg: _CustomLangConfig, timeout: int) -> tuple[bool, str]:
@@ -146,13 +139,17 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
         llm-sandbox sets up the container plumbing, but we never call session.run().
         Instead we write the code to a local temp file, copy it into the container with
         copy_to_runtime, and drive each compile/run command with execute_command.
+
+        Each invocation gets a unique UUID-scoped directory inside the container so that
+        concurrent calls never clobber each other's source files or build artefacts.
         """
+        run_id = uuid.uuid4().hex
         # copy_to_runtime uses arcname=os.path.basename(src), so the local filename
         # must match the desired in-container filename for put_archive to place it correctly.
         code_filename = f"code.{cfg.file_ext}"
-        code_file = f"/tmp/{code_filename}"
+        container_dir = f"/tmp/{run_id}"
+        code_file = f"{container_dir}/{code_filename}"
         output = ""
-        exit_code = -1
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = os.path.join(tmp_dir, code_filename)
@@ -165,7 +162,7 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
                 keep_template=True,
                 commit_container=False,
             ) as session:
-                session.execute_command = types.MethodType(multiple_execute_command, session)
+                session.execute_command(f"mkdir -p {container_dir}")
                 session.copy_to_runtime(tmp_path, code_file)
                 if timeout > 0:  # hack-add timeout from coreutils to the command executed
                     session.orig_execute_command = session.execute_command
@@ -173,11 +170,10 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
                         f"timeout {timeout} {command}"
                     )
                 for cmd_template in cfg.commands:
-                    cmd = cmd_template.format(code_file=code_file)
+                    cmd = cmd_template.format(code_file=code_file, container_dir=container_dir)
                     result: Any = session.execute_command(cmd)
-                    output = getattr(result, "text", "") or ""
-                    exit_code = getattr(result, "exit_code", -1)
-                    if exit_code != 0:
+                    if not result.success():
                         break
+                    output = result.stdout
 
-        return exit_code == 0, output
+        return result.success(), output

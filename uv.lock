@@ -953,7 +953,7 @@ requires-dist = [
     { name = "kubernetes", specifier = ">=31.0.0,<32" },
     { name = "langdetect", specifier = ">=1.0.9,<2" },
     { name = "lingua-language-detector", specifier = ">=2.0.2,<3" },
-    { name = "llm-sandbox", extras = ["docker"], specifier = ">=0.1.8,<0.2" },
+    { name = "llm-sandbox", extras = ["docker"], specifier = "==0.3.37" },
     { name = "lxml", specifier = ">=6,<7" },
     { name = "mistral-common", marker = "extra == 'mistral'", specifier = ">=1.7,<2" },
     { name = "mysql-connector-python", specifier = ">=9.0.0,<10" },
@@ -1721,11 +1721,14 @@ wheels = [
 
 [[package]]
 name = "llm-sandbox"
-version = "0.1.9"
+version = "0.3.37"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2d/ca/6a1eb03481f2bb0e578e368e7749c6c9e45c765bde5596d56c2c5f2f012a/llm_sandbox-0.1.9.tar.gz", hash = "sha256:0999ad6f3436ef99313f6b8bdb917082c90ed8698535d25da96e3239fd629f84", size = 17778, upload-time = "2025-02-02T08:42:04.426Z" }
+dependencies = [
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ff/96/fa676c1551ed96a6d4814c1a5ad8561d723be7344e03bc293d9ee53b3db7/llm_sandbox-0.3.37.tar.gz", hash = "sha256:bec2d2d2b6eb5311fd70e4aa6a21e60c3c7e8dee36f89aac47a1fd072485adc6", size = 605861, upload-time = "2026-03-02T06:45:28.168Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/4c/fcf50b3fc50b6af43fc94d2af8ca3d4338b884bfa63da36af3736ce5046f/llm_sandbox-0.1.9-py3-none-any.whl", hash = "sha256:b55d6a0c7153b68b960cccecb0c0fac70e5810f461e8a3543be18bc3a5bb0121", size = 21051, upload-time = "2025-02-02T08:42:03.094Z" },
+    { url = "https://files.pythonhosted.org/packages/a3/d0/63e594b6ae23ed4b63d57d5e442308f9c70f61f16002da4c41a4436939a6/llm_sandbox-0.3.37-py3-none-any.whl", hash = "sha256:8c0a01a79e8db45bcf709a349aee2983cc3ed22d56f3110ec9fbcdeef43c78f3", size = 106853, upload-time = "2026-03-02T06:45:26.766Z" },
 ]
 
 [package.optional-dependencies]
