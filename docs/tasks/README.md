@@ -28,6 +28,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [BigCodeBenchHard](BigCodeBenchHard.md)
 - [BigCodeBenchHardInstruct](BigCodeBenchHardInstruct.md)
 - [BigCodeBenchInstruct](BigCodeBenchInstruct.md)
+- [BigCodeBench_OLMES](BigCodeBench_OLMES.md)
 - [CASEHOLD](CASEHOLD.md)
 - [COPA](COPA.md)
 - [COPAEvalHarness](COPAEvalHarness.md)

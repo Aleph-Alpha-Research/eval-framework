@@ -1,3 +1,4 @@
+import logging
 import random
 import re
 from typing import Any
@@ -20,6 +21,8 @@ from eval_framework.tasks.utils import (
     _parse_unittest_output,
     unittest_merge_snippets,
 )
+
+logger = logging.getLogger(__name__)
 
 PROMPT_INSTRUCTION = (
     "Please provide a self-contained Python script, without tests or example usage, that solves the following "
@@ -46,7 +49,13 @@ class BigCodeBench(BaseTask[str]):
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
-        assert num_fewshot == 0, "Fewshot is not supported for BigCodeBench"
+        if self.__class__ is BigCodeBench and num_fewshot != 0:
+            logger.warning(
+                "Fewshot is not supported for BigCodeBench (got num_fewshot=%d); "
+                "setting to 0. Use BigCodeBench_OLMES for 3-shot.",
+                num_fewshot,
+            )
+            num_fewshot = 0
         # NOTE : this serializer should be the same class as initialized in the metric
         self.serializer = CallableSerializer()
         super().__init__(num_fewshot)
@@ -96,6 +105,41 @@ class BigCodeBench(BaseTask[str]):
             processed_text = extract_executable_code(completion_text)
 
         return processed_text
+
+
+# Instruction and prompt format matching oe_eval bigcodebench:3shot::olmo3:v2 (complete variant).
+# See oe_eval/tasks/oe_eval_tasks/codex_bigcodebench.py doc_to_text().
+PROMPT_INSTRUCTION_OLMES = (
+    "Please provide a self-contained Python script that solves the following problem in a markdown code block:"
+)
+
+
+class BigCodeBench_OLMES(BigCodeBench):
+    """
+    BigCodeBench variant matching oe_eval `bigcodebench:3shot::olmo3:v2`.
+
+    Recommended run settings for parity with oe_eval: temperature=0.6, top_p=0.6, repeats=5 (n=5),
+    then compute pass@1 over the 5 samples per problem (post-process if needed).
+    """
+
+    NAME = "BigCodeBench_OLMES"
+    SAMPLE_SPLIT = "v0.1.2"
+    FEWSHOT_SPLIT = "v0.1.2"
+
+    def __init__(self, num_fewshot: int = 5) -> None:
+        # Default 3-shot; config can override. Enforce 3 for this variant.
+        super().__init__(num_fewshot=3)
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        # Match oe_eval doc_to_text for prompt_variant "complete".
+        return PROMPT_INSTRUCTION_OLMES + "\n```\n" + item["complete_prompt"].strip() + "\n"
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        # Match oe_eval doc_to_target for complete: canonical_solution + "\\n```"
+        target = item["canonical_solution"]
+        if not isinstance(target, str):
+            raise ValueError(f"Expected canonical_solution to be a non-None str, got {type(target)}")
+        return target + "\n```"
 
 
 class BigCodeBenchInstruct(BigCodeBench):
