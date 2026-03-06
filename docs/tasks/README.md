@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 160**
+**Total number of tasks: 172**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -114,6 +114,18 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [MedQACloze](MedQACloze.md)
 - [MedQAMC](MedQAMC.md)
 - [MedQAMC_OLMES](MedQAMC_OLMES.md)
+- [MultiPLEHumanEvalCpp_OLMES](MultiPLEHumanEvalCpp_OLMES.md)
+- [MultiPLEHumanEvalJava_OLMES](MultiPLEHumanEvalJava_OLMES.md)
+- [MultiPLEHumanEvalJs_OLMES](MultiPLEHumanEvalJs_OLMES.md)
+- [MultiPLEHumanEvalPhp_OLMES](MultiPLEHumanEvalPhp_OLMES.md)
+- [MultiPLEHumanEvalRs_OLMES](MultiPLEHumanEvalRs_OLMES.md)
+- [MultiPLEHumanEvalSh_OLMES](MultiPLEHumanEvalSh_OLMES.md)
+- [MultiPLEMBPPCpp_OLMES](MultiPLEMBPPCpp_OLMES.md)
+- [MultiPLEMBPPJava_OLMES](MultiPLEMBPPJava_OLMES.md)
+- [MultiPLEMBPPJs_OLMES](MultiPLEMBPPJs_OLMES.md)
+- [MultiPLEMBPPPhp_OLMES](MultiPLEMBPPPhp_OLMES.md)
+- [MultiPLEMBPPRs_OLMES](MultiPLEMBPPRs_OLMES.md)
+- [MultiPLEMBPPSh_OLMES](MultiPLEMBPPSh_OLMES.md)
 - [NaturalQsOpen](NaturalQsOpen.md)
 - [NaturalQsOpenCloze](NaturalQsOpenCloze.md)
 - [NaturalQsOpenMC](NaturalQsOpenMC.md)
