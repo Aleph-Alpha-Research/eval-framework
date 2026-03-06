@@ -49,7 +49,7 @@ _CUSTOM_LANG_MAP: dict[str, _CustomLangConfig] = {
 }
 
 
-def multiple_execute_command(self, command: str | None, workdir: str | None = None) -> ConsoleOutput:
+def multiple_execute_command(self, command: str | None, workdir: str | None = None) -> ConsoleOutput:  # type: ignore
     if not command:
         raise ValueError("Command cannot be empty")
 
