@@ -255,8 +255,10 @@ If you use `eval-framework` in your research, please cite:
 
 ```bibtex
 @software{eval_framework,
+  author={Aleph Alpha Research},
   title={Aleph Alpha Eval Framework},
-  year={2025},
+  year={2026},
+  version = {x.y.z},
   url={https://github.com/Aleph-Alpha-Research/eval-framework}
 }
 ```
