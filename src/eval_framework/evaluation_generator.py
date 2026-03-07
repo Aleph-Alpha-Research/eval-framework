@@ -243,6 +243,59 @@ class EvaluationGenerator:
 
         return aggregated_results
 
+    def _aggregate_results_with_aggregators(self, results: list[Result]) -> dict[str, float | None]:
+        data = pd.DataFrame([r.model_dump() for r in results])
+        if len(data) == 0:
+            return {}
+        data = data.fillna({"key": ""})
+        aggregated_results: dict[str, float | None] = {}
+        data = data.loc[data.error.isnull()]
+
+        for (metric_name, current_metric_class), metric_group in data.groupby(["metric_name", "metric_class_name"]):
+            # The reason we groupby over both metric_name and metric_class_name is because we want to aggregate
+            # results for a single metric. Two metric classes can implement the same metric name. We want to separate
+            # those cases. We cannot group over only metric_class_name because each metric class can implement
+            # multiple metrics with different names.
+            current_metric = None
+            # now loop over the self.metrics list and find the metric class that matches the current_metric_class
+            for metric_class in self.metrics:
+                if metric_class.__name__ == current_metric_class:
+                    current_metric = metric_class
+                    break
+            if current_metric is None:
+                raise ValueError(f"Metric {metric_name} not found in metrics list")
+
+            for aggregator in current_metric.AGGREGATORS:
+                aggregated_results[f"{aggregator.name} {current_metric_class}.{metric_name}"] = (
+                    aggregator(metric_group, ["prompt"])
+                    .groupby(["key", "subject"])
+                    .agg({"value": "mean"})["value"]
+                    .mean()
+                    .item()
+                )
+
+        for (key, subject, metric_name), ksm_group in data.groupby(["key", "subject", "metric_name"]):
+            current_metric_class = metric_group["metric_class_name"].unique().item()
+            current_metric = None
+            # now loop over the self.metrics list and find the metric class that matches the current_metric_class
+            for metric_class in self.metrics:
+                if metric_class.__name__ == current_metric_class:
+                    current_metric = metric_class
+                    break
+
+            if current_metric is None:
+                raise ValueError(f"Metric {metric_name} not found in metrics list. This should never happen.")
+
+            for aggregator in current_metric.AGGREGATORS:
+                save_string = (
+                    f"{aggregator.name} {metric_name} - {subject}"
+                    if not key
+                    else f"{aggregator.name} {metric_name} - {key} - {subject}"
+                )
+                aggregated_results[save_string] = aggregator(metric_group, ["prompt"])["value"].mean().mean().item()
+
+        return aggregated_results
+
     def run_eval(self) -> list[Result]:
         """Runs evaluation using saved completions."""
         logger.info("Running evaluation...")
@@ -252,6 +305,8 @@ class EvaluationGenerator:
 
         metrics_results = self._run_metric_calculators(responses)
         aggregated_results = self._aggregate_results(metrics_results)
+        results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results)
+        aggregated_results.update(results_with_aggregators)
 
         wandb.log(aggregated_results)
         self.result_processor.save_aggregated_results(aggregated_results)

@@ -92,6 +92,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [MATHMinerva](MATHMinerva.md)
 - [MATHMinervaBPB](MATHMinervaBPB.md)
 - [MATHMinervaEvalHarness](MATHMinervaEvalHarness.md)
+- [MATHMinerva_OLMES](MATHMinerva_OLMES.md)
 - [MBPP](MBPP.md)
 - [MBPPBPB](MBPPBPB.md)
 - [MBPP_OLMES](MBPP_OLMES.md)
