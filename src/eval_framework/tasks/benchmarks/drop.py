@@ -122,6 +122,11 @@ class DropCompletion(BaseTask[str]):
             return None
         return DropMetricContext(answer_tuples=[list(a) for a in answers])
 
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
+
 
 class DropCompletion_OLMES(DropCompletion):
     """DropCompletion matching OLMES, using train split for fewshot and max tokens 100."""
@@ -171,6 +176,11 @@ class DropMC(BaseTask[str]):
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "Answer:"
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
 
 
 class DropMC_OLMES(DropMC):
@@ -226,3 +236,8 @@ class DropCloze(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         texts = item.get("choices", {}).get("text", [])
         return [f" {t}" for t in texts]
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"

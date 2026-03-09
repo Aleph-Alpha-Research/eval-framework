@@ -40,6 +40,11 @@ class CommonsenseQACloze(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {choice}" for choice in item["choices"]["text"]]
 
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
+
 
 class CommonsenseQAFullTextCloze(CommonsenseQACloze):
     """
