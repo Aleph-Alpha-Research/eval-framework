@@ -146,6 +146,7 @@ class BaseHFLLM(BaseLLM):
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
     ) -> list[RawCompletion]:
         if temperature is None:
             effective_temperature = 0.0  # Current default, TODO: refactor to use model's default
@@ -154,7 +155,8 @@ class BaseHFLLM(BaseLLM):
             )
         else:
             effective_temperature = temperature
-
+        if top_p is not None:
+            logger.warning("Huggingface LLM does not support top_p. Ignoring top_p value.")
         raw_completions = []
         for single_messages in messages:
             # format
