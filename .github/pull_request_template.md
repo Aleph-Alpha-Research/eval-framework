@@ -10,17 +10,14 @@
      - ✅ Provide tests for your changes.
      - 📝 Use descriptive commit messages.
      - 📗 Update any related documentation and include any relevant screenshots.
-     - 📗 Reflect the changes you made in the changelog.
-
 -->
 
-
 ## PR Checklist
+
 - [ ] Use descriptive commit messages.
 - [ ] Provide tests for your changes.
 - [ ] Update any related documentation and include any relevant screenshots.
 - [ ] Check if changes need to be made to docs (README or any guides in `/docs/`).
-- [ ] Reflect the changes you made in the changelog.
 
 ## What type of PR is this? (check all applicable)
 
@@ -52,8 +49,8 @@ _Please replace this line with instructions on how to test your changes, a note
 on the hardware and config this has been tested on, as well as any relevant
 additional information._
 
-
 ## Added/updated tests?
+
 - [ ] Yes
 - [ ] No, and this is why: _please replace this line with details on why tests
       have not been included_
