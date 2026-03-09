@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 158**
+**Total number of tasks: 160**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -12,6 +12,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 
 - [AIME2024](AIME2024.md)
 - [AIME2025](AIME2025.md)
+- [AIME2026](AIME2026.md)
 - [ARC](ARC.md)
 - [ARC_DE](ARC_DE.md)
 - [ARC_EU20_DE](ARC_EU20_DE.md)
@@ -68,6 +69,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [HumanEval](HumanEval.md)
 - [HumanEvalBPB](HumanEvalBPB.md)
 - [HumanEvalInstruct](HumanEvalInstruct.md)
+- [HumanEval_OLMES](HumanEval_OLMES.md)
 - [IFEval](IFEval.md)
 - [IFEvalDe](IFEvalDe.md)
 - [IFEvalFiSv](IFEvalFiSv.md)
@@ -93,6 +95,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [MATHMinervaEvalHarness](MATHMinervaEvalHarness.md)
 - [MBPP](MBPP.md)
 - [MBPPBPB](MBPPBPB.md)
+- [MBPP_OLMES](MBPP_OLMES.md)
 - [MBPP_PROMPT_WITHOUT_TESTS](MBPP_PROMPT_WITHOUT_TESTS.md)
 - [MBPP_PROMPT_WITHOUT_TESTS_SANITIZED](MBPP_PROMPT_WITHOUT_TESTS_SANITIZED.md)
 - [MBPP_SANITIZED](MBPP_SANITIZED.md)

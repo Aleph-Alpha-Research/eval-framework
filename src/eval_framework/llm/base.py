@@ -24,6 +24,7 @@ class BaseLLM(ABC):
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
     ) -> list[RawCompletion]:
         """
         stop_sequences and max_tokens are injected by the task if exist. They should be overwritten or
@@ -47,6 +48,7 @@ class BaseLLM(ABC):
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
     ) -> list[RawCompletion]:
         """
         stop_sequences and max_tokens are injected by the task if exist. They should be overwritten or
@@ -79,6 +81,7 @@ class BaseLLM(ABC):
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
+        top_p: float | None = None,
     ) -> list[RawCompletion]:
         """Generates a model response for each sample.
 
@@ -86,10 +89,10 @@ class BaseLLM(ABC):
         otherwise falls back to 'generate_from_messages'.
         """
         try:
-            return self.generate_from_samples(samples, stop_sequences, max_tokens, temperature)
+            return self.generate_from_samples(samples, stop_sequences, max_tokens, temperature, top_p)
         except NotImplementedError:
             messages: list[Sequence[Message]] = [sample.messages for sample in samples]
-            return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature)
+            return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature, top_p)
 
     def post_process_completion(self, completion: str, sample: Sample) -> str:
         """
