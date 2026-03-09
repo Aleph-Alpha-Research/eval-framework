@@ -1,9 +1,11 @@
+import atexit
 import base64
 import logging
 import os
 import random
 import re
 import string
+import threading
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal, NamedTuple
@@ -11,11 +13,41 @@ from typing import Any, Literal, NamedTuple
 import dill
 import numpy as np
 from llm_sandbox import SandboxSession
+from llm_sandbox.const import DefaultImage
+from llm_sandbox.pool import PoolConfig, create_pool_manager
+from llm_sandbox.pool.base import ContainerPoolManager
 
 logger = logging.getLogger(__name__)
 
 RANDOM_SEED = 42  # hacky way to get around circular import
 redis_warning_printed = False
+
+_pools: dict[str, ContainerPoolManager] = {}
+_pools_lock = threading.Lock()
+
+
+def _get_or_create_pool(image: str) -> ContainerPoolManager:
+    with _pools_lock:
+        if image not in _pools:
+            pool = create_pool_manager(
+                config=PoolConfig(min_pool_size=1, max_pool_size=2),
+                lang="python",
+                image=image,
+                keep_template=True,
+            )
+            _pools[image] = pool
+        return _pools[image]
+
+
+def _close_pools() -> None:
+    for pool in _pools.values():
+        try:
+            pool.close()
+        except Exception:
+            pass
+
+
+atexit.register(_close_pools)
 
 
 def raise_errors() -> bool:
@@ -48,7 +80,9 @@ def run_python_code(
     :param packages: List of python packages to install with pip.
     :return: The output of the code.
     """
-    with SandboxSession(lang="python", image=image, keep_template=True, commit_container=False) as session:
+    resolved_image = image or DefaultImage.PYTHON
+    pool = _get_or_create_pool(resolved_image)
+    with SandboxSession(pool=pool, lang="python") as session:
         for host_file, docker_file in input_files or []:
             session.copy_to_runtime(host_file, docker_file)
         return session.run(code, libraries=packages, timeout=timeout).stdout.strip()
