@@ -168,6 +168,8 @@
     "MBPP.Llama3Formatter": "259ba4fc8290421f3e0b0c19e220896e",
     "MBPPBPB.ConcatFormatter": "3d8536c15549c6c30d6c7154110456c4",
     "MBPPBPB.Llama3Formatter": "63b81fd3544ac6826d9516ac6c2916da",
+    "MBPP_OLMES.ConcatFormatter": "403f4a834baf46475d05ff403ae98ff9",
+    "MBPP_OLMES.Llama3Formatter": "9d3f173ba870ab057de080be6c93bcb7",
     "MBPP_PROMPT_WITHOUT_TESTS.ConcatFormatter": "af6320d664b273bde43c7cecfafa2f99",
     "MBPP_PROMPT_WITHOUT_TESTS.Llama3Formatter": "683d2a2040199d923ebe33a074838ca3",
     "MBPP_PROMPT_WITHOUT_TESTS_SANITIZED.ConcatFormatter": "981c72198b9df4a14079e00f21fe2a81",
