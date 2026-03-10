@@ -44,6 +44,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [DUC_EXTRACTIVE](DUC_EXTRACTIVE.md)
 - [DropCloze](DropCloze.md)
 - [DropCompletion](DropCompletion.md)
+- [DropCompletion_OLMES](DropCompletion_OLMES.md)
 - [DropMC](DropMC.md)
 - [DropMC_OLMES](DropMC_OLMES.md)
 - [Flores200](Flores200.md)

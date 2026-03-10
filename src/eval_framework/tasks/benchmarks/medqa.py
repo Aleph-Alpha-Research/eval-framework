@@ -43,6 +43,11 @@ class MedQACloze(BaseTask[str]):
         choices = item.get("choices", [])
         return [f" {c}" for c in choices]
 
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
+
 
 class MedQAMC(MedQACloze):
     """MedQA multiple choice (loglikelihood over A/B/C/D/...)."""
@@ -75,6 +80,7 @@ class MedQAMC_OLMES(MedQAMC):
     """
 
     NAME = "MedQAMC_OLMES"
+    FEWSHOT_SPLIT = "train"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
