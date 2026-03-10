@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 160**
+**Total number of tasks: 161**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -43,6 +43,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [DUC_EXTRACTIVE](DUC_EXTRACTIVE.md)
 - [DropCloze](DropCloze.md)
 - [DropCompletion](DropCompletion.md)
+- [DropCompletion_OLMES](DropCompletion_OLMES.md)
 - [DropMC](DropMC.md)
 - [DropMC_OLMES](DropMC_OLMES.md)
 - [Flores200](Flores200.md)

@@ -161,6 +161,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.csqa.CommonsenseQAMC")
     register_lazy_task("eval_framework.tasks.benchmarks.csqa.CommonsenseQAMC_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.drop.DropCompletion")
+    register_lazy_task("eval_framework.tasks.benchmarks.drop.DropCompletion_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.drop.DropMC")
     register_lazy_task("eval_framework.tasks.benchmarks.drop.DropMC_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.drop.DropCloze")

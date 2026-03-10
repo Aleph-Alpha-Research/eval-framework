@@ -36,6 +36,11 @@ class NaturalQsOpen(BaseTask[str]):
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return [f" {a}" for a in item.get("answer", [])]
 
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
+
 
 class NaturalQsOpenCloze(BaseTask[str]):
     NAME = "NaturalQsOpenCloze"
@@ -64,6 +69,11 @@ class NaturalQsOpenCloze(BaseTask[str]):
         texts = item.get("choices", {}).get("text", [])
         return [f" {t}" for t in texts]
 
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
+
 
 class NaturalQsOpenMC(NaturalQsOpenCloze):
     NAME = "NaturalQsOpenMC"
@@ -84,6 +94,11 @@ class NaturalQsOpenMC(NaturalQsOpenCloze):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {key}" for key in self.keys]
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
 
 
 class NaturalQsOpenMC_OLMES(NaturalQsOpenMC):

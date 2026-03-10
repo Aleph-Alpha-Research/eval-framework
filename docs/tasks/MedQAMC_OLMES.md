@@ -4,7 +4,7 @@
 NAME = MedQAMC_OLMES
 DATASET_PATH = davidheineman/medqa-en
 SAMPLE_SPLIT = test
-FEWSHOT_SPLIT = dev
+FEWSHOT_SPLIT = train
 RESPONSE_TYPE = LOGLIKELIHOODS
 METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['no_subject']
