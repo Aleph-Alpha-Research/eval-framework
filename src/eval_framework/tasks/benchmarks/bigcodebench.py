@@ -141,6 +141,10 @@ class BigCodeBench_OLMES(BigCodeBench):
             raise ValueError(f"Expected canonical_solution to be a non-None str, got {type(target)}")
         return target + "\n```"
 
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        # Olmes does not use a cue text
+        return ""
+
 
 class BigCodeBenchInstruct(BigCodeBench):
     """BigCodeBench dataset: https://huggingface.co/datasets/bigcode/bigcodebench"""
