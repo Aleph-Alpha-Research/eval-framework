@@ -43,8 +43,8 @@ def get_or_create_pool(
                 dockerfile=dockerfile,
                 keep_template=True,
             )
-            _pools[image] = pool
-        return _pools[image]
+            _pools[image] = pool  # type: ignore[index]
+        return _pools[image]  # type: ignore[index]
 
 
 def close_pools() -> None:
