@@ -29,6 +29,7 @@ _pools_lock = threading.Lock()
 def get_or_create_pool(
     image: str | None = None,
     dockerfile: str | None = None,
+    packages: list[str] | None = None,
     lang: str = "python",
     min_pool_size: int = 1,
     max_pool_size: int = 2,
@@ -42,9 +43,10 @@ def get_or_create_pool(
                 image=image,
                 dockerfile=dockerfile,
                 keep_template=True,
+                libraries=packages,
             )
-            _pools[image] = pool  # type: ignore[index]
-        return _pools[image]  # type: ignore[index]
+            _pools[(image or dockerfile, tuple(packages) if packages is not None else None)] = pool  # type: ignore[index]
+        return _pools[(image or dockerfile, tuple(packages) if packages is not None else None)]  # type: ignore[index]
 
 
 def close_pools() -> None:
@@ -89,11 +91,13 @@ def run_python_code(
     :return: The output of the code.
     """
     resolved_image = image or DefaultImage.PYTHON
-    pool = get_or_create_pool(resolved_image)
+    pool = get_or_create_pool(resolved_image, packages=packages)
     with SandboxSession(pool=pool, lang="python") as session:
         for host_file, docker_file in input_files or []:
             session.copy_to_runtime(host_file, docker_file)
-        return session.run(code, libraries=packages, timeout=timeout).stdout.strip()
+
+        output = session.run(code, timeout=timeout)
+        return (output.stderr + output.stdout).strip()
 
 
 def unittest_merge_snippets(code: str, test_code: str) -> str:

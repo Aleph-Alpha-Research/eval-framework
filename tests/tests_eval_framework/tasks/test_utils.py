@@ -1,6 +1,8 @@
 import os
 import tempfile
-import time
+
+import llm_sandbox
+import pytest
 
 from eval_framework.tasks.utils import (
     BIG_CODE_BENCH_PACKAGE_MAPPING,
@@ -30,9 +32,9 @@ def test_run_python_code() -> None:
 
 def test_run_python_code_timeout() -> None:
     code = """import time\ntime.sleep(15)"""
-    start = time.time()
-    run_python_code(code, image="python:3.13-slim", timeout=2)
-    assert time.time() - start < 5
+
+    with pytest.raises(llm_sandbox.exceptions.SandboxTimeoutError):
+        run_python_code(code, image="python:3.13-slim", timeout=2)
 
 
 def test_run_python_code_with_packages() -> None:
