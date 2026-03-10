@@ -26,20 +26,28 @@ _pools: dict[str, ContainerPoolManager] = {}
 _pools_lock = threading.Lock()
 
 
-def _get_or_create_pool(image: str) -> ContainerPoolManager:
+def get_or_create_pool(
+    image: str | None = None,
+    dockerfile: str | None = None,
+    lang: str = "python",
+    min_pool_size: int = 1,
+    max_pool_size: int = 2,
+) -> ContainerPoolManager:
+    assert image or dockerfile, "Either image or dockerfile must be provided"
     with _pools_lock:
         if image not in _pools:
             pool = create_pool_manager(
-                config=PoolConfig(min_pool_size=1, max_pool_size=2),
-                lang="python",
+                config=PoolConfig(min_pool_size=min_pool_size, max_pool_size=max_pool_size),
+                lang=lang,
                 image=image,
+                dockerfile=dockerfile,
                 keep_template=True,
             )
             _pools[image] = pool
         return _pools[image]
 
 
-def _close_pools() -> None:
+def close_pools() -> None:
     for pool in _pools.values():
         try:
             pool.close()
@@ -47,7 +55,7 @@ def _close_pools() -> None:
             pass
 
 
-atexit.register(_close_pools)
+atexit.register(close_pools)
 
 
 def raise_errors() -> bool:
@@ -81,7 +89,7 @@ def run_python_code(
     :return: The output of the code.
     """
     resolved_image = image or DefaultImage.PYTHON
-    pool = _get_or_create_pool(resolved_image)
+    pool = get_or_create_pool(resolved_image)
     with SandboxSession(pool=pool, lang="python") as session:
         for host_file, docker_file in input_files or []:
             session.copy_to_runtime(host_file, docker_file)
