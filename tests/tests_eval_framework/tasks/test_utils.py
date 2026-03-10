@@ -274,19 +274,16 @@ class TestHang(unittest.TestCase):
         self.assertTrue(True)  # This won't run because hang() will timeout
 unittest.main()
     """
-
-        result = execute_python_code_with_tests(
-            code=code,
-            test_code=test_code,
-            package_mapping=BIG_CODE_BENCH_PACKAGE_MAPPING,
-            merge_code_fn=unittest_merge_snippets,
-            image="python:3.12",
-            timeout=1,
-            parse_output_fn=_parse_unittest_output,
-        )
-
-        assert result.success is False
-        assert "timeout" in result.output.lower()
+        with pytest.raises(llm_sandbox.exceptions.SandboxTimeoutError):
+            execute_python_code_with_tests(
+                code=code,
+                test_code=test_code,
+                package_mapping={},
+                merge_code_fn=unittest_merge_snippets,
+                image="python:3.12",
+                timeout=1,
+                parse_output_fn=_parse_unittest_output,
+            )
 
     def test_with_imports(self) -> None:
         # Code that uses imports

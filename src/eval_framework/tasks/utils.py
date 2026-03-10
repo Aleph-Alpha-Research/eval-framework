@@ -35,8 +35,9 @@ def get_or_create_pool(
     max_pool_size: int = 2,
 ) -> ContainerPoolManager:
     assert image or dockerfile, "Either image or dockerfile must be provided"
+    key = (image or dockerfile, tuple(packages) if packages is not None else None)
     with _pools_lock:
-        if image not in _pools:
+        if key not in _pools:
             pool = create_pool_manager(
                 config=PoolConfig(min_pool_size=min_pool_size, max_pool_size=max_pool_size),
                 lang=lang,
@@ -45,8 +46,8 @@ def get_or_create_pool(
                 keep_template=True,
                 libraries=packages,
             )
-            _pools[(image or dockerfile, tuple(packages) if packages is not None else None)] = pool  # type: ignore[index]
-        return _pools[(image or dockerfile, tuple(packages) if packages is not None else None)]  # type: ignore[index]
+            _pools[key] = pool  # type: ignore[index]
+        return _pools[key]  # type: ignore[index]
 
 
 def close_pools() -> None:
@@ -77,6 +78,7 @@ def get_n_letters(n: int) -> list[str]:
 def run_python_code(
     code: str,
     image: str | None = None,
+    dockerfile: str | None = None,
     input_files: list[tuple[str, str]] | None = None,
     timeout: int = 60,
     packages: list[str] | None = None,
@@ -90,8 +92,8 @@ def run_python_code(
     :param packages: List of python packages to install with pip.
     :return: The output of the code.
     """
-    resolved_image = image or DefaultImage.PYTHON
-    pool = get_or_create_pool(resolved_image, packages=packages)
+    resolved_image = image or DefaultImage.PYTHON if not dockerfile else image
+    pool = get_or_create_pool(resolved_image, packages=packages, dockerfile=dockerfile)
     with SandboxSession(pool=pool, lang="python") as session:
         for host_file, docker_file in input_files or []:
             session.copy_to_runtime(host_file, docker_file)
