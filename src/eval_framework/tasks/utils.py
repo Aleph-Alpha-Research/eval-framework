@@ -29,22 +29,26 @@ _pools_lock = threading.Lock()
 def get_or_create_pool(
     image: str | None = None,
     dockerfile: str | None = None,
+    packages: list[str] | None = None,
     lang: str = "python",
     min_pool_size: int = 1,
     max_pool_size: int = 2,
 ) -> ContainerPoolManager:
     assert image or dockerfile, "Either image or dockerfile must be provided"
+    key = (image or dockerfile, tuple(packages) if packages is not None else None)
     with _pools_lock:
-        if image not in _pools:
+        print("HERERERERERAASDKLJAHBSDLKJHALKSJDH")
+        if key not in _pools:
             pool = create_pool_manager(
                 config=PoolConfig(min_pool_size=min_pool_size, max_pool_size=max_pool_size),
                 lang=lang,
                 image=image,
                 dockerfile=dockerfile,
                 keep_template=True,
+                libraries=packages,
             )
-            _pools[image] = pool  # type: ignore[index]
-        return _pools[image]  # type: ignore[index]
+            _pools[key] = pool  # type: ignore[index]
+        return _pools[key]  # type: ignore[index]
 
 
 def close_pools() -> None:
@@ -75,6 +79,7 @@ def get_n_letters(n: int) -> list[str]:
 def run_python_code(
     code: str,
     image: str | None = None,
+    dockerfile: str | None = None,
     input_files: list[tuple[str, str]] | None = None,
     timeout: int = 60,
     packages: list[str] | None = None,
@@ -88,12 +93,14 @@ def run_python_code(
     :param packages: List of python packages to install with pip.
     :return: The output of the code.
     """
-    resolved_image = image or DefaultImage.PYTHON
-    pool = get_or_create_pool(resolved_image)
+    resolved_image = image or DefaultImage.PYTHON if not dockerfile else image
+    pool = get_or_create_pool(resolved_image, packages=packages, dockerfile=dockerfile)
     with SandboxSession(pool=pool, lang="python") as session:
         for host_file, docker_file in input_files or []:
             session.copy_to_runtime(host_file, docker_file)
-        return session.run(code, libraries=packages, timeout=timeout).stdout.strip()
+
+        output = session.run(code, timeout=timeout)
+        return (output.stderr + output.stdout).strip()
 
 
 def unittest_merge_snippets(code: str, test_code: str) -> str:
@@ -128,6 +135,7 @@ def execute_python_code_with_tests(
     image: str | None,
     timeout: int,
     parse_output_fn: Callable[[str], ExecutionResult],
+    dockerfile: str | None = None,
 ) -> ExecutionResult:
     """
     Executes the given code with test cases in a sandboxed environment.
@@ -146,7 +154,7 @@ def execute_python_code_with_tests(
     packages = get_external_dependencies(combined_code, package_mapping)
 
     # Run the combined code in the sandbox
-    output = run_python_code(combined_code, image=image, timeout=timeout, packages=packages)
+    output = run_python_code(combined_code, image=image, timeout=timeout, packages=packages, dockerfile=dockerfile)
     if isinstance(output, bytes):
         output = output.decode("utf-8")
     # Parse the output to determine success
