@@ -155,7 +155,11 @@ class SocialIQACloze(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
@@ -174,6 +178,11 @@ class SocialIQACloze(BaseTask[str]):
         choices = [item["answerA"], item["answerB"], item["answerC"]]
         return f" {choices[idx]}"
 
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
+
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "Answer:"
 
@@ -189,6 +198,7 @@ class SocialIQAMC_OLMES(SocialIQACloze):
     """
 
     NAME = "SocialIQAMC_OLMES"
+    SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query = _social_iqa_context_question(item)
@@ -214,6 +224,7 @@ class SocialIQAMC(SocialIQAMC_OLMES):
     """
 
     NAME = "SocialIQAMC"
+    SAMPLE_SPLIT = "validation"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         query = _social_iqa_context_question(item)

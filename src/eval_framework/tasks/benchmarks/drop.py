@@ -86,14 +86,21 @@ class DropCompletion(BaseTask[str]):
 
     def _load_dataset(self, subject: str) -> None:
         hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH)
-        validation = list(hf_dataset.get(self.SAMPLE_SPLIT, []))
-        processed = []
-        for doc in validation:
-            parsed = _get_answers(doc)
-            if not parsed:
-                continue
-            processed.append({**doc, "parsed_answers": parsed})
-        self.dataset = self._shuffle_splits(hf_dataset={self.SAMPLE_SPLIT: processed, self.FEWSHOT_SPLIT: processed})
+
+        def process(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+            result = []
+            for doc in docs:
+                parsed = _get_answers(doc)
+                if not parsed:
+                    continue
+                result.append({**doc, "parsed_answers": parsed})
+            return result
+
+        sample_split = process(hf_dataset.get(self.SAMPLE_SPLIT, []))
+        fewshot_split = process(hf_dataset.get(self.FEWSHOT_SPLIT, []))
+        self.dataset = self._shuffle_splits(
+            hf_dataset={self.SAMPLE_SPLIT: sample_split, self.FEWSHOT_SPLIT: fewshot_split}
+        )
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         passage = (item.get("passage") or "").strip()
@@ -114,6 +121,22 @@ class DropCompletion(BaseTask[str]):
         if not answers:
             return None
         return DropMetricContext(answer_tuples=[list(a) for a in answers])
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
+
+
+class DropCompletion_OLMES(DropCompletion):
+    """DropCompletion matching OLMES, using train split for fewshot and max tokens 100."""
+
+    NAME = "DropCompletion_OLMES"
+    FEWSHOT_SPLIT = "train"
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.max_tokens = 100
 
 
 class DropMC(BaseTask[str]):
@@ -150,6 +173,14 @@ class DropMC(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         labels = item.get("choices", {}).get("label", [])
         return [f" {label}" for label in labels]
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return "Answer:"
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
 
 
 class DropMC_OLMES(DropMC):
@@ -205,3 +236,8 @@ class DropCloze(BaseTask[str]):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         texts = item.get("choices", {}).get("text", [])
         return [f" {t}" for t in texts]
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        ground_truth = self._get_ground_truth(item)
+        assert ground_truth is not None
+        return f"{self._get_cue_text(item)}{ground_truth}"
