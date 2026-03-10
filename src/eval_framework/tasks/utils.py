@@ -110,6 +110,7 @@ def execute_python_code_with_tests(
 
     # Run the combined code in the sandbox
     output = run_python_code(combined_code, image=image, timeout=timeout, packages=packages)
+    output = output.decode("utf-8")
 
     # Parse the output to determine success
     return parse_output_fn(output)
