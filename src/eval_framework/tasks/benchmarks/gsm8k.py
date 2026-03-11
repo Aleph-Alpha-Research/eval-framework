@@ -214,6 +214,4 @@ class GSM8K_OLMES(GSM8K):
         return numbers[-1] if numbers else output
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
-        output = re.sub(r"(\d),(\d)", r"\1\2", completion_text)
-        numbers = re.findall(r"[-+]?\d*\.\d+|\d+", output)
-        return numbers[-1] if numbers else output
+        return self._clean_short_answer(completion_text)
