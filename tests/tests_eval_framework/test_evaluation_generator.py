@@ -25,7 +25,7 @@ class MockMetric:
 
 class MockPassAtKMetric(BaseMetric):
     NAME = "ExactMatch"
-    AGGREGATORS = [PassAtK(k=1)]
+    AGGREGATORS = [PassAtK(k=1), PassAtK(k=2)]
 
     def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
         return []
@@ -314,12 +314,24 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
     # p3 s1 k2 1
     # p4 s2 k1 1
     # p5 s2 k2 0
+
+    # The pass@2 DF that gets aggregated is:
+    # p1 s1 k1 1
+    # p2 s1 k1 0
+    # p3 s1 k2 1
+    # p4 s2 k1 1
+    # p5 s2 k2 0
     assert aggregated == {
         "Pass@1 MockPassAtKMetric.ExactMatch": pytest.approx(((2 / 3 + 0) / 2 + 1 + 1 + 0) / 4),
         "Pass@1 ExactMatch - key1 - subject1": pytest.approx((2 / 3 + 0) / 2),
         "Pass@1 ExactMatch - key1 - subject2": 1,
         "Pass@1 ExactMatch - key2 - subject1": 1,
         "Pass@1 ExactMatch - key2 - subject2": 0.0,
+        "Pass@2 MockPassAtKMetric.ExactMatch": pytest.approx((1 / 2 + 1 + 1 + 0) / 4),
+        "Pass@2 ExactMatch - key1 - subject1": pytest.approx((1 + 0) / 2),
+        "Pass@2 ExactMatch - key1 - subject2": 1,
+        "Pass@2 ExactMatch - key2 - subject1": 1,
+        "Pass@2 ExactMatch - key2 - subject2": 0.0,
     }
 
 
