@@ -293,7 +293,7 @@ class EvaluationGenerator:
                     if not key
                     else f"{aggregator.name} {metric_name} - {key} - {subject}"
                 )
-                aggregated_results[save_string] = aggregator(metric_group, ["prompt"])["value"].mean().mean().item()
+                aggregated_results[save_string] = aggregator(ksm_group, ["prompt"])["value"].mean().mean().item()
 
         return aggregated_results
 
