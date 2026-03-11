@@ -270,11 +270,11 @@ class EvaluationGenerator:
                     aggregator(metric_group, ["prompt"])  # Compute the aggregator, grouped by the prompt...
                     .groupby(["key", "subject"])  # ... then group by key, subject...
                     .agg({"value": "mean"})["value"]  # ...and average scores over each key, subject group...
-                    .mean()  # ...and lastly average the scores across all groups. This gives equal weight to every key, subject group.
-                    .item()
+                    .mean()  # ...and lastly average the scores across all groups giving equal weight to every
+                    .item()  # key, subject group.
                 )
 
-        # Loop to additionally compute per-subject/per-key breakdown metric scores, e.g. for only subject="algebra" 
+        # Loop to additionally compute per-subject/per-key breakdown metric scores, e.g. for only subject="algebra"
         for (key, subject, metric_name), ksm_group in data.groupby(["key", "subject", "metric_name"]):
             current_metric_class = ksm_group["metric_class_name"].unique().item()
             current_metric = None
