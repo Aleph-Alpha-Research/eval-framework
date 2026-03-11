@@ -56,15 +56,23 @@ def closed_form_passatk(n: int, c: int, k: int) -> float:
 
 
 class PassAtK(Aggregator):
-    """Computes pass@k per problem group.
-
-    Each row is a (problem, sample) pair with a binary ``value`` (1=correct). The groupby
-    aggregates ``value`` with both ``sum`` (-> c) and ``count`` (-> n), while keeping the
-    ``first`` of every other column. Because ``value`` gets two agg functions, pandas
-    creates a MultiIndex on columns — e.g. ("value","sum"), ("other_cols","first"). After
-    computing scores and dropping the value tuples, ``droplevel(1)`` flattens the leftover
-    metadata MultiIndex back to plain column names. The result is one row per problem with
-    the pass@k score as ``value``.
+    """Computes pass@k: the probability that at least one of k random attempts is correct.
+    
+    Groups rows by ``identifier_columns``, counts correct (``c = sum(value)``) and
+    total (``n = count(value)``) attempts per problem, then applies the closed-form
+    estimator.
+    
+    Expects ``value`` to be binary (0 or 1). For k=1 this is equivalent to the mean.
+    
+    Example (k=2, continuing from the Aggregator docstring example):
+        "What is 2+2?": n=3, c=2, k=2 -> 1.0  (guaranteed correct pick)
+        "Solve x^2=4":  n=3, c=1,  k=2 -> 0.667 (as computed by the `closed_form_passatk`)
+        
+        Output:
+        | prompt         | value | subject |
+        |----------------|-------|---------|
+        | "What is 2+2?" | 1.000 | algebra |
+        | "Solve x^2=4"  | 0.667 | algebra |
     """
 
     def __init__(self, k: int = 1):
