@@ -52,6 +52,8 @@ class PIQA_OLMES(PIQA):
     """
 
     NAME = "PIQA_OLMES"
+    SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
+    FEWSHOT_SPLIT = "train"
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
@@ -61,7 +63,7 @@ class PIQA_OLMES(PIQA):
         goal = item["goal"]
         choices = [item["sol1"], item["sol2"]]
         options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, choices))
-        return f"Question: {goal}\n{options}\n"
+        return f"Goal: {goal}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         idx = 0 if item["label"] == 0 else 1

@@ -5,7 +5,7 @@ import pytest
 import wandb
 
 from eval_framework.evaluation_generator import EvaluationGenerator
-from eval_framework.metrics.aggregators.aggregators import PassAtK
+from eval_framework.metrics.aggregators.aggregators import IdentifierMean, PassAtK
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.base import Result
@@ -26,6 +26,14 @@ class MockMetric:
 class MockPassAtKMetric(BaseMetric):
     NAME = "ExactMatch"
     AGGREGATORS = [PassAtK(k=1)]
+
+    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
+        return []
+
+
+class MockIdentifierMeanMetric(BaseMetric):
+    NAME = "ExactMatch"
+    AGGREGATORS = [IdentifierMean()]
 
     def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
         return []
@@ -303,8 +311,77 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
         # First loop: PassAtK(k=1) over all 5 non-error rows (one sample per prompt → pass@1 = value).
         "Pass@1 MockPassAtKMetric.ExactMatch": 0.625,
         # mean(1.0, 0.0, 1.0, 1.0, 0.0) = 0.6
-        "Pass@1 ExactMatch - key1 - subject1": 0.6,
-        "Pass@1 ExactMatch - key1 - subject2": 0.6,
-        "Pass@1 ExactMatch - key2 - subject1": 0.6,
-        "Pass@1 ExactMatch - key2 - subject2": 0.6,
+        "Pass@1 ExactMatch - key1 - subject1": 0.5,
+        "Pass@1 ExactMatch - key1 - subject2": 1,
+        "Pass@1 ExactMatch - key2 - subject1": 1,
+        "Pass@1 ExactMatch - key2 - subject2": 0.0,
+    }
+
+
+def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
+    llm = MockLLM()
+    config = EvalConfig(
+        output_dir=tmp_path,
+        num_fewshot=0,
+        num_samples=2,
+        task_name=GPQA.NAME,
+        llm_class=llm.__class__,
+    )
+    evaluator = EvaluationGenerator(config, ResultsFileProcessor(tmp_path))
+    evaluator.metrics = [MockIdentifierMeanMetric]
+
+    responses = [
+        ("subject1", "ExactMatch", "key1", "p1", 1.0, None),
+        ("subject1", "ExactMatch", "key1", "p1", 0.0, None),
+        ("subject1", "ExactMatch", "key2", "p2", 1.0, None),
+        ("subject2", "ExactMatch", "key1", "p3", 1.0, None),
+        ("subject2", "ExactMatch", "key2", "p4", 0.0, None),
+        ("subject2", "ExactMatch", "key2", "p4", 1.0, None),
+        (
+            "subject2",
+            "ExactMatch",
+            "key1",
+            "p5",
+            None,
+            Error(error_class="AssertionError", message="asserted False!", traceback="just check the test data"),
+        ),
+    ]
+
+    results = []
+    for subject, metric_name, key, prompt, value, error in responses:
+        results.append(
+            Result(
+                id=0,
+                metric_name=metric_name,
+                num_fewshot=0,
+                key=key,
+                subject=subject,
+                llm_name="llm_name",
+                task_name="task_name",
+                metric_class_name="MockIdentifierMeanMetric",
+                value=value,
+                higher_is_better=True,
+                prompt=prompt,
+                response="completion",
+                error=error,
+            )
+        )
+
+    aggregated = evaluator._aggregate_results_with_aggregators(results)
+
+    # After IdentifierMean groups by prompt and averages:
+    #   p1 -> 0.5 (key1, subject1)
+    #   p2 -> 1.0 (key2, subject1)
+    #   p3 -> 1.0 (key1, subject2)
+    #   p4 -> 0.5 (key2, subject2)
+    #
+    # First loop: groupby (key, subject) means → (0.5, 1.0, 1.0, 0.5) → overall mean = 0.75
+    # Second loop: aggregator applied to full metric_group → per-prompt means [0.5, 1.0, 1.0, 0.5]
+    #   .mean().mean() = 0.75 for every (key, subject) combination
+    assert aggregated == {
+        "IdentifierMean MockIdentifierMeanMetric.ExactMatch": 0.75,
+        "IdentifierMean ExactMatch - key1 - subject1": 0.75,
+        "IdentifierMean ExactMatch - key2 - subject1": 0.75,
+        "IdentifierMean ExactMatch - key1 - subject2": 0.75,
+        "IdentifierMean ExactMatch - key2 - subject2": 0.75,
     }

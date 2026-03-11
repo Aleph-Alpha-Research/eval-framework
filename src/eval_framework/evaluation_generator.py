@@ -267,15 +267,16 @@ class EvaluationGenerator:
 
             for aggregator in current_metric.AGGREGATORS:
                 aggregated_results[f"{aggregator.name} {current_metric_class}.{metric_name}"] = (
-                    aggregator(metric_group, ["prompt"])
-                    .groupby(["key", "subject"])
-                    .agg({"value": "mean"})["value"]
-                    .mean()
-                    .item()
+                    aggregator(metric_group, ["prompt"])  # Compute the aggregator, grouped by the prompt...
+                    .groupby(["key", "subject"])  # ... then group by key, subject...
+                    .agg({"value": "mean"})["value"]  # ...and average scores over each key, subject group...
+                    .mean()  # ...and lastly average the scores across all groups giving equal weight to every
+                    .item()  # key, subject group.
                 )
 
+        # Loop to additionally compute per-subject/per-key breakdown metric scores, e.g. for only subject="algebra"
         for (key, subject, metric_name), ksm_group in data.groupby(["key", "subject", "metric_name"]):
-            current_metric_class = metric_group["metric_class_name"].unique().item()
+            current_metric_class = ksm_group["metric_class_name"].unique().item()
             current_metric = None
             # now loop over the self.metrics list and find the metric class that matches the current_metric_class
             for metric_class in self.metrics:
@@ -292,7 +293,7 @@ class EvaluationGenerator:
                     if not key
                     else f"{aggregator.name} {metric_name} - {key} - {subject}"
                 )
-                aggregated_results[save_string] = aggregator(metric_group, ["prompt"])["value"].mean().mean().item()
+                aggregated_results[save_string] = aggregator(ksm_group, ["prompt"])["value"].mean().mean().item()
 
         return aggregated_results
 

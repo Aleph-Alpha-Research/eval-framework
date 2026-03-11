@@ -29,9 +29,9 @@ class classproperty:
 class BaseMetric[Response](ABC):
     NAME: str
     KEYS: list[str] | None = None
-    # The aggregator determines how to aggregate the results of a metrics for a single
+    # The aggregator determines how to aggregate the results of a metric for a single
     # sample over multiple runs (LLM calls). We default to averaging and thus making
-    # macro averaging the overall computatiion default.
+    # macro averaging the overall computation default.
     AGGREGATORS: list[Aggregator] = []
 
     @classproperty

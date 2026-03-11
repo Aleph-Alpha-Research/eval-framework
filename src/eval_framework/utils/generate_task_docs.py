@@ -74,13 +74,17 @@ def generate_docs_for_task(
     try:
         num_fewshot = 1
         task = task_class(num_fewshot=num_fewshot)
-    except Exception:
+    except (TypeError, ValueError, AssertionError):
         try:
             num_fewshot = 0
             task = task_class(num_fewshot=num_fewshot)
-        except Exception as e:
-            print(f"Failed to instantiate task {task_name}: {e}")
-            return
+        except (TypeError, ValueError, AssertionError):
+            try:
+                task = task_class()
+                num_fewshot = task.num_fewshot
+            except Exception as e:
+                print(f"Failed to instantiate task {task_name}: {e}")
+                return
 
     with open(f"{output_docs_directory}/{task_name}.md", "w") as f:
         f.write(f"# {task_name}\n\n")
