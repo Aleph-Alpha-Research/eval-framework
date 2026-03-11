@@ -6,6 +6,7 @@ from typing import Any
 from eval_framework.metrics.completion.code_execution_pass_at_one import (
     CodeExecutionPassAtOne,
     CodeExecutionPassAtOneContext,
+    CodeExecutionPassAtOneWithCodebench,
 )
 from eval_framework.tasks.base import (
     RANDOM_SEED,
@@ -125,6 +126,7 @@ class BigCodeBench_OLMES(BigCodeBench):
     NAME = "BigCodeBench_OLMES"
     SAMPLE_SPLIT = "v0.1.2"
     FEWSHOT_SPLIT = "v0.1.2"
+    METRICS = [CodeExecutionPassAtOneWithCodebench]
 
     def __init__(self, num_fewshot: int = 5) -> None:
         # Default 3-shot; config can override. Enforce 3 for this variant.

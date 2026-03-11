@@ -26,17 +26,23 @@ _pools: dict[str, ContainerPoolManager] = {}
 _pools_lock = threading.Lock()
 
 
+# A ContainerPoolManager (from llm_sandbox) manages a pool of pre-warmed Docker containers
+# ready to execute sandboxed code. Spinning up a new container on every code execution is slow
+# and resource-intensive, so the pool keeps a configurable number of containers alive and idle
+# between uses. Each pool is scoped to a specific (image/dockerfile, packages) combination,
+# ensuring containers already have the right dependencies installed. The process-level singleton
+# cache in _pools means a given configuration only pays the startup cost once for the lifetime
+# of the process, and concurrent callers are protected by a lock.
 def get_or_create_pool(
     image: str | None = None,
     dockerfile: str | None = None,
     packages: list[str] | None = None,
     lang: str = "python",
     min_pool_size: int = 1,
-    max_pool_size: int = 2,
+    max_pool_size: int = 1,
 ) -> ContainerPoolManager:
     assert image or dockerfile, "Either image or dockerfile must be provided"
-    key = image or dockerfile
-    print(key)
+    key = (image or dockerfile, tuple(packages) if packages else None)
     with _pools_lock:
         if key not in _pools:
             pool = create_pool_manager(
@@ -93,14 +99,20 @@ def run_python_code(
     :param packages: List of python packages to install with pip.
     :return: The output of the code.
     """
-    resolved_image = image or DefaultImage.PYTHON if not dockerfile else image
+
+    # Only one of image or dockerfile should be provided.
+    # we fallback to the default python image if no dockerfile is provided.
+    resolved_image = image or (DefaultImage.PYTHON if not dockerfile else None)
     pool = get_or_create_pool(resolved_image, packages=packages, dockerfile=dockerfile)
     with SandboxSession(pool=pool, lang="python") as session:
         for host_file, docker_file in input_files or []:
             session.copy_to_runtime(host_file, docker_file)
 
         output = session.run(code, timeout=timeout)
-        return (output.stderr + output.stdout).strip()
+        out = (output.stderr + output.stdout).strip()
+        if isinstance(out, bytes):
+            out = out.decode("utf-8")
+        return out
 
 
 def unittest_merge_snippets(code: str, test_code: str) -> str:
@@ -130,12 +142,12 @@ class ExecutionResult(NamedTuple):
 def execute_python_code_with_tests(
     code: str,
     test_code: str,
+    dockerfile: str | None,
     package_mapping: dict[str, str | None],
     merge_code_fn: Callable[[str, str], str],
     image: str | None,
     timeout: int,
     parse_output_fn: Callable[[str], ExecutionResult],
-    dockerfile: str | None = None,
 ) -> ExecutionResult:
     """
     Executes the given code with test cases in a sandboxed environment.
@@ -154,9 +166,14 @@ def execute_python_code_with_tests(
     packages = get_external_dependencies(combined_code, package_mapping)
 
     # Run the combined code in the sandbox
-    output = run_python_code(combined_code, image=image, timeout=timeout, packages=packages, dockerfile=dockerfile)
-    if isinstance(output, bytes):
-        output = output.decode("utf-8")
+    output = run_python_code(
+        combined_code,
+        image=image,
+        dockerfile=dockerfile,
+        timeout=timeout,
+        packages=packages,
+    )
+
     # Parse the output to determine success
     return parse_output_fn(output)
 
@@ -228,7 +245,10 @@ def _parse_unittest_output(output: str) -> ExecutionResult:
         return ExecutionResult(False, f"Error during execution: {output}")
 
     # If we can't determine success/failure, return the raw output
-    return ExecutionResult(False, f"Could not determine test results, potentially due to timeout. Output: {output}")
+    return ExecutionResult(
+        False,
+        f"Could not determine test results, potentially due to timeout. Output: {output}",
+    )
 
 
 def get_external_dependencies(code: str, package_mapping: dict[str, str | None]) -> list[str]:
@@ -393,7 +413,12 @@ class Editor:
 
         return word
 
-    def __call__(self, sentence: str, character_edit_change: float, unmodifiable_words: list[str] | None = None) -> str:
+    def __call__(
+        self,
+        sentence: str,
+        character_edit_change: float,
+        unmodifiable_words: list[str] | None = None,
+    ) -> str:
         words, spaces, has_leading_space = self._split_sentence(sentence)
 
         num_characters = sum(map(len, words))
@@ -431,7 +456,10 @@ class HatPaperEditor:
         return self.rng.sample(indices, int(len(indices) * pct))
 
     def permute_chars_in_string(
-        self, input_text: str, permute_pct: float, unmodifiable_words: list[str] | None = None
+        self,
+        input_text: str,
+        permute_pct: float,
+        unmodifiable_words: list[str] | None = None,
     ) -> str:
         """
         Randomly permute permute_pct characters in the input string.
@@ -448,7 +476,10 @@ class HatPaperEditor:
         return "".join(permuted_text)
 
     def replace_chars_in_string(
-        self, input_text: str, replace_pct: float, unmodifiable_words: list[str] | None = None
+        self,
+        input_text: str,
+        replace_pct: float,
+        unmodifiable_words: list[str] | None = None,
     ) -> str:
         """
         Randomly replace replace_pct characters in the input string with replace_char.
@@ -463,7 +494,10 @@ class HatPaperEditor:
         return "".join(replaced_text)
 
     def delete_chars_in_string(
-        self, input_text: str, delete_pct: float, unmodifiable_words: list[str] | None = None
+        self,
+        input_text: str,
+        delete_pct: float,
+        unmodifiable_words: list[str] | None = None,
     ) -> str:
         """
         Randomly delete delete_pct characters in the input string.

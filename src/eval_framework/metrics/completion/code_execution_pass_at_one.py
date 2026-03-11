@@ -1,3 +1,4 @@
+import importlib.resources
 import traceback
 from collections.abc import Callable
 from typing import Self
@@ -5,8 +6,17 @@ from typing import Self
 from pydantic import Field
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.shared.types import BaseMetricContext, Completion, Error, extract_context_metric
-from eval_framework.tasks.utils import CallableSerializer, ExecutionResult, execute_python_code_with_tests
+from eval_framework.shared.types import (
+    BaseMetricContext,
+    Completion,
+    Error,
+    extract_context_metric,
+)
+from eval_framework.tasks.utils import (
+    CallableSerializer,
+    ExecutionResult,
+    execute_python_code_with_tests,
+)
 
 
 class CodeExecutionBaseContext(BaseMetricContext):
@@ -65,7 +75,14 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
 
     def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
+            return [
+                MetricResult(
+                    metric_name=self.NAME,
+                    value=None,
+                    higher_is_better=True,
+                    error=response.error,
+                )
+            ]
         try:
             context = extract_context_metric(response, CodeExecutionPassAtOneContext)
             parsed_context = RealtimeCodeExectionContext.from_context(context)
@@ -76,8 +93,19 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
         try:
             c, output = self._count_correct_samples(response.completion, parsed_context)
         except Exception as e:
-            error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=error)]
+            error = Error(
+                error_class=e.__class__.__name__,
+                message=str(e),
+                traceback=traceback.format_exc(),
+            )
+            return [
+                MetricResult(
+                    metric_name=self.NAME,
+                    value=None,
+                    higher_is_better=True,
+                    error=error,
+                )
+            ]
 
         pass_at_k_value = estimate_pass_at_k(n, c, self.k)
         return [
@@ -98,11 +126,32 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
             test_code=context.test_code,
             package_mapping=context.package_downloads,
             merge_code_fn=context.snippet_merge_fn,
-            # image=context.run_env,
-            image=None,
+            image=context.run_env,
             timeout=context.benchmark_timeout,
             parse_output_fn=context.output_parse_fn,
-            dockerfile="/home/prabhu.sivaprasad/tempcodes/eval-framework/Dockerfile_codebench",
+            dockerfile=None,
+        )
+        return (1 if result.success else 0), result.output
+
+
+class CodeExecutionPassAtOneWithCodebench(CodeExecutionPassAtOne):
+    NAME = "code-execution-pass@1-codebench"
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.dockerfile = str(importlib.resources.files("eval_framework.tasks") / "Dockerfile_codebench")
+
+    def _count_correct_samples(self, completion: str, context: RealtimeCodeExectionContext) -> tuple[int, str]:
+        dockerfile = str(importlib.resources.files("eval_framework.tasks") / "Dockerfile_codebench")
+        result = execute_python_code_with_tests(
+            code=completion,
+            test_code=context.test_code,
+            package_mapping={},  # the docker contains everything
+            merge_code_fn=context.snippet_merge_fn,
+            image=None,  # dockerfile provided
+            timeout=context.benchmark_timeout,
+            parse_output_fn=context.output_parse_fn,
+            dockerfile=dockerfile,
         )
         return (1 if result.success else 0), result.output
 

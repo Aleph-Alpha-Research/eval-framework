@@ -117,7 +117,7 @@ DEBUG=false
 | Dockerfile              | Purpose                                     |
 | ----------------------- | ------------------------------------------- |
 | `Dockerfile`            | Main evaluation framework with CUDA support |
-| `Dockerfile_codebench`  | Specialized for BigCodeBench coding tasks   |
+| `src/eval_framework/tasks/Dockerfile_codebench`  | Specialized for BigCodeBench coding tasks   |
 | `Dockerfile_Determined` | For Determined.ai cluster deployments       |
 
 
@@ -136,8 +136,8 @@ docker run -it --gpus all -v $(pwd):/workspace eval-framework
 #### Specialized Builds
 
 ```bash
-# BigCodeBench coding tasks
-docker build -f Dockerfile_codebench -t eval-framework-codebench .
+# BigCodeBench coding tasks (build context must be the tasks directory so COPY utils.py resolves)
+docker build -f src/eval_framework/tasks/Dockerfile_codebench -t eval-framework-codebench src/eval_framework/tasks/
 
 # Determined.ai cluster deployment
 docker build -f Dockerfile_Determined -t eval-framework-determined .
