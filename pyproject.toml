@@ -35,6 +35,7 @@ dependencies = [
   "mysql-connector-python>=9.0.0,<10", # required for sql-related tasks
   "psycopg2-binary>=2.9.9,<3", # required for sql-related tasks
   "sympy>=1.13.1,<2",
+  "llm-sandbox[docker]==0.3.37",
   "jsonlines>=4,<5",
   "lxml>=6,<7",
   "python-iso639>=2025.2.18",
@@ -44,7 +45,6 @@ dependencies = [
   # is a dependency of sympy, but not explicitly listed in the requirements.txt
   # https://github.com/sympy/sympy/blob/0204fa34e8f6f6f8ccb4de01209be9a2345c9d6e/doc/src/contributing/dependencies.md?plain=1#L125
   "antlr4-python3-runtime==4.11.0",
-  "llm-sandbox[docker]==0.3.37",
 ]
 
 [project.optional-dependencies]

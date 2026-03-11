@@ -26,16 +26,19 @@ _pools: dict[str, ContainerPoolManager] = {}
 _pools_lock = threading.Lock()
 
 
+# Process-level singleton cache: container startup is expensive, so pools of pre-warmed
+# containers are reused across the process lifetime. One pool is created per unique
+# (image/dockerfile, packages) combination; concurrent callers are protected by a lock.
 def get_or_create_pool(
     image: str | None = None,
     dockerfile: str | None = None,
     packages: list[str] | None = None,
     lang: str = "python",
     min_pool_size: int = 1,
-    max_pool_size: int = 2,
+    max_pool_size: int = 1,
 ) -> ContainerPoolManager:
     assert image or dockerfile, "Either image or dockerfile must be provided"
-    key = (image or dockerfile, tuple(packages) if packages is not None else None)
+    key = (image or dockerfile, tuple(packages) if packages else None)
     with _pools_lock:
         if key not in _pools:
             pool = create_pool_manager(
@@ -92,14 +95,17 @@ def run_python_code(
     :param packages: List of python packages to install with pip.
     :return: The output of the code.
     """
-    resolved_image = image or DefaultImage.PYTHON if not dockerfile else image
+    resolved_image = image or (DefaultImage.PYTHON if not dockerfile else None)
     pool = get_or_create_pool(resolved_image, packages=packages, dockerfile=dockerfile)
     with SandboxSession(pool=pool, lang="python") as session:
         for host_file, docker_file in input_files or []:
             session.copy_to_runtime(host_file, docker_file)
 
         output = session.run(code, timeout=timeout)
-        return (output.stderr + output.stdout).strip()
+        out = (output.stderr + output.stdout).strip()
+        if isinstance(out, bytes):
+            out = out.decode("utf-8")
+        return out
 
 
 def unittest_merge_snippets(code: str, test_code: str) -> str:
@@ -225,7 +231,10 @@ def _parse_unittest_output(output: str) -> ExecutionResult:
         return ExecutionResult(False, f"Error during execution: {output}")
 
     # If we can't determine success/failure, return the raw output
-    return ExecutionResult(False, f"Could not determine test results, potentially due to timeout. Output: {output}")
+    return ExecutionResult(
+        False,
+        f"Could not determine test results, potentially due to timeout. Output: {output}",
+    )
 
 
 def get_external_dependencies(code: str, package_mapping: dict[str, str | None]) -> list[str]:
@@ -390,7 +399,12 @@ class Editor:
 
         return word
 
-    def __call__(self, sentence: str, character_edit_change: float, unmodifiable_words: list[str] | None = None) -> str:
+    def __call__(
+        self,
+        sentence: str,
+        character_edit_change: float,
+        unmodifiable_words: list[str] | None = None,
+    ) -> str:
         words, spaces, has_leading_space = self._split_sentence(sentence)
 
         num_characters = sum(map(len, words))
@@ -428,7 +442,10 @@ class HatPaperEditor:
         return self.rng.sample(indices, int(len(indices) * pct))
 
     def permute_chars_in_string(
-        self, input_text: str, permute_pct: float, unmodifiable_words: list[str] | None = None
+        self,
+        input_text: str,
+        permute_pct: float,
+        unmodifiable_words: list[str] | None = None,
     ) -> str:
         """
         Randomly permute permute_pct characters in the input string.
@@ -445,7 +462,10 @@ class HatPaperEditor:
         return "".join(permuted_text)
 
     def replace_chars_in_string(
-        self, input_text: str, replace_pct: float, unmodifiable_words: list[str] | None = None
+        self,
+        input_text: str,
+        replace_pct: float,
+        unmodifiable_words: list[str] | None = None,
     ) -> str:
         """
         Randomly replace replace_pct characters in the input string with replace_char.
@@ -460,7 +480,10 @@ class HatPaperEditor:
         return "".join(replaced_text)
 
     def delete_chars_in_string(
-        self, input_text: str, delete_pct: float, unmodifiable_words: list[str] | None = None
+        self,
+        input_text: str,
+        delete_pct: float,
+        unmodifiable_words: list[str] | None = None,
     ) -> str:
         """
         Randomly delete delete_pct characters in the input string.
