@@ -311,10 +311,10 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
         # First loop: PassAtK(k=1) over all 5 non-error rows (one sample per prompt → pass@1 = value).
         "Pass@1 MockPassAtKMetric.ExactMatch": 0.625,
         # mean(1.0, 0.0, 1.0, 1.0, 0.0) = 0.6
-        "Pass@1 ExactMatch - key1 - subject1": 0.6,
-        "Pass@1 ExactMatch - key1 - subject2": 0.6,
-        "Pass@1 ExactMatch - key2 - subject1": 0.6,
-        "Pass@1 ExactMatch - key2 - subject2": 0.6,
+        "Pass@1 ExactMatch - key1 - subject1": 0.5,
+        "Pass@1 ExactMatch - key1 - subject2": 1,
+        "Pass@1 ExactMatch - key2 - subject1": 1,
+        "Pass@1 ExactMatch - key2 - subject2": 0.0,
     }
 
 

@@ -780,6 +780,7 @@ _OLMES_FEWSHOTS = [
 
 
 class MATHMinerva_OLMES(MATHMinerva):
+    NAME = "MATHMinerva_OLMES"
     METRICS = [MathMinervaCompletion, MathMinervaCompletionRelaxed]
 
     def __init__(self, num_fewshot: int = 4) -> None:
