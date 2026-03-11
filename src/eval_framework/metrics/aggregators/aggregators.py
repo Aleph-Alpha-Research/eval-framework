@@ -110,7 +110,13 @@ class IdentifierMean(Aggregator):
         return response_df.groupby(identifier_columns).agg(agg_dict).reset_index()
 
 
-class Identity(Aggregator):
+class Identity:
+    """No-op aggregator — returns the input unchanged.
+ 
+    Use for metrics where each row is already a final score and no cross-attempt
+    aggregation is needed (e.g. when ``num_samples=1``).
+    """
+ 
     def __init__(self) -> None:
         self.name = "Identity"
 
