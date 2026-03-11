@@ -80,6 +80,8 @@ class PassAtK(Aggregator):
         self.name = f"Pass@{k}"
 
     def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame:
+        # agg_dict decides how each column (`agg_dict` key) will get aggregated (`agg_dict` value).
+        # For the `value` column, we compute both the sum and the count, for all other columns we simply pick the first entry (as they are identical anyway).
         other_cols = [c for c in response_df.columns if c not in identifier_columns and c != "value"]
         agg_dict = {"value": ["sum", "count"], **{c: "first" for c in other_cols}}
         agg = response_df.groupby(identifier_columns).agg(agg_dict)
