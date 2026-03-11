@@ -193,6 +193,7 @@ class GSM8K_OLMES(GSM8K):
 
     def add_spaces_around_operators_no_regex(self, _str: str) -> str:
         """Add spacing around special operators if it does not exist"""
+        # TODO: This adds a space for negative numbers.
         operators = {"+", "-", "*", "/", "="}
         result: list[str] = []
         for char in _str:
