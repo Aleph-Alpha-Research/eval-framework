@@ -26,6 +26,9 @@ _pools: dict[str, ContainerPoolManager] = {}
 _pools_lock = threading.Lock()
 
 
+# Process-level singleton cache: container startup is expensive, so pools of pre-warmed
+# containers are reused across the process lifetime. One pool is created per unique
+# (image/dockerfile, packages) combination; concurrent callers are protected by a lock.
 def get_or_create_pool(
     image: str | None = None,
     dockerfile: str | None = None,
@@ -99,7 +102,10 @@ def run_python_code(
             session.copy_to_runtime(host_file, docker_file)
 
         output = session.run(code, timeout=timeout)
-        return (output.stderr + output.stdout).strip()
+        out = (output.stderr + output.stdout).strip()
+        if isinstance(out, bytes):
+            out = out.decode("utf-8")
+        return out
 
 
 def unittest_merge_snippets(code: str, test_code: str) -> str:
