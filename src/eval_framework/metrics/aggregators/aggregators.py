@@ -6,6 +6,35 @@ from scipy.special import comb
 
 
 class Aggregator(Protocol):
+    """Base class for metric aggregators.
+    
+    An aggregator collapses multiple evaluation rows for the same problem (i.e. prompt) into a
+    single score per problem. The input DataFrame has one row per (problem, attempt)
+    pair; the output has one row per problem with a new ``value``.
+    
+    Args:
+        response_df: DataFrame where each row is one evaluation attempt. Must contain
+            a ``value`` column (the per-attempt score) and all ``identifier_columns``.
+        identifier_columns: Columns that uniquely identify a problem (e.g. ``["prompt"]``).
+            Rows sharing the same identifier are different attempts at the same problem.
+            
+    Returns:
+        DataFrame with one row per unique problem and a ``value`` column holding
+        the aggregated score. All non-identifier, non-value columns are preserved
+        (typically via ``"first"``).
+        
+    Example input (``identifier_columns=["prompt"]``, 3 attempts per problem):
+    
+        | prompt         | value | subject |
+        |----------------|-------|---------|
+        | "What is 2+2?" |  1.0  | algebra |
+        | "What is 2+2?" |  1.0  | algebra |
+        | "What is 2+2?" |  0.0  | algebra |
+        | "Solve x^2=4"  |  0.0  | algebra |
+        | "Solve x^2=4"  |  1.0  | algebra |
+        | "Solve x^2=4"  |  0.0  | algebra |
+    """
+    
     name: str
 
     def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame: ...
