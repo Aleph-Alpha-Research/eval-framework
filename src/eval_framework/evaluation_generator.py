@@ -267,10 +267,10 @@ class EvaluationGenerator:
 
             for aggregator in current_metric.AGGREGATORS:
                 aggregated_results[f"{aggregator.name} {current_metric_class}.{metric_name}"] = (
-                    aggregator(metric_group, ["prompt"])
-                    .groupby(["key", "subject"])
-                    .agg({"value": "mean"})["value"]
-                    .mean()
+                    aggregator(metric_group, ["prompt"])  # Compute the aggregator, grouped by the prompt...
+                    .groupby(["key", "subject"])  # ... then group by key, subject...
+                    .agg({"value": "mean"})["value"]  # ...and average scores over each key, subject group...
+                    .mean()  # ...and lastly average the scores across all groups. This gives equal weight to every key, subject group.
                     .item()
                 )
 
