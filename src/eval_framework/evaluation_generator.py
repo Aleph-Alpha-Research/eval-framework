@@ -274,6 +274,7 @@ class EvaluationGenerator:
                     .item()
                 )
 
+        # Loop to additionally compute per-subject/per-key breakdown metric scores, e.g. for only subject="algebra" 
         for (key, subject, metric_name), ksm_group in data.groupby(["key", "subject", "metric_name"]):
             current_metric_class = metric_group["metric_class_name"].unique().item()
             current_metric = None
