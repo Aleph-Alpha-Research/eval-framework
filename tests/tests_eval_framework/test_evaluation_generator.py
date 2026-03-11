@@ -25,7 +25,7 @@ class MockMetric:
 
 class MockPassAtKMetric(BaseMetric):
     NAME = "ExactMatch"
-    AGGREGATORS = [PassAtK(k=1)]
+    AGGREGATORS = [PassAtK(k=1), PassAtK(k=2)]
 
     def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
         return []
@@ -271,6 +271,8 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
 
     responses = [
         ("subject1", "ExactMatch", "key1", "p1", 1.0, None),
+        ("subject1", "ExactMatch", "key1", "p1", 1.0, None),
+        ("subject1", "ExactMatch", "key1", "p1", 0.0, None),
         ("subject1", "ExactMatch", "key1", "p2", 0.0, None),
         ("subject1", "ExactMatch", "key2", "p3", 1.0, None),
         ("subject2", "ExactMatch", "key1", "p4", 1.0, None),
@@ -306,15 +308,30 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
         )
 
     aggregated = evaluator._aggregate_results_with_aggregators(results)
+    # The pass@1 DF that gets aggregated is:
+    # p1 s1 k1 2/3
+    # p2 s1 k1 0
+    # p3 s1 k2 1
+    # p4 s2 k1 1
+    # p5 s2 k2 0
 
+    # The pass@2 DF that gets aggregated is:
+    # p1 s1 k1 1
+    # p2 s1 k1 0
+    # p3 s1 k2 1
+    # p4 s2 k1 1
+    # p5 s2 k2 0
     assert aggregated == {
-        # First loop: PassAtK(k=1) over all 5 non-error rows (one sample per prompt → pass@1 = value).
-        "Pass@1 MockPassAtKMetric.ExactMatch": 0.625,
-        # mean(1.0, 0.0, 1.0, 1.0, 0.0) = 0.6
-        "Pass@1 ExactMatch - key1 - subject1": 0.5,
+        "Pass@1 MockPassAtKMetric.ExactMatch": pytest.approx(((2 / 3 + 0) / 2 + 1 + 1 + 0) / 4),
+        "Pass@1 ExactMatch - key1 - subject1": pytest.approx((2 / 3 + 0) / 2),
         "Pass@1 ExactMatch - key1 - subject2": 1,
         "Pass@1 ExactMatch - key2 - subject1": 1,
         "Pass@1 ExactMatch - key2 - subject2": 0.0,
+        "Pass@2 MockPassAtKMetric.ExactMatch": pytest.approx((1 / 2 + 1 + 1 + 0) / 4),
+        "Pass@2 ExactMatch - key1 - subject1": pytest.approx((1 + 0) / 2),
+        "Pass@2 ExactMatch - key1 - subject2": 1,
+        "Pass@2 ExactMatch - key2 - subject1": 1,
+        "Pass@2 ExactMatch - key2 - subject2": 0.0,
     }
 
 
@@ -332,11 +349,12 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
 
     responses = [
         ("subject1", "ExactMatch", "key1", "p1", 1.0, None),
+        ("subject1", "ExactMatch", "key1", "p1", 1.0, None),
         ("subject1", "ExactMatch", "key1", "p1", 0.0, None),
-        ("subject1", "ExactMatch", "key2", "p2", 1.0, None),
-        ("subject2", "ExactMatch", "key1", "p3", 1.0, None),
-        ("subject2", "ExactMatch", "key2", "p4", 0.0, None),
-        ("subject2", "ExactMatch", "key2", "p4", 1.0, None),
+        ("subject1", "ExactMatch", "key1", "p2", 0.0, None),
+        ("subject1", "ExactMatch", "key2", "p3", 1.0, None),
+        ("subject2", "ExactMatch", "key1", "p4", 1.0, None),
+        ("subject2", "ExactMatch", "key2", "p5", 0.0, None),
         (
             "subject2",
             "ExactMatch",
@@ -369,19 +387,18 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
 
     aggregated = evaluator._aggregate_results_with_aggregators(results)
 
-    # After IdentifierMean groups by prompt and averages:
-    #   p1 -> 0.5 (key1, subject1)
-    #   p2 -> 1.0 (key2, subject1)
-    #   p3 -> 1.0 (key1, subject2)
-    #   p4 -> 0.5 (key2, subject2)
+    # The aggregator with IdentifierMean DF that gets aggregated is:
+    # p1 s1 k1 2/3
+    # p2 s1 k1 0
+    # p3 s1 k2 1
+    # p4 s2 k1 1
+    # p5 s2 k2 0
     #
-    # First loop: groupby (key, subject) means → (0.5, 1.0, 1.0, 0.5) → overall mean = 0.75
-    # Second loop: aggregator applied to full metric_group → per-prompt means [0.5, 1.0, 1.0, 0.5]
-    #   .mean().mean() = 0.75 for every (key, subject) combination
+    # First loop: groupby (key, subject) means → (1/3, 1.0, 1.0, 0) → overall mean = 0.5833
     assert aggregated == {
-        "IdentifierMean MockIdentifierMeanMetric.ExactMatch": 0.75,
-        "IdentifierMean ExactMatch - key1 - subject1": 0.75,
-        "IdentifierMean ExactMatch - key2 - subject1": 0.75,
-        "IdentifierMean ExactMatch - key1 - subject2": 0.75,
-        "IdentifierMean ExactMatch - key2 - subject2": 0.75,
+        "IdentifierMean MockIdentifierMeanMetric.ExactMatch": pytest.approx(((2 / 3 + 0) / 2 + 1 + 1 + 0) / 4),
+        "IdentifierMean ExactMatch - key1 - subject1": pytest.approx((2 / 3 + 0) / 2),
+        "IdentifierMean ExactMatch - key2 - subject1": 1,
+        "IdentifierMean ExactMatch - key1 - subject2": 1,
+        "IdentifierMean ExactMatch - key2 - subject2": 0,
     }

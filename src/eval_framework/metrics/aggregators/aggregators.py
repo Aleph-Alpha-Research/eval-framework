@@ -50,6 +50,8 @@ def closed_form_passatk(n: int, c: int, k: int) -> float:
     are wrong; subtracting from 1 gives success probability. When n-c < k there aren't enough
     wrong samples to fill k slots, so the result is trivially 1.
     """
+    if n < k:
+        return 1.0 if c > 0 else 0.0
     if n - c < k:
         return 1.0
     return 1.0 - comb(n - c, k, exact=False) / comb(n, k, exact=False)
