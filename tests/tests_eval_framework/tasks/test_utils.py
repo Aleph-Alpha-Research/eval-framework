@@ -208,6 +208,7 @@ class TestAdd(unittest.TestCase):
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is True
@@ -226,6 +227,7 @@ class TestAdd(unittest.TestCase):
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is False
@@ -244,6 +246,7 @@ class TestAdd(unittest.TestCase):
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is False
@@ -262,6 +265,7 @@ class TestAdd(unittest.TestCase):
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is False
@@ -286,6 +290,7 @@ unittest.main()
                 image="python:3.12",
                 timeout=1,
                 parse_output_fn=_parse_unittest_output,
+                dockerfile=None,
             )
 
     def test_with_imports(self) -> None:
@@ -307,6 +312,7 @@ unittest.main()
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is True
@@ -337,6 +343,7 @@ unittest.main()
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is True
@@ -362,6 +369,7 @@ assert is_positive(0) == True  # This will fail
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is False
@@ -412,6 +420,7 @@ unittest.main()
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is True
@@ -430,6 +439,7 @@ unittest.main()
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is False
@@ -452,6 +462,7 @@ def function():
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is False
@@ -476,6 +487,7 @@ unittest.main()
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is True
@@ -494,6 +506,7 @@ unittest.main()
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
 
         assert result.success is False
@@ -553,6 +566,7 @@ unittest.main()
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
         assert result.success is True
         assert result.output == "All 2 tests completed successfully."
@@ -607,6 +621,7 @@ unittest.main()
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
         assert result.success is False
         assert "FAILED" in result.output or "Error during execution" in result.output
@@ -642,6 +657,7 @@ unittest.main()
             image="python:3.12",
             timeout=10,
             parse_output_fn=_parse_unittest_output,
+            dockerfile=None,
         )
         assert result.success is False
         assert "NameError" in result.output

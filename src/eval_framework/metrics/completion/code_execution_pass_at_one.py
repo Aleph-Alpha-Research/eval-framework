@@ -99,6 +99,7 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
             image=context.run_env,
             timeout=context.benchmark_timeout,
             parse_output_fn=context.output_parse_fn,
+            dockerfile=None,
         )
         return (1 if result.success else 0), result.output
 
