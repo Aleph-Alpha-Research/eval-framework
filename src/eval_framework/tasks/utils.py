@@ -35,9 +35,9 @@ def get_or_create_pool(
     max_pool_size: int = 2,
 ) -> ContainerPoolManager:
     assert image or dockerfile, "Either image or dockerfile must be provided"
-    key = (image or dockerfile, tuple(packages) if packages is not None else None)
+    key = image or dockerfile
+    print(key)
     with _pools_lock:
-        print("HERERERERERAASDKLJAHBSDLKJHALKSJDH")
         if key not in _pools:
             pool = create_pool_manager(
                 config=PoolConfig(min_pool_size=min_pool_size, max_pool_size=max_pool_size),
