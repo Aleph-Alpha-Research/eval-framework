@@ -6,7 +6,7 @@ DATASET_PATH = bigcode/bigcodebench
 SAMPLE_SPLIT = v0.1.2
 FEWSHOT_SPLIT = v0.1.2
 RESPONSE_TYPE = COMPLETION
-METRICS = [CodeExecutionPassAtOne]
+METRICS = [CodeExecutionPassAtOneWithCodebench]
 SUBJECTS = ['original', 'calibrated']
 LANGUAGE = <Language.ENG: 'English'>
 ````
