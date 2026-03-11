@@ -75,7 +75,7 @@ class PassAtK(Aggregator):
         | "Solve x^2=4"  | 0.667 | algebra |
     """
 
-    def __init__(self, k: int = 1):
+    def __init__(self, k: int = 1) -> None:
         self.k = k
         self.name = f"Pass@{k}"
 
