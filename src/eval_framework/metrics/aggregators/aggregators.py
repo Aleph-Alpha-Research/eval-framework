@@ -96,7 +96,19 @@ class PassAtK(Aggregator):
 
 
 class IdentifierMean(Aggregator):
-    """Computes the mean of the ``value`` column per problem group."""
+    """Computes the arithmetic mean of ``value`` across attempts per problem.
+    
+    Example (continuing from the Aggregator docstring example):
+    
+        "What is 2+2?": mean(1.0, 1.0, 0.0) = 0.667
+        "Solve x^2=4":  mean(0.0, 1.0, 0.0) = 0.333
+        
+        Output:
+        | prompt         | value | subject |
+        |----------------|-------|---------|
+        | "What is 2+2?" | 0.667 | algebra |
+        | "Solve x^2=4"  | 0.333 | algebra |
+    """
 
     def __init__(self) -> None:
         self.name = "IdentifierMean"
