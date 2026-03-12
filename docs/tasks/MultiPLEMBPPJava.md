@@ -1,7 +1,7 @@
-# MultiPLEMBPPPhp_OLMES
+# MultiPLEMBPPJava
 
 ````
-NAME = MultiPLEMBPPPhp_OLMES
+NAME = MultiPLEMBPPJava
 DATASET_PATH = nuprl/MultiPL-E
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = test
@@ -17,4 +17,4 @@ LANGUAGE = None
 
 - Link to dataset: [https://huggingface.co/datasets/nuprl/MultiPL-E](https://huggingface.co/datasets/nuprl/MultiPL-E)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "MultiPLEMBPPPhp_OLMES"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "MultiPLEMBPPJava"`.
