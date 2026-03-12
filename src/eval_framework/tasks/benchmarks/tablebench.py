@@ -102,11 +102,11 @@ class TableBench(BaseTask[tuple[str, str]]):
                     writer.writerows(table_dict["data"])
 
                 # Run the code in a Docker image, providing the table from the prompt
-                completion_text = run_python_code(
-                    code, image="amancevice/pandas:slim", input_files=[(filename, "/var/lib/pandas/table.csv")]
-                )
-
-                if "Error" in completion_text:
+                try:
+                    completion_text = run_python_code(
+                        code, image="amancevice/pandas:slim", input_files=[(filename, "/var/lib/pandas/table.csv")]
+                    )
+                except Exception:
                     return ""
 
         # Extract the answer, be it directly from the model or be it the result of the generated code
