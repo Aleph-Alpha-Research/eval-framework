@@ -12,7 +12,19 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
 
         # this will always be a list, if return is "" this will be an empty list
         code = response.completion
-        output = run_python_code(code, image="python:3.12-slim")
+        try:
+            output = run_python_code(code, image="python:3.12-slim")
+        except Exception as e:
+            import traceback
+
+            return [
+                MetricResult(
+                    metric_name=self.NAME,
+                    value=0.0,
+                    higher_is_better=True,
+                    error=Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc()),
+                )
+            ]
 
         # Split and filter out empty strings
         output_parts = [part for part in output.split() if part.strip()]
