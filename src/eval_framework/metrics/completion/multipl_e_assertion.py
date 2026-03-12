@@ -149,7 +149,7 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
         pool = get_or_create_pool(image=image, lang=sandbox_lang)
         with SandboxSession(pool=pool, lang=sandbox_lang) as session:
             result: Any = session.run(full_code, timeout=timeout)
-        return result.success(), result.stdout
+        return result.success(), result.stdout + result.stderr
 
     @staticmethod
     def _execute_via_custom_image(
@@ -201,6 +201,6 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
                     result: Any = session.execute_command(cmd)
                     if not result.success():
                         break
-                    output = result.stdout
+                    output = result.stdout + result.stderr
 
         return result.success(), output

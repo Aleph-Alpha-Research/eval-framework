@@ -32,7 +32,7 @@ MULTIPL_E_STOP_TOKENS: dict[str, list[str]] = {
 }
 
 
-class _BaseMPLE_OLMES(BaseTask[str]):
+class _BaseMPLE(BaseTask[str]):
     """Abstract base for all MultiPL-E OLMES per-language tasks.
 
     Subclasses must define:
@@ -94,11 +94,11 @@ class _BaseMPLE_OLMES(BaseTask[str]):
         return completion_text
 
 
-class _BaseMPLEHumanEval_OLMES(_BaseMPLE_OLMES):
+class _BaseMPLEHumanEval(_BaseMPLE):
     MULTIPL_E_DATASET_PREFIX = "humaneval"
 
 
-class MultiPLEHumanEvalCpp_OLMES(_BaseMPLEHumanEval_OLMES):
+class MultiPLEHumanEvalCpp(_BaseMPLEHumanEval):
     """MultiPL-E HumanEval in C++ — OLMES variant (nuprl/MultiPL-E, humaneval-cpp, test split).
 
     Corresponds to ``multipl_e_humaneval:cpp::olmo3:n32:v2`` in oe_eval.
@@ -109,7 +109,7 @@ class MultiPLEHumanEvalCpp_OLMES(_BaseMPLEHumanEval_OLMES):
     MULTIPL_E_LANGUAGE = "cpp"
 
 
-class MultiPLEHumanEvalJava_OLMES(_BaseMPLEHumanEval_OLMES):
+class MultiPLEHumanEvalJava(_BaseMPLEHumanEval):
     """MultiPL-E HumanEval in Java — OLMES variant (nuprl/MultiPL-E, humaneval-java, test split).
 
     Corresponds to ``multipl_e_humaneval:java::olmo3:n32:v2`` in oe_eval.
@@ -120,7 +120,7 @@ class MultiPLEHumanEvalJava_OLMES(_BaseMPLEHumanEval_OLMES):
     MULTIPL_E_LANGUAGE = "java"
 
 
-class MultiPLEHumanEvalJs_OLMES(_BaseMPLEHumanEval_OLMES):
+class MultiPLEHumanEvalJs(_BaseMPLEHumanEval):
     """MultiPL-E HumanEval in JavaScript — OLMES variant (nuprl/MultiPL-E, humaneval-js, test split).
 
     Corresponds to ``multipl_e_humaneval:js::olmo3:n32:v2`` in oe_eval.
@@ -131,7 +131,7 @@ class MultiPLEHumanEvalJs_OLMES(_BaseMPLEHumanEval_OLMES):
     MULTIPL_E_LANGUAGE = "js"
 
 
-class MultiPLEHumanEvalPhp_OLMES(_BaseMPLEHumanEval_OLMES):
+class MultiPLEHumanEvalPhp(_BaseMPLEHumanEval):
     """MultiPL-E HumanEval in PHP — OLMES variant (nuprl/MultiPL-E, humaneval-php, test split).
 
     Corresponds to ``multipl_e_humaneval:php::olmo3:n32:v2`` in oe_eval.
@@ -142,7 +142,7 @@ class MultiPLEHumanEvalPhp_OLMES(_BaseMPLEHumanEval_OLMES):
     MULTIPL_E_LANGUAGE = "php"
 
 
-class MultiPLEHumanEvalRs_OLMES(_BaseMPLEHumanEval_OLMES):
+class MultiPLEHumanEvalRs(_BaseMPLEHumanEval):
     """MultiPL-E HumanEval in Rust — OLMES variant (nuprl/MultiPL-E, humaneval-rs, test split).
 
     Corresponds to ``multipl_e_humaneval:rs::olmo3:n32:v2`` in oe_eval.
@@ -153,7 +153,7 @@ class MultiPLEHumanEvalRs_OLMES(_BaseMPLEHumanEval_OLMES):
     MULTIPL_E_LANGUAGE = "rs"
 
 
-class MultiPLEHumanEvalSh_OLMES(_BaseMPLEHumanEval_OLMES):
+class MultiPLEHumanEvalSh(_BaseMPLEHumanEval):
     """MultiPL-E HumanEval in Bash — OLMES variant (nuprl/MultiPL-E, humaneval-sh, test split).
 
     Corresponds to ``multipl_e_humaneval:sh::olmo3:n32:v2`` in oe_eval.
@@ -164,11 +164,11 @@ class MultiPLEHumanEvalSh_OLMES(_BaseMPLEHumanEval_OLMES):
     MULTIPL_E_LANGUAGE = "sh"
 
 
-class _BaseMPLEMBPP_OLMES(_BaseMPLE_OLMES):
+class _BaseMPLEMBPP(_BaseMPLE):
     MULTIPL_E_DATASET_PREFIX = "mbpp"
 
 
-class MultiPLEMBPPCpp_OLMES(_BaseMPLEMBPP_OLMES):
+class MultiPLEMBPPCpp(_BaseMPLEMBPP):
     """MultiPL-E MBPP in C++ — OLMES variant (nuprl/MultiPL-E, mbpp-cpp, test split).
 
     Corresponds to ``multipl_e_mbpp:cpp::olmo3:n32:v2`` in oe_eval.
@@ -179,7 +179,7 @@ class MultiPLEMBPPCpp_OLMES(_BaseMPLEMBPP_OLMES):
     MULTIPL_E_LANGUAGE = "cpp"
 
 
-class MultiPLEMBPPJava_OLMES(_BaseMPLEMBPP_OLMES):
+class MultiPLEMBPPJava(_BaseMPLEMBPP):
     """MultiPL-E MBPP in Java — OLMES variant (nuprl/MultiPL-E, mbpp-java, test split).
 
     Corresponds to ``multipl_e_mbpp:java::olmo3:n32:v2`` in oe_eval.
@@ -190,7 +190,7 @@ class MultiPLEMBPPJava_OLMES(_BaseMPLEMBPP_OLMES):
     MULTIPL_E_LANGUAGE = "java"
 
 
-class MultiPLEMBPPJs_OLMES(_BaseMPLEMBPP_OLMES):
+class MultiPLEMBPPJs(_BaseMPLEMBPP):
     """MultiPL-E MBPP in JavaScript — OLMES variant (nuprl/MultiPL-E, mbpp-js, test split).
 
     Corresponds to ``multipl_e_mbpp:js::olmo3:n32:v2`` in oe_eval.
@@ -201,7 +201,7 @@ class MultiPLEMBPPJs_OLMES(_BaseMPLEMBPP_OLMES):
     MULTIPL_E_LANGUAGE = "js"
 
 
-class MultiPLEMBPPPhp_OLMES(_BaseMPLEMBPP_OLMES):
+class MultiPLEMBPPPhp(_BaseMPLEMBPP):
     """MultiPL-E MBPP in PHP — OLMES variant (nuprl/MultiPL-E, mbpp-php, test split).
 
     Corresponds to ``multipl_e_mbpp:php::olmo3:n32:v2`` in oe_eval.
@@ -212,7 +212,7 @@ class MultiPLEMBPPPhp_OLMES(_BaseMPLEMBPP_OLMES):
     MULTIPL_E_LANGUAGE = "php"
 
 
-class MultiPLEMBPPRs_OLMES(_BaseMPLEMBPP_OLMES):
+class MultiPLEMBPPRs(_BaseMPLEMBPP):
     """MultiPL-E MBPP in Rust — OLMES variant (nuprl/MultiPL-E, mbpp-rs, test split).
 
     Corresponds to ``multipl_e_mbpp:rs::olmo3:n32:v2`` in oe_eval.
@@ -223,7 +223,7 @@ class MultiPLEMBPPRs_OLMES(_BaseMPLEMBPP_OLMES):
     MULTIPL_E_LANGUAGE = "rs"
 
 
-class MultiPLEMBPPSh_OLMES(_BaseMPLEMBPP_OLMES):
+class MultiPLEMBPPSh(_BaseMPLEMBPP):
     """MultiPL-E MBPP in Bash — OLMES variant (nuprl/MultiPL-E, mbpp-sh, test split).
 
     Corresponds to ``multipl_e_mbpp:sh::olmo3:n32:v2`` in oe_eval.
