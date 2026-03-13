@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 RANDOM_SEED = 42  # hacky way to get around circular import
 redis_warning_printed = False
 
-_pools: dict[str, ContainerPoolManager] = {}
+_pools: dict[tuple[str | None, tuple[str, ...] | None], ContainerPoolManager] = {}
 _pools_lock = threading.Lock()
 
 
