@@ -66,7 +66,7 @@ class PartialEvalAccuracy(BaseMetric[Loglikelihood]):
 
     NAME = "Partial Evaluation Accuracy"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._pending: dict[int, tuple[float, bool]] = {}
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
