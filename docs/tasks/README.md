@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 161**
+**Total number of tasks: 162**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -93,6 +93,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [MATHMinerva](MATHMinerva.md)
 - [MATHMinervaBPB](MATHMinervaBPB.md)
 - [MATHMinervaEvalHarness](MATHMinervaEvalHarness.md)
+- [MATHMinerva_OLMES](MATHMinerva_OLMES.md)
 - [MBPP](MBPP.md)
 - [MBPPBPB](MBPPBPB.md)
 - [MBPP_OLMES](MBPP_OLMES.md)

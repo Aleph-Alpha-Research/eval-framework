@@ -3,6 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from eval_framework.metrics.aggregators.aggregators import Aggregator
 from eval_framework.shared.types import Error
 
 
@@ -28,6 +29,10 @@ class classproperty:
 class BaseMetric[Response](ABC):
     NAME: str
     KEYS: list[str] | None = None
+    # The aggregator determines how to aggregate the results of a metric for a single
+    # sample over multiple runs (LLM calls). We default to averaging and thus making
+    # macro averaging the overall computation default.
+    AGGREGATORS: list[Aggregator] = []
 
     @classproperty
     def NAMES(cls) -> list[str]:
