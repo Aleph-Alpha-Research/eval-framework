@@ -1,7 +1,6 @@
 from typing import Any
 
-from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
-from eval_framework.metrics.completion.f1 import F1
+from eval_framework.metrics.completion.drop_completion import DropF1ExactMatch, DropMetricContext
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
@@ -17,7 +16,7 @@ class NaturalQsOpen(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [AccuracyCompletion, F1]
+    METRICS = [DropF1ExactMatch]
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
     LANGUAGE = Language.ENG
@@ -28,7 +27,7 @@ class NaturalQsOpen(BaseTask[str]):
         self.max_tokens = 50
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return f"Question: {item.get('question', '')}"
+        return f"Question: {item.get('question', '')}\n"
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "Answer:"
@@ -37,9 +36,27 @@ class NaturalQsOpen(BaseTask[str]):
         return [f" {a}" for a in item.get("answer", [])]
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        ground_truth = self._get_ground_truth(item)
-        assert ground_truth is not None
-        return f"{self._get_cue_text(item)}{ground_truth}"
+        ground_truths = self._get_ground_truth(item)
+        assert ground_truths is not None
+
+        # Extra processing step, since for this task, the ground truth can be a list of strings.
+        # Following, OLMES, we join the targets with a comma.
+        # TODO: Explore other ways (e.g. select a single target). The correct approach depends on the question.
+        # E.g. "how many seasons of vampire diaries r there" [ "eight", "8" ] should perhaps select just one.
+        # but "what are the three fifty shades of grey books"
+        # [ "Fifty Shades of Grey", "Fifty Shades Darker", "Fifty Shades Freed" ]
+        # would be better with joining.
+        target = ",".join(ground_truths)  # only comma, since the targets are already space-separated.
+
+        assert isinstance(target, str)
+        return f"{self._get_cue_text(item)}{target}"
+
+    def _get_context(self, item: dict[str, Any]) -> DropMetricContext | None:
+        # DROP metric expects list of lists of strings.
+        answers = item.get("answer", [])
+        if not answers:
+            return None
+        return DropMetricContext(answer_tuples=[[a] for a in answers])
 
 
 class NaturalQsOpenCloze(BaseTask[str]):
