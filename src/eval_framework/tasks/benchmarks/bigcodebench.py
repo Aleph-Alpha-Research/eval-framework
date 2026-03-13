@@ -131,6 +131,20 @@ class BigCodeBench_OLMES(BigCodeBench):
     def __init__(self, num_fewshot: int = 5) -> None:
         # Default 3-shot; config can override. Enforce 3 for this variant.
         super().__init__(num_fewshot=3)
+        self.stop_sequences = [
+            "<|endoftext|>",
+            "<|endofmask|>",
+            "</s>",
+            "\nif __name__",
+            "\ndef main(",
+            "\nprint(",
+            "\ndef ",
+            "\nclass ",
+            "\nimport ",
+            "\nfrom ",
+            "\nassert ",
+            "\nPlease",
+        ]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         # Match oe_eval doc_to_text for prompt_variant "complete".
@@ -146,6 +160,18 @@ class BigCodeBench_OLMES(BigCodeBench):
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         # Olmes does not use a cue text
         return ""
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        if sample is not None and sample.context is not None:
+            assert isinstance(sample.context, CodeExecutionPassAtOneContext), "Expected CodeExecutionPassAtOneContext"
+            processed_text = (
+                sample.context.code_prompt if sample.context is not None else ""
+            ) + completion_text.replace("```python", "").replace("```", "")
+
+        else:
+            processed_text = extract_executable_code(completion_text)
+
+        return processed_text
 
 
 class BigCodeBenchInstruct(BigCodeBench):
