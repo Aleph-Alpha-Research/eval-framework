@@ -6,7 +6,7 @@ DATASET_PATH = google-research-datasets/nq_open
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = train
 RESPONSE_TYPE = COMPLETION
-METRICS = [AccuracyCompletion, F1]
+METRICS = [DropF1ExactMatch]
 SUBJECTS = ['no_subject']
 LANGUAGE = <Language.ENG: 'English'>
 ````
