@@ -138,6 +138,16 @@ class DropCompletion_OLMES(DropCompletion):
         super().__init__(num_fewshot)
         self.max_tokens = 100
 
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+        # TODO: Do we want this same prompt in the non_OLMES variant?
+        context = (
+            "The following are reading comprehension questions, where the answer to each question is either a "
+            "segment of text from the corresponding passage, a number, or a date (containing any of the date, "
+            "month, and/or year components). Some questions may require you to pull together information pieces "
+            "from the passage and reason over them."
+        )
+        return context
+
 
 class DropMC(BaseTask[str]):
     """Multiple-choice variant using allenai/drop-gen2mc (passage_original, question_original, choices, answerKey)."""

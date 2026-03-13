@@ -9,7 +9,7 @@ from huggingface_hub import HfApi
 from huggingface_hub.errors import RevisionNotFoundError
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
-from eval_framework.metrics.completion.f1 import F1
+from eval_framework.metrics.completion.f1 import F1, F1SquadNormalized
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
 
@@ -234,3 +234,41 @@ class SQUAD(SQUAD2):
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["answers"]["text"]
+
+
+class SQuAD_OLMES(SQUAD):
+    """SQuAD variant matching OLMES implementation."""
+
+    NAME = "SQuAD_OLMES"
+    SAMPLE_SPLIT = "validation"
+    FEWSHOT_SPLIT = "train"
+    PERTURBATION_UNMODIFIABLE_WORDS = ["Title", "Background", "Question", "Answer"]
+    METRICS = [F1SquadNormalized]
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.stop_sequences = ["Title:", "\n\n"]
+        self.max_tokens = 50
+
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+        return (
+            "The following are reading comprehension questions, "
+            "where the answer to each question is a segment of text from the corresponding background text."
+        )
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return "Answer:"
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        # For fewshot, we only need to return the first ground truth.
+        target = self._get_ground_truth(item)[0]
+        assert target is not None
+        assert isinstance(target, str)
+        return f"{self._get_cue_text(item)}{target}"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return f"Title: {item['title']}\nBackground: {item['context']}\nQuestion: {item['question']}\n"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+        # SQuAD might have multiple ground truths, so we return a list.
+        return [f" {a}" for a in item["answers"]["text"]]
