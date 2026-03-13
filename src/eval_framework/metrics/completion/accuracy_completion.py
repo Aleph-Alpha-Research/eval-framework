@@ -109,6 +109,8 @@ def exact_match_hf_evaluate(
         predictions = np.char.translate(predictions, table=repl_table)  # type: ignore
         references = np.char.translate(references, table=repl_table)  # type: ignore
 
+    # NOTE: For multiple ground-truths OLMES returns the mean over their scores. The max over
+    # it would be more meaningful, but we leave it here for parity.
     score_list = predictions == references
 
     return {"exact_match": np.mean(score_list)}
