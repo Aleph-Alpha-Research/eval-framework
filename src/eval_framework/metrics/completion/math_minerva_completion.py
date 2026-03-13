@@ -2,6 +2,7 @@
 Minerva-style MATH completion metric: exact_match and exact_match_flex.
 """
 
+from eval_framework.metrics.aggregators.aggregators import PassAtK
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.metrics.completion.minerva_math_utils import (
     extract_answers,
@@ -19,6 +20,7 @@ class MathMinervaCompletion(BaseMetric[Completion]):
     """
 
     NAME = "Math Minerva Completion"
+    AGGREGATORS = [PassAtK()]
 
     def __init__(
         self,

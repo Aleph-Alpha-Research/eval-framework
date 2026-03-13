@@ -69,6 +69,7 @@ SPECIAL_ARGS: dict[str, dict[str, Any]] = {
     "MATHMinervaBPB": {"num_fewshot": 0},
     "MATHMinervaEvalHarness": {"num_fewshot": 0},
     "MATH500Minerva": {"num_fewshot": 0},
+    "MATHMinerva_OLMES": {"num_fewshot": 4},
     "MATHLvl5": {"num_fewshot": 1},
     "MATH500": {"num_fewshot": 1},
     "MBPP": {"num_fewshot": 1},

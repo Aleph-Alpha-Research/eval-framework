@@ -160,6 +160,8 @@
     "MATHMinervaBPB.Llama3Formatter": "3835016020dfd00a5125890a0542fca0",
     "MATHMinervaEvalHarness.ConcatFormatter": "44854feb4ce0835f908217570777fcde",
     "MATHMinervaEvalHarness.Llama3Formatter": "fe79ac3a345d7a03a532a619047c4dfd",
+    "MATHMinerva_OLMES.ConcatFormatter": "d5546aaa75084c9fe0521143eaa51e99",
+    "MATHMinerva_OLMES.Llama3Formatter": "0522fd0ac3f9e5c462029112884ce308",
     "MBPP.ConcatFormatter": "47d4cc9ce93b26daab05e7af058ea3e7",
     "MBPP.Llama3Formatter": "259ba4fc8290421f3e0b0c19e220896e",
     "MBPPBPB.ConcatFormatter": "3d8536c15549c6c30d6c7154110456c4",
