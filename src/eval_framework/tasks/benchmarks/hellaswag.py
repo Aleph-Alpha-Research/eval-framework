@@ -48,6 +48,11 @@ class HELLASWAG(BaseTask[str]):
         return [f" {self._preprocess(ending)}" for ending in item["endings"]]
 
 
+class HELLASWAG_OLMES(HELLASWAG):
+    NAME = "HellaSwag_OLMES"
+    SAMPLE_SPLIT = "train"
+
+
 class HELLASWAG_IDK(HELLASWAG):
     NAME = "HellaSwag_IDK"
     METRICS = [
