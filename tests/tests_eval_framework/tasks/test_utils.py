@@ -300,7 +300,8 @@ unittest.main()
                 dockerfile=None,
             )
 
-    def test_stdlib_imports_work(self) -> None:
+    def test_with_imports(self) -> None:
+        # Code that uses imports
         code = "import math\ndef circle_area(r): return math.pi * r * r"
         test_code = """
 import unittest

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 RANDOM_SEED = 42  # hacky way to get around circular import
 redis_warning_printed = False
 
-_pools: dict[str, ContainerPoolManager] = {}
+_pools: dict[tuple[str | None, tuple[str, ...] | None], ContainerPoolManager] = {}
 _pools_lock = threading.Lock()
 
 
@@ -53,8 +53,8 @@ def get_or_create_pool(
                 keep_template=True,
                 libraries=packages,
             )
-            _pools[key] = pool  # type: ignore[index]
-        return _pools[key]  # type: ignore[index]
+            _pools[key] = pool
+        return _pools[key]
 
 
 def close_pools() -> None:
@@ -94,6 +94,7 @@ def run_python_code(
     Run code in a sandboxed environment.
     :param code: The code to run.
     :param image: Docker image to use.
+    :param dockerfile: Dockerfile to use.
     :param input_files: pairs of host and docker paths, host files will be copied to the docker.
     :param timeout: Timeout in seconds, 0 if no timeout.
     :param packages: List of python packages to install with pip.
