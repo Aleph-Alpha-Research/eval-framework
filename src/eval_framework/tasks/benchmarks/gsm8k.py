@@ -1,8 +1,11 @@
+import logging
 import re
 from typing import Any
 
-from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion, AccuracyCompletionOLMES
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+
+logger = logging.getLogger(__name__)
 
 ANS_RE = re.compile(r"#### (\-?[0-9\.\,]+)")
 
@@ -149,3 +152,67 @@ class GSM8K(GSM8KEvalHarness):
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         """Override to use predefined fewshot examples instead of sampling from dataset"""
         return FEWSHOT_ITEMS[: self.num_fewshot]
+
+
+class GSM8K_OLMES(GSM8K):
+    NAME = "GSM8K_OLMES"
+    METRICS = [AccuracyCompletionOLMES]
+
+    def __init__(self, num_fewshot: int = 8) -> None:
+        if num_fewshot != 8:
+            logger.warning(f"GSM8K_OLMES supports a fixed num_fewshot of 8. Got {num_fewshot}")
+        super().__init__(8)
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str:
+        return self._clean_short_answer(item["answer"])
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return self.normalize_answer_str(item)
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return f"Question: {item['question']}\nAnswer:"
+
+    def normalize_answer_str(self, item: dict[str, Any]) -> str:
+        """
+        Rephrases the answer to a more natural-appearing string to improve bpb calculation (according to Olmes)
+
+        TODO: Verify the necessity of this operation.
+        """
+        answer = item["answer"]
+        short_answer = self._clean_short_answer(answer.split("####")[-1].strip())
+        answer = re.sub(r"<<.*?>>", "", answer)
+        answer = re.sub(r"\s+", " ", answer).strip()
+        answer = re.split(r"####", answer)[0]
+        answer = answer[0].capitalize() + answer[1:] if answer else answer
+        answer = answer.strip()
+        if not answer.endswith("."):
+            answer += "."
+        answer = answer + f" So the answer is {short_answer}."
+        answer = self.add_spaces_around_operators_no_regex(answer)
+        return " " + answer  # The olmes formatting requires a space after Answer:
+
+    def add_spaces_around_operators_no_regex(self, _str: str) -> str:
+        """Add spacing around special operators if it does not exist"""
+        # TODO: This adds a space for negative numbers.
+        operators = {"+", "-", "*", "/", "="}
+        result: list[str] = []
+        for char in _str:
+            if char in operators:
+                if result and result[-1] != " ":
+                    result.append(" ")
+                result.append(char)
+                result.append(" ")
+            else:
+                result.append(char)
+
+        # Join the list and replace double spaces with single spaces
+        return "".join(result).replace("  ", " ")
+
+    def _clean_short_answer(self, continuation: str) -> str:
+        # Replace commas
+        output = re.sub(r"(\d),(\d)", r"\1\2", continuation)
+        numbers = re.findall(r"[-+]?\d*\.\d+|\d+", output)
+        return numbers[-1] if numbers else output
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        return self._clean_short_answer(completion_text)

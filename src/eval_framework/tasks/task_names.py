@@ -52,6 +52,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.gpqa.GPQA_IDK")
     register_lazy_task("eval_framework.tasks.benchmarks.gsm8k.GSM8K")
     register_lazy_task("eval_framework.tasks.benchmarks.gsm8k.GSM8KEvalHarness")
+    register_lazy_task("eval_framework.tasks.benchmarks.gsm8k.GSM8K_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.GSM8KReasoning")
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.GSM8K_EU20_DE")
     register_lazy_task("eval_framework.tasks.benchmarks.opengptx_eu20.GSM8K_EU20_FR")
