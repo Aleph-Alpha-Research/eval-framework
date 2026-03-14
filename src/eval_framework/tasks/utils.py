@@ -94,6 +94,7 @@ def run_python_code(
     Run code in a sandboxed environment.
     :param code: The code to run.
     :param image: Docker image to use.
+    :param dockerfile: Dockerfile to use.
     :param input_files: pairs of host and docker paths, host files will be copied to the docker.
     :param timeout: Timeout in seconds, 0 if no timeout.
     :param packages: List of python packages to install with pip.
