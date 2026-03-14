@@ -53,8 +53,8 @@ def get_or_create_pool(
                 keep_template=True,
                 libraries=packages,
             )
-            _pools[key] = pool  # type: ignore[index]
-        return _pools[key]  # type: ignore[index]
+            _pools[key] = pool
+        return _pools[key]
 
 
 def close_pools() -> None:
