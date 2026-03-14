@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 163**
+**Total number of tasks: 164**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -28,6 +28,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [BigCodeBenchHard](BigCodeBenchHard.md)
 - [BigCodeBenchHardInstruct](BigCodeBenchHardInstruct.md)
 - [BigCodeBenchInstruct](BigCodeBenchInstruct.md)
+- [BigCodeBench_OLMES](BigCodeBench_OLMES.md)
 - [CASEHOLD](CASEHOLD.md)
 - [COPA](COPA.md)
 - [COPAEvalHarness](COPAEvalHarness.md)
