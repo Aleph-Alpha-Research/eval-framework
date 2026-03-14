@@ -12,6 +12,20 @@
 
 ### Bug Fixes
 
+## [0.2.15](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.14...v0.2.15) (2026-03-14)
+
+
+### Features
+
+* adding pool to sandbox ([#194](https://github.com/Aleph-Alpha-Research/eval-framework/issues/194)) ([fd87fd3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/fd87fd337259fd8e2d9a03da1799d92d47f9897c))
+* Adds GSM8k with Olmes parity ([#191](https://github.com/Aleph-Alpha-Research/eval-framework/issues/191)) ([aa86280](https://github.com/Aleph-Alpha-Research/eval-framework/commit/aa8628053b716735f6b8fe27a633ef64f7519ba5))
+* Feature to have metric aggregators like Pass@K  ([#190](https://github.com/Aleph-Alpha-Research/eval-framework/issues/190)) ([27319ed](https://github.com/Aleph-Alpha-Research/eval-framework/commit/27319edea46b2e4cbd0cdc43fa2cc5569f03f504))
+
+
+### Bug Fixes
+
+* OLMES matching effort (MC Task Suite) ([#182](https://github.com/Aleph-Alpha-Research/eval-framework/issues/182)) ([290dbc9](https://github.com/Aleph-Alpha-Research/eval-framework/commit/290dbc915285cef520b0483839b841a9c4bda458))
+
 ## [0.2.14](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.13...v0.2.14) (2026-03-09)
 
 
