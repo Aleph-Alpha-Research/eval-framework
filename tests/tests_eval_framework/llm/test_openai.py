@@ -156,7 +156,7 @@ def test_generate_from_messages_validates_temperature_and_top_p(mocker: MockerFi
 
 
 def test_construct_messages_correctly_formats_message_roles() -> None:
-    model = OpenAIModel.__new__(OpenAIModel)
+    model = OpenAIModel()
 
     converted = model._construct_messages(
         [
