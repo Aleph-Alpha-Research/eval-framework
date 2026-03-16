@@ -6,6 +6,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType
 from eval_framework.tasks.benchmarks.mmlu import MMLU_SUBJECTS
 from eval_framework.tasks.utils import get_n_letters
@@ -473,7 +474,7 @@ class GlobalMMLU(BaseTask[tuple[str, str]]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "dev"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = list(product(GLOBAL_MMLU_LANGUAGES, MMLU_SUBJECTS))
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"] + get_n_letters(4)
     LANGUAGE = {
