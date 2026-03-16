@@ -153,3 +153,22 @@ def test_generate_from_messages_validates_temperature_and_top_p(mocker: MockerFi
         model.generate_from_messages([], top_p=1.5)
     with pytest.raises(AssertionError, match="top_p"):
         model.generate_from_messages([], top_p=-1.0)
+
+
+def test_construct_messages_correctly_formats_message_roles() -> None:
+    model = OpenAIModel.__new__(OpenAIModel)
+
+    converted = model._construct_messages(
+        [
+            Message(role=Role.SYSTEM, content="system prompt"),
+            Message(role=Role.USER, content="user prompt"),
+            Message(role=Role.ASSISTANT, content="assistant prompt"),
+            Message(content="no role prompt"),
+        ]
+    )
+
+    assert len(converted) == 4
+    assert converted[0]["role"] == "system"
+    assert converted[1]["role"] == "user"
+    assert converted[2]["role"] == "assistant"
+    assert converted[3]["role"] == "assistant"
