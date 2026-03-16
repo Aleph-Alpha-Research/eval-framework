@@ -24,6 +24,7 @@ from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFForm
 
 logger = logging.getLogger(__name__)
 
+
 class OpenAIModel(BaseLLM):
     """
     LLM wrapper for OpenAI API providing text/chat completions and log-probability evaluation output.
@@ -109,6 +110,7 @@ class OpenAIModel(BaseLLM):
                 return ChatCompletionUserMessageParam(role="user", content=message.content)
             else:
                 return ChatCompletionAssistantMessageParam(role="assistant", content=message.content)
+
         return [construct_chat_completion_obj(m) for m in messages]
 
     def generate_from_messages(
