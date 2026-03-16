@@ -45,6 +45,8 @@ dependencies = [
   # is a dependency of sympy, but not explicitly listed in the requirements.txt
   # https://github.com/sympy/sympy/blob/0204fa34e8f6f6f8ccb4de01209be9a2345c9d6e/doc/src/contributing/dependencies.md?plain=1#L125
   "antlr4-python3-runtime==4.11.0",
+  "scipy>=1.14.0,<2",  # required for the aggregation of pass@k metrics
+
 ]
 
 [project.optional-dependencies]
@@ -105,7 +107,6 @@ dev = [
   "types-requests>=2.32.0.20250328,<3",
   "plotly>=5.24.1,<6",
   "ruff>=0.12.8",
-  "scipy>=1.14.0,<2",  # for tests comparing our Hungarian implementation to scipy
 ]
 flash-attn = [
   "flash-attn>=2.7.2.post1,<2.8",
