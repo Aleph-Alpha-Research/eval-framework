@@ -168,7 +168,7 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
         Each invocation gets a unique UUID-named directory inside the container so that
         concurrent calls never clobber each other's source files or build artefacts.
 
-        extra_host_files maps container filename → host path for any additional files that
+        extra_host_files maps container filename -> host path for any additional files that
         should be copied into container_dir before the commands run (e.g. dependency jars).
         """
         run_id = uuid.uuid4().hex
@@ -199,8 +199,8 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
                 for cmd_template in cfg.commands:
                     cmd = cmd_template.format(code_file=code_file, container_dir=container_dir)
                     result: Any = session.execute_command(cmd)
+                    output = result.stdout + result.stderr
                     if not result.success():
                         break
-                    output = result.stdout + result.stderr
 
         return result.success(), output

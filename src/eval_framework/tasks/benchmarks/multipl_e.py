@@ -23,12 +23,12 @@ from eval_framework.metrics.completion.multipl_e_assertion import MultiPLECodeAs
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, ResponseType, Sample
 
 MULTIPL_E_STOP_TOKENS: dict[str, list[str]] = {
-    "cpp": ["\n}"],
-    "java": ["\n }\n", "}\n}", "}\n\n"],
+    "cpp": ["\n}", "}\n//"],
+    "java": ["\n    }\n", "}\n}", "}\n\n", "\n    public static void main", "\n    // Write"],
     "js": ["\nfunction ", "\n/*", "\n//", "\nconsole.log"],
     "php": ["\nfunction", "\n?>", "\n//", "\n#"],
     "rs": ["\n}"],
-    "sh": ["\n}"],
+    "sh": ["}\n", "\n}"],
 }
 
 
