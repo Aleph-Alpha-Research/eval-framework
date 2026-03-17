@@ -87,7 +87,7 @@ class PartialEvalAccuracy(BaseMetric[Loglikelihood]):
             # Verify that only one of the samples is correct
             assert other_is_correct != is_correct, "Both samples cannot be correct or incorrect at the same time"
 
-            if logprob > other_logprob:
+            accuracy = is_correct if logprob > other_logprob else other_is_correct
                 # Prefer current option over the other
                 accuracy = is_correct  # 1 if current option is indeed ground_truth, 0 otherwise
             else:
