@@ -6,7 +6,7 @@ DATASET_PATH = LeoLM/HellaSwag_de
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = train
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['no_subject']
 LANGUAGE = <Language.DEU: 'German'>
 ````
