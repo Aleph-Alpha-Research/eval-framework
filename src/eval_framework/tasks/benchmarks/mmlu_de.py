@@ -4,6 +4,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
 from eval_framework.tasks.utils import get_n_letters
 
@@ -77,7 +78,7 @@ class MMLU_DE(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = list(MMLU_SUBJECTS_TRANSLATION.keys())
     PERTURBATION_UNMODIFIABLE_WORDS = ["Frage"] + get_n_letters(4)
     LANGUAGE = Language.DEU
