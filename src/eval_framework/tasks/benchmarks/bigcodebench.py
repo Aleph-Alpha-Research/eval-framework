@@ -128,7 +128,7 @@ class BigCodeBench_OLMES(BigCodeBench):
     FEWSHOT_SPLIT = "v0.1.2"
     METRICS = [CodeExecutionPassAtOneWithCodebench]
 
-    def __init__(self, num_fewshot: int = 5) -> None:
+    def __init__(self, num_fewshot: int = 3) -> None:
         # Default 3-shot; config can override. Enforce 3 for this variant.
         super().__init__(num_fewshot=3)
         self.stop_sequences = [

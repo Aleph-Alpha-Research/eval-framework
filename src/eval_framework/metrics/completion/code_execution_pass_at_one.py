@@ -143,7 +143,6 @@ class CodeExecutionPassAtOneWithCodebench(CodeExecutionPassAtOne):
         self.dockerfile = str(importlib.resources.files("eval_framework.tasks") / "Dockerfile_codebench")
 
     def _count_correct_samples(self, completion: str, context: RealtimeCodeExectionContext) -> tuple[int, str]:
-        dockerfile = str(importlib.resources.files("eval_framework.tasks") / "Dockerfile_codebench")
         result = execute_python_code_with_tests(
             code=completion,
             test_code=context.test_code,
@@ -152,7 +151,7 @@ class CodeExecutionPassAtOneWithCodebench(CodeExecutionPassAtOne):
             image=None,  # dockerfile provided
             timeout=context.benchmark_timeout,
             parse_output_fn=context.output_parse_fn,
-            dockerfile=dockerfile,
+            dockerfile=self.dockerfile,
         )
         return (1 if result.success else 0), result.output
 
