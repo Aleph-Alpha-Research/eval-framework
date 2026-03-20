@@ -6,7 +6,7 @@ DATASET_PATH = LeoLM/ArcChallenge_de
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = validation
 RESPONSE_TYPE = LOGLIKELIHOODS
-METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 SUBJECTS = ['no_subject']
 LANGUAGE = <Language.DEU: 'German'>
 ````
