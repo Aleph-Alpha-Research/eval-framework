@@ -86,6 +86,16 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--task-name", type=str, required=False, help="The name of the task to evaluate.")
     parser.add_argument(
+        "--task-suite",
+        type=Path,
+        required=False,
+        default=None,
+        help=(
+            "Path to a task suite definition file (.yaml or .py). "
+            "Mutually exclusive with --task-name. Runs all tasks defined in the suite."
+        ),
+    )
+    parser.add_argument(
         "--randomize-judge-order",
         action="store_true",
         help="Randomize the order of answers presented to the LLM judge to mitigate position bias.",
@@ -301,10 +311,13 @@ def parse_args() -> argparse.Namespace:
     # else:
     #     args.extra_task_modules = None
 
+    if args.task_suite and args.task_name:
+        parser.error("--task-suite and --task-name are mutually exclusive.")
+
     return args
 
 
-def run_with_kwargs(kwargs: dict) -> None:
+def _run_single_task(kwargs: dict) -> None:
     # Setup logging for the output directory
     output_dir = kwargs.get("output_dir", "results")
     log_level = kwargs.get("verbosity", 1)
@@ -365,6 +378,24 @@ def run_with_kwargs(kwargs: dict) -> None:
         )
 
     logger.info(f"time since start: {datetime.datetime.now() - now}")
+
+
+def run_with_kwargs(kwargs: dict) -> None:
+    task_suite_path = kwargs.pop("task_suite", None)
+
+    if task_suite_path is not None:
+        from eval_framework.suite import TaskSuite, run_suite
+
+        output_dir = kwargs.get("output_dir", "outputs")
+        log_level = kwargs.get("verbosity", 1)
+        setup_logging(output_dir, log_level=log_level)
+
+        suite = TaskSuite.load(task_suite_path)
+        logger.info(f"Loaded task suite '{suite.name}' from {task_suite_path}")
+        result = run_suite(suite, kwargs)
+        logger.info(f"Suite '{suite.name}' completed. Aggregates: {result.aggregates}")
+    else:
+        _run_single_task(kwargs)
 
 
 def run() -> None:
