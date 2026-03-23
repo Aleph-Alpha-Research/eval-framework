@@ -136,7 +136,7 @@ class TestMCTaskMixin:
 
     def test_metadata_includes_task_format(self) -> None:
         meta = self.task.get_metadata()
-        assert meta["task_format"] == TaskFormat.MULTIPLE_CHOICE
+        assert meta["task_format"] == TaskFormat.MULTIPLE_CHOICE.value
 
     def test_space_prefixed_labels(self) -> None:
         class SpacedTask(_FakeMCTask):
@@ -231,7 +231,7 @@ class TestClozeTaskMixin:
 
     def test_metadata_includes_task_format(self) -> None:
         meta = self.task.get_metadata()
-        assert meta["task_format"] == TaskFormat.CLOZE
+        assert meta["task_format"] == TaskFormat.CLOZE.value
 
     def test_trailing_newline_false(self) -> None:
         """TRAILING_NEWLINE=False is used for sentence-completion tasks."""
