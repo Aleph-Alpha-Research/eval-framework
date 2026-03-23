@@ -111,6 +111,16 @@ class MCTaskMixin:
     SPACE_PREFIXED_LABELS: bool = False
     TASK_FORMAT: TaskFormat = TaskFormat.MULTIPLE_CHOICE
 
+    # The following methods need to be implemented by the subclass, declaring them here for mypy.
+    def _get_raw_question(self, _item: dict[str, Any]) -> str:
+        raise NotImplementedError
+
+    def _get_choices(self, _item: dict[str, Any]) -> list[str]:
+        raise NotImplementedError
+
+    def _get_correct_index(self, _item: dict[str, Any]) -> int:
+        raise NotImplementedError
+
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """Auto-fill QUESTION_PREFIX & CUE_TEXT from _DEFAULT_QUESTION_CUE_TEXT if not set explicitly."""
         super().__init_subclass__(**kwargs)
@@ -221,6 +231,16 @@ class ClozeTaskMixin:
     CUE_TEXT: str = "Answer:"
     TRAILING_NEWLINE: bool = True
     TASK_FORMAT: TaskFormat = TaskFormat.CLOZE
+
+    # The following methods need to be implemented by the subclass, declaring them here for mypy.
+    def _get_raw_question(self, _item: dict[str, Any]) -> str:
+        raise NotImplementedError
+
+    def _get_choices(self, _item: dict[str, Any]) -> list[str]:
+        raise NotImplementedError
+
+    def _get_correct_index(self, _item: dict[str, Any]) -> int:
+        raise NotImplementedError
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """Auto-fill QUESTION_PREFIX & CUE_TEXT from _DEFAULT_QUESTION_CUE_TEXT if not set explicitly."""
