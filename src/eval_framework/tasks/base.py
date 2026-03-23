@@ -31,6 +31,11 @@ class ResponseType(Enum):
     LOGLIKELIHOODS = "loglikelihoods"
 
 
+class TaskFormat(Enum):
+    MULTIPLE_CHOICE = "multiple_choice"
+    CLOZE = "cloze"
+
+
 class Language(Enum):
     ENG = "English"
     DEU = "German"
