@@ -243,7 +243,7 @@ def _apply_method(
     elif method == "median":
         return float(np.median(vals))
     else:
-        raise ValueError(f"Unknown aggregation method: '{method}'. Use mean, weighted_mean, median.")
+        raise ValueError(f"Unknown aggregation method: '{method}'. Use mean or median.")
 
 
 def _merge_defaults(parent: dict[str, Any], child: dict[str, Any]) -> dict[str, Any]:
