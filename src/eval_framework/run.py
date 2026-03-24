@@ -347,6 +347,7 @@ def _run_single_task(kwargs: dict) -> None:
         wandb_project=kwargs["wandb_project"],
         wandb_entity=kwargs["wandb_entity"],
         wandb_run_id=kwargs["wandb_run_id"],
+        wandb_group=kwargs.get("wandb_group"),
         wandb_upload_results=kwargs["wandb_upload_results"],
         hf_upload_dir=kwargs["hf_upload_dir"],
         hf_upload_repo=kwargs["hf_upload_repo"],
