@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Annotated, Any, Self, cast
 
 import numpy as np
+import wandb
 import yaml
 from pydantic import BaseModel, BeforeValidator, ConfigDict, field_validator, model_validator
 
@@ -254,6 +255,7 @@ def run_suite(
     suite: TaskSuite,
     cli_kwargs: dict[str, Any],
     parent_defaults: dict[str, Any] | None = None,
+    root_suite_name: str | None = None,
 ) -> SuiteResult:
     """Recursively run all tasks in a suite and compute aggregates bottom-up using
     post-order traversal.
@@ -269,9 +271,17 @@ def run_suite(
     suite_name = suite.name  # guaranteed non-None by validate_suite
     assert suite_name is not None
 
+    # Track the top-level suite name so all leaf tasks share the same W&B group.
+    if root_suite_name is None:
+        root_suite_name = suite_name
+
     # Lets do post-order traversal here. If leaf, go to the code in run.py
     if suite.is_leaf:
         resolved = resolve_to_evalconfig_kwargs(suite, current_defaults, cli_kwargs)
+        # Each task in a suite gets its own W&B run (nulling a shared run_id prevents
+        # all tasks from piling into the same W&B run), and shares the suite group.
+        resolved["wandb_run_id"] = None
+        resolved["wandb_group"] = root_suite_name
         logger.info(f"Running task: {suite.task_name}")
         _run_single_task(resolved)
         return SuiteResult(
@@ -286,7 +296,9 @@ def run_suite(
 
     for child in children:
         assert child.name is not None
-        child_results[child.name] = run_suite(child, cli_kwargs, parent_defaults=current_defaults)
+        child_results[child.name] = run_suite(
+            child, cli_kwargs, parent_defaults=current_defaults, root_suite_name=root_suite_name
+        )
 
     # we can only compute the aggregates after all the children are run.
     suite_aggregates = compute_aggregates(suite.aggregates, child_results)
@@ -294,6 +306,7 @@ def run_suite(
     output_dir = Path(cli_kwargs.get("output_dir", "outputs"))
     # check that individual task results are saved in the output directory.
     save_suite_results(output_dir / suite_name, suite_aggregates)
+    _log_suite_aggregates_to_wandb(suite_name, root_suite_name, suite_aggregates, cli_kwargs)
 
     return SuiteResult(name=suite_name, task_results=child_results, aggregates=suite_aggregates)
 
@@ -336,6 +349,32 @@ def _load_aggregated_results(resolved_kwargs: dict[str, Any]) -> dict[str, Any]:
             return json.load(f)
 
     raise ValueError(f"No aggregated_results.json found at {agg_file}")
+
+
+def _log_suite_aggregates_to_wandb(
+    suite_name: str,
+    root_suite_name: str,
+    aggregates: dict[str, float | None],
+    cli_kwargs: dict[str, Any],
+) -> None:
+    """Create a W&B run for a composite suite and log its aggregate metrics."""
+    from eval_framework.main import _wandb_mode
+
+    wandb_project = cli_kwargs.get("wandb_project")
+    if not wandb_project:
+        return
+
+    with wandb.init(
+        entity=cli_kwargs.get("wandb_entity"),
+        project=wandb_project,
+        group=root_suite_name,
+        job_type="suite",
+        name=suite_name,
+        mode=_wandb_mode(wandb_project),
+        settings=wandb.Settings(disable_code=True),
+    ) as run:
+        run.log({k: v for k, v in aggregates.items() if v is not None})
+    logger.info(f"Logged suite aggregates for '{suite_name}' to W&B project '{wandb_project}'.")
 
 
 def save_suite_results(output_dir: Path, results: dict[str, float | None]) -> None:

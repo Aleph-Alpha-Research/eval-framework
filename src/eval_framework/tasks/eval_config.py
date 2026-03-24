@@ -19,6 +19,7 @@ KEYS_UNRELATED_TO_RESULTS = {
     "wandb_project",
     "wandb_entity",
     "wandb_run_id",
+    "wandb_group",
     "wandb_upload_results",
     "hf_upload_dir",
     "hf_upload_repo",
@@ -34,6 +35,7 @@ class EvalConfig(BaseConfig):
     wandb_project: str | None = None
     wandb_entity: str | None = None
     wandb_run_id: str | None = None
+    wandb_group: str | None = None
     wandb_upload_results: Annotated[bool, BeforeValidator(lambda v: True if v is None else v)] = True
     hf_upload_dir: str | None = None
     hf_upload_repo: str | None = None

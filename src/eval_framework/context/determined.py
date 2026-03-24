@@ -148,6 +148,7 @@ class DeterminedContext(EvalContext):
             wandb_project=self.hparams.wandb_project or self.wandb_project,
             wandb_entity=self.hparams.wandb_entity or self.wandb_entity,
             wandb_run_id=self.hparams.wandb_run_id or self.wandb_run_id,
+            wandb_group=self.wandb_group,
             wandb_upload_results=self.hparams.wandb_upload_results or self.wandb_upload_results,
             batch_size=self.hparams.task_args.batch_size or self.batch_size,
             description=self.hparams.description or self.description,
