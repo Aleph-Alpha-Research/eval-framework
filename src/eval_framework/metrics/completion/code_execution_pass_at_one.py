@@ -91,15 +91,19 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
         ]
 
     def _count_correct_samples(self, completion: str, context: RealtimeCodeExectionContext) -> tuple[int, str]:
-        result = execute_python_code_with_tests(
-            code=completion,
-            test_code=context.test_code,
-            package_mapping=context.package_downloads,
-            merge_code_fn=context.snippet_merge_fn,
-            image=context.run_env,
-            timeout=context.benchmark_timeout,
-            parse_output_fn=context.output_parse_fn,
-        )
+        try:
+            result = execute_python_code_with_tests(
+                code=completion,
+                test_code=context.test_code,
+                package_mapping=context.package_downloads,
+                merge_code_fn=context.snippet_merge_fn,
+                image=context.run_env,
+                timeout=context.benchmark_timeout,
+                parse_output_fn=context.output_parse_fn,
+                dockerfile=None,
+            )
+        except Exception as e:
+            return (0, str(e))
         return (1 if result.success else 0), result.output
 
 

@@ -1,3 +1,5 @@
+import traceback
+
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import Completion, Error
 from eval_framework.tasks.utils import run_python_code
@@ -12,7 +14,19 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
 
         # this will always be a list, if return is "" this will be an empty list
         code = response.completion
-        output = run_python_code(code, image="python:3.12-slim")
+        try:
+            output = run_python_code(code, image="python:3.12-slim")
+        except Exception as e:
+            return [
+                MetricResult(
+                    metric_name=self.NAME,
+                    value=0,
+                    higher_is_better=True,
+                    error=Error(
+                        error_class="CodeCompletionAssertionError", message=str(e), traceback=traceback.format_exc()
+                    ),
+                )
+            ]
 
         # Split and filter out empty strings
         output_parts = [part for part in output.split() if part.strip()]
