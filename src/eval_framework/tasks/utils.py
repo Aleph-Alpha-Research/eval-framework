@@ -167,7 +167,13 @@ def execute_python_code_with_tests(
     packages = get_external_dependencies(combined_code, package_mapping)
 
     # Run the combined code in the sandbox
-    output = run_python_code(combined_code, image=image, dockerfile=dockerfile, timeout=timeout, packages=packages)
+    output = run_python_code(
+        combined_code,
+        image=image,
+        dockerfile=dockerfile,
+        timeout=timeout,
+        packages=packages,
+    )
 
     # Parse the output to determine success
     return parse_output_fn(output)
@@ -240,7 +246,10 @@ def _parse_unittest_output(output: str) -> ExecutionResult:
         return ExecutionResult(False, f"Error during execution: {output}")
 
     # If we can't determine success/failure, return the raw output
-    return ExecutionResult(False, f"Could not determine test results, potentially due to timeout. Output: {output}")
+    return ExecutionResult(
+        False,
+        f"Could not determine test results, potentially due to timeout. Output: {output}",
+    )
 
 
 def get_external_dependencies(code: str, package_mapping: dict[str, str | None]) -> list[str]:
@@ -405,7 +414,12 @@ class Editor:
 
         return word
 
-    def __call__(self, sentence: str, character_edit_change: float, unmodifiable_words: list[str] | None = None) -> str:
+    def __call__(
+        self,
+        sentence: str,
+        character_edit_change: float,
+        unmodifiable_words: list[str] | None = None,
+    ) -> str:
         words, spaces, has_leading_space = self._split_sentence(sentence)
 
         num_characters = sum(map(len, words))
@@ -443,7 +457,10 @@ class HatPaperEditor:
         return self.rng.sample(indices, int(len(indices) * pct))
 
     def permute_chars_in_string(
-        self, input_text: str, permute_pct: float, unmodifiable_words: list[str] | None = None
+        self,
+        input_text: str,
+        permute_pct: float,
+        unmodifiable_words: list[str] | None = None,
     ) -> str:
         """
         Randomly permute permute_pct characters in the input string.
@@ -460,7 +477,10 @@ class HatPaperEditor:
         return "".join(permuted_text)
 
     def replace_chars_in_string(
-        self, input_text: str, replace_pct: float, unmodifiable_words: list[str] | None = None
+        self,
+        input_text: str,
+        replace_pct: float,
+        unmodifiable_words: list[str] | None = None,
     ) -> str:
         """
         Randomly replace replace_pct characters in the input string with replace_char.
@@ -475,7 +495,10 @@ class HatPaperEditor:
         return "".join(replaced_text)
 
     def delete_chars_in_string(
-        self, input_text: str, delete_pct: float, unmodifiable_words: list[str] | None = None
+        self,
+        input_text: str,
+        delete_pct: float,
+        unmodifiable_words: list[str] | None = None,
     ) -> str:
         """
         Randomly delete delete_pct characters in the input string.
