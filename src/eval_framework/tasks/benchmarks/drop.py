@@ -1,6 +1,9 @@
 from typing import Any
 
-from eval_framework.metrics.completion.drop_completion import DropF1ExactMatch, DropMetricContext
+from eval_framework.metrics.completion.drop_completion import (
+    DropF1ExactMatch,
+    DropMetricContext,
+)
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
@@ -10,7 +13,9 @@ from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseTy
 from eval_framework.tasks.utils import get_n_letters
 
 
-def _flatten_validated_answers(validated_answers: dict[str, Any]) -> list[dict[str, Any]]:
+def _flatten_validated_answers(
+    validated_answers: dict[str, Any],
+) -> list[dict[str, Any]]:
     """Flatten validated_answers from dict of lists to list of dicts."""
     num_list = validated_answers.get("number") or []
     date_list = validated_answers.get("date") or []
@@ -28,7 +33,7 @@ def _flatten_validated_answers(validated_answers: dict[str, Any]) -> list[dict[s
 
 def _parse_answer(answer: dict[str, Any]) -> tuple[str, ...]:
     """Return a hashable tuple for one answer (number, spans, or date string)."""
-    if answer.get("number"):
+    if answer.get("number") not in (None, ""):
         return (str(answer["number"]),)
     spans = answer.get("spans") or []
     if spans:
@@ -99,7 +104,10 @@ class DropCompletion(BaseTask[str]):
         sample_split = process(hf_dataset.get(self.SAMPLE_SPLIT, []))
         fewshot_split = process(hf_dataset.get(self.FEWSHOT_SPLIT, []))
         self.dataset = self._shuffle_splits(
-            hf_dataset={self.SAMPLE_SPLIT: sample_split, self.FEWSHOT_SPLIT: fewshot_split}
+            hf_dataset={
+                self.SAMPLE_SPLIT: sample_split,
+                self.FEWSHOT_SPLIT: fewshot_split,
+            }
         )
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -157,7 +165,11 @@ class DropMC(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Passage"]
     LANGUAGE = Language.ENG
@@ -221,7 +233,11 @@ class DropCloze(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Passage"]
     LANGUAGE = Language.ENG
