@@ -37,10 +37,17 @@ class EvaluationGenerator:
         self.save_intermediate_results = config.save_intermediate_results
 
         task_class = get_task(config.task_name)
-        if task_class.RESPONSE_TYPE == ResponseType.COMPLETION:
-            self.metrics = task_class.METRICS + [BytesCompletion, SequencePositionsCompletion]
-        elif task_class.RESPONSE_TYPE == ResponseType.LOGLIKELIHOODS:
-            self.metrics = task_class.METRICS + [BytesLoglikelihood, SequencePositionsLoglikelihood]
+        if hasattr(task_class, "FORMATTER"):
+            response_type = task_class.FORMATTER.response_type
+            task_metrics = list(task_class.FORMATTER.metrics)
+        else:
+            response_type = task_class.RESPONSE_TYPE
+            task_metrics = task_class.METRICS
+
+        if response_type == ResponseType.COMPLETION:
+            self.metrics = task_metrics + [BytesCompletion, SequencePositionsCompletion]
+        elif response_type == ResponseType.LOGLIKELIHOODS:
+            self.metrics = task_metrics + [BytesLoglikelihood, SequencePositionsLoglikelihood]
         else:
             raise NotImplementedError
 

@@ -2,13 +2,12 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1
-from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
-    AccuracyLoglikelihood,
-    AccuracyNormLoglikelihood,
-)
-from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
-from eval_framework.tasks.utils import get_n_letters
+from eval_framework.tasks.formatting import (
+    ClozeFormatter,
+    MCFormatter,
+    answer_key_to_index,
+)
 
 
 class NaturalQsOpen(BaseTask[str]):
@@ -42,74 +41,38 @@ class NaturalQsOpen(BaseTask[str]):
         return f"{self._get_cue_text(item)}{ground_truth}"
 
 
-class NaturalQsOpenCloze(BaseTask[str]):
-    NAME = "NaturalQsOpenCloze"
+class _NaturalQsOpenChoice_Base(BaseTask[str]):
+    """Shared base for choice-based NaturalQsOpen variants (Cloze, MC, MC_OLMES)."""
+
     DATASET_PATH = "allenai/nq-gen2mc"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
-    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
     LANGUAGE = Language.ENG
 
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return f"Question: {item.get('question', '')}\n"
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        return item.get("question", "")
 
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        texts = item.get("choices", {}).get("text", [])
-        labels = item.get("choices", {}).get("label", [])
-        gold_idx = labels.index(item.get("answerKey", ""))
-        return f" {texts[gold_idx]}"
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return item.get("choices", {}).get("text", [])
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
-        return "Answer:"
-
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        texts = item.get("choices", {}).get("text", [])
-        return [f" {t}" for t in texts]
-
-    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        ground_truth = self._get_ground_truth(item)
-        assert ground_truth is not None
-        return f"{self._get_cue_text(item)}{ground_truth}"
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return answer_key_to_index(item.get("answerKey", ""))
 
 
-class NaturalQsOpenMC(NaturalQsOpenCloze):
+class NaturalQsOpenCloze(_NaturalQsOpenChoice_Base):
+    NAME = "NaturalQsOpenCloze"
+    FORMATTER = ClozeFormatter()
+
+
+class NaturalQsOpenMC(_NaturalQsOpenChoice_Base):
     NAME = "NaturalQsOpenMC"
-
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
-        self.keys = get_n_letters(4)
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        question = item.get("question", "")
-        texts = item.get("choices", {}).get("text", [])
-        options = "\n".join(f" {key}. {t}" for key, t in zip(self.keys, texts))
-        return f"Question: {question}\n{options}\n"
-
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        gold_idx = self.keys.index(item.get("answerKey", ""))
-        return f" {self.keys[gold_idx]}"
-
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        return [f" {key}" for key in self.keys]
-
-    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        ground_truth = self._get_ground_truth(item)
-        assert ground_truth is not None
-        return f"{self._get_cue_text(item)}{ground_truth}"
+    FORMATTER = MCFormatter(space_prefixed_labels=True)
 
 
-class NaturalQsOpenMC_OLMES(NaturalQsOpenMC):
-    """
-    NaturalQsOpenMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
-    """
+class NaturalQsOpenMC_OLMES(_NaturalQsOpenChoice_Base):
+    """NaturalQsOpenMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...)."""
 
     NAME = "NaturalQsOpenMC_OLMES"
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        question = item.get("question", "")
-        texts = item.get("choices", {}).get("text", [])
-        options = "\n".join(f" {key}. {t}" for key, t in zip(self.keys, texts))
-        return f"Question: {question}\n{options}\n"
+    FORMATTER = MCFormatter(space_prefixed_labels=True)
