@@ -1,3 +1,4 @@
+import copy
 import importlib.util
 import json
 import logging
@@ -178,14 +179,14 @@ def resolve_to_evalconfig_kwargs(
     Merges CLI kwargs as the base, overlays resolved suite defaults, and routes
     temperature/top_p/extra_llm_args into the llm_args dict.
     """
-    kwargs = cli_kwargs.copy()
+    kwargs = copy.deepcopy(cli_kwargs)
 
     kwargs["task_name"] = leaf.task_name
 
     for key, value in resolved_defaults.items():
         if key in _EVAL_CONFIG_FIELDS:
             kwargs[key] = value
-        if key in _LLM_ARG_FIELDS:
+        elif key in _LLM_ARG_FIELDS:
             kwargs["llm_args"][key] = value
         elif key == "extra_llm_args":
             kwargs["llm_args"].update(value)
