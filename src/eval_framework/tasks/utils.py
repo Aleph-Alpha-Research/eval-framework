@@ -167,7 +167,13 @@ def execute_python_code_with_tests(
     packages = get_external_dependencies(combined_code, package_mapping)
 
     # Run the combined code in the sandbox
-    output = run_python_code(combined_code, image=image, dockerfile=dockerfile, timeout=timeout, packages=packages)
+    output = run_python_code(
+        combined_code,
+        image=image,
+        dockerfile=dockerfile,
+        timeout=timeout,
+        packages=packages,
+    )
 
     # Parse the output to determine success
     return parse_output_fn(output)

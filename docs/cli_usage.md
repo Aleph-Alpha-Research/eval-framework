@@ -39,6 +39,10 @@ The maximum number of tokens to generate for each sample. Overwrites any task de
 **`--batch-size BATCH_SIZE`**
 Size of batch of samples to send to the LLM for evaluation in parallel. Use 1 for sequential running (default).
 
+**`--task-suite PATH_TO_TASK_SUITE_FILE`**
+Path to a suite file (`.yaml` or `.py`) defining a set of tasks to run. Mutually exclusive with `--task-name`. Hyperparameter overrides and score aggregation methods can be configured within the suite file.
+
+
 ### Task Configuration
 
 **`--task-subjects TASK_SUBJECTS [TASK_SUBJECTS ...]`**
@@ -141,4 +145,51 @@ uv run eval_framework \
     --output-dir ./eval_results \
     --num-fewshot 5 \
     --num-samples 10
+```
+
+## Running a Task Suite
+
+Task suites let you run multiple tasks in one command and aggregate their scores. You can define a suite in a `.yaml` file:
+
+```yaml
+# my_suite.yaml
+name: my_suite
+tasks:
+  - tasks: MMLU
+    num_samples: 100
+    num_fewshot: 5
+  - tasks: GSM8K
+    num_samples: 50
+    num_fewshot: 0
+aggregates:
+  - name: avg_accuracy
+    metric: accuracy
+    method: mean
+```
+
+Or equivalently in a `.py` file:
+
+```python
+# my_suite.py
+from eval_framework.suite import SuiteAggregate, TaskSuite
+
+suite = TaskSuite(
+    name="my_suite",
+    tasks=[
+        TaskSuite(tasks="MMLU", num_samples=100, num_fewshot=5),
+        TaskSuite(tasks="GSM8K", num_samples=50, num_fewshot=0),
+    ],
+    aggregates=[
+        SuiteAggregate(name="avg_accuracy", metric="accuracy", method="mean"),
+    ],
+)
+```
+
+Then pass the suite file to the CLI:
+
+```bash
+uv run eval_framework \
+    --llm-name 'eval_framework.llm.models.Qwen3_0_6B_VLLM' \
+    --task-suite my_suite.yaml \
+    --output-dir ./eval_results
 ```

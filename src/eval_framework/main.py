@@ -66,7 +66,7 @@ def main(
     with wandb.init(
         entity=config.wandb_entity,
         project=config.wandb_project,
-        group=llm.name[:127],
+        group=(config.wandb_group or llm.name)[:127],
         job_type=config.task_name[:63],
         id=wandb_run_id,  # (potentially resuming run after preemption)
         config=response_generator._get_metadata(),

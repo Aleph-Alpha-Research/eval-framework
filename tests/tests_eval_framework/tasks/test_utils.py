@@ -154,8 +154,14 @@ class TestParseUnittestOutput:
         assert result.output == "All tests completed successfully."
 
 
-class TestCodeComposition:
-    def test_merge(self) -> None:
+class TestUnittestMergeSnippets:
+    """Tests for unittest_merge_snippets which combines solution code with unittest test code.
+
+    NOTE: The test data strings contain ``unittest.TestCase`` code because that is the format
+    used by the BigCodeBench dataset.  The tests themselves run under pytest.
+    """
+
+    def test_merges_code_and_tests_into_single_script(self) -> None:
         code = "import random\nimport statistics\ndef task_func(LETTERS):\n\treturn LETTERS"
         test_code = """
         import unittest
@@ -169,7 +175,7 @@ class TestCodeComposition:
         gt = code + "\n\n" + test_code
         assert merged_code.startswith(gt)
 
-    def test_with_main(self) -> None:
+    def test_preserves_existing_main_guard(self) -> None:
         code = "import random\nimport statistics\ndef task_func(LETTERS):\n\treturn LETTERS"
         test_code = """
         import unittest
@@ -187,9 +193,13 @@ class TestCodeComposition:
 
 
 class TestExecutePythonCodeWithTests:
-    """Integration tests for execute_python_code_with_tests."""
+    """Integration tests for execute_python_code_with_tests (Docker-based code execution).
 
-    def test_successful_execution(self) -> None:
+    NOTE: Test data strings use ``unittest.TestCase`` format because BigCodeBench test
+    cases are written that way.  The tests themselves run under pytest.
+    """
+
+    def test_correct_implementation_passes(self) -> None:
         # Simple code that should pass all tests using unittest
         code = "def add(a, b): return a + b"
         test_code = """
@@ -214,7 +224,7 @@ class TestAdd(unittest.TestCase):
         assert result.success is True
         assert "tests completed successfully" in result.output
 
-    def test_failing_assertion(self) -> None:
+    def test_wrong_implementation_fails_assertion(self) -> None:
         # Code with a failing test
         code = "def add(a, b): return a - b"  # Incorrect implementation
         test_code = "assert add(1, 2) == 3"
@@ -233,8 +243,7 @@ class TestAdd(unittest.TestCase):
         assert result.success is False
         assert "AssertionError" in result.output
 
-    def test_syntax_error(self) -> None:
-        # Code with syntax error
+    def test_syntax_error_is_reported(self) -> None:
         code = "def add(a, b) return a + b"  # Missing colon
         test_code = "assert add(1, 2) == 3"
 
@@ -252,8 +261,7 @@ class TestAdd(unittest.TestCase):
         assert result.success is False
         assert "SyntaxError" in result.output
 
-    def test_runtime_error(self) -> None:
-        # Code that raises a runtime error
+    def test_runtime_error_is_reported(self) -> None:
         code = "def divide(a, b): return a / b"
         test_code = "assert divide(1, 0) == float('inf')"
 
@@ -271,8 +279,7 @@ class TestAdd(unittest.TestCase):
         assert result.success is False
         assert any(err in result.output for err in ["ZeroDivisionError", "division by zero"])
 
-    def test_timeout(self) -> None:
-        # Code that should timeout
+    def test_infinite_loop_triggers_timeout(self) -> None:
         code = "import time\ndef hang(): time.sleep(5)\nhang()"
         test_code = """
 import unittest
@@ -318,8 +325,7 @@ unittest.main()
         assert result.success is True
         assert "tests completed successfully" in result.output
 
-    def test_multiple_assertions(self) -> None:
-        # Code with multiple test assertions
+    def test_multiple_assertions_all_pass(self) -> None:
         code = """
 def is_even(n):
     return n % 2 == 0
@@ -349,8 +355,7 @@ unittest.main()
         assert result.success is True
         assert "tests completed successfully" in result.output
 
-    def test_one_failing_among_many(self) -> None:
-        # Code with one failing test among many passing ones
+    def test_one_failing_among_many_reports_failure(self) -> None:
         code = """
 def is_positive(n):
     return n > 0  # Bug: doesn't handle zero correctly
@@ -375,8 +380,7 @@ assert is_positive(0) == True  # This will fail
         assert result.success is False
         assert "AssertionError" in result.output
 
-    def test_complex_code_execution(self) -> None:
-        # More complex code example
+    def test_class_based_code_with_unittest(self) -> None:
         code = """
 class Stack:
     def __init__(self) -> None:
@@ -426,8 +430,7 @@ unittest.main()
         assert result.success is True
         assert "tests completed successfully" in result.output
 
-    def test_missing_import(self) -> None:
-        # Test code that tries to use a module that isn't imported
+    def test_missing_import_raises_name_error(self) -> None:
         code = "def get_pi(): return math.pi"  # Missing import
         test_code = "assert get_pi() > 3.1"
 
@@ -445,8 +448,7 @@ unittest.main()
         assert result.success is False
         assert any(err in result.output for err in ["NameError", "math is not defined"])
 
-    def test_indentation_error(self) -> None:
-        # Test code with indentation error
+    def test_indentation_error_is_reported(self) -> None:
         code = """
 def function():
     x = 1
@@ -468,8 +470,7 @@ def function():
         assert result.success is False
         assert "IndentationError" in result.output
 
-    def test_empty_code(self) -> None:
-        # Test with empty implementation
+    def test_empty_code_with_passing_test(self) -> None:
         code = ""
         test_code = """
 import unittest
@@ -493,8 +494,7 @@ unittest.main()
         assert result.success is True
         assert "tests completed successfully" in result.output
 
-    def test_empty_test_code(self) -> None:
-        # Test with empty test code
+    def test_empty_test_code_fails(self) -> None:
         code = "def function(): return True"
         test_code = ""
 
@@ -512,29 +512,19 @@ unittest.main()
         assert result.success is False
         assert "'unittest' is not defined" in result.output
 
-    # Scenario 1: Correct implementation (should pass)
-    # Test for the correct implementation
-    def test_successful_unittest_execution(self) -> None:
-        # Using the correct implementation
+    def test_bigcodebench_correct_implementation_passes(self) -> None:
         code = r"""
 import re
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 def task_func(texts):
     # Handle empty input
     if all(text.strip() == "" for text in texts):
         return [], []
 
-    # Remove URLs
-    cleaned_texts = [re.sub('http[s]?://\S+', '', text) for text in texts]
-
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(cleaned_texts)
-
-    # Convert the sparse matrix to a dense format, round the values, convert to tuples and return along with
-    # feature names
-    dense_matrix = [tuple(round(val, 8) for val in row) for row in tfidf_matrix.toarray().tolist()]
-    return dense_matrix, list(vectorizer.get_feature_names_out())
+    # Remove URLs (use raw string to avoid invalid escape sequence)
+    cleaned_texts = [re.sub(r'http[s]?://\S+', '', text) for text in texts]
+    # Return cleaned texts and their lengths
+    return cleaned_texts, [len(t) for t in cleaned_texts]
     """
 
         test_code = r"""
@@ -542,13 +532,10 @@ import unittest
 class TestCases(unittest.TestCase):
     def test_case_1(self):
         input_texts = ['Visit https://www.python.org for more info.', 'Python is great.', 'I love Python.']
-        output = task_func(input_texts)
-        sorted_indices = sorted(range(len(output[1])), key=lambda k: output[1][k])
-        expected_output = (
-            [tuple(row[i] for i in sorted_indices) for row in output[0]],
-            sorted(output[1])
-        )
-        self.assertEqual(output, expected_output)
+        cleaned, lengths = task_func(input_texts)
+        self.assertEqual(cleaned[0], 'Visit  for more info.')
+        self.assertEqual(cleaned[1], 'Python is great.')
+        self.assertEqual(len(lengths), 3)
 
     def test_case_5(self):
         input_texts = ['', '', '']
@@ -571,25 +558,14 @@ unittest.main()
         assert result.success is True
         assert result.output == "All 2 tests completed successfully."
 
-    # Test for the flawed implementation
-    def test_failing_unittests_for_wrong_implementation(self) -> None:
-        # Flawed implementation with multiple issues
+    def test_bigcodebench_flawed_implementation_fails(self) -> None:
         code = r"""
 import re
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 def task_func(texts):
-    # Missing empty input check
-
-    # Incorrectly removes URLs (missing 's' in https)
-    cleaned_texts = [re.sub('http://\\S+', '', text) for text in texts]
-
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(cleaned_texts)
-
-    # Doesn't round the values, which will cause precision issues
-    dense_matrix = [tuple(val for val in row) for row in tfidf_matrix.toarray().tolist()]
-    return dense_matrix, list(vectorizer.get_feature_names_out())
+    # Missing empty input check - will return wrong result for ['', '', '']
+    cleaned_texts = [re.sub(r'http://\S+', '', text) for text in texts]
+    return cleaned_texts, [len(t) for t in cleaned_texts]
     """
 
         test_code = r"""
@@ -597,13 +573,8 @@ import unittest
 class TestCases(unittest.TestCase):
     def test_case_1(self):
         input_texts = ['Visit https://www.python.org for more info.', 'Python is great.', 'I love Python.']
-        output = task_func(input_texts)
-        sorted_indices = sorted(range(len(output[1])), key=lambda k: output[1][k])
-        expected_output = (
-            [tuple(row[i] for i in sorted_indices) for row in output[0]],
-            sorted(output[1])
-        )
-        self.assertEqual(output, expected_output)
+        cleaned, lengths = task_func(input_texts)
+        self.assertEqual(cleaned[0], 'Visit  for more info.')  # https URL must be removed
 
     def test_case_2(self):
         input_texts = ['', '', '']
@@ -626,9 +597,7 @@ unittest.main()
         assert result.success is False
         assert "FAILED" in result.output or "Error during execution" in result.output
 
-    # Test for missing implementation
-    def test_failing_unittests_for_missing_implementation(self) -> None:
-        # No implementation at all
+    def test_bigcodebench_missing_implementation_raises_name_error(self) -> None:
         code = """
 # No implementation of task_func
     """
