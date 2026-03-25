@@ -61,6 +61,7 @@ class EvalContext(AbstractContextManager):
         wandb_project: str | None = None,
         wandb_entity: str | None = None,
         wandb_run_id: str | None = None,
+        wandb_group: str | None = None,
         wandb_upload_results: bool | None = None,
         hf_upload_dir: str | None = None,
         hf_upload_repo: str | None = None,
@@ -89,6 +90,7 @@ class EvalContext(AbstractContextManager):
         self.wandb_project = wandb_project
         self.wandb_entity = wandb_entity
         self.wandb_run_id = wandb_run_id
+        self.wandb_group = wandb_group
         self.wandb_upload_results = wandb_upload_results
         self.hf_upload_dir = hf_upload_dir
         self.hf_upload_repo = hf_upload_repo
