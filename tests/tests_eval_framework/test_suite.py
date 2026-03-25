@@ -1,6 +1,6 @@
 import textwrap
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -10,6 +10,7 @@ from eval_framework.suite import (
     TaskSuite,
     compute_aggregates,
     resolve_to_evalconfig_kwargs,
+    run_suite,
 )
 
 
@@ -283,3 +284,99 @@ class TestComputeAggregates:
         }
         result = compute_aggregates(aggs, children)
         assert result["score"] == result["score2"] == pytest.approx(0.7)
+
+
+_BASE_CLI_KWARGS: dict = {
+    "llm_name": "MockLLM",
+    "llm_args": {},
+    "models": "models.py",
+    "task_name": None,
+    "output_dir": "outputs",
+    "wandb_project": None,
+    "wandb_entity": None,
+    "wandb_run_id": None,
+    "wandb_upload_results": True,
+    "wandb_group": None,
+}
+
+
+class TestRunSuite:
+    """Tests for run_suite() with _run_single_task and _load_aggregated_results patched."""
+
+    def test_flat_suite_calls_each_leaf(self, tmp_path: Path) -> None:
+        suite = TaskSuite(
+            name="list_suite",
+            tasks=[
+                TaskSuite(tasks="TaskA"),
+                TaskSuite(tasks="TaskB"),
+                TaskSuite(tasks="TaskC"),
+            ],
+        )
+
+        mock_run = MagicMock()
+        mock_load = MagicMock(return_value={"Average Accuracy": 0.123})
+
+        cli_kwargs = {**_BASE_CLI_KWARGS, "output_dir": str(tmp_path)}
+
+        with (
+            patch("eval_framework.suite._run_single_task", mock_run),
+            patch("eval_framework.suite._load_aggregated_results", mock_load),
+        ):
+            result = run_suite(suite, cli_kwargs)
+
+        assert mock_run.call_count == 3
+        assert mock_load.call_count == 3
+
+        called_task_names = [c.args[0]["task_name"] for c in mock_run.call_args_list]
+        assert called_task_names == ["TaskA", "TaskB", "TaskC"]
+
+        assert result.name == "list_suite"
+        assert len(result.task_results) == 3
+        assert all(r.aggregates["Average Accuracy"] == 0.123 for r in result.task_results.values())
+
+    def test_nested_suite_recurses_depth_first(self, tmp_path: Path) -> None:
+        suite = TaskSuite(
+            name="top",
+            tasks=[
+                TaskSuite(tasks="Solo"),
+                TaskSuite(
+                    name="group",
+                    tasks=[
+                        TaskSuite(tasks="Inner1"),
+                        TaskSuite(tasks="Inner2"),
+                    ],
+                    aggregates=[
+                        SuiteAggregate(name="group_score", metric="m", method="mean"),
+                    ],
+                ),
+            ],
+            aggregates=[
+                SuiteAggregate(name="overall", metric="m", method="mean"),
+            ],
+        )
+
+        call_order: list[str] = []
+
+        def run_to_collect_task_names(kwargs: dict) -> None:
+            call_order.append(kwargs["task_name"])
+
+        mock_load = MagicMock(return_value={"m": 0.5})
+
+        cli_kwargs = {**_BASE_CLI_KWARGS, "output_dir": str(tmp_path)}
+
+        with (
+            patch("eval_framework.suite._run_single_task", side_effect=run_to_collect_task_names),
+            patch("eval_framework.suite._load_aggregated_results", mock_load),
+        ):
+            result = run_suite(suite, cli_kwargs)
+
+        assert call_order == ["Solo", "Inner1", "Inner2"]
+
+        assert result.name == "top"
+        assert "Solo" in result.task_results
+        assert "group" in result.task_results
+
+        group_result = result.task_results["group"]
+        assert group_result.aggregates["group_score"] == pytest.approx(0.5)
+
+        assert result.aggregates["overall"] == pytest.approx(0.5)
