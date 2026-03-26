@@ -25,17 +25,12 @@ class DropF1ExactMatch(BaseMetric[Completion]):
         if response.error is not None:
             return [
                 MetricResult(
-                    metric_name=f"{self.NAME}/f1",
+                    metric_name=name,
                     value=None,
                     higher_is_better=True,
                     error=response.error,
-                ),
-                MetricResult(
-                    metric_name=f"{self.NAME}/exact_match",
-                    value=None,
-                    higher_is_better=True,
-                    error=response.error,
-                ),
+                )
+                for name in [n.strip() for n in self.NAME.split("/")]
             ]
 
         context = extract_context_metric(response, DropMetricContext)
@@ -52,15 +47,10 @@ class DropF1ExactMatch(BaseMetric[Completion]):
 
         return [
             MetricResult(
-                metric_name="DROP F1",
-                value=out["f1"],
+                metric_name=name,
+                value=out[key],
                 higher_is_better=True,
                 error=response.error,
-            ),
-            MetricResult(
-                metric_name="Exact Match",
-                value=out["exact_match"],
-                higher_is_better=True,
-                error=response.error,
-            ),
+            )
+            for name, key in zip([n.strip() for n in self.NAME.split("/")], self.KEYS)
         ]
