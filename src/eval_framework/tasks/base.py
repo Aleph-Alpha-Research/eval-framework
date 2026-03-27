@@ -278,40 +278,40 @@ class BaseTask[SubjectType](ABC):
         return None
 
     def _get_raw_question(self, item: dict[str, Any]) -> str:
-        raise NotImplementedError("Subclasses using a FORMATTER must implement _get_raw_question")
+        raise NotImplementedError("Subclasses using a TASK_STYLER must implement _get_raw_question")
 
     def _get_choices(self, item: dict[str, Any]) -> list[str]:
-        raise NotImplementedError("Subclasses using a FORMATTER must implement _get_choices")
+        raise NotImplementedError("Subclasses using a TASK_STYLER must implement _get_choices")
 
     def _get_correct_index(self, item: dict[str, Any]) -> int:
-        raise NotImplementedError("Subclasses using a FORMATTER must implement _get_correct_index")
+        raise NotImplementedError("Subclasses using a TASK_STYLER must implement _get_correct_index")
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        if hasattr(self, "FORMATTER"):
-            return self.FORMATTER.get_instruction_text(self._get_raw_question(item), self._get_choices(item))
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.get_instruction_text(self._get_raw_question(item), self._get_choices(item))
         raise NotImplementedError
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        if hasattr(self, "FORMATTER"):
-            return self.FORMATTER.get_fewshot_target_text(self._get_choices(item), self._get_correct_index(item))
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.get_fewshot_target_text(self._get_choices(item), self._get_correct_index(item))
         target = self._get_ground_truth(item)
         assert target is not None
         assert isinstance(target, str)
         return target
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
-        if hasattr(self, "FORMATTER"):
-            return self.FORMATTER.get_ground_truth(self._get_choices(item), self._get_correct_index(item))
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.get_ground_truth(self._get_choices(item), self._get_correct_index(item))
         raise NotImplementedError
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
-        if hasattr(self, "FORMATTER"):
-            return self.FORMATTER.get_cue_text()
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.get_cue_text()
         return ""
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        if hasattr(self, "FORMATTER"):
-            return self.FORMATTER.get_possible_completions(self._get_choices(item))
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.get_possible_completions(self._get_choices(item))
         return None
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
@@ -331,9 +331,9 @@ class BaseTask[SubjectType](ABC):
         return None
 
     def get_metadata(self) -> dict[str, str | list[str]]:
-        if hasattr(self, "FORMATTER"):
-            response_type = self.FORMATTER.response_type
-            metrics = self.FORMATTER.metrics
+        if hasattr(self, "TASK_STYLER"):
+            response_type = self.TASK_STYLER.response_type
+            metrics = self.TASK_STYLER.metrics
         else:
             response_type = self.RESPONSE_TYPE
             metrics = self.METRICS
@@ -346,8 +346,8 @@ class BaseTask[SubjectType](ABC):
             "metrics": [m.NAME for m in metrics],
             "subjects": [str(s) for s in self.SUBJECTS],
         }
-        if hasattr(self, "FORMATTER"):
-            meta.update(self.FORMATTER.get_extra_metadata())
+        if hasattr(self, "TASK_STYLER"):
+            meta.update(self.TASK_STYLER.get_extra_metadata())
         return meta
 
     def generate_completions(

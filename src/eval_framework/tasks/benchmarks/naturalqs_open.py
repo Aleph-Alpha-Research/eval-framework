@@ -63,16 +63,16 @@ class _NaturalQsOpenChoice_Base(BaseTask[str]):
 
 class NaturalQsOpenCloze(_NaturalQsOpenChoice_Base):
     NAME = "NaturalQsOpenCloze"
-    FORMATTER = ClozeFormatter()
+    TASK_STYLER = ClozeFormatter()
 
 
 class NaturalQsOpenMC(_NaturalQsOpenChoice_Base):
     NAME = "NaturalQsOpenMC"
-    FORMATTER = MCFormatter(space_prefixed_labels=True)
+    TASK_STYLER = MCFormatter(space_prefixed_labels=True)
 
 
 class NaturalQsOpenMC_OLMES(_NaturalQsOpenChoice_Base):
     """NaturalQsOpenMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...)."""
 
     NAME = "NaturalQsOpenMC_OLMES"
-    FORMATTER = MCFormatter(space_prefixed_labels=True)
+    TASK_STYLER = MCFormatter(space_prefixed_labels=True)

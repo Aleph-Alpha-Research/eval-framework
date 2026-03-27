@@ -37,9 +37,9 @@ class EvaluationGenerator:
         self.save_intermediate_results = config.save_intermediate_results
 
         task_class = get_task(config.task_name)
-        if hasattr(task_class, "FORMATTER"):
-            response_type = task_class.FORMATTER.response_type
-            task_metrics = list(task_class.FORMATTER.metrics)
+        if hasattr(task_class, "TASK_STYLER"):
+            response_type = task_class.TASK_STYLER.response_type
+            task_metrics = list(task_class.TASK_STYLER.metrics)
         else:
             response_type = task_class.RESPONSE_TYPE
             task_metrics = task_class.METRICS

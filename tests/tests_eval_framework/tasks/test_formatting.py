@@ -241,7 +241,7 @@ class _ConcreteMCTask(BaseTask[str]):
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
-    FORMATTER = MCFormatter()
+    TASK_STYLER = MCFormatter()
 
     def _get_raw_question(self, item: dict) -> str:
         return item["question"]
@@ -263,7 +263,7 @@ class _ConcreteClozeTask(BaseTask[str]):
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
-    FORMATTER = ClozeFormatter()
+    TASK_STYLER = ClozeFormatter()
 
     def _get_raw_question(self, item: dict) -> str:
         return item["question"]
@@ -301,7 +301,7 @@ class TestBaseTaskMCFormatter:
         assert meta["dataset_path"] == "test/dataset"
 
     def test_response_type_from_formatter(self) -> None:
-        assert self.task.FORMATTER.response_type == ResponseType.LOGLIKELIHOODS
+        assert self.task.TASK_STYLER.response_type == ResponseType.LOGLIKELIHOODS
 
     def test_metrics_from_formatter(self) -> None:
         from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
@@ -310,9 +310,9 @@ class TestBaseTaskMCFormatter:
         )
         from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 
-        assert AccuracyLoglikelihood in self.task.FORMATTER.metrics
-        assert AccuracyNormLoglikelihood in self.task.FORMATTER.metrics
-        assert BitsPerByteLoglikelihood in self.task.FORMATTER.metrics
+        assert AccuracyLoglikelihood in self.task.TASK_STYLER.metrics
+        assert AccuracyNormLoglikelihood in self.task.TASK_STYLER.metrics
+        assert BitsPerByteLoglikelihood in self.task.TASK_STYLER.metrics
 
 
 class TestBaseTaskClozeFormatter:
@@ -369,11 +369,11 @@ class TestBaseTaskFormatterVariants:
 
         class MCVariant(_Base):
             NAME = "MCVariant"
-            FORMATTER = MCFormatter()
+            TASK_STYLER = MCFormatter()
 
         class ClozeVariant(_Base):
             NAME = "ClozeVariant"
-            FORMATTER = ClozeFormatter()
+            TASK_STYLER = ClozeFormatter()
 
         mc_task = MCVariant()
         cloze_task = ClozeVariant()
@@ -395,7 +395,7 @@ class TestBaseTaskFormatterVariants:
 
         class Child(Parent):
             NAME = "Child"
-            FORMATTER = ClozeFormatter()
+            TASK_STYLER = ClozeFormatter()
 
         parent = Parent()
         child = Child()

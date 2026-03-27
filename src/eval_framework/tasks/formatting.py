@@ -7,7 +7,7 @@ override ``BaseTask`` methods directly continue to work unchanged.
 
 Quick-start
 -----------
-A new choice-based task sets ``FORMATTER`` on its ``BaseTask`` subclass and
+A new choice-based task sets ``TASK_STYLER`` on its ``BaseTask`` subclass and
 implements **three data-access methods**:
 
 * ``_get_raw_question(item) -> str``   — the bare question string
@@ -26,14 +26,14 @@ implements **three data-access methods**:
         FEWSHOT_SPLIT = "train"
         SUBJECTS = ["my_subject"]
         PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
-        FORMATTER = ClozeFormatter(question_prefix="Question: ", cue_text="Answer:")
+        TASK_STYLER = ClozeFormatter(question_prefix="Question: ", cue_text="Answer:")
 
         def _get_raw_question(self, item): return item["question"]
         def _get_choices(self, item): return item["choices"]
         def _get_correct_index(self, item): return item["answer_idx"]
 
 For task families with both MC and Cloze variants, a shared base class holds the
-dataset attributes and data-access methods.  Variants only differ in ``FORMATTER``:
+dataset attributes and data-access methods.  Variants only differ in ``TASK_STYLER``:
 
 .. code-block:: python
 
@@ -46,11 +46,11 @@ dataset attributes and data-access methods.  Variants only differ in ``FORMATTER
 
     class ARC(_ARC_Base):
         NAME = "ARC"
-        FORMATTER = ClozeFormatter()
+        TASK_STYLER = ClozeFormatter()
 
     class ARC_MC(_ARC_Base):
         NAME = "ARC_MC"
-        FORMATTER = MCFormatter(space_prefixed_labels=True)
+        TASK_STYLER = MCFormatter(space_prefixed_labels=True)
 """
 
 import hashlib
@@ -85,7 +85,7 @@ class TaskFormatter(ABC):
     """Strategy object that controls prompt assembly and scoring for choice-based tasks.
 
     Concrete implementations (``MCFormatter``, ``ClozeFormatter``) are assigned to a
-    task's ``FORMATTER`` class attribute.  ``BaseTask`` delegates its
+    task's ``TASK_STYLER`` class attribute.  ``BaseTask`` delegates its
     formatting hooks to this object, so task authors only implement data-access
     methods.
 
