@@ -1,15 +1,15 @@
-"""Unit tests for eval_framework.tasks.formatting.
+"""Unit tests for eval_framework.tasks.task_style.
 
 Covers: ``format_mc_prompt``, ``shuffle_correct_with_distractors``, ``answer_key_to_index``,
-``MCFormatter``, ``ClozeFormatter``, and ``BaseTask`` formatter integration.
+``MCStyle``, ``ClozeStyle``, and ``BaseTask`` task styler integration.
 """
 
 import pytest
 
-from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, TaskFormat
-from eval_framework.tasks.formatting import (
-    ClozeFormatter,
-    MCFormatter,
+from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, TaskStyle
+from eval_framework.tasks.task_style import (
+    ClozeStyle,
+    MCStyle,
     answer_key_to_index,
     format_mc_prompt,
     shuffle_correct_with_distractors,
@@ -109,130 +109,130 @@ class TestAnswerKeyToIndex:
 
 
 # ---------------------------------------------------------------------------
-# MCFormatter tests
+# MCStyle tests
 # ---------------------------------------------------------------------------
 
 
-class TestMCFormatter:
+class TestMCStyle:
     def setup_method(self) -> None:
-        self.formatter = MCFormatter()
+        self.styler = MCStyle()
 
     def test_get_instruction_text(self) -> None:
-        text = self.formatter.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        text = self.styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
         assert text == "Question: Capital of France?\nA. Berlin\nB. Paris\nC. London\n"
 
     def test_get_ground_truth(self) -> None:
-        assert self.formatter.get_ground_truth(_TEST_CHOICES, _TEST_CORRECT_INDEX) == " B"
+        assert self.styler.get_ground_truth(_TEST_CHOICES, _TEST_CORRECT_INDEX) == " B"
 
     def test_get_possible_completions(self) -> None:
-        assert self.formatter.get_possible_completions(_TEST_CHOICES) == [" A", " B", " C"]
+        assert self.styler.get_possible_completions(_TEST_CHOICES) == [" A", " B", " C"]
 
     def test_get_cue_text(self) -> None:
-        assert self.formatter.get_cue_text() == "Answer:"
+        assert self.styler.get_cue_text() == "Answer:"
 
     def test_get_fewshot_target_text(self) -> None:
-        assert self.formatter.get_fewshot_target_text(_TEST_CHOICES, _TEST_CORRECT_INDEX) == "Answer: B"
+        assert self.styler.get_fewshot_target_text(_TEST_CHOICES, _TEST_CORRECT_INDEX) == "Answer: B"
 
     def test_extra_metadata(self) -> None:
-        meta = self.formatter.get_extra_metadata()
-        assert meta["task_format"] == TaskFormat.MULTIPLE_CHOICE.value
+        meta = self.styler.get_extra_metadata()
+        assert meta["task_style"] == TaskStyle.MULTIPLE_CHOICE.value
 
     def test_response_type(self) -> None:
-        assert self.formatter.response_type == ResponseType.LOGLIKELIHOODS
+        assert self.styler.response_type == ResponseType.LOGLIKELIHOODS
 
     def test_space_prefixed_labels(self) -> None:
-        formatter = MCFormatter(space_prefixed_labels=True)
-        text = formatter.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        styler = MCStyle(space_prefixed_labels=True)
+        text = styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
         assert " A. Berlin" in text
 
     def test_custom_question_prefix(self) -> None:
-        formatter = MCFormatter(question_prefix="Ziel: ")
-        text = formatter.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        styler = MCStyle(question_prefix="Ziel: ")
+        text = styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
         assert text.startswith("Ziel: ")
 
     def test_for_language_german(self) -> None:
-        formatter = MCFormatter.for_language(Language.DEU)
-        text = formatter.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        styler = MCStyle.for_language(Language.DEU)
+        text = styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
         assert text.startswith("Frage: ")
-        assert formatter.get_cue_text() == "Antwort:"
+        assert styler.get_cue_text() == "Antwort:"
 
     def test_for_language_explicit_override(self) -> None:
         """Explicit kwargs take precedence over language defaults."""
-        formatter = MCFormatter.for_language(Language.DEU, question_prefix="Ziel: ")
-        text = formatter.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        styler = MCStyle.for_language(Language.DEU, question_prefix="Ziel: ")
+        text = styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
         assert text.startswith("Ziel: ")
-        assert formatter.get_cue_text() == "Antwort:"
+        assert styler.get_cue_text() == "Antwort:"
 
     def test_custom_get_question_text(self) -> None:
-        """Subclassing the formatter allows custom question formatting."""
+        """Subclassing the styler allows custom question formatting."""
 
-        class CustomMCFormatter(MCFormatter):
+        class CustomMCStyle(MCStyle):
             def get_question_text(self, raw_question: str) -> str:
                 return f"Test: {raw_question} extra?"
 
-        formatter = CustomMCFormatter()
-        text = formatter.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        styler = CustomMCStyle()
+        text = styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
         assert text.startswith("Test: Capital of France? extra?")
 
 
 # ---------------------------------------------------------------------------
-# ClozeFormatter tests
+# ClozeStyle tests
 # ---------------------------------------------------------------------------
 
 
-class TestClozeFormatter:
+class TestClozeStyle:
     def setup_method(self) -> None:
-        self.formatter = ClozeFormatter()
+        self.styler = ClozeStyle()
 
     def test_get_instruction_text(self) -> None:
-        text = self.formatter.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        text = self.styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
         assert text == "Question: Capital of France?\n"
         assert "Berlin" not in text
 
     def test_get_ground_truth(self) -> None:
-        assert self.formatter.get_ground_truth(_TEST_CHOICES, _TEST_CORRECT_INDEX) == " Paris"
+        assert self.styler.get_ground_truth(_TEST_CHOICES, _TEST_CORRECT_INDEX) == " Paris"
 
     def test_get_possible_completions(self) -> None:
-        assert self.formatter.get_possible_completions(_TEST_CHOICES) == [
+        assert self.styler.get_possible_completions(_TEST_CHOICES) == [
             " Berlin",
             " Paris",
             " London",
         ]
 
     def test_get_cue_text(self) -> None:
-        assert self.formatter.get_cue_text() == "Answer:"
+        assert self.styler.get_cue_text() == "Answer:"
 
     def test_get_fewshot_target_text(self) -> None:
-        assert self.formatter.get_fewshot_target_text(_TEST_CHOICES, _TEST_CORRECT_INDEX) == "Answer: Paris"
+        assert self.styler.get_fewshot_target_text(_TEST_CHOICES, _TEST_CORRECT_INDEX) == "Answer: Paris"
 
     def test_extra_metadata(self) -> None:
-        meta = self.formatter.get_extra_metadata()
-        assert meta["task_format"] == TaskFormat.CLOZE.value
+        meta = self.styler.get_extra_metadata()
+        assert meta["task_style"] == TaskStyle.CLOZE.value
 
     def test_trailing_newline_false(self) -> None:
         """trailing_newline=False is used for sentence-completion tasks."""
-        formatter = ClozeFormatter(question_prefix="", cue_text="", trailing_newline=False)
+        styler = ClozeStyle(question_prefix="", cue_text="", trailing_newline=False)
         fragment = "The cat sat on the"
         choices = ["mat", "floor"]
 
-        assert formatter.get_instruction_text(fragment, choices) == "The cat sat on the"
-        assert formatter.get_cue_text() == ""
-        assert formatter.get_ground_truth(choices, 0) == " mat"
+        assert styler.get_instruction_text(fragment, choices) == "The cat sat on the"
+        assert styler.get_cue_text() == ""
+        assert styler.get_ground_truth(choices, 0) == " mat"
 
     def test_for_language_german(self) -> None:
-        formatter = ClozeFormatter.for_language(Language.DEU)
-        text = formatter.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        styler = ClozeStyle.for_language(Language.DEU)
+        text = styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
         assert text.startswith("Frage: ")
-        assert formatter.get_cue_text() == "Antwort:"
+        assert styler.get_cue_text() == "Antwort:"
 
 
 # ---------------------------------------------------------------------------
-# BaseTask formatter integration tests
+# BaseTask task styler integration tests
 # ---------------------------------------------------------------------------
 
 
 class _ConcreteMCTask(BaseTask[str]):
-    """Minimal concrete task for testing BaseTask with MCFormatter."""
+    """Minimal concrete task for testing BaseTask with MCStyle."""
 
     NAME = "TestMCTask"
     DATASET_PATH = "test/dataset"
@@ -241,7 +241,7 @@ class _ConcreteMCTask(BaseTask[str]):
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
-    TASK_STYLER = MCFormatter()
+    TASK_STYLER = MCStyle()
 
     def _get_raw_question(self, item: dict) -> str:
         return item["question"]
@@ -254,7 +254,7 @@ class _ConcreteMCTask(BaseTask[str]):
 
 
 class _ConcreteClozeTask(BaseTask[str]):
-    """Minimal concrete task for testing BaseTask with ClozeFormatter."""
+    """Minimal concrete task for testing BaseTask with ClozeStyle."""
 
     NAME = "TestClozeTask"
     DATASET_PATH = "test/dataset"
@@ -263,7 +263,7 @@ class _ConcreteClozeTask(BaseTask[str]):
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
-    TASK_STYLER = ClozeFormatter()
+    TASK_STYLER = ClozeStyle()
 
     def _get_raw_question(self, item: dict) -> str:
         return item["question"]
@@ -275,7 +275,7 @@ class _ConcreteClozeTask(BaseTask[str]):
         return item["answer"]
 
 
-class TestBaseTaskMCFormatter:
+class TestBaseTaskMCStyle:
     def setup_method(self) -> None:
         self.task = _ConcreteMCTask()
 
@@ -295,15 +295,15 @@ class TestBaseTaskMCFormatter:
     def test_fewshot_target(self) -> None:
         assert self.task._get_fewshot_target_text(_TEST_ITEM) == "Answer: B"
 
-    def test_metadata_includes_task_format(self) -> None:
+    def test_metadata_includes_task_style(self) -> None:
         meta = self.task.get_metadata()
-        assert meta["task_format"] == TaskFormat.MULTIPLE_CHOICE.value
+        assert meta["task_style"] == TaskStyle.MULTIPLE_CHOICE.value
         assert meta["dataset_path"] == "test/dataset"
 
-    def test_response_type_from_formatter(self) -> None:
+    def test_response_type_from_styler(self) -> None:
         assert self.task.TASK_STYLER.response_type == ResponseType.LOGLIKELIHOODS
 
-    def test_metrics_from_formatter(self) -> None:
+    def test_metrics_from_styler(self) -> None:
         from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
             AccuracyLoglikelihood,
             AccuracyNormLoglikelihood,
@@ -315,7 +315,7 @@ class TestBaseTaskMCFormatter:
         assert BitsPerByteLoglikelihood in self.task.TASK_STYLER.metrics
 
 
-class TestBaseTaskClozeFormatter:
+class TestBaseTaskClozeStyle:
     def setup_method(self) -> None:
         self.task = _ConcreteClozeTask()
 
@@ -340,13 +340,13 @@ class TestBaseTaskClozeFormatter:
     def test_fewshot_target(self) -> None:
         assert self.task._get_fewshot_target_text(_TEST_ITEM) == "Answer: Paris"
 
-    def test_metadata_includes_task_format(self) -> None:
+    def test_metadata_includes_task_style(self) -> None:
         meta = self.task.get_metadata()
-        assert meta["task_format"] == TaskFormat.CLOZE.value
+        assert meta["task_style"] == TaskStyle.CLOZE.value
 
 
-class TestBaseTaskFormatterVariants:
-    """Test task families sharing a base and swapping formatters."""
+class TestBaseTaskStylerVariants:
+    """Test task families sharing a base and swapping stylers."""
 
     def test_shared_base_mc_variant(self) -> None:
         class _Base(BaseTask[str]):
@@ -369,11 +369,11 @@ class TestBaseTaskFormatterVariants:
 
         class MCVariant(_Base):
             NAME = "MCVariant"
-            TASK_STYLER = MCFormatter()
+            TASK_STYLER = MCStyle()
 
         class ClozeVariant(_Base):
             NAME = "ClozeVariant"
-            TASK_STYLER = ClozeFormatter()
+            TASK_STYLER = ClozeStyle()
 
         mc_task = MCVariant()
         cloze_task = ClozeVariant()
@@ -387,15 +387,15 @@ class TestBaseTaskFormatterVariants:
         assert mc_task._get_ground_truth(_TEST_ITEM) == " B"
         assert cloze_task._get_ground_truth(_TEST_ITEM) == " Paris"
 
-    def test_formatter_override_in_subclass(self) -> None:
-        """Subclass can swap formatter without affecting parent."""
+    def test_styler_override_in_subclass(self) -> None:
+        """Subclass can swap styler without affecting parent."""
 
         class Parent(_ConcreteMCTask):
             NAME = "Parent"
 
         class Child(Parent):
             NAME = "Child"
-            TASK_STYLER = ClozeFormatter()
+            TASK_STYLER = ClozeStyle()
 
         parent = Parent()
         child = Child()
@@ -403,8 +403,8 @@ class TestBaseTaskFormatterVariants:
         assert parent._get_ground_truth(_TEST_ITEM) == " B"
         assert child._get_ground_truth(_TEST_ITEM) == " Paris"
 
-    def test_metadata_response_type_from_formatter(self) -> None:
-        """get_metadata reads response_type from the formatter, not from RESPONSE_TYPE."""
+    def test_metadata_response_type_from_styler(self) -> None:
+        """get_metadata reads response_type from the styler, not from RESPONSE_TYPE."""
         task = _ConcreteMCTask()
         meta = task.get_metadata()
         assert meta["response_type"] == ResponseType.LOGLIKELIHOODS.value

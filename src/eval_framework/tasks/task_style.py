@@ -1,8 +1,8 @@
-"""Task-format formatters and helper functions for choice-based evaluation tasks.
+"""Task-style helpers and strategy classes for choice-based evaluation tasks.
 
-This module provides injectable formatting strategies — ``MCFormatter`` and
-``ClozeFormatter`` — that reduce boilerplate in multiple-choice and cloze
-evaluation tasks.  Using a formatter is entirely optional; existing tasks that
+This module provides injectable styling strategies — ``MCStyle`` and
+``ClozeStyle`` — that reduce boilerplate in multiple-choice and cloze
+evaluation tasks.  Using a task styler is entirely optional; existing tasks that
 override ``BaseTask`` methods directly continue to work unchanged.
 
 Quick-start
@@ -14,8 +14,9 @@ implements **three data-access methods**:
 * ``_get_choices(item) -> list[str]``  — ordered list of answer options
 * ``_get_correct_index(item) -> int``  — 0-based index of the correct answer
 
-``BaseTask`` automatically delegates its formatting hooks to the formatter.
-``RESPONSE_TYPE`` and ``METRICS`` are also auto-populated from the formatter.
+``BaseTask`` automatically delegates its styling hooks to the task styler.
+``RESPONSE_TYPE`` and ``METRICS`` are read from the styler by callers that need
+them (e.g. ``EvaluationGenerator``).
 
 .. code-block:: python
 
@@ -26,7 +27,7 @@ implements **three data-access methods**:
         FEWSHOT_SPLIT = "train"
         SUBJECTS = ["my_subject"]
         PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
-        TASK_STYLER = ClozeFormatter(question_prefix="Question: ", cue_text="Answer:")
+        TASK_STYLER = ClozeStyle(question_prefix="Question: ", cue_text="Answer:")
 
         def _get_raw_question(self, item): return item["question"]
         def _get_choices(self, item): return item["choices"]
@@ -46,11 +47,11 @@ dataset attributes and data-access methods.  Variants only differ in ``TASK_STYL
 
     class ARC(_ARC_Base):
         NAME = "ARC"
-        TASK_STYLER = ClozeFormatter()
+        TASK_STYLER = ClozeStyle()
 
     class ARC_MC(_ARC_Base):
         NAME = "ARC_MC"
-        TASK_STYLER = MCFormatter(space_prefixed_labels=True)
+        TASK_STYLER = MCStyle(space_prefixed_labels=True)
 """
 
 import hashlib
@@ -63,7 +64,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyNormLoglikelihood,
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
-from eval_framework.tasks.base import Language, ResponseType, TaskFormat
+from eval_framework.tasks.base import Language, ResponseType, TaskStyle
 from eval_framework.tasks.utils import get_n_letters
 
 if TYPE_CHECKING:
@@ -77,28 +78,28 @@ _DEFAULT_QUESTION_CUE_TEXT: dict[Language, tuple[str, str]] = {
 
 
 # ---------------------------------------------------------------------------
-# Formatter strategy classes
+# Task styler strategy classes
 # ---------------------------------------------------------------------------
 
 
-class TaskFormatter(ABC):
+class TaskStyler(ABC):
     """Strategy object that controls prompt assembly and scoring for choice-based tasks.
 
-    Concrete implementations (``MCFormatter``, ``ClozeFormatter``) are assigned to a
+    Concrete implementations (``MCStyle``, ``ClozeStyle``) are assigned to a
     task's ``TASK_STYLER`` class attribute.  ``BaseTask`` delegates its
-    formatting hooks to this object, so task authors only implement data-access
+    styling hooks to this object, so task authors only implement data-access
     methods.
 
     Attributes:
         response_type: The response type the task should use (e.g. LOGLIKELIHOODS).
-        metrics:       Default metric classes for tasks using this formatter.
-        task_format:   Discriminator for metadata (MULTIPLE_CHOICE or CLOZE).
+        metrics:       Default metric classes for tasks using this styler.
+        task_style:    Discriminator for metadata (MULTIPLE_CHOICE or CLOZE).
         question_prefix: String prepended to the raw question.
     """
 
     response_type: ResponseType
     metrics: list[type["BaseMetric"]]
-    task_format: TaskFormat
+    task_style: TaskStyle
     question_prefix: str
 
     @abstractmethod
@@ -130,8 +131,8 @@ class TaskFormatter(ABC):
         return f"{self.get_cue_text()}{self.get_ground_truth(choices, correct_index)}"
 
     def get_extra_metadata(self) -> dict:
-        """Return formatter-specific metadata to merge into the task's metadata."""
-        return {"task_format": self.task_format.value}
+        """Return styler-specific metadata to merge into the task's metadata."""
+        return {"task_style": self.task_style.value}
 
     @classmethod
     def for_language(cls, language: Language, **kwargs: Any) -> Self:
@@ -146,8 +147,8 @@ class TaskFormatter(ABC):
         return cls(**kwargs)
 
 
-class MCFormatter(TaskFormatter):
-    """Multiple-choice formatter: choices shown in prompt, model scored over letter labels.
+class MCStyle(TaskStyler):
+    """Multiple-choice styler: choices shown in prompt, model scored over letter labels.
 
     Args:
         question_prefix:        Prepended to the raw question (default ``"Question: "``).
@@ -169,7 +170,7 @@ class MCFormatter(TaskFormatter):
         AccuracyNormLoglikelihood,
         BitsPerByteLoglikelihood,
     ]
-    task_format = TaskFormat.MULTIPLE_CHOICE
+    task_style = TaskStyle.MULTIPLE_CHOICE
 
     def __init__(
         self,
@@ -199,8 +200,8 @@ class MCFormatter(TaskFormatter):
         return [f" {label}" for label in get_n_letters(len(choices))]
 
 
-class ClozeFormatter(TaskFormatter):
-    """Cloze formatter: no choices in prompt, model scored over full choice text.
+class ClozeStyle(TaskStyler):
+    """Cloze styler: no choices in prompt, model scored over full choice text.
 
     Also known as "ranked classification" (RC).  The prompt only shows the question;
     the model's score for each full answer text determines the prediction.
@@ -233,7 +234,7 @@ class ClozeFormatter(TaskFormatter):
         AccuracyNormLoglikelihood,
         BitsPerByteLoglikelihood,
     ]
-    task_format = TaskFormat.CLOZE
+    task_style = TaskStyle.CLOZE
 
     def __init__(
         self,

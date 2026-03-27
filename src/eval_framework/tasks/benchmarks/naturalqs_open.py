@@ -3,9 +3,9 @@ from typing import Any
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
-from eval_framework.tasks.formatting import (
-    ClozeFormatter,
-    MCFormatter,
+from eval_framework.tasks.task_style import (
+    ClozeStyle,
+    MCStyle,
     answer_key_to_index,
 )
 
@@ -63,16 +63,16 @@ class _NaturalQsOpenChoice_Base(BaseTask[str]):
 
 class NaturalQsOpenCloze(_NaturalQsOpenChoice_Base):
     NAME = "NaturalQsOpenCloze"
-    TASK_STYLER = ClozeFormatter()
+    TASK_STYLER = ClozeStyle()
 
 
 class NaturalQsOpenMC(_NaturalQsOpenChoice_Base):
     NAME = "NaturalQsOpenMC"
-    TASK_STYLER = MCFormatter(space_prefixed_labels=True)
+    TASK_STYLER = MCStyle(space_prefixed_labels=True)
 
 
 class NaturalQsOpenMC_OLMES(_NaturalQsOpenChoice_Base):
     """NaturalQsOpenMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...)."""
 
     NAME = "NaturalQsOpenMC_OLMES"
-    TASK_STYLER = MCFormatter(space_prefixed_labels=True)
+    TASK_STYLER = MCStyle(space_prefixed_labels=True)

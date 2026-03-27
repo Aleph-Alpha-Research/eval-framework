@@ -31,7 +31,7 @@ class ResponseType(Enum):
     LOGLIKELIHOODS = "loglikelihoods"
 
 
-class TaskFormat(Enum):
+class TaskStyle(Enum):
     MULTIPLE_CHOICE = "multiple_choice"
     CLOZE = "cloze"
 
