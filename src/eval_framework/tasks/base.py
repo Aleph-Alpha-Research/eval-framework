@@ -2,7 +2,7 @@ import logging
 import os
 import random
 import traceback
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
@@ -29,6 +29,11 @@ NO_SUBJECT = "no_subject"
 class ResponseType(Enum):
     COMPLETION = "completion"
     LOGLIKELIHOODS = "loglikelihoods"
+
+
+class TaskStyle(Enum):
+    MULTIPLE_CHOICE = "multiple_choice"
+    CLOZE = "cloze"
 
 
 class Language(Enum):
@@ -272,24 +277,41 @@ class BaseTask[SubjectType](ABC):
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
         return None
 
-    @abstractmethod
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        raise NotImplementedError("Subclasses using a TASK_STYLER must implement _get_raw_question")
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        raise NotImplementedError("Subclasses using a TASK_STYLER must implement _get_choices")
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        raise NotImplementedError("Subclasses using a TASK_STYLER must implement _get_correct_index")
+
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.get_instruction_text(self._get_raw_question(item), self._get_choices(item))
         raise NotImplementedError
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.get_fewshot_target_text(self._get_choices(item), self._get_correct_index(item))
         target = self._get_ground_truth(item)
         assert target is not None
         assert isinstance(target, str)
         return target
 
-    @abstractmethod
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.get_ground_truth(self._get_choices(item), self._get_correct_index(item))
         raise NotImplementedError
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.get_cue_text()
         return ""
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.get_possible_completions(self._get_choices(item))
         return None
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
@@ -309,14 +331,24 @@ class BaseTask[SubjectType](ABC):
         return None
 
     def get_metadata(self) -> dict[str, str | list[str]]:
-        return {
+        if hasattr(self, "TASK_STYLER"):
+            response_type = self.TASK_STYLER.response_type
+            metrics = self.TASK_STYLER.metrics
+        else:
+            response_type = self.RESPONSE_TYPE
+            metrics = self.METRICS
+
+        meta: dict[str, str | list[str]] = {
             "dataset_path": self.DATASET_PATH,
             "sample_split": self.SAMPLE_SPLIT,
             "fewshot_split": self.FEWSHOT_SPLIT,
-            "response_type": self.RESPONSE_TYPE.value,
-            "metrics": [m.NAME for m in self.METRICS],
+            "response_type": response_type.value,
+            "metrics": [m.NAME for m in metrics],
             "subjects": [str(s) for s in self.SUBJECTS],
         }
+        if hasattr(self, "TASK_STYLER"):
+            meta.update(self.TASK_STYLER.get_extra_metadata())
+        return meta
 
     def generate_completions(
         self,

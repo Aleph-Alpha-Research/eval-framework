@@ -98,11 +98,16 @@ def generate_docs_for_task(
             f.write(f"SAMPLE_SPLIT = {task.SAMPLE_SPLIT}".strip() + "\n")
         if hasattr(task, "FEWSHOT_SPLIT"):
             f.write(f"FEWSHOT_SPLIT = {task.FEWSHOT_SPLIT}".strip() + "\n")
-        if hasattr(task, "RESPONSE_TYPE"):
-            f.write(f"RESPONSE_TYPE = {task.RESPONSE_TYPE.name}".strip() + "\n")
-        if hasattr(task, "METRICS"):
-            metrics_list = [f"{m.__name__}" for m in task.METRICS]
+        if hasattr(task, "TASK_STYLER"):
+            f.write(f"RESPONSE_TYPE = {task.TASK_STYLER.response_type.name}".strip() + "\n")
+            metrics_list = [f"{m.__name__}" for m in task.TASK_STYLER.metrics]
             f.write(f"METRICS = [{', '.join(metrics_list)}]".strip() + "\n")
+        else:
+            if hasattr(task, "RESPONSE_TYPE"):
+                f.write(f"RESPONSE_TYPE = {task.RESPONSE_TYPE.name}".strip() + "\n")
+            if hasattr(task, "METRICS"):
+                metrics_list = [f"{m.__name__}" for m in task.METRICS]
+                f.write(f"METRICS = [{', '.join(metrics_list)}]".strip() + "\n")
         if hasattr(task, "SUBJECTS"):
             f.write(f"SUBJECTS = {repr(task.SUBJECTS)}".strip() + "\n")
         if hasattr(task, "LANGUAGE"):
