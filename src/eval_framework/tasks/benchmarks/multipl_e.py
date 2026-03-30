@@ -20,7 +20,7 @@ Paper: https://ieeexplore.ieee.org/abstract/document/10103177
 from typing import Any
 
 from eval_framework.metrics.completion.multipl_e_assertion import MultiPLECodeAssertion, MultiPLEMetricContext
-from eval_framework.tasks.base import NO_SUBJECT, BaseTask, ResponseType, Sample
+from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
 
 MULTIPL_E_STOP_TOKENS: dict[str, list[str]] = {
     "cpp": ["\n}", "}\n//"],
@@ -49,7 +49,7 @@ class _BaseMPLE(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [MultiPLECodeAssertion]
     SUBJECTS = [NO_SUBJECT]
-    LANGUAGE = None
+    LANGUAGE = Language.ENG
 
     MULTIPL_E_LANGUAGE: str  # overridden by each language subclass
     MULTIPL_E_DATASET_PREFIX: str  # "humaneval" or "mbpp"
