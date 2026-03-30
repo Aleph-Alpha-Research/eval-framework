@@ -8,7 +8,7 @@ FEWSHOT_SPLIT = test
 RESPONSE_TYPE = COMPLETION
 METRICS = [MultiPLECodeAssertion]
 SUBJECTS = ['no_subject']
-LANGUAGE = None
+LANGUAGE = <Language.ENG: 'English'>
 ````
 
 - Module: `eval_framework.tasks.benchmarks.multipl_e`
