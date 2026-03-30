@@ -374,7 +374,6 @@ class BaseTask[SubjectType](ABC):
             if raise_errors():
                 raise e
             logger.info(f"Error: {e.__class__.__name__} {e}")
-            assert len(samples) == 1, "LLMs not handling errors are not supported in batch mode"
             raw_completions = [
                 RawCompletion(
                     prompt="",
