@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 176**
+**Total number of tasks: 179**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -68,6 +68,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [HELLASWAG_EU20_DE](HELLASWAG_EU20_DE.md)
 - [HELLASWAG_EU20_FR](HELLASWAG_EU20_FR.md)
 - [HELLASWAG_IDK](HELLASWAG_IDK.md)
+- [HELLASWAG_OLMES](HELLASWAG_OLMES.md)
 - [HumanEval](HumanEval.md)
 - [HumanEvalBPB](HumanEvalBPB.md)
 - [HumanEvalInstruct](HumanEvalInstruct.md)
@@ -154,6 +155,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [SQUAD](SQUAD.md)
 - [SQUAD2](SQUAD2.md)
 - [SQUAD2BPB](SQUAD2BPB.md)
+- [SQuAD_OLMES](SQuAD_OLMES.md)
 - [SocialIQACloze](SocialIQACloze.md)
 - [SocialIQAMC](SocialIQAMC.md)
 - [SocialIQAMC_OLMES](SocialIQAMC_OLMES.md)
@@ -168,6 +170,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [WINOGENDER](WINOGENDER.md)
 - [WINOGENDER_IDK](WINOGENDER_IDK.md)
 - [WINOGRANDE](WINOGRANDE.md)
+- [WINOGRANDECloze](WINOGRANDECloze.md)
 - [WINOGRANDE_IDK](WINOGRANDE_IDK.md)
 - [WINOGRANDE_OLMES](WINOGRANDE_OLMES.md)
 - [WINOX_DE](WINOX_DE.md)
