@@ -171,3 +171,7 @@ wandb
 
 # Generated docs
 docs/api/generated
+
+# AI Agent and Claude files
+AGENTS.md
+CLAUDE.md

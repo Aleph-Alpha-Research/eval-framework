@@ -1,3 +1,5 @@
+import re
+import string
 from collections import Counter
 from typing import Any
 
@@ -6,7 +8,22 @@ from eval_framework.shared.types import Completion
 
 
 class F1(BaseMetric[Completion]):
+    """
+    Token-overlap F1 metric.
+
+    Default behavior is backward-compatible with the previous implementation:
+    lowercase + whitespace tokenization.
+    """
+
     NAME = "F1"
+
+    def normalize(self, text: str) -> str:
+        """Normalizes text to use lower case."""
+        return text.lower()
+
+    def tokenize(self, text: str) -> list[str]:
+        """Tokenizes text into a list of tokens using whitespace as the delimiter."""
+        return self.normalize(text).split()
 
     def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error is not None:
@@ -16,11 +33,33 @@ class F1(BaseMetric[Completion]):
         if not ground_truths:
             return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True, error=response.error)]
 
-        hyp_tokens = response.completion.lower().split()
-        f1_scores = [calculate_f1(gt.lower().split(), hyp_tokens) for gt in ground_truths]
+        prediction_tokens = self.tokenize(response.completion)
+        ground_truths_tokens = [self.tokenize(gt) for gt in ground_truths]
+        f1_scores = [calculate_f1(gt_tokens, prediction_tokens) for gt_tokens in ground_truths_tokens]
         max_f1 = max(f1_scores)
 
         return [MetricResult(metric_name=self.NAME, value=max_f1, higher_is_better=True, error=response.error)]
+
+
+class F1SquadNormalized(F1):
+    """
+    SQuAD-style normalized F1:
+    - lowercase
+    - remove punctuation
+    - remove articles (a, an, the)
+    - collapse extra whitespace
+    """
+
+    NAME = "F1 SQuAD Normalized"
+    _ARTICLES_RE = re.compile(r"\b(a|an|the)\b")
+    _PUNCTUATION = set(string.punctuation)
+
+    def normalize(self, text: str) -> str:
+        text = text.lower()
+        text = "".join(ch for ch in text if ch not in self._PUNCTUATION)
+        text = self._ARTICLES_RE.sub(" ", text)
+        text = " ".join(text.split())
+        return text
 
 
 def calculate_f1(ref_tokens: list[Any], hyp_tokens: list[Any]) -> float:

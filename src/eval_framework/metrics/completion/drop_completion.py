@@ -2,7 +2,11 @@
 
 from eval_framework.external.drop_process_results import process_results
 from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.shared.types import BaseMetricContext, Completion, extract_context_metric
+from eval_framework.shared.types import (
+    BaseMetricContext,
+    Completion,
+    extract_context_metric,
+)
 
 
 class DropMetricContext(BaseMetricContext):
@@ -20,10 +24,13 @@ class DropF1ExactMatch(BaseMetric[Completion]):
     def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error is not None:
             return [
-                MetricResult(metric_name=f"{self.NAME}/f1", value=None, higher_is_better=True, error=response.error),
                 MetricResult(
-                    metric_name=f"{self.NAME}/exact_match", value=None, higher_is_better=True, error=response.error
-                ),
+                    metric_name=name,
+                    value=None,
+                    higher_is_better=True,
+                    error=response.error,
+                )
+                for name in [n.strip() for n in self.NAME.split("/")]
             ]
 
         context = extract_context_metric(response, DropMetricContext)
@@ -36,12 +43,14 @@ class DropF1ExactMatch(BaseMetric[Completion]):
             pred_spans = [raw]
 
         doc = {"answers": answer_tuples}
-        results = [pred_spans]
-        out = process_results(doc, results)
+        out = process_results(doc, pred_spans)
 
         return [
-            MetricResult(metric_name="DROP F1", value=out["f1"], higher_is_better=True, error=response.error),
             MetricResult(
-                metric_name="Exact Match", value=out["exact_match"], higher_is_better=True, error=response.error
-            ),
+                metric_name=name,
+                value=out[key],
+                higher_is_better=True,
+                error=response.error,
+            )
+            for name, key in zip([n.strip() for n in self.NAME.split("/")], self.KEYS)
         ]

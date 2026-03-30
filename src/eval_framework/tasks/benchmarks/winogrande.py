@@ -3,13 +3,15 @@ from typing import Any
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
+    PartialEvalAccuracy,
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
-from eval_framework.tasks.base import BaseTask, Language, ResponseType
+from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.utils import get_n_letters
+from template_formatting.formatter import Message, Role
 
 ANSWER_STR_TO_NUM = {"1": 0, "2": 1}
 
@@ -95,3 +97,55 @@ class WINOGRANDE_IDK(WINOGRANDE):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         completions = super()._get_possible_completions(item)
         return (completions or []) + [" I do not know."]
+
+
+class WINOGRANDECloze(WINOGRANDE):
+    """Winogrande with Cloze-style prompt.
+
+    The big change from usual tasks is that Winogrande uses a 'partial evaluation', meaning for
+    a sentence like "The _ is small" and options "garage" and "backyard", it wants to evaluate
+    p(suffix | prefix + option), e.g. p("is small" | "The garage") and p("is small" | "The backyard").
+    This is conceptually different from usual tasks, where we evaluate p(options + suffix | prefix),
+    i.e. p("garage is small" | "The") and p("backyard is small" | "The").
+
+    Mathematically, they differ by p(option + suffix | prefix) = p(option | prefix) * p(suffix | prefix + option)
+    and thus can differ significantly, if the options have different base probabilities.
+
+    In the implementation, this creates the following issue: Normally, we have the same prompt for all
+    options, and then check different completions. However, with the correct format, we would have
+    different prompts for different options, and then check the same completion.
+
+    In this implementation, we fix this by having `_create_samples` create two samples per dataset item,
+    and then use a custom metric (`PartialEvalAccuracy`) that pairs them up and compares them.
+    """
+
+    NAME = "WinograndeCloze"
+    SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
+    METRICS = [PartialEvalAccuracy]  # Custom metric for partial evaluation accuracy (see docstring)
+
+    def _get_pre_and_suffix_text(self, item: dict[str, Any]) -> tuple[str, str]:
+        prefix, suffix = item["sentence"].split("_", 1)
+        prefix = prefix.replace("  ", " ")
+        suffix = suffix.replace("  ", " ")
+        return prefix, suffix
+
+    def _create_samples(self, item: dict[str, Any], index: int, subject: str) -> list[Sample]:
+        """Creates two samples per dataset item, one for each option."""
+        fewshot_messages = self._get_example_messages(item)
+        prefix, suffix = self._get_pre_and_suffix_text(item)
+        ground_truth_option = ANSWER_STR_TO_NUM[item["answer"]]
+
+        samples = []
+        for opt_idx, option in enumerate([item["option1"], item["option2"]]):
+            messages = fewshot_messages + [Message(role=Role.USER, content=f"{prefix}{option}")]
+            samples.append(
+                Sample(
+                    id=index + opt_idx,
+                    subject=str(subject),
+                    messages=messages,
+                    ground_truth=str(opt_idx == ground_truth_option),  # True/False to encode correctness
+                    possible_completions=[suffix],  # Only one possible completion, the suffix
+                )
+            )
+
+        return samples
