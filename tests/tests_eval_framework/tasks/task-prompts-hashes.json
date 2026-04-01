@@ -236,6 +236,8 @@
     "MultiPLEMBPPSh.Llama3Formatter": "d842dfd22a7fe4c8b4ea6eac54c42cb6",
     "NaturalQsOpen.ConcatFormatter": "6545c9dd54015c1e1227b322dcd82598",
     "NaturalQsOpen.Llama3Formatter": "3bfec3e5d48974262309c56a179fde60",
+    "NaturalQsOpenBPB.ConcatFormatter": "e02c13a7c739e5a95de5ef7b11635bff",
+    "NaturalQsOpenBPB.Llama3Formatter": "6ac2ba06cbd2c5dfaf0ee0cad406d047",
     "NaturalQsOpenCloze.ConcatFormatter": "681f3cb09c2d4f36a65f4d0d3fec9d1a",
     "NaturalQsOpenCloze.Llama3Formatter": "b350c62360e9b1ae5ffa780a98cbebdb",
     "NaturalQsOpenMC.ConcatFormatter": "600d03c8758b3131d4ff55f54423b5f6",
