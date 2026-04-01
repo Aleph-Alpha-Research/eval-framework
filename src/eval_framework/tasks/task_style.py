@@ -116,10 +116,10 @@ class TaskStyler(ABC):
 
     @abstractmethod
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
-        """Return the list of scored completion strings.
+        """Return the list of completion strings to be evaluated.
 
         ``correct_index`` is only required by ``BPBStyle``, which scores solely the
-        ground-truth completion.  ``MCStyle`` and ``ClozeStyle`` score all choices and
+        ground-truth completion. ``MCStyle`` and ``ClozeStyle`` score all choices and
         ignore it; callers may omit it when using those stylers.
         """
 
@@ -206,6 +206,7 @@ class MCStyle(TaskStyler):
         return f" {labels[correct_index]}"
 
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+        """Note: `correct_index` is ignored for `MCStyle` and only used for `BPBStyle`."""
         return [f" {label}" for label in get_n_letters(len(choices))]
 
 
@@ -292,6 +293,9 @@ class BPBStyle(ClozeStyle):
     task_style = TaskStyle.BPB
 
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+        assert correct_index is not None, (
+            "BPBStyle only evaluates the loglikelhood of the ground truth answer and thus requires the correct index."
+        )
         return [f" {choices[correct_index]}"]
 
 
