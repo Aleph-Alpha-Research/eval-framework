@@ -8,6 +8,7 @@ import pytest
 
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, TaskStyle
 from eval_framework.tasks.task_style import (
+    BPBStyle,
     ClozeStyle,
     MCStyle,
     answer_key_to_index,
@@ -408,3 +409,100 @@ class TestBaseTaskStylerVariants:
         task = _ConcreteMCTask()
         meta = task.get_metadata()
         assert meta["response_type"] == ResponseType.LOGLIKELIHOODS.value
+
+
+# ---------------------------------------------------------------------------
+# BPBStyle tests
+# ---------------------------------------------------------------------------
+
+
+class TestBPBStyle:
+    def setup_method(self) -> None:
+        self.styler = BPBStyle()
+
+    def test_get_instruction_text(self) -> None:
+        """Prompt is identical to ClozeStyle — no choices shown."""
+        text = self.styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        assert text == "Question: Capital of France?\n"
+        assert "Berlin" not in text
+
+    def test_get_ground_truth(self) -> None:
+        assert self.styler.get_ground_truth(_TEST_CHOICES, _TEST_CORRECT_INDEX) == " Paris"
+
+    def test_get_possible_completions_returns_only_ground_truth(self) -> None:
+        completions = self.styler.get_possible_completions(_TEST_CHOICES, _TEST_CORRECT_INDEX)
+        assert completions == [" Paris"]
+        assert len(completions) == 1
+
+    def test_get_cue_text(self) -> None:
+        assert self.styler.get_cue_text() == "Answer:"
+
+    def test_get_fewshot_target_text(self) -> None:
+        assert self.styler.get_fewshot_target_text(_TEST_CHOICES, _TEST_CORRECT_INDEX) == "Answer: Paris"
+
+    def test_extra_metadata(self) -> None:
+        meta = self.styler.get_extra_metadata()
+        assert meta["task_style"] == TaskStyle.BPB.value
+
+    def test_response_type(self) -> None:
+        assert self.styler.response_type == ResponseType.LOGLIKELIHOODS
+
+    def test_metrics_bpb_only(self) -> None:
+        from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
+        from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
+
+        assert self.styler.metrics == [BitsPerByteLoglikelihood]
+        assert AccuracyLoglikelihood not in self.styler.metrics
+
+    def test_for_language_german(self) -> None:
+        styler = BPBStyle.for_language(Language.DEU)
+        text = styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        assert text.startswith("Frage: ")
+        assert styler.get_cue_text() == "Antwort:"
+
+
+class _ConcreteBPBTask(BaseTask[str]):
+    """Minimal concrete task for testing BaseTask with BPBStyle."""
+
+    NAME = "TestBPBTask"
+    DATASET_PATH = "test/dataset"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "train"
+    SUBJECTS = [NO_SUBJECT]
+    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
+    LANGUAGE = Language.ENG
+    TASK_STYLER = BPBStyle()
+
+    def _get_raw_question(self, item: dict) -> str:
+        return item["question"]
+
+    def _get_choices(self, item: dict) -> list[str]:
+        return item["choices"]
+
+    def _get_correct_index(self, item: dict) -> int:
+        return item["answer"]
+
+
+class TestBaseTaskBPBStyle:
+    def setup_method(self) -> None:
+        self.task = _ConcreteBPBTask()
+
+    def test_instruction_text(self) -> None:
+        text = self.task._get_instruction_text(_TEST_ITEM)
+        assert text == "Question: Capital of France?\n"
+        assert "Berlin" not in text
+
+    def test_ground_truth(self) -> None:
+        assert self.task._get_ground_truth(_TEST_ITEM) == " Paris"
+
+    def test_possible_completions_single_entry(self) -> None:
+        completions = self.task._get_possible_completions(_TEST_ITEM)
+        assert completions == [" Paris"]
+
+    def test_metadata_task_style(self) -> None:
+        meta = self.task.get_metadata()
+        assert meta["task_style"] == TaskStyle.BPB.value
+
+    def test_metadata_metrics_bpb_only(self) -> None:
+        meta = self.task.get_metadata()
+        assert meta["metrics"] == ["BitsPerByte"]
