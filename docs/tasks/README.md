@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 179**
+**Total number of tasks: 180**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -132,6 +132,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [MultiPLEMBPPRs](MultiPLEMBPPRs.md)
 - [MultiPLEMBPPSh](MultiPLEMBPPSh.md)
 - [NaturalQsOpen](NaturalQsOpen.md)
+- [NaturalQsOpenBPB](NaturalQsOpenBPB.md)
 - [NaturalQsOpenCloze](NaturalQsOpenCloze.md)
 - [NaturalQsOpenMC](NaturalQsOpenMC.md)
 - [NaturalQsOpenMC_OLMES](NaturalQsOpenMC_OLMES.md)
