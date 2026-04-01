@@ -52,6 +52,10 @@ dataset attributes and data-access methods.  Variants only differ in ``TASK_STYL
     class ARC_MC(_ARC_Base):
         NAME = "ARC_MC"
         TASK_STYLER = MCStyle(space_prefixed_labels=True)
+
+    class ARC_BPB(_ARC_Base):
+        NAME = "ARC_BPB"
+        TASK_STYLER = BPBStyle()
 """
 
 import hashlib
@@ -111,8 +115,13 @@ class TaskStyler(ABC):
         """Return the ground-truth string for scoring."""
 
     @abstractmethod
-    def get_possible_completions(self, choices: list[str]) -> list[str]:
-        """Return the list of scored completion strings."""
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+        """Return the list of scored completion strings.
+
+        ``correct_index`` is only required by ``BPBStyle``, which scores solely the
+        ground-truth completion.  ``MCStyle`` and ``ClozeStyle`` score all choices and
+        ignore it; callers may omit it when using those stylers.
+        """
 
     @abstractmethod
     def get_cue_text(self) -> str:
@@ -196,7 +205,7 @@ class MCStyle(TaskStyler):
         labels = get_n_letters(len(choices))
         return f" {labels[correct_index]}"
 
-    def get_possible_completions(self, choices: list[str]) -> list[str]:
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
         return [f" {label}" for label in get_n_letters(len(choices))]
 
 
@@ -256,8 +265,34 @@ class ClozeStyle(TaskStyler):
     def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
         return f" {choices[correct_index]}"
 
-    def get_possible_completions(self, choices: list[str]) -> list[str]:
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
         return [f" {c}" for c in choices]
+
+
+class BPBStyle(ClozeStyle):
+    """BPB-only styler: prompt identical to ClozeStyle, but scores only the ground-truth completion.
+
+    One LLM forward pass per sample instead of N (one per choice), making evaluation
+    significantly faster when accuracy metrics are not needed.
+
+    Args:
+        question_prefix:   Prepended to the raw question (default ``"Question: "``).
+        cue_text:          Assistant cue after the prompt (default ``"Answer:"``).
+        trailing_newline:  When ``True`` (default), the instruction ends with ``"\\n"``.
+
+    Assembled prompt example (3 choices)::
+
+        "Question: What is the capital of France?\\n"
+
+        Scored completions: [" Paris"]  ← ground truth only, one forward pass
+        Ground truth:        " Paris"
+    """
+
+    metrics: list[type["BaseMetric"]] = [BitsPerByteLoglikelihood]
+    task_style = TaskStyle.BPB
+
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+        return [f" {choices[correct_index]}"]
 
 
 # ---------------------------------------------------------------------------

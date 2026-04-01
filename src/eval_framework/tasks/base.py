@@ -34,6 +34,7 @@ class ResponseType(Enum):
 class TaskStyle(Enum):
     MULTIPLE_CHOICE = "multiple_choice"
     CLOZE = "cloze"
+    BPB = "bpb"
 
 
 class Language(Enum):
@@ -311,7 +312,7 @@ class BaseTask[SubjectType](ABC):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         if hasattr(self, "TASK_STYLER"):
-            return self.TASK_STYLER.get_possible_completions(self._get_choices(item))
+            return self.TASK_STYLER.get_possible_completions(self._get_choices(item), self._get_correct_index(item))
         return None
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
