@@ -293,9 +293,11 @@ class BPBStyle(ClozeStyle):
     task_style = TaskStyle.BPB
 
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
-        assert correct_index is not None, (
-            "BPBStyle only evaluates the loglikelhood of the ground truth answer and thus requires the correct index."
-        )
+        if correct_index is None:
+            raise ValueError(
+                "BPBStyle evaluates the loglikelihood of the ground truth answer only,"
+                "and thus requires the correct index."
+            )
         return [f" {choices[correct_index]}"]
 
 

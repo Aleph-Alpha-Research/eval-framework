@@ -67,14 +67,18 @@ class ResponseGenerator:
         if config.perturbation_config is not None:
             perturbation_task_class = create_perturbation_class(task_class, config.perturbation_config)
             self.task = perturbation_task_class.with_overwrite(
-                self.few_shot, custom_subjects=self.config.task_subjects, custom_hf_revision=self.config.hf_revision
+                self.few_shot,
+                custom_subjects=self.config.task_subjects,
+                custom_hf_revision=self.config.hf_revision,
             )
         else:
             self.task = task_class.with_overwrite(
-                self.few_shot, custom_subjects=self.config.task_subjects, custom_hf_revision=self.config.hf_revision
+                self.few_shot,
+                custom_subjects=self.config.task_subjects,
+                custom_hf_revision=self.config.hf_revision,
             )
 
-        self.response_type = task_class.RESPONSE_TYPE
+        self.response_type, _ = self.task._get_type_and_metrics()
 
     def _llm_task_param_precedence(self) -> tuple[list[str] | None, int | None]:
         """
@@ -89,7 +93,10 @@ class ResponseGenerator:
         task_stop_sequences = getattr(self.task, "stop_sequences", None)
         task_max_tokens = self.config.max_tokens or getattr(self.task, "max_tokens", None)
         # if both task and model define a max_token, the smaller value is used
-        max_tokens = min([x for x in [llm_max_tokens, task_max_tokens] if x is not None], default=None)
+        max_tokens = min(
+            [x for x in [llm_max_tokens, task_max_tokens] if x is not None],
+            default=None,
+        )
         logger.info(f"Set max_tokens to {max_tokens}")
         # if both task and model define stop sequences, those are merged into one list
         stop_sequences_merged = (llm_stop_sequences or []) + (task_stop_sequences or [])
@@ -117,7 +124,9 @@ class ResponseGenerator:
                     loglikelihoods={},
                     loglikelihoods_sequence_positions={},
                     raw_loglikelihood_error=Error(
-                        error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc()
+                        error_class=e.__class__.__name__,
+                        message=str(e),
+                        traceback=traceback.format_exc(),
                     ),
                 )
                 for _ in range(len(samples))
@@ -142,7 +151,9 @@ class ResponseGenerator:
             )
         return loglikelihood_list
 
-    def _generative_output_type_selector(self) -> Callable[[list[Sample]], list[Completion] | list[Loglikelihood]]:
+    def _generative_output_type_selector(
+        self,
+    ) -> Callable[[list[Sample]], list[Completion] | list[Loglikelihood]]:
         """
         Selects the generative output type based on the response type.
         :return: function to generate responses
@@ -151,7 +162,10 @@ class ResponseGenerator:
             case ResponseType.COMPLETION:
                 stop_sequences, max_tokens = self._llm_task_param_precedence()
                 return partial(
-                    self.task.generate_completions, self.llm, stop_sequences=stop_sequences, max_tokens=max_tokens
+                    self.task.generate_completions,
+                    self.llm,
+                    stop_sequences=stop_sequences,
+                    max_tokens=max_tokens,
                 )  # type: ignore[call-arg]
             case ResponseType.LOGLIKELIHOODS:
                 return self._generate_loglikelihoods
@@ -245,7 +259,9 @@ class ResponseGenerator:
 
         samples_batch: list[Sample] = []
         with tqdm(
-            total=total_num_samples, desc=f"Processing {self.response_type.value}", disable=get_disable_bar_flag()
+            total=total_num_samples,
+            desc=f"Processing {self.response_type.value}",
+            disable=get_disable_bar_flag(),
         ) as pbar:
             samples = self.task.iterate_samples(self.num_samples)
             for i, sample in enumerate(repeat_samples(samples, repeats)):

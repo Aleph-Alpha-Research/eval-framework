@@ -332,12 +332,7 @@ class BaseTask[SubjectType](ABC):
         return None
 
     def get_metadata(self) -> dict[str, str | list[str]]:
-        if hasattr(self, "TASK_STYLER"):
-            response_type = self.TASK_STYLER.response_type
-            metrics = self.TASK_STYLER.metrics
-        else:
-            response_type = self.RESPONSE_TYPE
-            metrics = self.METRICS
+        response_type, metrics = self._get_type_and_metrics()
 
         meta: dict[str, str | list[str]] = {
             "dataset_path": self.DATASET_PATH,
@@ -424,3 +419,8 @@ class BaseTask[SubjectType](ABC):
                 )
             )
         return completion_list
+
+    def _get_type_and_metrics(self) -> tuple[ResponseType, list[type["BaseMetric"]]]:
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.response_type, self.TASK_STYLER.metrics
+        return self.RESPONSE_TYPE, self.METRICS
