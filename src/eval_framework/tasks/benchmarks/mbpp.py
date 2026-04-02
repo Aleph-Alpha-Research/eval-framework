@@ -9,6 +9,7 @@ from eval_framework.metrics.completion.code_assertion import (
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.task_style import BPBStyle
 
 logger = logging.getLogger(__name__)
 
@@ -307,3 +308,124 @@ class MBPP_OLMES(MBPP):
         mbpp_ground_truth = str(sample.ground_truth)
         code = self._code_expander(extracted_code, mbpp_ground_truth)
         return code
+
+
+class _MBPP_Base(BaseTask[str]):
+    """Shared base for TASK_STYLER-based MBPP variants.
+
+    MBPP has no discrete answer choices, so MCStyle and ClozeStyle do not apply.
+    Only BPBStyle (bits-per-byte of the reference solution) is supported.
+
+    Subclasses set ``NAME`` and ``TASK_STYLER``; everything else is inherited.
+    """
+
+    DATASET_PATH = "google-research-datasets/mbpp"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "train"
+    SUBJECTS = ["full"]
+    LANGUAGE = Language.ENG
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        tests = "\n".join(item["test_list"])
+        text = item["text"] if "text" in item else item["prompt"]
+        return f"You are an expert Python programmer, and here is your task: {text} Your code should pass these tests:\n\n{tests}"  # noqa
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return [item["code"]]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return 0
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return f"{BEGIN}\n{item['code']}\n{END}"
+
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+        return self.rnd.sample(self.dataset[self.FEWSHOT_SPLIT], self.num_fewshot)
+
+
+class MBPP_BPB(_MBPP_Base):
+    """BPB-only variant: scores bits-per-byte of the reference code solution."""
+
+    NAME = "MBPP_BPB"
+    TASK_STYLER = BPBStyle(question_prefix="", cue_text=BEGIN)
+
+
+# fmt: off
+# Fixed 3-shot fewshot examples matching codex_mbpp_gold_bpb_3shot.
+# Source: MBPP "full" prompt split, task_ids 3, 9, 4 (in that order).
+_CODEX_MBPP_FEWSHOTS: list[dict[str, Any]] = [
+    {
+        "text": "Write a python function to identify non-prime numbers.",
+        "code": "import math\ndef is_not_prime(n):\n    result = False\n    for i in range(2,int(math.sqrt(n)) + 1):\n        if n % i == 0:\n            result = True\n    return result",#noqa
+    },
+    {
+        "text": "Write a python function to find the minimum number of rotations required to get the same string.",
+        "code": "def find_Rotations(str): \n    tmp = str + str\n    n = len(str) \n    for i in range(1,n + 1): \n        substring = tmp[i: i+n] \n        if (str == substring): \n            return i \n    return n",#noqa
+    },
+    {
+        "text": "Write a function to find the largest integers from a given list of numbers using heap queue algorithm.",#noqa
+        "code": "import heapq as hq\ndef heap_queue_largest(nums,n):\n  largest_nums = hq.nlargest(n, nums)\n  return largest_nums",#noqa
+    },
+]
+# fmt: on
+
+
+class _CodexMBPP_Base(BaseTask[str]):
+    """Shared base for the codex_mbpp_gold_bpb_3shot-compatible MBPP variants.
+
+    Prompt format (per item)::
+
+        Write a python function to {description}.
+        ```python
+        {code}
+        ```
+
+    The task description is used verbatim as the question; no test-assertions
+    are included in the prompt.  BPB is scored over the full reference code
+    (including the closing ``` fence).  Line endings are normalised to LF and
+    trailing whitespace is stripped from the code string.
+    """
+
+    DATASET_PATH = "google-research-datasets/mbpp"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "test"
+    SUBJECTS = ["full"]
+    LANGUAGE = Language.ENG
+
+    @staticmethod
+    def _normalize_code(code: str) -> str:
+        return code.replace("\r\n", "\n").replace("\r", "").rstrip()
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        return item["text"]
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return [self._normalize_code(item["code"])]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return 0
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        code = self._normalize_code(item["code"])
+        return f"```python\n{code}\n```"
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
+        # No leading space: the cue already ends with "\n" so the code starts
+        # directly on the next line (unlike the default ClozeStyle which
+        # prepends a space to each completion).
+        code = self._normalize_code(item["code"])
+        return [f"{code}\n```"]
+
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict[str, Any]]:
+        return _CODEX_MBPP_FEWSHOTS[: self.num_fewshot]
+
+
+class CodexMBPP_BPB(_CodexMBPP_Base):
+    """BPB-only MBPP variant that matches the codex_mbpp_gold_bpb_3shot reference.
+
+    Prompt: ``"{description}\\n```python\\n"``
+    Completion: ``"{code}\\n```"``
+    """
+
+    NAME = "CodexMBPP_BPB"
+    TASK_STYLER = BPBStyle(question_prefix="", cue_text="```python\n", trailing_newline=True)

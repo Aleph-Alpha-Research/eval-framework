@@ -11,67 +11,79 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle
 from eval_framework.tasks.utils import get_n_letters
 
-MMLU_SUBJECTS = [
+MMLU_STEM = [
     "abstract_algebra",
-    "anatomy",
     "astronomy",
-    "business_ethics",
-    "clinical_knowledge",
     "college_biology",
     "college_chemistry",
     "college_computer_science",
     "college_mathematics",
-    "college_medicine",
     "college_physics",
     "computer_security",
     "conceptual_physics",
-    "econometrics",
     "electrical_engineering",
     "elementary_mathematics",
-    "formal_logic",
-    "global_facts",
     "high_school_biology",
     "high_school_chemistry",
     "high_school_computer_science",
-    "high_school_european_history",
-    "high_school_geography",
-    "high_school_government_and_politics",
-    "high_school_macroeconomics",
     "high_school_mathematics",
-    "high_school_microeconomics",
     "high_school_physics",
-    "high_school_psychology",
     "high_school_statistics",
+    "machine_learning",
+]
+
+MMLU_HUMANITIES = [
+    "formal_logic",
+    "high_school_european_history",
     "high_school_us_history",
     "high_school_world_history",
-    "human_aging",
-    "human_sexuality",
     "international_law",
     "jurisprudence",
     "logical_fallacies",
-    "machine_learning",
-    "management",
-    "marketing",
-    "medical_genetics",
-    "miscellaneous",
     "moral_disputes",
     "moral_scenarios",
-    "nutrition",
     "philosophy",
     "prehistory",
-    "professional_accounting",
     "professional_law",
-    "professional_medicine",
+    "world_religions",
+]
+
+MMLU_SOCIAL_SCIENCES = [
+    "econometrics",
+    "high_school_geography",
+    "high_school_government_and_politics",
+    "high_school_macroeconomics",
+    "high_school_microeconomics",
+    "high_school_psychology",
+    "human_sexuality",
     "professional_psychology",
     "public_relations",
     "security_studies",
     "sociology",
     "us_foreign_policy",
-    "virology",
-    "world_religions",
 ]
+
+MMLU_OTHER = [
+    "anatomy",
+    "business_ethics",
+    "clinical_knowledge",
+    "college_medicine",
+    "global_facts",
+    "human_aging",
+    "management",
+    "marketing",
+    "medical_genetics",
+    "miscellaneous",
+    "nutrition",
+    "professional_accounting",
+    "professional_medicine",
+    "virology",
+]
+
+MMLU_SUBJECTS = MMLU_STEM + MMLU_HUMANITIES + MMLU_SOCIAL_SCIENCES + MMLU_OTHER
 
 
 class MMLU(BaseTask[str]):
@@ -228,3 +240,70 @@ class MMLU_COT(MMLU):
             'Summarize your reasoning concisely, then conclude with "Therefore, the answer is: X", where X is '
             "one of A, B, C, or D."
         )
+
+
+class _MMLU_Base(BaseTask[str]):
+    """Shared base for TASK_STYLER-based MMLU variants (Cloze, MC, BPB).
+
+    Subclasses set ``NAME`` and ``TASK_STYLER``; everything else is inherited.
+    """
+
+    DATASET_PATH = "cais/mmlu"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "dev"
+    SUBJECTS = MMLU_SUBJECTS
+    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"] + get_n_letters(4)
+    LANGUAGE = Language.ENG
+
+    def _get_subject_name(self, item: dict[str, Any]) -> str:
+        return " ".join(item["subject"].split("_"))
+
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+        return f"The following are multiple choice questions (with answers) about {self._get_subject_name(item)}:"
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        return item["question"].strip()
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return item["choices"]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return item["answer"]
+
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict[str, Any]]:
+        return list(self.dataset[self.FEWSHOT_SPLIT][: self.num_fewshot])
+
+
+class MMLUCloze(_MMLU_Base):
+    NAME = "MMLUCloze"
+    TASK_STYLER = ClozeStyle()
+
+
+class MMLUMC(_MMLU_Base):
+    NAME = "MMLUMC"
+    TASK_STYLER = MCStyle(space_prefixed_labels=True)
+
+
+class MMLUBPB(_MMLU_Base):
+    NAME = "MMLUBPB"
+    TASK_STYLER = BPBStyle()
+
+
+class MMLUOtherBPB(MMLUBPB):
+    NAME = "MMLUOtherBPB"
+    SUBJECTS = MMLU_OTHER
+
+
+class MMLUStemBPB(MMLUBPB):
+    NAME = "MMLUStemBPB"
+    SUBJECTS = MMLU_STEM
+
+
+class MMLUHumanitiesBPB(MMLUBPB):
+    NAME = "MMLUHumanitiesBPB"
+    SUBJECTS = MMLU_HUMANITIES
+
+
+class MMLUSocialSciencesBPB(MMLUBPB):
+    NAME = "MMLUSocialSciencesBPB"
+    SUBJECTS = MMLU_SOCIAL_SCIENCES
