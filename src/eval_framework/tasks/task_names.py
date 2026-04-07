@@ -190,6 +190,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.naturalqs_open.NaturalQsOpenCloze")
     register_lazy_task("eval_framework.tasks.benchmarks.naturalqs_open.NaturalQsOpenMC")
     register_lazy_task("eval_framework.tasks.benchmarks.naturalqs_open.NaturalQsOpenMC_OLMES")
+    register_lazy_task("eval_framework.tasks.benchmarks.naturalqs_open.NaturalQsOpenBPB")
     register_lazy_task("eval_framework.tasks.benchmarks.social_iqa.SocialIQACloze")
     register_lazy_task("eval_framework.tasks.benchmarks.social_iqa.SocialIQAMC_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.social_iqa.SocialIQAMC")

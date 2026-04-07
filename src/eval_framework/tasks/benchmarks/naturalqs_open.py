@@ -3,6 +3,7 @@ from typing import Any
 from eval_framework.metrics.completion.drop_completion import DropF1ExactMatch, DropMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
 from eval_framework.tasks.task_style import (
+    BPBStyle,
     ClozeStyle,
     MCStyle,
     answer_key_to_index,
@@ -93,3 +94,10 @@ class NaturalQsOpenMC_OLMES(_NaturalQsOpenChoice_Base):
 
     NAME = "NaturalQsOpenMC_OLMES"
     TASK_STYLER = MCStyle(space_prefixed_labels=True)
+
+
+class NaturalQsOpenBPB(_NaturalQsOpenChoice_Base):
+    """BPB-only variant."""
+
+    NAME = "NaturalQsOpenBPB"
+    TASK_STYLER = BPBStyle()
