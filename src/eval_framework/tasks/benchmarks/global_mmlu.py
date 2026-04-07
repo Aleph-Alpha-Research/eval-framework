@@ -477,7 +477,7 @@ class GlobalMMLU(BaseTask[tuple[str, str]]):
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = list(product(GLOBAL_MMLU_LANGUAGES, MMLU_SUBJECTS))
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"] + get_n_letters(4)
-    LANGUAGE = {
+    LANGUAGE: Language | dict[str, Language] | None = {
         str((lang_code.split("_")[0], subject)): LANGUAGE_NAME_MAP[lang_code]
         for lang_code, subjects in LANGUAGE_SUBJECTS_MAP.items()
         for subject in subjects
@@ -531,3 +531,9 @@ class GlobalMMLU(BaseTask[tuple[str, str]]):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {key}" for key in self.keys]
+
+
+class GlobalMMLU_German(GlobalMMLU):
+    NAME = "GlobalMMLU_German"
+    SUBJECTS = [("de", subject) for subject in MMLU_SUBJECTS]
+    LANGUAGE = Language.DEU
