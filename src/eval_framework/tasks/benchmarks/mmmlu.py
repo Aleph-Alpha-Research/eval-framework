@@ -426,7 +426,7 @@ class MMMLU(BaseTask[tuple[str, str]]):
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
     SUBJECTS = list(product(MMMLU_LANGS, MMLU_SUBJECTS))
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"] + get_n_letters(4)
-    LANGUAGE = {
+    LANGUAGE: Language | dict[str, Language] | None = {
         str((lang_code.split("_")[0], subject)): LANGUAGE_NAME_MAP[lang_code]
         for lang_code, subjects in LANGUAGE_SUBJECTS_MAP.items()
         for subject in subjects
