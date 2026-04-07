@@ -206,6 +206,8 @@
     "MMMLU.Llama3Formatter": "c8f280bd2bf86a043ec8b068de2ed256",
     "MMMLU_GERMAN_COT.ConcatFormatter": "23d0b09dc6482ec978633eb2d7ae21b3",
     "MMMLU_GERMAN_COT.Llama3Formatter": "b8f519808c5610962e16cf13d4d9f7e1",
+    "MMMLU_German.ConcatFormatter": "afb9a45dee3c89c305a32107cc29c63e",
+    "MMMLU_German.Llama3Formatter": "00198614da4d45d592988771ecda8dae",
     "MedQACloze.ConcatFormatter": "ea013c2b92adde396e76fd8f71cf6023",
     "MedQACloze.Llama3Formatter": "c531709cf4357d8a09e8876b8e5a9bfa",
     "MedQAMC.ConcatFormatter": "da88cb7f684244fbc2123aa8a21d1075",
