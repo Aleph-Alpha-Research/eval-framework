@@ -480,6 +480,12 @@ class MMMLU(BaseTask[tuple[str, str]]):
         return [f" {key}" for key in self.keys]
 
 
+class MMMLU_German(MMMLU):
+    NAME = "MMMLU_German"
+    SUBJECTS = [("DE_DE", subject) for subject in MMLU_SUBJECTS]
+    LANGUAGE = Language.DEU
+
+
 class MMMLU_GERMAN_COT(MMMLU):
     NAME = "MMMLU_GERMAN_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION

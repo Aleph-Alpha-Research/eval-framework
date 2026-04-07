@@ -531,3 +531,9 @@ class GlobalMMLU(BaseTask[tuple[str, str]]):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {key}" for key in self.keys]
+
+
+class GlobalMMLU_German(GlobalMMLU):
+    NAME = "GlobalMMLU_German"
+    SUBJECTS = [("de", subject) for subject in MMLU_SUBJECTS]
+    LANGUAGE = Language.DEU
