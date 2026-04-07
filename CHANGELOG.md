@@ -12,6 +12,29 @@
 
 ### Bug Fixes
 
+## [0.2.15](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.14...v0.2.15) (2026-04-07)
+
+
+### Features
+
+* add BPB metric to more tasks ([#198](https://github.com/Aleph-Alpha-Research/eval-framework/issues/198)) ([3f960f3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3f960f3bb5fedf5068e710b7700ff663b45b4738))
+* add BPBStyle ([#205](https://github.com/Aleph-Alpha-Research/eval-framework/issues/205)) ([fb45f57](https://github.com/Aleph-Alpha-Research/eval-framework/commit/fb45f57b4e66f4d07dfd138a29d90845bf5911aa))
+* add German-only subsets of GlobalMMLU and MMMLU ([#208](https://github.com/Aleph-Alpha-Research/eval-framework/issues/208)) ([3eed55b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3eed55beca3fdae89a3b77c8b63c4779e2961d6f))
+* add MultiPL HumanEval & MBPPP tasks ([#189](https://github.com/Aleph-Alpha-Research/eval-framework/issues/189)) ([07d3702](https://github.com/Aleph-Alpha-Research/eval-framework/commit/07d37022dc9c493e00c0f54473785ab1f2f7e271))
+* add OLMES variant of BigCodeBench ([#184](https://github.com/Aleph-Alpha-Research/eval-framework/issues/184)) ([f7d6fd3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f7d6fd36756711f1e67e7f7a249a9b04cb24d950))
+* adding pool to sandbox ([#194](https://github.com/Aleph-Alpha-Research/eval-framework/issues/194)) ([fd87fd3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/fd87fd337259fd8e2d9a03da1799d92d47f9897c))
+* Adds GSM8k with Olmes parity ([#191](https://github.com/Aleph-Alpha-Research/eval-framework/issues/191)) ([aa86280](https://github.com/Aleph-Alpha-Research/eval-framework/commit/aa8628053b716735f6b8fe27a633ef64f7519ba5))
+* Feature to have metric aggregators like Pass@K  ([#190](https://github.com/Aleph-Alpha-Research/eval-framework/issues/190)) ([27319ed](https://github.com/Aleph-Alpha-Research/eval-framework/commit/27319edea46b2e4cbd0cdc43fa2cc5569f03f504))
+* Task suites ([#200](https://github.com/Aleph-Alpha-Research/eval-framework/issues/200)) ([b1c3c15](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b1c3c15aadbfc00ec43fd81a3179a5a8dc12b88b))
+
+
+### Bug Fixes
+
+* bug fix in grouping per subject metrics ([#201](https://github.com/Aleph-Alpha-Research/eval-framework/issues/201)) ([226bc71](https://github.com/Aleph-Alpha-Research/eval-framework/commit/226bc7158547bf7e0123c9a5e1bb6bdb356175a3))
+* match OLMES for GenQA tasks ([#195](https://github.com/Aleph-Alpha-Research/eval-framework/issues/195)) ([cca01bd](https://github.com/Aleph-Alpha-Research/eval-framework/commit/cca01bdddbad238e4531e96a9a5b98a5ca5d30a7))
+* OLMES matching effort (MC Task Suite) ([#182](https://github.com/Aleph-Alpha-Research/eval-framework/issues/182)) ([290dbc9](https://github.com/Aleph-Alpha-Research/eval-framework/commit/290dbc915285cef520b0483839b841a9c4bda458))
+* scipy should be a non-optional dependency ([#196](https://github.com/Aleph-Alpha-Research/eval-framework/issues/196)) ([f014956](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f01495622a2e2e514d78be0f7e077c4db780db22))
+
 ## [0.2.14](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.13...v0.2.14) (2026-03-09)
 
 
