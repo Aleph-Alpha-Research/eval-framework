@@ -1,4 +1,4 @@
-from eval_framework.suite import SuiteAggregate, TaskSuite
+from eval_framework.suite import MetricSource, SuiteAggregate, TaskSuite
 
 _GSM8K_OLMO3_N8_V2 = TaskSuite(
     name="gsm8k_olmo3_n8_v2",
@@ -28,18 +28,19 @@ suite = TaskSuite(
     aggregates=[
         SuiteAggregate(
             name="Math Average Accuracy",
-            metric=["Average Accuracy Completion", "Average Exact Match (Flex)"],
             method="mean",
+            sources=[
+                MetricSource(child="gsm8k_olmo3_n8_v2", metric="Average Accuracy Completion"),
+                MetricSource(child="minerva_math_olmes_n4_v2", metric="Average Exact Match (Flex)"),
+            ],
         ),
         SuiteAggregate(
             name="gsm8k_olmo3_n8_v2",
-            metric="Average Accuracy Completion",
-            method="passthrough",
+            sources=[MetricSource(child="gsm8k_olmo3_n8_v2", metric="Average Accuracy Completion")],
         ),
         SuiteAggregate(
             name="minerva_math_olmes_n4_v2",
-            metric="Average Exact Match (Flex)",
-            method="passthrough",
+            sources=[MetricSource(child="minerva_math_olmes_n4_v2", metric="Average Exact Match (Flex)")],
         ),
     ],
 )

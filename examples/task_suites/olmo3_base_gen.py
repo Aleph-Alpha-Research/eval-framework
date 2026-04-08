@@ -1,4 +1,4 @@
-from eval_framework.suite import SuiteAggregate, TaskSuite
+from eval_framework.suite import MetricSource, SuiteAggregate, TaskSuite
 
 HELLASWAG_RC = TaskSuite(name="hellaswag_rc_xlarge", tasks="HELLASWAG_OLMES", num_fewshot=5)
 WINOGRANDE_RC = TaskSuite(name="winogrande_rc_xlarge", tasks="WINOGRANDECloze", num_fewshot=5)
@@ -16,24 +16,38 @@ suite = TaskSuite(
         SQUAD_GEN,
     ],
     aggregates=[
-        # Joint average
+        # Joint average — each task uses a different metric name.
         SuiteAggregate(
             name="macro",
-            metric=[
-                "Average Accuracy Normalized Loglikelihood",
-                "Average Partial Evaluation Accuracy",
-                "Average DROP F1",
-                "Average F1 SQuAD Normalized",
-            ],
             method="mean",
+            sources=[
+                MetricSource(child="hellaswag_rc_xlarge", metric="Average Accuracy Normalized Loglikelihood"),
+                MetricSource(child="winogrande_rc_xlarge", metric="Average Partial Evaluation Accuracy"),
+                MetricSource(child="drop_xlarge", metric="Average DROP F1"),
+                MetricSource(child="naturalqs_xlarge", metric="Average DROP F1"),
+                MetricSource(child="squad_xlarge", metric="Average F1 SQuAD Normalized"),
+            ],
         ),
         # Per-task scores.
         SuiteAggregate(
-            name="hellaswag_rc_xlarge", metric="Average Accuracy Normalized Loglikelihood", method="passthrough"
+            name="hellaswag_rc_xlarge",
+            sources=[MetricSource(child="hellaswag_rc_xlarge", metric="Average Accuracy Normalized Loglikelihood")],
         ),
-        SuiteAggregate(name="winogrande_rc_xlarge", metric="Average Partial Evaluation Accuracy", method="passthrough"),
-        SuiteAggregate(name="naturalqs_xlarge", metric="Average DROP F1", method="passthrough"),
-        SuiteAggregate(name="drop_xlarge", metric="Average DROP F1", method="passthrough"),
-        SuiteAggregate(name="squad_xlarge", metric="Average F1 SQuAD Normalized", method="passthrough"),
+        SuiteAggregate(
+            name="winogrande_rc_xlarge",
+            sources=[MetricSource(child="winogrande_rc_xlarge", metric="Average Partial Evaluation Accuracy")],
+        ),
+        SuiteAggregate(
+            name="naturalqs_xlarge",
+            sources=[MetricSource(child="naturalqs_xlarge", metric="Average DROP F1")],
+        ),
+        SuiteAggregate(
+            name="drop_xlarge",
+            sources=[MetricSource(child="drop_xlarge", metric="Average DROP F1")],
+        ),
+        SuiteAggregate(
+            name="squad_xlarge",
+            sources=[MetricSource(child="squad_xlarge", metric="Average F1 SQuAD Normalized")],
+        ),
     ],
 )

@@ -46,7 +46,17 @@ def parse_strings_to_task_or_suite(v: str | list) -> str | list:
     return [{"tasks": item, "name": item} if isinstance(item, str) else item for item in v]
 
 
-_VALID_METHODS = {"mean", "median", "passthrough"}
+_VALID_METHODS = {"mean", "median"}
+
+
+class MetricSource(BaseModel):
+    """A single (child, metric) pair used as an input to a SuiteAggregate. See the examples folder
+    for how these are used."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    child: str
+    metric: str
 
 
 class SuiteAggregate(BaseModel):
@@ -55,7 +65,7 @@ class SuiteAggregate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str
-    metric: Annotated[list[str], BeforeValidator(lambda v: [v] if isinstance(v, str) else v)]
+    sources: list[MetricSource]
     method: str | Callable[[list[float]], float] = "mean"
 
     @field_validator("method")
@@ -197,52 +207,44 @@ def compute_aggregates(
     aggregates: list[SuiteAggregate],
     child_results: dict[str, SuiteResult],
 ) -> dict[str, float | None]:
-    """Compute suite-level stats from children's results.
+    """Compute suite-level stats from explicitly named (child, metric) sources.
 
-    Each SuiteAggregate either reduces a metric across all children
-    (method="mean", "median", or a callable) or surfaces a metric
-    from exactly one child as-is (method="passthrough").
+    For each `SuiteAggregate`, the value from each `MetricSource` is looked up by
+    child name and exact metric key. Sources whose child is missing or whose metric is
+    None or NaN are silently skipped. If no sources yield a valid value the aggregate is None.
     """
     result: dict[str, float | None] = {}
 
     for agg in aggregates:
-        if agg.method == "passthrough":
-            child = child_results.get(agg.name)
+        values: list[float] = []
+        for source in agg.sources:
+            child = child_results.get(source.child)
             if child is None:
-                raise ValueError(
-                    f"SuiteAggregate '{agg.name}' uses method='passthrough' but no child "
-                    f"named '{agg.name}' exists. Available children: {list(child_results.keys())}."
+                logger.warning(
+                    f"SuiteAggregate '{agg.name}' uses source '{source.child}' which is not a child of the suite. "
+                    f"Available children: {list(child_results.keys())}."
                 )
-            # don't count NaN and None values.
-            result[agg.name] = next(
-                (v for m in agg.metric if (v := child.aggregates.get(m)) is not None and not math.isnan(v)),
-                None,
-            )
-        else:
-            values: dict[str, float] = {}
-            for child_name, child in child_results.items():
-                for m in agg.metric:
-                    val = child.aggregates.get(m)
-                    if val is not None and not math.isnan(val):
-                        values[child_name] = val
-                        break
-            result[agg.name] = _apply_method(agg.method, values) if values else None
+                continue
+            val = child.aggregates.get(source.metric)
+            if val is not None and not math.isnan(val):
+                values.append(val)
+            else:
+                logger.warning(f"The value for source '{source.child}' with metric '{source.metric}' is None or NaN.")
+        result[agg.name] = _apply_method(agg.method, values) if values else None
 
     return result
 
 
 def _apply_method(
     method: str | Callable[[list[float]], float],
-    values: dict[str, float],
+    values: list[float],
 ) -> float:
-    vals = list(values.values())
-
     if callable(method):
-        return method(vals)
+        return method(values)
     elif method == "mean":
-        return float(np.mean(vals))
+        return float(np.mean(values))
     elif method == "median":
-        return float(np.median(vals))
+        return float(np.median(values))
     else:
         raise ValueError(f"Unknown aggregation method: '{method}'. Use mean or median.")
 

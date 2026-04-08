@@ -1,4 +1,4 @@
-from eval_framework.suite import SuiteAggregate, TaskSuite
+from eval_framework.suite import MetricSource, SuiteAggregate, TaskSuite
 
 MMLU_HUMANITIES_SUBJECTS: list[str] = [
     "formal_logic",
@@ -73,32 +73,24 @@ _SOCIALIQA = TaskSuite(name="socialiqa_mc_xlarge", tasks="SocialIQAMC_OLMES", nu
 _DROP_MC = TaskSuite(name="drop_mc_gen2mc_xlarge", tasks="DropMC_OLMES", num_fewshot=5)
 _NQ_MC = TaskSuite(name="naturalqs_mc_gen2mc_xlarge", tasks="NaturalQsOpenMC_OLMES", num_fewshot=5)
 
+_METRIC = "Average Accuracy Loglikelihood"
+_ALL_TASKS = [_MMLU_HUM, _MMLU_SOC, _MMLU_OTHER, _CSQA, _PIQA, _SOCIALIQA, _DROP_MC, _NQ_MC]
+
 suite = TaskSuite(
     name="olmo3_base_nonstem_qa_mc",
-    tasks=[
-        _MMLU_HUM,
-        _MMLU_SOC,
-        _MMLU_OTHER,
-        _CSQA,
-        _PIQA,
-        _SOCIALIQA,
-        _DROP_MC,
-        _NQ_MC,
-    ],
+    tasks=_ALL_TASKS,
     aggregates=[
-        SuiteAggregate(name="macro", metric="Average Accuracy Loglikelihood", method="mean"),
+        SuiteAggregate(
+            name="macro",
+            method="mean",
+            sources=[MetricSource(child=task.name, metric=_METRIC) for task in _ALL_TASKS],
+        ),
     ]
     + [
-        SuiteAggregate(name=f"{task.name}", metric="Average Accuracy Loglikelihood", method="passthrough")
-        for task in [
-            _MMLU_HUM,
-            _MMLU_SOC,
-            _MMLU_OTHER,
-            _CSQA,
-            _PIQA,
-            _SOCIALIQA,
-            _DROP_MC,
-            _NQ_MC,
-        ]
+        SuiteAggregate(
+            name=task.name,
+            sources=[MetricSource(child=task.name, metric=_METRIC)],
+        )
+        for task in _ALL_TASKS
     ],
 )
