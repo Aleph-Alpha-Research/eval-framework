@@ -52,6 +52,10 @@ dataset attributes and data-access methods.  Variants only differ in ``TASK_STYL
     class ARC_MC(_ARC_Base):
         NAME = "ARC_MC"
         TASK_STYLER = MCStyle(space_prefixed_labels=True)
+
+    class ARC_BPB(_ARC_Base):
+        NAME = "ARC_BPB"
+        TASK_STYLER = BPBStyle()
 """
 
 import hashlib
@@ -111,8 +115,13 @@ class TaskStyler(ABC):
         """Return the ground-truth string for scoring."""
 
     @abstractmethod
-    def get_possible_completions(self, choices: list[str]) -> list[str]:
-        """Return the list of scored completion strings."""
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+        """Return the list of completion strings to be evaluated.
+
+        ``correct_index`` is only required by ``BPBStyle``, which scores solely the
+        ground-truth completion. ``MCStyle`` and ``ClozeStyle`` score all choices and
+        ignore it; callers may omit it when using those stylers.
+        """
 
     @abstractmethod
     def get_cue_text(self) -> str:
@@ -196,7 +205,8 @@ class MCStyle(TaskStyler):
         labels = get_n_letters(len(choices))
         return f" {labels[correct_index]}"
 
-    def get_possible_completions(self, choices: list[str]) -> list[str]:
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+        """Note: `correct_index` is ignored for `MCStyle` and only used for `BPBStyle`."""
         return [f" {label}" for label in get_n_letters(len(choices))]
 
 
@@ -241,10 +251,12 @@ class ClozeStyle(TaskStyler):
         question_prefix: str = "Question: ",
         cue_text: str = "Answer:",
         trailing_newline: bool = True,
+        leading_space_continuations: bool = True,
     ) -> None:
         self.question_prefix = question_prefix
         self._cue_text = cue_text
         self.trailing_newline = trailing_newline
+        self.leading_space_continuations = leading_space_continuations
 
     def get_cue_text(self) -> str:
         return self._cue_text
@@ -254,10 +266,41 @@ class ClozeStyle(TaskStyler):
         return f"{text}\n" if self.trailing_newline else text
 
     def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
-        return f" {choices[correct_index]}"
+        return f" {choices[correct_index]}" if self.leading_space_continuations else choices[correct_index]
 
-    def get_possible_completions(self, choices: list[str]) -> list[str]:
-        return [f" {c}" for c in choices]
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+        return [f" {c}" for c in choices] if self.leading_space_continuations else [f"{c}" for c in choices]
+
+
+class BPBStyle(ClozeStyle):
+    """BPB-only styler: prompt identical to ClozeStyle, but scores only the ground-truth completion.
+
+    One LLM forward pass per sample instead of N (one per choice), making evaluation
+    significantly faster when accuracy metrics are not needed.
+
+    Args:
+        question_prefix:   Prepended to the raw question (default ``"Question: "``).
+        cue_text:          Assistant cue after the prompt (default ``"Answer:"``).
+        trailing_newline:  When ``True`` (default), the instruction ends with ``"\\n"``.
+
+    Assembled prompt example (3 choices)::
+
+        "Question: What is the capital of France?\\n"
+
+        Scored completions: [" Paris"]  ← ground truth only, one forward pass
+        Ground truth:        " Paris"
+    """
+
+    metrics: list[type["BaseMetric"]] = [BitsPerByteLoglikelihood]
+    task_style = TaskStyle.BPB
+
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+        if correct_index is None:
+            raise ValueError(
+                "BPBStyle evaluates the loglikelihood of the ground truth answer only,"
+                "and thus requires the correct index."
+            )
+        return [f" {choices[correct_index]}"] if self.leading_space_continuations else [choices[correct_index]]
 
 
 # ---------------------------------------------------------------------------

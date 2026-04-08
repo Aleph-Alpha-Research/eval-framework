@@ -112,7 +112,8 @@ class EvalConfig(BaseConfig):
     @model_validator(mode="after")
     def validate_llm_judge_defined(self) -> "EvalConfig":
         task = get_task(self.task_name)
-        for metric_class in task.METRICS:
+        _, task_metrics = task(num_fewshot=0)._get_type_and_metrics()
+        for metric_class in task_metrics:
             if issubclass(metric_class, BaseLLMJudgeMetric):
                 assert self.llm_judge_class is not None, "The LLM Judge must be defined for this evaluation task."
         return self
