@@ -12,6 +12,15 @@
 
 ### Bug Fixes
 
+## [0.3.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.0...v0.3.1) (2026-04-08)
+
+
+### Features
+
+* add BPBStyle ([#205](https://github.com/Aleph-Alpha-Research/eval-framework/issues/205)) ([fb45f57](https://github.com/Aleph-Alpha-Research/eval-framework/commit/fb45f57b4e66f4d07dfd138a29d90845bf5911aa))
+* add German-only subsets of GlobalMMLU and MMMLU ([#208](https://github.com/Aleph-Alpha-Research/eval-framework/issues/208)) ([3eed55b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3eed55beca3fdae89a3b77c8b63c4779e2961d6f))
+* Suite aggregation specifies metric names ([#206](https://github.com/Aleph-Alpha-Research/eval-framework/issues/206)) ([8aeb3e2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/8aeb3e2a9478bddf9932370307aa04e3883e8c46))
+
 ## [0.2.14](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.2.13...v0.2.14) (2026-03-09)
 
 
