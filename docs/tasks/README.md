@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 182**
+**Total number of tasks: 198**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -14,6 +14,9 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [AIME2025](AIME2025.md)
 - [AIME2026](AIME2026.md)
 - [ARC](ARC.md)
+- [ARCBPB](ARCBPB.md)
+- [ARCCloze](ARCCloze.md)
+- [ARCMC](ARCMC.md)
 - [ARC_DE](ARC_DE.md)
 - [ARC_EU20_DE](ARC_EU20_DE.md)
 - [ARC_EU20_FR](ARC_EU20_FR.md)
@@ -36,6 +39,8 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [COPA_IDKEvalHarness](COPA_IDKEvalHarness.md)
 - [COPA_OLMES](COPA_OLMES.md)
 - [ChemBench](ChemBench.md)
+- [CodexHumanEval_BPB](CodexHumanEval_BPB.md)
+- [CodexMBPP_BPB](CodexMBPP_BPB.md)
 - [CommonsenseQACloze](CommonsenseQACloze.md)
 - [CommonsenseQAFullTextCloze](CommonsenseQAFullTextCloze.md)
 - [CommonsenseQAMC](CommonsenseQAMC.md)
@@ -65,6 +70,9 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [GlobalMMLU](GlobalMMLU.md)
 - [GlobalMMLU_German](GlobalMMLU_German.md)
 - [HELLASWAG](HELLASWAG.md)
+- [HELLASWAGBPB](HELLASWAGBPB.md)
+- [HELLASWAGCloze](HELLASWAGCloze.md)
+- [HELLASWAGMC](HELLASWAGMC.md)
 - [HELLASWAG_DE](HELLASWAG_DE.md)
 - [HELLASWAG_EU20_DE](HELLASWAG_EU20_DE.md)
 - [HELLASWAG_EU20_FR](HELLASWAG_EU20_FR.md)
@@ -93,6 +101,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [MATH](MATH.md)
 - [MATH500](MATH500.md)
 - [MATH500Minerva](MATH500Minerva.md)
+- [MATH500Minerva_BPB](MATH500Minerva_BPB.md)
 - [MATHLvl5](MATHLvl5.md)
 - [MATHMinerva](MATHMinerva.md)
 - [MATHMinervaBPB](MATHMinervaBPB.md)
@@ -105,6 +114,13 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [MBPP_PROMPT_WITHOUT_TESTS_SANITIZED](MBPP_PROMPT_WITHOUT_TESTS_SANITIZED.md)
 - [MBPP_SANITIZED](MBPP_SANITIZED.md)
 - [MMLU](MMLU.md)
+- [MMLUBPB](MMLUBPB.md)
+- [MMLUCloze](MMLUCloze.md)
+- [MMLUHumanitiesBPB](MMLUHumanitiesBPB.md)
+- [MMLUMC](MMLUMC.md)
+- [MMLUOtherBPB](MMLUOtherBPB.md)
+- [MMLUSocialSciencesBPB](MMLUSocialSciencesBPB.md)
+- [MMLUStemBPB](MMLUStemBPB.md)
 - [MMLU_COT](MMLU_COT.md)
 - [MMLU_DE](MMLU_DE.md)
 - [MMLU_EU20_DE](MMLU_EU20_DE.md)

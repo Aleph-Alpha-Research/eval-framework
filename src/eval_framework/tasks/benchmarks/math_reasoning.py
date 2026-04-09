@@ -16,6 +16,7 @@ from eval_framework.metrics.completion.minerva_math_utils import (
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
+from eval_framework.tasks.task_style import BPBStyle
 
 # Hendrycks MATH subject splits (shared by MATH, MATHMinervaEvalHarness, MATHMinervaBPB)
 MATH_SUBJECTS = [
@@ -790,3 +791,57 @@ class MATHMinerva_OLMES(MATHMinerva):
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         return _OLMES_FEWSHOTS[: self.num_fewshot]
+
+
+class _MATH500Minerva_Base(BaseTask[str]):
+    """Shared base for TASK_STYLER-based MATH500Minerva variants.
+
+    MATH-500 has no discrete answer choices, so MCStyle and ClozeStyle do not
+    apply.  Only BPBStyle (bits-per-byte of the normalized gold answer) is
+    supported.  Uses the MATH-500 dataset with the 4 hardcoded OLMES fewshot
+    examples from ``_OLMES_FEWSHOTS`` (same as MATHMinerva_OLMES).
+
+    Subclasses set ``NAME`` and ``TASK_STYLER``; everything else is inherited.
+    """
+
+    DATASET_PATH = "HuggingFaceH4/MATH-500"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "test"
+    SUBJECTS = [NO_SUBJECT]
+    LANGUAGE = Language.ENG
+
+    def __init__(self, num_fewshot: int = 4) -> None:
+        if num_fewshot != 4:
+            logger.warning("MATH500Minerva TASK_STYLER variants support a fixed num_fewshot of 4.")
+        super().__init__(num_fewshot=4)
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        # Embed "Solution:" so BPBStyle's empty cue produces the same prompt as
+        # MATHMinervaEvalHarness: "Problem:\n{problem}\n\nSolution:".
+        return "Problem:\n" + item["problem"] + "\n\nSolution:"
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        # BPB is scored over the full gold solution (matching minerva_math_500_gold_bpb_0shot).
+        return [item["solution"]]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return 0
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return " " + item["solution"]
+
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+        return _OLMES_FEWSHOTS[: self.num_fewshot]
+
+
+class MATH500Minerva_BPB(_MATH500Minerva_Base):
+    """BPB-only variant of MATH500Minerva with OLMES 4-shot prompt.
+
+    Scores bits-per-byte of the normalized gold answer conditioned on the
+    Minerva-style prompt with 4 hardcoded OLMES fewshot examples.
+    """
+
+    NAME = "MATH500Minerva_BPB"
+    # trailing_newline=False keeps the prompt as "Problem:\n...\n\nSolution:"
+    # without an extra newline; question_prefix="" suppresses "Question: ".
+    TASK_STYLER = BPBStyle(question_prefix="", cue_text="", trailing_newline=False)

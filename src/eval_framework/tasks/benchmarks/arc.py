@@ -9,6 +9,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, answer_key_to_index
 from eval_framework.tasks.utils import get_n_letters
 
 
@@ -94,3 +95,45 @@ class ARC_IDK(ARC):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         completions = super()._get_possible_completions(item)
         return (completions or []) + [" I do not know."]
+
+
+class _ARCChoice_Base(BaseTask[str]):
+    """Shared base for choice-based ARC variants (Cloze, MC, BPB).
+
+    Subclasses set ``NAME`` and ``TASK_STYLER``; everything else is inherited.
+    """
+
+    DATASET_PATH = "allenai/ai2_arc"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "train"
+    SUBJECTS = ["ARC-Easy", "ARC-Challenge"]
+    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"] + get_n_letters(5)
+    LANGUAGE = Language.ENG
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        return item["question"]
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return item["choices"]["text"]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return answer_key_to_index(item["answerKey"])
+
+
+class ARCCloze(_ARCChoice_Base):
+    NAME = "ARCCloze"
+    TASK_STYLER = ClozeStyle()
+
+
+class ARCMC(_ARCChoice_Base):
+    """ARC with OLMES-style MC prompt: options listed as ' A. ...', scored over ' A'/' B'/...."""
+
+    NAME = "ARCMC"
+    TASK_STYLER = MCStyle(space_prefixed_labels=True)
+
+
+class ARCBPB(_ARCChoice_Base):
+    """BPB-only variant: scores loglikelihood over the ground-truth answer text only."""
+
+    NAME = "ARCBPB"
+    TASK_STYLER = BPBStyle()

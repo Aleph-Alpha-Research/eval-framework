@@ -4,6 +4,7 @@ from eval_framework.metrics.completion.code_assertion import CodeCompletionAsser
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.task_style import BPBStyle
 
 CODE_TO_EXECUTE = """
 {start_of_code}
@@ -139,3 +140,33 @@ class HumanEvalInstruct(HumanEval):
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return self.CUE_PREFIX + item["prompt"].lstrip()
+
+
+class _CodexHumanEval_Base(BaseTask[str]):
+    """Shared base for codex_humaneval_gold_bpb_3shot-compatible HumanEval variants."""
+
+    DATASET_PATH = "openai/openai_humaneval"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "test"
+    SUBJECTS = [NO_SUBJECT]
+    LANGUAGE = Language.ENG
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        return item["prompt"]
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return [item["canonical_solution"]]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return 0
+
+
+class CodexHumanEval_BPB(_CodexHumanEval_Base):
+    """BPB-only HumanEval that matches codex_humaneval_gold_bpb_3shot.
+
+    Prompt: ``{prompt}`` (function signature + docstring, verbatim)
+    Scored completion: ``{canonical_solution}``
+    """
+
+    NAME = "CodexHumanEval_BPB"
+    TASK_STYLER = BPBStyle(question_prefix="", cue_text="", trailing_newline=False, leading_space_continuations=False)

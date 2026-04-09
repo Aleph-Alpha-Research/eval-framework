@@ -10,6 +10,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle
 
 
 class HELLASWAG(BaseTask[str]):
@@ -73,3 +74,54 @@ class HELLASWAG_IDK(HELLASWAG):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         completions = super()._get_possible_completions(item)
         return (completions or []) + [" I do not know."]
+
+
+class _HELLASWAG_Base(BaseTask[str]):
+    """Shared base for HELLASWAG variants (Cloze, MC, BPB).
+
+    Subclasses set ``NAME`` and ``TASK_STYLER``; everything else is inherited.
+    """
+
+    DATASET_PATH = "Rowan/hellaswag"
+    SAMPLE_SPLIT = "validation"
+    FEWSHOT_SPLIT = "train"
+    SUBJECTS = [NO_SUBJECT]
+    LANGUAGE = Language.ENG
+
+    @staticmethod
+    def _preprocess(prompt: str) -> str:
+        # remove bracketed text
+        prompt = prompt.strip()
+        prompt = prompt.replace(" [title]", ". ")
+        prompt = re.sub("\\[.*?\\]", "", prompt)
+        prompt = prompt.replace("  ", " ")
+        prompt = re.sub(r"\.\. ", ". ", prompt)
+        return prompt
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return [self._preprocess(ending) for ending in item["endings"]]
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        # Include activity_label as prefix to match the OLMES prompt format:
+        # "ActivityLabel: preprocessed_context"
+        subject = self._preprocess(item["activity_label"])
+        context = self._preprocess(item["ctx_a"] + " " + item["ctx_b"].capitalize()).strip()
+        return f"{subject}: {context}"
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return int(item["label"] if item["label"] != "" else 0)
+
+
+class HELLASWAGCloze(_HELLASWAG_Base):
+    NAME = "HELLASWAGCloze"
+    TASK_STYLER = ClozeStyle()
+
+
+class HELLASWAGMC(_HELLASWAG_Base):
+    NAME = "HELLASWAGMC"
+    TASK_STYLER = MCStyle(space_prefixed_labels=True)
+
+
+class HELLASWAGBPB(_HELLASWAG_Base):
+    NAME = "HellaSwagBPB"
+    TASK_STYLER = BPBStyle(question_prefix="", cue_text="", trailing_newline=False)
