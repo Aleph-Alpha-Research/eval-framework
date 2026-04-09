@@ -12,6 +12,13 @@
 
 ### Bug Fixes
 
+## [0.3.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.1...v0.3.2) (2026-04-09)
+
+
+### Bug Fixes
+
+* mbpp creation ([#213](https://github.com/Aleph-Alpha-Research/eval-framework/issues/213)) ([f61e4cf](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f61e4cf67d998905ca70f63cb7a4f7849486a8da))
+
 ## [0.3.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.0...v0.3.1) (2026-04-08)
 
 
