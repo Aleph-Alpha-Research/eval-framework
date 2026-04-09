@@ -4,7 +4,7 @@
 NAME = TRUTHFULQA_OLMES
 DATASET_PATH = truthfulqa/truthful_qa
 SAMPLE_SPLIT = validation
-FEWSHOT_SPLIT =
+FEWSHOT_SPLIT = validation
 RESPONSE_TYPE = LOGLIKELIHOODS
 METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, ProbabilityMass, ProbabilityMassNorm]
 SUBJECTS = ['mc1', 'mc2']

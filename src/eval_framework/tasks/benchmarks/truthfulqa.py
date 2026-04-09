@@ -106,13 +106,18 @@ class TRUTHFULQA_OLMES(TRUTHFULQA):
     """
 
     NAME = "TruthfulQA_OLMES"
+    FEWSHOT_SPLIT = "validation"  # use dataset few-shot for multiple-choice options
+    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return "Answer:"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
         choices = item[self.target_identifier]["choices"]
         labels = get_n_letters(len(choices))
         options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices))
-        return f"Q: {question}\n{options}\n"
+        return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
         labels_arr = item[self.target_identifier]["labels"]
@@ -126,7 +131,17 @@ class TRUTHFULQA_OLMES(TRUTHFULQA):
         return [f" {letter}" for letter in letters]
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
-        return self.FEWSHOT_ITEMS[: self.num_fewshot]
+        # Reuse BaseTask's split-based sampler.
+        return BaseTask._sample_fewshot_examples(self, item)
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        cue_text = self._get_cue_text(item)
+        labels_arr = item[self.target_identifier]["labels"]
+        letters = get_n_letters(len(labels_arr))
+        # Pick one correct option for the demonstration answer.
+        correct_letters = [letters[i] for i, label in enumerate(labels_arr) if label == 1]
+        letter = correct_letters[0] if correct_letters else letters[0]
+        return f"{cue_text} {letter}"
 
 
 class TRUTHFULQA_IDK(TRUTHFULQA):
