@@ -243,10 +243,7 @@ class MMLU_COT(MMLU):
 
 
 class _MMLU_Base(BaseTask[str]):
-    """Shared base for TASK_STYLER-based MMLU variants (Cloze, MC, BPB).
-
-    Subclasses set ``NAME`` and ``TASK_STYLER``; everything else is inherited.
-    """
+    """Shared base for TASK_STYLER-based MMLU variants (Cloze, MC, BPB)."""
 
     DATASET_PATH = "cais/mmlu"
     SAMPLE_SPLIT = "test"
@@ -269,9 +266,6 @@ class _MMLU_Base(BaseTask[str]):
 
     def _get_correct_index(self, item: dict[str, Any]) -> int:
         return item["answer"]
-
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict[str, Any]]:
-        return list(self.dataset[self.FEWSHOT_SPLIT][: self.num_fewshot])
 
 
 class MMLUCloze(_MMLU_Base):

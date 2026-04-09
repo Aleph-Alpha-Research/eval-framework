@@ -409,13 +409,6 @@ class _CodexMBPP_Base(BaseTask[str]):
         code = self._normalize_code(item["code"])
         return f"```python\n{code}\n```"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
-        # No leading space: the cue already ends with "\n" so the code starts
-        # directly on the next line (unlike the default ClozeStyle which
-        # prepends a space to each completion).
-        code = self._normalize_code(item["code"])
-        return [f"{code}\n```"]
-
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict[str, Any]]:
         return _CODEX_MBPP_FEWSHOTS[: self.num_fewshot]
 
@@ -429,3 +422,4 @@ class CodexMBPP_BPB(_CodexMBPP_Base):
 
     NAME = "CodexMBPP_BPB"
     TASK_STYLER = BPBStyle(question_prefix="", cue_text="```python\n", trailing_newline=True)
+    TASK_STYLER.get_possible_completions = lambda self, item: [f"```python\n{self._normalize_code(item['code'])}\n```"]

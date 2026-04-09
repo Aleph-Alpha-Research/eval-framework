@@ -142,48 +142,6 @@ class HumanEvalInstruct(HumanEval):
         return self.CUE_PREFIX + item["prompt"].lstrip()
 
 
-# fmt: off
-# Fixed 3-shot fewshot examples for codex_humaneval_gold_bpb_3shot.
-# Source: HumanEval test split, task_ids HumanEval/112, HumanEval/29, HumanEval/1 (in that order).
-_CODEX_HUMANEVAL_FEWSHOTS: list[dict[str, Any]] = [
-    {
-        "task_id": "HumanEval/112",
-        "entry_point": "reverse_delete",
-        # The HumanEval/112 prompt starts with "\n" in the dataset.  In the
-        # reference (olmo_eval) this becomes the very first character of the
-        # pre-baked ctx string, and ConcatFormatter strips it when formatting a
-        # single-message context.  We strip it here so that our multi-message
-        # context produces the same output.
-        "prompt": 'def reverse_delete(s,c):\n    """Task\n    We are given two strings s and c, you have to deleted all the characters in s that are equal to any character in c\n    then check if the result string is palindrome.\n    A string is called palindrome if it reads the same backward as forward.\n    You should return a tuple containing the result string and True/False for the check.\n    Example\n    For s = "abcde", c = "ae", the result should be (\'bcd\',False)\n    For s = "abcdef", c = "b"  the result should be (\'acdef\',False)\n    For s = "abcdedcba", c = "ab", the result should be (\'cdedc\',True)\n    """\n',#noqa
-        "canonical_solution": "    s = ''.join([char for char in s if char not in c])\n    return (s,s[::-1] == s)\n",
-    },
-    {
-        "task_id": "HumanEval/29",
-        "entry_point": "filter_by_prefix",
-        "prompt": "from typing import List\n\n\ndef filter_by_prefix(strings: List[str], prefix: str) -> List[str]:\n    \"\"\" Filter an input list of strings only for ones that start with a given prefix.\n    >>> filter_by_prefix([], 'a')\n    []\n    >>> filter_by_prefix(['abc', 'bcd', 'cde', 'array'], 'a')\n    ['abc', 'array']\n    \"\"\"\n",#noqa
-        "canonical_solution": "    return [x for x in strings if x.startswith(prefix)]\n",
-    },
-    {
-        "task_id": "HumanEval/1",
-        "entry_point": "separate_paren_groups",
-        "prompt": "from typing import List\n\n\ndef separate_paren_groups(paren_string: str) -> List[str]:\n    \"\"\" Input to this function is a string containing multiple groups of nested parentheses. Your goal is to\n    separate those group into separate strings and return the list of those.\n    Separate groups are balanced (each open brace is properly closed) and not nested within each other\n    Ignore any spaces in the input string.\n    >>> separate_paren_groups('( ) (( )) (( )( ))')\n    ['()', '(())', '(()())']\n    \"\"\"\n",#noqa
-        "canonical_solution": "    result = []\n    current_string = []\n    current_depth = 0\n\n    for c in paren_string:\n        if c == '(':\n            current_depth += 1\n            current_string.append(c)\n        elif c == ')':\n            current_depth -= 1\n            current_string.append(c)\n\n            if current_depth == 0:\n                result.append(''.join(current_string))\n                current_string.clear()\n\n    return result\n",#noqa
-    },
-]
-
-# Replacement fewshot used when the test item coincides with one of the standard
-# three (to avoid self-referential fewshots, mirroring the olmo_eval behaviour).
-_STRLEN_FEWSHOT: dict[str, Any] = {
-    "task_id": "HumanEval/23",
-    "entry_point": "strlen",
-    "prompt": '\n\ndef strlen(string: str) -> int:\n    """ Return length of given string\n    >>> strlen(\'\')\n    0\n    >>> strlen(\'abc\')\n    3\n    """\n',#noqa
-    "canonical_solution": "    return len(string)\n",
-}
-# fmt: on
-
-_STANDARD_FEWSHOT_IDS: frozenset[str] = frozenset(d["task_id"] for d in _CODEX_HUMANEVAL_FEWSHOTS)
-
-
 class _CodexHumanEval_Base(BaseTask[str]):
     """Shared base for codex_humaneval_gold_bpb_3shot-compatible HumanEval variants.
 
@@ -218,20 +176,6 @@ class _CodexHumanEval_Base(BaseTask[str]):
     def _get_correct_index(self, item: dict[str, Any]) -> int:
         return 0
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        # Skip BPBStyle's default " " prefix — the prompt's trailing "\n" is
-        # stripped by ConcatFormatter, so no extra space is needed.
-        return [item["canonical_solution"]]
-
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict[str, Any]]:
-        test_id = item.get("task_id", "")
-        if test_id in _STANDARD_FEWSHOT_IDS:
-            # Avoid self-referential fewshots: drop the test item's own example
-            # and substitute strlen (HumanEval/23), mirroring olmo_eval.
-            base = [d for d in _CODEX_HUMANEVAL_FEWSHOTS if d["task_id"] != test_id]
-            return (base + [_STRLEN_FEWSHOT])[: self.num_fewshot]
-        return _CODEX_HUMANEVAL_FEWSHOTS[: self.num_fewshot]
-
 
 class CodexHumanEval_BPB(_CodexHumanEval_Base):
     """BPB-only HumanEval that matches codex_humaneval_gold_bpb_3shot.
@@ -242,3 +186,4 @@ class CodexHumanEval_BPB(_CodexHumanEval_Base):
 
     NAME = "CodexHumanEval_BPB"
     TASK_STYLER = BPBStyle(question_prefix="", cue_text="", trailing_newline=False)
+    TASK_STYLER.get_possible_completions = lambda self, item: [item["canonical_solution"]]
