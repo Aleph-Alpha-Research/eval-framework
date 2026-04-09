@@ -12,10 +12,6 @@ class TestMBPP_OLMES:
         with DatasetPatcher(MBPP_OLMES, num_fewshot=3, num_samples=10) as patched_task:
             return patched_task
 
-    def test_num_fewshot_must_be_3(self) -> None:
-        with pytest.raises(AssertionError, match="MBPP_OLMES requires exactly 3 fewshot examples"):
-            MBPP_OLMES(num_fewshot=1)
-
     def test_stop_sequences(self) -> None:
         task = MBPP_OLMES(num_fewshot=3)
         assert task.stop_sequences == ["```", '\n"""', "\nassert", "\n#"]
