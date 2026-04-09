@@ -143,23 +143,7 @@ class HumanEvalInstruct(HumanEval):
 
 
 class _CodexHumanEval_Base(BaseTask[str]):
-    """Shared base for codex_humaneval_gold_bpb_3shot-compatible HumanEval variants.
-
-    Follows the TASK_STYLER pattern (like ARC):
-    - ``_get_raw_question`` → ``item["prompt"]`` (function signature + docstring)
-    - ``_get_choices``      → ``[item["canonical_solution"]]``
-    - ``_get_correct_index`` → ``0``
-
-    ``RESPONSE_TYPE`` and ``METRICS`` are provided by the ``TASK_STYLER``.
-
-    BPBStyle normally prepends ``" "`` to the scored completion, but HumanEval
-    prompts already end with ``"\\n"`` which ConcatFormatter strips from the last
-    USER message.  ``_get_possible_completions`` is therefore overridden to omit
-    that space so the completion starts directly with the four-space indent of
-    the function body, matching the olmo_eval reference.  The fewshot *target*
-    retains the leading space via ``BPBStyle.get_fewshot_target_text`` because
-    those messages are not the final USER turn (no stripping).
-    """
+    """Shared base for codex_humaneval_gold_bpb_3shot-compatible HumanEval variants."""
 
     DATASET_PATH = "openai/openai_humaneval"
     SAMPLE_SPLIT = "test"

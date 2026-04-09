@@ -351,26 +351,6 @@ class MBPP_BPB(_MBPP_Base):
     TASK_STYLER = BPBStyle(question_prefix="", cue_text=BEGIN)
 
 
-# fmt: off
-# Fixed 3-shot fewshot examples matching codex_mbpp_gold_bpb_3shot.
-# Source: MBPP "full" prompt split, task_ids 3, 9, 4 (in that order).
-_CODEX_MBPP_FEWSHOTS: list[dict[str, Any]] = [
-    {
-        "text": "Write a python function to identify non-prime numbers.",
-        "code": "import math\ndef is_not_prime(n):\n    result = False\n    for i in range(2,int(math.sqrt(n)) + 1):\n        if n % i == 0:\n            result = True\n    return result",#noqa
-    },
-    {
-        "text": "Write a python function to find the minimum number of rotations required to get the same string.",
-        "code": "def find_Rotations(str): \n    tmp = str + str\n    n = len(str) \n    for i in range(1,n + 1): \n        substring = tmp[i: i+n] \n        if (str == substring): \n            return i \n    return n",#noqa
-    },
-    {
-        "text": "Write a function to find the largest integers from a given list of numbers using heap queue algorithm.",#noqa
-        "code": "import heapq as hq\ndef heap_queue_largest(nums,n):\n  largest_nums = hq.nlargest(n, nums)\n  return largest_nums",#noqa
-    },
-]
-# fmt: on
-
-
 class _CodexMBPP_Base(BaseTask[str]):
     """Shared base for the codex_mbpp_gold_bpb_3shot-compatible MBPP variants.
 
@@ -409,9 +389,6 @@ class _CodexMBPP_Base(BaseTask[str]):
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
         code = self._normalize_code(item["code"])
         return f"```python\n{code}\n```"
-
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict[str, Any]]:
-        return _CODEX_MBPP_FEWSHOTS[: self.num_fewshot]
 
 
 class CodexMBPP_BPB(_CodexMBPP_Base):
