@@ -276,7 +276,8 @@ class MBPP_OLMES(MBPP):
 
     def __init__(self, num_fewshot: int = 3) -> None:
         super().__init__(num_fewshot)
-        assert num_fewshot == 3, "MBPP_OLMES requires exactly 3 fewshot examples"
+        if num_fewshot != 3:
+            logger.warning(f"MBPP_OLMES supports only 3-shot, got {num_fewshot}")
         self.stop_sequences = ["```", '\n"""', "\nassert", "\n#"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
