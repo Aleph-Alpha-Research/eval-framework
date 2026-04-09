@@ -1,7 +1,7 @@
-# FullTextMMLU
+# MMLUMC
 
 ````
-NAME = FullTextMMLU
+NAME = MMLUMC
 DATASET_PATH = cais/mmlu
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = dev
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/cais/mmlu](https://huggingface.co/datasets/cais/mmlu)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "FullTextMMLU"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "MMLUMC"`.

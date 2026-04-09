@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from eval_framework.suite import (
+    MetricSource,
     SuiteAggregate,
     SuiteResult,
     TaskSuite,
@@ -96,8 +97,12 @@ def test_load_nested(tmp_path: Path) -> None:
                 - tasks: Math
               aggregates:
                 - name: taskgroup_score
-                  metric: Average Accuracy
                   method: mean
+                  sources:
+                    - child: GSM8K
+                      metric: Average Accuracy
+                    - child: Math
+                      metric: Average Accuracy
     """)
     f = tmp_path / "suite.yaml"
     f.write_text(yaml_content)
@@ -108,12 +113,19 @@ def test_load_nested(tmp_path: Path) -> None:
     assert isinstance(sub, TaskSuite)
     assert sub.name == "taskgroup"
     assert len(sub.tasks) == 2
+    assert len(sub.aggregates) == 1
+    assert sub.aggregates[0].name == "taskgroup_score"
+    assert len(sub.aggregates[0].sources) == 2
+    assert sub.aggregates[0].sources[0].child == "GSM8K"
+    assert sub.aggregates[0].sources[0].metric == "Average Accuracy"
+    assert sub.aggregates[0].sources[1].child == "Math"
+    assert sub.aggregates[0].sources[1].metric == "Average Accuracy"
 
 
 class TestLoadFromPy:
     def test_load_from_py(self, tmp_path: Path) -> None:
         py_content = textwrap.dedent("""\
-            from eval_framework.suite import TaskSuite, SuiteAggregate
+            from eval_framework.suite import TaskSuite, SuiteAggregate, MetricSource
 
             suite = TaskSuite(
                 name="test-suite",
@@ -122,7 +134,10 @@ class TestLoadFromPy:
                     TaskSuite(tasks="GSM8K", max_tokens=512),
                 ],
                 aggregates=[
-                    SuiteAggregate(name="overall", metric="Average Accuracy"),
+                    SuiteAggregate(name="overall", sources=[
+                        MetricSource(child="MMLU", metric="Average Accuracy"),
+                        MetricSource(child="GSM8K", metric="Average Accuracy"),
+                    ]),
                 ],
             )
         """)
@@ -132,6 +147,7 @@ class TestLoadFromPy:
         assert s.name == "test-suite"
         assert len(s.tasks) == 2
         assert len(s.aggregates) == 1
+        assert s.aggregates[0].name == "overall"
 
     def test_load_missing_suite_variable(self, tmp_path: Path) -> None:
         py_content = "x = 42\n"
@@ -193,7 +209,16 @@ class TestComputeAggregates:
         return SuiteResult(name=name, aggregates=aggregates)
 
     def test_mean(self) -> None:
-        aggs = [SuiteAggregate(name="score", metric="Average Accuracy", method="mean")]
+        aggs = [
+            SuiteAggregate(
+                name="score",
+                method="mean",
+                sources=[
+                    MetricSource(child="A", metric="Average Accuracy"),
+                    MetricSource(child="B", metric="Average Accuracy"),
+                ],
+            )
+        ]
         children = {
             "A": self._result("A", **{"Average Accuracy": 0.8}),
             "B": self._result("B", **{"Average Accuracy": 0.6}),
@@ -202,7 +227,17 @@ class TestComputeAggregates:
         assert result["score"] == pytest.approx(0.7)
 
     def test_median(self) -> None:
-        aggs = [SuiteAggregate(name="score", metric="m", method="median")]
+        aggs = [
+            SuiteAggregate(
+                name="score",
+                method="median",
+                sources=[
+                    MetricSource(child="A", metric="m"),
+                    MetricSource(child="B", metric="m"),
+                    MetricSource(child="C", metric="m"),
+                ],
+            )
+        ]
         children = {
             "A": self._result("A", m=1.0),
             "B": self._result("B", m=3.0),
@@ -212,14 +247,28 @@ class TestComputeAggregates:
         assert result["score"] == pytest.approx(2.0)
 
     def test_missing_metric_returns_none(self) -> None:
-        aggs = [SuiteAggregate(name="score", metric="NonExistent")]
+        aggs = [
+            SuiteAggregate(
+                name="score",
+                sources=[MetricSource(child="A", metric="NonExistent")],
+            )
+        ]
         children = {"A": self._result("A", Other=1.0)}
         result = compute_aggregates(aggs, children)
         assert result["score"] is None
         assert "Other" not in result
 
     def test_unlisted_metrics_not_in_result(self) -> None:
-        aggs = [SuiteAggregate(name="avg", metric="m", method="mean")]
+        aggs = [
+            SuiteAggregate(
+                name="avg",
+                method="mean",
+                sources=[
+                    MetricSource(child="A", metric="m"),
+                    MetricSource(child="B", metric="m"),
+                ],
+            )
+        ]
         children = {
             "A": self._result("A", m=0.5, extra=2.0),
             "B": self._result("B", m=0.7, extra=2.0),
@@ -228,10 +277,20 @@ class TestComputeAggregates:
         assert result["avg"] == pytest.approx(0.6)
         assert "extra" not in result
 
-    def test_explicit_passthrough(self) -> None:
+    def test_single_source_passthrough(self) -> None:
         aggs = [
-            SuiteAggregate(name="avg", metric="m", method="mean"),
-            SuiteAggregate(name="A", metric="extra", method="passthrough"),
+            SuiteAggregate(
+                name="avg",
+                method="mean",
+                sources=[
+                    MetricSource(child="A", metric="m"),
+                    MetricSource(child="B", metric="m"),
+                ],
+            ),
+            SuiteAggregate(
+                name="A_extra",
+                sources=[MetricSource(child="A", metric="extra")],
+            ),
         ]
         children = {
             "A": self._result("A", m=0.5, extra=2.0),
@@ -239,10 +298,19 @@ class TestComputeAggregates:
         }
         result = compute_aggregates(aggs, children)
         assert result["avg"] == pytest.approx(0.6)
-        assert result["A"] == pytest.approx(2.0)
+        assert result["A_extra"] == pytest.approx(2.0)
 
-    def test_passthrough_metric_omitted_on_conflict(self) -> None:
-        aggs = [SuiteAggregate(name="avg", metric="m", method="mean")]
+    def test_unlisted_child_not_in_result(self) -> None:
+        aggs = [
+            SuiteAggregate(
+                name="avg",
+                method="mean",
+                sources=[
+                    MetricSource(child="A", metric="m"),
+                    MetricSource(child="B", metric="m"),
+                ],
+            )
+        ]
         children = {
             "A": self._result("A", m=0.5, extra=1.0),
             "B": self._result("B", m=0.7, extra=2.0),
@@ -252,7 +320,16 @@ class TestComputeAggregates:
         assert "extra" not in result
 
     def test_none_metric_value_skipped(self) -> None:
-        aggs = [SuiteAggregate(name="score", metric="m", method="mean")]
+        aggs = [
+            SuiteAggregate(
+                name="score",
+                method="mean",
+                sources=[
+                    MetricSource(child="A", metric="m"),
+                    MetricSource(child="B", metric="m"),
+                ],
+            )
+        ]
         children = {
             "A": self._result("A", m=0.8),
             "B": self._result("B", m=None),
@@ -261,7 +338,16 @@ class TestComputeAggregates:
         assert result["score"] == pytest.approx(0.8)
 
     def test_aggregate_with_nested_suite_results(self) -> None:
-        aggs = [SuiteAggregate(name="overall", metric="sub_score", method="mean")]
+        aggs = [
+            SuiteAggregate(
+                name="overall",
+                method="mean",
+                sources=[
+                    MetricSource(child="task_A", metric="sub_score"),
+                    MetricSource(child="sub_suite", metric="sub_score"),
+                ],
+            )
+        ]
         children = {
             "task_A": self._result("task_A", sub_score=0.9),
             "sub_suite": SuiteResult(
@@ -274,9 +360,13 @@ class TestComputeAggregates:
         assert result["overall"] == pytest.approx(0.7)
 
     def test_multiple_aggregates(self) -> None:
+        sources = [
+            MetricSource(child="A", metric="Average Accuracy"),
+            MetricSource(child="B", metric="Average Accuracy"),
+        ]
         aggs = [
-            SuiteAggregate(name="score", metric="Average Accuracy", method="mean"),
-            SuiteAggregate(name="score2", metric="Average Accuracy", method="mean"),
+            SuiteAggregate(name="score", method="mean", sources=sources),
+            SuiteAggregate(name="score2", method="mean", sources=sources),
         ]
         children = {
             "A": self._result("A", **{"Average Accuracy": 0.8}),
@@ -346,12 +436,26 @@ class TestRunSuite:
                         TaskSuite(tasks="Inner2"),
                     ],
                     aggregates=[
-                        SuiteAggregate(name="group_score", metric="m", method="mean"),
+                        SuiteAggregate(
+                            name="group_score",
+                            method="mean",
+                            sources=[
+                                MetricSource(child="Inner1", metric="m"),
+                                MetricSource(child="Inner2", metric="m"),
+                            ],
+                        ),
                     ],
                 ),
             ],
             aggregates=[
-                SuiteAggregate(name="overall", metric="m", method="mean"),
+                SuiteAggregate(
+                    name="overall",
+                    method="mean",
+                    sources=[
+                        MetricSource(child="Solo", metric="m"),
+                        MetricSource(child="group", metric="group_score"),
+                    ],
+                ),
             ],
         )
 

@@ -251,10 +251,12 @@ class ClozeStyle(TaskStyler):
         question_prefix: str = "Question: ",
         cue_text: str = "Answer:",
         trailing_newline: bool = True,
+        leading_space_continuations: bool = True,
     ) -> None:
         self.question_prefix = question_prefix
         self._cue_text = cue_text
         self.trailing_newline = trailing_newline
+        self.leading_space_continuations = leading_space_continuations
 
     def get_cue_text(self) -> str:
         return self._cue_text
@@ -264,10 +266,10 @@ class ClozeStyle(TaskStyler):
         return f"{text}\n" if self.trailing_newline else text
 
     def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
-        return f" {choices[correct_index]}"
+        return f" {choices[correct_index]}" if self.leading_space_continuations else choices[correct_index]
 
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
-        return [f" {c}" for c in choices]
+        return [f" {c}" for c in choices] if self.leading_space_continuations else [f"{c}" for c in choices]
 
 
 class BPBStyle(ClozeStyle):
@@ -298,7 +300,7 @@ class BPBStyle(ClozeStyle):
                 "BPBStyle evaluates the loglikelihood of the ground truth answer only,"
                 "and thus requires the correct index."
             )
-        return [f" {choices[correct_index]}"]
+        return [f" {choices[correct_index]}"] if self.leading_space_continuations else [choices[correct_index]]
 
 
 # ---------------------------------------------------------------------------
