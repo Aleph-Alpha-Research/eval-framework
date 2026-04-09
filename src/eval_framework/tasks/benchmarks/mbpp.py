@@ -276,8 +276,9 @@ class MBPP_OLMES(MBPP):
     FEWSHOT_SPLIT = "test"
 
     def __init__(self, num_fewshot: int = 3) -> None:
-        super().__init__(num_fewshot)
-        assert num_fewshot == 3, "MBPP_OLMES requires exactly 3 fewshot examples"
+        if num_fewshot != 3:
+            logger.warning(f"MBPP_OLMES supports only 3-shot, got {num_fewshot}")
+        super().__init__(num_fewshot=3)
         self.stop_sequences = ["```", '\n"""', "\nassert", "\n#"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -421,5 +422,6 @@ class CodexMBPP_BPB(_CodexMBPP_Base):
     """
 
     NAME = "CodexMBPP_BPB"
-    TASK_STYLER = BPBStyle(question_prefix="", cue_text="```python\n", trailing_newline=True)
-    TASK_STYLER.get_possible_completions = lambda self, item: [f"```python\n{self._normalize_code(item['code'])}\n```"]
+    TASK_STYLER = BPBStyle(
+        question_prefix="", cue_text="```python\n", trailing_newline=True, leading_space_continuations=False
+    )

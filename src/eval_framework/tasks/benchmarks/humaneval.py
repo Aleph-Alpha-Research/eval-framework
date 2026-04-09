@@ -185,5 +185,4 @@ class CodexHumanEval_BPB(_CodexHumanEval_Base):
     """
 
     NAME = "CodexHumanEval_BPB"
-    TASK_STYLER = BPBStyle(question_prefix="", cue_text="", trailing_newline=False)
-    TASK_STYLER.get_possible_completions = lambda self, item: [item["canonical_solution"]]
+    TASK_STYLER = BPBStyle(question_prefix="", cue_text="", trailing_newline=False, leading_space_continuations=False)
