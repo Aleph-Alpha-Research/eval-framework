@@ -18,7 +18,7 @@ class DropMetricContext(BaseMetricContext):
 class DropF1ExactMatch(BaseMetric[Completion]):
     """DROP F1 and exact match. Requires DropMetricContext with answer_tuples."""
 
-    NAME = "DROP F1 / Exact Match"
+    NAME = "Drop F1"
     KEYS = ["f1", "exact_match"]
 
     def calculate(self, response: Completion) -> list[MetricResult]:
@@ -52,5 +52,5 @@ class DropF1ExactMatch(BaseMetric[Completion]):
                 higher_is_better=True,
                 error=response.error,
             )
-            for name, key in zip([n.strip() for n in self.NAME.split("/")], self.KEYS)
+            for name, key in zip(self.NAMES, self.KEYS)
         ]
