@@ -332,14 +332,12 @@ class BaseTask[SubjectType](ABC):
         return None
 
     def get_metadata(self) -> dict[str, str | list[str]]:
-        response_type, metrics = self._get_type_and_metrics()
-
         meta: dict[str, str | list[str]] = {
             "dataset_path": self.DATASET_PATH,
             "sample_split": self.SAMPLE_SPLIT,
             "fewshot_split": self.FEWSHOT_SPLIT,
-            "response_type": response_type.value,
-            "metrics": [m.NAME for m in metrics],
+            "response_type": self.get_response_type().value,
+            "metrics": [m.NAME for m in self.get_metrics()],
             "subjects": [str(s) for s in self.SUBJECTS],
         }
         if hasattr(self, "TASK_STYLER"):
@@ -420,7 +418,24 @@ class BaseTask[SubjectType](ABC):
             )
         return completion_list
 
-    def _get_type_and_metrics(self) -> tuple[ResponseType, list[type["BaseMetric"]]]:
+    def get_response_type(self) -> ResponseType:
+        """Return the response type of the task (or the styler if it exists)."""
         if hasattr(self, "TASK_STYLER"):
-            return self.TASK_STYLER.response_type, self.TASK_STYLER.metrics
-        return self.RESPONSE_TYPE, self.METRICS
+            return self.TASK_STYLER.response_type
+        return self.RESPONSE_TYPE
+
+    def get_metrics(self) -> list[type["BaseMetric"]]:
+        """Return the metrics of the task (or the styler if it exists)."""
+        if hasattr(self, "TASK_STYLER"):
+            return self.TASK_STYLER.metrics
+        return self.METRICS
+
+    @property
+    def RESPONSE_TYPE(self) -> ResponseType:
+        """For backwards compatibility."""
+        return self.get_response_type()
+
+    @property
+    def METRICS(self) -> list[type["BaseMetric"]]:
+        """For backwards compatibility."""
+        return self.get_metrics()
