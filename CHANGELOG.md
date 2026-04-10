@@ -12,6 +12,14 @@
 
 ### Bug Fixes
 
+## [0.3.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.2...v0.3.3) (2026-04-10)
+
+
+### Bug Fixes
+
+* fewshot sampling in truthfulqa_olmes ([#211](https://github.com/Aleph-Alpha-Research/eval-framework/issues/211)) ([aa1d6c1](https://github.com/Aleph-Alpha-Research/eval-framework/commit/aa1d6c10c7e942afbdcc2afa94877eb6364ca788))
+* metric name format fix ([#215](https://github.com/Aleph-Alpha-Research/eval-framework/issues/215)) ([4d73704](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4d73704d60e22f5aae8945a0afe154f17f8d1a66))
+
 ## [0.3.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.1...v0.3.2) (2026-04-09)
 
 
