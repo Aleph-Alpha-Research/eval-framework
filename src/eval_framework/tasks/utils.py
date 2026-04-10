@@ -8,7 +8,7 @@ import string
 import threading
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Literal, NamedTuple
+from typing import Any, Literal, NamedTuple, overload
 
 import dill
 import numpy as np
@@ -21,6 +21,24 @@ logger = logging.getLogger(__name__)
 
 RANDOM_SEED = 42  # hacky way to get around circular import
 redis_warning_printed = False
+
+
+class classproperty[T]:
+    """Descriptor supporting property-like access on classes and instances."""
+
+    def __init__(self, fget: Callable[[Any], T]) -> None:
+        self.fget = fget
+
+    @overload
+    def __get__(self, obj: None, owner: type[Any]) -> T: ...
+
+    @overload
+    def __get__(self, obj: object, owner: type[Any] | None = None) -> T: ...
+
+    def __get__(self, obj: object | None, owner: type[Any] | None = None) -> T:
+        cls = owner if owner is not None else type(obj)
+        return self.fget(cls)
+
 
 _pools: dict[tuple[str | None, tuple[str, ...] | None], ContainerPoolManager] = {}
 _pools_lock = threading.Lock()

@@ -15,7 +15,7 @@ from huggingface_hub.errors import RevisionNotFoundError
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
-from eval_framework.tasks.utils import raise_errors
+from eval_framework.tasks.utils import classproperty, raise_errors
 from template_formatting.formatter import Message, Role
 
 if TYPE_CHECKING:
@@ -102,8 +102,9 @@ class BaseTask[SubjectType](ABC):
     # language by subtopic, or `None` (for tasks not specific to a single language).
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
 
-    # Note: We don't declare RESPONSE_TYPE/METRICS here, instead exposing them as properties.
-    # This allows for backwards compatibility (accessing via task.METRICS) both when using a styler and when not.
+    # RESPONSE_TYPE and METRICS use exposed as classproperties, so you can access them via either
+    # `TaskClass.*` or `task.*` (or `task.get_metrics()`). This avoids mypy conflicts from re-declaring class vars.
+    # By default, these values come from TASK_STYLER if set, otherwise from legacy class attributes.
 
     def __init__(self, num_fewshot: int = 0) -> None:
         self.num_fewshot = num_fewshot
@@ -419,24 +420,26 @@ class BaseTask[SubjectType](ABC):
             )
         return completion_list
 
-    def get_response_type(self) -> ResponseType:
+    @classmethod
+    def get_response_type(cls) -> ResponseType:
         """Return the response type of the task (or the styler if it exists)."""
-        if hasattr(self, "TASK_STYLER"):
-            return self.TASK_STYLER.response_type
-        return self.RESPONSE_TYPE
+        if hasattr(cls, "TASK_STYLER"):
+            return cls.TASK_STYLER.response_type
+        return cls.RESPONSE_TYPE
 
-    def get_metrics(self) -> list[type["BaseMetric"]]:
+    @classmethod
+    def get_metrics(cls) -> list[type["BaseMetric"]]:
         """Return the metrics of the task (or the styler if it exists)."""
-        if hasattr(self, "TASK_STYLER"):
-            return self.TASK_STYLER.metrics
-        return self.METRICS
+        if hasattr(cls, "TASK_STYLER"):
+            return cls.TASK_STYLER.metrics
+        return cls.METRICS
 
-    @property
-    def RESPONSE_TYPE(self) -> ResponseType:
+    @classproperty
+    def RESPONSE_TYPE(cls) -> ResponseType:
         """For backwards compatibility."""
-        return self.get_response_type()
+        return cls.get_response_type()
 
-    @property
-    def METRICS(self) -> list[type["BaseMetric"]]:
+    @classproperty
+    def METRICS(cls) -> list[type["BaseMetric"]]:
         """For backwards compatibility."""
-        return self.get_metrics()
+        return cls.get_metrics()
