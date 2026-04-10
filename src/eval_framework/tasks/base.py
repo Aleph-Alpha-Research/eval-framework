@@ -91,8 +91,6 @@ class BaseTask[SubjectType](ABC):
     DATASET_PATH: str
     SAMPLE_SPLIT: str
     FEWSHOT_SPLIT: str
-    RESPONSE_TYPE: ResponseType
-    METRICS: list[type["BaseMetric"]]
     SUBJECTS: list[SubjectType]
     HF_REVISION: str | None = None  # tag name, or branch name, or commit hash to ensure reproducibility
 
@@ -103,6 +101,9 @@ class BaseTask[SubjectType](ABC):
     # The language (or languages) tested by the benchmark. Accepts a single string, a dictionary specifying
     # language by subtopic, or `None` (for tasks not specific to a single language).
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
+
+    # Note: We don't declare RESPONSE_TYPE/METRICS here, instead exposing them as properties.
+    # This allows for backwards compatibility (accessing via task.METRICS) both when using a styler and when not.
 
     def __init__(self, num_fewshot: int = 0) -> None:
         self.num_fewshot = num_fewshot
