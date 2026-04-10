@@ -20,6 +20,7 @@ class MathMinervaCompletion(BaseMetric[Completion]):
     """
 
     NAME = "Math Minerva Completion"
+    KEYS = ["Exact", "Exact Flex"]
     AGGREGATORS = [PassAtK()]
 
     def __init__(
@@ -36,17 +37,12 @@ class MathMinervaCompletion(BaseMetric[Completion]):
         if response.error:
             return [
                 MetricResult(
-                    metric_name="Exact Match",
+                    metric_name=x,
                     value=None,
                     higher_is_better=True,
                     error=response.error,
-                ),
-                MetricResult(
-                    metric_name="Exact Match (Flex)",
-                    value=None,
-                    higher_is_better=True,
-                    error=response.error,
-                ),
+                )
+                for x in self.NAMES
             ]
 
         gold = response.ground_truth
@@ -55,17 +51,12 @@ class MathMinervaCompletion(BaseMetric[Completion]):
         if not gold:
             return [
                 MetricResult(
-                    metric_name="Exact Match",
+                    metric_name=x,
                     value=None,
                     higher_is_better=True,
                     error="No ground truth available",
-                ),
-                MetricResult(
-                    metric_name="Exact Match (Flex)",
-                    value=None,
-                    higher_is_better=True,
-                    error="No ground truth available",
-                ),
+                )
+                for x in self.NAMES
             ]
 
         raw = response.raw_completion or response.completion
@@ -84,12 +75,8 @@ class MathMinervaCompletion(BaseMetric[Completion]):
         )
 
         return [
-            MetricResult(metric_name="Exact Match", value=exact_match, higher_is_better=True),
-            MetricResult(
-                metric_name="Exact Match (Flex)",
-                value=exact_match_flex,
-                higher_is_better=True,
-            ),
+            MetricResult(metric_name=name, value=value, higher_is_better=True)
+            for name, value in zip(self.NAMES, [exact_match, exact_match_flex])
         ]
 
 
