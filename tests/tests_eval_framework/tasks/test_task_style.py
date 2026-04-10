@@ -506,3 +506,11 @@ class TestBaseTaskBPBStyle:
     def test_metadata_metrics_bpb_only(self) -> None:
         meta = self.task.get_metadata()
         assert meta["metrics"] == ["BitsPerByte"]
+
+
+def test_instance_properties_are_styler_backed() -> None:
+    task = _ConcreteMCTask()
+
+    # Check compatibility access points for metadata.
+    assert task.RESPONSE_TYPE == ResponseType.LOGLIKELIHOODS
+    assert task.METRICS == task.TASK_STYLER.metrics
