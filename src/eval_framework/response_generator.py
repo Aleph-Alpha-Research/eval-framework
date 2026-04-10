@@ -78,7 +78,7 @@ class ResponseGenerator:
                 custom_hf_revision=self.config.hf_revision,
             )
 
-        self.response_type, _ = self.task._get_type_and_metrics()
+        self.response_type = self.task.get_response_type()
 
     def _llm_task_param_precedence(self) -> tuple[list[str] | None, int | None]:
         """
