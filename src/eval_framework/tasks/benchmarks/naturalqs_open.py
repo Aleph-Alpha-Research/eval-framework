@@ -86,7 +86,7 @@ class NaturalQsOpenCloze(_NaturalQsOpenChoice_Base):
 
 class NaturalQsOpenMC(_NaturalQsOpenChoice_Base):
     NAME = "NaturalQsOpenMC"
-    TASK_STYLER = MCStyle(space_prefixed_labels=True)
+    TASK_STYLER = MCStyle()
 
 
 class NaturalQsOpenMC_OLMES(_NaturalQsOpenChoice_Base):
