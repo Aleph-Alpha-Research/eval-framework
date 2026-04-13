@@ -12,6 +12,13 @@
 
 ### Bug Fixes
 
+## [0.3.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.3...v0.3.4) (2026-04-13)
+
+
+### Bug Fixes
+
+* update non-_OLMES variant to not use space prefix ([#218](https://github.com/Aleph-Alpha-Research/eval-framework/issues/218)) ([b59cae1](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b59cae1b6d8a4ae42113158916486d7f956e28d5))
+
 ## [0.3.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.2...v0.3.3) (2026-04-10)
 
 
