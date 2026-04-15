@@ -32,6 +32,11 @@ from eval_framework.tasks.perturbation import create_perturbation_class
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag, safe_tqdm_write
+from eval_framework.utils.tracemalloc_utils import (
+    TRACEMALLOC_PROGRESS_INTERVAL,
+    ensure_tracemalloc_started,
+    log_tracemalloc_debug,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -181,15 +186,19 @@ class ResponseGenerator:
         :return: list of responses, preempted
         """
         logger.info(f"{RED}[ Running task {self.task.NAME} against model ------------ ]{RESET}")
+        ensure_tracemalloc_started()
+        log_tracemalloc_debug(logger, "responses_run_start")
         self.start_time, monotonic_start = time.time(), time.monotonic()
         run_fn = self._generative_output_type_selector()
         self._verify_loaded_metadata_compatibility()
         responses = self.result_processor.load_responses()  # load responses if present
+        log_tracemalloc_debug(logger, "responses_after_load_responses")
         subject_response_id_mapping = self._map_subject_response_ids(responses)
         self.result_processor.save_metadata(self._get_metadata())
         responses, preempted = self._curate_responses(
             responses, subject_response_id_mapping, run_fn, should_preempt_callable
         )
+        log_tracemalloc_debug(logger, "responses_after_curation")
         self.end_time, monotonic_end = time.time(), time.monotonic()
         self.total_time = monotonic_end - monotonic_start
         self.result_processor.save_metadata(self._get_metadata())  # overwrite with updated timing
@@ -275,27 +284,33 @@ class ResponseGenerator:
                     logger.info(log_msg)  # For log files
                     safe_tqdm_write(log_msg)  # For console display with tqdm
                     pbar.update(1)
-                    continue
-
-                log_msg = f"Task: {self.response_type.value}{subject} - Sample: {sample_index}/{total_num_samples}"
-                logger.info(log_msg)  # For log files
-                safe_tqdm_write(log_msg)  # For console display with tqdm
-                pbar.set_postfix_str(f"Sample {sample_index}/{total_num_samples}")
-                pbar.update(1)
-
-                samples_batch.append(sample)
-
-                if len(samples_batch) >= samples_batch_size:
-                    _process_batch(samples_batch)
-                    samples_batch = []
-
-                if should_preempt_callable():
-                    log_msg = "Preempt"
+                else:
+                    log_msg = f"Task: {self.response_type.value}{subject} - Sample: {sample_index}/{total_num_samples}"
                     logger.info(log_msg)  # For log files
                     safe_tqdm_write(log_msg)  # For console display with tqdm
-                    if not self.save_intermediate_results:
-                        self.result_processor.save_responses(responses)
-                    return responses, True
+                    pbar.set_postfix_str(f"Sample {sample_index}/{total_num_samples}")
+                    pbar.update(1)
+
+                    samples_batch.append(sample)
+
+                    if len(samples_batch) >= samples_batch_size:
+                        _process_batch(samples_batch)
+                        samples_batch = []
+
+                    if should_preempt_callable():
+                        log_msg = "Preempt"
+                        logger.info(log_msg)  # For log files
+                        safe_tqdm_write(log_msg)  # For console display with tqdm
+                        if not self.save_intermediate_results:
+                            self.result_processor.save_responses(responses)
+                        return responses, True
+
+                if sample_index % TRACEMALLOC_PROGRESS_INTERVAL == 0:
+                    log_tracemalloc_debug(
+                        logger,
+                        f"responses_processing sample={sample_index}/{total_num_samples}",
+                        top_stats=4,
+                    )
 
             _process_batch(samples_batch)
 

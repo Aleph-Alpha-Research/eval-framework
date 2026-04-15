@@ -21,6 +21,11 @@ from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import get_task
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag, safe_tqdm_write
+from eval_framework.utils.tracemalloc_utils import (
+    TRACEMALLOC_PROGRESS_INTERVAL,
+    ensure_tracemalloc_started,
+    log_tracemalloc_debug,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +66,9 @@ class EvaluationGenerator:
         for result in results:
             subject_result_id_existing.add(f"{result.subject}_{result.id}_{result.metric_class_name}")
 
+        ensure_tracemalloc_started()
+        log_tracemalloc_debug(logger, "metrics_phase_start")
+
         """
         we have three dimensions: subject, metric, sample_id
         we wanna average over sample_id
@@ -83,50 +91,64 @@ class EvaluationGenerator:
 
             logger.info(f"Starting calculation of {metric.NAME}")
             safe_tqdm_write(f"INFO: Calculating {metric.NAME}")
-            for response in tqdm(responses, desc=f"Calculating {metric.NAME}", disable=get_disable_bar_flag()):
-                if f"{response.subject}_{response.id}_{metric.__class__.__name__}" in subject_result_id_existing:
-                    continue
+            n_responses = len(responses)
+            for idx, response in enumerate(
+                tqdm(responses, desc=f"Calculating {metric.NAME}", disable=get_disable_bar_flag()),
+                start=1,
+            ):
+                if f"{response.subject}_{response.id}_{metric.__class__.__name__}" not in subject_result_id_existing:
+                    subject = response.subject
+                    metric_results = metric.calculate(response)
+                    for metric_result in metric_results:
+                        if "/" in metric_result.metric_name:
+                            metric_name, key = metric_result.metric_name.split("/")
+                        else:
+                            metric_name = metric_result.metric_name
+                            key = None
+                        completion = (
+                            response.completion if isinstance(response, Completion) else str(response.ground_truth)
+                        )
 
-                subject = response.subject
-                metric_results = metric.calculate(response)
-                for metric_result in metric_results:
-                    if "/" in metric_result.metric_name:
-                        metric_name, key = metric_result.metric_name.split("/")
-                    else:
-                        metric_name = metric_result.metric_name
-                        key = None
-                    completion = response.completion if isinstance(response, Completion) else str(response.ground_truth)
+                        result = Result(
+                            id=response.id,
+                            metric_class_name=metric.__class__.__name__,
+                            metric_name=metric_name,
+                            num_fewshot=self.few_shot,
+                            key=key,
+                            subject=subject,
+                            llm_name=llm_name,
+                            task_name=self.task_name,
+                            value=metric_result.value,
+                            higher_is_better=metric_result.higher_is_better,
+                            prompt=response.prompt,
+                            response=completion,
+                            llm_judge_prompt=metric_result.llm_judge_prompt,
+                            llm_judge_response=metric_result.llm_judge_response,
+                            code_execution_trace=metric_result.code_execution_trace,
+                            error=metric_result.error,
+                        )
+                        results.append(result)
+                        if self.save_intermediate_results:
+                            self.result_processor.save_metrics_result(result)
 
-                    result = Result(
-                        id=response.id,
-                        metric_class_name=metric.__class__.__name__,
-                        metric_name=metric_name,
-                        num_fewshot=self.few_shot,
-                        key=key,
-                        subject=subject,
-                        llm_name=llm_name,
-                        task_name=self.task_name,
-                        value=metric_result.value,
-                        higher_is_better=metric_result.higher_is_better,
-                        prompt=response.prompt,
-                        response=completion,
-                        llm_judge_prompt=metric_result.llm_judge_prompt,
-                        llm_judge_response=metric_result.llm_judge_response,
-                        code_execution_trace=metric_result.code_execution_trace,
-                        error=metric_result.error,
+                if idx % TRACEMALLOC_PROGRESS_INTERVAL == 0:
+                    log_tracemalloc_debug(
+                        logger,
+                        f"metrics_{metric_class.__name__} tqdm_idx={idx}/{n_responses}",
+                        top_stats=4,
                     )
-                    results.append(result)
-                    if self.save_intermediate_results:
-                        self.result_processor.save_metrics_result(result)
 
             logger.info(f"Completed calculation of {metric.NAME}")
             safe_tqdm_write(f"INFO: Completed {metric.NAME}")
+            log_tracemalloc_debug(logger, f"metrics_after_{metric_class.__name__}")
 
         if not self.save_intermediate_results:
             self.result_processor.save_metrics_results(results)
+        log_tracemalloc_debug(logger, "metrics_phase_end")
         return results
 
     def _aggregate_results(self, results: list[Result]) -> dict[str, float | None]:
+        log_tracemalloc_debug(logger, "aggregate_before_dataframe")
         data = pd.DataFrame([r.model_dump() for r in results])
         if len(data) == 0:
             return {}
@@ -251,6 +273,7 @@ class EvaluationGenerator:
         return aggregated_results
 
     def _aggregate_results_with_aggregators(self, results: list[Result]) -> dict[str, float | None]:
+        log_tracemalloc_debug(logger, "aggregate_with_aggregators_before_dataframe")
         data = pd.DataFrame([r.model_dump() for r in results])
         if len(data) == 0:
             return {}
@@ -308,17 +331,24 @@ class EvaluationGenerator:
     def run_eval(self) -> list[Result]:
         """Runs evaluation using saved completions."""
         logger.info("Running evaluation...")
+        ensure_tracemalloc_started()
+        log_tracemalloc_debug(logger, "run_eval_start")
         responses = self.result_processor.load_responses()
+        log_tracemalloc_debug(logger, "eval_after_load_responses")
         if not responses:
             raise ValueError("No saved completions found. Run 'run_completions' first.")
 
         metrics_results = self._run_metric_calculators(responses)
+        log_tracemalloc_debug(logger, "eval_after_all_metrics")
         aggregated_results = self._aggregate_results(metrics_results)
+        log_tracemalloc_debug(logger, "eval_after_aggregate_results")
         results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results)
         aggregated_results.update(results_with_aggregators)
+        log_tracemalloc_debug(logger, "eval_after_aggregate_with_aggregators")
 
         wandb.log(aggregated_results)
         self.result_processor.save_aggregated_results(aggregated_results)
         logger.info(aggregated_results)
         logger.info(f"{RED}[ Evaluation completed and results saved! ]{RESET}")
+        log_tracemalloc_debug(logger, "run_eval_end")
         return metrics_results
