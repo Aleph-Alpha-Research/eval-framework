@@ -165,6 +165,8 @@ jobs:
             type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:buildcache
             type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:latest
             type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
+          cache-to: |
+            type=gha,scope=shared,mode=max
 
   test-extras:
     # Test uv installs (CPU)
