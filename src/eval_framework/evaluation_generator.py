@@ -127,7 +127,18 @@ class EvaluationGenerator:
         return results
 
     def _aggregate_results(self, results: list[Result]) -> dict[str, float | None]:
-        data = pd.DataFrame([r.model_dump() for r in results])
+        data = pd.DataFrame(
+            [
+                {
+                    "metric_name": r.metric_name,
+                    "subject": r.subject,
+                    "key": r.key,
+                    "value": r.value,
+                    "error": r.error,
+                }
+                for r in results
+            ]
+        )
         if len(data) == 0:
             return {}
         data.fillna({"key": ""}, inplace=True)
@@ -251,7 +262,20 @@ class EvaluationGenerator:
         return aggregated_results
 
     def _aggregate_results_with_aggregators(self, results: list[Result]) -> dict[str, float | None]:
-        data = pd.DataFrame([r.model_dump() for r in results])
+        data = pd.DataFrame(
+            [
+                {
+                    "metric_name": r.metric_name,
+                    "metric_class_name": r.metric_class_name,
+                    "subject": r.subject,
+                    "key": r.key,
+                    "value": r.value,
+                    "error": r.error,
+                    "prompt": r.prompt,
+                }
+                for r in results
+            ]
+        )
         if len(data) == 0:
             return {}
         data = data.fillna({"key": ""})
