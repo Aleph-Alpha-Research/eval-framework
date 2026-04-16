@@ -337,6 +337,7 @@ class EvaluationGenerator:
             raise ValueError("No saved completions found. Run 'run_completions' first.")
 
         metrics_results = self._run_metric_calculators(responses)
+        del responses
         aggregated_results = self._aggregate_results(metrics_results)
         results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results)
         aggregated_results.update(results_with_aggregators)
