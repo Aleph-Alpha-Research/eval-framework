@@ -36,9 +36,9 @@ class ResultsFileProcessor(ResultProcessor):
             return {}
 
     def save_responses(self, responses: list[Completion | Loglikelihood]) -> None:
-        responses_data = [response.model_dump(mode="json", serialize_as_any=True) for response in responses]
         with jsonlines.open(self.output_dir / "output.jsonl", "w") as f:
-            f.write_all(responses_data)
+            for response in responses:
+                f.write(response.model_dump(mode="json", serialize_as_any=True))
 
     def save_response(self, response: Completion | Loglikelihood) -> None:
         with jsonlines.open(self.output_dir / "output.jsonl", "a") as f:
@@ -72,9 +72,9 @@ class ResultsFileProcessor(ResultProcessor):
         return responses
 
     def save_metrics_results(self, results: list[Result]) -> None:
-        result_data = [x.model_dump(mode="json") for x in results]
         with jsonlines.open(self.output_dir / "results.jsonl", "w") as f:
-            f.write_all(result_data)
+            for result in results:
+                f.write(result.model_dump(mode="json"))
 
     def save_metrics_result(self, result: Result) -> None:
         with jsonlines.open(self.output_dir / "results.jsonl", "a") as f:
