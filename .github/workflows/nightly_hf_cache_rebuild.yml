@@ -1,9 +1,9 @@
-name: Nightly HuggingFace Datasets Cache Rebuild
+name: Weekly HuggingFace Datasets Cache Rebuild
 
 on:
   schedule:
-    # Run every night at 2 AM UTC
-    - cron: '0 2 * * *'
+    # Run every Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
   # Allow manual trigger
   workflow_dispatch:
 

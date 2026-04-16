@@ -22,6 +22,8 @@ env:
   REPO_OWNER: research/public-registry
   IMAGE_NAME: eval_framework
   HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # <- single source of truth
+  HF_HUB_OFFLINE: "1"        # use cached datasets only; cache is rebuilt weekly by nightly_hf_cache_rebuild.yml
+  HF_DATASETS_OFFLINE: "1"
   UV_LINK_MODE: symlink
   UV_LOCKED: 1
 
@@ -76,31 +78,6 @@ jobs:
 
       - name: Run MyPy
         run: uv run --all-extras mypy
-
-  hf-datasets-cache:
-    runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: "~=0.8.16"
-
-      - name: Restore and save cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
-          restore-keys: |
-            hf-datasets-
-
-      - name: Download only updated datasets
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: |
-          echo "Updating changed datasets"
-          uv run --extra=comet --extra=openai python tests/tests_eval_framework/utils/update_datasets.py update
 
   tag:
     # Set Docker Tag and Image Name for Docker Build and Push (GPU Runs)
@@ -198,7 +175,7 @@ jobs:
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+    needs: [test-extras]
     steps:
       - uses: actions/checkout@v4
 
@@ -210,8 +187,8 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-${{ github.run_id }}
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          key: hf-datasets-
           restore-keys: |
             hf-datasets-
 
@@ -225,7 +202,7 @@ jobs:
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+    needs: [test-extras]
     steps:
       - uses: actions/checkout@v4
 
@@ -238,7 +215,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-
           restore-keys: |
             hf-datasets-
 
@@ -252,7 +229,7 @@ jobs:
   test-formatter-hash:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+    needs: [test-extras]
     steps:
       - uses: actions/checkout@v4
 
@@ -265,7 +242,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-
           restore-keys: |
             hf-datasets-
 
@@ -307,7 +284,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-
           restore-keys: |
             hf-datasets-
 
