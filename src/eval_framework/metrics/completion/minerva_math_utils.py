@@ -7,6 +7,8 @@ import multiprocessing
 import os
 import re
 import threading
+from multiprocessing.context import DefaultContext
+from typing import cast
 
 from sympy import SympifyError, simplify
 from sympy.parsing.latex import parse_latex
@@ -15,7 +17,11 @@ from sympy.parsing.latex.errors import LaTeXParsingError
 # Fork inherits an already-imported SymPy in the child (fast). Spawn re-imports the
 # whole stack per worker and is much slower; we only use it on Windows where fork
 # is unavailable. See https://docs.python.org/3/library/multiprocessing.html#contexts
-_worker_ctx = multiprocessing.get_context("spawn" if os.name == "nt" else "fork")
+# Stubs type get_context() as BaseContext, which omits Process; runtime is DefaultContext.
+_worker_ctx = cast(
+    DefaultContext,
+    multiprocessing.get_context("spawn" if os.name == "nt" else "fork"),
+)
 
 # Virtual-address-space budget for a single sympy simplify() call.
 # Pathological expressions can cause sympy to allocate tens of GiBs;
