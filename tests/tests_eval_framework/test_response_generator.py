@@ -1,4 +1,6 @@
+from collections.abc import Iterable, Sequence
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -7,15 +9,17 @@ from huggingface_hub.errors import RevisionNotFoundError
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator, repeat_samples
+from eval_framework.result_processors.base import ResultProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
-from eval_framework.shared.types import Completion, RawCompletion
-from eval_framework.tasks.base import Sample
+from eval_framework.shared.types import Completion, RawCompletion, RawLoglikelihood
+from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig, PerturbationType
-from eval_framework.tasks.registry import get_task
+from eval_framework.tasks.registry import get_task, register_task
 from template_formatting.formatter import Message, Role
 from tests.tests_eval_framework.conftest import MockLLM
+from tests.tests_eval_framework.tasks.test_registry import temporary_registry
 
 
 def test_generate_completions_message_handling() -> None:
@@ -269,7 +273,9 @@ def test_response_generator_llm_token_overloading(
     )
     generated = generator.generate(lambda: False)
     # make sure that run complete is called with the precedence values
-    called_stop_sequences, called_max_tokens = generator.task.generate_completions.call_args[1].values()
+    call_kwargs = generator.task.generate_completions.call_args[1]
+    called_stop_sequences = call_kwargs["stop_sequences"]
+    called_max_tokens = call_kwargs["max_tokens"]
 
     assert generated
     assert expected_max_tokens == called_max_tokens
@@ -561,3 +567,106 @@ def test_response_generator_applies_model_then_task_post_processing(tmp_path: Pa
 
     assert completions[0].raw_completion == "raw_answer"
     assert completions[0].completion == "TASK[MODEL[raw_answer]]"
+
+
+class SaboteurLLM(BaseLLM):
+    """LLM that always raises — drives the fail_on_error code path without mocks."""
+
+    def generate_from_messages(
+        self,
+        messages: list[Sequence[Message]],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+    ) -> list[RawCompletion]:
+        raise RuntimeError("inference connection failed")
+
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+        raise RuntimeError("inference connection failed")
+
+
+class NoopResultProcessor(ResultProcessor):
+    """No-op result processor sufficient for ResponseGenerator's metadata + IO calls."""
+
+    output_dir = Path("/tmp")
+
+    def save_metadata(self, metadata: dict) -> None: ...
+    def load_metadata(self) -> dict:
+        return {}
+
+    def save_responses(self, responses: list) -> None: ...
+    def save_response(self, response: Any) -> None: ...
+    def load_responses(self) -> list:
+        return []
+
+    def save_metrics_results(self, results: list) -> None: ...
+    def save_metrics_result(self, result: Any) -> None: ...
+    def save_aggregated_results(self, result: dict) -> None: ...
+    def load_metrics_results(self) -> list:
+        return []
+
+
+class StubTask(BaseTask[str]):
+    """Minimal task that yields a single sample, no HF dataset loader."""
+
+    NAME = "StubTask"
+    DATASET_PATH = "stub"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "test"
+    SUBJECTS = ["stub"]
+    LANGUAGE = Language.ENG
+    RESPONSE_TYPE = ResponseType.COMPLETION
+    METRICS: list = []
+    PERTURBATION_UNMODIFIABLE_WORDS: list = []
+
+    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
+        yield Sample(
+            id=0,
+            messages=[Message(role=Role.USER, content="Hello")],
+            ground_truth="A",
+            subject="stub",
+            possible_completions=None,
+        )
+
+
+@temporary_registry
+def test_fail_on_error_propagates_llm_failure() -> None:
+    # Given a generator configured with fail_on_error=True against an LLM that always raises
+    register_task(StubTask)
+    config = EvalConfig(
+        task_name="StubTask",
+        num_fewshot=0,
+        num_samples=1,
+        llm_class=SaboteurLLM,
+        save_intermediate_results=False,
+        fail_on_error=True,
+    )
+    generator = ResponseGenerator(SaboteurLLM(), config, NoopResultProcessor())  # type: ignore[arg-type]
+
+    # Then the original exception propagates
+    with pytest.raises(RuntimeError, match="inference connection failed"):
+        # When running the generator
+        generator.generate(should_preempt_callable=lambda: False)
+
+
+@temporary_registry
+def test_fail_on_error_disabled_swallows_llm_failure() -> None:
+    # Given a generator with the default fail_on_error=False against an LLM that always raises
+    register_task(StubTask)
+    config = EvalConfig(
+        task_name="StubTask",
+        num_fewshot=0,
+        num_samples=1,
+        llm_class=SaboteurLLM,
+        save_intermediate_results=False,
+    )
+    generator = ResponseGenerator(SaboteurLLM(), config, NoopResultProcessor())  # type: ignore[arg-type]
+
+    # When running the generator
+    responses, _ = generator.generate(should_preempt_callable=lambda: False)
+
+    # Then the failure is captured per-sample as an Error, not raised
+    assert len(responses) == 1
+    assert responses[0].error is not None
+    assert responses[0].error.error_class == "RuntimeError"

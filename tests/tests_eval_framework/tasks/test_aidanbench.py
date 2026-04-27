@@ -116,7 +116,7 @@ def test_generate_completions_returns_proper_format():
     task = AidanBench(num_fewshot=0)
 
     # Mock the generation loop to return simple message history
-    def mock_generation_loop(llm, stop_sequences, max_tokens, initial_samples):
+    def mock_generation_loop(llm, stop_sequences, max_tokens, initial_samples, fail_on_error=False):
         message_histories = []
         errors = []
 

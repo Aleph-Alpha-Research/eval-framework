@@ -104,7 +104,12 @@ class AidanBenchOriginal(BaseTask[str]):
         return [Message(role=Role.USER, content=instruction_message)]
 
     def _generation_loop(
-        self, llm: "BaseLLM", stop_sequences: list[str] | None, max_tokens: int | None, initial_samples: list[Sample]
+        self,
+        llm: "BaseLLM",
+        stop_sequences: list[str] | None,
+        max_tokens: int | None,
+        initial_samples: list[Sample],
+        fail_on_error: bool = False,
     ) -> tuple[list[list[Message]], list[Union["Error", None]]]:
         initial_messages = [s.messages for s in initial_samples]
         samples = [(s, False) for s in initial_samples]  # (sample, is_done)
@@ -118,6 +123,7 @@ class AidanBenchOriginal(BaseTask[str]):
                 [samples[i][0] for i in not_done_idx],
                 stop_sequences=stop_sequences,
                 max_tokens=max_tokens,
+                fail_on_error=fail_on_error,
             )
             new_completion_messages: list[list[Message] | None] = [c.messages for c in new_completions]
             new_errors = [c.error for c in new_completions]
@@ -164,11 +170,14 @@ class AidanBenchOriginal(BaseTask[str]):
         samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
+        fail_on_error: bool = False,
     ) -> list[Completion]:
         assert all(len(s.messages) == 1 and s.messages[0].role == Role.USER for s in samples), (
             "Each sample must have exactly one USER message."
         )
-        all_message_histories, errors = self._generation_loop(llm, stop_sequences, max_tokens, samples)
+        all_message_histories, errors = self._generation_loop(
+            llm, stop_sequences, max_tokens, samples, fail_on_error=fail_on_error
+        )
 
         completion_list = []
         for idx, sample in enumerate(samples):
