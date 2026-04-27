@@ -12,6 +12,7 @@ from sympy.parsing.latex.errors import LaTeXParsingError
 
 INVALID_ANSWER = "[invalidanswer]"
 END_SEQ = "I hope it is correct."
+END_SEQ_DE = "Ich hoffe, die Antwort ist korrekt."  # German pendant to END_SEQ
 
 # Minerva normalize_final_answer: appendix D of Lewkowycz et al. (2022)
 SUBSTITUTIONS = [
@@ -141,6 +142,44 @@ def get_unnormalized_answer(text: str, relaxed: bool = False) -> str:
     if match:
         return match.group(1).strip()
     return INVALID_ANSWER
+
+
+def get_unnormalized_answer_de(text: str, relaxed: bool = False) -> str:
+    """German analogue of ``get_unnormalized_answer``."""
+    if relaxed:
+        match = re.search(
+            r"(?i)(?:finale|endgültige)\s+antwort\s*:\s*"
+            r"(?:die\s+(?:finale\s+|endgültige\s+)?antwort\s+(?:ist|lautet)\s*)?(.*)",
+            text,
+            re.DOTALL,
+        )
+        if match:
+            raw = match.group(1).strip()
+            raw = re.sub(
+                r"\.?\s*ich\s+hoffe,?\s+(?:die\s+antwort|sie|es)\s+(?:ist|sei)\s+korrekt\.?\s*$",
+                "",
+                raw,
+                flags=re.IGNORECASE,
+            ).strip()
+            return raw
+        return INVALID_ANSWER
+    text = text + END_SEQ_DE
+    match = re.search(
+        r"Finale Antwort: Die finale Antwort lautet(.*?)\. Ich hoffe, die Antwort ist korrekt\.",
+        text,
+    )
+    if match:
+        return match.group(1).strip()
+    return INVALID_ANSWER
+
+
+# Registry of supported `cot_style` values
+# Keys are the strings passed by metric configurations; values are language-specific final-answer extractors
+# `(text: str, relaxed: bool) -> str`. Extend this dict to add a new language.
+COT_EXTRACTORS = {
+    "minerva": get_unnormalized_answer,
+    "minerva_de": get_unnormalized_answer_de,
+}
 
 
 def normalized_gold_from_solution(solution: str) -> str | None:
@@ -368,10 +407,12 @@ def extract_answers(
     all_answers: list[str] = []
 
     if use_cot:
-        if cot_style == "minerva":
-            minerva_answer = normalize_final_answer(get_unnormalized_answer(raw, relaxed=relaxed))
-            if minerva_answer and minerva_answer != INVALID_ANSWER:
-                all_answers.append(minerva_answer)
+        if cot_style not in COT_EXTRACTORS:
+            raise ValueError(f"Unknown cot_style {cot_style!r}; valid: {sorted(COT_EXTRACTORS)}")
+        extractor = COT_EXTRACTORS[cot_style]
+        minerva_answer = normalize_final_answer(extractor(raw, relaxed=relaxed))
+        if minerva_answer and minerva_answer != INVALID_ANSWER:
+            all_answers.append(minerva_answer)
         boxed = last_boxed_only_string(raw)
         if boxed is not None:
             try:
