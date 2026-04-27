@@ -352,12 +352,15 @@ class BaseTask[SubjectType](ABC):
         samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
+        fail_on_error: bool = False,
     ) -> list[Completion]:
         """
         Generates completions for the sample.
         :param sample: sample to generate completions for
         :param stop_sequences: stop sequences to use in completion generation
         :param max_tokens: maximum tokens to use in completion generation
+        :param fail_on_error: if True, re-raise the original exception instead of capturing it
+                              into a per-sample Error completion
         :return: completion
         """
         if stop_sequences is None:
@@ -367,8 +370,8 @@ class BaseTask[SubjectType](ABC):
         try:
             raw_completions = llm.generate(samples=samples, stop_sequences=stop_sequences, max_tokens=max_tokens)
         except Exception as e:
-            if raise_errors():
-                raise e
+            if raise_errors() or fail_on_error:
+                raise
             logger.info(f"Error: {e.__class__.__name__} {e}")
             raw_completions = [
                 RawCompletion(

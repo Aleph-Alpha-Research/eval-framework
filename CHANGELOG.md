@@ -10,6 +10,8 @@
 
 ### General
 
+* Add `EvalConfig.fail_on_error` (default `False`). When set, request/sample errors (e.g. unreachable inference endpoint, exhausted retries) propagate instead of being captured into a blank `Error` result. Useful when a non-zero exit code is wanted on failure, e.g. in CI.
+
 ### Bug Fixes
 
 ## [0.3.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.3...v0.3.4) (2026-04-13)
