@@ -27,6 +27,7 @@ KEYS_UNRELATED_TO_RESULTS = {
     "save_intermediate_results",
     "save_logs",
     "delete_output_dir_after_upload",
+    "fail_on_error",
 }
 
 
@@ -59,6 +60,9 @@ class EvalConfig(BaseConfig):
     # how many times to repeat a single sample
     # can be used to reduce variance of tasks with low number of samples, e.g. AIME24
     repeats: Annotated[int, BeforeValidator(lambda v: 1 if v is None else v), Field(ge=1)] = 1
+    # When True, request/sample errors (e.g. unreachable inference endpoint, exhausted retries)
+    # propagate instead of being captured into a blank Error result.
+    fail_on_error: Annotated[bool, BeforeValidator(lambda v: False if v is None else v)] = False
     # Adding a new member? Remember to update KEYS_UNRELATED_TO_RESULTS if it doesn't impact eval results.
 
     @property

@@ -114,8 +114,8 @@ class ResponseGenerator:
         try:
             raw_loglikelihoods = self.llm.logprobs(samples)
         except Exception as e:
-            if raise_errors():
-                raise e
+            if raise_errors() or self.config.fail_on_error:
+                raise
             logger.info(f"Error: {e.__class__.__name__} {e}")
             raw_loglikelihoods = [
                 RawLoglikelihood(
@@ -166,7 +166,8 @@ class ResponseGenerator:
                     self.llm,
                     stop_sequences=stop_sequences,
                     max_tokens=max_tokens,
-                )  # type: ignore[call-arg]
+                    fail_on_error=self.config.fail_on_error,
+                )
             case ResponseType.LOGLIKELIHOODS:
                 return self._generate_loglikelihoods
             case _:
