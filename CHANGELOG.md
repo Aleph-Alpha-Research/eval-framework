@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.3.5](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.4...v0.3.5) (2026-04-27)
+
+
+### Features
+
+* add EvalConfig.fail_on_error to surface request failures ([#224](https://github.com/Aleph-Alpha-Research/eval-framework/issues/224)) ([a141f69](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a141f69fc5b621cb99fd44b6780bccdcbaf32ec9))
+
 ## [0.3.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.3...v0.3.4) (2026-04-13)
 
 
