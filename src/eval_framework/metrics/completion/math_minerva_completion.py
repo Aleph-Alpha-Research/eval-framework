@@ -18,15 +18,15 @@ class MathMinervaCompletion(BaseMetric[Completion]):
     Uses raw_completion to extract multiple candidates; primary for exact_match,
     all candidates with both Minerva and Hendrycks equivalence for exact_match_flex.
 
-    English Minerva extraction is the default. Other final-answer styles can be
-    selected at the metric-class boundary via ``COT_STYLE``.
+    English Minerva extraction is the default. Subclasses select other
+    final-answer styles by overriding ``COT_STYLE`` / ``RELAXED``.
     """
 
     NAME = "Math Minerva Completion"
     KEYS = ["Exact", "Exact Flex"]
     AGGREGATORS = [PassAtK()]
 
-    # Defaults; override on subclasses or via ``configured()`` to build variants.
+    # Defaults; subclasses override these class attributes to define variants.
     COT_STYLE: str = "minerva"
     RELAXED: bool = False
 
@@ -39,46 +39,6 @@ class MathMinervaCompletion(BaseMetric[Completion]):
         self.use_cot = use_cot
         self.cot_style = cot_style if cot_style is not None else self.COT_STYLE
         self.relaxed = relaxed if relaxed is not None else self.RELAXED
-
-    @classmethod
-    def configured(
-        cls,
-        *,
-        cot_style: str | None = None,
-        relaxed: bool | None = None,
-        name: str | None = None,
-    ) -> type["MathMinervaCompletion"]:
-        """Return a subclass with the given defaults baked into class attributes.
-
-        This is an adapter for task-side ``METRICS`` wiring, where the
-        framework expects metric classes that can be instantiated with no args.
-        Callers are responsible for passing the final ``name`` (no implicit
-        ``"Relaxed"`` suffix is added).
-
-        Example::
-
-            METRICS = [
-                MathMinervaCompletion.configured(
-                    cot_style="minerva_de", name="Math Minerva Completion DE"),
-                MathMinervaCompletion.configured(
-                    cot_style="minerva_de", relaxed=True,
-                    name="Math Minerva Completion DE Relaxed"),
-            ]
-        """
-        effective_cot_style = cot_style if cot_style is not None else cls.COT_STYLE
-        effective_relaxed = relaxed if relaxed is not None else cls.RELAXED
-
-        attrs: dict[str, object] = {}
-        if cot_style is not None:
-            attrs["COT_STYLE"] = cot_style
-        if relaxed is not None:
-            attrs["RELAXED"] = relaxed
-        if name is not None:
-            attrs["NAME"] = name
-
-        suffix = f"{effective_cot_style}{'_relaxed' if effective_relaxed else ''}"
-        synthetic_name = f"{cls.__name__}__{suffix}"
-        return type(synthetic_name, (cls,), attrs)
 
     def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error:
@@ -136,4 +96,18 @@ class MathMinervaCompletionRelaxed(MathMinervaCompletion):
     """MathMinervaCompletion with relaxed=True by default (flexible final-answer matching)."""
 
     NAME = "Math Minerva Completion Relaxed"
+    RELAXED = True
+
+
+class MathMinervaCompletionDE(MathMinervaCompletion):
+    """MathMinervaCompletion with German final-answer extraction (``Finale Antwort: …``)."""
+
+    NAME = "Math Minerva Completion DE"
+    COT_STYLE = "minerva_de"
+
+
+class MathMinervaCompletionRelaxedDE(MathMinervaCompletionDE):
+    """MathMinervaCompletionDE with relaxed=True by default."""
+
+    NAME = "Math Minerva Completion Relaxed DE"
     RELAXED = True
