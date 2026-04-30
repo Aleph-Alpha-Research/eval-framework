@@ -222,6 +222,7 @@ jobs:
       - name: Run tests
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+          UV_TORCH_BACKEND: cpu
         run: |
           uv run $CPU_EXTRAS python -c "import nltk; nltk.download('punkt_tab')"
           uv run $CPU_EXTRAS pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and not cpu_slow and not external_api and not formatter_hash and not vllm"
@@ -249,6 +250,7 @@ jobs:
       - name: Run tests
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+          UV_TORCH_BACKEND: cpu
         run: |
           uv run $CPU_EXTRAS python -c "import nltk; nltk.download('punkt_tab')"
           uv run $CPU_EXTRAS pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not slow_download and not external_api and not formatter_hash and not vllm"
@@ -276,6 +278,7 @@ jobs:
       - name: Run formatter hashing tests
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+          UV_TORCH_BACKEND: cpu
         run: |
           uv run $CPU_EXTRAS python -c "import nltk; nltk.download('punkt_tab')"
           uv run $CPU_EXTRAS pytest -n auto --max-worker-restart=0 --durations=30 -v -m "formatter_hash"
