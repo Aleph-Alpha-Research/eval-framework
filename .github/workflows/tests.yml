@@ -224,7 +224,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
           uv run $CPU_EXTRAS python -c "import nltk; nltk.download('punkt_tab')"
-          uv run $CPU_EXTRAS pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and not cpu_slow and not external_api and not formatter_hash"
+          uv run $CPU_EXTRAS pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and not cpu_slow and not external_api and not formatter_hash and not vllm"
 
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
@@ -251,7 +251,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
           uv run $CPU_EXTRAS python -c "import nltk; nltk.download('punkt_tab')"
-          uv run $CPU_EXTRAS pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not slow_download and not external_api and not formatter_hash"
+          uv run $CPU_EXTRAS pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not slow_download and not external_api and not formatter_hash and not vllm"
 
   test-formatter-hash:
     runs-on: cpu-runner-8c-32gb-01
