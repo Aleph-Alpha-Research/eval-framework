@@ -24,6 +24,8 @@ env:
   HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # <- single source of truth
   UV_LINK_MODE: symlink
   UV_LOCKED: 1
+  # CPU runners skip the vllm/mistral extras to avoid pulling GPU-only deps.
+  CPU_EXTRAS: "--extra determined --extra api --extra openai --extra transformers --extra accelerate --extra comet --extra optional"
 
 jobs:
 
@@ -221,8 +223,8 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and not cpu_slow and not external_api and not formatter_hash"
+          uv run $CPU_EXTRAS python -c "import nltk; nltk.download('punkt_tab')"
+          uv run $CPU_EXTRAS pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and not cpu_slow and not external_api and not formatter_hash"
 
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
@@ -248,8 +250,8 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not slow_download and not external_api and not formatter_hash"
+          uv run $CPU_EXTRAS python -c "import nltk; nltk.download('punkt_tab')"
+          uv run $CPU_EXTRAS pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not slow_download and not external_api and not formatter_hash"
 
   test-formatter-hash:
     runs-on: cpu-runner-8c-32gb-01
@@ -275,8 +277,8 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "formatter_hash"
+          uv run $CPU_EXTRAS python -c "import nltk; nltk.download('punkt_tab')"
+          uv run $CPU_EXTRAS pytest -n auto --max-worker-restart=0 --durations=30 -v -m "formatter_hash"
 
   test-docker-gpu:
     # Build the image locally on the GPU runner and run tests against it.

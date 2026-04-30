@@ -1,20 +1,23 @@
+from __future__ import annotations
+
 from collections.abc import Sequence
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from huggingface_hub import hf_hub_download, try_to_load_from_cache
-
-# mistral's api specific imports
-from mistral_common.protocol.instruct.messages import AssistantMessage, SystemMessage, UserMessage
-from mistral_common.protocol.instruct.request import ChatCompletionRequest, InstructRequest
-from mistral_common.tokens.tokenizers.base import InstructTokenizer
-from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
 
 # package level imports
 from .formatter import BaseFormatter, ChatTemplate, Message, Role
 
+if TYPE_CHECKING:
+    from mistral_common.protocol.instruct.messages import AssistantMessage, SystemMessage, UserMessage
+    from mistral_common.protocol.instruct.request import InstructRequest
+    from mistral_common.tokens.tokenizers.base import InstructTokenizer
+
 
 class MistralSerializer:
     def __init__(self, llm_target: str):
+        from mistral_common.tokens.tokenizers.mistral import MistralTokenizer
+
         self.tokenizer = MistralTokenizer.from_hf_hub(llm_target)
 
     def get_tokenizer(self) -> InstructTokenizer:
@@ -37,6 +40,8 @@ class MistralSerializer:
 
     @staticmethod
     def convert_from_aa(msg_lst: Sequence[Message]) -> Sequence[SystemMessage | UserMessage | AssistantMessage]:
+        from mistral_common.protocol.instruct.messages import AssistantMessage, SystemMessage, UserMessage
+
         translated_messages: list[SystemMessage | UserMessage | AssistantMessage] = []
         for idx, msg in enumerate(msg_lst):
             match msg.role:
@@ -54,6 +59,8 @@ class MistralSerializer:
     def build_mistral_request(
         self, mistral_msg_lst: Sequence[SystemMessage | UserMessage | AssistantMessage]
     ) -> InstructRequest:
+        from mistral_common.protocol.instruct.request import ChatCompletionRequest
+
         # build chat request
         request: ChatCompletionRequest = ChatCompletionRequest(messages=mistral_msg_lst)
         # validate pydantic fields

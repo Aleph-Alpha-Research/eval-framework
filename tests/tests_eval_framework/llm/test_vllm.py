@@ -6,10 +6,14 @@ from typing import Any, cast
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-import torch
-from pytest_mock import MockerFixture
-from vllm import SamplingParams
-from vllm.distributed.parallel_state import destroy_distributed_environment, destroy_model_parallel
+
+pytest.importorskip("vllm")
+pytest.importorskip("torch")
+
+import torch  # noqa: E402
+from pytest_mock import MockerFixture  # noqa: E402
+from vllm import SamplingParams  # noqa: E402
+from vllm.distributed.parallel_state import destroy_distributed_environment, destroy_model_parallel  # noqa: E402
 
 from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.llm.mistral import MistralAdapter, MistralVLLM
