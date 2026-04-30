@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.3.6](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.5...v0.3.6) (2026-04-30)
+
+
+### Features
+
+* enhance MathMinervaCompletion for German extraction and add tests ([#225](https://github.com/Aleph-Alpha-Research/eval-framework/issues/225)) ([28de07c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/28de07c795e23665c16f4045f59e1b3be9166f6c))
+
 ## [0.3.5](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.4...v0.3.5) (2026-04-27)
 
 
