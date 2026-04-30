@@ -352,7 +352,10 @@ jobs:
             -v ${{ env.HF_DATASET_CACHE_DIR }}:${{ env.HF_DATASET_CACHE_DIR }} \
             -w /eval_framework \
             ${{ env.LOCAL_IMAGE }} \
-            uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
+            bash -c '
+              uv run --all-extras python -c "import nltk; nltk.download(\"punkt_tab\")" &&
+              uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
+            '
 
       - name: Test VLLM
         timeout-minutes: 20
@@ -368,7 +371,10 @@ jobs:
             -v ${{ env.HF_DATASET_CACHE_DIR }}:${{ env.HF_DATASET_CACHE_DIR }} \
             -w /eval_framework \
             ${{ env.LOCAL_IMAGE }} \
-            pytest --log-cli-level=INFO -v -m "vllm"
+            bash -c '
+              python -c "import nltk; nltk.download(\"punkt_tab\")" &&
+              pytest --log-cli-level=INFO -v -m "vllm"
+            '
 
       - name: Cleanup local image
         if: always()
