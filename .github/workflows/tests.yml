@@ -131,7 +131,9 @@ jobs:
         echo "Docker image: ${{ steps.set-tag.outputs.image }}"
 
   build:
-    # Build and Push Docker Image (GPU Runs)
+    # Build and push image only on main / merge_group, to keep :latest and :buildcache warm
+    # for the GPU job's cache-from. PRs build locally on the GPU runner instead.
+    if: github.event_name == 'push' || github.event_name == 'merge_group'
     needs: [lint, tag]
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
@@ -277,31 +279,47 @@ jobs:
           uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "formatter_hash"
 
   test-docker-gpu:
-    # Run full test suite in Docker Container with GPU
+    # Build the image locally on the GPU runner and run tests against it.
+    # Avoids the registry push/pull round-trip that dominated wall time.
     runs-on: EvalFrameworkGPURunner
-    needs: [tag, build, test-cpu, test-cpu-slow, test-formatter-hash]
-    container:
-      image: "${{ needs.tag.outputs.image }}"
-      credentials:
-        username: token
-        password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
-      options: --gpus all
-    defaults:
-      run:
-        working-directory: /eval_framework
+    needs: [tag, hf-datasets-cache, test-cpu, test-cpu-slow, test-formatter-hash]
+    env:
+      LOCAL_IMAGE: eval_framework:ci-${{ github.run_id }}
     steps:
-      - name: Verify GPU installs via uv --exact
-        run: |
-          set -e  # fail fast if any test fails
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-          echo "Testing vllm extra"
-          uv run --exact --extra vllm pytest -v --noconftest tests/tests_eval_framework/installs/test_vllm.py
+      - name: Disk space before build
+        run: df -h
 
-          echo "Testing mistral extra"
-          uv run --exact --extra mistral pytest -v --noconftest tests/tests_eval_framework/installs/test_mistral.py
+      - name: Registry authentication (for cache-from)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: token
+          password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
 
-          echo "Testing all extras together"
-          uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
+      - name: Setup Docker BuildX
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image locally
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          load: true
+          push: false
+          tags: ${{ env.LOCAL_IMAGE }}
+          build-args: BUILDKIT_INLINE_CACHE=1
+          cache-from: |
+            type=gha,scope=shared
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:buildcache
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:latest
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
+
+      - name: Disk space after build
+        if: always()
+        run: df -h
 
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v4
@@ -311,20 +329,47 @@ jobs:
           restore-keys: |
             hf-datasets-
 
+      - name: Verify GPU installs via uv --exact
+        run: |
+          set -e
+          docker run --rm --gpus all -w /eval_framework ${{ env.LOCAL_IMAGE }} bash -c '
+            set -e
+            echo "Testing vllm extra"
+            uv run --exact --extra vllm pytest -v --noconftest tests/tests_eval_framework/installs/test_vllm.py
+
+            echo "Testing mistral extra"
+            uv run --exact --extra mistral pytest -v --noconftest tests/tests_eval_framework/installs/test_mistral.py
+
+            echo "Testing all extras together"
+            uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
+          '
+
       - name: Test GPU
         timeout-minutes: 20
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
+        run: |
+          docker run --rm --gpus all \
+            -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
+            -v ${{ env.HF_DATASET_CACHE_DIR }}:${{ env.HF_DATASET_CACHE_DIR }} \
+            -w /eval_framework \
+            ${{ env.LOCAL_IMAGE }} \
+            uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
 
       - name: Test VLLM
         timeout-minutes: 20
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-          VLLM_LOGGING_LEVEL: DEBUG
-          VLLM_WORKER_MULTIPROC_METHOD: spawn
-          VLLM_USE_MODELSCOPE: False
-          VLLM_NCCL_SO_PATH: ""
-          VLLM_USE_TRITON_FLASH_ATTN: 0
-          VLLM_DISABLE_CUSTOM_ALL_REDUCE: 1
-        run: pytest --log-cli-level=INFO -v -m "vllm"
+        run: |
+          docker run --rm --gpus all \
+            -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
+            -e VLLM_LOGGING_LEVEL=DEBUG \
+            -e VLLM_WORKER_MULTIPROC_METHOD=spawn \
+            -e VLLM_USE_MODELSCOPE=False \
+            -e VLLM_NCCL_SO_PATH="" \
+            -e VLLM_USE_TRITON_FLASH_ATTN=0 \
+            -e VLLM_DISABLE_CUSTOM_ALL_REDUCE=1 \
+            -v ${{ env.HF_DATASET_CACHE_DIR }}:${{ env.HF_DATASET_CACHE_DIR }} \
+            -w /eval_framework \
+            ${{ env.LOCAL_IMAGE }} \
+            pytest --log-cli-level=INFO -v -m "vllm"
+
+      - name: Cleanup local image
+        if: always()
+        run: docker image rm ${{ env.LOCAL_IMAGE }} || true
