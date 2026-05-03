@@ -6,10 +6,14 @@ from typing import Any, cast
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-import torch
-from pytest_mock import MockerFixture
-from vllm import SamplingParams
-from vllm.distributed.parallel_state import destroy_distributed_environment, destroy_model_parallel
+
+pytest.importorskip("vllm")
+pytest.importorskip("torch")
+
+import torch  # noqa: E402
+from pytest_mock import MockerFixture  # noqa: E402
+from vllm import SamplingParams  # noqa: E402
+from vllm.distributed.parallel_state import destroy_distributed_environment, destroy_model_parallel  # noqa: E402
 
 from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.llm.mistral import MistralAdapter, MistralVLLM
@@ -721,7 +725,7 @@ def test_vllm_generate_with_llama_tokenizer_avoids_double_bos() -> None:
         DEFAULT_FORMATTER = Llama3Formatter
 
     # Mock the VLLM engine to avoid actual model loading
-    with patch("eval_framework.llm.vllm.LLM") as mock_llm:
+    with patch("vllm.LLM") as mock_llm:
         model = TestLlamaVLLMModel(max_model_len=64, tensor_parallel_size=1)
 
         try:
@@ -793,7 +797,7 @@ def test_vllm_logprobs_with_llama_tokenizer_avoids_double_bos() -> None:
         DEFAULT_FORMATTER = Llama3Formatter
 
     # Mock the VLLM engine to avoid actual model loading
-    with patch("eval_framework.llm.vllm.LLM"):
+    with patch("vllm.LLM"):
         model = TestLlamaVLLMModel(max_model_len=64, tensor_parallel_size=1)
 
         try:
@@ -858,7 +862,7 @@ def test_tokenizer_single_initialization(
         mock_tokenizer_cls.return_value = mock_tokenizer
 
         # Create the model with mocked LLM to avoid actual model loading
-        with patch("eval_framework.llm.vllm.LLM"):
+        with patch("vllm.LLM"):
             model = TestVLLMModel(max_model_len=128)
 
             # Get tokenizer references multiple times
@@ -938,8 +942,8 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
 @pytest.mark.parametrize("kwargs, expected_model, expected_name", LLM_INIT_SOURCE_PARAMS)
 def test_vllm_init_source(mocker: MockerFixture, kwargs: Any, expected_model: str, expected_name: str) -> None:
     """Test that VLLMModel initializes correctly with different checkpoint source arguments."""
-    mocker.patch("eval_framework.llm.vllm.get_tokenizer")
-    VLLM_patch = mocker.patch("eval_framework.llm.vllm.LLM")
+    mocker.patch("vllm.transformers_utils.tokenizer.get_tokenizer")
+    VLLM_patch = mocker.patch("vllm.LLM")
     mock_wandb_fs = MagicMock()
     mock_wandb_fs.__enter__().find_hf_checkpoint_root_from_path_list.return_value = "/download"
     mocker.patch("eval_framework.utils.file_ops.WandbFs", return_value=mock_wandb_fs)
@@ -979,8 +983,8 @@ def test_vllm_init_source_multiple_args() -> None:
 @pytest.mark.vllm
 @pytest.mark.parametrize("kwargs, expected_formatter_cls", LLM_INIT_FORMATTER_PARAMS)
 def test_vllm_init_formatter(mocker: MockerFixture, kwargs: Any, expected_formatter_cls: type) -> None:
-    tokenizer_mock = mocker.patch("eval_framework.llm.vllm.get_tokenizer")
-    mocker.patch("eval_framework.llm.vllm.LLM")
+    tokenizer_mock = mocker.patch("vllm.transformers_utils.tokenizer.get_tokenizer")
+    mocker.patch("vllm.LLM")
 
     # Test with a typical subclass
     class MyModel(VLLMModel):

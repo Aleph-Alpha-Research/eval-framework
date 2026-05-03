@@ -1,12 +1,15 @@
+from __future__ import annotations
+
 from functools import partial
 from pathlib import Path
-from typing import Any, Literal, override
-
-from vllm import SamplingParams
+from typing import TYPE_CHECKING, Any, Literal, override
 
 from eval_framework.llm.vllm import TokenizedContainer, VLLMModel, VLLMTokenizerAPI
 from template_formatting.formatter import BaseFormatter, Message
 from template_formatting.mistral_formatter import MagistralFormatter, MistralSerializer
+
+if TYPE_CHECKING:
+    from vllm import SamplingParams
 
 __all__ = [
     "MistralAdapter",

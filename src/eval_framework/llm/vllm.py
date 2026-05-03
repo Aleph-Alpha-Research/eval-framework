@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import gc
 import logging
 import math
@@ -8,14 +10,11 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from typing import Any, Literal, Protocol, cast, override
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast, override
 
-import torch
-from vllm import LLM, SamplingParams
-from vllm.distributed.parallel_state import cleanup_dist_env_and_memory
-from vllm.inputs.data import TokensPrompt
-from vllm.outputs import RequestOutput
-from vllm.transformers_utils.tokenizer import get_tokenizer
+if TYPE_CHECKING:
+    from vllm import SamplingParams
+    from vllm.outputs import RequestOutput
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import (
@@ -80,6 +79,8 @@ class HFTokenizerProtocol(Protocol):
 
 class VLLMTokenizer(VLLMTokenizerAPI[str]):
     def __init__(self, target_mdl: str | Path) -> None:
+        from vllm.transformers_utils.tokenizer import get_tokenizer
+
         self.tokenizer = cast(HFTokenizerProtocol, get_tokenizer(target_mdl))
 
     def _encode_text(self, text: str) -> TokenizedContainer:
@@ -136,6 +137,9 @@ class BaseVLLMModel(BaseLLM):
 
         self.batch_size = batch_size
 
+        import torch
+        from vllm import LLM
+
         if "VLLM_TARGET_DEVICE" not in os.environ and not torch.cuda.is_available():
             os.environ["VLLM_TARGET_DEVICE"] = "cpu"
 
@@ -158,6 +162,8 @@ class BaseVLLMModel(BaseLLM):
         )
 
     def _process_sampling_params(self, sampling_params: SamplingParams | dict[str, Any] | None) -> SamplingParams:
+        from vllm import SamplingParams
+
         processed_sampling_params: SamplingParams | None = None
         if isinstance(sampling_params, dict):
             processed_sampling_params = SamplingParams(**sampling_params)
@@ -216,9 +222,15 @@ class BaseVLLMModel(BaseLLM):
             if hasattr(self.model, "llm_engine") and hasattr(self.model.llm_engine, "engine_core"):
                 self.model.llm_engine.engine_core.shutdown()
             del self.model
-        cleanup_dist_env_and_memory()
-        gc.collect()
-        torch.cuda.empty_cache()
+        try:
+            import torch
+            from vllm.distributed.parallel_state import cleanup_dist_env_and_memory
+
+            cleanup_dist_env_and_memory()
+            gc.collect()
+            torch.cuda.empty_cache()
+        except ImportError:
+            gc.collect()
 
     def generate_from_messages(
         self,
@@ -324,6 +336,8 @@ class BaseVLLMModel(BaseLLM):
         prompt_objs: list[TokenizedContainer],
         sampling_params: SamplingParams,
     ) -> list[RequestOutput]:
+        from vllm.inputs.data import TokensPrompt
+
         vllm_token_prompt = [TokensPrompt(prompt_token_ids=prompt_obj.tokens) for prompt_obj in prompt_objs]
         outputs = self.model.generate(vllm_token_prompt, sampling_params)
 
@@ -404,6 +418,9 @@ class BaseVLLMModel(BaseLLM):
 
     def _model_log_probs(self, batch_data: list[tuple[TokenizedContainer, TokenizedContainer]]) -> list[float]:
         """Batched version of _model_log_probs for processing multiple prompt-choice pairs at once."""
+        from vllm import SamplingParams
+        from vllm.inputs.data import TokensPrompt
+
         sampling_params = SamplingParams(
             max_tokens=1,
             temperature=0.0,
