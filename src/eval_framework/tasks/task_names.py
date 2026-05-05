@@ -199,6 +199,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.medqa.MedQACloze")
     register_lazy_task("eval_framework.tasks.benchmarks.medqa.MedQAMC")
     register_lazy_task("eval_framework.tasks.benchmarks.medqa.MedQAMC_OLMES")
+    register_lazy_task("eval_framework.tasks.benchmarks.phoenix_identity.PhoenixVibeCheck")
     try:
         # Importing the companion registers the additional tasks from the module.
         # This is mostly for convenience for internal use-cases
