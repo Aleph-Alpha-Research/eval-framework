@@ -8,16 +8,36 @@ from functools import partial
 
 import tiktoken
 from openai import OpenAI
-from openai.types.chat import ChatCompletionAssistantMessageParam, ChatCompletionUserMessageParam
+from openai.types.chat import (
+    ChatCompletionAssistantMessageParam,
+    ChatCompletionMessageParam,
+    ChatCompletionSystemMessageParam,
+    ChatCompletionUserMessageParam,
+)
 from tokenizers import Tokenizer
 from transformers import AutoTokenizer
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import ConcatCompression, Error, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message, Role
 
 logger = logging.getLogger(__name__)
+
+
+def _to_chat_completion_message(message: Message) -> ChatCompletionMessageParam:
+    match message.role:
+        case Role.SYSTEM:
+            return ChatCompletionSystemMessageParam(role="system", content=message.content)
+        case Role.USER:
+            return ChatCompletionUserMessageParam(role="user", content=message.content)
+        case Role.ASSISTANT:
+            return ChatCompletionAssistantMessageParam(role="assistant", content=message.content)
+        case None:
+            raise ValueError(
+                "Cannot send a Message without a role through the chat completion API; "
+                "the legacy roleless format is only supported for fine-tuning."
+            )
 
 
 class OpenAIModel(BaseLLM):
@@ -158,14 +178,7 @@ class OpenAIModel(BaseLLM):
 
             else:
                 # Use chat completion API
-                chat_messages = [
-                    (
-                        ChatCompletionUserMessageParam(role="user", content=m.content)
-                        if m.role is not None and m.role.value.lower() == "user"
-                        else ChatCompletionAssistantMessageParam(role="assistant", content=m.content)
-                    )
-                    for m in single_messages
-                ]
+                chat_messages = [_to_chat_completion_message(m) for m in single_messages]
                 assert self._model_name is not None
                 chat_response = self._client.chat.completions.create(
                     model=self._model_name,
