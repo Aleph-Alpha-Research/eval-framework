@@ -8,14 +8,19 @@ from functools import partial
 
 import tiktoken
 from openai import OpenAI
-from openai.types.chat import ChatCompletionAssistantMessageParam, ChatCompletionUserMessageParam
+from openai.types.chat import (
+    ChatCompletionAssistantMessageParam,
+    ChatCompletionMessageParam,
+    ChatCompletionSystemMessageParam,
+    ChatCompletionUserMessageParam,
+)
 from tokenizers import Tokenizer
 from transformers import AutoTokenizer
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import ConcatCompression, Error, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message, Role
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +102,17 @@ class OpenAIModel(BaseLLM):
         """
         return len(self._encoder.encode(text))
 
+    def _construct_messages(self, messages: Sequence[Message]) -> Sequence[ChatCompletionMessageParam]:
+        def construct_chat_completion_obj(message: Message) -> ChatCompletionMessageParam:
+            if message.role == Role.SYSTEM:
+                return ChatCompletionSystemMessageParam(role="system", content=message.content)
+            elif message.role == Role.USER:
+                return ChatCompletionUserMessageParam(role="user", content=message.content)
+            else:
+                return ChatCompletionAssistantMessageParam(role="assistant", content=message.content)
+
+        return [construct_chat_completion_obj(m) for m in messages]
+
     def generate_from_messages(
         self,
         messages: list[Sequence[Message]],
@@ -158,14 +174,7 @@ class OpenAIModel(BaseLLM):
 
             else:
                 # Use chat completion API
-                chat_messages = [
-                    (
-                        ChatCompletionUserMessageParam(role="user", content=m.content)
-                        if m.role is not None and m.role.value.lower() == "user"
-                        else ChatCompletionAssistantMessageParam(role="assistant", content=m.content)
-                    )
-                    for m in single_messages
-                ]
+                chat_messages = self._construct_messages(single_messages)
                 assert self._model_name is not None
                 chat_response = self._client.chat.completions.create(
                     model=self._model_name,
