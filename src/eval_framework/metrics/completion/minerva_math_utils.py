@@ -2,13 +2,31 @@
 Minerva-style MATH answer extraction and equivalence (Lewkowycz et al. 2022).
 """
 
+import atexit
+import multiprocessing
+import os
 import re
-import signal
-from typing import Any
+import threading
+from multiprocessing.context import DefaultContext
+from typing import cast
 
 from sympy import SympifyError, simplify
 from sympy.parsing.latex import parse_latex
 from sympy.parsing.latex.errors import LaTeXParsingError
+
+# Fork inherits an already-imported SymPy in the child (fast). Spawn re-imports the
+# whole stack per worker and is much slower; we only use it on Windows where fork
+# is unavailable. See https://docs.python.org/3/library/multiprocessing.html#contexts
+# Stubs type get_context() as BaseContext, which omits Process; runtime is DefaultContext.
+_worker_ctx = cast(
+    DefaultContext,
+    multiprocessing.get_context("spawn" if os.name == "nt" else "fork"),
+)
+
+# Virtual-address-space budget for a single sympy simplify() call.
+# Pathological expressions can cause sympy to allocate tens of GiBs;
+# this cap turns that into a caught MemoryError instead of an OOM kill.
+_SYMPY_MEMORY_BUDGET_BYTES = 2 * 1024**3  # 2 GiB
 
 INVALID_ANSWER = "[invalidanswer]"
 END_SEQ = "I hope it is correct."
@@ -350,15 +368,27 @@ def strip_string_hendrycks(string: str) -> str:
     return string
 
 
-def is_equiv_minerva(x1: str, x2: str, timeout_seconds: int = 5) -> bool:
-    """Sympy-based equivalence (Minerva)."""
+def _set_memory_budget(budget_bytes: int) -> None:
+    """Limit virtual address space growth to *budget_bytes* above current usage.
 
-    def _timeout_handler(signum: Any, frame: Any) -> None:
-        raise TimeoutError()
-
+    Uses RLIMIT_AS on Linux; silently skipped on unsupported platforms.
+    """
     try:
-        signal.signal(signal.SIGALRM, _timeout_handler)
-        signal.alarm(timeout_seconds)
+        import resource
+
+        with open(f"/proc/{os.getpid()}/statm") as f:
+            current_pages = int(f.read().split()[0])
+        page_size = os.sysconf("SC_PAGE_SIZE")
+        limit = current_pages * page_size + budget_bytes
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+    except Exception:
+        pass
+
+
+def _sympy_equiv_once(x1: str, x2: str) -> bool:
+    """Run Minerva sympy equivalence in the current process (subprocess worker only)."""
+    _set_memory_budget(_SYMPY_MEMORY_BUDGET_BYTES)
+    try:
         try:
             parsed_x1 = parse_latex(x1)
             parsed_x2 = parse_latex(x2)
@@ -372,12 +402,129 @@ def is_equiv_minerva(x1: str, x2: str, timeout_seconds: int = 5) -> bool:
             return simplify(diff) == 0
         except (ValueError, TimeoutError):
             return False
-        finally:
-            signal.alarm(0)
     except Exception:
+        # Catches MemoryError (from RLIMIT_AS) and anything else.
         return False
-    finally:
-        signal.alarm(0)
+
+
+def _persistent_worker_main(conn: "multiprocessing.connection.Connection") -> None:
+    """Long-lived worker: recv (x1, x2), send bool. Exit on None or broken pipe."""
+    while True:
+        try:
+            msg = conn.recv()
+        except (EOFError, OSError):
+            break
+        if msg is None:
+            break
+        x1, x2 = msg
+        result = _sympy_equiv_once(x1, x2)
+        try:
+            conn.send(result)
+        except (BrokenPipeError, OSError):
+            break
+    try:
+        conn.close()
+    except Exception:
+        pass
+
+
+# One subprocess serves many equivalence checks; restart on timeout, crash, or job limit.
+_worker_lock = threading.Lock()
+_worker_proc: "multiprocessing.Process | None" = None
+_worker_conn: "multiprocessing.connection.Connection | None" = None
+_worker_jobs: int = 0
+# Periodic worker restart limits SymPy heap growth; keep high to avoid spawn cold-start.
+_WORKER_MAX_JOBS_BEFORE_ROTATE = 50_000
+
+
+def _stop_worker_locked() -> None:
+    """Tear down the persistent worker; caller must hold _worker_lock."""
+    global _worker_proc, _worker_conn, _worker_jobs
+    if _worker_conn is not None:
+        # Do not send a shutdown message: the worker may be stuck in simplify()
+        # and would not read the pipe until it finishes.
+        try:
+            _worker_conn.close()
+        except Exception:
+            pass
+        _worker_conn = None
+    if _worker_proc is not None:
+        if _worker_proc.is_alive():
+            _worker_proc.kill()
+            _worker_proc.join(timeout=2)
+        _worker_proc = None
+    _worker_jobs = 0
+
+
+def _spawn_worker_locked() -> None:
+    """Start a fresh worker; caller must hold _worker_lock and no worker alive."""
+    global _worker_proc, _worker_conn
+    parent_conn, child_conn = _worker_ctx.Pipe(duplex=True)
+    p = _worker_ctx.Process(target=_persistent_worker_main, args=(child_conn,))
+    p.start()
+    child_conn.close()
+    _worker_proc = p
+    _worker_conn = parent_conn
+
+
+def _ensure_worker_locked() -> None:
+    """Ensure a live worker process; caller must hold _worker_lock."""
+    global _worker_jobs
+    if _worker_proc is not None and _worker_proc.is_alive() and _worker_conn is not None:
+        return
+    _stop_worker_locked()
+    _spawn_worker_locked()
+
+
+def _ipc_sympy_equiv(x1: str, x2: str, timeout_seconds: int) -> bool:
+    """Send one job to the persistent worker; restart worker on timeout or I/O failure."""
+    global _worker_jobs
+    _ensure_worker_locked()
+    assert _worker_conn is not None and _worker_proc is not None
+    try:
+        _worker_conn.send((x1, x2))
+        poll_timeout = timeout_seconds if timeout_seconds > 0 else 0.0
+        if _worker_conn.poll(poll_timeout):
+            result = _worker_conn.recv()
+            _worker_jobs += 1
+            if _worker_jobs >= _WORKER_MAX_JOBS_BEFORE_ROTATE:
+                _stop_worker_locked()
+            return bool(result)
+        # Worker stuck in simplify — discard process.
+        _stop_worker_locked()
+        return False
+    except (EOFError, OSError, BrokenPipeError):
+        _stop_worker_locked()
+        return False
+
+
+def _shutdown_persistent_worker() -> None:
+    with _worker_lock:
+        _stop_worker_locked()
+
+
+atexit.register(_shutdown_persistent_worker)
+
+
+# @lru_cache(maxsize=8192)
+def _equiv_minerva_cached(x1: str, x2: str, timeout_seconds: int) -> bool:
+    """Memoized sympy path (invoked only on LRU miss)."""
+    with _worker_lock:
+        return _ipc_sympy_equiv(x1, x2, timeout_seconds)
+
+
+def is_equiv_minerva(x1: str, x2: str, timeout_seconds: int = 5) -> bool:
+    """Sympy-based equivalence (Minerva).
+
+    Uses a long-lived subprocess with a capped virtual-address-space budget so
+    pathological expressions cannot OOM-kill the parent. Results are memoized
+    to avoid repeated IPC for identical (x1, x2, timeout) pairs.
+    """
+    if x1 == x2:
+        return True
+    if x1.strip() == x2.strip():
+        return True
+    return _equiv_minerva_cached(x1, x2, timeout_seconds)
 
 
 def is_equiv_hendrycks(str1: str | None, str2: str | None) -> bool:
