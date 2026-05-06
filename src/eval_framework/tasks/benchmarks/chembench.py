@@ -64,7 +64,7 @@ class ChemBench(BaseTask[str]):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["examples"][0]["input"].strip()
         target_scores = json.loads(item["examples"][0]["target_scores"])
-        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, target_scores.keys())])
+        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, target_scores.keys(), strict=False)])
         return f"Question: {question}\n{choices}"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:

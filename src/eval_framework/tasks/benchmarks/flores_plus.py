@@ -58,7 +58,7 @@ class FloresPlus(BaseTask[str]):
             data_src = hf_dataset_src[split]
             data_tgt = hf_dataset_tgt[split]
             data_list = []
-            for item_src, item_tgt in zip(data_src, data_tgt):
+            for item_src, item_tgt in zip(data_src, data_tgt, strict=False):
                 assert item_src["id"] == item_tgt["id"]
                 iso_src = f"{item_src['iso_639_3']}_{item_src['iso_15924']}"
                 iso_tgt = f"{item_tgt['iso_639_3']}_{item_tgt['iso_15924']}"

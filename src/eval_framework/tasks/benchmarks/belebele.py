@@ -39,7 +39,9 @@ class BELEBELE(BaseTask[str]):
             [
                 f"{key}. {choice}\n"
                 for key, choice in zip(
-                    self.keys, [item["mc_answer1"], item["mc_answer2"], item["mc_answer3"], item["mc_answer4"]]
+                    self.keys,
+                    [item["mc_answer1"], item["mc_answer2"], item["mc_answer3"], item["mc_answer4"]],
+                    strict=False,
                 )
             ]
         )

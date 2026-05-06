@@ -107,7 +107,10 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
             response.ground_truth,
             f"golden_{schema_id}",
         )
-        completion_stripped = response.completion.strip().strip("```sql").strip("```")
+        completion_stripped = response.completion.strip()
+        completion_stripped = completion_stripped.removeprefix("```sql").strip()
+        completion_stripped = completion_stripped.removeprefix("```").strip()
+        completion_stripped = completion_stripped.removesuffix("```").strip()
         completion_query = extract_query_from_completions(completion_stripped)
         if completion_query:
             result = self.validate_query(

@@ -93,7 +93,7 @@ class MMLU_DE(BaseTask[str]):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question_de"].strip()
-        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices_de"])])
+        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices_de"], strict=False)])
         return f"Frage: {question}\n{choices}"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:

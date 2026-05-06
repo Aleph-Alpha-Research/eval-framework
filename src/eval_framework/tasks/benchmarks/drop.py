@@ -183,7 +183,7 @@ class DropMC(BaseTask[str]):
         question = item.get("question_original", "")
         texts = item.get("choices", {}).get("text", [])
         labels = item.get("choices", {}).get("label", self.keys[: len(texts)])
-        options = "\n".join(f"{label}. {t}" for label, t in zip(labels, texts))
+        options = "\n".join(f"{label}. {t}" for label, t in zip(labels, texts, strict=False))
         return f"Passage: {passage}\nQuestion: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -217,7 +217,7 @@ class DropMC_OLMES(DropMC):
         question = item.get("question_original", "")
         texts = item.get("choices", {}).get("text", [])
         labels = item.get("choices", {}).get("label", self.keys[: len(texts)])
-        options = "\n".join(f" {label}. {t}" for label, t in zip(labels, texts))
+        options = "\n".join(f" {label}. {t}" for label, t in zip(labels, texts, strict=False))
         return f"Passage: {passage}\nQuestion: {question}\n{options}\n"
 
 

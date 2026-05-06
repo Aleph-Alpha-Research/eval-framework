@@ -100,7 +100,7 @@ class MMLU(BaseTask[str]):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"])])
+        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"], strict=False)])
         return f"Question: {question}\n{choices}"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
@@ -127,7 +127,7 @@ class MMLU_OLMES(MMLU):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "".join([f" {key}. {choice}\n" for key, choice in zip(self.keys, item["choices"])])
+        choices = "".join([f" {key}. {choice}\n" for key, choice in zip(self.keys, item["choices"], strict=False)])
         return f"Question: {question}\n{choices}"
 
 
@@ -219,7 +219,7 @@ class MMLU_COT(MMLU):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "\n".join([f"{key}. {choice}" for key, choice in zip(self.keys, item["choices"])])
+        choices = "\n".join([f"{key}. {choice}" for key, choice in zip(self.keys, item["choices"], strict=False)])
         return f"Question: {question}\n{choices}"
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:

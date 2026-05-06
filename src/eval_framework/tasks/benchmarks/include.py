@@ -98,7 +98,7 @@ class INCLUDE(BaseTask[str]):
             [
                 f"{key}. {choice}\n"
                 for key, choice in zip(
-                    self.keys, [item["option_a"], item["option_b"], item["option_c"], item["option_d"]]
+                    self.keys, [item["option_a"], item["option_b"], item["option_c"], item["option_d"]], strict=False
                 )
             ]
         )

@@ -62,7 +62,7 @@ class PIQA_OLMES(PIQA):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         goal = item["goal"]
         choices = [item["sol1"], item["sol2"]]
-        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, choices))
+        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, choices, strict=False))
         return f"Goal: {goal}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

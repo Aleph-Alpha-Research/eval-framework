@@ -259,7 +259,7 @@ class MMLU_EU20_DE(MMLU):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"])])
+        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"], strict=False)])
         return f"Frage: {question}\n{choices}"
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
@@ -366,7 +366,7 @@ class MMLU_EU20_FR(MMLU):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"])])
+        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"], strict=False)])
         return f"Question: {question}\n{choices}"
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:

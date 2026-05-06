@@ -32,7 +32,9 @@ class OPENBOOKQA(BaseTask[str]):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question_stem"].strip()
         fact = item["fact1"].strip()
-        choices = "".join([f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"])])
+        choices = "".join(
+            f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"], strict=False)
+        )
         return f"Fact: {fact}\nComplete: {question}:\n{choices}\nAnswer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -85,7 +87,7 @@ class OPENBOOKQA_OLMES(OPENBOOKQA):
         question = item["question_stem"].strip()
         fact = item["fact1"].strip()
         choices = item["choices"]["text"]
-        options = "\n".join(f" {key}. {choice.strip()}" for key, choice in zip(self.keys, choices))
+        options = "\n".join(f" {key}. {choice.strip()}" for key, choice in zip(self.keys, choices, strict=False))
         return f"Fact: {fact}\nComplete: {question}:\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -104,7 +106,9 @@ class OPENBOOKQA_EVAL_HARNESS(OPENBOOKQA):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question_stem"].strip()
-        choices = "".join([f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"])])
+        choices = "".join(
+            f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"], strict=False)
+        )
         return f"Complete: {question}:\n{choices}\nAnswer:"
 
 
@@ -118,7 +122,7 @@ class OPENBOOKQA_EVAL_HARNESS_OLMES(OPENBOOKQA_EVAL_HARNESS):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question_stem"].strip()
         choices = item["choices"]["text"]
-        options = "\n".join(f" {key}. {choice.strip()}" for key, choice in zip(self.keys, choices))
+        options = "\n".join(f" {key}. {choice.strip()}" for key, choice in zip(self.keys, choices, strict=False))
         return f"Complete: {question}:\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

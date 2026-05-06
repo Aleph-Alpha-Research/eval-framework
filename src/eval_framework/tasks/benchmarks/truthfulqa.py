@@ -89,7 +89,7 @@ class TRUTHFULQA(BaseTask[str]):
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
         labels = item[self.target_identifier]["labels"]
         choices = item[self.target_identifier]["choices"]
-        return [f" {choice}" for label, choice in zip(labels, choices) if label == 1]
+        return [f" {choice}" for label, choice in zip(labels, choices, strict=False) if label == 1]
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         choices = item[self.target_identifier]["choices"]
@@ -116,7 +116,7 @@ class TRUTHFULQA_OLMES(TRUTHFULQA):
         question = item["question"]
         choices = item[self.target_identifier]["choices"]
         labels = get_n_letters(len(choices))
-        options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices))
+        options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices, strict=False))
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:

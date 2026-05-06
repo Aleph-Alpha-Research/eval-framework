@@ -66,7 +66,7 @@ class WINOGRANDE_OLMES(WINOGRANDE):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = self._extract_question(item)
         choices = self._extract_choices(item)
-        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, choices))
+        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, choices, strict=False))
         return f"{question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

@@ -136,7 +136,7 @@ class GPQA_OLMES(GPQA):
         self.rnd_choice_shuffle.shuffle(choices)
         correct_answer_position = self.rnd_choice_shuffle.randint(0, 3)
         choices.insert(correct_answer_position, correct_answer)
-        choices = [f" {label}. {choice}" for label, choice in zip(self.keys, choices)]
+        choices = [f" {label}. {choice}" for label, choice in zip(self.keys, choices, strict=False)]
         return choices, correct_answer_position
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

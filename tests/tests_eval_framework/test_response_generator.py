@@ -231,8 +231,8 @@ def test_response_generator_llm_token_overloading(
     # setting up mock llm
     llm = MockLLM()
     # defining max_tokens and stop_sequences from parameters
-    setattr(llm, "max_tokens", llm_max_tokens)
-    setattr(llm, "stop_sequences", llm_stop_sequences)
+    llm.max_tokens = llm_max_tokens
+    llm.stop_sequences = llm_stop_sequences
 
     # defining task eval config
     config = EvalConfig(

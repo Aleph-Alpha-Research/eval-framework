@@ -61,7 +61,7 @@ class COPA_OLMES(COPAEvalHarness):
         premise = item["premise"].strip()[:-1] + f" {connector}"
         choices = [self.convert_choice(item["choice1"]), self.convert_choice(item["choice2"])]
         labels = get_n_letters(len(choices))
-        options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices))
+        options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices, strict=False))
         return f"{premise}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

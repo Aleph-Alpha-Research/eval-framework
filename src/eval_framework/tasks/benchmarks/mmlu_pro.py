@@ -73,7 +73,9 @@ class MMLU_PRO(BaseTask[str]):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         instruction_text = item["question"].strip() + "\n"
-        instruction_text += "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["options"])])
+        instruction_text += "".join(
+            f"{key}. {choice}\n" for key, choice in zip(self.keys, item["options"], strict=False)
+        )
         return instruction_text
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
@@ -100,7 +102,9 @@ class MMLU_PRO_OLMES(MMLU_PRO):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         instruction_text = item["question"].strip() + "\n"
-        instruction_text += "".join([f" {key}. {choice}\n" for key, choice in zip(self.keys, item["options"])])
+        instruction_text += "".join(
+            f" {key}. {choice}\n" for key, choice in zip(self.keys, item["options"], strict=False)
+        )
         return instruction_text
 
 
@@ -169,7 +173,9 @@ class MMLU_PRO_COT(MMLU_PRO):
             '"Therefore, the answer is (ANSWER_LETTER)" where (ANSWER_LETTER) is one of (A), (B), (C), (D), (E), etc.'
         )
         instruction_text += f"\n\nQuestion: {item['question'].strip()}\n"
-        instruction_text += "\n".join([f"({key}) {choice}" for key, choice in zip(self.keys, item["options"])])
+        instruction_text += "\n".join(
+            f"({key}) {choice}" for key, choice in zip(self.keys, item["options"], strict=False)
+        )
         instruction_text += (
             "\n\nAnswer the above question and REMEMBER to finish your response with the exact phrase "
             '"Therefore, the answer is (ANSWER_LETTER)" where (ANSWER_LETTER) is one of (A), (B), (C), (D), (E), etc.'

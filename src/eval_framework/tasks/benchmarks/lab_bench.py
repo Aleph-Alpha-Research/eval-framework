@@ -60,7 +60,7 @@ class LabBenchMC(LabBenchCloze):
         question = item.get("question", "")
         choices, order, keys = self._get_choices_order_keys(item)
         shuffled_choices = [choices[i] for i in order]
-        options = "\n".join(f" {key}. {c}" for key, c in zip(keys, shuffled_choices))
+        options = "\n".join(f" {key}. {c}" for key, c in zip(keys, shuffled_choices, strict=False))
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -85,5 +85,5 @@ class LabBenchMC_OLMES(LabBenchMC):
         question = item.get("question", "")
         choices, order, keys = self._get_choices_order_keys(item)
         shuffled_choices = [choices[i] for i in order]
-        options = "\n".join(f" {key}. {c}" for key, c in zip(keys, shuffled_choices))
+        options = "\n".join(f" {key}. {c}" for key, c in zip(keys, shuffled_choices, strict=False))
         return f"Question: {question}\n{options}\n"

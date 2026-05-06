@@ -88,7 +88,7 @@ class MathMinervaCompletion(BaseMetric[Completion]):
 
         return [
             MetricResult(metric_name=name, value=value, higher_is_better=True)
-            for name, value in zip(self.NAMES, [exact_match, exact_match_flex])
+            for name, value in zip(self.NAMES, [exact_match, exact_match_flex], strict=False)
         ]
 
 

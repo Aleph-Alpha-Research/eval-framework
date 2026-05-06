@@ -80,7 +80,7 @@ class SCIQ_OLMES(SCIQ):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
         shuffled, _ = _shuffled_choices_and_correct_index(item)
-        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, shuffled))
+        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, shuffled, strict=False))
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

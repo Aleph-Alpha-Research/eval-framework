@@ -61,7 +61,7 @@ class ARC_OLMES(ARC):
         question = item["question"]
         texts = item["choices"]["text"]
         labels = get_n_letters(len(texts))
-        options = "\n".join(f" {label}. {t}" for label, t in zip(labels, texts))
+        options = "\n".join(f" {label}. {t}" for label, t in zip(labels, texts, strict=False))
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

@@ -204,7 +204,7 @@ class SocialIQAMC_OLMES(SocialIQACloze):
         query = _social_iqa_context_question(item)
         choices = [item["answerA"], item["answerB"], item["answerC"]]
         labels = get_n_letters(len(choices))
-        options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices))
+        options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices, strict=False))
         return f"Question: {query}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -230,7 +230,7 @@ class SocialIQAMC(SocialIQAMC_OLMES):
         query = _social_iqa_context_question(item)
         choices = [item["answerA"], item["answerB"], item["answerC"]]
         labels = get_n_letters(len(choices))
-        options = "\n".join(f"{label}. {choice}" for label, choice in zip(labels, choices))
+        options = "\n".join(f"{label}. {choice}" for label, choice in zip(labels, choices, strict=False))
         return f"Question: {query}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

@@ -61,7 +61,7 @@ class MedQAMC(MedQACloze):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
         choices = item.get("choices", [])
-        options = "\n".join(f"{label}. {choice}" for label, choice in zip(self.keys, choices))
+        options = "\n".join(f"{label}. {choice}" for label, choice in zip(self.keys, choices, strict=False))
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -85,5 +85,5 @@ class MedQAMC_OLMES(MedQAMC):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
         choices = item.get("choices", [])
-        options = "\n".join(f" {label}. {choice}" for label, choice in zip(self.keys, choices))
+        options = "\n".join(f" {label}. {choice}" for label, choice in zip(self.keys, choices, strict=False))
         return f"Question: {question}\n{options}\n"

@@ -156,6 +156,9 @@ select = [
     "UP", # Auto-upgrading of new Python features
     "I", # Sort imports
 ]
+extend-select = [
+    "B", # flake8-bugbear
+]
 
 [tool.ruff.lint.isort]
 # https://github.com/astral-sh/ruff-pre-commit/issues/121

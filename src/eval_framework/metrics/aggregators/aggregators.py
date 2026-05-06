@@ -91,7 +91,7 @@ class PassAtK(Aggregator):
         # flatten multi-index columns from value agg: ("value", "sum") / ("value", "count")
         c = agg[("value", "sum")].values
         n = agg[("value", "count")].values
-        scores = np.array([closed_form_passatk(n_i, c_i, self.k) for n_i, c_i in zip(n, c)])
+        scores = np.array([closed_form_passatk(n_i, c_i, self.k) for n_i, c_i in zip(n, c, strict=False)])
         out = agg.drop(columns=[("value", "sum"), ("value", "count")])
         if isinstance(out.columns, pd.MultiIndex):
             out.columns = out.columns.droplevel(1)

@@ -511,7 +511,7 @@ def test_logprobs_batched_vs_single[T: VLLMModel](model_fn: type[T], kwargs: Any
 
     assert len(single_results) == len(batched_results) == 3
 
-    for i, (single_result, batched_result) in enumerate(zip(single_results, batched_results)):
+    for i, (single_result, batched_result) in enumerate(zip(single_results, batched_results, strict=False)):
         print(f"\n=== Comparing Sample {i} ===")
 
         # Check logprobs with detailed logging
@@ -653,7 +653,7 @@ def test_completions_batched_vs_single[T: VLLMModel](model_fn: type[T], kwargs: 
 
     assert len(single_results) == len(batched_results) == 3
 
-    for i, (single_result, batched_result) in enumerate(zip(single_results, batched_results)):
+    for i, (single_result, batched_result) in enumerate(zip(single_results, batched_results, strict=False)):
         assert single_result.prompt == batched_result.prompt, f"Message {i}: Prompts don't match"
         assert single_result.prompt_sequence_positions == batched_result.prompt_sequence_positions, (
             f"Message {i}: Prompt sequence positions don't match"

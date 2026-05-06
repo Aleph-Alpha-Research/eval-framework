@@ -129,7 +129,7 @@ class AidanBenchOriginal(BaseTask[str]):
             new_errors = [c.error for c in new_completions]
 
             new_samples = [s for s in samples]
-            for idx, completion_msgs, error in zip(not_done_idx, new_completion_messages, new_errors):
+            for idx, completion_msgs, error in zip(not_done_idx, new_completion_messages, new_errors, strict=False):
                 old_sample = samples[idx][0]
                 if completion_msgs is not None:
                     message_history[idx].append(completion_msgs[-1])  # add latest model response to history

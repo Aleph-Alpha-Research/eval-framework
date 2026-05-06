@@ -383,5 +383,5 @@ def format_mc_prompt(
     """
     labels = get_n_letters(len(choices))
     pfx = " " if space_prefixed_labels else ""
-    options = "\n".join(f"{pfx}{label}. {choice}" for label, choice in zip(labels, choices))
+    options = "\n".join(f"{pfx}{label}. {choice}" for label, choice in zip(labels, choices, strict=False))
     return f"{question_text}\n{options}\n"
