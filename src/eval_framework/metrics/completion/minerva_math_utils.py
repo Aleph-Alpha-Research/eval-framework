@@ -2,13 +2,21 @@
 Minerva-style MATH answer extraction and equivalence (Lewkowycz et al. 2022).
 """
 
+import multiprocessing
+import os
 import re
-import signal
-from typing import Any
 
 from sympy import SympifyError, simplify
 from sympy.parsing.latex import parse_latex
 from sympy.parsing.latex.errors import LaTeXParsingError
+
+# Fork so the child inherits already-imported sympy (fast startup).
+_mp = multiprocessing.get_context("fork")
+
+# Virtual-address-space budget for a single sympy simplify() call.
+# Pathological expressions can cause sympy to allocate tens of GiBs;
+# this cap turns that into a caught MemoryError instead of an OOM kill.
+_SYMPY_MEMORY_BUDGET_BYTES = 2 * 1024**3  # 2 GiB
 
 INVALID_ANSWER = "[invalidanswer]"
 END_SEQ = "I hope it is correct."
@@ -350,34 +358,73 @@ def strip_string_hendrycks(string: str) -> str:
     return string
 
 
-def is_equiv_minerva(x1: str, x2: str, timeout_seconds: int = 5) -> bool:
-    """Sympy-based equivalence (Minerva)."""
+def _set_memory_budget(budget_bytes: int) -> None:
+    """Limit virtual address space growth to *budget_bytes* above current usage.
 
-    def _timeout_handler(signum: Any, frame: Any) -> None:
-        raise TimeoutError()
-
+    Uses RLIMIT_AS on Linux; silently skipped on unsupported platforms.
+    """
     try:
-        signal.signal(signal.SIGALRM, _timeout_handler)
-        signal.alarm(timeout_seconds)
+        import resource
+
+        with open(f"/proc/{os.getpid()}/statm") as f:
+            current_pages = int(f.read().split()[0])
+        page_size = os.sysconf("SC_PAGE_SIZE")
+        limit = current_pages * page_size + budget_bytes
+        resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+    except Exception:
+        pass
+
+
+def _equiv_worker(x1: str, x2: str, conn: "multiprocessing.connection.Connection") -> None:
+    """Subprocess worker: run sympy equivalence with a memory budget."""
+    _set_memory_budget(_SYMPY_MEMORY_BUDGET_BYTES)
+    try:
         try:
             parsed_x1 = parse_latex(x1)
             parsed_x2 = parse_latex(x2)
         except (LaTeXParsingError, SympifyError, TypeError):
-            return False
+            conn.send(False)
+            return
         try:
             diff = parsed_x1 - parsed_x2
         except TypeError:
-            return False
+            conn.send(False)
+            return
         try:
-            return simplify(diff) == 0
+            conn.send(simplify(diff) == 0)
         except (ValueError, TimeoutError):
-            return False
-        finally:
-            signal.alarm(0)
+            conn.send(False)
     except Exception:
+        # Catches MemoryError (from RLIMIT_AS) and anything else.
+        try:
+            conn.send(False)
+        except Exception:
+            pass
+    finally:
+        conn.close()
+
+
+def is_equiv_minerva(x1: str, x2: str, timeout_seconds: int = 5) -> bool:
+    """Sympy-based equivalence (Minerva).
+
+    Runs in a forked subprocess with a capped virtual-address-space budget so
+    that pathological expressions cannot OOM-kill the parent process.
+    """
+    recv_conn, send_conn = _mp.Pipe(duplex=False)
+    p = _mp.Process(target=_equiv_worker, args=(x1, x2, send_conn))
+    p.start()
+    send_conn.close()  # parent only reads
+    try:
+        if recv_conn.poll(timeout_seconds):
+            return recv_conn.recv()
+        return False
+    except (EOFError, OSError):
         return False
     finally:
-        signal.alarm(0)
+        if p.is_alive():
+            p.kill()
+        p.join(timeout=2)
+        recv_conn.close()
 
 
 def is_equiv_hendrycks(str1: str | None, str2: str | None) -> bool:
