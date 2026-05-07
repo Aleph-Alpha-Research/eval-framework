@@ -46,7 +46,7 @@ class QUALITY(BaseTask[str]):
         question = item["question"]
         return f"Article: {article}\nQuestion: {question}\n"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

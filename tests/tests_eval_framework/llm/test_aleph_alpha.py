@@ -267,7 +267,7 @@ def test_extract_choice_logprob_text_mismatch() -> None:
 
 
 @mock.patch.object(aleph_alpha.AlephAlphaAPIModel, "_validate_model_availability")
-def test_generate_from_messages_validates_temperature_and_top_p(mock_validate: mock.MagicMock) -> None:
+def test_generate_from_messages_validates_temperature_and_top_p(mock_validate: mock.MagicMock) -> None:  # noqa: ARG001
     model = Llama31_8B_Instruct_API()
     with pytest.raises(ValueError, match="temperature"):
         model.generate_from_messages([], temperature=3.0)

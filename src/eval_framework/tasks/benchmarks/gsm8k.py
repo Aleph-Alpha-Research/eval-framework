@@ -120,7 +120,7 @@ class GSM8KEvalHarness(BaseTask[str]):
         else:
             return "[invalid]"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -149,7 +149,7 @@ class GSM8K(GSM8KEvalHarness):
         question = re.sub(r"<<.*?>>", "", item["question"])
         return f"Question: {question}\nAnswer:"
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:  # noqa: ARG002
         """Override to use predefined fewshot examples instead of sampling from dataset"""
         return FEWSHOT_ITEMS[: self.num_fewshot]
 
@@ -191,12 +191,12 @@ class GSM8K_OLMES(GSM8K):
         answer = self.add_spaces_around_operators_no_regex(answer)
         return " " + answer  # The olmes formatting requires a space after Answer:
 
-    def add_spaces_around_operators_no_regex(self, _str: str) -> str:
+    def add_spaces_around_operators_no_regex(self, text: str) -> str:
         """Add spacing around special operators if it does not exist"""
         # TODO: This adds a space for negative numbers.
         operators = {"+", "-", "*", "/", "="}
         result: list[str] = []
-        for char in _str:
+        for char in text:
             if char in operators:
                 if result and result[-1] != " ":
                     result.append(" ")
@@ -214,5 +214,5 @@ class GSM8K_OLMES(GSM8K):
         numbers = re.findall(r"[-+]?\d*\.\d+|\d+", output)
         return numbers[-1] if numbers else output
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         return self._clean_short_answer(completion_text)

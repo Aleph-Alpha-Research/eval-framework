@@ -55,7 +55,7 @@ class ChemBench(BaseTask[str]):
     def _get_subject_name(self, item: dict[str, Any]) -> str:
         return " ".join(item["subject"].split("_"))
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "The following is a question about chemistry. Please answer by responding with the letter of the correct "
             "answer."
@@ -71,7 +71,7 @@ class ChemBench(BaseTask[str]):
         ground_truth = self._get_ground_truth(item)
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

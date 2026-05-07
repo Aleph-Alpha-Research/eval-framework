@@ -57,7 +57,7 @@ def test_generate_completions_message_handling() -> None:
             completion_sequence_positions=None,
         )
     ]
-    llm.post_process_completion.side_effect = lambda completion, sample: completion
+    llm.post_process_completion.side_effect = lambda completion, sample: completion  # noqa: ARG005
 
     # Execute and assert for case 1
     completion_with_cue = generator.task.generate_completions(llm, [sample_with_cue])[0]
@@ -522,7 +522,7 @@ def test_perturbed_response_differs(tmp_path: Path, perturbation_type: Perturbat
 
 def test_response_generator_applies_model_then_task_post_processing(tmp_path: Path) -> None:
     class MarkerLLM(MockLLM):
-        def post_process_completion(self, completion: str, sample: Sample) -> str:
+        def post_process_completion(self, completion: str, sample: Sample) -> str:  # noqa: ARG002
             return f"MODEL[{completion}]"
 
     llm = MarkerLLM()
@@ -574,15 +574,15 @@ class SaboteurLLM(BaseLLM):
 
     def generate_from_messages(
         self,
-        messages: list[Sequence[Message]],
-        stop_sequences: list[str] | None = None,
-        max_tokens: int | None = None,
-        temperature: float | None = None,
-        top_p: float | None = None,
+        messages: list[Sequence[Message]],  # noqa: ARG002
+        stop_sequences: list[str] | None = None,  # noqa: ARG002
+        max_tokens: int | None = None,  # noqa: ARG002
+        temperature: float | None = None,  # noqa: ARG002
+        top_p: float | None = None,  # noqa: ARG002
     ) -> list[RawCompletion]:
         raise RuntimeError("inference connection failed")
 
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:  # noqa: ARG002
         raise RuntimeError("inference connection failed")
 
 
@@ -620,7 +620,7 @@ class StubTask(BaseTask[str]):
     METRICS: list = []
     PERTURBATION_UNMODIFIABLE_WORDS: list = []
 
-    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
+    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:  # noqa: ARG002
         yield Sample(
             id=0,
             messages=[Message(role=Role.USER, content="Hello")],

@@ -62,7 +62,7 @@ class _BaseMPLE(BaseTask[str]):
         self.stop_sequences: list[str] = MULTIPL_E_STOP_TOKENS[self.MULTIPL_E_LANGUAGE]
         self.max_tokens: int = 1024
 
-    def _load_dataset(self, subject: str) -> None:
+    def _load_dataset(self, subject: str) -> None:  # noqa: ARG002
         hf_dataset = self._load_hf_dataset(
             path=self.DATASET_PATH,
             name=f"{self.MULTIPL_E_DATASET_PREFIX}-{self.MULTIPL_E_LANGUAGE}",
@@ -75,7 +75,7 @@ class _BaseMPLE(BaseTask[str]):
         # is applied, matching the oe_eval behaviour (use_chat_format=False).
         return item["prompt"]
 
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:  # noqa: ARG002
         # Evaluation is entirely test-based; there is no single ground-truth string.
         return None
 
@@ -86,7 +86,7 @@ class _BaseMPLE(BaseTask[str]):
             language=item["language"],
         )
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         """Apply language-specific stop sequences to trim the model's raw continuation."""
         for stop_seq in self.stop_sequences:
             if stop_seq in completion_text:

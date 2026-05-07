@@ -82,13 +82,13 @@ class StructEval(BaseTask[str]):
             paths=item["raw_output_metric"],
         )
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "<|BEGIN_CODE|>"
 
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:  # noqa: ARG002
         return None
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         m = re.search(r"(?:<\|BEGIN_CODE\|>|```[\w+-]*)(.*?)(?:<\|END_CODE\|>|```*)", completion_text, re.DOTALL)
         return m.group(1).strip() if m else completion_text.strip()
 

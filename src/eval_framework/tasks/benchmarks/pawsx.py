@@ -48,10 +48,10 @@ class PAWSX(BaseTask[str]):
                 # Please translate to other language as necessary
                 return "Yes" if item["label"] == "1" else "No"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         return completion_text.strip().strip("\"'.")
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:  # noqa: ARG002
         # Note that this, together with BaseTask._get_messages(), produces a different prompt structure than
         # what PARAPHRASUS suggests in Figure 4. But both seem approaches are somehow valid...
         examples: list[dict] = []

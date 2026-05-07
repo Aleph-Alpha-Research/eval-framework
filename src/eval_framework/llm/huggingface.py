@@ -44,7 +44,7 @@ class StopSequenceCriteria(StoppingCriteria):
         # need to be decoded to check for stop sequences
         self.token_history_length = max(map(len, stop_sequences), default=0)
 
-    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs: Any) -> bool:
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs: Any) -> bool:  # noqa: ARG002
         if not self.stop_sequences:
             return False
 
@@ -68,7 +68,7 @@ class RepeatedTokenSequenceCriteria(StoppingCriteria):
         self.completion_start_index = completion_start_index
         # self.newline_token_id = tokenizer.encode('\n')
 
-    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs: Any) -> torch.Tensor:
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs: Any) -> torch.Tensor:  # noqa: ARG002
         # Convert token ids to tokens
         tokens = self.tokenizer.decode(input_ids[0][self.completion_start_index :])
 
@@ -235,7 +235,7 @@ class BaseHFLLM(BaseLLM):
             )
         return raw_completions
 
-    def _model_generate(self, redis_key: Any, prompt_token_count: int, **kwargs: Any) -> tuple[str, int]:
+    def _model_generate(self, redis_key: Any, prompt_token_count: int, **kwargs: Any) -> tuple[str, int]:  # noqa: ARG002
         with torch.no_grad():
             outputs = self.model.generate(**kwargs)[0]
             completion = self.tokenizer.decode(outputs[prompt_token_count:], skip_special_tokens=True)

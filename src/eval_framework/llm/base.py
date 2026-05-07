@@ -94,7 +94,7 @@ class BaseLLM(ABC):
             messages: list[Sequence[Message]] = [sample.messages for sample in samples]
             return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature, top_p)
 
-    def post_process_completion(self, completion: str, sample: Sample) -> str:
+    def post_process_completion(self, completion: str, sample: Sample) -> str:  # noqa: ARG002
         """
         Model-specific post-processing of generated completions.
 

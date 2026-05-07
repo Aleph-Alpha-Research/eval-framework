@@ -19,7 +19,7 @@ from tests.tests_eval_framework.conftest import MockLLM
 class MockMetric:
     NAME = "MockMetric"
 
-    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:  # noqa: ARG002
         return [MetricResult(metric_name="MockMetric", value=1.0, higher_is_better=True)]
 
 
@@ -27,7 +27,7 @@ class MockPassAtKMetric(BaseMetric):
     NAME = "ExactMatch"
     AGGREGATORS = [PassAtK(k=1), PassAtK(k=2)]
 
-    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:  # noqa: ARG002
         return []
 
 
@@ -35,7 +35,7 @@ class MockIdentifierMeanMetric(BaseMetric):
     NAME = "ExactMatch"
     AGGREGATORS = [IdentifierMean()]
 
-    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:  # noqa: ARG002
         return []
 
 
@@ -63,7 +63,7 @@ def test_evaluator_run_completions(tmp_path: Path, should_preempt_callable: Call
     assert (output_dir / "metadata.json").exists()
 
 
-def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable, wandb_run: wandb.Run) -> None:
+def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable, wandb_run: wandb.Run) -> None:  # noqa: ARG001
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,
@@ -92,7 +92,7 @@ def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable, w
     assert (output_dir / "aggregated_results.json").exists()
 
 
-def test_evaluator_run_eval_no_completions(tmp_path: Path, wandb_run: wandb.Run) -> None:
+def test_evaluator_run_eval_no_completions(tmp_path: Path, wandb_run: wandb.Run) -> None:  # noqa: ARG001
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,
@@ -113,7 +113,7 @@ def test_evaluator_run_eval_no_completions(tmp_path: Path, wandb_run: wandb.Run)
     assert str(exc_info.value) == "No saved completions found. Run 'run_completions' first."
 
 
-def test_evaluator_run_all(tmp_path: Path, should_preempt_callable: Callable, wandb_run: wandb.Run) -> None:
+def test_evaluator_run_all(tmp_path: Path, should_preempt_callable: Callable, wandb_run: wandb.Run) -> None:  # noqa: ARG001
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,

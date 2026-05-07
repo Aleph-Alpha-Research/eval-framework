@@ -89,7 +89,7 @@ def assert_hash_string(task_name: str, suffix_key: str, tested_string: str) -> s
 def create_mock_load_hf_dataset(
     subjects: list[SubjectType], captured_kwargs_list: list[dict[str, Any]]
 ) -> Callable[[Any], DatasetDict]:
-    def mock_load_hf_dataset(self: BaseTask, **kwargs: Any) -> DatasetDict:
+    def mock_load_hf_dataset(self: BaseTask, **kwargs: Any) -> DatasetDict:  # noqa: ARG001
         # Find which subject this call corresponds to by matching kwargs
         for subject, captured_kwargs in zip(subjects, captured_kwargs_list, strict=False):
             if kwargs == captured_kwargs:

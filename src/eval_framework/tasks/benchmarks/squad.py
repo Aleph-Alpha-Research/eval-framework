@@ -250,13 +250,13 @@ class SQuAD_OLMES(SQUAD):
         self.stop_sequences = ["Title:", "\n\n"]
         self.max_tokens = 50
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "The following are reading comprehension questions, "
             "where the answer to each question is a segment of text from the corresponding background text."
         )
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:

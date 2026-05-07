@@ -61,7 +61,7 @@ class BigCodeBench(BaseTask[str]):
         self.serializer = CallableSerializer()
         super().__init__(num_fewshot)
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: SubjectType) -> None:  # noqa: ARG002
         hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=None)
         self.dataset = {}
 
@@ -85,7 +85,7 @@ class BigCodeBench(BaseTask[str]):
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return item["canonical_solution"]  # Not needed for evaluation, as it is test based given the generated code
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return None
 
     def _get_context(self, item: dict[str, Any]) -> CodeExecutionPassAtOneContext:
@@ -128,7 +128,7 @@ class BigCodeBench_OLMES(BigCodeBench):
     FEWSHOT_SPLIT = "v0.1.2"
     METRICS = [CodeExecutionPassAtOneWithCodebench]
 
-    def __init__(self, num_fewshot: int = 3) -> None:
+    def __init__(self, num_fewshot: int = 3) -> None:  # noqa: ARG002
         # Default 3-shot; config can override. Enforce 3 for this variant.
         super().__init__(num_fewshot=3)
         self.stop_sequences = [
@@ -157,7 +157,7 @@ class BigCodeBench_OLMES(BigCodeBench):
             raise ValueError(f"Expected canonical_solution to be a non-None str, got {type(target)}")
         return target + "\n```"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         # Olmes does not use a cue text
         return ""
 

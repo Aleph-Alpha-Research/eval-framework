@@ -27,7 +27,7 @@ def main(
     config: EvalConfig,
     should_preempt_callable: Callable[[], bool] | None = None,
     trial_id: int | None = None,
-    *args: Any,
+    *args: Any,  # noqa: ARG001
     resource_cleanup: bool = False,
     verbosity: int = 1,
 ) -> list[Result]:

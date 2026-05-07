@@ -54,7 +54,7 @@ class AidanBenchOriginal(BaseTask[str]):
         )
         return base_prompt
 
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:  # noqa: ARG002
         return None
 
     def _calculate_novelty_score(self, messages: list[Message]) -> float:
@@ -75,7 +75,7 @@ class AidanBenchOriginal(BaseTask[str]):
         assert len(similarities_squeezed) == len(previous_embeddings)
         return 1 - max(similarities_squeezed)
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:  # noqa: ARG002
         return []
 
     def _fuse_messages(self, messages: list[Message]) -> list[Message]:

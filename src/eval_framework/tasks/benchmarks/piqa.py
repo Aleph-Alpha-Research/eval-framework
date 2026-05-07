@@ -34,7 +34,7 @@ class PIQA(BaseTask[str]):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -69,7 +69,7 @@ class PIQA_OLMES(PIQA):
         idx = 0 if item["label"] == 0 else 1
         return f" {self.keys[idx]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]
 
 
@@ -83,7 +83,7 @@ class PIQA_IDK(PIQA):
         TernaryScore,
     ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
             "answers receive points. It is acceptable to answer with 'I do not know' if you are unsure, and "

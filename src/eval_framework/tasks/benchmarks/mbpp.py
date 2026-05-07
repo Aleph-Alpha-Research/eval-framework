@@ -83,7 +83,7 @@ class MBPP(BaseTask[str]):
         instruction_text = f"You are an expert Python programmer, and here is your task: {text} Your code should pass these tests:\n\n{tests}\n"  # noqa E501
         return instruction_text
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return BEGIN
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -98,7 +98,7 @@ class MBPP(BaseTask[str]):
         assert isinstance(target, str)
         return f"{BEGIN}\n" + target + f"\n{END}"
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:  # noqa: ARG002
         fewshot_examples = self.rnd.sample(self.dataset[self.FEWSHOT_SPLIT], self.num_fewshot)
         return fewshot_examples
 
@@ -288,13 +288,13 @@ class MBPP_OLMES(MBPP):
             f" in a markdown code block:\n```\n{text.strip()}\n{test}\n```\n"
         )
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Here is the completed function:\n\n```python\n"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
         return item["code"] + "\n"
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:  # noqa: ARG002
         return list(_OLMES_FEWSHOT_EXAMPLES)
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample) -> str:  # type: ignore[override]

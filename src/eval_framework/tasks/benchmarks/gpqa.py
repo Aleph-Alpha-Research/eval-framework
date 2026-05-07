@@ -66,7 +66,7 @@ class GPQA(BaseTask[str]):
 
                 self.dataset[split] = data_list_filtered
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         system_prompt_text = (
             "Here are some example questions from experts. "
             "An explanation is given before the final answer. "
@@ -85,7 +85,7 @@ class GPQA(BaseTask[str]):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -106,7 +106,7 @@ class GPQA(BaseTask[str]):
         choices = [f"({self.keys[i]}) {choice}" for i, choice in enumerate(choices)]
         return choices, correct_answer_position
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" ({x})" for x in self.keys]
 
     @staticmethod
@@ -143,7 +143,7 @@ class GPQA_OLMES(GPQA):
         _, correct_answer_position = self._get_possible_completions_marked(item)
         return f" {self.keys[correct_answer_position]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {x}" for x in self.keys]
 
 
@@ -157,7 +157,7 @@ class GPQA_IDK(GPQA):
         TernaryScore,
     ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
             "It is acceptable to answer with '?' if you are unsure, and you will receive 0 points."
@@ -193,13 +193,13 @@ class GPQA_COT(GPQA):
         else:
             return "[invalid]"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
         return self._extract_answer(completion_text)
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return ""
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -218,7 +218,7 @@ class GPQA_COT(GPQA):
         )
         return instruction_text
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return ""
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

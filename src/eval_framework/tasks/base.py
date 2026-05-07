@@ -211,7 +211,7 @@ class BaseTask[SubjectType](ABC):
         hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
         self.dataset = self._shuffle_splits(hf_dataset=hf_dataset)
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         return completion_text
 
     def _get_example_messages(self, item: dict[str, Any]) -> list[Message]:
@@ -274,10 +274,10 @@ class BaseTask[SubjectType](ABC):
             )
         ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return ""
 
-    def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
+    def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:  # noqa: ARG002
         return None
 
     def _get_raw_question(self, item: dict[str, Any]) -> str:
@@ -307,7 +307,7 @@ class BaseTask[SubjectType](ABC):
             return self.TASK_STYLER.get_ground_truth(self._get_choices(item), self._get_correct_index(item))
         raise NotImplementedError
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         if hasattr(self, "TASK_STYLER"):
             return self.TASK_STYLER.get_cue_text()
         return ""
@@ -330,7 +330,7 @@ class BaseTask[SubjectType](ABC):
             # Separate splits: no risk of leaking the current item, sample directly.
             return self.rnd.sample(self.dataset[self.FEWSHOT_SPLIT], self.num_fewshot)
 
-    def _get_context(self, item: dict[str, Any]) -> BaseMetricContext | list[BaseMetricContext] | None:
+    def _get_context(self, item: dict[str, Any]) -> BaseMetricContext | list[BaseMetricContext] | None:  # noqa: ARG002
         return None
 
     def get_metadata(self) -> dict[str, str | list[str]]:

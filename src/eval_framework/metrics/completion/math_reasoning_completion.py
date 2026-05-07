@@ -12,7 +12,7 @@ from eval_framework.metrics.completion.minerva_math_utils import _normalize_late
 from eval_framework.shared.types import Completion
 
 
-def timeout_handler(signum: Any, frame: Any) -> None:
+def timeout_handler(signum: Any, frame: Any) -> None:  # noqa: ARG001
     raise TimeoutError()
 
 

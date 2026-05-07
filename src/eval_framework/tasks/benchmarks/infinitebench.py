@@ -106,7 +106,7 @@ class InfiniteBench_CodeRun(InfiniteBenchCompletion):
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 30  # Avg Output Tokens: 1.3
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -140,10 +140,10 @@ class InfiniteBench_EnDia(InfiniteBenchCompletion):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"{item['context']}\n\n{item['input']}\n"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "The character which is $$MASK$$ is:"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -170,7 +170,7 @@ class InfiniteBench_EnQA(InfiniteBenchCompletion):
         answers = [i.replace('"', "").lower() for i in item["answer"]]
         return answers
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -190,7 +190,7 @@ class InfiniteBench_MathFind(InfiniteBenchCompletion):
         self.stop_sequences: list[str] = ["\n"]
         self.max_tokens = 30  # Avg Output Tokens: 1.3
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -219,7 +219,7 @@ class InfiniteBench_RetrieveKV2(InfiniteBenchCompletion):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"{item['context']}\n{item['input']}"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -249,10 +249,10 @@ class InfiniteBench_RetrieveNumber(InfiniteBenchCompletion):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"{item['context']}\n{item['input']}\n"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "The sequence of digits is:"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -282,10 +282,10 @@ class InfiniteBench_RetrievePassKey1(InfiniteBenchCompletion):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"{item['context']}\n{item['input']}\n"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "The pass key is:"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]

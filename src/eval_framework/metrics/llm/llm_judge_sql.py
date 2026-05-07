@@ -263,7 +263,7 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
             case _:
                 raise NotImplementedError(f"Query validation not implemented for {dialect.value}.")
 
-    def validate_query_sqlite(self, create_db_statements: str, sql_query: str, db_schema: str) -> SqlValidationResult:
+    def validate_query_sqlite(self, create_db_statements: str, sql_query: str, db_schema: str) -> SqlValidationResult:  # noqa: ARG002
         con = sqlite3.connect(":memory:")
         cur = con.cursor()
         try:

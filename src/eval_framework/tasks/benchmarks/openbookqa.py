@@ -55,7 +55,7 @@ class OPENBOOKQA_IDK(OPENBOOKQA):
         TernaryScore,
     ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
             "completions receive points. It is acceptable to answer with 'I do not know' if you are unsure, "
@@ -72,7 +72,7 @@ class OPENBOOKQA_IDK(OPENBOOKQA):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
 
@@ -95,7 +95,7 @@ class OPENBOOKQA_OLMES(OPENBOOKQA):
         idx = self.keys.index(answer_key) if answer_key in self.keys else 0
         return f" {self.keys[idx]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]
 
 
@@ -130,5 +130,5 @@ class OPENBOOKQA_EVAL_HARNESS_OLMES(OPENBOOKQA_EVAL_HARNESS):
         idx = self.keys.index(answer_key) if answer_key in self.keys else 0
         return f" {self.keys[idx]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]
