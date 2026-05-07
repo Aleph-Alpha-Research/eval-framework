@@ -1,6 +1,7 @@
 from typing import Any
 
 from eval_framework.metrics.completion.ifeval import IFEvalMetric, IFEvalMetricContext
+from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
 
 
@@ -76,3 +77,4 @@ class IFEvalDe(IFEval):
     DATASET_PATH = "jzhang86/de_ifeval"
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = {NO_SUBJECT: Language.DEU}
+    METRICS = [IFEvalMetric, LanguageRawConsistencyChecker]
