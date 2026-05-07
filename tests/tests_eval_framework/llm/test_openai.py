@@ -153,3 +153,24 @@ def test_generate_from_messages_validates_temperature_and_top_p(mocker: MockerFi
         model.generate_from_messages([], top_p=1.5)
     with pytest.raises(AssertionError, match="top_p"):
         model.generate_from_messages([], top_p=-1.0)
+
+
+def test_generate_from_messages_preserves_message_roles(mocker: MockerFixture) -> None:
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    mock_client.chat.completions.create.return_value = _make_chat_response(mocker)
+
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18")
+    messages = [
+        [
+            Message(role=Role.SYSTEM, content="system prompt"),
+            Message(role=Role.USER, content="user prompt"),
+            Message(role=Role.ASSISTANT, content="assistant prompt"),
+        ]
+    ]
+
+    model.generate_from_messages(messages)
+
+    sent_messages = mock_client.chat.completions.create.call_args.kwargs["messages"]
+    assert [m["role"] for m in sent_messages] == ["system", "user", "assistant"]
+    assert [m["content"] for m in sent_messages] == ["system prompt", "user prompt", "assistant prompt"]
