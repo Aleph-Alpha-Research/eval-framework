@@ -91,8 +91,7 @@ class OpenAIModel(BaseLLM):
             base_url=base_url,
         )
 
-        # Initialize tokenizer for the model
-        self._encoder = self._get_encoder()
+        self._encoder: tiktoken.Encoding | Tokenizer | None = self._get_encoder_or_none()
 
         # set bytes_per_token_scalar for non-standard models
         if bytes_per_token is not None and bytes_per_token <= 0:
@@ -101,9 +100,23 @@ class OpenAIModel(BaseLLM):
             4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
         )
 
-    def _get_encoder(self) -> tiktoken.Encoding:
+    def _get_encoder_or_none(self) -> tiktoken.Encoding | None:
         assert self._model_name is not None
-        return tiktoken.encoding_for_model(self._model_name)
+        try:
+            return tiktoken.encoding_for_model(self._model_name)
+        except KeyError:
+            logger.info(
+                "tiktoken could not map model_name=%r. Disabling token counting for this model.",
+                self._model_name,
+            )
+            return None
+        except Exception as e:
+            logger.warning(
+                "Failed to initialize tiktoken encoder for model_name=%r (%s). Disabling token counting.",
+                self._model_name,
+                e.__class__.__name__,
+            )
+            return None
 
     def _count_tokens(self, text: str) -> int:
         """
@@ -115,6 +128,8 @@ class OpenAIModel(BaseLLM):
         Returns:
             Number of tokens.
         """
+        if self._encoder is None:
+            raise RuntimeError("Token counting is not available (no encoder configured).")
         return len(self._encoder.encode(text))
 
     def generate_from_messages(
@@ -166,14 +181,31 @@ class OpenAIModel(BaseLLM):
                     stop=stop_sequences,
                 )
                 completion = response.choices[0].text
+                usage = getattr(response, "usage", None)
+                prompt_tokens = getattr(usage, "prompt_tokens", None) if usage is not None else None
+                completion_tokens = getattr(usage, "completion_tokens", None) if usage is not None else None
                 return RawCompletion(
                     prompt=prompt,
-                    prompt_sequence_positions=self._count_tokens(prompt),
-                    concat_compression=ConcatCompression.calculate(
-                        single_messages, count_tokens=self._count_tokens, completion=completion
+                    prompt_sequence_positions=(
+                        prompt_tokens
+                        if prompt_tokens is not None
+                        else (self._count_tokens(prompt) if self._encoder is not None else None)
+                    ),
+                    concat_compression=(
+                        ConcatCompression.calculate(
+                            single_messages,
+                            count_tokens=self._count_tokens,
+                            completion=completion,
+                        )
+                        if self._encoder is not None
+                        else None
                     ),
                     completion=completion,
-                    completion_sequence_positions=self._count_tokens(completion),
+                    completion_sequence_positions=(
+                        completion_tokens
+                        if completion_tokens is not None
+                        else (self._count_tokens(completion) if self._encoder is not None else None)
+                    ),
                 )
 
             else:
@@ -190,15 +222,26 @@ class OpenAIModel(BaseLLM):
                 )
                 prompt = "\n".join([f"{m.get('role', '')}: {m.get('content', '')}" for m in chat_messages])
                 prompt_tokens = getattr(chat_response.usage, "prompt_tokens", None)
+                completion_tokens = getattr(chat_response.usage, "completion_tokens", None)
                 completion = chat_response.choices[0].message.content or ""
                 return RawCompletion(
                     prompt=prompt,
                     prompt_sequence_positions=prompt_tokens,
-                    concat_compression=ConcatCompression.calculate(
-                        single_messages, count_tokens=self._count_tokens, completion=completion
+                    concat_compression=(
+                        ConcatCompression.calculate(
+                            single_messages,
+                            count_tokens=self._count_tokens,
+                            completion=completion,
+                        )
+                        if self._encoder is not None
+                        else None
                     ),
                     completion=completion,
-                    completion_sequence_positions=self._count_tokens(completion),
+                    completion_sequence_positions=(
+                        completion_tokens
+                        if completion_tokens is not None
+                        else (self._count_tokens(completion) if self._encoder is not None else None)
+                    ),
                 )
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -218,6 +261,10 @@ class OpenAIModel(BaseLLM):
         Note:
             Uses the OpenAI completions API with echo=True; chat logprobs are not supported.
         """
+        if self._encoder is None:
+            raise NotImplementedError(
+                "OpenAIModel.logprobs() requires a local tokenizer/encoder, but none is available."
+            )
         assert self._model_name in ["babbage-002", "davinci-002"], (
             "Log-probs for prompt tokens are only supported for a limited set of models."
         )
@@ -383,12 +430,16 @@ class DeepseekModel(OpenAIModel):
             base_url="https://api.deepseek.com/beta",
         )
         self._tokenizer_name = tokenizer_name if tokenizer_name is not None else "deepseek-ai/DeepSeek-V3.2-Exp"
+        # DeepSeek uses HF tokenization; override the base encoder (which may be None).
+        self._encoder = self._get_encoder()
 
     def _get_encoder(self) -> Tokenizer:
         return AutoTokenizer.from_pretrained(self._tokenizer_name)
 
     def _count_tokens(self, text: str) -> int:
-        return len(self._encoder.encode(text))
+        encoder = self._encoder
+        assert encoder is not None
+        return len(encoder.encode(text))  # type: ignore[union-attr]
 
 
 ### Model Aliases ###
