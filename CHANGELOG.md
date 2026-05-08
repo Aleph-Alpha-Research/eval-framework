@@ -14,6 +14,18 @@
 
 ### Bug Fixes
 
+## [0.3.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.6...v0.3.7) (2026-05-08)
+
+
+### Features
+
+* add language consistency metric to IFEvalDe task ([#236](https://github.com/Aleph-Alpha-Research/eval-framework/issues/236)) ([bda7ad5](https://github.com/Aleph-Alpha-Research/eval-framework/commit/bda7ad51aab09fd1d53305007a933832125e4721))
+
+
+### Bug Fixes
+
+* preserve system role when sending messages to OpenAI chat API ([#227](https://github.com/Aleph-Alpha-Research/eval-framework/issues/227)) ([85c0d6c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/85c0d6c38ae1ff6dd338de33de6e1635fefb0fd6))
+
 ## [0.3.6](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.5...v0.3.6) (2026-04-30)
 
 
