@@ -6,7 +6,7 @@ DATASET_PATH = jzhang86/de_ifeval
 SAMPLE_SPLIT = train
 FEWSHOT_SPLIT = train
 RESPONSE_TYPE = COMPLETION
-METRICS = [IFEvalMetric]
+METRICS = [IFEvalMetric, LanguageRawConsistencyChecker]
 SUBJECTS = ['no_subject']
 LANGUAGE = {'no_subject': <Language.DEU: 'German'>}
 ````
