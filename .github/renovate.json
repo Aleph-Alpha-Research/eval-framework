@@ -1,0 +1,51 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "automerge": true,
+    "enabledManagers": [
+        "pep621",
+        "github-actions",
+        "pre-commit"
+    ],
+    "extends": [
+        "config:recommended",
+        ":enablePreCommit"
+    ],
+    "lockFileMaintenance": {
+        "enabled": true,
+        "schedule": [
+            "before 4am"
+        ]
+    },
+    "minimumReleaseAge": "3 days",
+    "packageRules": [
+        {
+            "groupName": "pytest",
+            "groupSlug": "pytest",
+            "matchPackageNames": [
+                "/^pytest/"
+            ]
+        },
+        {
+            "groupName": "mypy",
+            "groupSlug": "mypy",
+            "matchPackageNames": [
+                "/^mypy/",
+                "/^types-/"
+            ]
+        },
+        {
+            "groupName": "ruff",
+            "groupSlug": "ruff",
+            "matchPackageNames": [
+                "/^ruff/",
+                "astral-sh/ruff-pre-commit"
+            ]
+        }
+    ],
+    "patch": {
+        "enabled": true
+    },
+    "prHourlyLimit": 0,
+    "rangeStrategy": "bump",
+    "rebaseWhen": "behind-base-branch"
+}
