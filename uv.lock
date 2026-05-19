@@ -187,11 +187,11 @@ wheels = [
 
 [[package]]
 name = "antlr4-python3-runtime"
-version = "4.11.0"
+version = "4.13.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a4/1b/59dc12d9816edee8be6a166be7c220910ff18cce2ded9877a08b27396a83/antlr4-python3-runtime-4.11.0.tar.gz", hash = "sha256:6a46d4f6033c8d7e53c8975cee5d83b3ba1b48157f6beb09a4965062dacfe2e0", size = 116951, upload-time = "2022-09-04T19:49:27.321Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/33/5f/2cdf6f7aca3b20d3f316e9f505292e1f256a32089bd702034c29ebde6242/antlr4_python3_runtime-4.13.2.tar.gz", hash = "sha256:909b647e1d2fc2b70180ac586df3933e38919c85f98ccc656a96cd3f25ef3916", size = 117467, upload-time = "2024-08-03T19:00:12.757Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/37/f3/2cab1ffe441ffcc4605bf638f524fed86db6699a25d04bbecb5bfdde372b/antlr4_python3_runtime-4.11.0-py3-none-any.whl", hash = "sha256:f523f91387283045f129c343b363a8dda3a07eea62721b8eda95f2d8b817b656", size = 144189, upload-time = "2022-09-04T19:49:25.198Z" },
+    { url = "https://files.pythonhosted.org/packages/89/03/a851e84fcbb85214dc637b6378121ef9a0dd61b4c65264675d8a5c9b1ae7/antlr4_python3_runtime-4.13.2-py3-none-any.whl", hash = "sha256:fe3835eb8d33daece0e799090eda89719dbccee7aa39ef94eed3818cafa5a7e8", size = 144462, upload-time = "2024-08-03T19:00:11.134Z" },
 ]
 
 [[package]]
@@ -939,7 +939,7 @@ requires-dist = [
     { name = "accelerate", marker = "extra == 'accelerate'" },
     { name = "accelerate", marker = "extra == 'transformers'", specifier = ">=0.30.0,<1" },
     { name = "aleph-alpha-client", marker = "extra == 'api'", specifier = ">=11.5.1" },
-    { name = "antlr4-python3-runtime", specifier = "==4.11.0" },
+    { name = "antlr4-python3-runtime", specifier = "==4.13.2" },
     { name = "boto3", specifier = ">=1.40.54,<2" },
     { name = "datasets", specifier = ">=4.0.0,<5" },
     { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38,<0.39" },
@@ -3811,7 +3811,7 @@ dependencies = [
     { name = "typing-extensions", marker = "sys_platform == 'linux'" },
 ]
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu124/torch-2.6.0%2Bcu124-cp312-cp312-linux_x86_64.whl", hash = "sha256:a393b506844035c0dac2f30ea8478c343b8e95a429f06f3b3cadfc7f53adb597" },
+    { url = "https://download-r2.pytorch.org/whl/cu124/torch-2.6.0%2Bcu124-cp312-cp312-linux_x86_64.whl", hash = "sha256:a393b506844035c0dac2f30ea8478c343b8e95a429f06f3b3cadfc7f53adb597", upload-time = "2025-01-30T00:57:08Z" },
 ]
 
 [[package]]
