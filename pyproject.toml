@@ -109,7 +109,7 @@ dev = [
   "ruff>=0.12.8",
 ]
 flash-attn = [
-  "flash-attn>=2.7.2.post1,<2.8",
+  "flash-attn>=2.8.3,<2.9",
   "torch"
 ]
 
