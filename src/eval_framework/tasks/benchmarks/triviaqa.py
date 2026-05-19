@@ -38,5 +38,5 @@ class TRIVIAQA(BaseTask[str]):
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["answer"]["aliases"]
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         return completion_text.strip().rstrip(".")

@@ -25,7 +25,7 @@ def _load_model_mock(llm_name: str, models_path, *, info: str = ""):
 @patch("eval_framework.response_generator.create_perturbation_class")
 def test_run(
     mock_create_perturbation_class: Mock,
-    _mock_load_model: Mock,
+    mock_load_model: Mock,  # noqa: ARG001
     mock_parse_args: Mock,
     tmp_path: Path,
 ) -> None:
@@ -81,7 +81,7 @@ def test_run(
 @patch("eval_framework.response_generator.create_perturbation_class")
 def test_run_path(
     mock_create_perturbation_class: Mock,
-    _mock_load_model: Mock,
+    mock_load_model: Mock,  # noqa: ARG001
     mock_parse_args: Mock,
     tmp_path: Path,
 ) -> None:

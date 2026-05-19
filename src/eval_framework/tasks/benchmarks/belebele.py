@@ -29,7 +29,7 @@ class BELEBELE(BaseTask[str]):
         self.keys = get_n_letters(4)
         self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "The following are multiple choice questions (with answers)."
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -39,7 +39,9 @@ class BELEBELE(BaseTask[str]):
             [
                 f"{key}. {choice}\n"
                 for key, choice in zip(
-                    self.keys, [item["mc_answer1"], item["mc_answer2"], item["mc_answer3"], item["mc_answer4"]]
+                    self.keys,
+                    [item["mc_answer1"], item["mc_answer2"], item["mc_answer3"], item["mc_answer4"]],
+                    strict=False,
                 )
             ]
         )
@@ -50,11 +52,11 @@ class BELEBELE(BaseTask[str]):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return f" {self.keys[int(item['correct_answer_num']) - 1]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]

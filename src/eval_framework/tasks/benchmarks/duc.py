@@ -27,7 +27,7 @@ class DUC(BaseTask[str], ABC):
         self.stop_sequences: list[str] = ["Text:"]
         self.max_tokens = 50  # longest keyphrase is less than 50 characters long
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -57,7 +57,7 @@ class DUC_EXTRACTIVE(DUC):
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["extractive_keyphrases"]
 
-    def _get_system_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_system_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "You are an AI model tasked with extracting keyphrases from a text document. "
             "Keyphrases should capture main ideas or significant topics exactly as worded in the text."
@@ -85,11 +85,11 @@ class DUC_ABSTRACTIVE(DUC):
             if split in [self.SAMPLE_SPLIT, self.FEWSHOT_SPLIT]:
                 self.dataset[split] = data_list
 
-    def _get_system_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_system_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "You are an AI model tasked with generating abstractive keyphrases "
             "that capture the main ideas of the text without using exact wording."
         )
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Paraphrase the following texts to improve clarity and relevance."

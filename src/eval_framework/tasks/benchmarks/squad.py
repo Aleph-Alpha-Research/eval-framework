@@ -55,7 +55,7 @@ class SQUAD2(BaseTask[str]):
 
                 warnings.warn(
                     f"Dataset {kwargs.get('path', self.DATASET_PATH)} has incompatible feature types "
-                    "(List instead of Sequence), loading directly from JSON files"
+                    "(List instead of Sequence), loading directly from JSON files", stacklevel=2
                 )
                 return self._load_from_json(**kwargs)
             raise
@@ -116,7 +116,7 @@ class SQUAD2(BaseTask[str]):
         except Exception as e:
             import warnings
 
-            warnings.warn(f"Failed to download {split} split: {e}")
+            warnings.warn(f"Failed to download {split} split: {e}", stacklevel=2)
             return None
 
     def _flatten_squad_data(self, squad_data: dict) -> list[dict]:
@@ -250,13 +250,13 @@ class SQuAD_OLMES(SQUAD):
         self.stop_sequences = ["Title:", "\n\n"]
         self.max_tokens = 50
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "The following are reading comprehension questions, "
             "where the answer to each question is a segment of text from the corresponding background text."
         )
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:

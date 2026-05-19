@@ -55,7 +55,7 @@ class SCIQ(BaseTask[str]):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
@@ -80,14 +80,14 @@ class SCIQ_OLMES(SCIQ):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
         shuffled, _ = _shuffled_choices_and_correct_index(item)
-        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, shuffled))
+        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, shuffled, strict=False))
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         _, correct_index = _shuffled_choices_and_correct_index(item)
         return f" {self.keys[correct_index]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]
 
 
@@ -101,7 +101,7 @@ class SCIQ_IDK(SCIQ):
         TernaryScore,
     ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
             "It is acceptable to answer with 'don't know' if you are unsure, and you will receive 0 points."
@@ -143,7 +143,7 @@ class SCIQEvalHarness_IDK(SCIQEvalHarness):
         TernaryScore,
     ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
             "It is acceptable to answer with 'don't know' if you are unsure, and you will receive 0 points."

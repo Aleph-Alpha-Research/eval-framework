@@ -94,7 +94,7 @@ class BaseLLM(ABC):
             messages: list[Sequence[Message]] = [sample.messages for sample in samples]
             return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature, top_p)
 
-    def post_process_completion(self, completion: str, sample: Sample) -> str:
+    def post_process_completion(self, completion: str, sample: Sample) -> str:  # noqa: ARG002
         """
         Model-specific post-processing of generated completions.
 
@@ -110,7 +110,7 @@ class BaseLLM(ABC):
         """
         return completion
 
-    def __del__(self) -> None:
+    def __del__(self) -> None:  # noqa: B027 -- optional hook; subclasses override for resource cleanup
         """
         Method for custom resource cleanup (particularly GPUs)
         """

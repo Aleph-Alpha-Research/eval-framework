@@ -54,10 +54,10 @@ class IFEval(BaseTask[str]):
             additional_kwargs=item["kwargs"],
         )
 
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:  # noqa: ARG002
         return None
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:  # noqa: ARG002
         return []
 
 

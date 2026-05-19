@@ -9,7 +9,7 @@ class GridDifference(BaseMetric[Completion]):
 
     def count_differences(self, character_list_1: list[str], character_list_2: list[str]) -> int:
         count = 0
-        for character_1, character_2 in zip(character_list_1, character_list_2):
+        for character_1, character_2 in zip(character_list_1, character_list_2, strict=False):
             if character_1 != character_2:
                 count += 1
         return count

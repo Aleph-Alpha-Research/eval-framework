@@ -49,7 +49,7 @@ def test_registry_model_config_integration(model_class: type, extra_args: dict[s
         assert config.llm_args["batch_size"] == 4
 
 
-def test_additional_artifact_use(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, wandb_run: wandb.Run) -> None:
+def test_additional_artifact_use(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, wandb_run: wandb.Run) -> None:  # noqa: ARG001
     """Test that additional wandb artifacts are registered as being used during evaluation."""
     mock_llm = MockLLM()
     eval_config = EvalConfig(

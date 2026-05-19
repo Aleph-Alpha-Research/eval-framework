@@ -39,7 +39,7 @@ def sample_config(tmp_path: Path) -> EvalConfig:
 
 
 def test_upload_success(
-    mocker: MockerFixture, sample_config: EvalConfig, wandb_run: wandb.Run, sample_output_dir: Path
+    mocker: MockerFixture, sample_config: EvalConfig, wandb_run: wandb.Run, sample_output_dir: Path  # noqa: ARG001
 ) -> None:
     """Test successful upload of files."""
     mocker.patch("eval_framework.result_processors.hf_uploader.login")

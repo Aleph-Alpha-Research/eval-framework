@@ -54,7 +54,7 @@ class AidanBenchOriginal(BaseTask[str]):
         )
         return base_prompt
 
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:  # noqa: ARG002
         return None
 
     def _calculate_novelty_score(self, messages: list[Message]) -> float:
@@ -75,7 +75,7 @@ class AidanBenchOriginal(BaseTask[str]):
         assert len(similarities_squeezed) == len(previous_embeddings)
         return 1 - max(similarities_squeezed)
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:  # noqa: ARG002
         return []
 
     def _fuse_messages(self, messages: list[Message]) -> list[Message]:
@@ -129,7 +129,7 @@ class AidanBenchOriginal(BaseTask[str]):
             new_errors = [c.error for c in new_completions]
 
             new_samples = [s for s in samples]
-            for idx, completion_msgs, error in zip(not_done_idx, new_completion_messages, new_errors):
+            for idx, completion_msgs, error in zip(not_done_idx, new_completion_messages, new_errors, strict=False):
                 old_sample = samples[idx][0]
                 if completion_msgs is not None:
                     message_history[idx].append(completion_msgs[-1])  # add latest model response to history

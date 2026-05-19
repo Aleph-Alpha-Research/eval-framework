@@ -229,7 +229,7 @@ def get_datasets_needing_update() -> tuple[bool, set[str]]:
     datasets_needing_update: set[str] = set()
 
     print("Checking HuggingFace dataset versions...")
-    for task_name, task_class in registered_tasks_iter():
+    for _task_name, task_class in registered_tasks_iter():
         dataset_path = getattr(task_class, "DATASET_PATH", None)
         if dataset_path and dataset_path not in current_commits:
             try:
@@ -345,7 +345,7 @@ def save_hf_dataset_commits() -> None:
     commits = {}
 
     print("Saving dataset commit hashes...")
-    for task_name, task_class in registered_tasks_iter():
+    for _task_name, task_class in registered_tasks_iter():
         dataset_path = getattr(task_class, "DATASET_PATH", None)
 
         if dataset_path and dataset_path not in commits:

@@ -476,7 +476,7 @@ class MMMLU(BaseTask[tuple[str, str]]):
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return f" {item['Answer']}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]
 
 
@@ -510,13 +510,13 @@ class MMMLU_GERMAN_COT(MMMLU):
         else:
             return "[invalid]"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return ""
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return item["Answer"]
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]

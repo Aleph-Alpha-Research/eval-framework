@@ -35,13 +35,13 @@ class ZERO_SCROLLS_QUALITY(BaseTask[str]):
         query_end_index = item["query_end_index"]
         return f"{item['input'][:query_end_index]}\n\n"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return f" {item['output']}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]
 
 
@@ -158,7 +158,7 @@ class ZERO_SCROLLS_SPACE_DIGEST(ZERO_SCROLLS_COMPLETION):
         assert num_fewshot == 0, "ZeroSCROLLS SpaceDigest only supports zero fewshot examples"
         super().__init__(num_fewshot)
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         # First, try to find patterns like "X%" or "X percent" or "X percentage"
         percentage_patterns = [
             r"(\d+(?:\.\d+)?)%",  # Matches: 30%, 30.5%

@@ -87,7 +87,7 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
             context = extract_context_metric(response, CodeExecutionPassAtOneContext)
             parsed_context = RealtimeCodeExectionContext.from_context(context)
         except Exception as e:
-            raise Exception(f"Failed to rebuild parsing functions => {e}")
+            raise RuntimeError(f"Failed to rebuild parsing functions => {e}") from e
 
         n = 1  # we only support N=1 at the moment
         try:

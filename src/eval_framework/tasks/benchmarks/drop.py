@@ -89,7 +89,7 @@ class DropCompletion(BaseTask[str]):
         self.stop_sequences = ["Passage:", "Question:", "\n\n"]
         self.max_tokens = 50
 
-    def _load_dataset(self, subject: str) -> None:
+    def _load_dataset(self, subject: str) -> None:  # noqa: ARG002
         hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH)
 
         def process(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -121,7 +121,7 @@ class DropCompletion(BaseTask[str]):
             return None
         return f" {_tuple_to_display(answers[0])}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_context(self, item: dict[str, Any]) -> DropMetricContext | None:
@@ -146,7 +146,7 @@ class DropCompletion_OLMES(DropCompletion):
         super().__init__(num_fewshot)
         self.max_tokens = 100
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         # TODO: Do we want this same prompt in the non_OLMES variant?
         context = (
             "The following are reading comprehension questions, where the answer to each question is either a "
@@ -183,7 +183,7 @@ class DropMC(BaseTask[str]):
         question = item.get("question_original", "")
         texts = item.get("choices", {}).get("text", [])
         labels = item.get("choices", {}).get("label", self.keys[: len(texts)])
-        options = "\n".join(f"{label}. {t}" for label, t in zip(labels, texts))
+        options = "\n".join(f"{label}. {t}" for label, t in zip(labels, texts, strict=False))
         return f"Passage: {passage}\nQuestion: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -196,7 +196,7 @@ class DropMC(BaseTask[str]):
         labels = item.get("choices", {}).get("label", [])
         return [f" {label}" for label in labels]
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
@@ -217,7 +217,7 @@ class DropMC_OLMES(DropMC):
         question = item.get("question_original", "")
         texts = item.get("choices", {}).get("text", [])
         labels = item.get("choices", {}).get("label", self.keys[: len(texts)])
-        options = "\n".join(f" {label}. {t}" for label, t in zip(labels, texts))
+        options = "\n".join(f" {label}. {t}" for label, t in zip(labels, texts, strict=False))
         return f"Passage: {passage}\nQuestion: {question}\n{options}\n"
 
 
@@ -256,7 +256,7 @@ class DropCloze(BaseTask[str]):
         idx = labels.index(key)
         return f" {texts[idx]}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:

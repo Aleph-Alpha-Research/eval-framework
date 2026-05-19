@@ -44,7 +44,7 @@ def mock_s3_client() -> Generator[tuple[Mock, Mock], None, None]:
 
 @pytest.fixture
 def wandb_fs_with_env(
-    aws_env: dict[str, str], mock_s3_client: tuple[Mock, Mock], mock_wandb: Mock
+    aws_env: dict[str, str], mock_s3_client: tuple[Mock, Mock], mock_wandb: Mock  # noqa: ARG001
 ) -> Generator[tuple[WandbFs, Mock, Mock], None, None]:
     mock_s3_client_instance, mock_boto_client = mock_s3_client
     with patch.dict(os.environ, aws_env):
@@ -109,7 +109,7 @@ class TestWandbFs:
         Test the download_artifact method to ensure it handles artifact downloads correctly.
         """
 
-        def fail_open(*args: Any, **kwargs: Any) -> None:
+        def fail_open(*args: Any, **kwargs: Any) -> None:  # noqa: ARG001
             raise OSError(errno.ENOSPC, "No space left on device")
 
         # Call the download_artifact method
@@ -201,7 +201,7 @@ class TestWandbFs:
 
         # Test that waiting can timeout
         monkeypatch.setenv("WANDB_ARTIFACT_WAIT_TIMEOUT_SEC", "1")
-        monkeypatch.setattr("time.sleep", lambda x: _original_sleep(0.1))  # speed busy wait
+        monkeypatch.setattr("time.sleep", lambda x: _original_sleep(0.1))  # speed busy wait  # noqa: ARG005
 
         with pytest.raises(RuntimeError, match="Timed out"):
             artifact = wandb_fs.get_artifact("test-entity/project/test-model", query_version)

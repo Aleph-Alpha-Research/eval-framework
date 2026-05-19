@@ -137,7 +137,7 @@ class TRUTHFULQA_EU20_DE(TRUTHFULQA):
     HF_REVISION = "cff042da87dfb8885c357cb1c83194fa6aaf1d49"
     LANGUAGE = Language.DEU
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:  # noqa: ARG002
         return TRUTHFULQA_EU20_DE_FEWSHOT_ITEMS[: self.num_fewshot]
 
     def _load_dataset(self, subject: SubjectType) -> None:
@@ -209,7 +209,7 @@ class TRUTHFULQA_EU20_FR(TRUTHFULQA):
 
             self.dataset[split] = data_list
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:  # noqa: ARG002
         return TRUTHFULQA_EU20_FR_FEWSHOT_ITEMS[: self.num_fewshot]
 
 
@@ -259,10 +259,10 @@ class MMLU_EU20_DE(MMLU):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"])])
+        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"], strict=False)])
         return f"Frage: {question}\n{choices}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Antwort:"
 
 
@@ -366,8 +366,8 @@ class MMLU_EU20_FR(MMLU):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"])])
+        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"], strict=False)])
         return f"Question: {question}\n{choices}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Réponse:"

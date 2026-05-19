@@ -100,7 +100,7 @@ class MMLU(BaseTask[str]):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"])])
+        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices"], strict=False)])
         return f"Question: {question}\n{choices}"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
@@ -108,13 +108,13 @@ class MMLU(BaseTask[str]):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return f" {self.keys[item['answer']]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]
 
 
@@ -127,7 +127,7 @@ class MMLU_OLMES(MMLU):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "".join([f" {key}. {choice}\n" for key, choice in zip(self.keys, item["choices"])])
+        choices = "".join([f" {key}. {choice}\n" for key, choice in zip(self.keys, item["choices"], strict=False)])
         return f"Question: {question}\n{choices}"
 
 
@@ -205,13 +205,13 @@ class MMLU_COT(MMLU):
         else:
             return "[invalid]"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return ""
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return self.keys[item["answer"]]
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -219,7 +219,7 @@ class MMLU_COT(MMLU):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
-        choices = "\n".join([f"{key}. {choice}" for key, choice in zip(self.keys, item["choices"])])
+        choices = "\n".join([f"{key}. {choice}" for key, choice in zip(self.keys, item["choices"], strict=False)])
         return f"Question: {question}\n{choices}"
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:

@@ -294,7 +294,7 @@ def test_all_imports_in_mapping() -> None:
         dataset = load_dataset(path="bigcode/bigcodebench", download_config=DownloadConfig(max_retries=5))
 
         # Process each split
-        for split, data in dataset.items():
+        for split, _data in dataset.items():
             if split in ["v0.1.4"]:  # Adjust based on available splits
                 all_unique_imports = set()
 

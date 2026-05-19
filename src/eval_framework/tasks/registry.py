@@ -86,7 +86,7 @@ class Registry:
         try:
             name, task = self._registry[task_key]
         except KeyError:
-            raise KeyError(f"Task not found: {name}")
+            raise KeyError(f"Task not found: {name}") from None
 
         if isinstance(task, TaskPlaceholder):
             task = task.load()

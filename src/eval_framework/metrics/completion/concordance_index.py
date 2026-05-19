@@ -32,7 +32,7 @@ def calculate_concordance_index(
         return 0
 
     concordance_count = 0
-    for gt, c in zip(ground_truth_arr, completion_arr):
+    for gt, c in zip(ground_truth_arr, completion_arr, strict=False):
         concordance_count += 1 if gt == c else 0
 
     return concordance_count / len(ground_truth_arr)

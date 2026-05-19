@@ -29,7 +29,7 @@ class HFUploader(ResultsUploader):
         if self.hf_api is None:
             logger.error("Could not login into HuggingFace (check HF_TOKEN). Results not persisted in HuggingFace.")
 
-    def upload(self, llm_name: str, config: EvalConfig, output_dir: Path) -> bool:
+    def upload(self, llm_name: str, config: EvalConfig, output_dir: Path) -> bool:  # noqa: ARG002
         if not hasattr(self, "hf_api") or self.hf_api is None:
             return False
         assert config.hf_upload_repo and config.hf_upload_dir
