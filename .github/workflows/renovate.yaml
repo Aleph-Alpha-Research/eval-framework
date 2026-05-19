@@ -1,25 +1,20 @@
 name: Renovate
 
+# NOTE: dry-run test branch. Schedule trigger removed so this branch can only
+# be invoked manually via workflow_dispatch. Revert before merging to main.
 on:
-  schedule:
-    - cron: "0 0-5/2 * * *" # every 2 hours between midnight and 6am UTC
   workflow_dispatch:
     inputs:
       log_level:
         description: "Renovate log level"
         required: false
         type: choice
-        default: "info"
+        default: "debug"
         options:
           - "debug"
           - "info"
           - "warn"
           - "error"
-      dry_run:
-        description: dry-run (no changes will be made)
-        required: false
-        type: boolean
-        default: false
       base_branch:
         description: "Branch to scan (defaults to main)"
         required: false
@@ -30,30 +25,17 @@ jobs:
   renovate:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
+      issues: write
     steps:
-      - name: Create Renovate token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        id: renovate-token
-        with:
-          app-id: ${{ vars.AAR_VERSION_BUMP_BOT_APP_ID }}
-          private-key: ${{ secrets.AAR_VERSION_BUMP_BOT_PRIVATE_KEY }}
-          repositories: |
-            eval-framework
-
-      - name: Checkout
-        uses: actions/checkout@v6
-
       - name: Renovate
         uses: renovatebot/github-action@693b9ef15eec82123529a37c782242f091365961 # v46.1.14
         with:
-          configurationFile: .github/renovate.json
-          token: ${{ steps.renovate-token.outputs.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
         env:
-          LOG_LEVEL: ${{ inputs.log_level || 'info' }}
-          RENOVATE_DRY_RUN: ${{ inputs.dry_run == 'true' && 'full' || null }}
+          LOG_LEVEL: ${{ inputs.log_level || 'debug' }}
           RENOVATE_REPOSITORIES: "['Aleph-Alpha-Research/eval-framework']"
           RENOVATE_ONBOARDING: "false"
           RENOVATE_REQUIRE_CONFIG: "ignored"
           RENOVATE_BASE_BRANCHES: "[\"${{ inputs.base_branch || 'main' }}\"]"
-          RENOVATE_HOST_RULES: '[{"matchHost": "https://gitlab.aleph-alpha.de/api/v4/projects/1126/packages/pypi/simple", "hostType": "pypi", "username": "token", "password": "${{ secrets.GL_API_PACKAGE_REGISTRY_READ }}"}]'
