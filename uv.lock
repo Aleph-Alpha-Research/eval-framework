@@ -953,7 +953,7 @@ requires-dist = [
     { name = "kubernetes", specifier = ">=31.0.0,<32" },
     { name = "langdetect", specifier = ">=1.0.9,<2" },
     { name = "lingua-language-detector", specifier = ">=2.0.2,<3" },
-    { name = "llm-sandbox", extras = ["docker"], specifier = "==0.3.37" },
+    { name = "llm-sandbox", extras = ["docker"], specifier = "==0.3.39" },
     { name = "lxml", specifier = ">=6,<7" },
     { name = "mistral-common", marker = "extra == 'mistral'", specifier = ">=1.7,<2" },
     { name = "mysql-connector-python", specifier = ">=9.0.0,<10" },
@@ -1721,14 +1721,14 @@ wheels = [
 
 [[package]]
 name = "llm-sandbox"
-version = "0.3.37"
+version = "0.3.39"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ff/96/fa676c1551ed96a6d4814c1a5ad8561d723be7344e03bc293d9ee53b3db7/llm_sandbox-0.3.37.tar.gz", hash = "sha256:bec2d2d2b6eb5311fd70e4aa6a21e60c3c7e8dee36f89aac47a1fd072485adc6", size = 605861, upload-time = "2026-03-02T06:45:28.168Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fb/f1/30b41350f105dbd794639565a1f6e4ab28f95940fc2907cb721471dca105/llm_sandbox-0.3.39.tar.gz", hash = "sha256:7452317a054df3ac20fb652a2e100b5697624886282874fecfb738bac21b27bb", size = 611034, upload-time = "2026-04-20T16:59:45.133Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a3/d0/63e594b6ae23ed4b63d57d5e442308f9c70f61f16002da4c41a4436939a6/llm_sandbox-0.3.37-py3-none-any.whl", hash = "sha256:8c0a01a79e8db45bcf709a349aee2983cc3ed22d56f3110ec9fbcdeef43c78f3", size = 106853, upload-time = "2026-03-02T06:45:26.766Z" },
+    { url = "https://files.pythonhosted.org/packages/35/cf/c0419980643daca64173cadda2edad6addc8965b0e694ab0e18a8f77a2c6/llm_sandbox-0.3.39-py3-none-any.whl", hash = "sha256:4fd22a4ae175695de8d9e151f6b12e270859d65208f946b8abec8d5ae2e29b66", size = 108859, upload-time = "2026-04-20T16:59:44.02Z" },
 ]
 
 [package.optional-dependencies]
@@ -3811,7 +3811,7 @@ dependencies = [
     { name = "typing-extensions", marker = "sys_platform == 'linux'" },
 ]
 wheels = [
-    { url = "https://download.pytorch.org/whl/cu124/torch-2.6.0%2Bcu124-cp312-cp312-linux_x86_64.whl", hash = "sha256:a393b506844035c0dac2f30ea8478c343b8e95a429f06f3b3cadfc7f53adb597" },
+    { url = "https://download-r2.pytorch.org/whl/cu124/torch-2.6.0%2Bcu124-cp312-cp312-linux_x86_64.whl", hash = "sha256:a393b506844035c0dac2f30ea8478c343b8e95a429f06f3b3cadfc7f53adb597", upload-time = "2025-01-30T00:57:08Z" },
 ]
 
 [[package]]
