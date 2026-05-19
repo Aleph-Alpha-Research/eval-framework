@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.3.8](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.7...v0.3.8) (2026-05-19)
+
+
+### Features
+
+* renovate bot ([#238](https://github.com/Aleph-Alpha-Research/eval-framework/issues/238)) ([1223a21](https://github.com/Aleph-Alpha-Research/eval-framework/commit/1223a21ccd92b9a767a40d4700382eb377240e8e))
+* **vllm:** add local vLLM OpenAI-server backend and GPU tests ([#235](https://github.com/Aleph-Alpha-Research/eval-framework/issues/235)) ([f119c11](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f119c11909edc6b790aca146e65eb6eb23c79eb4))
+
 ## [0.3.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.6...v0.3.7) (2026-05-08)
 
 
