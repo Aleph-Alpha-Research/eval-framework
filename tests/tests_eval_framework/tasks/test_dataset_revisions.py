@@ -5,15 +5,14 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from eval_framework.tasks.benchmarks import dataset_revisions as dr
+from tests.tests_eval_framework.tasks.conftest import FIXTURE_COPA_SHA, FIXTURE_REVISIONS_FILE
 
 
 def test_revisions_file_lives_next_to_module() -> None:
     """The default output path should be the checked-in JSON in tasks/benchmarks."""
-    expected_name = "task-dataset-revisions.json"
     module_dir = Path(dr.__file__).resolve().parent
-
-    assert dr.REVISIONS_FILE.name == expected_name
-    assert dr.REVISIONS_FILE.parent == module_dir
+    assert dr.DEFAULT_REVISIONS_FILE.name == "task-dataset-revisions.json"
+    assert dr.DEFAULT_REVISIONS_FILE.parent == module_dir
 
 
 def test_collect_dataset_revisions_fetches_sha_for_hf_task() -> None:
@@ -76,12 +75,11 @@ def test_collect_dataset_revisions_skips_failed_dataset_lookup() -> None:
 
 
 def test_get_pinned_dataset_revision_returns_sha_for_known_task() -> None:
-    """Pinned revisions from task-dataset-revisions.json are keyed by task class name."""
-    assert dr.get_pinned_dataset_revision("COPA") == "3de24cf8022e94f4ee4b9d55a6f539891524d646"
+    assert dr.get_pinned_dataset_revision("COPA", revisions_file=FIXTURE_REVISIONS_FILE) == FIXTURE_COPA_SHA
 
 
 def test_get_pinned_dataset_revision_returns_none_for_unknown_task() -> None:
-    assert dr.get_pinned_dataset_revision("NotARegisteredTask") is None
+    assert dr.get_pinned_dataset_revision("NotARegisteredTask", revisions_file=FIXTURE_REVISIONS_FILE) is None
 
 
 def test_collect_dataset_revisions_reuses_sha_for_shared_dataset() -> None:

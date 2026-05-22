@@ -3,7 +3,11 @@ from typing import Any
 import pytest
 
 from eval_framework.tasks.base import BaseTask
+from eval_framework.tasks.benchmarks import dataset_revisions as dr
+from eval_framework.tasks.benchmarks.copa import COPA
+from eval_framework.tasks.benchmarks.piqa import PIQA
 from eval_framework.tasks.registry import register_task
+from tests.tests_eval_framework.tasks.conftest import FIXTURE_COPA_SHA, FIXTURE_REVISIONS_FILE
 from tests.tests_eval_framework.tasks.test_registry import temporary_registry
 
 
@@ -103,3 +107,20 @@ def test_base_task() -> None:
     register_task(MyTask2)  # type: ignore[type-abstract]
     task2 = MyTask2.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
     assert task2.NAME == "MyTask2"
+
+
+def test_pinned_hf_revision_applied_when_unset(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(dr, "REVISIONS_FILE", FIXTURE_REVISIONS_FILE)
+    dr._pinned_revisions.cache_clear()
+    task = COPA.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+    assert task.HF_REVISION == FIXTURE_COPA_SHA
+
+
+def test_custom_hf_revision_overrides_pinned() -> None:
+    task = COPA.with_overwrite(0, custom_subjects=None, custom_hf_revision="custom-sha")
+    assert task.HF_REVISION == "custom-sha"
+
+
+def test_class_hf_revision_not_overridden_by_pin_file() -> None:
+    task = PIQA.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+    assert task.HF_REVISION == "6b3aceb3276e5ab7e51895d73151a718690af38c"

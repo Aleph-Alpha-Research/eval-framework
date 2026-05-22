@@ -10,15 +10,29 @@ Usage::
 import json
 import logging
 from collections.abc import Callable
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from eval_framework.tasks.registry import get_task, registered_task_names
 from huggingface_hub import HfApi
 
 logger = logging.getLogger(__name__)
 
-REVISIONS_FILE = Path(__file__).resolve().parent / "task-dataset-revisions.json"
+DEFAULT_REVISIONS_FILE = Path(__file__).resolve().parent / "task-dataset-revisions.json"
+REVISIONS_FILE = DEFAULT_REVISIONS_FILE
+
+
+@lru_cache
+def _pinned_revisions(revisions_file: Path) -> dict[str, str]:
+    return json.loads(revisions_file.read_text(encoding="utf-8"))
+
+
+def get_pinned_dataset_revision(
+    task_class_name: str,
+    *,
+    revisions_file: Path | None = None,
+) -> str | None:
+    return _pinned_revisions(revisions_file or REVISIONS_FILE).get(task_class_name)
 
 
 def _repo_sha(api: HfApi, repo_id: str, cache: dict[str, str | None]) -> str | None:
@@ -37,9 +51,13 @@ def collect_dataset_revisions(
     task_names: list[str],
     api: HfApi,
     *,
-    get_task_fn: Callable[[str], Any] = get_task,
+    get_task_fn: Callable[[str], Any] | None = None,
 ) -> dict[str, str]:
     """Return task class name → latest dataset commit SHA for tasks with a Hugging Face path."""
+    if get_task_fn is None:
+        from eval_framework.tasks.registry import get_task
+
+        get_task_fn = get_task
     cache: dict[str, str | None] = {}
     revisions: dict[str, str] = {}
     for name in task_names:
@@ -55,6 +73,8 @@ def collect_dataset_revisions(
 
 
 def main() -> None:
+    from eval_framework.tasks.registry import registered_task_names
+
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     revisions = collect_dataset_revisions(registered_task_names(), HfApi())
     REVISIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
