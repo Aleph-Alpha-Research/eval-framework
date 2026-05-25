@@ -937,7 +937,7 @@ flash-attn = [
 [package.metadata]
 requires-dist = [
     { name = "accelerate", marker = "extra == 'accelerate'" },
-    { name = "accelerate", marker = "extra == 'transformers'", specifier = ">=0.30.0,<1" },
+    { name = "accelerate", marker = "extra == 'transformers'", specifier = ">=0.34.2,<1" },
     { name = "aleph-alpha-client", marker = "extra == 'api'", specifier = ">=11.5.1" },
     { name = "antlr4-python3-runtime", specifier = "==4.11.0" },
     { name = "boto3", specifier = ">=1.40.54,<2" },
