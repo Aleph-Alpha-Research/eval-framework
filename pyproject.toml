@@ -98,7 +98,7 @@ eval_framework = "eval_framework.run:run"
 [dependency-groups]
 dev = [
   "mypy>=1.10,<2",
-  "pytest>=8.3.3,<9",
+  "pytest>=9.0.3,<10",
   "pytest-mock>=3.14.1",
   "pytest-xdist>=3.6.1,<4",
   "pytest-sugar>1.1,<2",
