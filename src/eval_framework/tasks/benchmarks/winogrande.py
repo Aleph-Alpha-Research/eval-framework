@@ -66,14 +66,14 @@ class WINOGRANDE_OLMES(WINOGRANDE):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = self._extract_question(item)
         choices = self._extract_choices(item)
-        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, choices))
+        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, choices, strict=False))
         return f"{question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         idx = ANSWER_STR_TO_NUM[item["answer"]]
         return f" {self.keys[idx]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]
 
 
@@ -87,7 +87,7 @@ class WINOGRANDE_IDK(WINOGRANDE):
         TernaryScore,
     ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
             "answers receive points. It is acceptable to answer with 'I do not know' if you are unsure, and "

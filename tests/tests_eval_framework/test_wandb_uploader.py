@@ -43,7 +43,7 @@ def sample_config(tmp_path: Path) -> EvalConfig:
 
 @pytest.fixture
 def custom_upload_function() -> Generator[None, None, None]:
-    def custom_artifact_upload_function(artifact_name: str, subpath: str, file_paths: list[Path]) -> str:
+    def custom_artifact_upload_function(artifact_name: str, subpath: str, file_paths: list[Path]) -> str:  # noqa: ARG001
         return subpath
 
     register_artifact_upload_function(custom_artifact_upload_function)
@@ -106,20 +106,20 @@ def test_upload_all_files_gz(
         assert len(list(sample_output_dir.glob("*.gz"))) == 0  # original files are not left in the directory
 
 
-def test_init_missing(mock_wandb: Mock, sample_config: EvalConfig) -> None:
+def test_init_missing(mock_wandb: Mock, sample_config: EvalConfig) -> None:  # noqa: ARG001
     """Test initialization when wandb is not initialized."""
     uploader = WandbUploader(sample_config, include_all=False, compress_non_json=False)
     assert not uploader.upload("test-model", sample_config, Path("/non-existent"))
 
 
-def test_init_disabled(mock_wandb: Mock, sample_config: EvalConfig) -> None:
+def test_init_disabled(mock_wandb: Mock, sample_config: EvalConfig) -> None:  # noqa: ARG001
     """Test initialization when wandb is disabled."""
     with wandb.init(mode="disabled"):
         uploader = WandbUploader(sample_config, include_all=False, compress_non_json=False)
         assert not uploader.upload("test-model", sample_config, Path("/non-existent"))
 
 
-def test_turned_off(mock_wandb: Mock) -> None:
+def test_turned_off(mock_wandb: Mock) -> None:  # noqa: ARG001
     """Test initialization when the upload is disabled in config."""
     sample_config = EvalConfig(
         task_name=ARC.NAME,
@@ -134,7 +134,7 @@ def test_turned_off(mock_wandb: Mock) -> None:
 
 
 def test_custom_upload_function(
-    mock_wandb: Mock, sample_config: EvalConfig, sample_output_dir: Path, custom_upload_function: None
+    mock_wandb: Mock, sample_config: EvalConfig, sample_output_dir: Path, custom_upload_function: None  # noqa: ARG001
 ) -> None:
     """Test that a custom artifact upload function is used."""
     with wandb.init():

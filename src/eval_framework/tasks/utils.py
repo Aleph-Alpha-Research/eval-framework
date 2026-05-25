@@ -351,9 +351,9 @@ class Editor:
     @staticmethod
     def _recombine(words: list[str], spaces: list[str], has_leading_space: bool) -> str:
         if has_leading_space:
-            combined_lists = sum([[w, s] for w, s in zip(words, spaces[1:])], [spaces[0]])
+            combined_lists = sum([[w, s] for w, s in zip(words, spaces[1:], strict=False)], [spaces[0]])
         else:
-            combined_lists = sum([[w, s] for w, s in zip(words, spaces)], [])
+            combined_lists = sum([[w, s] for w, s in zip(words, spaces, strict=False)], [])
         if len(words) > len(spaces) - (1 if has_leading_space else 0):
             combined_lists.append(words[-1])
         return "".join(combined_lists)
@@ -449,7 +449,7 @@ class Editor:
         edits_per_word = self.np_rng.multinomial(num_edits, probs)
         unmodifiable_words_set = set([w.lower() for w in unmodifiable_words or []])
         edited_words = []
-        for edits, word in zip(edits_per_word, words):
+        for edits, word in zip(edits_per_word, words, strict=False):
             if word.lower() not in unmodifiable_words_set:
                 edited_words.append(self._edit_word(word, int(edits)))
             else:

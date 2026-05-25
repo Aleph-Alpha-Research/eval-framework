@@ -49,10 +49,10 @@ class MockWandbRun:
     def log_artifact(
         self,
         artifact_or_path: "MockArtifact" | StrPath,
-        name: str | None = None,
-        type: str | None = None,
+        name: str | None = None,  # noqa: ARG002
+        type: str | None = None,  # noqa: ARG002
         aliases: list[str] | None = None,
-        tags: list[str] | None = None,
+        tags: list[str] | None = None,  # noqa: ARG002
     ) -> "MockArtifact":
         assert isinstance(artifact_or_path, MockArtifact)
         logged_artifact = copy.deepcopy(artifact_or_path)
@@ -86,7 +86,7 @@ class MockWandb:
         if self.run:
             self.run.log(data, step, commit)
 
-    def login(self, key: str | None = None, **kwargs: Any) -> None:
+    def login(self, key: str | None = None, **kwargs: Any) -> None:  # noqa: ARG002
         self._login_called = True
 
     def finish(self, exit_code: int = 0) -> None:
@@ -151,10 +151,10 @@ class MockArtifact:
     def download(
         self,
         root: StrPath | None = None,
-        allow_missing_references: bool = False,
-        skip_cache: bool | None = None,
-        path_prefix: StrPath | None = None,
-        multipart: bool | None = None,
+        allow_missing_references: bool = False,  # noqa: ARG002
+        skip_cache: bool | None = None,  # noqa: ARG002
+        path_prefix: StrPath | None = None,  # noqa: ARG002
+        multipart: bool | None = None,  # noqa: ARG002
     ) -> str:
         if root:
             return str(root)
@@ -162,7 +162,7 @@ class MockArtifact:
         return tempfile.mkdtemp()
 
     def add_reference(
-        self, uri: str, name: StrPath | None = None, checksum: bool = True, max_objects: int | None = None
+        self, uri: str, name: StrPath | None = None, checksum: bool = True, max_objects: int | None = None  # noqa: ARG002
     ) -> Sequence[str]:
         # Mock implementation: just return the URI for testing
         self._files.append(MockArtifactFile(uri))
@@ -172,10 +172,10 @@ class MockArtifact:
         self,
         local_path: str,
         name: str | None = None,
-        is_tmp: bool | None = False,
-        skip_cache: bool | None = False,
-        policy: Literal["mutable", "immutable"] | None = "mutable",
-        overwrite: bool = False,
+        is_tmp: bool | None = False,  # noqa: ARG002
+        skip_cache: bool | None = False,  # noqa: ARG002
+        policy: Literal["mutable", "immutable"] | None = "mutable",  # noqa: ARG002
+        overwrite: bool = False,  # noqa: ARG002
     ) -> None:
         # Mock implementation: just return None instead of `ArtifactManifestEntry`
         self._files.append(MockArtifactFile(Path(local_path).name if name is None else name))

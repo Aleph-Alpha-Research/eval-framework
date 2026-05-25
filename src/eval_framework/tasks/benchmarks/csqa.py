@@ -34,7 +34,7 @@ class CommonsenseQACloze(BaseTask[str]):
         correct_index = self.keys.index(correct_label)
         return f" {self.keys[correct_index]}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
@@ -69,7 +69,7 @@ class CommonsenseQAMC(CommonsenseQACloze):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
         texts = item["choices"]["text"]
-        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, texts))
+        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, texts, strict=False))
         return f"Question: {question}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -93,5 +93,5 @@ class CommonsenseQAMC_OLMES(CommonsenseQAMC):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
         texts = item["choices"]["text"]
-        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, texts))
+        options = "\n".join(f" {key}. {choice}" for key, choice in zip(self.keys, texts, strict=False))
         return f"Question: {question}\n{options}\n"

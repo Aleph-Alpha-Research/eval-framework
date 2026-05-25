@@ -107,7 +107,10 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
             response.ground_truth,
             f"golden_{schema_id}",
         )
-        completion_stripped = response.completion.strip().strip("```sql").strip("```")
+        completion_stripped = response.completion.strip()
+        completion_stripped = completion_stripped.removeprefix("```sql").strip()
+        completion_stripped = completion_stripped.removeprefix("```").strip()
+        completion_stripped = completion_stripped.removesuffix("```").strip()
         completion_query = extract_query_from_completions(completion_stripped)
         if completion_query:
             result = self.validate_query(
@@ -260,7 +263,7 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
             case _:
                 raise NotImplementedError(f"Query validation not implemented for {dialect.value}.")
 
-    def validate_query_sqlite(self, create_db_statements: str, sql_query: str, db_schema: str) -> SqlValidationResult:
+    def validate_query_sqlite(self, create_db_statements: str, sql_query: str, db_schema: str) -> SqlValidationResult:  # noqa: ARG002
         con = sqlite3.connect(":memory:")
         cur = con.cursor()
         try:

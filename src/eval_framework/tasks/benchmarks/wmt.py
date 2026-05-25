@@ -30,7 +30,10 @@ class WMT(BaseTask[str], ABC):
         src_file, ref_file, _, _, _ = sacrebleu.download_test_set(test_set=self.DATASET_PATH, langpair=subject)
         src_data, ref_data = [[line.rstrip() for line in sacrebleu.smart_open(file)] for file in (src_file, ref_file)]
 
-        data_list = [{"source": src, "target": ref, "subject": subject} for src, ref in zip(src_data, ref_data)]
+        data_list = [
+            {"source": src, "target": ref, "subject": subject}
+            for src, ref in zip(src_data, ref_data, strict=False)
+        ]
         self.rnd = random.Random(RANDOM_SEED)
         self.rnd.shuffle(data_list)
         self.dataset = {"test": data_list}
@@ -60,7 +63,7 @@ class WMT(BaseTask[str], ABC):
         assert isinstance(target, str)
         return f" {target}"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -111,7 +114,7 @@ class WMT_INSTRUCT(WMT):
         src_lang, tar_lang = map(self._code_to_language, item["subject"].split("-"))
         return f"Please translate from {src_lang} to {tar_lang}: {item['source']}"
 
-    def _get_cue(self, item: dict[str, Any]) -> str:
+    def _get_cue(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return self.COMPLETION_PREFIX
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
@@ -119,7 +122,7 @@ class WMT_INSTRUCT(WMT):
         assert target is not None
         return f" {target}"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         completion_text = completion_text.removeprefix(self.COMPLETION_PREFIX)
         completion_text = completion_text.strip()
         for stop_sequence in self.stop_sequences:

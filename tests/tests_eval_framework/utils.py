@@ -60,7 +60,7 @@ def assert_hash_string(task_name: str, suffix_key: str, tested_string: str) -> s
             print("\nNote: Expected output is not stored (only hash).")
             print("=" * 80 + "\n")
 
-            assert False, (
+            raise AssertionError(
                 f"Hash mismatch for key: {key}\n"
                 f"Expected: {expected_hash}\n"
                 f"Actual:   {tested_string_hash}\n"
@@ -81,7 +81,7 @@ def assert_hash_string(task_name: str, suffix_key: str, tested_string: str) -> s
         with HASHES_FILE.open("w", encoding="utf-8") as f:
             json.dump(dict(sorted(all_hashes.items())), f, indent=4, ensure_ascii=False)
 
-        assert False, f"Hash for key '{key}' not found in {HASHES_FILE}. It was added for future runs."
+        raise AssertionError(f"Hash for key '{key}' not found in {HASHES_FILE}. It was added for future runs.")
 
     return tested_string_hash
 
@@ -89,9 +89,9 @@ def assert_hash_string(task_name: str, suffix_key: str, tested_string: str) -> s
 def create_mock_load_hf_dataset(
     subjects: list[SubjectType], captured_kwargs_list: list[dict[str, Any]]
 ) -> Callable[[Any], DatasetDict]:
-    def mock_load_hf_dataset(self: BaseTask, **kwargs: Any) -> DatasetDict:
+    def mock_load_hf_dataset(self: BaseTask, **kwargs: Any) -> DatasetDict:  # noqa: ARG001
         # Find which subject this call corresponds to by matching kwargs
-        for subject, captured_kwargs in zip(subjects, captured_kwargs_list):
+        for subject, captured_kwargs in zip(subjects, captured_kwargs_list, strict=False):
             if kwargs == captured_kwargs:
                 # return load_dataset('json', data_files=f'{subject}_data.json')
 
@@ -145,7 +145,7 @@ class DatasetPatcher[T: BaseTask]:
         # Next, we use the captured (kw)args to load the dataset and turn them into streaming datasets
         # This will allow us to get data without having to download the entire dataset
         # (even though we pass cache_dir)
-        for subject, kwargs in zip(task.SUBJECTS, captured_kwargs):
+        for subject, kwargs in zip(task.SUBJECTS, captured_kwargs, strict=False):
             json_path = self.cache_dir / f"{kwargs['path'].replace('/', '_')}_{subject}_{self.num_samples}.json"
             if json_path.exists():
                 continue

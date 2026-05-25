@@ -72,7 +72,7 @@ log_likelihood_params = [
 
 @pytest.mark.parametrize("response,expected_sp,expected_bytes", log_likelihood_params)
 def test_sequence_positions_loglikelihood(
-    response: Loglikelihood, expected_sp: float | None, expected_bytes: float | None
+    response: Loglikelihood, expected_sp: float | None, expected_bytes: float | None  # noqa: ARG001
 ) -> None:
     metric = SequencePositionsLoglikelihood()
     results = metric.calculate(response)
@@ -81,7 +81,7 @@ def test_sequence_positions_loglikelihood(
 
 
 @pytest.mark.parametrize("response,expected_sp,expected_bytes", log_likelihood_params)
-def test_bytes_loglikelihood(response: Loglikelihood, expected_sp: float | None, expected_bytes: float | None) -> None:
+def test_bytes_loglikelihood(response: Loglikelihood, expected_sp: float | None, expected_bytes: float | None) -> None:  # noqa: ARG001
     metric = BytesLoglikelihood()
     results = metric.calculate(response)
     assert len(results) == 1
@@ -160,7 +160,7 @@ completion_params = [
 
 @pytest.mark.parametrize("response,expected_sp,expected_bytes", completion_params)
 def test_sequence_positions_completion(
-    response: Completion, expected_sp: float | None, expected_bytes: float | None
+    response: Completion, expected_sp: float | None, expected_bytes: float | None  # noqa: ARG001
 ) -> None:
     metric = SequencePositionsCompletion()
     results = metric.calculate(response)
@@ -169,7 +169,7 @@ def test_sequence_positions_completion(
 
 
 @pytest.mark.parametrize("response,expected_sp,expected_bytes", completion_params)
-def test_bytes_completion(response: Completion, expected_sp: float | None, expected_bytes: float | None) -> None:
+def test_bytes_completion(response: Completion, expected_sp: float | None, expected_bytes: float | None) -> None:  # noqa: ARG001
     metric = BytesCompletion()
     results = metric.calculate(response)
     assert len(results) == 1

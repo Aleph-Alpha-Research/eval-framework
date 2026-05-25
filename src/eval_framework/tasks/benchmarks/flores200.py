@@ -118,5 +118,5 @@ class Flores200(BaseTask[str]):
         assert isinstance(target, str)
         return target
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         return completion_text.strip()

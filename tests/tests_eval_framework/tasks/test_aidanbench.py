@@ -116,7 +116,7 @@ def test_generate_completions_returns_proper_format():
     task = AidanBench(num_fewshot=0)
 
     # Mock the generation loop to return simple message history
-    def mock_generation_loop(llm, stop_sequences, max_tokens, initial_samples, fail_on_error=False):
+    def mock_generation_loop(llm, stop_sequences, max_tokens, initial_samples, fail_on_error=False):  # noqa: ARG001
         message_histories = []
         errors = []
 
@@ -364,7 +364,7 @@ def test_generation_loop_continues_with_high_coherence_and_novelty(mock_cosine_s
     # Create a counter to control when to stop (avoid infinite loop)
     call_count = 0
 
-    def mock_coherence_grade(*args, **kwargs):
+    def mock_coherence_grade(*args, **kwargs):  # noqa: ARG001
         nonlocal call_count
         call_count += 1
         result = Mock()

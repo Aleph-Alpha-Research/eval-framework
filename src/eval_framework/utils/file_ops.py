@@ -85,7 +85,7 @@ class WandbFs:
         else:
             atexit.unregister(self._cleanup_temp_dir)
 
-    def _clean_on_signal(self, signum: int, frame: FrameType | None) -> None:
+    def _clean_on_signal(self, signum: int, frame: FrameType | None) -> None:  # noqa: ARG002
         # we need to re-raise the signal to terminate gracefully with __exit__
         # if we call cleanup directly, then the first time we try to rmtree
         # we get an OSError

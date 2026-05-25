@@ -171,7 +171,7 @@ class TestNIAHAccuracy:
         result: MetricResult = metric.calculate(completion)[0]
         assert result.value == 0.0
 
-    def test_niah_none_other_language(self, metric: NIAHAccuracy, default_messages: list[Message]) -> None:
+    def test_niah_none_other_language(self, metric: NIAHAccuracy, default_messages: list[Message]) -> None:  # noqa: ARG002
         # Test a correct "none" answer in another language
         completion = Completion(
             id=10,

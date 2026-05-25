@@ -61,14 +61,14 @@ class COPA_OLMES(COPAEvalHarness):
         premise = item["premise"].strip()[:-1] + f" {connector}"
         choices = [self.convert_choice(item["choice1"]), self.convert_choice(item["choice2"])]
         labels = get_n_letters(len(choices))
-        options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices))
+        options = "\n".join(f" {label}. {choice}" for label, choice in zip(labels, choices, strict=False))
         return f"{premise}\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         labels = get_n_letters(2)
         return f" {labels[item['label']]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {label}" for label in get_n_letters(2)]
 
 
@@ -94,7 +94,7 @@ class COPA_IDKEvalHarness(COPAEvalHarness):
         TernaryScore,
     ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
             "answers receive points. It is acceptable to answer with 'I do not know' if you are unsure, and "

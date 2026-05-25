@@ -43,10 +43,10 @@ class MockLLM(BaseLLM):
     def generate_from_messages(
         self,
         messages: list[Sequence[Message]],
-        stop_sequences: list[str] | None = None,
-        max_tokens: int | None = None,
-        temperature: float | None = None,
-        top_p: float | None = None,
+        stop_sequences: list[str] | None = None,  # noqa: ARG002
+        max_tokens: int | None = None,  # noqa: ARG002
+        temperature: float | None = None,  # noqa: ARG002
+        top_p: float | None = None,  # noqa: ARG002
     ) -> list[RawCompletion]:
         self.generate_counter += 1
         return [
@@ -105,6 +105,6 @@ def mock_wandb(monkeypatch: pytest.MonkeyPatch) -> MockWandb:
 
 
 @pytest.fixture
-def wandb_run(mock_wandb: Mock) -> Generator[wandb.Run, None, None]:
+def wandb_run(mock_wandb: Mock) -> Generator[wandb.Run, None, None]:  # noqa: ARG001
     with wandb.init(project="test-project") as run:
         yield run

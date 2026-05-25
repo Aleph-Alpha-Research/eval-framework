@@ -93,7 +93,7 @@ class MMLU_DE(BaseTask[str]):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question_de"].strip()
-        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices_de"])])
+        choices = "".join([f"{key}. {choice}\n" for key, choice in zip(self.keys, item["choices_de"], strict=False)])
         return f"Frage: {question}\n{choices}"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
@@ -101,11 +101,11 @@ class MMLU_DE(BaseTask[str]):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Antwort:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return f" {self.keys[item['answer']]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]

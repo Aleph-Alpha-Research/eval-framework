@@ -32,7 +32,9 @@ class OPENBOOKQA(BaseTask[str]):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question_stem"].strip()
         fact = item["fact1"].strip()
-        choices = "".join([f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"])])
+        choices = "".join(
+            f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"], strict=False)
+        )
         return f"Fact: {fact}\nComplete: {question}:\n{choices}\nAnswer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -53,7 +55,7 @@ class OPENBOOKQA_IDK(OPENBOOKQA):
         TernaryScore,
     ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return (
             "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
             "completions receive points. It is acceptable to answer with 'I do not know' if you are unsure, "
@@ -70,7 +72,7 @@ class OPENBOOKQA_IDK(OPENBOOKQA):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
         return "Answer:"
 
 
@@ -85,7 +87,7 @@ class OPENBOOKQA_OLMES(OPENBOOKQA):
         question = item["question_stem"].strip()
         fact = item["fact1"].strip()
         choices = item["choices"]["text"]
-        options = "\n".join(f" {key}. {choice.strip()}" for key, choice in zip(self.keys, choices))
+        options = "\n".join(f" {key}. {choice.strip()}" for key, choice in zip(self.keys, choices, strict=False))
         return f"Fact: {fact}\nComplete: {question}:\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -93,7 +95,7 @@ class OPENBOOKQA_OLMES(OPENBOOKQA):
         idx = self.keys.index(answer_key) if answer_key in self.keys else 0
         return f" {self.keys[idx]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]
 
 
@@ -104,7 +106,9 @@ class OPENBOOKQA_EVAL_HARNESS(OPENBOOKQA):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question_stem"].strip()
-        choices = "".join([f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"])])
+        choices = "".join(
+            f"{choice.strip()}\n" for key, choice in zip(self.keys, item["choices"]["text"], strict=False)
+        )
         return f"Complete: {question}:\n{choices}\nAnswer:"
 
 
@@ -118,7 +122,7 @@ class OPENBOOKQA_EVAL_HARNESS_OLMES(OPENBOOKQA_EVAL_HARNESS):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question_stem"].strip()
         choices = item["choices"]["text"]
-        options = "\n".join(f" {key}. {choice.strip()}" for key, choice in zip(self.keys, choices))
+        options = "\n".join(f" {key}. {choice.strip()}" for key, choice in zip(self.keys, choices, strict=False))
         return f"Complete: {question}:\n{options}\n"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -126,5 +130,5 @@ class OPENBOOKQA_EVAL_HARNESS_OLMES(OPENBOOKQA_EVAL_HARNESS):
         idx = self.keys.index(answer_key) if answer_key in self.keys else 0
         return f" {self.keys[idx]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:  # noqa: ARG002
         return [f" {key}" for key in self.keys]

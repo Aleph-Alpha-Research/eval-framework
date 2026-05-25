@@ -60,10 +60,10 @@ def test_task_custom_subjects(
         SUBJECTS = subjects
         NAME = "MyTask"
 
-        def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        def _get_instruction_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
             return ""
 
-        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:  # noqa: ARG002
             return []
 
     register_task(MyTask)  # type: ignore[type-abstract]
@@ -81,19 +81,19 @@ def test_base_task() -> None:
     class MyTask1(BaseTask):
         NAME = "MyTask1"
 
-        def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        def _get_instruction_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
             return ""
 
-        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:  # noqa: ARG002
             return []
 
     class MyTask2(BaseTask):
         NAME = "MyTask2"
 
-        def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        def _get_instruction_text(self, item: dict[str, Any]) -> str:  # noqa: ARG002
             return ""
 
-        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:  # noqa: ARG002
             return []
 
     register_task(MyTask1)  # type: ignore[type-abstract]

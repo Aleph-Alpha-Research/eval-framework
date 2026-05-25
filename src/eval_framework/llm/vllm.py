@@ -273,7 +273,9 @@ class BaseVLLMModel(BaseLLM):
         if prompt_objs:
             model_outputs = self._model_generate(prompt_objs=prompt_objs, sampling_params=sampling_params)
 
-            for (original_index, single_messages), prompt_obj, output in zip(prompt_info, prompt_objs, model_outputs):
+            for (original_index, single_messages), prompt_obj, output in zip(
+                prompt_info, prompt_objs, model_outputs, strict=False
+            ):
                 raw_completions[original_index] = RawCompletion(
                     prompt=prompt_obj.text,
                     prompt_sequence_positions=len(output.prompt_token_ids) if output.prompt_token_ids else 0,
@@ -422,7 +424,7 @@ class BaseVLLMModel(BaseLLM):
             raise e
 
         results = []
-        for i, (prompt_obj, choice_obj) in enumerate(batch_data):
+        for i, (_prompt_obj, choice_obj) in enumerate(batch_data):
             output = outputs[i]
             assert output.prompt_logprobs is not None
 
@@ -433,7 +435,7 @@ class BaseVLLMModel(BaseLLM):
             for j, token_id in enumerate(choice_obj.tokens):
                 logprob_obj = choice_logprobs[j]
                 assert logprob_obj is not None, f"logprob_obj is None: {logprob_obj}"
-                logprob_value = getattr(logprob_obj[token_id], "logprob")
+                logprob_value = logprob_obj[token_id].logprob
                 assert logprob_value is not None, f"logprob_value is None: {logprob_value}"
                 total_logprob += logprob_value
 
@@ -540,7 +542,7 @@ class VLLMRegistryModel(VLLMModel):  # deprecated
             **kwargs: Additional arguments passed to VLLMModel
         """
 
-        warnings.warn("`VLLMRegistryModel` is deprecated, please use `VLLMModel`.", DeprecationWarning)
+        warnings.warn("`VLLMRegistryModel` is deprecated, please use `VLLMModel`.", DeprecationWarning, stacklevel=2)
 
         download_path = kwargs.pop("download_path", None)
         if download_path is not None and os.getenv("WANDB_ARTIFACT_DIR") is None:

@@ -205,7 +205,7 @@ class MCStyle(TaskStyler):
         labels = get_n_letters(len(choices))
         return f" {labels[correct_index]}"
 
-    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:  # noqa: ARG002
         """Note: `correct_index` is ignored for `MCStyle` and only used for `BPBStyle`."""
         return [f" {label}" for label in get_n_letters(len(choices))]
 
@@ -261,14 +261,14 @@ class ClozeStyle(TaskStyler):
     def get_cue_text(self) -> str:
         return self._cue_text
 
-    def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
+    def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:  # noqa: ARG002
         text = self.get_question_text(raw_question)
         return f"{text}\n" if self.trailing_newline else text
 
     def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
         return f" {choices[correct_index]}" if self.leading_space_continuations else choices[correct_index]
 
-    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:  # noqa: ARG002
         return [f" {c}" for c in choices] if self.leading_space_continuations else [f"{c}" for c in choices]
 
 
@@ -383,5 +383,5 @@ def format_mc_prompt(
     """
     labels = get_n_letters(len(choices))
     pfx = " " if space_prefixed_labels else ""
-    options = "\n".join(f"{pfx}{label}. {choice}" for label, choice in zip(labels, choices))
+    options = "\n".join(f"{pfx}{label}. {choice}" for label, choice in zip(labels, choices, strict=False))
     return f"{question_text}\n{options}\n"

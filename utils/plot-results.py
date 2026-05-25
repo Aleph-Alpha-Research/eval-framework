@@ -51,8 +51,14 @@ PREFERED_METRICS: list[str] = [
 
 
 def filter_results(
-    results: list, exclude_models: list[str] = [], exclude_tasks: list[str] = [], only_tasks: list[str] = []
+    results: list, exclude_models: list[str] = None, exclude_tasks: list[str] = None, only_tasks: list[str] = None
 ) -> list:
+    if only_tasks is None:
+        only_tasks = []
+    if exclude_tasks is None:
+        exclude_tasks = []
+    if exclude_models is None:
+        exclude_models = []
     filtered_results = []
     for res in results:
         if res["checkpoint"] in exclude_models or res["checkpoint"] in EXCLUDE_MODELS:
@@ -196,7 +202,8 @@ def make_barplot(results: list, outfile: str, add_stderr: bool) -> None:
         values = [r["value"] for r in reslist]
         stderrs = [r["stderr"] if r["stderr"] is not None else 0 for r in reslist]
         # Sort alphabetically by checkpoint name
-        sorted_chks, sorted_vals, sorted_stds = zip(*sorted(zip(checkpoints, values, stderrs), reverse=True))
+        sorted_triples = sorted(zip(checkpoints, values, stderrs, strict=False), reverse=True)
+        sorted_chks, sorted_vals, sorted_stds = zip(*sorted_triples, strict=False)
         palette = sns.color_palette("tab10", n_colors=len(sorted_chks))
         # Plot with error bars if needed
         axes[idx].bar(

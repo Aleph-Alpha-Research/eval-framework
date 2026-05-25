@@ -95,7 +95,7 @@ class AlephAlphaAPIModel(BaseLLM):
             client.complete(request, model=self._llm_name)
             logger.info(f"Model '{self._llm_name}' available and loaded.")
         except Exception as e:
-            raise RuntimeError(f"Model '{self._llm_name}' is not available: {e}")
+            raise RuntimeError(f"Model '{self._llm_name}' is not available: {e}") from e
 
     def _error_from_exception(self, e: Exception) -> Error:
         """Convert an exception to an Error object."""
