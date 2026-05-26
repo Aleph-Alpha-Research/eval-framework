@@ -1,10 +1,13 @@
 from unittest.mock import Mock, patch
 
+import pytest
+
 from eval_framework.metrics.completion.aidanbench import AidanBenchMetric
 from eval_framework.shared.types import Completion
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.benchmarks.aidanbench import COHERENCE_THRESHOLD, AidanBench
-from template_formatting.formatter import Message, Role
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
+from tests.tests_eval_framework.tasks.utils import get_task_names_for_module, run_formatter_hash_test
 
 
 def test_get_instruction_text():
@@ -430,3 +433,10 @@ def test_task_constants_and_metadata():
     assert AidanBenchMetric in task.METRICS
     assert len(task.SUBJECTS) == 1
     assert task.SUBJECTS[0] == "no_subject"
+
+
+@pytest.mark.formatter_hash
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
+@pytest.mark.parametrize("task_name", get_task_names_for_module("aidanbench"))
+def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
+    run_formatter_hash_test(task_name, formatter_cls)

@@ -3,7 +3,12 @@ import re
 import pytest
 
 from eval_framework.tasks.benchmarks.gpqa import GPQA, GPQA_COT
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
+from tests.tests_eval_framework.tasks.utils import get_task_names_for_module, run_formatter_hash_test
 from tests.tests_eval_framework.utils import DatasetPatcher
+
+# GPQA_OLMES uses a gated HuggingFace dataset (Idavidrein/gpqa); hashes cannot be computed without auth.
+_SKIPPED_TASKS = ["GPQA_OLMES"]
 
 
 class TestGPQA:
@@ -84,3 +89,10 @@ class TestGPQA_COT:
                 possible_completions = [f"({choice[1]})" for choice in choices]
                 assert f"({ground_truth})" in possible_completions
             assert len(ground_truths) == 1
+
+
+@pytest.mark.formatter_hash
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
+@pytest.mark.parametrize("task_name", get_task_names_for_module("gpqa", skip_tasks=_SKIPPED_TASKS))
+def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
+    run_formatter_hash_test(task_name, formatter_cls)

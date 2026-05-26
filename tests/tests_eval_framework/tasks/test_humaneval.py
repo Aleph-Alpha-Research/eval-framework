@@ -2,7 +2,11 @@ import pytest
 
 from eval_framework.tasks.benchmarks.humaneval import HumanEval, HumanEval_OLMES, HumanEvalInstruct
 from eval_framework.tasks.utils import run_python_code
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
+from tests.tests_eval_framework.tasks.utils import get_task_names_for_module, run_formatter_hash_test
 from tests.tests_eval_framework.utils import DatasetPatcher
+
+_NUM_FEWSHOT = {"HumanEval_OLMES": 3}
 
 
 class TestHumanEvalCode:
@@ -83,3 +87,10 @@ class TestHumanEvalInstructCode:
             formatted_code = human_eval_task_inst.post_process_generated_completion(completion, sample)
             assert run_python_code(formatted_code).endswith("True")
         assert i == 9
+
+
+@pytest.mark.formatter_hash
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
+@pytest.mark.parametrize("task_name", get_task_names_for_module("humaneval"))
+def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
+    run_formatter_hash_test(task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1))

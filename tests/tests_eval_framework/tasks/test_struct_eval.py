@@ -2,6 +2,8 @@ import pytest
 
 from eval_framework.metrics.completion.struct_eval_metrics import StructMetricContext
 from eval_framework.tasks.benchmarks.struct_eval import StructEval
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
+from tests.tests_eval_framework.tasks.utils import get_task_names_for_module, run_formatter_hash_test
 
 
 class TestStructEval:
@@ -45,3 +47,10 @@ class TestStructEval:
     def test_post_processing_removes_fences(self, struct_eval_task: StructEval, sample_text: str) -> None:
         cleaned_sample = struct_eval_task.post_process_generated_completion(sample_text)
         assert cleaned_sample == "sample\ncode", "Post-processing did not remove code fences correctly."
+
+
+@pytest.mark.formatter_hash
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
+@pytest.mark.parametrize("task_name", get_task_names_for_module("struct_eval"))
+def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
+    run_formatter_hash_test(task_name, formatter_cls, num_fewshot=0)
