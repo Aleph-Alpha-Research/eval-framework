@@ -17,7 +17,6 @@ concurrency:
 env:
   UV_LINK_MODE: symlink
   UV_LOCKED: 1
-  REVISIONS_FILE: src/eval_framework/tasks/benchmarks/task-dataset-revisions.json
 
 jobs:
   pin-dataset-revisions:
@@ -31,9 +30,6 @@ jobs:
         with:
           version: "~=0.8.16"
 
-      - name: Backup revisions file
-        run: cp "${{ env.REVISIONS_FILE }}" /tmp/task-dataset-revisions.json.bak
-
       - name: Update pinned dataset revisions
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
@@ -44,19 +40,7 @@ jobs:
           main()
           "
 
-      - name: Check for revisions changes
-        id: changes
-        run: |
-          if cmp -s "${{ env.REVISIONS_FILE }}" /tmp/task-dataset-revisions.json.bak; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No dataset revision changes; skipping PR."
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Dataset revisions changed."
-          fi
-
       - name: Create pull request
-        if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           commit-message: chore: pin dataset revisions
