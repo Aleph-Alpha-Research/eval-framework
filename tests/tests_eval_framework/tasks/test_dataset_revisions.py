@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from eval_framework.tasks.benchmarks import dataset_revisions as dr
-from tests.tests_eval_framework.tasks.conftest import FIXTURE_COPA_SHA, FIXTURE_REVISIONS_FILE
+from tests.tests_eval_framework.tasks.conftest import FIXTURE_REVISIONS
 
 
 def test_revisions_file_lives_next_to_module() -> None:
@@ -75,12 +75,12 @@ def test_collect_dataset_revisions_skips_failed_dataset_lookup() -> None:
     assert revisions == {}
 
 
-def test_get_pinned_dataset_revision_returns_sha_for_known_task() -> None:
-    assert dr.get_pinned_dataset_revision("COPA", revisions_file=FIXTURE_REVISIONS_FILE) == FIXTURE_COPA_SHA
+def test_get_pinned_dataset_revision_returns_sha_for_known_task(fixture_revisions_file: Path) -> None:
+    assert dr.get_pinned_dataset_revision("COPA", revisions_file=fixture_revisions_file) == FIXTURE_REVISIONS["COPA"]
 
 
-def test_get_pinned_dataset_revision_returns_none_for_unknown_task() -> None:
-    assert dr.get_pinned_dataset_revision("NotARegisteredTask", revisions_file=FIXTURE_REVISIONS_FILE) is None
+def test_get_pinned_dataset_revision_returns_none_for_unknown_task(fixture_revisions_file: Path) -> None:
+    assert dr.get_pinned_dataset_revision("NotARegisteredTask", revisions_file=fixture_revisions_file) is None
 
 
 def test_collect_dataset_revisions_reuses_sha_for_shared_dataset() -> None:

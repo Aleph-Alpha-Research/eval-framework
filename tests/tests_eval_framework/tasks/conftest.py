@@ -1,4 +1,19 @@
+import json
 from pathlib import Path
 
-FIXTURE_REVISIONS_FILE = Path(__file__).resolve().parent / "fixtures" / "pinned-dataset-revisions.json"
-FIXTURE_COPA_SHA = "abcdef0123456789abcdef0123456789abcdef01"
+import pytest
+
+FIXTURE_REVISIONS: dict[str, str] = {
+    "COPA": "abcdef0123456789abcdef0123456789abcdef01",
+}
+
+
+def write_fixture_revisions_file(directory: Path) -> Path:
+    path = directory / "task-dataset-revisions.json"
+    path.write_text(json.dumps(FIXTURE_REVISIONS, indent=4) + "\n", encoding="utf-8")
+    return path
+
+
+@pytest.fixture
+def fixture_revisions_file(tmp_path: Path) -> Path:
+    return write_fixture_revisions_file(tmp_path)
