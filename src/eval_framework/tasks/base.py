@@ -114,6 +114,8 @@ class BaseTask[SubjectType](ABC):
         self._apply_hf_revision()
 
     def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> None:
+        # Precedence: CLI/config override > class HF_REVISION > task-dataset-revisions.json pin.
+        # Applied once at instance creation; not refreshed if the pin file changes mid-run.
         if custom_hf_revision:
             self.HF_REVISION = custom_hf_revision
         elif self.HF_REVISION is None and (pinned := get_pinned_dataset_revision(self.__class__.__name__)):
