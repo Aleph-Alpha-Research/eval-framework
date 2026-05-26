@@ -1,7 +1,17 @@
 import pytest
 
 from eval_framework.tasks.benchmarks.math_reasoning import MATH
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
+from tests.tests_eval_framework.tasks.utils import get_task_names_for_module, run_formatter_hash_test
 from tests.tests_eval_framework.utils import DatasetPatcher
+
+_NUM_FEWSHOT = {
+    "GSM8KReasoning": 0,
+    "MATHMinervaBPB": 0,
+    "MATHMinervaEvalHarness": 0,
+    "MATH500Minerva": 0,
+    "MATHMinerva_OLMES": 4,
+}
 
 
 @pytest.fixture()
@@ -90,3 +100,10 @@ def test_split_text_command_with_search(
     math_reasoning: MATH, string: str, search: str, expected: tuple[str, str, str]
 ) -> None:
     assert math_reasoning._split_text_command(string, search) == expected
+
+
+@pytest.mark.formatter_hash
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
+@pytest.mark.parametrize("task_name", get_task_names_for_module("math_reasoning"))
+def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
+    run_formatter_hash_test(task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1))

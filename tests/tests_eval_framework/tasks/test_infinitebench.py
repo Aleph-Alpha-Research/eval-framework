@@ -9,6 +9,8 @@ from eval_framework.tasks.benchmarks.infinitebench import (
     InfiniteBench_RetrieveNumber,
     InfiniteBench_RetrievePassKey1,
 )
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
+from tests.tests_eval_framework.tasks.utils import get_task_names_for_module, run_formatter_hash_test
 from tests.tests_eval_framework.utils import DatasetPatcher
 
 
@@ -96,3 +98,10 @@ class Test_InfiniteBench_RetrievePassKey1:
     def test_InfiniteBench_RetrievePassKey1_postprocessing(self, task: InfiniteBench_RetrievePassKey1) -> None:
         assert task.post_process_generated_completion(completion_text="03182", sample=None) == "03182"
         assert task.post_process_generated_completion(completion_text="no key provided", sample=None) == "[invalid]"
+
+
+@pytest.mark.formatter_hash
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
+@pytest.mark.parametrize("task_name", get_task_names_for_module("infinitebench"))
+def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
+    run_formatter_hash_test(task_name, formatter_cls, num_fewshot=0)

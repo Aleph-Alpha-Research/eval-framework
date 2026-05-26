@@ -1,6 +1,8 @@
 import pytest
 
 from eval_framework.tasks.benchmarks.arc_fi import ARC_FI
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
+from tests.tests_eval_framework.tasks.utils import get_task_names_for_module, run_formatter_hash_test
 from tests.tests_eval_framework.utils import DatasetPatcher
 
 
@@ -27,3 +29,10 @@ class TestARC_FI:
         gt = arc_fi_task._get_ground_truth(item)
         assert gt is not None
         assert gt in result
+
+
+@pytest.mark.formatter_hash
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
+@pytest.mark.parametrize("task_name", get_task_names_for_module("arc_fi"))
+def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
+    run_formatter_hash_test(task_name, formatter_cls)
