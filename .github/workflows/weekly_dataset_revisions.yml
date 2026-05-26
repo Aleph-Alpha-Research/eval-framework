@@ -1,0 +1,61 @@
+name: Weekly dataset revision pin
+
+on:
+  schedule:
+    # Monday 04:00 UTC
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: weekly-dataset-revisions
+  cancel-in-progress: false
+
+env:
+  UV_LINK_MODE: symlink
+  UV_LOCKED: 1
+
+jobs:
+  pin-dataset-revisions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+
+      - name: Update pinned dataset revisions
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: |
+          uv run python -c "
+          import eval_framework.tasks  # registers all benchmark tasks
+          from eval_framework.tasks.benchmarks.dataset_revisions import main
+          main()
+          "
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: chore: pin dataset revisions
+          branch: automated/dataset-revisions-${{ github.run_id }}
+          delete-branch: true
+          title: chore: pin dataset revisions
+          body: |
+            ## Summary
+
+            Automated weekly update of pinned Hugging Face dataset commit SHAs in
+            `task-dataset-revisions.json`.
+
+            ## Review
+
+            Please review the dataset SHA diffs before merging. This PR is **not** auto-merged.
+
+            Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          labels: automated

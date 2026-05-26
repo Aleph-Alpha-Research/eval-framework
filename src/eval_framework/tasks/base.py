@@ -15,6 +15,7 @@ from huggingface_hub.errors import RevisionNotFoundError
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
+from eval_framework.tasks.benchmarks.dataset_revisions import get_pinned_dataset_revision
 from eval_framework.tasks.utils import classproperty, raise_errors
 from template_formatting.formatter import Message, Role
 
@@ -110,6 +111,15 @@ class BaseTask[SubjectType](ABC):
         self.num_fewshot = num_fewshot
         self.stop_sequences: list[str] | None = None
         self.max_tokens: int | None = None
+        self._apply_hf_revision()
+
+    def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> None:
+        # Precedence: CLI/config override > class HF_REVISION > task-dataset-revisions.json pin.
+        # Applied once at instance creation; not refreshed if the pin file changes mid-run.
+        if custom_hf_revision:
+            self.HF_REVISION = custom_hf_revision
+        elif self.HF_REVISION is None and (pinned := get_pinned_dataset_revision(self.__class__.__name__)):
+            self.HF_REVISION = pinned
 
     @classmethod
     def with_overwrite(
@@ -123,10 +133,7 @@ class BaseTask[SubjectType](ABC):
             logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {instance.__class__.__name__}")
             instance.SUBJECTS = filtered_subjects  # type: ignore[assignment]
 
-        # If a custom revision was provided during initialization, it takes precedence over the class-level HF_REVISION.
-        if custom_hf_revision:
-            logger.info(f"Setting HF revision to `{custom_hf_revision}` for the task {instance.__class__.__name__}")
-            instance.HF_REVISION = custom_hf_revision
+        instance._apply_hf_revision(custom_hf_revision)
 
         return instance
 
