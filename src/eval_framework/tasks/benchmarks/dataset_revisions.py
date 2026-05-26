@@ -9,10 +9,8 @@ Usage::
 
 import json
 import logging
-from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
 
 from huggingface_hub import HfApi
 
@@ -50,19 +48,15 @@ def _repo_sha(api: HfApi, repo_id: str, cache: dict[str, str | None]) -> str | N
 def collect_dataset_revisions(
     task_names: list[str],
     api: HfApi,
-    *,
-    get_task_fn: Callable[[str], Any] | None = None,
 ) -> dict[str, str]:
     """Return task class name → latest dataset commit SHA for tasks with a Hugging Face path."""
-    if get_task_fn is None:
-        from eval_framework.tasks.registry import get_task
+    from eval_framework.tasks.registry import get_task
 
-        get_task_fn = get_task
     cache: dict[str, str | None] = {}
     revisions: dict[str, str] = {}
     for name in task_names:
         try:
-            cls = get_task_fn(name)
+            cls = get_task(name)
         except Exception as exc:
             logger.warning("Skipping task %s: %s", name, exc)
             continue

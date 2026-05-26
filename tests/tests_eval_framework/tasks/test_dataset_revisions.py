@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from eval_framework.tasks.benchmarks import dataset_revisions as dr
 from tests.tests_eval_framework.tasks.conftest import FIXTURE_COPA_SHA, FIXTURE_REVISIONS_FILE
@@ -25,7 +25,8 @@ def test_collect_dataset_revisions_fetches_sha_for_hf_task() -> None:
     api = MagicMock()
     api.dataset_info.return_value = SimpleNamespace(sha="abc123")
 
-    revisions = dr.collect_dataset_revisions(["CoQA"], api, get_task_fn=lambda _: CoQA)
+    with patch("eval_framework.tasks.registry.get_task", return_value=CoQA):
+        revisions = dr.collect_dataset_revisions(["CoQA"], api)
 
     assert revisions == {"CoQA": "abc123"}
     api.dataset_info.assert_called_once_with("EleutherAI/coqa", timeout=100.0)
@@ -40,7 +41,8 @@ def test_collect_dataset_revisions_skips_task_without_dataset_path() -> None:
 
     api = MagicMock()
 
-    revisions = dr.collect_dataset_revisions(["NoDataset"], api, get_task_fn=lambda _: NoDataset)
+    with patch("eval_framework.tasks.registry.get_task", return_value=NoDataset):
+        revisions = dr.collect_dataset_revisions(["NoDataset"], api)
 
     assert revisions == {}
     api.dataset_info.assert_not_called()
@@ -50,10 +52,8 @@ def test_collect_dataset_revisions_skips_failed_task_load() -> None:
     """If loading a task class fails, the script continues without that task."""
     api = MagicMock()
 
-    def failing_get_task(_: str) -> type:
-        raise ImportError("broken import")
-
-    revisions = dr.collect_dataset_revisions(["BrokenTask"], api, get_task_fn=failing_get_task)
+    with patch("eval_framework.tasks.registry.get_task", side_effect=ImportError("broken import")):
+        revisions = dr.collect_dataset_revisions(["BrokenTask"], api)
 
     assert revisions == {}
     api.dataset_info.assert_not_called()
@@ -69,7 +69,8 @@ def test_collect_dataset_revisions_skips_failed_dataset_lookup() -> None:
     api = MagicMock()
     api.dataset_info.side_effect = RuntimeError("not found")
 
-    revisions = dr.collect_dataset_revisions(["CoQA"], api, get_task_fn=lambda _: CoQA)
+    with patch("eval_framework.tasks.registry.get_task", return_value=CoQA):
+        revisions = dr.collect_dataset_revisions(["CoQA"], api)
 
     assert revisions == {}
 
@@ -96,11 +97,11 @@ def test_collect_dataset_revisions_reuses_sha_for_shared_dataset() -> None:
     api = MagicMock()
     api.dataset_info.return_value = SimpleNamespace(sha="shared-sha")
 
-    revisions = dr.collect_dataset_revisions(
-        ["CoQA", "CoQAMC"],
-        api,
-        get_task_fn=lambda name: CoQA if name == "CoQA" else CoQAMC,
-    )
+    with patch(
+        "eval_framework.tasks.registry.get_task",
+        side_effect=lambda name: CoQA if name == "CoQA" else CoQAMC,
+    ):
+        revisions = dr.collect_dataset_revisions(["CoQA", "CoQAMC"], api)
 
     assert revisions == {"CoQA": "shared-sha", "CoQAMC": "shared-sha"}
     api.dataset_info.assert_called_once()
