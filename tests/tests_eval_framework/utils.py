@@ -15,7 +15,7 @@ from eval_framework.result_processors.base import Result
 from eval_framework.tasks.base import BaseTask, SubjectType
 from eval_framework.utils.constants import RED, RESET
 
-HASHES_FILE = Path(__file__).parent / "tasks" / "task-prompts-hashes.json"
+HASHES_FILE = Path(__file__).parent / "tasks" / "benchmarks" / "task-prompts-hashes.json"
 
 logger = logging.getLogger(__name__)
 
