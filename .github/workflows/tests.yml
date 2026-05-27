@@ -255,15 +255,45 @@ jobs:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
     needs: [hf-datasets-cache, test-extras]
+    permissions:
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            task_related:
+              - 'src/eval_framework/tasks/**'
+              - 'tests/tests_eval_framework/tasks/benchmarks/**'
+              - 'src/template_formatting/**'
+
+      - name: Set formatter hash run flag
+        id: should_run
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || \
+             [ "${{ github.event_name }}" = "merge_group" ] || \
+             [ "${{ steps.filter.outputs.task_related }}" = "true" ]; then
+            echo "value=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip formatter hash tests (no relevant changes)
+        if: steps.should_run.outputs.value != 'true'
+        run: echo "Skipping formatter hash tests — no task-related paths changed."
 
       - name: Setup uv
+        if: steps.should_run.outputs.value == 'true'
         uses: astral-sh/setup-uv@v6
         with:
           version: "~=0.8.16"
 
       - name: Huggingface datasets cache
+        if: steps.should_run.outputs.value == 'true'
         uses: actions/cache/restore@v4
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
@@ -272,6 +302,7 @@ jobs:
             hf-datasets-
 
       - name: Run formatter hashing tests
+        if: steps.should_run.outputs.value == 'true'
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
