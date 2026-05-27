@@ -78,7 +78,7 @@ mistral = [
 ]
 # Benchmark/metric specific extras
 comet = [
-  "unbabel-comet>=2.2.6,<3",
+  "unbabel-comet>=2.2.7,<3",
 ]
 # from template-formatting
 optional = [
