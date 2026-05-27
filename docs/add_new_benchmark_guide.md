@@ -277,17 +277,17 @@ The task will now be available through `get_task("GeographyQA")`.
 
 ### Testing your benchmark
 
-All tasks automatically go through formatting tests to ensure proper prompt generation. The formatting test lives in `tests/tests_eval_framework/tasks/test_all_formatters.py` and runs all registered tasks automatically.
+Add a per-benchmark test file at `tests/tests_eval_framework/tasks/benchmarks/test_<module>.py` (for example `test_geographyqa.py` next to `src/eval_framework/tasks/benchmarks/geographyqa.py`). Use `get_task_names_for_module` from `tests.tests_eval_framework.tasks.benchmarks.utils` to parametrize formatter hash tests over the tasks registered in that module.
 
 > [!TIP]
-> CI runs this test across all registered tasks, but during development you can target only your task, for example:
-> `uv run pytest tests/tests_eval_framework/tasks/test_all_formatters.py -k "YourTaskName"`
+> CI runs formatter hash tests when task-related paths change. During development, target only your benchmark file or task name:
+> `uv run pytest tests/tests_eval_framework/tasks/benchmarks/test_geographyqa.py -m formatter_hash -k "YourTaskName"`
 
 #### Automatic Formatting Tests
 
-All benchmarks are automatically tested for proper prompt formatting across different chat templates. If your new task needs non-default initialization arguments (for example, a specific `num_fewshot`), add an entry for your task to `SPECIAL_ARGS` in `tests/tests_eval_framework/tasks/test_all_formatters.py`.
+Benchmark formatter tests use `@pytest.mark.formatter_hash` and shared helpers in `tests/tests_eval_framework/tasks/benchmarks/utils.py`. If your task needs non-default initialization arguments (for example, a specific `num_fewshot`), pass them via `run_formatter_hash_test(..., num_fewshot=...)`.
 
-The expected formatter outputs are tracked as hashes in `tests/tests_eval_framework/tasks/task-prompts-hashes.json`.
+The expected formatter outputs are tracked as hashes in `tests/tests_eval_framework/tasks/benchmarks/task-prompts-hashes.json`.
 
 When you add a new task:
 
@@ -295,15 +295,15 @@ When you add a new task:
 2. If your task hash is new, it will be added to `task-prompts-hashes.json`.
 3. Commit the updated JSON file together with your task changes.
 
-Run the formatter hash test only for your newly created task (replace `YourTaskName`):
+Run the formatter hash test only for your newly created task (replace `YourTaskName` and the test file as needed):
 
 ```bash
-uv run pytest tests/tests_eval_framework/tasks/test_all_formatters.py -m formatter_hash -k "YourTaskName"
+uv run pytest tests/tests_eval_framework/tasks/benchmarks/test_geographyqa.py -m formatter_hash -k "YourTaskName"
 ```
 
 #### Custom Task Tests (Optional)
 
-If your benchmark has specific logic that needs testing, create a test file in `tests/tasks/` to test it.
+If your benchmark has specific logic that needs testing, add tests to `tests/tests_eval_framework/tasks/benchmarks/test_<module>.py` or a dedicated file in that directory.
 
 ### Update benchmark documentation
 
