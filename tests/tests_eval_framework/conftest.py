@@ -7,8 +7,6 @@ import wandb
 from _pytest.fixtures import FixtureRequest
 
 from eval_framework.llm.base import BaseLLM, Sample
-from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MInstruct
-from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
 from tests.tests_eval_framework.mock_wandb import MockArtifact, MockWandb, MockWandbApi, MockWandbRun
@@ -60,20 +58,29 @@ class MockLLM(BaseLLM):
         ]
 
 
-model_dict = {
-    "Pythia410m": Pythia410m,
-    "SmolLM135M": SmolLM135M,
-    "Smollm135MInstruct": Smollm135MInstruct,
-    "Qwen3_0_6B_VLLM": Qwen3_0_6B_VLLM,
-    "MockLLM": MockLLM,
-}
+# Stand-ins for ``import_models`` / dotted ``llm_name`` in ``test_run`` (no torch).
+# ``test_llms`` lazy-imports real HF classes when a parametrized test runs.
+SmolLM135M = type("SmolLM135M", (MockLLM,), {})
+Smollm135MInstruct = type("Smollm135MInstruct", (MockLLM,), {})
+
+# Supported ``test_llms`` parametrization values (HF/vLLM imported lazily in the fixture).
+model_list: list[str] = ["Pythia410m", "SmolLM135M", "Smollm135MInstruct", "Qwen3_0_6B_VLLM", "MockLLM"]
 
 
 @pytest.fixture()
 def test_llms(request: FixtureRequest) -> BaseLLM:
-    if request.param not in model_dict:
-        raise ValueError(f"Unknown LLM name: {request.param}")
-    return model_dict[request.param]()
+    name = request.param
+    if name == "MockLLM":
+        return MockLLM()
+    elif name == "Qwen3_0_6B_VLLM":
+        from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
+
+        return Qwen3_0_6B_VLLM()
+    elif name in model_list:
+        import eval_framework.llm.huggingface as hf_module
+
+        return getattr(hf_module, name)
+    raise ValueError(f"Unknown LLM name: {name}")
 
 
 @pytest.fixture

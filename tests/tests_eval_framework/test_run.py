@@ -7,17 +7,17 @@ from unittest.mock import Mock, patch
 
 from eval_framework.context.local import _load_model as _load_model_orig
 from eval_framework.run import run
-from tests.tests_eval_framework.conftest import MockLLM
+from tests.tests_eval_framework import conftest as test_conftest
+
+_CLI_MOCK_LLM_NAMES = frozenset({"SmolLM135M", "Smollm135MInstruct"})
 
 
 def _load_model_mock(llm_name: str, models_path, *, info: str = ""):
-    """Return MockLLM for SmolLM135M/Smollm135MInstruct to avoid downloading real models.
-    Use a subclass with the same __name__ as the requested class so output paths match
-    the test assertions (which use llm_name, i.e. the class name)."""
-    clazz = _load_model_orig(llm_name, models_path, info=info)
-    if clazz.__name__ in ("SmolLM135M", "Smollm135MInstruct"):
-        return type(clazz.__name__, (MockLLM,), {})
-    return clazz
+    """Use conftest stand-ins for Smol names so ``test_run`` never imports torch/HF."""
+    class_name = llm_name.rsplit(".", 1)[-1]
+    if class_name in _CLI_MOCK_LLM_NAMES:
+        return getattr(test_conftest, class_name)
+    return _load_model_orig(llm_name, models_path, info=info)
 
 
 @patch("argparse.ArgumentParser.parse_args")
