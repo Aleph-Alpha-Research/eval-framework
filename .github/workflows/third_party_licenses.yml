@@ -1,0 +1,63 @@
+name: Third-party licenses
+
+on:
+  schedule:
+    # Every night at 2:00 UTC
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: third-party-licenses
+  cancel-in-progress: false
+
+env:
+  UV_LINK_MODE: symlink
+  UV_LOCKED: 1
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create bot token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: bot-token
+        with:
+          app-id: ${{ vars.AAR_PUBLIC_VERSION_BUMP_BOT_APP_ID }}
+          private-key: ${{ secrets.AAR_PUBLIC_VERSION_BUMP_BOT_PRIVATE_KEY }}
+          repositories: |
+            eval-framework
+
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ steps.bot-token.outputs.token }}
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "~=0.8.16"
+
+      - name: Regenerate license reports
+        run: uv run --group dev python_licenses.py both
+
+      - name: Create pull request
+        id: pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.bot-token.outputs.token }}
+          commit-message: chore: refresh third-party license reports
+          branch: automated/third-party-licenses
+          delete-branch: true
+          title: chore: refresh third-party license reports
+          add-paths: |
+            THIRD_PARTY.md
+            THIRD_PARTY_LICENSES.md
+          labels: automated
+
+      - name: Enable auto-merge
+        if: steps.pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+        run: gh pr merge --auto --merge "${{ steps.pr.outputs.pull-request-number }}"
