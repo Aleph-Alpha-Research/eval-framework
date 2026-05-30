@@ -961,7 +961,7 @@ requires-dist = [
     { name = "pycountry", specifier = ">=24.6.1,<25" },
     { name = "pydantic", specifier = ">=2.7,<3" },
     { name = "python-dotenv", specifier = ">=1.0.1,<2" },
-    { name = "python-iso639", specifier = ">=2025.2.18" },
+    { name = "python-iso639", specifier = ">=2025.11.16" },
     { name = "pyyaml", specifier = ">=6.0.1,<7" },
     { name = "sacrebleu", specifier = ">=2.4.3,<3" },
     { name = "scipy", specifier = ">=1.14.0,<2" },
@@ -3046,11 +3046,11 @@ wheels = [
 
 [[package]]
 name = "python-iso639"
-version = "2025.11.11"
+version = "2026.4.20"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/89/6f/45bc5ae1c132ab7852a8642d66d25ffff6e4b398195127ac66158d3b5f4d/python_iso639-2025.11.11.tar.gz", hash = "sha256:75fab30f1a0f46b4e8161eafb84afe4ecd07eaada05e2c5364f14b0f9c864477", size = 173897, upload-time = "2025-11-11T15:23:00.893Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/da/c8/22c80367213029ea3abc4e7ab6e1ed8545542f98e5db6e1ab4f2973890ad/python_iso639-2026.4.20.tar.gz", hash = "sha256:00570376d24788f889578991bb2ad93c030a014c1d373f64f2ceffe84732a537", size = 173955, upload-time = "2026-04-20T14:15:47.748Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/69/081960288e4cd541cbdb90e1768373e1198b040bf2ae40cd25b9c9799205/python_iso639-2025.11.11-py3-none-any.whl", hash = "sha256:02ea4cfca2c189b5665e4e8adc8c17c62ab6e4910932541a23baddea33207ea2", size = 167723, upload-time = "2025-11-11T15:22:59.819Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/71/520fbac49c0650aba66093396282e1e4a1315a7242461c21480132a1b0df/python_iso639-2026.4.20-py3-none-any.whl", hash = "sha256:60a380571fafdbcc6190c5c1ee78e217194332cbe3caec76345327712e5a65cb", size = 167842, upload-time = "2026-04-20T14:15:46.308Z" },
 ]
 
 [[package]]
