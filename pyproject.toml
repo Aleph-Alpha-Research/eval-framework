@@ -52,7 +52,7 @@ dependencies = [
 [project.optional-dependencies]
 # Model-specific extras
 determined = [
-  "determined>=0.38,<0.39",
+  "determined>=0.38.1,<0.39",
   "tensorboard==2.19.0"
 ]
 api = ["aleph-alpha-client>=11.5.1"]
