@@ -939,7 +939,7 @@ requires-dist = [
     { name = "antlr4-python3-runtime", specifier = "==4.11.0" },
     { name = "boto3", specifier = ">=1.40.54,<2" },
     { name = "datasets", specifier = ">=4.0.0,<5" },
-    { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38,<0.39" },
+    { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38.1,<0.39" },
     { name = "eval-framework", extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "comet", "optional", "mistral"], marker = "extra == 'all'" },
     { name = "eval-framework", extras = ["vllm"], marker = "extra == 'mistral'" },
     { name = "google-crc32c", specifier = ">=1.5.0,<2" },
