@@ -960,7 +960,7 @@ requires-dist = [
     { name = "psycopg2-binary", specifier = ">=2.9.12,<3" },
     { name = "pycountry", specifier = ">=24.6.1,<25" },
     { name = "pydantic", specifier = ">=2.7,<3" },
-    { name = "python-dotenv", specifier = ">=1.0.1,<2" },
+    { name = "python-dotenv", specifier = ">=1.2.2,<2" },
     { name = "python-iso639", specifier = ">=2025.11.16" },
     { name = "pyyaml", specifier = ">=6.0.1,<7" },
     { name = "sacrebleu", specifier = ">=2.4.3,<3" },
