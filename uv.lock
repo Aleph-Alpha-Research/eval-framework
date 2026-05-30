@@ -954,7 +954,7 @@ requires-dist = [
     { name = "lxml", specifier = ">=6.1.1,<7" },
     { name = "mistral-common", marker = "extra == 'mistral'", specifier = ">=1.7,<2" },
     { name = "mysql-connector-python", specifier = ">=9.0.0,<10" },
-    { name = "nltk", specifier = ">=3.9.1,<4" },
+    { name = "nltk", specifier = ">=3.9.4,<4" },
     { name = "numpy", specifier = ">=1.26.4" },
     { name = "openai", marker = "extra == 'openai'", specifier = ">=1.62,<3" },
     { name = "psycopg2-binary", specifier = ">=2.9.12,<3" },
