@@ -40,7 +40,7 @@ dependencies = [
   "lxml>=6.1.1,<7",
   "python-iso639>=2025.11.16",
   "wandb>=0.23.0,<1",
-  "boto3>=1.40.54,<2",
+  "boto3>=1.43.16,<2",
   "numpy>=1.26.4",
   # is a dependency of sympy, but not explicitly listed in the requirements.txt
   # https://github.com/sympy/sympy/blob/0204fa34e8f6f6f8ccb4de01209be9a2345c9d6e/doc/src/contributing/dependencies.md?plain=1#L125
