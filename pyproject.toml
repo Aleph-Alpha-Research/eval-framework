@@ -19,7 +19,7 @@ classifiers = [
 ]
 dependencies = [
   "pyyaml>=6.0.3,<7",
-  "xmltodict>=0.13.0,<0.16",
+  "xmltodict>=0.15.1,<0.16",
   "pydantic>=2.7,<3",
   "datasets>=4.0.0,<5",
   "sacrebleu>=2.4.3,<3",
