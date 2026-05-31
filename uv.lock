@@ -961,7 +961,7 @@ requires-dist = [
     { name = "pycountry", specifier = ">=24.6.1,<25" },
     { name = "pydantic", specifier = ">=2.7,<3" },
     { name = "python-dotenv", specifier = ">=1.2.2,<2" },
-    { name = "python-iso639", specifier = ">=2025.11.16" },
+    { name = "python-iso639", specifier = ">=2026.4.20" },
     { name = "pyyaml", specifier = ">=6.0.3,<7" },
     { name = "sacrebleu", specifier = ">=2.4.3,<3" },
     { name = "scipy", specifier = ">=1.14.0,<2" },
