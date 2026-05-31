@@ -979,7 +979,7 @@ requires-dist = [
     { name = "unbabel-comet", marker = "extra == 'comet'", specifier = ">=2.2.7,<3" },
     { name = "vllm", marker = "extra == 'vllm'", specifier = ">=0.8.5,<0.9" },
     { name = "wandb", specifier = ">=0.23.0,<1" },
-    { name = "xmltodict", specifier = ">=0.13.0,<0.16" },
+    { name = "xmltodict", specifier = ">=0.15.1,<0.16" },
 ]
 provides-extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "mistral", "comet", "optional", "all"]
 
