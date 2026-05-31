@@ -952,7 +952,7 @@ requires-dist = [
     { name = "lingua-language-detector", specifier = ">=2.0.2,<3" },
     { name = "llm-sandbox", extras = ["docker"], specifier = "==0.3.39" },
     { name = "lxml", specifier = ">=6.1.1,<7" },
-    { name = "mistral-common", marker = "extra == 'mistral'", specifier = ">=1.7,<2" },
+    { name = "mistral-common", marker = "extra == 'mistral'", specifier = ">=1.11.2,<2" },
     { name = "mysql-connector-python", specifier = ">=9.0.0,<10" },
     { name = "nltk", specifier = ">=3.9.4,<4" },
     { name = "numpy", specifier = ">=1.26.4" },
@@ -1898,7 +1898,7 @@ wheels = [
 
 [[package]]
 name = "mistral-common"
-version = "1.8.5"
+version = "1.11.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jsonschema" },
@@ -1910,9 +1910,9 @@ dependencies = [
     { name = "tiktoken" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ce/ff/1992a00ccc936f2c6e69ecb1f2cac678e0fd46c53c71bdab99eda4f89dfd/mistral_common-1.8.5.tar.gz", hash = "sha256:9f6204ede9c807f09040a208a9381ae78ef93e2e5a9cd5202dc12e712a025de8", size = 6331923, upload-time = "2025-09-12T06:43:01.937Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c2/eb/12167a1bea9714582e5b4f539f9c019323363e314a499c72855ff0e5ad43/mistral_common-1.11.2.tar.gz", hash = "sha256:79f68fc2d1190f28637f40e053f919c8c2697e00b2aa679ddee562a95183f4ad", size = 6357845, upload-time = "2026-05-04T19:47:40.413Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/91/4a/54e19c5e75939fd9418c7b806c21d12cf252ea2ba38f122b597272b459dd/mistral_common-1.8.5-py3-none-any.whl", hash = "sha256:f3cf87b61958a00485e603f3fe0530eb509d7e9b2f7178329dcd260e307eced1", size = 6515140, upload-time = "2025-09-12T06:42:59.622Z" },
+    { url = "https://files.pythonhosted.org/packages/47/f0/6a5d604b972e442b9d36c117d01788feddad099e4965699e3516ee6fefc3/mistral_common-1.11.2-py3-none-any.whl", hash = "sha256:ebb42062cd705a0aa2bc69b4cde2b83d446ae58150b7e29322c90cb08fcfca6c", size = 6531968, upload-time = "2026-05-04T19:47:37.718Z" },
 ]
 
 [package.optional-dependencies]
