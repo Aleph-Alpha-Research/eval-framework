@@ -963,7 +963,7 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.2.2,<2" },
     { name = "python-iso639", specifier = ">=2026.4.20" },
     { name = "pyyaml", specifier = ">=6.0.3,<7" },
-    { name = "sacrebleu", specifier = ">=2.4.3,<3" },
+    { name = "sacrebleu", specifier = ">=2.6.0,<3" },
     { name = "scipy", specifier = ">=1.14.0,<2" },
     { name = "spacy", specifier = ">=3.8.14,<4" },
     { name = "sympy", specifier = ">=1.13.1,<2" },
@@ -3433,7 +3433,7 @@ wheels = [
 
 [[package]]
 name = "sacrebleu"
-version = "2.5.1"
+version = "2.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama" },
@@ -3443,9 +3443,9 @@ dependencies = [
     { name = "regex" },
     { name = "tabulate" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/01/14/8526cf8a5b912b618e7d6ed319a5b1876788bebba1f9a660e1291832c1cc/sacrebleu-2.5.1.tar.gz", hash = "sha256:1a088cc1c74ffaff0759c3191a85db09eecfa7a52e09be244e319d8d64e2fb11", size = 1896900, upload-time = "2025-01-03T20:15:16.772Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d3/ed/d7acddcff74d690c56fe26a1f7828bdde548262828d0743414ea916c40c1/sacrebleu-2.6.0.tar.gz", hash = "sha256:91499b6cd46138d95154fff1e863c2f9be57e82f0c719d8dd718d0006cf6c566", size = 1893419, upload-time = "2026-01-12T17:17:20.799Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cd/45/7b55a7bd7e5c5b573b40ad58ba43fa09962dc5c8d71b1f573d4aeaa54a7e/sacrebleu-2.5.1-py3-none-any.whl", hash = "sha256:7c9f7ee75bec3a5bf19dd87112dfd654952130e403ad30c48298fb7da3212d5d", size = 104107, upload-time = "2025-01-03T20:15:14.626Z" },
+    { url = "https://files.pythonhosted.org/packages/06/f2/6c90ccf3ad1d09a7d662a405b274f3c93b92df59c8d6a025d26aaf34d302/sacrebleu-2.6.0-py3-none-any.whl", hash = "sha256:3edc1531575cfe4ad04ce53491a9307e234af1c3f805a1f491cbec844229a8a8", size = 100785, upload-time = "2026-01-12T17:17:18.868Z" },
 ]
 
 [[package]]
