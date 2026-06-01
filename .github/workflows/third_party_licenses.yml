@@ -47,10 +47,10 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.bot-token.outputs.token }}
-          commit-message: chore: refresh third-party license reports
+          commit-message: "chore: refresh third-party license reports"
           branch: automated/third-party-licenses
           delete-branch: true
-          title: chore: refresh third-party license reports
+          title: "chore: refresh third-party license reports"
           add-paths: |
             THIRD_PARTY.md
             THIRD_PARTY_LICENSES.md
