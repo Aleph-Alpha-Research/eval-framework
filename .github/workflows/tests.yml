@@ -138,6 +138,9 @@ jobs:
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
     steps:
+      - name: Fix git safe directory (docker:dind ownership mismatch)
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
