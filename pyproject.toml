@@ -167,6 +167,7 @@ known-third-party = ["wandb"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "__init__.py" = ["F401"]
+"tests/tests_eval_framework/tasks/benchmarks/test_mmlu_de.py" = ["E501"]
 
 [tool.mypy]
 plugins = "pydantic.mypy"
