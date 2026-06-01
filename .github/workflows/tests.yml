@@ -251,39 +251,46 @@ jobs:
           uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
           uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not gpu and cpu_slow and not slow_download and not external_api and not formatter_hash"
 
-  test-formatter-hash:
-    runs-on: cpu-runner-8c-32gb-01
-    container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+  check-task-paths:
+    # dorny/paths-filter is a JavaScript action: it runs on the HOST runner process, not
+    # inside any job container. When the container checks out code, actions/checkout only
+    # sets git safe.directory inside the container; the host git process never sees it.
+    # On push events dorny falls back to local git commands and hits "dubious ownership".
+    # Running paths-filter in a separate containerless job sidesteps the issue entirely.
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      task_related: ${{ steps.filter.outputs.task_related }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - name: Check for task-related changes
+      - uses: dorny/paths-filter@v3
         id: filter
-        run: |
-          # dorny/paths-filter is a JS action that runs on the HOST runner, not inside this
-          # container. On push events it calls `git` on the host, which fails with "dubious
-          # ownership" because actions/checkout only set safe.directory inside the container.
-          # Running the diff ourselves inside the container avoids that mismatch entirely.
-          if git rev-parse HEAD~1 >/dev/null 2>&1; then
-            CHANGED=$(git diff --name-only HEAD~1 HEAD)
-          else
-            CHANGED=""
-          fi
-          if echo "$CHANGED" | grep -qE '^(src/eval_framework/tasks/|tests/tests_eval_framework/tasks/benchmarks/|src/template_formatting/)'; then
-            echo "task_related=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "task_related=false" >> "$GITHUB_OUTPUT"
-          fi
+        with:
+          filters: |
+            task_related:
+              - 'src/eval_framework/tasks/**'
+              - 'tests/tests_eval_framework/tasks/benchmarks/**'
+              - 'src/template_formatting/**'
+
+  test-formatter-hash:
+    runs-on: cpu-runner-8c-32gb-01
+    container: derskythe/github-runner-base:ubuntu-noble
+    needs: [hf-datasets-cache, test-extras, check-task-paths]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Set formatter hash run flag
         id: should_run
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] || \
              [ "${{ github.event_name }}" = "merge_group" ] || \
-             [ "${{ steps.filter.outputs.task_related }}" = "true" ]; then
+             [ "${{ needs.check-task-paths.outputs.task_related }}" = "true" ]; then
             echo "value=true" >> "$GITHUB_OUTPUT"
           else
             echo "value=false" >> "$GITHUB_OUTPUT"
