@@ -43,10 +43,10 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
         with:
-          commit-message: chore: pin dataset revisions
+          commit-message: "chore: pin dataset revisions"
           branch: automated/dataset-revisions-${{ github.run_id }}
           delete-branch: true
-          title: chore: pin dataset revisions
+          title: "chore: pin dataset revisions"
           body: |
             ## Summary
 
