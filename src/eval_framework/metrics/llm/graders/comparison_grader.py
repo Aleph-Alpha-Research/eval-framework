@@ -1,6 +1,6 @@
 import random
 from collections.abc import Mapping
-from enum import Enum
+from enum import StrEnum
 
 from eval_framework.llm.base import BaseLLM as StructuredOutputChatModel
 from eval_framework.metrics.llm.graders.language import Language
@@ -12,7 +12,7 @@ from eval_framework.metrics.llm.graders.models import (
 from eval_framework.metrics.llm.utils import order_answers_for_comparison
 
 
-class MatchOutcome(str, Enum):
+class MatchOutcome(StrEnum):
     A_WINS = "a_wins"
     DRAW = "draw"
     B_WINS = "b_wins"
