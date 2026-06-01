@@ -1,15 +1,14 @@
 import importlib.resources
-import traceback
 from collections.abc import Callable
 from typing import Self
 
+from llm_sandbox.exceptions import SandboxTimeoutError
 from pydantic import Field
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import (
     BaseMetricContext,
     Completion,
-    Error,
     extract_context_metric,
 )
 from eval_framework.tasks.utils import (
@@ -90,22 +89,10 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
             raise Exception(f"Failed to rebuild parsing functions => {e}")
 
         n = 1  # we only support N=1 at the moment
-        try:
-            c, output = self._count_correct_samples(response.completion, parsed_context)
-        except Exception as e:
-            error = Error(
-                error_class=e.__class__.__name__,
-                message=str(e),
-                traceback=traceback.format_exc(),
-            )
-            return [
-                MetricResult(
-                    metric_name=self.NAME,
-                    value=None,
-                    higher_is_better=True,
-                    error=error,
-                )
-            ]
+        # A sandbox/Docker failure (e.g. an image pull rate limit) propagates so the run fails
+        # rather than being scored as a wrong answer; only a code timeout is counted as a failure
+        # (handled in _count_correct_samples).
+        c, output = self._count_correct_samples(response.completion, parsed_context)
 
         pass_at_k_value = estimate_pass_at_k(n, c, self.k)
         return [
@@ -130,7 +117,8 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
                 parse_output_fn=context.output_parse_fn,
                 dockerfile=None,
             )
-        except Exception as e:
+        except SandboxTimeoutError as e:
+            # The submitted code timed out (e.g. an infinite loop) -- a failing sample.
             return (0, str(e))
         return (1 if result.success else 0), result.output
 
@@ -143,16 +131,20 @@ class CodeExecutionPassAtOneWithCodebench(CodeExecutionPassAtOne):
         self.dockerfile = str(importlib.resources.files("eval_framework.tasks") / "Dockerfile_codebench")
 
     def _count_correct_samples(self, completion: str, context: RealtimeCodeExectionContext) -> tuple[int, str]:
-        result = execute_python_code_with_tests(
-            code=completion,
-            test_code=context.test_code,
-            package_mapping={},  # the docker contains everything
-            merge_code_fn=context.snippet_merge_fn,
-            image=None,  # dockerfile provided
-            timeout=context.benchmark_timeout,
-            parse_output_fn=context.output_parse_fn,
-            dockerfile=self.dockerfile,
-        )
+        try:
+            result = execute_python_code_with_tests(
+                code=completion,
+                test_code=context.test_code,
+                package_mapping={},  # the docker contains everything
+                merge_code_fn=context.snippet_merge_fn,
+                image=None,  # dockerfile provided
+                timeout=context.benchmark_timeout,
+                parse_output_fn=context.output_parse_fn,
+                dockerfile=self.dockerfile,
+            )
+        except SandboxTimeoutError as e:
+            # The submitted code timed out (e.g. an infinite loop) -- a failing sample.
+            return (0, str(e))
         return (1 if result.success else 0), result.output
 
 

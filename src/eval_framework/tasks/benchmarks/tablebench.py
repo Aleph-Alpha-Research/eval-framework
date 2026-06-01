@@ -6,6 +6,8 @@ import tempfile
 from itertools import product
 from typing import Any
 
+from llm_sandbox.exceptions import SandboxTimeoutError
+
 from eval_framework.exceptions import LogicError
 from eval_framework.metrics.completion.rouge_l import ROUGE_L
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
@@ -106,7 +108,9 @@ class TableBench(BaseTask[tuple[str, str]]):
                     completion_text = run_python_code(
                         code, image="amancevice/pandas:slim", input_files=[(filename, "/var/lib/pandas/table.csv")]
                     )
-                except Exception:
+                except SandboxTimeoutError:
+                    # The generated code timed out -- treat as no answer. Any other sandbox/Docker
+                    # failure (e.g. an image pull rate limit) propagates so the run can fail.
                     return ""
 
         # Extract the answer, be it directly from the model or be it the result of the generated code
