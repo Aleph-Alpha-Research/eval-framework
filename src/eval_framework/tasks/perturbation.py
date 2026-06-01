@@ -1,5 +1,5 @@
 import threading
-from enum import Enum
+from enum import StrEnum
 from typing import Annotated, Any, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -9,7 +9,7 @@ from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Sample
 from eval_framework.tasks.utils import Editor, HatPaperEditor
 
 
-class PerturbationType(str, Enum):
+class PerturbationType(StrEnum):
     # Editor methods
     EDITOR = "editor"
     # Hat paper methods
