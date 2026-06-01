@@ -138,9 +138,6 @@ jobs:
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
     steps:
-      - name: Fix git safe directory (docker:dind ownership mismatch)
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -258,21 +255,28 @@ jobs:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
     needs: [hf-datasets-cache, test-extras]
-    permissions:
-      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - uses: dorny/paths-filter@v3
+      - name: Check for task-related changes
         id: filter
-        with:
-          filters: |
-            task_related:
-              - 'src/eval_framework/tasks/**'
-              - 'tests/tests_eval_framework/tasks/benchmarks/**'
-              - 'src/template_formatting/**'
+        run: |
+          # dorny/paths-filter is a JS action that runs on the HOST runner, not inside this
+          # container. On push events it calls `git` on the host, which fails with "dubious
+          # ownership" because actions/checkout only set safe.directory inside the container.
+          # Running the diff ourselves inside the container avoids that mismatch entirely.
+          if git rev-parse HEAD~1 >/dev/null 2>&1; then
+            CHANGED=$(git diff --name-only HEAD~1 HEAD)
+          else
+            CHANGED=""
+          fi
+          if echo "$CHANGED" | grep -qE '^(src/eval_framework/tasks/|tests/tests_eval_framework/tasks/benchmarks/|src/template_formatting/)'; then
+            echo "task_related=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "task_related=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set formatter hash run flag
         id: should_run
