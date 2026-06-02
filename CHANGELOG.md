@@ -14,6 +14,52 @@
 
 ### Bug Fixes
 
+## [0.3.8](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.7...v0.3.8) (2026-06-02)
+
+
+### Features
+
+* pin data sets and enable update mechanism ([#252](https://github.com/Aleph-Alpha-Research/eval-framework/issues/252)) ([c3ef7c9](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c3ef7c93f17ae174385d708d4f30ae3d3defe533))
+* renovate bot ([#238](https://github.com/Aleph-Alpha-Research/eval-framework/issues/238)) ([1223a21](https://github.com/Aleph-Alpha-Research/eval-framework/commit/1223a21ccd92b9a767a40d4700382eb377240e8e))
+* **vllm:** add local vLLM OpenAI-server backend and GPU tests ([#235](https://github.com/Aleph-Alpha-Research/eval-framework/issues/235)) ([f119c11](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f119c11909edc6b790aca146e65eb6eb23c79eb4))
+
+
+### Bug Fixes
+
+* **deps:** update dependency accelerate to &gt;=0.34.2,&lt;1 ([#254](https://github.com/Aleph-Alpha-Research/eval-framework/issues/254)) ([7e7f5ab](https://github.com/Aleph-Alpha-Research/eval-framework/commit/7e7f5abd3796b7ff6004a4747b824af6b270f5d2))
+* **deps:** update dependency boto3 to &gt;=1.43.16,&lt;2 ([#274](https://github.com/Aleph-Alpha-Research/eval-framework/issues/274)) ([4622a89](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4622a89ec8da9f361fefdb1b40a50270e8f30579))
+* **deps:** update dependency boto3 to &gt;=1.43.17,&lt;2 ([#284](https://github.com/Aleph-Alpha-Research/eval-framework/issues/284)) ([56deded](https://github.com/Aleph-Alpha-Research/eval-framework/commit/56deded4f6d5f684b8c7ee16484060a67fce3eaa))
+* **deps:** update dependency boto3 to &gt;=1.43.18,&lt;2 ([#297](https://github.com/Aleph-Alpha-Research/eval-framework/issues/297)) ([d960e5d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d960e5d0136ad2988a454b6b80d03fa09113c7d1))
+* **deps:** update dependency datasets to &gt;=4.8.5,&lt;5 ([#275](https://github.com/Aleph-Alpha-Research/eval-framework/issues/275)) ([d908992](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d908992f8ead528a22ce76329ddcebca67b161fd))
+* **deps:** update dependency determined to &gt;=0.38.1,&lt;0.39 ([#255](https://github.com/Aleph-Alpha-Research/eval-framework/issues/255)) ([53bb73b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/53bb73b919937d568212887e9fe184d3d528825e))
+* **deps:** update dependency google-crc32c to &gt;=1.8.0,&lt;2 ([#276](https://github.com/Aleph-Alpha-Research/eval-framework/issues/276)) ([68f821b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/68f821b31d1571fd8189376c752fd1a7de1eb526))
+* **deps:** update dependency jsonschema to &gt;=4.26.0,&lt;5 ([#278](https://github.com/Aleph-Alpha-Research/eval-framework/issues/278)) ([b2a1ccd](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b2a1ccd5162e1e797f7b94920e5e00f05298b2d0))
+* **deps:** update dependency lingua-language-detector to &gt;=2.2.0,&lt;3 ([#279](https://github.com/Aleph-Alpha-Research/eval-framework/issues/279)) ([aea38f4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/aea38f402a9e7ff1d5a8cd518fd159410b800e65))
+* **deps:** update dependency lxml to &gt;=6.1.1,&lt;7 ([#256](https://github.com/Aleph-Alpha-Research/eval-framework/issues/256)) ([1551ea6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/1551ea6c2d8f638c6f11544960ffc55a1655a7a9))
+* **deps:** update dependency mistral-common to &gt;=1.11.2,&lt;2 ([#280](https://github.com/Aleph-Alpha-Research/eval-framework/issues/280)) ([a7b777f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a7b777f664283ae1d89715a049b8f5f7464a2b1b))
+* **deps:** update dependency mysql-connector-python to &gt;=9.7.0,&lt;10 ([#281](https://github.com/Aleph-Alpha-Research/eval-framework/issues/281)) ([cf82719](https://github.com/Aleph-Alpha-Research/eval-framework/commit/cf827194677be0749d85dbf0f3249199a1c746e4))
+* **deps:** update dependency nltk to &gt;=3.9.4,&lt;4 ([#257](https://github.com/Aleph-Alpha-Research/eval-framework/issues/257)) ([cf6ed57](https://github.com/Aleph-Alpha-Research/eval-framework/commit/cf6ed5753dd802fce65bb1ac4f12507c3d1eb74f))
+* **deps:** update dependency psycopg2-binary to &gt;=2.9.12,&lt;3 ([#258](https://github.com/Aleph-Alpha-Research/eval-framework/issues/258)) ([cba844b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/cba844b5e89314d15db3fa5cc2ad8b1e4a6ebe23))
+* **deps:** update dependency pydantic to &gt;=2.13.4,&lt;3 ([#287](https://github.com/Aleph-Alpha-Research/eval-framework/issues/287)) ([c154ab0](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c154ab0d1f39fb487fae4a88dd2eade8c7fbddb3))
+* **deps:** update dependency python-dotenv to &gt;=1.2.2,&lt;2 ([#259](https://github.com/Aleph-Alpha-Research/eval-framework/issues/259)) ([d75d9d7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d75d9d7c28db4a6d013595f8154f85c3783ec423))
+* **deps:** update dependency python-iso639 to &gt;=2025.11.16 ([#260](https://github.com/Aleph-Alpha-Research/eval-framework/issues/260)) ([afa3a9c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/afa3a9c936c6512bd2b37d868e12d7e1feb1547c))
+* **deps:** update dependency python-iso639 to &gt;=2026.4.20 ([#269](https://github.com/Aleph-Alpha-Research/eval-framework/issues/269)) ([5d43045](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5d430455111ae241425e55b777d1adf67638e497))
+* **deps:** update dependency pyyaml to &gt;=6.0.3,&lt;7 ([#261](https://github.com/Aleph-Alpha-Research/eval-framework/issues/261)) ([20dd89a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/20dd89a70b4843e30c322970dd8b2fd218e9859f))
+* **deps:** update dependency sacrebleu to &gt;=2.6.0,&lt;3 ([#288](https://github.com/Aleph-Alpha-Research/eval-framework/issues/288)) ([9678caf](https://github.com/Aleph-Alpha-Research/eval-framework/commit/9678cafa7746504e021c82377e08b63f088d0d55))
+* **deps:** update dependency scipy to &gt;=1.17.1,&lt;2 ([#289](https://github.com/Aleph-Alpha-Research/eval-framework/issues/289)) ([13651b7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/13651b73d4da08a5733944051a770abc93e41714))
+* **deps:** update dependency spacy to &gt;=3.8.14,&lt;4 ([#262](https://github.com/Aleph-Alpha-Research/eval-framework/issues/262)) ([69776a3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/69776a3f661253634b596180b4e756b612eae7c0))
+* **deps:** update dependency tensorboard to v2.20.0 ([#291](https://github.com/Aleph-Alpha-Research/eval-framework/issues/291)) ([75e9e72](https://github.com/Aleph-Alpha-Research/eval-framework/commit/75e9e72ac214f3ef638db4b76938ff0d29d20c51))
+* **deps:** update dependency tiktoken to &gt;=0.13.0,&lt;1 ([#298](https://github.com/Aleph-Alpha-Research/eval-framework/issues/298)) ([490d8a4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/490d8a42e86b6274f7737de4f8402d6e71a9dbfb))
+* **deps:** update dependency unbabel-comet to &gt;=2.2.7,&lt;3 ([#263](https://github.com/Aleph-Alpha-Research/eval-framework/issues/263)) ([aa82f05](https://github.com/Aleph-Alpha-Research/eval-framework/commit/aa82f05f564946f6f97f56e102c7b391d3a6ad80))
+* **deps:** update dependency xmltodict to &gt;=0.15.1,&lt;0.16 ([#265](https://github.com/Aleph-Alpha-Research/eval-framework/issues/265)) ([68e80e2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/68e80e2a4be54b0947eb0c7f702a1a5b629860cc))
+* fail code-execution benchmarks when a Docker image pull fails ([#294](https://github.com/Aleph-Alpha-Research/eval-framework/issues/294)) ([05786f4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/05786f460393b43cd990b82a9538d42073c3be00))
+
+
+### Documentation
+
+* add third-party dependency and license documentation ([b55e76a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b55e76a19223e1ecd49de30d74f4e69a9ecce77e))
+* change uv pip to uv add to avoid version overwriting ([#306](https://github.com/Aleph-Alpha-Research/eval-framework/issues/306)) ([ad7f583](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ad7f5839d6aadd4046874ba2b2e6cf0ee803891d))
+
 ## [0.3.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.6...v0.3.7) (2026-05-08)
 
 
