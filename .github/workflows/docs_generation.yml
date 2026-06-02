@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Sphinx and extensions
         run: |
-          uv pip install sphinx furo sphinx-autodoc-typehints myst-parser pallets-sphinx-themes ghp-import
+          uv add --dev sphinx furo sphinx-autodoc-typehints myst-parser pallets-sphinx-themes ghp-import
 
       - name: Symlink root files into docs/
         run: |
