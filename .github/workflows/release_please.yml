@@ -51,7 +51,7 @@ jobs:
     steps:
       - if: ${{ needs.release-please.outputs.release_created }}
         name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - if: ${{ needs.release-please.outputs.release_created }}
         name: Extract version from tag
