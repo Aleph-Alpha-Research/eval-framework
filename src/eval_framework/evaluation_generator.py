@@ -80,6 +80,7 @@ class EvaluationGenerator:
                 )
             else:
                 metric = metric_class()
+            metric.fail_on_error = self.config.fail_on_error
 
             logger.info(f"Starting calculation of {metric.NAME}")
             safe_tqdm_write(f"INFO: Calculating {metric.NAME}")

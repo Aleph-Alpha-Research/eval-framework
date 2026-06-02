@@ -8,6 +8,7 @@ from typing import Any, NamedTuple
 
 from llm_sandbox import SandboxSession
 from llm_sandbox.const import DefaultImage, SupportedLanguage
+from llm_sandbox.exceptions import SandboxTimeoutError
 from pydantic import Field
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
@@ -104,13 +105,18 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
 
         try:
             success, output = self._execute(context, response.completion, timeout=60)
-        except Exception as exc:
+        except SandboxTimeoutError as exc:
+            # The submitted code timed out (e.g. an infinite loop) -- a failing sample, not an infra
+            # problem.
             error = Error(
                 error_class=exc.__class__.__name__,
                 message=str(exc),
                 traceback=traceback.format_exc(),
             )
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=error)]
+        except Exception as exc:
+            # Any other sandbox/Docker error (e.g. an image pull rate limit) is an infra failure.
+            return self._record_or_raise(exc)
 
         return [
             MetricResult(

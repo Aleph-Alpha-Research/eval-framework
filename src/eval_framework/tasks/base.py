@@ -409,6 +409,8 @@ class BaseTask[SubjectType](ABC):
                 model_post_processed_completion = llm.post_process_completion(raw_completion.completion, sample)
                 completion = self.post_process_generated_completion(model_post_processed_completion, sample)
             except Exception as e:
+                if raise_errors() or fail_on_error:
+                    raise
                 error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
                 completion = ""
 

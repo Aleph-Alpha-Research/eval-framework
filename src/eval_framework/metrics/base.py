@@ -1,3 +1,4 @@
+import traceback
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -5,6 +6,7 @@ from pydantic import BaseModel, ConfigDict
 
 from eval_framework.metrics.aggregators.aggregators import Aggregator
 from eval_framework.shared.types import Error
+from eval_framework.tasks.utils import raise_errors
 
 
 class MetricResult(BaseModel):
@@ -33,6 +35,8 @@ class BaseMetric[Response](ABC):
     # sample over multiple runs (LLM calls). We default to averaging and thus making
     # macro averaging the overall computation default.
     AGGREGATORS: list[Aggregator] = []
+    # Set by the evaluation generator before calculate(); controls how infra failures are handled.
+    fail_on_error: bool = False
 
     @classproperty
     def NAMES(cls) -> list[str]:
@@ -43,3 +47,17 @@ class BaseMetric[Response](ABC):
     @abstractmethod
     def calculate(self, response: Response) -> list[MetricResult]:
         raise NotImplementedError
+
+    def _record_or_raise(self, exc: Exception) -> list[MetricResult]:
+        """Infra failure (e.g. a Docker image-pull rate limit): abort when fail_on_error is set,
+        otherwise record a per-sample error so the run continues."""
+        if raise_errors() or self.fail_on_error:
+            raise exc
+        return [
+            MetricResult(
+                metric_name=self.NAME,
+                value=None,
+                higher_is_better=True,
+                error=Error(error_class=exc.__class__.__name__, message=str(exc), traceback=traceback.format_exc()),
+            )
+        ]
