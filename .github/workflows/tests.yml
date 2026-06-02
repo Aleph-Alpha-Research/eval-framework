@@ -88,7 +88,7 @@ jobs:
           version: "~=0.8.16"
 
       - name: Restore and save cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-${{ github.run_id }}
@@ -210,7 +210,7 @@ jobs:
           version: "~=0.8.16"
 
       - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
           key: hf-datasets-${{ github.run_id }}
@@ -237,7 +237,7 @@ jobs:
           version: "~=0.8.16"
 
       - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-${{ github.run_id }}
@@ -294,7 +294,7 @@ jobs:
 
       - name: Huggingface datasets cache
         if: steps.should_run.outputs.value == 'true'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-${{ github.run_id }}
@@ -329,7 +329,7 @@ jobs:
           version: "~=0.8.16"
 
       - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-${{ github.run_id }}
@@ -390,7 +390,7 @@ jobs:
         run: docker pull ${{ needs.tag.outputs.image }}
 
       - name: Huggingface datasets cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
           key: hf-datasets-${{ github.run_id }}
