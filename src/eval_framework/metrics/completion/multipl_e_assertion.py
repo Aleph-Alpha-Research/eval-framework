@@ -107,14 +107,16 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
             success, output = self._execute(context, response.completion, timeout=60)
         except SandboxTimeoutError as exc:
             # The submitted code timed out (e.g. an infinite loop) -- a failing sample, not an infra
-            # problem. Any other sandbox/Docker error (e.g. an image pull rate limit) propagates so
-            # the run fails instead of being scored as a wrong answer.
+            # problem.
             error = Error(
                 error_class=exc.__class__.__name__,
                 message=str(exc),
                 traceback=traceback.format_exc(),
             )
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=error)]
+        except Exception as exc:
+            # Any other sandbox/Docker error (e.g. an image pull rate limit) is an infra failure.
+            return self._record_or_raise(exc)
 
         return [
             MetricResult(

@@ -340,15 +340,29 @@ def _completion() -> Completion:
     )
 
 
-def test_code_assertion_propagates_image_pull_error() -> None:
+def test_code_assertion_propagates_image_pull_error_when_fail_on_error() -> None:
     # An infra failure (image pull rate-limited) must abort the run, not be scored as value=0.
     metric = CodeCompletionAssertion()
+    metric.fail_on_error = True
     with patch(
         "eval_framework.metrics.completion.code_assertion.run_python_code",
         side_effect=ImagePullError("python:3.12-slim", "429 toomanyrequests"),
     ):
         with pytest.raises(ImagePullError):
             metric.calculate(_completion())
+
+
+def test_code_assertion_records_image_pull_error_by_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Without fail_on_error, an infra failure is recorded as a per-sample error (value=None).
+    monkeypatch.setenv("DEBUG", "false")
+    metric = CodeCompletionAssertion()
+    with patch(
+        "eval_framework.metrics.completion.code_assertion.run_python_code",
+        side_effect=ImagePullError("python:3.12-slim", "429 toomanyrequests"),
+    ):
+        results = metric.calculate(_completion())
+    assert results[0].value is None
+    assert results[0].error is not None
 
 
 def test_code_assertion_scores_timeout_as_failure() -> None:

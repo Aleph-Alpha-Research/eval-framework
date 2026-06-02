@@ -89,10 +89,12 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
             raise Exception(f"Failed to rebuild parsing functions => {e}")
 
         n = 1  # we only support N=1 at the moment
-        # A sandbox/Docker failure (e.g. an image pull rate limit) propagates so the run fails
-        # rather than being scored as a wrong answer; only a code timeout is counted as a failure
-        # (handled in _count_correct_samples).
-        c, output = self._count_correct_samples(response.completion, parsed_context)
+        try:
+            c, output = self._count_correct_samples(response.completion, parsed_context)
+        except Exception as e:
+            # Infra failure (e.g. an image pull rate limit); a code timeout is already scored as a
+            # failure inside _count_correct_samples.
+            return self._record_or_raise(e)
 
         pass_at_k_value = estimate_pass_at_k(n, c, self.k)
         return [
