@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 59**
+**Total number of tasks: 60**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -29,6 +29,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [GSM8K_OLMES](GSM8K_OLMES.md)
 - [GlobalMMLU](GlobalMMLU.md)
 - [GlobalMMLU_German](GlobalMMLU_German.md)
+- [HELLASWAG](HELLASWAG.md)
 - [HELLASWAG_OLMES](HELLASWAG_OLMES.md)
 - [HumanEvalBPB](HumanEvalBPB.md)
 - [HumanEval_OLMES](HumanEval_OLMES.md)

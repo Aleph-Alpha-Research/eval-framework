@@ -13,7 +13,6 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.main import main
 from eval_framework.result_processors.base import Result
 from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
-from eval_framework.tasks.benchmarks.wmt import WMT14
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import get_task
 from eval_framework.tasks.task_names import TaskNameEnum
@@ -30,13 +29,6 @@ experiment_setups = [
         "SmolLM135M",
         HELLASWAG.NAME,
         {"Accuracy Loglikelihood": 0.4, "Accuracy Normalized Loglikelihood": 0.6},
-        NUM_FEWSHOT,
-        NUM_SAMPLES,
-    ),
-    (
-        "Pythia410m",
-        WMT14.NAME,
-        {"BLEU": 10.349088304273867, "chrF": 31.319761493950665, "TER": 835.0922904366865},
         NUM_FEWSHOT,
         NUM_SAMPLES,
     ),
