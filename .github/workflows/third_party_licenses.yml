@@ -42,6 +42,9 @@ jobs:
       - name: Regenerate license reports
         run: uv run --group dev python_licenses.py both
 
+      - name: Run Pre-Commit
+        run: uvx pre-commit run --all-files
+
       - name: Create pull request
         id: pr
         uses: peter-evans/create-pull-request@v8
@@ -60,4 +63,4 @@ jobs:
         if: steps.pr.outputs.pull-request-number != ''
         env:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
-        run: gh pr merge --auto --merge "${{ steps.pr.outputs.pull-request-number }}"
+        run: gh pr merge --auto --squash "${{ steps.pr.outputs.pull-request-number }}"
