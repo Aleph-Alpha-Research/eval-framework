@@ -288,25 +288,7 @@ def test_response_generator_llm_token_overloading(
 @pytest.mark.parametrize(
     "task_subjects, expected_subjects, raises, task_name",
     [
-        pytest.param(
-            # ["DP, *", "*, DataAnalysis", "PoT, FactChecking"],
-            ["TCoT, *", "*, DataAnalysis", "PoT, FactChecking"],
-            [
-                # ("DP", "NumericalReasoning"),
-                # ("DP", "DataAnalysis"),
-                # ("DP", "FactChecking"),
-                ("PoT", "DataAnalysis"),
-                ("PoT", "FactChecking"),
-                ("SCoT", "DataAnalysis"),
-                ("TCoT", "NumericalReasoning"),
-                ("TCoT", "DataAnalysis"),
-                ("TCoT", "FactChecking"),
-            ],
-            False,
-            "TableBench",
-            id="valid_subjects_tuples",
-        ),
-        pytest.param(["foobar, *"], [], True, "TableBench", id="invalid_subjects_str"),
+        pytest.param(["foobar, *"], [], True, "HumanEval_OLMES", id="invalid_subjects_str"),
         pytest.param(
             ["computer_security", "conceptual_physics"],
             ["computer_security", "conceptual_physics"],
@@ -337,8 +319,8 @@ def test_filter_task_subjects(
 @pytest.mark.parametrize(
     "task_name, hf_revision, raises",
     [
-        pytest.param("Math", None, False),
-        pytest.param("Math", "not_valid_revision_1", True),
+        pytest.param("HumanEval_OLMES", None, False),
+        pytest.param("HumanEval_OLMES", "not_valid_revision_1", True),
         pytest.param("ARC", None, False),
         pytest.param("IFEval", "9381f5d15347ba8854ffa2a480984ce7e554ef56", False),  # old valid revision
     ],
