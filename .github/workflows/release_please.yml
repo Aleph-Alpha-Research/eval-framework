@@ -27,7 +27,7 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
     steps:
       - id: release
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v5
       - if: ${{ steps.release.outputs.release_created }}
         name: Checkout
         uses: actions/checkout@v6
