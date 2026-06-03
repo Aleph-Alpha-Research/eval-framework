@@ -77,7 +77,7 @@ jobs:
 
       - if: ${{ needs.release-please.outputs.release_created }}
         name: Build and Push Image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: Dockerfile
