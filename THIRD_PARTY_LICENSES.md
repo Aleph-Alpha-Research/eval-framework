@@ -9,8 +9,9 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 |---|---|
 | `MIT` | 41 |
 | `BSD-3-Clause` | 33 |
-| `Apache-2.0` | 19 |
+| `Apache-2.0` | 18 |
 | `Apache-2.0 OR BSD-3-Clause` | 2 |
+| `UNKNOWN` | 2 |
 | `Apache Software License; MIT License` | 1 |
 | `Apache-2.0 AND CNRI-Python` | 1 |
 | `Copyright (c) 2013-2025, Graham Dumpleton` | 1 |
@@ -21,7 +22,6 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 | `MIT License; Mozilla Public License 2.0 (MPL 2.0)` | 1 |
 | `MPL-2.0` | 1 |
 | `PSF-2.0` | 1 |
-| `UNKNOWN` | 1 |
 | `Unlicense` | 1 |
 
 ## Apache Software License; MIT License
@@ -30,23 +30,22 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.40.72 - https://github.com/boto/boto3
-- **botocore** 1.40.72 - https://github.com/boto/botocore
-- **datasets** 4.5.0 - https://github.com/huggingface/datasets
+- **boto3** 1.43.19 - https://github.com/boto/boto3
+- **botocore** 1.43.19 - https://github.com/boto/botocore
+- **datasets** 4.8.5 - https://github.com/huggingface/datasets
 - **google-auth** 2.43.0 - https://github.com/googleapis/google-auth-library-python
-- **google-crc32c** 1.7.1 - https://github.com/googleapis/python-crc32c
 - **hf-xet** 1.2.0 - https://github.com/huggingface/xet-core
-- **huggingface-hub** 0.33.5 - https://github.com/huggingface/huggingface_hub
+- **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
 - **kubernetes** 31.0.0 - https://github.com/kubernetes-client/python
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
-- **lingua-language-detector** 2.1.1 - https://github.com/pemistahl/lingua-py
+- **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.9.4 - https://www.nltk.org/
 - **pyarrow** 22.0.0 - https://arrow.apache.org/
-- **python-iso639** 2025.11.11 - https://github.com/jacksonllee/iso639
+- **python-iso639** 2026.4.20 - https://github.com/jacksonllee/iso639
 - **requests** 2.32.5 - https://requests.readthedocs.io
 - **rsa** 4.9.1 - https://stuvel.eu/rsa
-- **s3transfer** 0.14.0 - https://github.com/boto/s3transfer
-- **sacrebleu** 2.5.1 - https://github.com/mjpost/sacrebleu
+- **s3transfer** 0.18.0 - https://github.com/boto/s3transfer
+- **sacrebleu** 2.6.0 - https://github.com/mjpost/sacrebleu
 - **tzdata** 2025.2 - https://github.com/python/tzdata
 - **websocket-client** 1.9.0 - https://github.com/websocket-client/websocket-client.git
 
@@ -89,7 +88,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **Pygments** 2.19.2 - https://pygments.org
 - **python-dotenv** 1.2.2 - https://github.com/theskumar/python-dotenv
 - **requests-oauthlib** 2.0.0 - https://github.com/requests/requests-oauthlib
-- **scipy** 1.16.3 - https://scipy.org/
+- **scipy** 1.17.1 - https://scipy.org/
 - **sentry-sdk** 2.44.0 - https://github.com/getsentry/sentry-python
 - **smmap** 5.0.2 - https://github.com/gitpython-developers/smmap
 - **sympy** 1.13.1 - https://sympy.org
@@ -101,7 +100,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## GNU General Public License (GPL)
 
-- **mysql-connector-python** 9.5.0 - https://dev.mysql.com/doc/connector-python/en/
+- **mysql-connector-python** 9.7.0 - https://dev.mysql.com/doc/connector-python/en/
 
 ## GNU Lesser General Public License v2 (LGPLv2)
 
@@ -129,15 +128,15 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **durationpy** 0.10 - https://github.com/icholy/durationpy
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.0.1 - https://github.com/jmespath/jmespath.py
-- **jsonschema** 4.25.1 - https://github.com/python-jsonschema/jsonschema
+- **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
 - **jsonschema-specifications** 2025.9.1 - https://github.com/python-jsonschema/jsonschema-specifications
 - **markdown-it-py** 4.0.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
 - **murmurhash** 1.0.14 - https://github.com/explosion/murmurhash
 - **platformdirs** 4.5.0 - https://github.com/tox-dev/platformdirs
 - **preshed** 3.0.10 - https://github.com/explosion/preshed
-- **pydantic** 2.12.4 - https://github.com/pydantic/pydantic
-- **pydantic_core** 2.41.5 - https://github.com/pydantic/pydantic-core
+- **pydantic** 2.13.4 - https://github.com/pydantic/pydantic
+- **pydantic_core** 2.46.4 - https://github.com/pydantic
 - **pytz** 2025.2 - http://pythonhosted.org/pytz
 - **PyYAML** 6.0.3 - https://pyyaml.org/
 - **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
@@ -154,7 +153,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **typer** 0.20.0 - https://github.com/fastapi/typer
 - **typing-inspection** 0.4.2 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.5.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
-- **wandb** 0.23.0 - https://github.com/wandb/wandb
+- **wandb** 0.27.0 - https://github.com/wandb/wandb
 - **wasabi** 1.1.3 - https://github.com/explosion/wasabi
 - **weasel** 1.0.0 - https://github.com/explosion/weasel/
 - **xmltodict** 0.15.1 - https://github.com/martinblech/xmltodict
@@ -173,6 +172,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## UNKNOWN
 
+- **google-crc32c** 1.8.0 - https://github.com/googleapis/python-crc32c
 - **llm-sandbox** 0.3.39 - https://vndee.github.io/llm-sandbox/
 
 ## Unlicense
@@ -306,7 +306,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.40.72 (Apache-2.0)
+### boto3 1.43.19 (Apache-2.0)
 
 ```text
 Apache License
@@ -487,7 +487,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.40.72 (Apache-2.0)
+### botocore 1.43.19 (Apache-2.0)
 
 ```text
 Apache License
@@ -913,7 +913,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### datasets 4.5.0 (Apache-2.0)
+### datasets 4.8.5 (Apache-2.0)
 
 ```text
 Apache License
@@ -1520,7 +1520,7 @@ Apache License
    limitations under the License.
 ```
 
-### google-crc32c 1.7.1 (Apache-2.0)
+### google-crc32c 1.8.0 (UNKNOWN)
 
 ```text
 Apache License
@@ -2008,7 +2008,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### huggingface-hub 0.33.5 (Apache-2.0)
+### huggingface_hub 0.36.2 (Apache-2.0)
 
 ```text
 Apache License
@@ -2377,7 +2377,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### jsonschema 4.25.1 (MIT)
+### jsonschema 4.26.0 (MIT)
 
 ```text
 Copyright (c) 2013 Julian Berman
@@ -2649,7 +2649,7 @@ Copyright 2014-2015 Michal "Mimino" Danilak
    limitations under the License.
 ```
 
-### lingua-language-detector 2.1.1 (Apache-2.0)
+### lingua-language-detector 2.2.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -3118,12 +3118,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### mysql-connector-python 9.5.0 (GNU General Public License (GPL))
+### mysql-connector-python 9.7.0 (GNU General Public License (GPL))
 
 ```text
 Licensing Information User Manual
 
-MySQL Connector/Python 9.5.0 Community
+MySQL Connector/Python 9.7.0 Community
      __________________________________________________________________
 
 Introduction
@@ -3131,18 +3131,18 @@ Introduction
    This License Information User Manual contains Oracle's product license
    and other licensing information, including licensing information for
    third-party software which may be included in this distribution of
-   MySQL Connector/Python 9.5.0 Community.
+   MySQL Connector/Python 9.7.0 Community.
 
-   Last updated: September 2025
+   Last updated: February 2026
 
 Licensing Information
 
-   This release of MySQL Connector/Python 9.5.0 Community is brought to
+   This release of MySQL Connector/Python 9.7.0 Community is brought to
    you by the MySQL team at Oracle. This software is released under
    version 2 of the GNU General Public License (GPLv2), as set forth
    below, with the following additional permissions:
 
-   This distribution of MySQL Connector/Python 9.5.0 Community is designed
+   This distribution of MySQL Connector/Python 9.7.0 Community is designed
    to work with certain software (including but not limited to OpenSSL)
    that is licensed under separate terms, as designated in a particular
    file or component or in the license documentation. Without limiting
@@ -3157,7 +3157,7 @@ Licensing Information
    a copy of which is reproduced below and can also be found along with
    its FAQ at http://oss.oracle.com/licenses/universal-foss-exception.
 
-   Copyright (c) 2012, 2025, Oracle and/or its affiliates.
+   Copyright (c) 2012, 2026, Oracle and/or its affiliates.
 
 Election of GPLv2
 
@@ -16734,7 +16734,7 @@ DAMAGES.
                      END OF TERMS AND CONDITIONS
 ```
 
-### pydantic 2.12.4 (MIT)
+### pydantic 2.13.4 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -16760,7 +16760,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### pydantic_core 2.41.5 (MIT)
+### pydantic_core 2.46.4 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -16907,7 +16907,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### python-iso639 2025.11.11 (Apache-2.0)
+### python-iso639 2026.4.20 (Apache-2.0)
 
 ```text
 Apache License
@@ -17653,7 +17653,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ```
 
-### s3transfer 0.14.0 (Apache-2.0)
+### s3transfer 0.18.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -17859,7 +17859,7 @@ Apache License
    limitations under the License.
 ```
 
-### sacrebleu 2.5.1 (Apache-2.0)
+### sacrebleu 2.6.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -18065,7 +18065,7 @@ Apache License
    limitations under the License.
 ```
 
-### scipy 1.16.3 (BSD-3-Clause)
+### scipy 1.17.1 (BSD-3-Clause)
 
 ```text
 Copyright (c) 2001-2002 Enthought, Inc. 2003, SciPy Developers.
@@ -19888,7 +19888,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### wandb 0.23.0 (MIT)
+### wandb 0.27.0 (MIT)
 
 ```text
 MIT License

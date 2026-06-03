@@ -10,31 +10,31 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.40.54,<2` |
-| `datasets` | `>=4.0.0,<5` |
-| `google-crc32c` | `>=1.5.0,<2` |
+| `boto3` | `>=1.43.18,<2` |
+| `datasets` | `>=4.8.5,<5` |
+| `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
-| `jsonschema` | `>=4.23.0,<5` |
+| `jsonschema` | `>=4.26.0,<5` |
 | `kubernetes` | `>=31.0.0,<32` |
 | `langdetect` | `>=1.0.9,<2` |
-| `lingua-language-detector` | `>=2.0.2,<3` |
+| `lingua-language-detector` | `>=2.2.0,<3` |
 | `llm-sandbox` | `==0.3.39` |
 | `lxml` | `>=6.1.1,<7` |
-| `mysql-connector-python` | `>=9.0.0,<10` |
-| `nltk` | `>=3.9.1,<4` |
+| `mysql-connector-python` | `>=9.7.0,<10` |
+| `nltk` | `>=3.9.4,<4` |
 | `numpy` | `>=1.26.4` |
 | `psycopg2-binary` | `>=2.9.12,<3` |
 | `pycountry` | `>=24.6.1,<25` |
-| `pydantic` | `>=2.7,<3` |
-| `python-dotenv` | `>=1.0.1,<2` |
-| `python-iso639` | `>=2025.2.18` |
-| `pyyaml` | `>=6.0.1,<7` |
-| `sacrebleu` | `>=2.4.3,<3` |
-| `scipy` | `>=1.14.0,<2` |
+| `pydantic` | `>=2.13.4,<3` |
+| `python-dotenv` | `>=1.2.2,<2` |
+| `python-iso639` | `>=2026.4.20` |
+| `pyyaml` | `>=6.0.3,<7` |
+| `sacrebleu` | `>=2.6.0,<3` |
+| `scipy` | `>=1.17.1,<2` |
 | `spacy` | `>=3.8.14,<4` |
 | `sympy` | `>=1.13.1,<2` |
-| `wandb` | `>=0.23.0,<1` |
-| `xmltodict` | `>=0.13.0,<0.16` |
+| `wandb` | `>=0.27.0,<1` |
+| `xmltodict` | `>=0.15.1,<0.16` |
 
 ## Transitive
 
@@ -44,7 +44,7 @@ and first-party/internal packages are excluded.
 | `anyio` | `4.11.0` |
 | `attrs` | `25.4.0` |
 | `blis` | `1.3.2` |
-| `botocore` | `1.40.72` |
+| `botocore` | `1.43.19` |
 | `cachetools` | `6.2.1` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2025.11.12` |
@@ -65,7 +65,7 @@ and first-party/internal packages are excluded.
 | `hf-xet` | `1.2.0` |
 | `httpcore` | `1.0.9` |
 | `httpx` | `0.28.1` |
-| `huggingface-hub` | `0.33.5` |
+| `huggingface-hub` | `0.36.2` |
 | `idna` | `3.11` |
 | `jinja2` | `3.1.6` |
 | `jmespath` | `1.0.1` |
@@ -87,7 +87,7 @@ and first-party/internal packages are excluded.
 | `pyarrow` | `22.0.0` |
 | `pyasn1` | `0.6.1` |
 | `pyasn1-modules` | `0.4.2` |
-| `pydantic-core` | `2.41.5` |
+| `pydantic-core` | `2.46.4` |
 | `pygments` | `2.19.2` |
 | `python-dateutil` | `2.9.0.post0` |
 | `pytz` | `2025.2` |
@@ -99,7 +99,7 @@ and first-party/internal packages are excluded.
 | `rich` | `14.2.0` |
 | `rpds-py` | `0.28.0` |
 | `rsa` | `4.9.1` |
-| `s3transfer` | `0.14.0` |
+| `s3transfer` | `0.18.0` |
 | `sentry-sdk` | `2.44.0` |
 | `setuptools` | `80.9.0` |
 | `shellingham` | `1.5.4` |
