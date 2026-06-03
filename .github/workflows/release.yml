@@ -40,7 +40,7 @@ jobs:
       - name: Build Wheel
         run: uv build --out-dir ./dist .
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: 'pypi-dist'
           path: './dist'
@@ -59,7 +59,7 @@ jobs:
 
     steps:
       - name: Download dist
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: 'pypi-dist'
           path: './dist'
@@ -84,7 +84,7 @@ jobs:
 
     steps:
       - name: Download dist
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: 'pypi-dist'
           path: './dist'
