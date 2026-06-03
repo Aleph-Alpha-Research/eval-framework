@@ -44,7 +44,7 @@ jobs:
 
       - name: Create pull request
         id: pr
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ steps.bot-token.outputs.token }}
           commit-message: "chore: refresh third-party license reports"
