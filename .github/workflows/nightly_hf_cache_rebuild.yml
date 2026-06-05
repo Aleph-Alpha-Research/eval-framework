@@ -40,4 +40,4 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
           echo "Rebuilding all datasets cache"
-          uv run --extra=comet --extra=openai python tests/tests_eval_framework/utils/update_datasets.py rebuild
+          uv run --extra=openai python tests/tests_eval_framework/utils/update_datasets.py rebuild

@@ -100,7 +100,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
           echo "Updating changed datasets"
-          uv run --extra=comet --extra=openai python tests/tests_eval_framework/utils/update_datasets.py update
+          uv run --extra=openai python tests/tests_eval_framework/utils/update_datasets.py update
 
   tag:
     # Set Docker Tag and Image Name for Docker Build and Push (GPU Runs)
@@ -177,7 +177,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        extras: ['', 'determined', 'api', 'openai', 'transformers', 'accelerate', 'comet', 'optional']
+        extras: ['', 'determined', 'api', 'openai', 'transformers', 'accelerate', 'optional']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
