@@ -973,7 +973,7 @@ requires-dist = [
     { name = "jinja2", marker = "extra == 'optional'", specifier = ">=3.1.6,<4" },
     { name = "jsonlines", specifier = ">=4,<5" },
     { name = "jsonschema", specifier = ">=4.26.0,<5" },
-    { name = "kubernetes", specifier = ">=36.0.1,<37" },
+    { name = "kubernetes", specifier = ">=36.0.2,<37" },
     { name = "langdetect", specifier = ">=1.0.9,<2" },
     { name = "lingua-language-detector", specifier = ">=2.2.0,<3" },
     { name = "llm-sandbox", extras = ["docker"], specifier = "==0.3.39" },
