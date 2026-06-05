@@ -4,7 +4,6 @@ from typing import Any
 
 from eval_framework.metrics.completion.bleu import BLEU
 from eval_framework.metrics.completion.chrf import CHRF
-from eval_framework.metrics.completion.comet import COMET
 from eval_framework.shared.types import BaseMetricContext, UntemplatedPrompt
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 
@@ -29,7 +28,7 @@ class FloresPlus(BaseTask[str]):
     SAMPLE_SPLIT = "dev"
     FEWSHOT_SPLIT = "devtest"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [BLEU, CHRF, COMET]
+    METRICS = [BLEU, CHRF]
     SUBJECTS = [f"{s}-{t}" for s, t in product(LANG_MAP, LANG_MAP) if s != t]
     PERTURBATION_UNMODIFIABLE_WORDS = ["sentence"]
     LANGUAGE = {
