@@ -10,12 +10,12 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.18,<2` |
+| `boto3` | `>=1.43.19,<2` |
 | `datasets` | `>=4.8.5,<5` |
 | `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
 | `jsonschema` | `>=4.26.0,<5` |
-| `kubernetes` | `>=36.0.1,<37` |
+| `kubernetes` | `>=36.0.2,<37` |
 | `langdetect` | `>=1.0.9,<2` |
 | `lingua-language-detector` | `>=2.2.0,<3` |
 | `llm-sandbox` | `==0.3.39` |
@@ -47,7 +47,7 @@ and first-party/internal packages are excluded.
 | `anyio` | `4.11.0` |
 | `attrs` | `25.4.0` |
 | `blis` | `1.3.2` |
-| `botocore` | `1.43.19` |
+| `botocore` | `1.43.23` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2025.11.12` |
 | `charset-normalizer` | `3.4.4` |
