@@ -22,7 +22,6 @@ uv sync --all-extras
 To select specific optional features, you can install them individually. Available extras are:
 
 - `api` for Aleph Alpha client inference
-- `comet` for COMET metric
 - `determined` for distributed evaluation
 - `mistral` for Mistral model inference
 - `transformers` for HuggingFace inference

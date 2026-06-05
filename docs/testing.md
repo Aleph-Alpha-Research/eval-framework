@@ -57,7 +57,7 @@ uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/in
 
   * **Runtime:** ~20 min
   * **Purpose:** Rebuild the full dataset cache for CI and experiments
-  * **Command:** `uv run --extra=comet --extra=openai python tests/tests_eval_framework/utils/update_datasets.py rebuild`
+  * **Command:** `uv run --extra=openai python tests/tests_eval_framework/utils/update_datasets.py rebuild`
 
 * **Nightly Docker build cache**
 
