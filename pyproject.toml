@@ -68,7 +68,7 @@ transformers = [
 ]
 accelerate = ["accelerate"]
 vllm = [
-  "vllm>=0.8.5,<0.9",
+  "vllm>=0.22,<0.23",
   "torch>=2.5,<3"
 ]
 mistral = [
