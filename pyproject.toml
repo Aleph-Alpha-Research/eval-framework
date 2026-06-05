@@ -34,7 +34,7 @@ dependencies = [
   "jsonschema>=4.26.0,<5",
   "mysql-connector-python>=9.7.0,<10", # required for sql-related tasks
   "psycopg2-binary>=2.9.12,<3", # required for sql-related tasks
-  "sympy>=1.13.1,<2",
+  "sympy>=1.14.0,<2",
   "llm-sandbox[docker]==0.3.39",
   "jsonlines>=4,<5",
   "lxml>=6.1.1,<7",
