@@ -47,7 +47,6 @@ pip install eval_framework
 
 There are optional extras available to unlock specific features of the library:
 - `api` for inference using the aleph-alpha client.
-- `comet` for the COMET metric.
 - `determined` for running jobs via determined.
 - `mistral` for inference on Mistral models.
 - `transformers` for inference using the transformers library.
