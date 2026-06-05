@@ -59,10 +59,10 @@ api = ["aleph-alpha-client>=11.5.1"]
 openai = [
   "openai>=1.62,<3",
   "tiktoken>=0.13.0,<1",
-  "transformers>=4.45.2,<5",
+  "transformers>=5,<6",
 ]
 transformers = [
-  "transformers>=4.45.2,<5",
+  "transformers>=5,<6",
   "torch>=2.5,<3",
   "accelerate>=1.13.0,<2",
 ]
@@ -78,7 +78,7 @@ mistral = [
 ]
 # from template-formatting
 optional = [
-  "transformers>=4.45.2,<5",
+  "transformers>=5,<6",
   "jinja2>=3.1.6,<4"
 ]
 all = [
