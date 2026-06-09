@@ -8,7 +8,7 @@ from datasets import Dataset, DatasetDict
 from eval_framework.tasks.base import Sample
 from eval_framework.tasks.benchmarks.mmlu_de import MMLU_DE
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
-from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
+from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
 
 # ---------------------------------------------------------------------------
 # Formatter hash tests (Hugging Face)
@@ -17,8 +17,9 @@ from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash
 
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-def test_formatter_hash(formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test("MMLU_DE", formatter_cls)
+@pytest.mark.parametrize("task_name", get_task_names_for_module("mmlu_de"))
+def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
+    run_formatter_hash_test(task_name, formatter_cls)
 
 
 # ---------------------------------------------------------------------------
