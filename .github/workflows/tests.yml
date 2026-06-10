@@ -262,6 +262,9 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Mark workspace as safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - uses: dorny/paths-filter@v4
         id: filter
         with:
