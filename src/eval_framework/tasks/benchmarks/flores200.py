@@ -1,7 +1,7 @@
 import os
 import random
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pycountry
 from datasets import DatasetDict, DownloadConfig, load_dataset
@@ -100,11 +100,11 @@ class Flores200(BaseTask[str]):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         source_key = item["subject"].split("-")[0]
-        source_language = pycountry.languages.get(alpha_3=source_key.split("_")[0]).name
+        source_language = cast(Any, pycountry.languages.get(alpha_3=source_key.split("_")[0])).name
         source = item[f"sentence_{source_key}"]
         instruction = f"{source_language} sentence: {source}\n"
         target_key = item["subject"].split("-")[1]
-        target_language = pycountry.languages.get(alpha_3=target_key.split("_")[0]).name
+        target_language = cast(Any, pycountry.languages.get(alpha_3=target_key.split("_")[0])).name
 
         return f"{instruction}{target_language} sentence:"
 
