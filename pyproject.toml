@@ -21,7 +21,7 @@ dependencies = [
   "pyyaml>=6.0.3,<7",
   "xmltodict>=0.15.1,<0.16",
   "pydantic>=2.13.4,<3",
-  "datasets>=4.8.5,<5",
+  "datasets>=5.0.0,<6",
   "sacrebleu>=2.6.0,<3",
   "pycountry>=26.2.16,<27",
   "nltk>=3.9.4,<4",
@@ -38,7 +38,7 @@ dependencies = [
   "jsonlines>=4,<5",
   "lxml>=6.1.1,<7",
   "python-iso639>=2026.4.20",
-  "wandb>=0.27.0,<1",
+  "wandb>=0.27.2,<1",
   "boto3>=1.43.19,<2",
   "numpy>=2.2.6",
   # is a dependency of sympy, but not explicitly listed in the requirements.txt
