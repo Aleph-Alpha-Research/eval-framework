@@ -23,7 +23,7 @@ and first-party/internal packages are excluded.
 | `nltk` | `>=3.9.4,<4` |
 | `numpy` | `>=2.2.6` |
 | `psycopg2-binary` | `>=2.9.12,<3` |
-| `pycountry` | `>=24.6.1,<25` |
+| `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.13.4,<3` |
 | `python-dotenv` | `>=1.2.2,<2` |
 | `python-iso639` | `>=2026.4.20` |
@@ -33,7 +33,7 @@ and first-party/internal packages are excluded.
 | `spacy` | `>=3.8.14,<4` |
 | `sympy` | `>=1.13.1,<2` |
 | `wandb` | `>=0.27.2,<1` |
-| `xmltodict` | `>=0.15.1,<0.16` |
+| `xmltodict` | `>=1.0.4,<1.1` |
 
 ## Transitive
 
