@@ -16,9 +16,9 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 | `Apache-2.0 AND CNRI-Python` | 1 |
 | `Copyright (c) 2013-2025, Graham Dumpleton` | 1 |
 | `GNU General Public License (GPL)` | 1 |
-| `GNU Lesser General Public License v2 (LGPLv2)` | 1 |
 | `GNU Library or Lesser General Public License (LGPL)` | 1 |
 | `ISC` | 1 |
+| `LGPL-2.1-only` | 1 |
 | `MIT License; Mozilla Public License 2.0 (MPL 2.0)` | 1 |
 | `MPL-2.0` | 1 |
 | `PSF-2.0` | 1 |
@@ -94,10 +94,6 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 - **mysql-connector-python** 9.7.0 - https://dev.mysql.com/doc/connector-python/en/
 
-## GNU Lesser General Public License v2 (LGPLv2)
-
-- **pycountry** 24.6.1 - https://github.com/flyingcircusio/pycountry
-
 ## GNU Library or Lesser General Public License (LGPL)
 
 - **psycopg2-binary** 2.9.12 - https://psycopg.org/
@@ -105,6 +101,10 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## ISC
 
 - **shellingham** 1.5.4 - https://github.com/sarugaku/shellingham
+
+## LGPL-2.1-only
+
+- **pycountry** 26.2.16 - https://github.com/pycountry/pycountry
 
 ## MIT
 
@@ -146,7 +146,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **wandb** 0.27.2 - https://github.com/wandb/wandb
 - **wasabi** 1.1.3 - https://github.com/explosion/wasabi
 - **weasel** 1.0.0 - https://github.com/explosion/weasel/
-- **xmltodict** 0.15.1 - https://github.com/martinblech/xmltodict
+- **xmltodict** 1.0.4 - https://github.com/martinblech/xmltodict
 
 ## MIT License; Mozilla Public License 2.0 (MPL 2.0)
 
@@ -15722,7 +15722,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### pycountry 24.6.1 (GNU Lesser General Public License v2 (LGPLv2))
+### pycountry 26.2.16 (LGPL-2.1-only)
 
 ```text
 GNU LESSER GENERAL PUBLIC LICENSE
@@ -19408,7 +19408,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### xmltodict 0.15.1 (MIT)
+### xmltodict 1.0.4 (MIT)
 
 ```text
 Copyright (C) 2012 Martin Blech and individual contributors.
