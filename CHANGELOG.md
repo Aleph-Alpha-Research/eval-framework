@@ -14,6 +14,33 @@
 
 ### Bug Fixes
 
+## [0.4.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.8...v0.4.0) (2026-06-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* narrow task registry to tested tasks ([#318](https://github.com/Aleph-Alpha-Research/eval-framework/issues/318))
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.19,&lt;2 ([#327](https://github.com/Aleph-Alpha-Research/eval-framework/issues/327)) ([db3e7ad](https://github.com/Aleph-Alpha-Research/eval-framework/commit/db3e7ad6c76420e116fa8e408b431035a92e9009))
+* **deps:** update dependency kubernetes to &gt;=36.0.2,&lt;37 ([#328](https://github.com/Aleph-Alpha-Research/eval-framework/issues/328)) ([893469b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/893469b09fe8cbab867edbc7ba391e1465246510))
+* **deps:** update dependency kubernetes to v36 ([#321](https://github.com/Aleph-Alpha-Research/eval-framework/issues/321)) ([41f4cfd](https://github.com/Aleph-Alpha-Research/eval-framework/commit/41f4cfd74e9733a0b663bbd060179b2f5a3e8209))
+* **deps:** update dependency mistral-common to &gt;=1.11.3,&lt;2 ([#347](https://github.com/Aleph-Alpha-Research/eval-framework/issues/347)) ([55617c8](https://github.com/Aleph-Alpha-Research/eval-framework/commit/55617c8506b2929b0147dcedd0b0ba6acc95705b))
+* **deps:** update dependency pycountry to v26 ([#353](https://github.com/Aleph-Alpha-Research/eval-framework/issues/353)) ([a601fce](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a601fcec7a7667d31934bf7739661052ec500372))
+* **deps:** update dependency wandb to &gt;=0.27.2,&lt;1 ([#354](https://github.com/Aleph-Alpha-Research/eval-framework/issues/354)) ([21e22a6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/21e22a6bb028a83cd09806bfe50638f9feaa520d))
+* **deps:** update dependency xmltodict to v1 ([#360](https://github.com/Aleph-Alpha-Research/eval-framework/issues/360)) ([03e7b2f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/03e7b2fa80cbb3262042fda8863df75f369dfbb8))
+
+
+### Documentation
+
+* removing comet from docs ([af3bf5f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/af3bf5fc2ee81a8651995ead4f2fd337f5a615c1))
+
+
+### Code Refactoring
+
+* narrow task registry to tested tasks ([#318](https://github.com/Aleph-Alpha-Research/eval-framework/issues/318)) ([e876175](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e876175ef8624ee5e1e18b5e4d9131673dc4bf04))
+
 ## [0.3.8](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.7...v0.3.8) (2026-06-02)
 
 
