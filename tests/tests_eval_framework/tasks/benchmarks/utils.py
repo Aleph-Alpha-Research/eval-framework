@@ -2,16 +2,20 @@
 
 import random
 import sys
+from dataclasses import dataclass
+from unittest.mock import patch
 
 import pytest
+from datasets import Dataset, DatasetDict
 
+from eval_framework.tasks.base import BaseTask, Sample
 from eval_framework.tasks.registry import (
     _REGISTRY,
     TaskPlaceholder,
     get_task,
     registered_task_names,
 )
-from template_formatting.formatter import BaseFormatter
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Message
 from tests.tests_eval_framework.utils import assert_hash_string
 
 
@@ -121,3 +125,67 @@ def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], 
         suffix_key=formatter_cls.__name__,
         tested_string=formatted_sample_with_completions,
     )
+
+
+# ---------------------------------------------------------------------------
+# Shared util functions for offline prompt tests
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ExpectedPrompt:
+    messages: list[Message]
+    concat: str
+    ground_truth: str | list[str] | None
+    completions: list[str] | None
+
+
+def _get_first_offline_sample(
+    task_cls: type[BaseTask],
+    eval_rows: list[dict],
+    fewshot_rows: list[dict],
+    *,
+    num_fewshot: int,
+    subjects: list[str],
+) -> Sample:
+    """Same entry points as production: ``with_overwrite`` + ``iterate_samples``."""
+    task = task_cls.with_overwrite(num_fewshot=num_fewshot, custom_subjects=subjects, custom_hf_revision=None)
+    if task.FEWSHOT_SPLIT != task.SAMPLE_SPLIT:
+        fictional_dataset = DatasetDict(
+            {
+                task.SAMPLE_SPLIT: Dataset.from_list(eval_rows),
+                task.FEWSHOT_SPLIT: Dataset.from_list(fewshot_rows),
+            }
+        )
+    else:
+        fictional_dataset = DatasetDict(
+            # Use fewshot row first such that after shuffling (with seed 42) the eval row is the first item
+            {task.SAMPLE_SPLIT: Dataset.from_list(fewshot_rows + eval_rows)},
+        )
+    with patch.object(task, "_load_hf_dataset", return_value=fictional_dataset):
+        return next(iter(task.iterate_samples(1)))
+
+
+def assert_offline_prompt_formatting(
+    task_cls: type[BaseTask],
+    eval_rows: list[dict],
+    fewshot_rows: list[dict],
+    *,
+    subjects: list[str],
+    zeroshot: ExpectedPrompt,
+    fewshot: ExpectedPrompt | None = None,  # toggle: skip 1-shot when None
+) -> None:
+    for num_fewshot, expected in [(0, zeroshot), (1, fewshot)]:
+        if expected is None:
+            continue
+        sample = _get_first_offline_sample(
+            task_cls,
+            eval_rows,
+            fewshot_rows,
+            num_fewshot=num_fewshot,
+            subjects=subjects,
+        )
+        assert sample.messages == expected.messages
+        assert ConcatFormatter().format(sample.messages, output_mode="string") == expected.concat
+        assert sample.ground_truth == expected.ground_truth
+        assert sample.possible_completions == expected.completions
