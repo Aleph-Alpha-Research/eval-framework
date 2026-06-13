@@ -1,3 +1,4 @@
+import os
 from unittest.mock import Mock, patch
 
 import pytest
@@ -8,6 +9,8 @@ from eval_framework.tasks.base import Sample
 from eval_framework.tasks.benchmarks.aidanbench import COHERENCE_THRESHOLD, AidanBench
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
 from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
+
+os.environ["OPENAI_API_KEY"] = "sk-proj-1234567890"
 
 
 def test_get_instruction_text():
