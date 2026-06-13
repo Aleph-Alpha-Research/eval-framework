@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Literal, overload, override
+from typing import Any, Literal, cast, overload, override
 
 from pydantic import BaseModel, field_serializer, field_validator
 
@@ -324,7 +324,7 @@ class HFFormatter(BaseFormatter):
                 }
             )
 
-        return self.tokenizer.apply_chat_template(hf_chat, **template_kwargs)
+        return cast(str, self.tokenizer.apply_chat_template(hf_chat, **template_kwargs))
 
 
 class ReasoningFormatter(BaseFormatter):
