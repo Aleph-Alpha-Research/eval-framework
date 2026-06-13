@@ -1,6 +1,6 @@
 import random
 from abc import ABC
-from typing import Any
+from typing import Any, cast
 
 import pycountry
 import sacrebleu
@@ -38,7 +38,7 @@ class WMT(BaseTask[str], ABC):
     def _code_to_language(self, code: str) -> str:
         # key is alpha_2 or alpha_3 depending on the code length
         key = f"alpha_{len(code)}"
-        language_tuple = pycountry.languages.get(**{key: code})
+        language_tuple = cast(Any, pycountry.languages.get(**{key: code}))
         return language_tuple.name
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
