@@ -73,7 +73,7 @@ def main() -> None:
     revisions = collect_dataset_revisions(registered_task_names(), HfApi())
     REVISIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
     REVISIONS_FILE.write_text(
-        json.dumps(dict(sorted(revisions.items())), indent=2, ensure_ascii=False) + "\n",
+        json.dumps(dict(sorted(revisions.items())), indent=4, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
     logger.info("Wrote %d revisions to %s", len(revisions), REVISIONS_FILE)
