@@ -76,11 +76,17 @@ def test_collect_dataset_revisions_skips_failed_dataset_lookup() -> None:
 
 
 def test_get_pinned_dataset_revision_returns_sha_for_known_task(fixture_revisions_file: Path) -> None:
-    assert dr.get_pinned_dataset_revision("COPA", revisions_file=fixture_revisions_file) == FIXTURE_REVISIONS["COPA"]
+    dr.DatasetRevision.reset()
+    dr.DatasetRevision.add_revision_file(fixture_revisions_file)
+
+    assert dr.DatasetRevision.pinned_revision("COPA") == FIXTURE_REVISIONS["COPA"]
 
 
 def test_get_pinned_dataset_revision_returns_none_for_unknown_task(fixture_revisions_file: Path) -> None:
-    assert dr.get_pinned_dataset_revision("NotARegisteredTask", revisions_file=fixture_revisions_file) is None
+    dr.DatasetRevision.reset()
+    dr.DatasetRevision.add_revision_file(fixture_revisions_file)
+
+    assert dr.DatasetRevision.pinned_revision("NotARegisteredTask") is None
 
 
 def test_collect_dataset_revisions_reuses_sha_for_shared_dataset() -> None:

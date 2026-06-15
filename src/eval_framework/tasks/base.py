@@ -15,7 +15,7 @@ from huggingface_hub.errors import RevisionNotFoundError
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
-from eval_framework.tasks.benchmarks.dataset_revisions import get_pinned_dataset_revision
+from eval_framework.tasks.benchmarks.dataset_revisions import DatasetRevision
 from eval_framework.tasks.utils import classproperty, raise_errors
 from template_formatting.formatter import Message, Role
 
@@ -118,7 +118,7 @@ class BaseTask[SubjectType](ABC):
         # Applied once at instance creation; not refreshed if the pin file changes mid-run.
         if custom_hf_revision:
             self.HF_REVISION = custom_hf_revision
-        elif self.HF_REVISION is None and (pinned := get_pinned_dataset_revision(self.__class__.__name__)):
+        elif self.HF_REVISION is None and (pinned := DatasetRevision.pinned_revision(self.__class__.__name__)):
             self.HF_REVISION = pinned
 
     @classmethod
