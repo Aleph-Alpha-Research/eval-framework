@@ -55,7 +55,7 @@ class OpenAIModel(BaseLLM):
         formatter: BaseFormatter | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
-        api_key: str | None = os.getenv("OPENAI_API_KEY", ""),
+        api_key: str | None = None,
         organization: str | None = None,
         base_url: str | None = None,
         bytes_per_token: float | None = None,
@@ -86,7 +86,7 @@ class OpenAIModel(BaseLLM):
         self._top_p = top_p
 
         self._client = OpenAI(
-            api_key=api_key,
+            api_key=api_key if api_key is not None else os.getenv("OPENAI_API_KEY", ""),
             organization=organization,
             base_url=base_url,
         )
