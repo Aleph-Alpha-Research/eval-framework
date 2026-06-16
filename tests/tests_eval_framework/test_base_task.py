@@ -111,8 +111,11 @@ def test_base_task() -> None:
 
 
 def test_pinned_hf_revision_applied_when_unset(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.setattr(dr, "REVISIONS_FILE", write_fixture_revisions_file(tmp_path))
+    fixture_path = write_fixture_revisions_file(tmp_path)
+    monkeypatch.setattr(dr, "REVISIONS_FILE", fixture_path)
     dr._pinned_revisions.cache_clear()
+    monkeypatch.setattr(dr.DatasetRevision, "_INSTANCE", None)
+    dr.DatasetRevision.add_revision_file(fixture_path)
     task = COPA.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
     assert task.HF_REVISION == FIXTURE_REVISIONS["COPA"]
 
