@@ -231,7 +231,7 @@ class MCCompletionStyle(TaskStyler):
 
     Assembled prompt example (default settings, 4 choices)::
 
-        "Question: What is the capital of France?\\nA. Munich\\nB. Stuttgart\\nC. Berlin\\nD. Paris\\n"
+        "Question: What is the capital of France?\\nA. Munich\\nB. Stuttgart\\nC. Berlin\\nD. Paris\\nAnswer:"
 
         Ground truth: "Paris"
     """
