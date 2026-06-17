@@ -6,7 +6,8 @@ from eval_framework.tasks.benchmarks.mmlu_de import MMLU_DE
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
 from tests.tests_eval_framework.tasks.benchmarks.utils import (
     ExpectedPrompt,
-    assert_offline_prompt_formatting,
+    assert_offline_oneshot_prompt,
+    assert_offline_zeroshot_prompt,
     get_task_names_for_module,
     run_formatter_hash_test,
 )
@@ -128,11 +129,16 @@ _FEWSHOT = ExpectedPrompt(
 
 
 def test_mmlu_de_offline_prompt_formatting() -> None:
-    assert_offline_prompt_formatting(
+    assert_offline_zeroshot_prompt(
         MMLU_DE,
-        eval_rows=[_EVAL_ROW],
-        fewshot_rows=[_FEWSHOT_ROW],
+        eval_row=_EVAL_ROW,
         subjects=[_SUBJECT],
-        zeroshot=_ZEROSHOT,
-        fewshot=_FEWSHOT,
+        expected=_ZEROSHOT,
+    )
+    assert_offline_oneshot_prompt(
+        MMLU_DE,
+        eval_row=_EVAL_ROW,
+        fewshot_row=_FEWSHOT_ROW,
+        subjects=[_SUBJECT],
+        expected=_FEWSHOT,
     )
