@@ -10,6 +10,7 @@ from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseTy
 from eval_framework.tasks.task_style import (
     BPBStyle,
     ClozeStyle,
+    MCCompletionStyle,
     MCStyle,
     answer_key_to_index,
     format_mc_prompt,
@@ -228,6 +229,39 @@ class TestClozeStyle:
 
 
 # ---------------------------------------------------------------------------
+# MCCompletionStyle tests
+# ---------------------------------------------------------------------------
+
+
+class TestMCCompletionStyle:
+    def setup_method(self) -> None:
+        self.styler = MCCompletionStyle()
+
+    def test_get_instruction_text(self) -> None:
+        text = self.styler.get_instruction_text(_TEST_QUESTION, _TEST_CHOICES)
+        assert text == "Question: Capital of France?\nA. Berlin\nB. Paris\nC. London\n"
+
+    def test_get_ground_truth(self) -> None:
+        assert self.styler.get_ground_truth(_TEST_CHOICES, _TEST_CORRECT_INDEX) == "Paris"
+
+    def test_get_fewshot_target_text(self) -> None:
+        assert self.styler.get_fewshot_target_text(_TEST_CHOICES, _TEST_CORRECT_INDEX) == "Answer: Paris"
+
+    def test_get_possible_completions_none(self) -> None:
+        assert self.styler.get_possible_completions(_TEST_CHOICES) is None
+
+    def test_get_cue_text(self) -> None:
+        assert self.styler.get_cue_text() == "Answer:"
+
+    def test_response_type(self) -> None:
+        assert self.styler.response_type == ResponseType.COMPLETION
+
+    def test_extra_metadata(self) -> None:
+        meta = self.styler.get_extra_metadata()
+        assert meta["task_style"] == TaskStyle.MULTIPLE_CHOICE.value
+
+
+# ---------------------------------------------------------------------------
 # BaseTask task styler integration tests
 # ---------------------------------------------------------------------------
 
@@ -265,6 +299,28 @@ class _ConcreteClozeTask(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
     TASK_STYLER = ClozeStyle()
+
+    def _get_raw_question(self, item: dict) -> str:
+        return item["question"]
+
+    def _get_choices(self, item: dict) -> list[str]:
+        return item["choices"]
+
+    def _get_correct_index(self, item: dict) -> int:
+        return item["answer"]
+
+
+class _ConcreteMCCompletionTask(BaseTask[str]):
+    """Minimal concrete task for testing BaseTask with MCCompletionStyle."""
+
+    NAME = "TestMCCompletionTask"
+    DATASET_PATH = "test/dataset"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "train"
+    SUBJECTS = [NO_SUBJECT]
+    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
+    LANGUAGE = Language.ENG
+    TASK_STYLER = MCCompletionStyle()
 
     def _get_raw_question(self, item: dict) -> str:
         return item["question"]
@@ -344,6 +400,34 @@ class TestBaseTaskClozeStyle:
     def test_metadata_includes_task_style(self) -> None:
         meta = self.task.get_metadata()
         assert meta["task_style"] == TaskStyle.CLOZE.value
+
+
+class TestBaseTaskMCCompletionStyle:
+    def setup_method(self) -> None:
+        self.task = _ConcreteMCCompletionTask()
+
+    def test_instruction_text(self) -> None:
+        text = self.task._get_instruction_text(_TEST_ITEM)
+        assert text == "Question: Capital of France?\nA. Berlin\nB. Paris\nC. London\n"
+
+    def test_ground_truth(self) -> None:
+        assert self.task._get_ground_truth(_TEST_ITEM) == "Paris"
+
+    def test_fewshot_target(self) -> None:
+        assert self.task._get_fewshot_target_text(_TEST_ITEM) == "Answer: Paris"
+
+    def test_possible_completions_none(self) -> None:
+        assert self.task._get_possible_completions(_TEST_ITEM) is None
+
+    def test_cue_text(self) -> None:
+        assert self.task._get_cue_text(_TEST_ITEM) == "Answer:"
+
+    def test_metadata_response_type_completion(self) -> None:
+        meta = self.task.get_metadata()
+        assert meta["response_type"] == ResponseType.COMPLETION.value
+
+    def test_response_type_from_styler(self) -> None:
+        assert self.task.TASK_STYLER.response_type == ResponseType.COMPLETION
 
 
 class TestBaseTaskStylerVariants:
