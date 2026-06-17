@@ -95,7 +95,6 @@ class GSM8KEvalHarness(BaseTask[str]):
 
     NAME = "GSM8KEvalHarness"
     DATASET_PATH = "openai/gsm8k"
-    HF_REVISION = "main"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
