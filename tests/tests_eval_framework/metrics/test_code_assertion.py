@@ -374,4 +374,5 @@ def test_code_assertion_scores_timeout_as_failure() -> None:
     ):
         results = metric.calculate(_completion())
     assert results[0].value == 0.0
-    assert results[0].error is not None
+    assert results[0].error is None
+    assert results[0].code_execution_trace is not None
