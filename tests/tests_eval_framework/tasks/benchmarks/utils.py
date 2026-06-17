@@ -140,52 +140,54 @@ class ExpectedPrompt:
     completions: list[str] | None
 
 
-def _get_first_offline_sample(
-    task_cls: type[BaseTask],
-    eval_rows: list[dict],
-    fewshot_rows: list[dict],
-    *,
-    num_fewshot: int,
-    subjects: list[str],
-) -> Sample:
-    """Same entry points as production: ``with_overwrite`` + ``iterate_samples``."""
-    task = task_cls.with_overwrite(num_fewshot=num_fewshot, custom_subjects=subjects, custom_hf_revision=None)
-    if task.FEWSHOT_SPLIT != task.SAMPLE_SPLIT:
-        fictional_dataset = DatasetDict(
-            {
-                task.SAMPLE_SPLIT: Dataset.from_list(eval_rows),
-                task.FEWSHOT_SPLIT: Dataset.from_list(fewshot_rows),
-            }
-        )
-    else:
-        fictional_dataset = DatasetDict(
-            # Use fewshot row first such that after shuffling (with seed 42) the eval row is the first item
-            {task.SAMPLE_SPLIT: Dataset.from_list(fewshot_rows + eval_rows)},
-        )
+def _iterate_samples_over_mock_dataset(task: BaseTask, fictional_dataset: DatasetDict) -> Sample:
+    """Same entry points as production: ``iterate_samples`` over a patched HF load."""
     with patch.object(task, "_load_hf_dataset", return_value=fictional_dataset):
         return next(iter(task.iterate_samples(1)))
 
 
-def assert_offline_prompt_formatting(
+def _assert_sample_matches(sample: Sample, expected: ExpectedPrompt) -> None:
+    assert sample.messages == expected.messages
+    assert ConcatFormatter().format(sample.messages, output_mode="string") == expected.concat
+    assert sample.ground_truth == expected.ground_truth
+    assert sample.possible_completions == expected.completions
+
+
+def assert_offline_zeroshot_prompt(
     task_cls: type[BaseTask],
-    eval_rows: list[dict],
-    fewshot_rows: list[dict],
+    eval_row: dict,
     *,
     subjects: list[str],
-    zeroshot: ExpectedPrompt,
-    fewshot: ExpectedPrompt | None = None,  # toggle: skip 1-shot when None
+    expected: ExpectedPrompt,
 ) -> None:
-    for num_fewshot, expected in [(0, zeroshot), (1, fewshot)]:
-        if expected is None:
-            continue
-        sample = _get_first_offline_sample(
-            task_cls,
-            eval_rows,
-            fewshot_rows,
-            num_fewshot=num_fewshot,
-            subjects=subjects,
+    """Assert the 0-shot prompt. Only ``eval_row`` is needed with ``num_fewshot=0`` so a dataset
+    with just the sample split suffices."""
+    task = task_cls.with_overwrite(num_fewshot=0, custom_subjects=subjects, custom_hf_revision=None)
+    mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([eval_row])})
+    _assert_sample_matches(_iterate_samples_over_mock_dataset(task, mock_dataset), expected)
+
+
+def assert_offline_oneshot_prompt(
+    task_cls: type[BaseTask],
+    eval_row: dict,
+    fewshot_row: dict,
+    *,
+    subjects: list[str],
+    expected: ExpectedPrompt,
+) -> None:
+    """Assert the 1-shot prompt. The dataset layout depends on whether the task draws
+    fewshot examples from a separate split (``FEWSHOT_SPLIT != SAMPLE_SPLIT``) or the same one."""
+    task = task_cls.with_overwrite(num_fewshot=1, custom_subjects=subjects, custom_hf_revision=None)
+    if task.FEWSHOT_SPLIT != task.SAMPLE_SPLIT:
+        mock_dataset = DatasetDict(
+            {
+                task.SAMPLE_SPLIT: Dataset.from_list([eval_row]),
+                task.FEWSHOT_SPLIT: Dataset.from_list([fewshot_row]),
+            }
         )
-        assert sample.messages == expected.messages
-        assert ConcatFormatter().format(sample.messages, output_mode="string") == expected.concat
-        assert sample.ground_truth == expected.ground_truth
-        assert sample.possible_completions == expected.completions
+    else:
+        mock_dataset = DatasetDict(
+            # Use fewshot row first such that after shuffling (with seed 42) the eval row is the first item
+            {task.SAMPLE_SPLIT: Dataset.from_list([fewshot_row, eval_row])},
+        )
+    _assert_sample_matches(_iterate_samples_over_mock_dataset(task, mock_dataset), expected)
