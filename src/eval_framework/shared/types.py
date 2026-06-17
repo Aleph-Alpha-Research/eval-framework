@@ -2,7 +2,7 @@ import re
 from collections.abc import Callable, Sequence
 from typing import Annotated, NamedTuple, Self, TypeVar, cast
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from eval_framework.metrics.llm.graders.language import detect_language_of
 from eval_framework.utils.helpers import count_bytes
@@ -198,6 +198,11 @@ class Loglikelihood(BaseLoglikelihood):
     subject: str
     ground_truth: str | list[str]
     error: Error | None = None
+    # Optional extra scores; only populated by backends that score the prompt span
+    # (e.g. VLLMOpenAIAPI). prompt_loglikelihood = log P(prompt) (one per sample);
+    # joint_loglikelihoods = {choice: log P(prompt + completion)}.
+    prompt_loglikelihood: float | None = None
+    joint_loglikelihoods: dict[str, float] = Field(default_factory=dict)
 
     @property
     def ground_truth_list(self) -> list[str] | list[None]:

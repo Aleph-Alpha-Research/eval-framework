@@ -230,6 +230,12 @@ class MMLU_COT(MMLU):
         )
 
 
-class MMLUSpaceExp1(MMLU_OLMES):
+class MMLUSpaceInPrompt(MMLU_OLMES):
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        return [self._get_ground_truth(item)]
+        return [f"{self.keys[item['answer']]}"]
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        return f"{self.keys[item['answer']]}"
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return "Answer: "

@@ -146,6 +146,9 @@ class ResponseGenerator:
                     concat_compression=raw_loglikelihood.concat_compression,
                     loglikelihoods=raw_loglikelihood.loglikelihoods,
                     loglikelihoods_sequence_positions=raw_loglikelihood.loglikelihoods_sequence_positions,
+                    # Carried through only by backends that provide them (duck-typed, default-safe).
+                    prompt_loglikelihood=getattr(raw_loglikelihood, "prompt_loglikelihood", None),
+                    joint_loglikelihoods=getattr(raw_loglikelihood, "joint_loglikelihoods", {}),
                     error=raw_loglikelihood.raw_loglikelihood_error,
                 )
             )
