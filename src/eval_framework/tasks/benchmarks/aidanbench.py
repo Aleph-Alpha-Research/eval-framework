@@ -109,7 +109,7 @@ class AidanBenchOriginal(BaseTask[str]):
         stop_sequences: list[str] | None,
         max_tokens: int | None,
         initial_samples: list[Sample],
-        fail_on_error: bool = False,
+        fail_on_error: bool = True,
     ) -> tuple[list[list[Message]], list[Union["Error", None]]]:
         initial_messages = [s.messages for s in initial_samples]
         samples = [(s, False) for s in initial_samples]  # (sample, is_done)
@@ -170,7 +170,7 @@ class AidanBenchOriginal(BaseTask[str]):
         samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-        fail_on_error: bool = False,
+        fail_on_error: bool = True,
     ) -> list[Completion]:
         assert all(len(s.messages) == 1 and s.messages[0].role == Role.USER for s in samples), (
             "Each sample must have exactly one USER message."

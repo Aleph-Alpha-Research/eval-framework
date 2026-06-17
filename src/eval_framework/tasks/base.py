@@ -359,7 +359,7 @@ class BaseTask[SubjectType](ABC):
         samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-        fail_on_error: bool = False,
+        fail_on_error: bool = True,
     ) -> list[Completion]:
         """
         Generates completions for the sample.

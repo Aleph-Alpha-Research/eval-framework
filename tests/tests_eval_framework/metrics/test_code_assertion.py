@@ -356,6 +356,7 @@ def test_code_assertion_records_image_pull_error_by_default(monkeypatch: pytest.
     # Without fail_on_error, an infra failure is recorded as a per-sample error (value=None).
     monkeypatch.setenv("DEBUG", "false")
     metric = CodeCompletionAssertion()
+    metric.fail_on_error = False
     with patch(
         "eval_framework.metrics.completion.code_assertion.run_python_code",
         side_effect=ImagePullError("python:3.12-slim", "429 toomanyrequests"),
