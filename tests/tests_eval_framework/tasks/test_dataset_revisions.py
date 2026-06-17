@@ -4,7 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-from eval_framework.tasks.benchmarks import dataset_revisions as dr
+from eval_framework.tasks import dataset_revisions as dr
 from tests.tests_eval_framework.tasks.conftest import FIXTURE_REVISIONS
 
 
