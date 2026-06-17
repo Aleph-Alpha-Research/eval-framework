@@ -3,8 +3,8 @@ from typing import Any
 
 import pytest
 
+from eval_framework.tasks import dataset_revisions as dr
 from eval_framework.tasks.base import BaseTask
-from eval_framework.tasks.benchmarks import dataset_revisions as dr
 from eval_framework.tasks.benchmarks.copa import COPA
 from eval_framework.tasks.benchmarks.piqa import PIQA
 from eval_framework.tasks.registry import register_task

@@ -15,7 +15,7 @@ from huggingface_hub.errors import RevisionNotFoundError
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
-from eval_framework.tasks.benchmarks.dataset_revisions import DatasetRevision
+from eval_framework.tasks.dataset_revisions import DatasetRevision
 from eval_framework.tasks.utils import classproperty, raise_errors
 from template_formatting.formatter import Message, Role
 
