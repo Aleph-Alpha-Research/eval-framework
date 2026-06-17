@@ -36,7 +36,7 @@ class BaseMetric[Response](ABC):
     # macro averaging the overall computation default.
     AGGREGATORS: list[Aggregator] = []
     # Set by the evaluation generator before calculate(); controls how infra failures are handled.
-    fail_on_error: bool = False
+    fail_on_error: bool = True
 
     @classproperty
     def NAMES(cls) -> list[str]:
