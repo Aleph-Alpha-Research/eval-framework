@@ -228,3 +228,8 @@ class MMLU_COT(MMLU):
             'Summarize your reasoning concisely, then conclude with "Therefore, the answer is: X", where X is '
             "one of A, B, C, or D."
         )
+
+
+class MMLUSpaceExp1(MMLU_OLMES):
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        return [self._get_ground_truth(item)]
