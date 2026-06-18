@@ -8,7 +8,7 @@ from types import ModuleType
 from typing import Any
 
 from eval_framework.tasks.base import BaseTask
-from eval_framework.tasks.registry import is_registered, register_task
+from eval_framework.tasks.registry import is_registered, register_task, get_task
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +64,9 @@ def load_extra_tasks(module_paths: Sequence[str | os.PathLike]) -> None:
                     logger.info(f"[User Task Loader] Skipping {obj.__module__} - no NAME attribute present.")
                 else:
                     if is_registered(obj.NAME):
+                        if get_task(obj.NAME) is obj:  # same task, no need to do anything
+                            continue
+
                         # two classes with the same NAME attribute
                         logger.info(obj.__module__)
 
