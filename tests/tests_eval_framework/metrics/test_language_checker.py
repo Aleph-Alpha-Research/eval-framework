@@ -227,8 +227,13 @@ from template_formatting.formatter import Message, Role
     ],
 )
 def test_language_checker(response: Completion, expected_value: float) -> None:
+    # Given a completion with a known ground-truth language
     metric = LanguageChecker()
+
+    # When the language check metric is calculated
     results = metric.calculate(response)
+
+    # Then it returns a single score reflecting whether the languages match
     assert len(results) == 1
     assert results[0].value == pytest.approx(expected_value)
     assert results[0].metric_name == "Language Check"
@@ -283,7 +288,11 @@ def test_language_checker(response: Completion, expected_value: float) -> None:
     ],
 )
 def test_language_checker_errors(completion: Completion) -> None:
+    # Given a completion with a missing, unknown, or unavailable ground-truth language
     metric = LanguageChecker()
+
+    # When the language check metric is calculated
+    # Then it raises a LogicError
     with pytest.raises(LogicError):
         metric.calculate(completion)
 
@@ -324,12 +333,39 @@ def test_language_checker_errors(completion: Completion) -> None:
     ],
 )
 def test_language_consistency_checker(response: Completion, expected_value: float) -> None:
+    # Given a completion whose language is compared against its instruction language
     metric = LanguageConsistencyChecker()
+
+    # When the language consistency metric is calculated
     results = metric.calculate(response)
+
+    # Then it returns a single score reflecting whether the languages match
     assert len(results) == 1
     assert results[0].value == pytest.approx(expected_value)
     assert results[0].metric_name == "Language Consistency"
     assert results[0].higher_is_better is True
+
+
+def test_language_consistency_checker_empty_completion() -> None:
+    # Given a completion with an empty completion string (no language to detect)
+    response = Completion(
+        id=1,
+        subject="test",
+        ground_truth=None,
+        prompt="test",
+        prompt_sequence_positions=None,
+        messages=[Message(role=Role.USER, content="Hallo, erzähl mir etwas!")],
+        completion="",
+        raw_completion="Brautkleid bleibt Brautkleid und Blaukraut bleibt Blaukraut",
+        raw_completion_sequence_positions=None,
+    )
+    metric = LanguageConsistencyChecker()
+
+    # When the language consistency metric is calculated
+    results = metric.calculate(response)
+
+    # Then no result is emitted so the completion is excluded from aggregation entirely
+    assert results == []
 
 
 @pytest.mark.parametrize(
@@ -368,9 +404,36 @@ def test_language_consistency_checker(response: Completion, expected_value: floa
     ],
 )
 def test_language_raw_consistency_checker(response: Completion, expected_value: float) -> None:
+    # Given a completion whose raw language is compared against its instruction language
     metric = LanguageRawConsistencyChecker()
+
+    # When the raw language consistency metric is calculated
     results = metric.calculate(response)
+
+    # Then it returns a single score reflecting whether the languages match
     assert len(results) == 1
     assert results[0].value == pytest.approx(expected_value)
     assert results[0].metric_name == "Language Consistency Raw"
     assert results[0].higher_is_better is True
+
+
+def test_language_raw_consistency_checker_empty_raw_completion() -> None:
+    # Given a completion with an empty raw_completion string (no language to detect)
+    response = Completion(
+        id=1,
+        subject="test",
+        ground_truth=None,
+        prompt="test",
+        prompt_sequence_positions=None,
+        messages=[Message(role=Role.USER, content="Hallo, erzähl mir etwas!")],
+        completion="Brautkleid bleibt Brautkleid und Blaukraut bleibt Blaukraut",
+        raw_completion="",
+        raw_completion_sequence_positions=None,
+    )
+    metric = LanguageRawConsistencyChecker()
+
+    # When the raw language consistency metric is calculated
+    results = metric.calculate(response)
+
+    # Then no result is emitted so the completion is excluded from aggregation entirely
+    assert results == []
