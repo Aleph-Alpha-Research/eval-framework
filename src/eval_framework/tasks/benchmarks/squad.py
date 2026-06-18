@@ -176,7 +176,7 @@ class SQUAD2(BaseTask[str]):
             self.UNANSWERABLE_STR.capitalize(),
         ]
         ground_truths = text_ if text_ else ground_truth_for_unanswerable
-        return [f" {ground_truth}" for ground_truth in ground_truths]
+        return [f"{ground_truth}" for ground_truth in ground_truths]
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
         target = self._get_ground_truth(item)[0]
