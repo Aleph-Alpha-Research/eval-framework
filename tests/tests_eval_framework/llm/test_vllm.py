@@ -195,13 +195,20 @@ def test_vllm_error_on_overly_long_prompt[T: VLLMModel](model_fn: type[T], kwarg
 def test_vllm_hf_token_equivalence() -> None:
     """
     Test that VLLM and HF versions of Qwen3 0.6B produce matching first 20 tokens.
+
+    Note on max_tokens=20: vLLM and HF do not produce byte-identical outputs even at
+    temperature=0 with matching dtype. vLLM uses fused CUDA kernels (FLASH_ATTN attention,
+    RMSNorm/RoPE/act+quant fusion) while HF runs ops separately via SDPA, so logits differ
+    at the last bits of bf16 and greedy decoding diverges after ~20 tokens. The window is
+    kept small so both the token-match and concat_compression (byte/token count)
+    assertions pass; expanding it will reintroduce flakiness on any kernel/version change.
     """
 
     vllm_model = safe_vllm_setup(
         model_fn=Qwen3_0_6B_VLLM,
         kwargs={
             "max_model_len": 128,
-            "dtype": "float16",
+            "dtype": "bfloat16",
             "tensor_parallel_size": 1,
             "gpu_memory_utilization": 0.3,
             "swap_space": 0,
@@ -215,7 +222,7 @@ def test_vllm_hf_token_equivalence() -> None:
             content="Tell me a short story about a robot learning to paint.",
         )
     ]
-    vllm_results = vllm_model.generate_from_messages(messages=[messages], max_tokens=50, temperature=0)
+    vllm_results = vllm_model.generate_from_messages(messages=[messages], max_tokens=20, temperature=0)
     vllm_completion = vllm_results[0].completion
     vllm_tokens = vllm_model.tokenizer.encode_plain_text(vllm_completion).tokens[:20]
 
@@ -225,7 +232,7 @@ def test_vllm_hf_token_equivalence() -> None:
     torch.cuda.empty_cache()
 
     hf_model = Qwen3_0_6B()
-    hf_results = hf_model.generate_from_messages(messages=[messages], max_tokens=50, temperature=0)
+    hf_results = hf_model.generate_from_messages(messages=[messages], max_tokens=20, temperature=0)
     hf_completion = hf_results[0].completion
     hf_tokens = hf_model.tokenizer.encode(hf_completion)[:20]
     # free up memory
@@ -288,7 +295,7 @@ def test_seq_length_priority_order() -> None:
 def test_vllm_load_from_invalid_checkpoint() -> None:
     invalid_path = "/fake/path/to/model"
 
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(OSError) as exc_info:
         Qwen3_0_6B_VLLM(
             checkpoint_path=invalid_path,
             checkpoint_name="fake",
@@ -296,7 +303,7 @@ def test_vllm_load_from_invalid_checkpoint() -> None:
         )
 
     error_msg = str(exc_info.value).lower()
-    assert "invalid repository id or local directory specified" in error_msg
+    assert "repo id must be in the form" in error_msg
     assert invalid_path.lower() in error_msg
 
 

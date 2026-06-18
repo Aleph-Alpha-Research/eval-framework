@@ -13,11 +13,11 @@ from tokenizers import Tokenizer
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
+    PreTrainedTokenizerBase,
     StoppingCriteria,
     StoppingCriteriaList,
 )
 from transformers.models.gpt2 import GPT2Tokenizer
-from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import (
@@ -133,7 +133,8 @@ class BaseHFLLM(BaseLLM):
 
     def __del__(self) -> None:
         if hasattr(self, "model"):
-            num_gpus = len(self.model.hf_device_map)
+            hf_device_map = getattr(self.model, "hf_device_map", None)
+            num_gpus = len(hf_device_map) if isinstance(hf_device_map, dict) else 0
             del self.model
             if num_gpus > 1 and torch.distributed.is_initialized():
                 torch.distributed.destroy_process_group()
@@ -237,8 +238,9 @@ class BaseHFLLM(BaseLLM):
 
     def _model_generate(self, redis_key: Any, prompt_token_count: int, **kwargs: Any) -> tuple[str, int]:
         with torch.no_grad():
-            outputs = self.model.generate(**kwargs)[0]
+            outputs = self.model.generate(**kwargs)[0]  # type: ignore[misc]
             completion = self.tokenizer.decode(outputs[prompt_token_count:], skip_special_tokens=True)
+            assert isinstance(completion, str)
 
             if kwargs["stopping_criteria"][0].__class__.__name__ == "StopSequenceCriteria":
                 for stop_sequence in kwargs["stopping_criteria"][0].stop_sequences:
