@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 60**
+**Total number of tasks: 61**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -66,6 +66,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [PIQA_IDK](PIQA_IDK.md)
 - [PIQA_OLMES](PIQA_OLMES.md)
 - [SCIQ_OLMES](SCIQ_OLMES.md)
+- [SQuAD2_MA](SQuAD2_MA.md)
 - [SQuAD_OLMES](SQuAD_OLMES.md)
 - [SocialIQAMC_OLMES](SocialIQAMC_OLMES.md)
 - [TRIVIAQA](TRIVIAQA.md)
