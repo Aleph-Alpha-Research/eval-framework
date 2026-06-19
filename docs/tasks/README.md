@@ -2,11 +2,8 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-<<<<<<< triviaqa_ma
 **Total number of tasks: 62**
-=======
-**Total number of tasks: 61**
->>>>>>> main
+
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
