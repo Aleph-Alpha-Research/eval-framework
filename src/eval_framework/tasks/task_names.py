@@ -1,7 +1,9 @@
 import logging
 import random
+import re
 import time
 from enum import Enum
+from typing import NamedTuple
 
 from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import register_lazy_task, registered_tasks_iter
@@ -13,6 +15,36 @@ class TaskNameEnum(Enum):
     @property
     def value(self) -> type[BaseTask]:
         return super().value
+
+
+# Task name grammar: {Dataset}_{Source}_{Language}[_{Style}][_{Variant}][_{Subset}] (docs/task_naming.md).
+_TOKEN = r"[A-Z][A-Za-z0-9]*"
+_LANGUAGE = r"[A-Z]{2}"
+_NAMING_RE = re.compile(
+    rf"^(?P<dataset>{_TOKEN})_(?P<source>{_TOKEN})_(?P<language>{_LANGUAGE})(?P<rest>(?:_{_TOKEN})*)$"
+)
+KNOWN_STYLES = ("MC", "Cloze", "BPB", "PartialEval")  # Closed vocabulary for Style.
+
+
+class ParsedTaskName(NamedTuple):
+    """The parts of a task name. ``style`` is set only when a recognized style token is present."""
+
+    dataset: str
+    source: str
+    language: str
+    style: str | None
+    variants: tuple[str, ...]
+
+
+def parse_task_name(name: str) -> ParsedTaskName | None:
+    """Split a task name into its parts, or return ``None`` if it doesn't follow the convention."""
+    match = _NAMING_RE.match(name)
+    if match is None:
+        return None
+    rest = [token for token in match.group("rest").split("_") if token]
+    style = rest[0] if rest and rest[0] in KNOWN_STYLES else None
+    variants = tuple(rest[1:]) if style is not None else tuple(rest)
+    return ParsedTaskName(match.group("dataset"), match.group("source"), match.group("language"), style, variants)
 
 
 def register_all_tasks() -> None:
