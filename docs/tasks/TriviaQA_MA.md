@@ -1,7 +1,7 @@
-# TriviaQAMA
+# TriviaQA_MA
 
 ````
-NAME = TriviaQAMA
+NAME = TriviaQA_MA
 DATASET_PATH = mandarjoshi/trivia_qa
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = train
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/mandarjoshi/trivia_qa](https://huggingface.co/datasets/mandarjoshi/trivia_qa)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "TriviaQAMA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "TriviaQA_MA"`.
