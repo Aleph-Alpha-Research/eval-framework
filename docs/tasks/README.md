@@ -66,6 +66,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [PIQA_IDK](PIQA_IDK.md)
 - [PIQA_OLMES](PIQA_OLMES.md)
 - [SCIQ_OLMES](SCIQ_OLMES.md)
+- [SQuAD2_MA](SQuAD2_MA.md)
 - [SQuAD_OLMES](SQuAD_OLMES.md)
 - [SocialIQAMC_OLMES](SocialIQAMC_OLMES.md)
 - [TRIVIAQA](TRIVIAQA.md)
