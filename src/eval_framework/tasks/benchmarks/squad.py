@@ -237,8 +237,7 @@ class SQUAD(SQUAD2):
 
 
 class SQuAD2MA(SQUAD2):
-    """SQuAD v2 with the exact system prompt used in MA training
-    """
+    """SQuAD v2 with the exact system prompt used in MA training"""
 
     NAME = "SQuAD2_MA"
     METRICS = [AccuracyCompletion, F1, F1SquadNormalized]
