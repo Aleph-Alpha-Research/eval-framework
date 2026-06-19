@@ -4,6 +4,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion, AccuracyCompletionOLMES
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.task_style import BPBStyle
 
 logger = logging.getLogger(__name__)
 
@@ -215,3 +216,19 @@ class GSM8K_OLMES(GSM8K):
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         return self._clean_short_answer(completion_text)
+
+
+class GSM8KBPB(GSM8K_OLMES):
+    NAME = "GSM8KBPB"
+    TASK_STYLER = BPBStyle(cue_text="")
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        return item["question"]
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        answer = self.normalize_answer_str(item)
+        gnd_truth = self._get_ground_truth(item)
+        return [answer + gnd_truth]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return 0
