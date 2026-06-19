@@ -32,7 +32,7 @@ def test_squad2_ma_system_prompt_instructs_reject() -> None:
 
 def test_squad2_ma_instruction_is_context_question_answer_only() -> None:
     instruction = SQuAD2_MA()._get_instruction_text(_ANSWERABLE)
-    assert instruction == ("Context:\nParis is the capital of France.\n\nQuestion:\nWhat is the capital of France?")
+    assert instruction == ("Context:\nParis is the capital of France.\n\nQuestion:\nWhat is the capital of France?\n")
 
 
 def test_squad2_ma_reject_ground_truth_matches_instruction() -> None:
