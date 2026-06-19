@@ -3,7 +3,7 @@ import pytest
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
 
-_NUM_FEWSHOT = {"GSM8K_OLMES": 8}
+_NUM_FEWSHOT = {"GSM8K_OpenAI_EN_OLMES": 8}
 
 
 @pytest.mark.formatter_hash

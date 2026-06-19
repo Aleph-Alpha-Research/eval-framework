@@ -18,7 +18,7 @@ def test_cli_nested_sampling_params_parsing() -> None:
         "--llm-name",
         "Qwen3_0_6B_VLLM",
         "--task-name",
-        "MMLU",
+        "MMLU_CAIS_EN_MC",
         "--llm-args",
         "max_model_len=128",
         "sampling_params.temperature=0.8",
@@ -41,7 +41,7 @@ def test_eval_config_validates_nested_sampling_params() -> None:
             "max_model_len": "128",
             "sampling_params": {"temperature": "0.7", "top_p": "0.9", "max_tokens": "100"},
         },
-        "task_name": "MMLU",
+        "task_name": "MMLU_CAIS_EN_MC",
         "num_fewshot": 5,
         "num_samples": 10,
     }

@@ -6,12 +6,16 @@ from eval_framework.tasks.utils import BIG_CODE_BENCH_PACKAGE_MAPPING, extract_i
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
 
-# BigCodeBenchHard / BigCodeBenchHardInstruct / BigCodeBenchInstruct have non-deterministic
-# dataset/sample selection across runs, so their formatter output hashes are not stable.
-_SKIPPED_TASKS = ["BigCodeBenchHard", "BigCodeBenchHardInstruct", "BigCodeBenchInstruct"]
+# BigCodeBench tasks have non-deterministic dataset/sample selection across runs,
+# so their formatter output hashes are not stable.
+_SKIPPED_TASKS = [
+    "BigCodeBenchHard_BigCode_EN",
+    "BigCodeBenchHard_BigCode_EN_Instruct",
+    "BigCodeBench_BigCode_EN_Instruct",
+]
 _NUM_FEWSHOT = {
-    "BigCodeBench": 0,
-    "BigCodeBench_OLMES": 3,
+    "BigCodeBench_BigCode_EN": 0,
+    "BigCodeBench_BigCode_EN_OLMES": 3,
 }
 
 
@@ -298,7 +302,7 @@ def hello_world():
 
 
 def test_all_imports_in_mapping() -> None:
-    """Test that all imports in the BigCodeBench dataset are in our mapping."""
+    """Test that all imports in the BigCodeBench_BigCode_EN dataset are in our mapping."""
     # Load the dataset
     try:
         dataset = load_dataset(path="bigcode/bigcodebench", download_config=DownloadConfig(max_retries=5))

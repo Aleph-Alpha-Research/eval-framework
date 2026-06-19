@@ -30,7 +30,7 @@ def test_run(
     tmp_path: Path,
 ) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
-    task_name = "ARC"
+    task_name = "ARC_AllenAI_EN_Cloze"
     llm_name = "SmolLM135M"
     mock_parse_args.return_value = Namespace(
         context="local",
@@ -86,7 +86,7 @@ def test_run_path(
     tmp_path: Path,
 ) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
-    task_name = "ARC"
+    task_name = "ARC_AllenAI_EN_Cloze"
     module = "tests.tests_eval_framework.conftest"
     llm_name = "SmolLM135M"
     mock_parse_args.return_value = Namespace(
@@ -135,7 +135,7 @@ def test_run_path(
 @patch("argparse.ArgumentParser.parse_args")
 def test_run_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
-    task_name = "ARC"
+    task_name = "ARC_AllenAI_EN_Cloze"
     llm_name = "SmolLM135M"
     mock_parse_args.return_value = Namespace(
         context="local",
@@ -181,7 +181,7 @@ def test_run_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
 @patch("argparse.ArgumentParser.parse_args")
 def test_run_path_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
-    task_name = "ARC"
+    task_name = "ARC_AllenAI_EN_Cloze"
     module = "tests.tests_eval_framework.conftest"
     llm_name = "SmolLM135M"
     mock_parse_args.return_value = Namespace(

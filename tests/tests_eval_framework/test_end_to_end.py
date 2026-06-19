@@ -12,7 +12,7 @@ from datasets import disable_caching
 from eval_framework.llm.base import BaseLLM
 from eval_framework.main import main
 from eval_framework.result_processors.base import Result
-from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
+from eval_framework.tasks.benchmarks.hellaswag import HellaSwag_Rowan_EN_Cloze
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import get_task
 from eval_framework.tasks.task_names import TaskNameEnum
@@ -27,7 +27,7 @@ NUM_SAMPLES = 10
 experiment_setups = [
     (
         "SmolLM135M",
-        HELLASWAG.NAME,
+        HellaSwag_Rowan_EN_Cloze.NAME,
         {"Accuracy Loglikelihood": 0.4, "Accuracy Normalized Loglikelihood": 0.6},
         NUM_FEWSHOT,
         NUM_SAMPLES,

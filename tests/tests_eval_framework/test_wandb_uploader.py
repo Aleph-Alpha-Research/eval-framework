@@ -9,7 +9,7 @@ import wandb
 
 from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.result_processors.wandb_uploader import WandbUploader, register_artifact_upload_function
-from eval_framework.tasks.benchmarks.arc import ARC
+from eval_framework.tasks.benchmarks.arc import ARC_AllenAI_EN_Cloze
 from eval_framework.tasks.eval_config import EvalConfig
 from tests.tests_eval_framework.mock_wandb import MockArtifact
 
@@ -31,7 +31,7 @@ def sample_output_dir(tmp_path: Path) -> Path:
 @pytest.fixture
 def sample_config(tmp_path: Path) -> EvalConfig:
     return EvalConfig(
-        task_name=ARC.NAME,
+        task_name=ARC_AllenAI_EN_Cloze.NAME,
         num_fewshot=0,
         num_samples=10,
         output_dir=tmp_path,
@@ -122,7 +122,7 @@ def test_init_disabled(mock_wandb: Mock, sample_config: EvalConfig) -> None:
 def test_turned_off(mock_wandb: Mock) -> None:
     """Test initialization when the upload is disabled in config."""
     sample_config = EvalConfig(
-        task_name=ARC.NAME,
+        task_name=ARC_AllenAI_EN_Cloze.NAME,
         num_fewshot=0,
         num_samples=10,
         llm_class=Qwen3_0_6B,

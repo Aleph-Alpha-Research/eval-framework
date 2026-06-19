@@ -1,21 +1,25 @@
 import pytest
 
-from eval_framework.tasks.benchmarks.humaneval import HumanEval, HumanEval_OLMES, HumanEvalInstruct
+from eval_framework.tasks.benchmarks.humaneval import (
+    HumanEval_OpenAI_EN,
+    HumanEval_OpenAI_EN_Instruct,
+    HumanEval_OpenAI_EN_OLMES,
+)
 from eval_framework.tasks.utils import run_python_code
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
 from tests.tests_eval_framework.utils import DatasetPatcher
 
-_NUM_FEWSHOT = {"HumanEval_OLMES": 3}
+_NUM_FEWSHOT = {"HumanEval_OpenAI_EN_OLMES": 3}
 
 
 class TestHumanEvalCode:
     @pytest.fixture
-    def human_eval_task(self) -> HumanEval:
-        with DatasetPatcher(HumanEval, num_fewshot=0) as patched_task:
+    def human_eval_task(self) -> HumanEval_OpenAI_EN:
+        with DatasetPatcher(HumanEval_OpenAI_EN, num_fewshot=0) as patched_task:
             return patched_task
 
-    def test_code_is_executed(self, human_eval_task: HumanEval) -> None:
+    def test_code_is_executed(self, human_eval_task: HumanEval_OpenAI_EN) -> None:
         assert len(human_eval_task.SUBJECTS) > 0
         human_eval_task._load_dataset(human_eval_task.SUBJECTS[0])
         i = 0
@@ -30,11 +34,11 @@ class TestHumanEvalCode:
 
 class TestHumanEvalOLMES:
     @pytest.fixture
-    def human_eval_olmes_task(self) -> HumanEval_OLMES:
-        with DatasetPatcher(HumanEval_OLMES, num_fewshot=3) as patched_task:
+    def human_eval_olmes_task(self) -> HumanEval_OpenAI_EN_OLMES:
+        with DatasetPatcher(HumanEval_OpenAI_EN_OLMES, num_fewshot=3) as patched_task:
             return patched_task
 
-    def test_code_is_executed(self, human_eval_olmes_task: HumanEval_OLMES) -> None:
+    def test_code_is_executed(self, human_eval_olmes_task: HumanEval_OpenAI_EN_OLMES) -> None:
         assert len(human_eval_olmes_task.SUBJECTS) > 0
         subject = human_eval_olmes_task.SUBJECTS[0]
         human_eval_olmes_task._load_dataset(subject)
@@ -48,7 +52,7 @@ class TestHumanEvalOLMES:
             assert not run_python_code(formatted_code).endswith("True")
         assert i == 9
 
-    def test_olmes_settings(self, human_eval_olmes_task: HumanEval_OLMES) -> None:
+    def test_olmes_settings(self, human_eval_olmes_task: HumanEval_OpenAI_EN_OLMES) -> None:
         assert human_eval_olmes_task.num_fewshot == 3
         assert human_eval_olmes_task.max_tokens == 1024
         assert "\nclass" in human_eval_olmes_task.stop_sequences
@@ -59,7 +63,7 @@ class TestHumanEvalOLMES:
         assert human_eval_olmes_task.SAMPLE_SPLIT == "test"
         assert human_eval_olmes_task.FEWSHOT_SPLIT == "test"
 
-    def test_olmes_prompt_format(self, human_eval_olmes_task: HumanEval_OLMES) -> None:
+    def test_olmes_prompt_format(self, human_eval_olmes_task: HumanEval_OpenAI_EN_OLMES) -> None:
         human_eval_olmes_task._load_dataset(human_eval_olmes_task.SUBJECTS[0])
         item = human_eval_olmes_task.dataset[human_eval_olmes_task.SAMPLE_SPLIT][0]
         instruction = human_eval_olmes_task._get_instruction_text(item)
@@ -73,11 +77,11 @@ class TestHumanEvalOLMES:
 
 class TestHumanEvalInstructCode:
     @pytest.fixture
-    def human_eval_task_inst(self) -> HumanEvalInstruct:
-        with DatasetPatcher(HumanEvalInstruct, num_fewshot=0) as patched_task:
+    def human_eval_task_inst(self) -> HumanEval_OpenAI_EN_Instruct:
+        with DatasetPatcher(HumanEval_OpenAI_EN_Instruct, num_fewshot=0) as patched_task:
             return patched_task
 
-    def test_code_is_executed(self, human_eval_task_inst: HumanEvalInstruct) -> None:
+    def test_code_is_executed(self, human_eval_task_inst: HumanEval_OpenAI_EN_Instruct) -> None:
         assert len(human_eval_task_inst.SUBJECTS) > 0
         human_eval_task_inst._load_dataset(human_eval_task_inst.SUBJECTS[0])
         i = 0

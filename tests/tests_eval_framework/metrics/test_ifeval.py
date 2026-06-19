@@ -38,13 +38,13 @@ def test_ifeval_metric() -> None:
     for result in results:
         assert result.value is not None
         match result.metric_name:
-            case "IFEval/prompt_level_strict_acc":
+            case "IFEval_Google_EN/prompt_level_strict_acc":
                 assert result.value == 0.0
-            case "IFEval/prompt_level_loose_acc":
+            case "IFEval_Google_EN/prompt_level_loose_acc":
                 assert result.value == 0.0
-            case "IFEval/inst_level_strict_acc":
+            case "IFEval_Google_EN/inst_level_strict_acc":
                 inst_level_strict_acc += result.value
-            case "IFEval/inst_level_loose_acc":
+            case "IFEval_Google_EN/inst_level_loose_acc":
                 inst_level_loose_acc += result.value
 
     assert inst_level_strict_acc == 2.0  # punctuation and number_highlighted_sections succeeded

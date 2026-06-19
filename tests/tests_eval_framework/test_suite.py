@@ -24,39 +24,39 @@ def _skip_registry_check():
 
 class TestTaskSuiteValidation:
     def test_leaf_suite(self) -> None:
-        s = TaskSuite(name="my-mmlu", tasks="MMLU", num_fewshot=5)
+        s = TaskSuite(name="my-mmlu", tasks="MMLU_CAIS_EN_MC", num_fewshot=5)
         assert s.is_leaf
         assert s.name == "my-mmlu"
         assert s.num_fewshot == 5
 
-        s = TaskSuite(tasks="MMLU")
+        s = TaskSuite(tasks="MMLU_CAIS_EN_MC")
         assert s.is_leaf
-        assert s.name == "MMLU"
-        assert s.task_name == "MMLU"
+        assert s.name == "MMLU_CAIS_EN_MC"
+        assert s.task_name == "MMLU_CAIS_EN_MC"
 
     def test_composite_suite(self) -> None:
         s = TaskSuite(
             name="mytasks",
             tasks=[
-                TaskSuite(tasks="GSM8K"),
+                TaskSuite(tasks="GSM8K_OpenAI_EN"),
                 TaskSuite(tasks="Math"),
             ],
         )
         assert not s.is_leaf
         assert s.name == "mytasks"
         assert len(s.tasks) == 2
-        assert s == TaskSuite(name="mytasks", tasks=["GSM8K", "Math"])
+        assert s == TaskSuite(name="mytasks", tasks=["GSM8K_OpenAI_EN", "Math"])
 
     def test_mixed_bare_strings_and_suites(self) -> None:
         s = TaskSuite(
             name="mixed",
             tasks=[
-                "MMLU",
-                TaskSuite(tasks="GSM8K", max_tokens=512),
+                "MMLU_CAIS_EN_MC",
+                TaskSuite(tasks="GSM8K_OpenAI_EN", max_tokens=512),
             ],
         )
         assert len(s.tasks) == 2
-        assert s.tasks[0].task_name == "MMLU"
+        assert s.tasks[0].task_name == "MMLU_CAIS_EN_MC"
         assert s.tasks[1].max_tokens == 512
 
     def test_empty_tasks_raises(self) -> None:
@@ -65,7 +65,7 @@ class TestTaskSuiteValidation:
 
     def test_composite_without_name_raises(self) -> None:
         with pytest.raises(ValueError, match="must have a 'name'"):
-            TaskSuite(tasks=[TaskSuite(tasks="MMLU")])
+            TaskSuite(tasks=[TaskSuite(tasks="MMLU_CAIS_EN_MC")])
 
     def test_nested_suites(self) -> None:
         s = TaskSuite(
@@ -90,16 +90,16 @@ def test_load_nested(tmp_path: Path) -> None:
         name: top
         temperature: 0.0
         tasks:
-            - tasks: MMLU
+            - tasks: MMLU_CAIS_EN_MC
             - name: taskgroup
               tasks:
-                - tasks: GSM8K
+                - tasks: GSM8K_OpenAI_EN
                 - tasks: Math
               aggregates:
                 - name: taskgroup_score
                   method: mean
                   sources:
-                    - child: GSM8K
+                    - child: GSM8K_OpenAI_EN
                       metric: Average Accuracy
                     - child: Math
                       metric: Average Accuracy
@@ -116,7 +116,7 @@ def test_load_nested(tmp_path: Path) -> None:
     assert len(sub.aggregates) == 1
     assert sub.aggregates[0].name == "taskgroup_score"
     assert len(sub.aggregates[0].sources) == 2
-    assert sub.aggregates[0].sources[0].child == "GSM8K"
+    assert sub.aggregates[0].sources[0].child == "GSM8K_OpenAI_EN"
     assert sub.aggregates[0].sources[0].metric == "Average Accuracy"
     assert sub.aggregates[0].sources[1].child == "Math"
     assert sub.aggregates[0].sources[1].metric == "Average Accuracy"
@@ -130,13 +130,13 @@ class TestLoadFromPy:
             suite = TaskSuite(
                 name="test-suite",
                 tasks=[
-                    TaskSuite(tasks="MMLU", num_fewshot=5),
-                    TaskSuite(tasks="GSM8K", max_tokens=512),
+                    TaskSuite(tasks="MMLU_CAIS_EN_MC", num_fewshot=5),
+                    TaskSuite(tasks="GSM8K_OpenAI_EN", max_tokens=512),
                 ],
                 aggregates=[
                     SuiteAggregate(name="overall", sources=[
-                        MetricSource(child="MMLU", metric="Average Accuracy"),
-                        MetricSource(child="GSM8K", metric="Average Accuracy"),
+                        MetricSource(child="MMLU_CAIS_EN_MC", metric="Average Accuracy"),
+                        MetricSource(child="GSM8K_OpenAI_EN", metric="Average Accuracy"),
                     ]),
                 ],
             )
@@ -166,7 +166,7 @@ class TestLoadFromPy:
 
 class TestResolveToEvalKwargs:
     def test_routes_temperature_to_llm_args(self) -> None:
-        leaf = TaskSuite(tasks="MMLU")
+        leaf = TaskSuite(tasks="MMLU_CAIS_EN_MC")
         defaults = {"temperature": 0.7, "top_p": 0.9, "num_fewshot": 5}
         cli_kwargs = {
             "llm_name": "MyModel",
@@ -176,7 +176,7 @@ class TestResolveToEvalKwargs:
         }
         result = resolve_to_evalconfig_kwargs(leaf, defaults, cli_kwargs)
 
-        assert result["task_name"] == "MMLU"
+        assert result["task_name"] == "MMLU_CAIS_EN_MC"
         assert result["num_fewshot"] == 5
         assert result["llm_args"]["temperature"] == 0.7
         assert result["llm_args"]["top_p"] == 0.9

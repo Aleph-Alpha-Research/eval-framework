@@ -3,7 +3,10 @@ from collections.abc import Callable
 
 import pytest
 
-from eval_framework.tasks.benchmarks.math_reasoning import MATH, MATHLvl5
+from eval_framework.tasks.benchmarks.math_reasoning import (
+    HendrycksMath_EleutherAI_EN,
+    HendrycksMath_EleutherAI_EN_Level5,
+)
 from eval_framework.tasks.registry import (
     Registry,
     get_task,
@@ -29,24 +32,26 @@ def temporary_registry[**P, T](fun: Callable[P, T]) -> Callable[P, T]:
 
 @temporary_registry
 def test_case_insensitive_lookup() -> None:
-    register_task(MATH)
+    register_task(HendrycksMath_EleutherAI_EN)
 
-    assert is_registered("MATH")
-    assert set(registered_task_names()) == {"MATH"}
-    assert get_task("MATH") is MATH
-    assert get_task("Math") is MATH
-    assert get_task("math") is MATH
+    assert is_registered("HendrycksMath_EleutherAI_EN")
+    assert set(registered_task_names()) == {"HendrycksMath_EleutherAI_EN"}
+    assert get_task("HendrycksMath_EleutherAI_EN") is HendrycksMath_EleutherAI_EN
+    assert get_task("hendrycksmath_eleutherai_en") is HendrycksMath_EleutherAI_EN
+    assert get_task("HENDRYCKSMATH_ELEUTHERAI_EN") is HendrycksMath_EleutherAI_EN
 
-    register_task(MATHLvl5)
-    assert set(registered_task_names()) == {"MATH", "MATHLvl5"}
-    assert get_task("math lvl 5") is MATHLvl5
-    assert get_task("MATH LVL 5") is MATHLvl5
-    assert get_task("Math Lvl 5") is MATHLvl5
-    assert get_task("Math Lvl     5") is MATHLvl5
-    assert get_task("Math-Lvl_5") is MATHLvl5
+    register_task(HendrycksMath_EleutherAI_EN_Level5)
+    assert set(registered_task_names()) == {
+        "HendrycksMath_EleutherAI_EN",
+        "HendrycksMath_EleutherAI_EN_Level5",
+    }
+    assert get_task("hendrycksmath eleutherai en level5") is HendrycksMath_EleutherAI_EN_Level5
+    assert get_task("HENDRYCKSMATH ELEUTHERAI EN LEVEL5") is HendrycksMath_EleutherAI_EN_Level5
+    assert get_task("HendrycksMath_EleutherAI_EN_Level5") is HendrycksMath_EleutherAI_EN_Level5
+    assert get_task("Hendrycks-Math_EleutherAI EN Level5") is HendrycksMath_EleutherAI_EN_Level5
 
     with pytest.raises(ValueError):
-        get_task("Math.Lvl.5")
+        get_task("HendrycksMath.EleutherAI.EN.Level5")
 
 
 @temporary_registry
@@ -63,5 +68,5 @@ def test_register_non_task() -> None:
 
 @temporary_registry
 def test_lazy_registration() -> None:
-    register_lazy_task(f"{MATH.__module__}.{MATH.__name__}")
-    assert get_task("Math") is MATH
+    register_lazy_task(f"{HendrycksMath_EleutherAI_EN.__module__}.{HendrycksMath_EleutherAI_EN.__name__}")
+    assert get_task("hendrycksmath_eleutherai_en") is HendrycksMath_EleutherAI_EN

@@ -14,7 +14,7 @@ class TestEvalConfigLLMArgsValidation:
         config_data = {
             "llm_class": Qwen3_0_6B_VLLM,
             "llm_args": {"max_tokens": "42", "batch_size": "10"},
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)
@@ -29,7 +29,7 @@ class TestEvalConfigLLMArgsValidation:
         config_data = {
             "llm_class": Qwen3_0_6B_VLLM,
             "llm_args": {"temperature": "0.7", "top_p": "0.95", "learning_rate": "1e-4"},
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)
@@ -46,7 +46,7 @@ class TestEvalConfigLLMArgsValidation:
         config_data = {
             "llm_class": Qwen3_0_6B_VLLM,
             "llm_args": {"use_cache": "True", "verbose": "False"},
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)
@@ -61,7 +61,7 @@ class TestEvalConfigLLMArgsValidation:
         config_data = {
             "llm_class": Qwen3_0_6B_VLLM,
             "llm_args": {"seed": "None", "checkpoint": "None"},
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)
@@ -78,7 +78,7 @@ class TestEvalConfigLLMArgsValidation:
                 "numbers": "[1, 2, 3, 4]",
                 "mixed_list": '["text", 42, 3.14, True, None]',
             },
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)
@@ -98,7 +98,7 @@ class TestEvalConfigLLMArgsValidation:
                 "config": '{"temperature": 0.8, "max_tokens": 100}',
                 "nested": '{"outer": {"inner": 42, "flag": True}}',
             },
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)
@@ -119,7 +119,7 @@ class TestEvalConfigLLMArgsValidation:
                 "malformed_list": "[1, 2, 3",  # Invalid syntax
                 "malformed_dict": '{"key": }',  # Invalid syntax
             },
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)
@@ -158,7 +158,7 @@ class TestEvalConfigLLMArgsValidation:
                     },
                 },
             },
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)
@@ -207,7 +207,7 @@ class TestEvalConfigLLMArgsValidation:
                     "already_converted": 456,
                 },
             },
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)
@@ -247,7 +247,7 @@ class TestEvalConfigLLMArgsValidation:
                 "single_quote_string": "'hello'",
                 "double_quote_string": '"world"',
             },
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)
@@ -277,7 +277,7 @@ class TestEvalConfigLLMArgsValidation:
         config_data = {
             "llm_class": Qwen3_0_6B_VLLM,
             "llm_args": {},
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
             "repeats": None,
         }
 
@@ -300,7 +300,7 @@ class TestEvalConfigJudgeModelArgsValidation:
                 "model_name": "gpt-4",  # String should remain string
                 "use_cache": "True",  # String should remain string (not converted to bool)
             },
-            "task_name": "MMLU",
+            "task_name": "MMLU_CAIS_EN_MC",
         }
 
         config = EvalConfig(**config_data)

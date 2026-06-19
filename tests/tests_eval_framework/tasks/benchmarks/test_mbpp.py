@@ -3,7 +3,7 @@ import pytest
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
 
-_NUM_FEWSHOT = {"MBPP_OLMES": 3}
+_NUM_FEWSHOT = {"MBPP_Google_EN_OLMES": 3}
 
 
 @pytest.mark.formatter_hash

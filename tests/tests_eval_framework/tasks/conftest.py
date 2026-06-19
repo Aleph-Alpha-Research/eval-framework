@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 FIXTURE_REVISIONS: dict[str, str] = {
-    "COPA": "abcdef0123456789abcdef0123456789abcdef01",
+    "COPA_SuperGLUE_EN_Cloze": "abcdef0123456789abcdef0123456789abcdef01",
 }
 
 

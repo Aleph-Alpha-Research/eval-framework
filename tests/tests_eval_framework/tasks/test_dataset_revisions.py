@@ -79,7 +79,7 @@ def test_get_pinned_dataset_revision_returns_sha_for_known_task(fixture_revision
     dr.DatasetRevision.reset()
     dr.DatasetRevision.add_revision_file(fixture_revisions_file)
 
-    assert dr.DatasetRevision.pinned_revision("COPA") == FIXTURE_REVISIONS["COPA"]
+    assert dr.DatasetRevision.pinned_revision("COPA_SuperGLUE_EN_Cloze") == FIXTURE_REVISIONS["COPA_SuperGLUE_EN_Cloze"]
 
 
 def test_get_pinned_dataset_revision_returns_none_for_unknown_task(fixture_revisions_file: Path) -> None:

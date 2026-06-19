@@ -1,22 +1,22 @@
 import pytest
 
-from eval_framework.tasks.benchmarks.math_reasoning import MATH
+from eval_framework.tasks.benchmarks.math_reasoning import HendrycksMath_EleutherAI_EN
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
 from tests.tests_eval_framework.utils import DatasetPatcher
 
 _NUM_FEWSHOT = {
-    "GSM8KReasoning": 0,
-    "MATHMinervaBPB": 0,
-    "MATHMinervaEvalHarness": 0,
-    "MATH500Minerva": 0,
-    "MATHMinerva_OLMES": 4,
+    "GSM8K_OpenAI_EN_Reasoning": 0,
+    "HendrycksMath_EleutherAI_EN_BPB": 0,
+    "HendrycksMath_EleutherAI_EN_EvalHarness": 0,
+    "MATH500_HuggingFaceH4_EN_OLMES": 0,
+    "HendrycksMath_EleutherAI_EN_OLMES": 4,
 }
 
 
 @pytest.fixture()
-def math_reasoning() -> MATH:
-    with DatasetPatcher(MATH) as patched_task:
+def math_reasoning() -> HendrycksMath_EleutherAI_EN:
+    with DatasetPatcher(HendrycksMath_EleutherAI_EN) as patched_task:
         return patched_task
 
 
@@ -42,11 +42,13 @@ def math_reasoning() -> MATH:
         pytest.param("{" + "a" * 10000 + "}", 0, 10001, id="large_content_inside_brackets-0-10001"),
     ],
 )
-def test_find_closing_bracket(math_reasoning: MATH, string: str, start_index: int, expected: int) -> None:
+def test_find_closing_bracket(
+    math_reasoning: HendrycksMath_EleutherAI_EN, string: str, start_index: int, expected: int
+) -> None:
     assert math_reasoning._find_closing_bracket(string, start_index) == expected
 
 
-def test_find_closing_bracket_exceptions(math_reasoning: MATH) -> None:
+def test_find_closing_bracket_exceptions(math_reasoning: HendrycksMath_EleutherAI_EN) -> None:
     """Test cases that should raise ValueError."""
     with pytest.raises(ValueError):
         math_reasoning._find_closing_bracket("{}", -1)  # Negative index
@@ -81,7 +83,9 @@ def test_find_closing_bracket_exceptions(math_reasoning: MATH) -> None:
         ("", ("", "", "")),
     ],
 )
-def test_split_text_command(math_reasoning: MATH, string: str, expected: tuple[str, str, str]) -> None:
+def test_split_text_command(
+    math_reasoning: HendrycksMath_EleutherAI_EN, string: str, expected: tuple[str, str, str]
+) -> None:
     assert math_reasoning._split_text_command(string) == expected
 
 
@@ -97,7 +101,7 @@ def test_split_text_command(math_reasoning: MATH, string: str, expected: tuple[s
     ],
 )
 def test_split_text_command_with_search(
-    math_reasoning: MATH, string: str, search: str, expected: tuple[str, str, str]
+    math_reasoning: HendrycksMath_EleutherAI_EN, string: str, search: str, expected: tuple[str, str, str]
 ) -> None:
     assert math_reasoning._split_text_command(string, search) == expected
 

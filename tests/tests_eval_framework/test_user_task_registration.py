@@ -84,8 +84,8 @@ def test_derived_user_task_registration(tmp_path: Path) -> None:
     with open(task_file, "w") as f:
         f.write(
             textwrap.dedent("""
-            from eval_framework.tasks.benchmarks.copa import COPA
-            class MyCOPA(COPA):
+            from eval_framework.tasks.benchmarks.copa import COPA_SuperGLUE_EN_Cloze
+            class MyCOPA(COPA_SuperGLUE_EN_Cloze):
                 NAME = "MyCOPA"
         """)
         )

@@ -2,22 +2,22 @@ import re
 
 import pytest
 
-from eval_framework.tasks.benchmarks.gpqa import GPQA, GPQA_COT
+from eval_framework.tasks.benchmarks.gpqa import GPQA_Idavidrein_EN_COTMC, GPQA_Idavidrein_EN_MC
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
 from tests.tests_eval_framework.utils import DatasetPatcher
 
-# GPQA_OLMES uses a gated HuggingFace dataset (Idavidrein/gpqa); hashes cannot be computed without auth.
-_SKIPPED_TASKS = ["GPQA_OLMES"]
+# GPQA uses a gated HuggingFace dataset (Idavidrein/gpqa); hashes cannot be computed without auth.
+_SKIPPED_TASKS = ["GPQA_Idavidrein_EN_MC_OLMES"]
 
 
 class TestGPQA:
     @pytest.fixture
-    def gpqa_task(self) -> GPQA:
-        with DatasetPatcher(GPQA, num_fewshot=1) as patched_task:
+    def gpqa_task(self) -> GPQA_Idavidrein_EN_MC:
+        with DatasetPatcher(GPQA_Idavidrein_EN_MC, num_fewshot=1) as patched_task:
             return patched_task
 
-    def test_ground_truth_in_completion(self, gpqa_task: GPQA) -> None:
+    def test_ground_truth_in_completion(self, gpqa_task: GPQA_Idavidrein_EN_MC) -> None:
         assert len(gpqa_task.SUBJECTS) > 0
         subject = gpqa_task.SUBJECTS[0]
         gpqa_task._load_dataset(subject)
@@ -37,11 +37,11 @@ class TestGPQA:
 
 class TestGPQA_COT:
     @pytest.fixture
-    def gpqa_cot_task(self) -> GPQA_COT:
-        with DatasetPatcher(GPQA_COT) as patched_task:
+    def gpqa_cot_task(self) -> GPQA_Idavidrein_EN_COTMC:
+        with DatasetPatcher(GPQA_Idavidrein_EN_COTMC) as patched_task:
             return patched_task
 
-    def test_get_possible_completions_marked_deterministic(self, gpqa_cot_task: GPQA_COT) -> None:
+    def test_get_possible_completions_marked_deterministic(self, gpqa_cot_task: GPQA_Idavidrein_EN_COTMC) -> None:
         assert len(gpqa_cot_task.SUBJECTS) > 0
         subject = gpqa_cot_task.SUBJECTS[0]
         gpqa_cot_task._load_dataset(subject)
@@ -54,7 +54,7 @@ class TestGPQA_COT:
         assert 0 <= correct_index <= 3
         assert re.sub(r"\([A-Z]\)\s+", "", choices[correct_index]) == item["Correct Answer"]
 
-    def test_get_ground_truth_returns_correct_letter(self, gpqa_cot_task: GPQA_COT) -> None:
+    def test_get_ground_truth_returns_correct_letter(self, gpqa_cot_task: GPQA_Idavidrein_EN_COTMC) -> None:
         assert len(gpqa_cot_task.SUBJECTS) > 0
         subject = gpqa_cot_task.SUBJECTS[0]
         gpqa_cot_task._load_dataset(subject)
@@ -64,7 +64,7 @@ class TestGPQA_COT:
         result = gpqa_cot_task._get_ground_truth(item)
         assert result == expected_correct_letter
 
-    def test_ground_truth_in_completion(self, gpqa_cot_task: GPQA_COT) -> None:
+    def test_ground_truth_in_completion(self, gpqa_cot_task: GPQA_Idavidrein_EN_COTMC) -> None:
         assert len(gpqa_cot_task.SUBJECTS) > 0
         subject = gpqa_cot_task.SUBJECTS[0]
         gpqa_cot_task._load_dataset(subject)
@@ -74,7 +74,7 @@ class TestGPQA_COT:
         possible_completions = [f"({choice[1]})" for choice in choices]
         assert f"({ground_truth})" in possible_completions
 
-    def test_ground_truth_in_completion_cot(self, gpqa_cot_task: GPQA_COT) -> None:
+    def test_ground_truth_in_completion_cot(self, gpqa_cot_task: GPQA_Idavidrein_EN_COTMC) -> None:
         assert len(gpqa_cot_task.SUBJECTS) > 0
         subject = gpqa_cot_task.SUBJECTS[0]
         gpqa_cot_task._load_dataset(subject)

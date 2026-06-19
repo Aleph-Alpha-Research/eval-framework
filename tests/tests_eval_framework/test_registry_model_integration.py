@@ -7,7 +7,7 @@ import wandb
 from eval_framework import main as main_file
 from eval_framework.llm.huggingface import HFLLMRegistryModel
 from eval_framework.llm.vllm import VLLMRegistryModel
-from eval_framework.tasks.benchmarks.arc import ARC
+from eval_framework.tasks.benchmarks.arc import ARC_AllenAI_EN_Cloze
 from eval_framework.tasks.eval_config import EvalConfig
 from tests.tests_eval_framework.conftest import MockLLM
 
@@ -35,7 +35,7 @@ def test_registry_model_config_integration(model_class: type, extra_args: dict[s
     config = EvalConfig(
         llm_class=model_class,
         llm_args=llm_args,
-        task_name="ARC",
+        task_name="ARC_AllenAI_EN_Cloze",
         num_fewshot=2,
         num_samples=10,
         output_dir=Path("/tmp/test_output"),
@@ -53,7 +53,7 @@ def test_additional_artifact_use(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     """Test that additional wandb artifacts are registered as being used during evaluation."""
     mock_llm = MockLLM()
     eval_config = EvalConfig(
-        task_name=ARC.NAME,
+        task_name=ARC_AllenAI_EN_Cloze.NAME,
         num_fewshot=0,
         num_samples=10,
         output_dir=tmp_path,

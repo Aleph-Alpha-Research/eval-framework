@@ -5,8 +5,8 @@ import pytest
 
 from eval_framework.tasks import dataset_revisions as dr
 from eval_framework.tasks.base import BaseTask
-from eval_framework.tasks.benchmarks.copa import COPA
-from eval_framework.tasks.benchmarks.piqa import PIQA
+from eval_framework.tasks.benchmarks.copa import COPA_SuperGLUE_EN_Cloze
+from eval_framework.tasks.benchmarks.piqa import PIQA_YBisk_EN_Cloze
 from eval_framework.tasks.registry import register_task
 from tests.tests_eval_framework.tasks.conftest import FIXTURE_REVISIONS, write_fixture_revisions_file
 from tests.tests_eval_framework.tasks.test_registry import temporary_registry
@@ -116,15 +116,15 @@ def test_pinned_hf_revision_applied_when_unset(monkeypatch: pytest.MonkeyPatch, 
     dr._pinned_revisions.cache_clear()
     monkeypatch.setattr(dr.DatasetRevision, "_INSTANCE", None)
     dr.DatasetRevision.add_revision_file(fixture_path)
-    task = COPA.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
-    assert task.HF_REVISION == FIXTURE_REVISIONS["COPA"]
+    task = COPA_SuperGLUE_EN_Cloze.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+    assert task.HF_REVISION == FIXTURE_REVISIONS["COPA_SuperGLUE_EN_Cloze"]
 
 
 def test_custom_hf_revision_overrides_pinned() -> None:
-    task = COPA.with_overwrite(0, custom_subjects=None, custom_hf_revision="custom-sha")
+    task = COPA_SuperGLUE_EN_Cloze.with_overwrite(0, custom_subjects=None, custom_hf_revision="custom-sha")
     assert task.HF_REVISION == "custom-sha"
 
 
 def test_class_hf_revision_not_overridden_by_pin_file() -> None:
-    task = PIQA.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+    task = PIQA_YBisk_EN_Cloze.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
     assert task.HF_REVISION == "6b3aceb3276e5ab7e51895d73151a718690af38c"

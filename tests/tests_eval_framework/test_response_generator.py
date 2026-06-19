@@ -13,7 +13,7 @@ from eval_framework.result_processors.base import ResultProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
-from eval_framework.tasks.benchmarks.arc import ARC
+from eval_framework.tasks.benchmarks.arc import ARC_AllenAI_EN_Cloze
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig, PerturbationType
 from eval_framework.tasks.registry import get_task, register_task
@@ -26,7 +26,11 @@ def test_generate_completions_message_handling() -> None:
     # Setup
     llm = Mock(spec=BaseLLM)
     config = EvalConfig(
-        task_name="ARC", num_fewshot=0, num_samples=1, llm_class=llm.__class__, save_intermediate_results=False
+        task_name="ARC_AllenAI_EN_Cloze",
+        num_fewshot=0,
+        num_samples=1,
+        llm_class=llm.__class__,
+        save_intermediate_results=False,
     )
     result_processor = Mock(spec=ResultsFileProcessor)
     generator = ResponseGenerator(llm, config, result_processor)
@@ -236,7 +240,11 @@ def test_response_generator_llm_token_overloading(
 
     # defining task eval config
     config = EvalConfig(
-        task_name="AIME2024", num_fewshot=0, num_samples=1, llm_class=llm.__class__, max_tokens=config_max_tokens
+        task_name="AIME2024_HuggingFaceH4_EN",
+        num_fewshot=0,
+        num_samples=1,
+        llm_class=llm.__class__,
+        max_tokens=config_max_tokens,
     )
 
     generator = ResponseGenerator(llm, config, ResultsFileProcessor(tmp_path))
@@ -288,15 +296,15 @@ def test_response_generator_llm_token_overloading(
 @pytest.mark.parametrize(
     "task_subjects, expected_subjects, raises, task_name",
     [
-        pytest.param(["foobar, *"], [], True, "HumanEval_OLMES", id="invalid_subjects_str"),
+        pytest.param(["foobar, *"], [], True, "HumanEval_OpenAI_EN_OLMES", id="invalid_subjects_str"),
         pytest.param(
             ["computer_security", "conceptual_physics"],
             ["computer_security", "conceptual_physics"],
             False,
-            "MMLU",
+            "MMLU_CAIS_EN_MC",
             id="valid_subjects_tuples",
         ),
-        pytest.param(["computer_security", "foobar"], [], True, "MMLU", id="invalid_subjects_str"),
+        pytest.param(["computer_security", "foobar"], [], True, "MMLU_CAIS_EN_MC", id="invalid_subjects_str"),
     ],
 )
 def test_filter_task_subjects(
@@ -319,10 +327,10 @@ def test_filter_task_subjects(
 @pytest.mark.parametrize(
     "task_name, hf_revision, raises",
     [
-        pytest.param("HumanEval_OLMES", None, False),
-        pytest.param("HumanEval_OLMES", "not_valid_revision_1", True),
-        pytest.param("ARC", None, False),
-        pytest.param("IFEval", "9381f5d15347ba8854ffa2a480984ce7e554ef56", False),  # old valid revision
+        pytest.param("HumanEval_OpenAI_EN_OLMES", None, False),
+        pytest.param("HumanEval_OpenAI_EN_OLMES", "not_valid_revision_1", True),
+        pytest.param("ARC_AllenAI_EN_Cloze", None, False),
+        pytest.param("IFEval_Google_EN", "9381f5d15347ba8854ffa2a480984ce7e554ef56", False),  # old valid revision
     ],
 )
 def test_hf_revisions(task_name: str, hf_revision: str, raises: bool) -> None:
@@ -351,9 +359,13 @@ def test_response_generator_metadata_handling(tmp_path: Path) -> None:
     # Setup
     llm = MockLLM()
     config = EvalConfig(
-        task_name="ARC", num_fewshot=0, num_samples=1, llm_class=llm.__class__, save_intermediate_results=False
+        task_name="ARC_AllenAI_EN_Cloze",
+        num_fewshot=0,
+        num_samples=1,
+        llm_class=llm.__class__,
+        save_intermediate_results=False,
     )
-    config = EvalConfig(task_name="AIME2024", num_fewshot=0, num_samples=1, llm_class=llm.__class__)
+    config = EvalConfig(task_name="AIME2024_HuggingFaceH4_EN", num_fewshot=0, num_samples=1, llm_class=llm.__class__)
 
     generator = ResponseGenerator(llm, config, ResultsFileProcessor(tmp_path))
     generator.generate(lambda: False)
@@ -374,7 +386,7 @@ def test_response_generator_metadata_handling(tmp_path: Path) -> None:
 def test_response_generator_repeats_generates_multiple_outputs(tmp_path: Path) -> None:
     llm = MockLLM()
     config = EvalConfig(
-        task_name="AIME2024",
+        task_name="AIME2024_HuggingFaceH4_EN",
         num_fewshot=0,
         num_samples=1,
         llm_class=MockLLM,
@@ -394,7 +406,7 @@ def test_response_generator_repeats_with_intermediate_results_writes_unique_ids(
     llm = MockLLM()
     repeats = 3
     config = EvalConfig(
-        task_name="AIME2024",
+        task_name="AIME2024_HuggingFaceH4_EN",
         num_fewshot=0,
         num_samples=1,
         llm_class=MockLLM,
@@ -442,14 +454,24 @@ def test_with_wrong_loaded_metadata(mock_create_perturbation_class: Mock, tmp_pa
         pass
 
     configs = [
-        EvalConfig(task_name="ARC", num_fewshot=0, num_samples=1, llm_class=MockLLM),
-        EvalConfig(task_name="ARC", num_fewshot=0, num_samples=1, llm_class=OtherMockLLM),
-        EvalConfig(task_name="AIME2024", num_fewshot=0, num_samples=1, llm_class=MockLLM),
-        EvalConfig(task_name="ARC", num_fewshot=1, num_samples=1, llm_class=MockLLM),
-        EvalConfig(task_name="ARC", num_fewshot=0, num_samples=2, llm_class=MockLLM),
-        EvalConfig(task_name="ARC", num_fewshot=0, num_samples=1, llm_class=MockLLM, task_subjects=["ARC-Easy"]),
+        EvalConfig(task_name="ARC_AllenAI_EN_Cloze", num_fewshot=0, num_samples=1, llm_class=MockLLM),
+        EvalConfig(task_name="ARC_AllenAI_EN_Cloze", num_fewshot=0, num_samples=1, llm_class=OtherMockLLM),
+        EvalConfig(task_name="AIME2024_HuggingFaceH4_EN", num_fewshot=0, num_samples=1, llm_class=MockLLM),
+        EvalConfig(task_name="ARC_AllenAI_EN_Cloze", num_fewshot=1, num_samples=1, llm_class=MockLLM),
+        EvalConfig(task_name="ARC_AllenAI_EN_Cloze", num_fewshot=0, num_samples=2, llm_class=MockLLM),
         EvalConfig(
-            task_name="ARC", num_fewshot=0, num_samples=1, llm_class=MockLLM, perturbation_config=PerturbationConfig()
+            task_name="ARC_AllenAI_EN_Cloze",
+            num_fewshot=0,
+            num_samples=1,
+            llm_class=MockLLM,
+            task_subjects=["ARC-Easy"],
+        ),
+        EvalConfig(
+            task_name="ARC_AllenAI_EN_Cloze",
+            num_fewshot=0,
+            num_samples=1,
+            llm_class=MockLLM,
+            perturbation_config=PerturbationConfig(),
         ),
     ]
     configs.append(configs[0])
@@ -473,7 +495,7 @@ def test_perturbed_response_differs(tmp_path: Path, perturbation_type: Perturbat
     """Test that perturbed responses differ from original samples for each perturbation type."""
     output_dir = tmp_path / "eval"
     perturbed_eval_config = EvalConfig(
-        task_name=ARC.NAME,  # Use a simple task for testing
+        task_name=ARC_AllenAI_EN_Cloze.NAME,  # Use a simple task for testing
         num_fewshot=0,
         num_samples=1,
         output_dir=output_dir,
@@ -509,7 +531,7 @@ def test_response_generator_applies_model_then_task_post_processing(tmp_path: Pa
 
     llm = MarkerLLM()
     config = EvalConfig(
-        task_name="ARC",
+        task_name="ARC_AllenAI_EN_Cloze",
         num_fewshot=0,
         num_samples=1,
         llm_class=llm.__class__,

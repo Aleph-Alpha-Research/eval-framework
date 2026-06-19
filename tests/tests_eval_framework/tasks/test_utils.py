@@ -158,7 +158,7 @@ class TestUnittestMergeSnippets:
     """Tests for unittest_merge_snippets which combines solution code with unittest test code.
 
     NOTE: The test data strings contain ``unittest.TestCase`` code because that is the format
-    used by the BigCodeBench dataset.  The tests themselves run under pytest.
+    used by the BigCodeBench_BigCode_EN dataset.  The tests themselves run under pytest.
     """
 
     def test_merges_code_and_tests_into_single_script(self) -> None:
@@ -195,7 +195,7 @@ class TestUnittestMergeSnippets:
 class TestExecutePythonCodeWithTests:
     """Integration tests for execute_python_code_with_tests (Docker-based code execution).
 
-    NOTE: Test data strings use ``unittest.TestCase`` format because BigCodeBench test
+    NOTE: Test data strings use ``unittest.TestCase`` format because BigCodeBench_BigCode_EN test
     cases are written that way.  The tests themselves run under pytest.
     """
 

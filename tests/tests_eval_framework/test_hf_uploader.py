@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 
 from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.result_processors.hf_uploader import HFUploader
-from eval_framework.tasks.benchmarks.arc import ARC
+from eval_framework.tasks.benchmarks.arc import ARC_AllenAI_EN_Cloze
 from eval_framework.tasks.eval_config import EvalConfig
 
 
@@ -28,7 +28,7 @@ def sample_output_dir(tmp_path: Path) -> Path:
 @pytest.fixture
 def sample_config(tmp_path: Path) -> EvalConfig:
     return EvalConfig(
-        task_name=ARC.NAME,
+        task_name=ARC_AllenAI_EN_Cloze.NAME,
         num_fewshot=0,
         num_samples=10,
         output_dir=tmp_path,
@@ -87,7 +87,7 @@ def test_init_login_failure(mocker: MockerFixture, sample_config: EvalConfig) ->
 def test_init_turned_off() -> None:
     """Test initialization when HF details are not specified."""
     sample_config = EvalConfig(
-        task_name=ARC.NAME,
+        task_name=ARC_AllenAI_EN_Cloze.NAME,
         num_fewshot=0,
         num_samples=10,
         llm_class=Qwen3_0_6B,
