@@ -42,7 +42,7 @@ class TRIVIAQA(BaseTask[str]):
         return completion_text.strip().rstrip(".")
 
 
-class TriviaQAMA(TRIVIAQA):
+class TriviaQA_MA(TRIVIAQA):
     """TriviaQA with the exact system prompt used in MA training"""
 
     NAME = "TriviaQA_MA"

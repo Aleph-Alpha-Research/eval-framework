@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.tasks.benchmarks.triviaqa import TriviaQAMA
+from eval_framework.tasks.benchmarks.triviaqa import TriviaQA_MA
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
 
@@ -20,13 +20,13 @@ _ITEM = {
 
 
 def test_triviaqa_ma_system_prompt_instructs_reject() -> None:
-    system = TriviaQAMA()._get_system_prompt_text(_ITEM)
+    system = TriviaQA_MA()._get_system_prompt_text(_ITEM)
     assert system is not None
-    assert f"respond with '{TriviaQAMA.UNANSWERABLE_STR}'" in system
+    assert f"respond with '{TriviaQA_MA.UNANSWERABLE_STR}'" in system
 
 
 def test_triviaqa_ma_instruction_is_context_question_only() -> None:
-    instruction = TriviaQAMA()._get_instruction_text(_ITEM)
+    instruction = TriviaQA_MA()._get_instruction_text(_ITEM)
     assert instruction == (
         "Context:\nParis is the capital of France.\n\nFrance is in Europe.\n\n"
         "Question:\nWhat is the capital of France?\n"
@@ -34,4 +34,4 @@ def test_triviaqa_ma_instruction_is_context_question_only() -> None:
 
 
 def test_triviaqa_ma_ground_truth_uses_aliases() -> None:
-    assert TriviaQAMA()._get_ground_truth(_ITEM) == ["Paris", "Paris, France"]
+    assert TriviaQA_MA()._get_ground_truth(_ITEM) == ["Paris", "Paris, France"]
