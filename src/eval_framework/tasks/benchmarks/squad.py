@@ -240,6 +240,8 @@ class SQuAD2MA(SQUAD2):
     """SQuAD v2 with the exact system prompt used in MA training"""
 
     NAME = "SQuAD2_MA"
+    UNANSWERABLE_STR = "unanswerable"
+
     METRICS = [AccuracyCompletion, F1, F1SquadNormalized]
 
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
@@ -252,7 +254,7 @@ class SQuAD2MA(SQUAD2):
         )
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return f"Context:\n{item['context']}\n\nQuestion:\n{item['question']}\nAnswer:"
+        return f"Context:\n{item['context']}\n\nQuestion:\n{item['question']}\n"
 
 
 class SQuAD_OLMES(SQUAD):
