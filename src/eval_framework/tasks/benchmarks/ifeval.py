@@ -5,10 +5,10 @@ from eval_framework.metrics.completion.language_checker import LanguageRawConsis
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
 
 
-class IFEval(BaseTask[str]):
+class IFEval_Google_EN(BaseTask[str]):
     """IFEval: Instruction Following Eval (https://arxiv.org/pdf/2311.07911)."""
 
-    NAME = "IFEval"
+    NAME = "IFEval_Google_EN"
     DATASET_PATH = "google/IFEval"
     SAMPLE_SPLIT = "train"
     FEWSHOT_SPLIT = "train"
@@ -61,19 +61,28 @@ class IFEval(BaseTask[str]):
         return []
 
 
-class IFEvalFiSv(IFEval):
+class IFEval_LumiOpen_FI(IFEval_Google_EN):
     """Machine translated versions of the Instruction Following Evaluation (IFEval) benchmark."""
 
-    NAME = "IFEval Finnish & Swedish"
+    NAME = "IFEval_LumiOpen_FI"
     DATASET_PATH = "LumiOpen/ifeval_mt"
-    SUBJECTS = ["fi", "sv"]
-    LANGUAGE = {"fi": Language.FIN, "sv": Language.SWE}
+    SUBJECTS = ["fi"]
+    LANGUAGE = {"fi": Language.FIN}
 
 
-class IFEvalDe(IFEval):
+class IFEval_LumiOpen_SV(IFEval_Google_EN):
+    """Machine translated versions of the Instruction Following Evaluation (IFEval) benchmark."""
+
+    NAME = "IFEval_LumiOpen_SV"
+    DATASET_PATH = "LumiOpen/ifeval_mt"
+    SUBJECTS = ["sv"]
+    LANGUAGE = {"sv": Language.SWE}
+
+
+class IFEval_JZhang_DE(IFEval_Google_EN):
     """German version of the Instruction Following Evaluation (IFEval) benchmark."""
 
-    NAME = "IFEval German"
+    NAME = "IFEval_JZhang_DE"
     DATASET_PATH = "jzhang86/de_ifeval"
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = {NO_SUBJECT: Language.DEU}

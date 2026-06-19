@@ -458,7 +458,7 @@ LANGUAGE_NAME_MAP = {
 }
 
 
-class GlobalMMLU(BaseTask[tuple[str, str]]):
+class GlobalMMLU_Cohere_XX_MC(BaseTask[tuple[str, str]]):
     """
     MMLU dataset: https://huggingface.co/datasets/CohereLabs/Global-MMLU
 
@@ -469,7 +469,7 @@ class GlobalMMLU(BaseTask[tuple[str, str]]):
     https://github.com/aisingapore/SEA-HELM/blob/main/seahelm_tasks/knowledge/global_mmlu/abstract_algebra/config.yaml
     """
 
-    NAME = "GlobalMMLU"
+    NAME = "GlobalMMLU_Cohere_XX_MC"
     DATASET_PATH = "CohereLabs/Global-MMLU"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "dev"
@@ -533,7 +533,7 @@ class GlobalMMLU(BaseTask[tuple[str, str]]):
         return [f" {key}" for key in self.keys]
 
 
-class GlobalMMLU_German(GlobalMMLU):
-    NAME = "GlobalMMLU_German"
+class GlobalMMLU_Cohere_DE_MC(GlobalMMLU_Cohere_XX_MC):
+    NAME = "GlobalMMLU_Cohere_DE_MC"
     SUBJECTS = [("de", subject) for subject in MMLU_SUBJECTS]
     LANGUAGE = Language.DEU

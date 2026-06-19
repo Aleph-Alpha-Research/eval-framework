@@ -7,12 +7,12 @@ from huggingface_hub import HfApi
 from huggingface_hub.errors import RevisionNotFoundError
 
 from eval_framework.tasks.base import Language
-from eval_framework.tasks.benchmarks.winogrande import WINOGRANDE
+from eval_framework.tasks.benchmarks.winogrande import WinoGrande_AllenAI_EN_Cloze
 
 ANSWER_STR_TO_NUM = {"1": 0, "2": 1}
 
 
-class WINOX(WINOGRANDE):
+class WINOX(WinoGrande_AllenAI_EN_Cloze):
     """
     Wino-X is a parallel dataset of German, French, and Russian Winograd schemas, aligned with their English
     counterparts, used to examine whether neural machine translation models can perform coreference resolution that

@@ -18,10 +18,10 @@ from eval_framework.tasks.utils import get_n_letters
 logger = logging.getLogger(__name__)
 
 
-class GPQA(BaseTask[str]):
+class GPQA_Idavidrein_EN_MC(BaseTask[str]):
     """GPQA dataset: https://huggingface.co/datasets/Idavidrein/gpqa"""
 
-    NAME = "GPQA"
+    NAME = "GPQA_Idavidrein_EN_MC"
     DATASET_PATH = "Idavidrein/gpqa"
     SAMPLE_SPLIT = "train"
     FEWSHOT_SPLIT = "train"
@@ -120,13 +120,13 @@ class GPQA(BaseTask[str]):
         return text
 
 
-class GPQA_OLMES(GPQA):
+class GPQA_Idavidrein_EN_MC_OLMES(GPQA_Idavidrein_EN_MC):
     """
     GPQA multiple choice (OLMES/oe_eval style): prompt shows options with space-prefixed labels
     (" A.", " B.", " C.", " D."); loglikelihood over " A"/" B"/" C"/" D".
     """
 
-    NAME = "GPQA_OLMES"
+    NAME = "GPQA_Idavidrein_EN_MC_OLMES"
 
     def _get_possible_completions_marked(self, item: dict[str, Any]) -> tuple[list[str], int]:
         choices = [self._preprocess(item[f"Incorrect Answer {x}"]) for x in range(1, 4)]
@@ -147,8 +147,8 @@ class GPQA_OLMES(GPQA):
         return [f" {x}" for x in self.keys]
 
 
-class GPQA_IDK(GPQA):
-    NAME = "GPQA_IDK"
+class GPQA_Idavidrein_EN_MC_IDK(GPQA_Idavidrein_EN_MC):
+    NAME = "GPQA_Idavidrein_EN_MC_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
@@ -168,8 +168,8 @@ class GPQA_IDK(GPQA):
         return (completions or []) + [" (?)"]
 
 
-class GPQA_COT(GPQA):
-    NAME = "GPQA_COT"
+class GPQA_Idavidrein_EN_COTMC(GPQA_Idavidrein_EN_MC):
+    NAME = "GPQA_Idavidrein_EN_COTMC"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Therefore", "the", "answer", "is", "ANSWER_LETTER"] + get_n_letters(
@@ -178,7 +178,7 @@ class GPQA_COT(GPQA):
     ANS_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
 
     def __init__(self, num_fewshot: int = 0) -> None:
-        assert num_fewshot == 0, "Fewshot is not supported for GPQA_COT"
+        assert num_fewshot == 0, "Fewshot is not supported for GPQA_Idavidrein_EN_COT"
         super().__init__(num_fewshot)
         self.stop_sequences: list[str] = ["Question:"]
         self.keys = get_n_letters(4)

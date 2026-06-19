@@ -88,12 +88,12 @@ FEWSHOT_ITEMS = [
 ]
 
 
-class GSM8KEvalHarness(BaseTask[str]):
+class GSM8K_OpenAI_EN_EvalHarness(BaseTask[str]):
     """GSM8K dataset: https://huggingface.co/datasets/openai/gsm8k
     This version uses samples from the train split as fewshot examples.
     """
 
-    NAME = "GSM8KEvalHarness"
+    NAME = "GSM8K_OpenAI_EN_EvalHarness"
     DATASET_PATH = "openai/gsm8k"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -135,8 +135,8 @@ class GSM8KEvalHarness(BaseTask[str]):
         return self._extract_answer(item["answer"])
 
 
-class GSM8K(GSM8KEvalHarness):
-    NAME = "GSM8K"
+class GSM8K_OpenAI_EN(GSM8K_OpenAI_EN_EvalHarness):
+    NAME = "GSM8K_OpenAI_EN"
     FEWSHOT_SPLIT = ""  # Changed to empty string since we're using predefined examples
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -153,13 +153,13 @@ class GSM8K(GSM8KEvalHarness):
         return FEWSHOT_ITEMS[: self.num_fewshot]
 
 
-class GSM8K_OLMES(GSM8K):
-    NAME = "GSM8K_OLMES"
+class GSM8K_OpenAI_EN_OLMES(GSM8K_OpenAI_EN):
+    NAME = "GSM8K_OpenAI_EN_OLMES"
     METRICS = [AccuracyCompletionOLMES]
 
     def __init__(self, num_fewshot: int = 8) -> None:
         if num_fewshot != 8:
-            logger.warning(f"GSM8K_OLMES supports a fixed num_fewshot of 8. Got {num_fewshot}")
+            logger.warning(f"{self.NAME} supports a fixed num_fewshot of 8. Got {num_fewshot}")
         super().__init__(8)
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:

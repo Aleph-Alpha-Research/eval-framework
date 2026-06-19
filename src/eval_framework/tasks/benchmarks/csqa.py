@@ -9,10 +9,11 @@ from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseTy
 from eval_framework.tasks.utils import get_n_letters
 
 
-class CommonsenseQACloze(BaseTask[str]):
-    """CommonsenseQA dataset: https://huggingface.co/datasets/tau/commonsense_qa"""
+class _CommonsenseQA_Tau_EN_Base(BaseTask[str]):
+    """CommonsenseQA dataset: https://huggingface.co/datasets/tau/commonsense_qa.
 
-    NAME = "CommonsenseQACloze"
+    TODO: (Frank) I belive this task is currently broken and have instead turned it into a base class."""
+
     DATASET_PATH = "tau/commonsense_qa"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
@@ -46,13 +47,13 @@ class CommonsenseQACloze(BaseTask[str]):
         return f"{self._get_cue_text(item)}{ground_truth}"
 
 
-class CommonsenseQAFullTextCloze(CommonsenseQACloze):
+class CommonsenseQA_Tau_EN_Cloze(_CommonsenseQA_Tau_EN_Base):
     """
     CommonsenseQA cloze with full answer text as ground truth (not just the letter).
     Scores loglikelihood over the full correct choice text; includes bits-per-byte.
     """
 
-    NAME = "CommonsenseQAFullTextCloze"
+    NAME = "CommonsenseQA_Tau_EN_Cloze"
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -61,10 +62,10 @@ class CommonsenseQAFullTextCloze(CommonsenseQACloze):
         return f" {item['choices']['text'][correct_index]}"
 
 
-class CommonsenseQAMC(CommonsenseQACloze):
+class CommonsenseQA_Tau_EN_MC(_CommonsenseQA_Tau_EN_Base):
     """Multiple-choice variant of CommonsenseQA where the model selects a letter (A-E)."""
 
-    NAME = "CommonsenseQAMC"
+    NAME = "CommonsenseQA_Tau_EN_MC"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
@@ -81,12 +82,12 @@ class CommonsenseQAMC(CommonsenseQACloze):
         return [f" {label}" for label in labels]
 
 
-class CommonsenseQAMC_OLMES(CommonsenseQAMC):
+class CommonsenseQA_Tau_EN_MC_OLMES(CommonsenseQA_Tau_EN_MC):
     """
     CommonsenseQA MC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
     """
 
-    NAME = "CommonsenseQAMC_OLMES"
+    NAME = "CommonsenseQA_Tau_EN_MC_OLMES"
     SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
     FEWSHOT_SPLIT = "train"
 

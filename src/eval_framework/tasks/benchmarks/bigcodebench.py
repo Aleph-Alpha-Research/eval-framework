@@ -37,10 +37,10 @@ RESPONSE_PREFIX = (
 )  # from https://github.com/bigcode-project/bigcodebench/blob/main/bigcodebench/generate.py#L149
 
 
-class BigCodeBench(BaseTask[str]):
+class BigCodeBench_BigCode_EN(BaseTask[str]):
     """BigCodeBench dataset: https://huggingface.co/datasets/bigcode/bigcodebench"""
 
-    NAME = "BigCodeBench"
+    NAME = "BigCodeBench_BigCode_EN"
     DATASET_PATH = "bigcode/bigcodebench"
     SAMPLE_SPLIT = "v0.1.4"
     FEWSHOT_SPLIT = "v0.1.4"  # (there is no dedicated split, few-shot is not expected for this dataset)
@@ -50,9 +50,9 @@ class BigCodeBench(BaseTask[str]):
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
-        if self.__class__ is BigCodeBench and num_fewshot != 0:
+        if self.__class__ is BigCodeBench_BigCode_EN and num_fewshot != 0:
             logger.warning(
-                "Fewshot is not supported for BigCodeBench (got num_fewshot=%d); "
+                f"Fewshot is not supported for {self.__class__} (got num_fewshot=%d); "
                 "setting to 0. Use BigCodeBench_OLMES for 3-shot.",
                 num_fewshot,
             )
@@ -115,7 +115,7 @@ PROMPT_INSTRUCTION_OLMES = (
 )
 
 
-class BigCodeBench_OLMES(BigCodeBench):
+class BigCodeBench_BigCode_EN_OLMES(BigCodeBench_BigCode_EN):
     """
     BigCodeBench variant matching oe_eval `bigcodebench:3shot::olmo3:v2`.
 
@@ -123,7 +123,7 @@ class BigCodeBench_OLMES(BigCodeBench):
     then compute pass@1 over the 5 samples per problem (post-process if needed).
     """
 
-    NAME = "BigCodeBench_OLMES"
+    NAME = "BigCodeBench_BigCode_EN_OLMES"
     SAMPLE_SPLIT = "v0.1.2"
     FEWSHOT_SPLIT = "v0.1.2"
     METRICS = [CodeExecutionPassAtOneWithCodebench]
@@ -174,29 +174,29 @@ class BigCodeBench_OLMES(BigCodeBench):
         return processed_text
 
 
-class BigCodeBenchInstruct(BigCodeBench):
+class BigCodeBench_BigCode_EN_Instruct(BigCodeBench_BigCode_EN):
     """BigCodeBench dataset: https://huggingface.co/datasets/bigcode/bigcodebench"""
 
-    NAME = "BigCodeBenchInstruct"
+    NAME = "BigCodeBench_BigCode_EN_Instruct"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return PROMPT_INSTRUCTION + item["instruct_prompt"]
 
 
-class BigCodeBenchHard(BigCodeBench):
+class BigCodeBenchHard_BigCode_EN(BigCodeBench_BigCode_EN):
     """BigCodeBench dataset: https://huggingface.co/datasets/bigcode/bigcodebench-hard"""
 
-    NAME = "BigCodeBenchHard"
+    NAME = "BigCodeBenchHard_BigCode_EN"
     DATASET_PATH = "bigcode/bigcodebench-hard"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return PROMPT_INSTRUCTION + item["complete_prompt"]
 
 
-class BigCodeBenchHardInstruct(BigCodeBenchHard):
+class BigCodeBenchHard_BigCode_EN_Instruct(BigCodeBenchHard_BigCode_EN):
     """BigCodeBench dataset: https://huggingface.co/datasets/bigcode/bigcodebench-hard"""
 
-    NAME = "BigCodeBenchHardInstruct"
+    NAME = "BigCodeBenchHard_BigCode_EN_Instruct"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return PROMPT_INSTRUCTION + item["instruct_prompt"]

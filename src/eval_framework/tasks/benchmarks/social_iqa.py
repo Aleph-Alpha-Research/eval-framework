@@ -145,12 +145,12 @@ def _social_iqa_context_question(item: dict[str, Any]) -> str:
     return f"{context} {question}".strip()
 
 
-class SocialIQACloze(BaseTask[str]):
+class SocialIQa_AllenAI_EN_Cloze(BaseTask[str]):
     """
     Social IQA cloze: loglikelihood over full answer text.
     """
 
-    NAME = "SocialIQACloze"
+    NAME = "SocialIQa_AllenAI_EN_Cloze"
     DATASET_PATH = SOCIAL_I_QA_DATASET_PATH
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
@@ -191,13 +191,13 @@ class SocialIQACloze(BaseTask[str]):
         return [f" {c}" for c in choices]
 
 
-class SocialIQAMC_OLMES(SocialIQACloze):
+class SocialIQa_AllenAI_EN_MC_OLMES(SocialIQa_AllenAI_EN_Cloze):
     """
     Social IQA multiple choice (OLMES/oe_eval style): loglikelihood over " A"/" B"/" C".
     Uses space-prefixed labels in prompt (" A.", " B.", " C.") for tokenization parity with oe_eval.
     """
 
-    NAME = "SocialIQAMC_OLMES"
+    NAME = "SocialIQa_AllenAI_EN_MC_OLMES"
     SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -216,14 +216,14 @@ class SocialIQAMC_OLMES(SocialIQACloze):
         return [f" {label}" for label in get_n_letters(3)]
 
 
-class SocialIQAMC(SocialIQAMC_OLMES):
+class SocialIQa_AllenAI_EN_MC(SocialIQa_AllenAI_EN_MC_OLMES):
     """
     Social IQA multiple choice: loglikelihood over " A"/" B"/" C".
     Labels in prompt have no leading space ("A.", "B.", "C."); possible completions use a
     prefixed space (" A", " B", " C") for tokenization consistency.
     """
 
-    NAME = "SocialIQAMC"
+    NAME = "SocialIQa_AllenAI_EN_MC"
     SAMPLE_SPLIT = "validation"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

@@ -31,10 +31,10 @@ MMLU_PRO_SUBJECTS = [
 ]
 
 
-class MMLU_PRO(BaseTask[str]):
+class MMLUPro_TIGERLab_EN_MC(BaseTask[str]):
     """MMLU_PRO dataset: https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro"""
 
-    NAME = "MMLU Pro"
+    NAME = "MMLUPro_TIGERLab_EN_MC"
     DATASET_PATH = "TIGER-Lab/MMLU-Pro"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
@@ -91,12 +91,12 @@ class MMLU_PRO(BaseTask[str]):
         return [f" {key}" for key in self.keys]
 
 
-class MMLU_PRO_OLMES(MMLU_PRO):
+class MMLUPro_TIGERLab_EN_MC_OLMES(MMLUPro_TIGERLab_EN_MC):
     """
     MMLU Pro with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
     """
 
-    NAME = "MMLU Pro_OLMES"
+    NAME = "MMLUPro_TIGERLab_EN_MC_OLMES"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         instruction_text = item["question"].strip() + "\n"
@@ -104,8 +104,8 @@ class MMLU_PRO_OLMES(MMLU_PRO):
         return instruction_text
 
 
-class MMLU_PRO_IDK(MMLU_PRO):
-    NAME = "MMLU Pro_IDK"
+class MMLUPro_TIGERLab_EN_MC_IDK(MMLUPro_TIGERLab_EN_MC):
+    NAME = "MMLUPro_TIGERLab_EN_MC_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
@@ -126,8 +126,8 @@ class MMLU_PRO_IDK(MMLU_PRO):
         return (completions or []) + [" ?"]
 
 
-class MMLU_PRO_COT(MMLU_PRO):
-    NAME = "MMLU_PRO_COT"
+class MMLUPro_TIGERLab_EN_COTMC(MMLUPro_TIGERLab_EN_MC):
+    NAME = "MMLUPro_TIGERLab_EN_COTMC"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Therefore", "the", "answer", "is", "ANSWER_LETTER"] + get_n_letters(

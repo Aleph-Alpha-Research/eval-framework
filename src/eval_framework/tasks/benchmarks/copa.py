@@ -11,12 +11,12 @@ from eval_framework.tasks.base import BaseTask, Language, ResponseType
 from eval_framework.tasks.utils import get_n_letters
 
 
-class COPAEvalHarness(BaseTask[str]):
+class COPA_SuperGLUE_EN_Cloze_EvalHarness(BaseTask[str]):
     """COPA dataset: https://huggingface.co/datasets/aps/super_glue
     This version uses samples from the validation split as evaluation examples (same as lm-eval-harness).
     """
 
-    NAME = "COPAEvalHarness"
+    NAME = "COPA_SuperGLUE_EN_Cloze_EvalHarness"
     DATASET_PATH = "aps/super_glue"
     SAMPLE_SPLIT = "validation"  # 100 examples (same split as lm-eval)
     FEWSHOT_SPLIT = "test"  # 500 examples
@@ -45,13 +45,13 @@ class COPAEvalHarness(BaseTask[str]):
         return choices
 
 
-class COPA_OLMES(COPAEvalHarness):
+class COPA_SuperGLUE_EN_MC(COPA_SuperGLUE_EN_Cloze_EvalHarness):
     """
     COPA multiple choice (OLMES/oe_eval style): prompt shows premise + connector and options with
     space-prefixed labels (" A.", " B."); loglikelihood over " A"/" B".
     """
 
-    NAME = "COPA_OLMES"
+    NAME = "COPA_SuperGLUE_EN_MC"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         connector = {
@@ -72,20 +72,20 @@ class COPA_OLMES(COPAEvalHarness):
         return [f" {label}" for label in get_n_letters(2)]
 
 
-class COPA(COPAEvalHarness):
+class COPA_SuperGLUE_EN_Cloze(COPA_SuperGLUE_EN_Cloze_EvalHarness):
     """
     Unlike the original COPA task, this version uses the test split for evaluation and the validation split for
     few-shot examples. Previously, the test split labels were unavailable in the original dataset, but they are
     now accessible, allowing this configuration.
     """
 
-    NAME = "COPA"
+    NAME = "COPA_SuperGLUE_EN_Cloze"
     SAMPLE_SPLIT = "test"  # 500 examples
     FEWSHOT_SPLIT = "validation"  # 100 examples
 
 
-class COPA_IDKEvalHarness(COPAEvalHarness):
-    NAME = "COPA_IDKEvalHarness"
+class COPA_SuperGLUE_EN_Cloze_EvalHarness_IDK(COPA_SuperGLUE_EN_Cloze_EvalHarness):
+    NAME = "COPA_SuperGLUE_EN_Cloze_EvalHarness_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
@@ -106,7 +106,7 @@ class COPA_IDKEvalHarness(COPAEvalHarness):
         return (completions or []) + [" I do not know."]
 
 
-class COPA_IDK(COPA_IDKEvalHarness):
-    NAME = "COPA_IDK"
+class COPA_SuperGLUE_EN_Cloze_IDK(COPA_SuperGLUE_EN_Cloze_EvalHarness_IDK):
+    NAME = "COPA_SuperGLUE_EN_Cloze_IDK"
     SAMPLE_SPLIT = "test"  # 500 examples
     FEWSHOT_SPLIT = "validation"  # 100 examples

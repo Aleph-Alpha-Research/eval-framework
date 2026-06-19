@@ -16,10 +16,10 @@ from template_formatting.formatter import Message, Role
 ANSWER_STR_TO_NUM = {"1": 0, "2": 1}
 
 
-class WINOGRANDE(BaseTask[str]):
+class WinoGrande_AllenAI_EN_Cloze(BaseTask[str]):
     """WINOGRANDE dataset: https://huggingface.co/datasets/allenai/winogrande"""
 
-    NAME = "Winogrande"
+    NAME = "WinoGrande_AllenAI_EN_Cloze"
     DATASET_PATH = "allenai/winogrande"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
@@ -51,13 +51,13 @@ class WINOGRANDE(BaseTask[str]):
         return [f" {choice}" for choice in self._extract_choices(item)]
 
 
-class WINOGRANDE_OLMES(WINOGRANDE):
+class WinoGrande_AllenAI_EN_MC(WinoGrande_AllenAI_EN_Cloze):
     """
     Winogrande with OLMES-style prompt: options shown with space-prefixed labels (" A.", " B.");
     loglikelihood over " A"/" B".
     """
 
-    NAME = "Winogrande_OLMES"
+    NAME = "WinoGrande_AllenAI_EN_MC"
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
@@ -77,8 +77,8 @@ class WINOGRANDE_OLMES(WINOGRANDE):
         return [f" {key}" for key in self.keys]
 
 
-class WINOGRANDE_IDK(WINOGRANDE):
-    NAME = "Winogrande_IDK"
+class WinoGrande_AllenAI_EN_Cloze_IDK(WinoGrande_AllenAI_EN_Cloze):
+    NAME = "WinoGrande_AllenAI_EN_Cloze_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
@@ -99,7 +99,7 @@ class WINOGRANDE_IDK(WINOGRANDE):
         return (completions or []) + [" I do not know."]
 
 
-class WINOGRANDECloze(WINOGRANDE):
+class WinoGrande_AllenAI_EN_PartialEval(WinoGrande_AllenAI_EN_Cloze):
     """Winogrande with Cloze-style prompt.
 
     The big change from usual tasks is that Winogrande uses a 'partial evaluation', meaning for
@@ -119,7 +119,7 @@ class WINOGRANDECloze(WINOGRANDE):
     and then use a custom metric (`PartialEvalAccuracy`) that pairs them up and compares them.
     """
 
-    NAME = "WinograndeCloze"
+    NAME = "WinoGrande_AllenAI_EN_PartialEval"
     SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
     METRICS = [PartialEvalAccuracy]  # Custom metric for partial evaluation accuracy (see docstring)
 

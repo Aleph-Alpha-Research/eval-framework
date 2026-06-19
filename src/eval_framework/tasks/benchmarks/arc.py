@@ -12,10 +12,10 @@ from eval_framework.tasks.base import BaseTask, Language, ResponseType
 from eval_framework.tasks.utils import get_n_letters
 
 
-class ARC(BaseTask[str]):
+class ARC_AllenAI_EN_Cloze(BaseTask[str]):
     """ARC dataset: https://huggingface.co/datasets/allenai/ai2_arc"""
 
-    NAME = "ARC"
+    NAME = "ARC_AllenAI_EN_Cloze"
     DATASET_PATH = "allenai/ai2_arc"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -49,13 +49,13 @@ class ARC(BaseTask[str]):
         return [f" {choice}" for choice in item["choices"]["text"]]
 
 
-class ARC_OLMES(ARC):
+class ARC_AllenAI_EN_MC(ARC_AllenAI_EN_Cloze):
     """
     ARC with OLMES-style prompt: options shown with space-prefixed labels (" A.", " B.", ...);
     loglikelihood over " A"/" B"/ etc.
     """
 
-    NAME = "ARC_OLMES"
+    NAME = "ARC_AllenAI_EN_MC"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"]
@@ -75,8 +75,8 @@ class ARC_OLMES(ARC):
         return [f" {label}" for label in get_n_letters(n)]
 
 
-class ARC_IDK(ARC):
-    NAME = "ARC_IDK"
+class ARC_AllenAI_EN_Cloze_IDK(ARC_AllenAI_EN_Cloze):
+    NAME = "ARC_AllenAI_EN_Cloze_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

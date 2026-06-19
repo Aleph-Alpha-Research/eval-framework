@@ -20,7 +20,7 @@ class MBPPMetricContext(BaseMetricContext):
     tests_code: str
 
 
-class MBPP(BaseTask[str]):
+class MBPP_Google_EN(BaseTask[str]):
     """
     MBPP provides both the problem statement and the test cases upfront. It says, "Here's the problem and here are the
     tests; write code that passes them.". Note that LLMs can cheat and only write code that passes the tests without
@@ -30,7 +30,7 @@ class MBPP(BaseTask[str]):
     initially. It says, "Here's the problem and function signature; write code, then we'll run tests later."
     """
 
-    NAME = "MBPP"
+    NAME = "MBPP_Google_EN"
     DATASET_PATH = "google-research-datasets/mbpp"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -118,13 +118,13 @@ class MBPP(BaseTask[str]):
         return code
 
 
-class MBPPBPB(MBPP):
+class MBPP_Google_EN_BPB(MBPP_Google_EN):
     """
     MBPP variant that scores loglikelihood of the gold reference code.
     Reports bits-per-byte on the reference solution.
     """
 
-    NAME = "MBPP BPB"
+    NAME = "MBPP_Google_EN_BPB"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [BitsPerByteLoglikelihood]
 
@@ -139,12 +139,12 @@ class MBPPBPB(MBPP):
         return [gt] if gt else None
 
 
-class MBPP_SANITIZED(MBPP):
-    NAME = "MBPP_SANITZED"
+class MBPP_Google_EN_Sanitized(MBPP_Google_EN):
+    NAME = "MBPP_Google_EN_Sanitized"
     SUBJECTS = ["sanitized"]
 
 
-class MBPP_PROMPT_WITHOUT_TESTS(MBPP):
+class MBPP_Google_EN_PromptWithoutTests(MBPP_Google_EN):
     """
     MBPP provides both the problem statement and the test cases upfront. It says, "Here's the problem and here are the
     tests; write code that passes them.". Note that LLMs can cheat and only write code that passes the tests without
@@ -154,7 +154,7 @@ class MBPP_PROMPT_WITHOUT_TESTS(MBPP):
     initially. It says, "Here's the problem and function signature; write code, then we'll run tests later."
     """
 
-    NAME = "MBPP_PROMPT_WITHOUT_TESTS"
+    NAME = "MBPP_Google_EN_PromptWithoutTests"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         """
@@ -205,8 +205,8 @@ class MBPP_PROMPT_WITHOUT_TESTS(MBPP):
         return function_header + code
 
 
-class MBPP_PROMPT_WITHOUT_TESTS_SANITIZED(MBPP_PROMPT_WITHOUT_TESTS):
-    NAME = "MBPP_PROMPT_WITHOUT_TESTS_SANITIZED"
+class MBPP_Google_EN_PromptWithoutTests_Sanitized(MBPP_Google_EN_PromptWithoutTests):
+    NAME = "MBPP_Google_EN_PromptWithoutTests_Sanitized"
     SUBJECTS = ["sanitized"]
 
 
@@ -253,7 +253,7 @@ _OLMES_FEWSHOT_EXAMPLES: list[dict[str, Any]] = [
 ]
 
 
-class MBPP_OLMES(MBPP):
+class MBPP_Google_EN_OLMES(MBPP_Google_EN):
     """
     MBPP OLMES variant replicating oe_eval's ``mbpp:3shot::olmo3:n32:v2``.
 
@@ -271,7 +271,7 @@ class MBPP_OLMES(MBPP):
         repeats: 32
     """
 
-    NAME = "MBPP_OLMES"
+    NAME = "MBPP_Google_EN_OLMES"
     FEWSHOT_SPLIT = "test"
 
     def __init__(self, num_fewshot: int = 3) -> None:

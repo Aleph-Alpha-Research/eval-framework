@@ -3,15 +3,15 @@ import re
 from typing import Any
 
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, Language, SubjectType
-from eval_framework.tasks.benchmarks.arc import ARC
-from eval_framework.tasks.benchmarks.gsm8k import GSM8KEvalHarness
-from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
-from eval_framework.tasks.benchmarks.mmlu import MMLU, MMLU_SUBJECTS
+from eval_framework.tasks.benchmarks.arc import ARC_AllenAI_EN_Cloze
+from eval_framework.tasks.benchmarks.gsm8k import GSM8K_OpenAI_EN_EvalHarness
+from eval_framework.tasks.benchmarks.hellaswag import HellaSwag_Rowan_EN_Cloze
+from eval_framework.tasks.benchmarks.mmlu import MMLU_CAIS_EN_MC, MMLU_SUBJECTS
 from eval_framework.tasks.benchmarks.mmlu_de import MMLU_SUBJECTS_TRANSLATION
 from eval_framework.tasks.benchmarks.truthfulqa import TRUTHFULQA
 
 
-class ARC_EU20_DE(ARC):
+class ARC_EU20_DE(ARC_AllenAI_EN_Cloze):
     """
     EU20 Benchmarks from the openGPT-X paper:
     - https://arxiv.org/abs/2410.08928
@@ -34,7 +34,7 @@ class ARC_EU20_DE(ARC):
     LANGUAGE = Language.DEU
 
 
-class ARC_EU20_FR(ARC):
+class ARC_EU20_FR(ARC_AllenAI_EN_Cloze):
     NAME = "ARC_EU20_FR"
     DATASET_PATH = "openGPT-X/arcx"
     HF_REVISION = "e4c31fa077b82832cc21e614832701603a8ad319"
@@ -44,7 +44,7 @@ class ARC_EU20_FR(ARC):
     LANGUAGE = Language.FRA
 
 
-class GSM8K_EU20_DE(GSM8KEvalHarness):
+class GSM8K_EU20_DE(GSM8K_OpenAI_EN_EvalHarness):
     """
     https://huggingface.co/datasets/openGPT-X/gsm8kx
       entries in 'DE': 1319 test, 104 train
@@ -61,7 +61,7 @@ class GSM8K_EU20_DE(GSM8KEvalHarness):
     LANGUAGE = Language.DEU
 
 
-class GSM8K_EU20_FR(GSM8KEvalHarness):
+class GSM8K_EU20_FR(GSM8K_OpenAI_EN_EvalHarness):
     NAME = "GSM8K_EU20_FR"
     HF_REVISION = "3ed0f81d31a9013e05d16644aabcc36db50078a9"
     DATASET_PATH = "openGPT-X/gsm8kx"
@@ -71,7 +71,7 @@ class GSM8K_EU20_FR(GSM8KEvalHarness):
     LANGUAGE = Language.FRA
 
 
-class HELLASWAG_EU20_DE(HELLASWAG):
+class HELLASWAG_EU20_DE(HellaSwag_Rowan_EN_Cloze):
     """
     https://huggingface.co/datasets/openGPT-X/hellaswagx
       entries in 'DE': 99 train, 9979 validation
@@ -88,7 +88,7 @@ class HELLASWAG_EU20_DE(HELLASWAG):
     LANGUAGE = Language.DEU
 
 
-class HELLASWAG_EU20_FR(HELLASWAG):
+class HELLASWAG_EU20_FR(HellaSwag_Rowan_EN_Cloze):
     NAME = "HellaSwag_EU20_FR"
     DATASET_PATH = "openGPT-X/hellaswagx"
     HF_REVISION = "7c30407f4f11fa4fada74bd4384ed0fe572ae8f2"
@@ -213,7 +213,7 @@ class TRUTHFULQA_EU20_FR(TRUTHFULQA):
         return TRUTHFULQA_EU20_FR_FEWSHOT_ITEMS[: self.num_fewshot]
 
 
-class MMLU_EU20_DE(MMLU):
+class MMLU_EU20_DE(MMLU_CAIS_EN_MC):
     """
     https://huggingface.co/datasets/openGPT-X/mmlux
       entries in 'philosophy_DE': 311 test, 5 dev, 5 validation
@@ -226,7 +226,7 @@ class MMLU_EU20_DE(MMLU):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "dev"  # one could merge dev and validation to have a larger pool of fewshot examples
     SUBJECTS = [i + "_DE" for i in MMLU_SUBJECTS]
-    PERTURBATION_UNMODIFIABLE_WORDS = MMLU.PERTURBATION_UNMODIFIABLE_WORDS + ["Frage"]
+    PERTURBATION_UNMODIFIABLE_WORDS = MMLU_CAIS_EN_MC.PERTURBATION_UNMODIFIABLE_WORDS + ["Frage"]
     LANGUAGE = Language.DEU
 
     def _load_dataset(self, subject: SubjectType) -> None:
@@ -327,7 +327,7 @@ MMLU_SUBJECTS_TRANSLATION_FR = {
 }
 
 
-class MMLU_EU20_FR(MMLU):
+class MMLU_EU20_FR(MMLU_CAIS_EN_MC):
     NAME = "MMLU_EU20_FR"
     DATASET_PATH = "openGPT-X/mmlux"
     HF_REVISION = "6412d5d5d03a7b31d02f4ba34b787c2e7939a800"

@@ -10,8 +10,8 @@ from eval_framework.tasks.task_style import (
 )
 
 
-class NaturalQsOpen(BaseTask[str]):
-    NAME = "NaturalQsOpen"
+class NaturalQsOpen_Google_EN(BaseTask[str]):
+    NAME = "NaturalQsOpen_Google_EN"
     DATASET_PATH = "google-research-datasets/nq_open"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
@@ -59,7 +59,7 @@ class NaturalQsOpen(BaseTask[str]):
         return DropMetricContext(answer_tuples=[[a] for a in answers])
 
 
-class _NaturalQsOpenChoice_Base(BaseTask[str]):
+class _NaturalQsOpen_AllenAI_Base(BaseTask[str]):
     """Shared base for choice-based NaturalQsOpen variants (Cloze, MC, MC_OLMES)."""
 
     DATASET_PATH = "allenai/nq-gen2mc"
@@ -79,25 +79,25 @@ class _NaturalQsOpenChoice_Base(BaseTask[str]):
         return answer_key_to_index(item.get("answerKey", ""))
 
 
-class NaturalQsOpenCloze(_NaturalQsOpenChoice_Base):
-    NAME = "NaturalQsOpenCloze"
+class NaturalQsOpen_AllenAI_EN_Cloze(_NaturalQsOpen_AllenAI_Base):
+    NAME = "NaturalQsOpen_AllenAI_EN_Cloze"
     TASK_STYLER = ClozeStyle()
 
 
-class NaturalQsOpenMC(_NaturalQsOpenChoice_Base):
-    NAME = "NaturalQsOpenMC"
+class NaturalQsOpen_AllenAI_EN_MC(_NaturalQsOpen_AllenAI_Base):
+    NAME = "NaturalQsOpen_AllenAI_EN_MC"
     TASK_STYLER = MCStyle()
 
 
-class NaturalQsOpenMC_OLMES(_NaturalQsOpenChoice_Base):
+class NaturalQsOpen_AllenAI_EN_MC_OLMES(_NaturalQsOpen_AllenAI_Base):
     """NaturalQsOpenMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...)."""
 
-    NAME = "NaturalQsOpenMC_OLMES"
+    NAME = "NaturalQsOpen_AllenAI_EN_MC_OLMES"
     TASK_STYLER = MCStyle(space_prefixed_labels=True)
 
 
-class NaturalQsOpenBPB(_NaturalQsOpenChoice_Base):
+class NaturalQsOpen_AllenAI_EN_BPB(_NaturalQsOpen_AllenAI_Base):
     """BPB-only variant."""
 
-    NAME = "NaturalQsOpenBPB"
+    NAME = "NaturalQsOpen_AllenAI_EN_BPB"
     TASK_STYLER = BPBStyle()

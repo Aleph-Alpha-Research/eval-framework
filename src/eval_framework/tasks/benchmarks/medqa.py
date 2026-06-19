@@ -13,10 +13,10 @@ from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseTy
 from eval_framework.tasks.utils import get_n_letters
 
 
-class MedQACloze(BaseTask[str]):
+class MedQA_DavidHeineman_EN_Cloze(BaseTask[str]):
     """MedQA cloze (loglikelihood over choice text)."""
 
-    NAME = "MedQACloze"
+    NAME = "MedQA_DavidHeineman_EN_Cloze"
     DATASET_PATH = "davidheineman/medqa-en"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "dev"
@@ -49,10 +49,10 @@ class MedQACloze(BaseTask[str]):
         return f"{self._get_cue_text(item)}{ground_truth}"
 
 
-class MedQAMC(MedQACloze):
+class MedQA_DavidHeineman_EN_MC(MedQA_DavidHeineman_EN_Cloze):
     """MedQA multiple choice (loglikelihood over A/B/C/D/...)."""
 
-    NAME = "MedQAMC"
+    NAME = "MedQA_DavidHeineman_EN_MC"
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
@@ -74,12 +74,12 @@ class MedQAMC(MedQACloze):
         return [f" {label}" for label in self.keys]
 
 
-class MedQAMC_OLMES(MedQAMC):
+class MedQA_DavidHeineman_EN_MC_OLMES(MedQA_DavidHeineman_EN_MC):
     """
     MedQA multiple choice with OLMES-style prompt: space before each label (" A.", " B.", ...).
     """
 
-    NAME = "MedQAMC_OLMES"
+    NAME = "MedQA_DavidHeineman_EN_MC_OLMES"
     FEWSHOT_SPLIT = "train"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

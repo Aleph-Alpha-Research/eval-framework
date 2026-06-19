@@ -6,10 +6,10 @@ from eval_framework.metrics.completion.f1 import F1
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 
 
-class TRIVIAQA(BaseTask[str]):
+class TriviaQA_MandarJoshi_EN(BaseTask[str]):
     """Trivia QA dataset: https://huggingface.co/datasets/mandarjoshi/trivia_qa"""
 
-    NAME = "TriviaQA"
+    NAME = "TriviaQA_MandarJoshi_EN"
     DATASET_PATH = "mandarjoshi/trivia_qa"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"

@@ -9,15 +9,19 @@ from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseTy
 from eval_framework.tasks.utils import get_n_letters
 
 
-class ARC_DE(BaseTask[str]):
+class ARC_LeoLM_DE_Cloze(BaseTask[str]):
     """ARC-DE dataset: https://huggingface.co/datasets/LeoLM/ArcChallenge_de"""
 
-    NAME = "ARC German"
+    NAME = "ARC_LeoLM_DE_Cloze"
     DATASET_PATH = "LeoLM/ArcChallenge_de"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = [NO_SUBJECT]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Frage"] + get_n_letters(5)
     LANGUAGE = Language.DEU

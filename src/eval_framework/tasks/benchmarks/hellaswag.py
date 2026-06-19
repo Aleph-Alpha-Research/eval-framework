@@ -12,11 +12,11 @@ from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
 
 
-class HELLASWAG(BaseTask[str]):
+class HellaSwag_Rowan_EN_Cloze(BaseTask[str]):
     """Hellaswag dataset: https://huggingface.co/datasets/Rowan/hellaswag
     available data set sections: train, validation, test"""
 
-    NAME = "HellaSwag"
+    NAME = "HellaSwag_Rowan_EN_Cloze"
     DATASET_PATH = "Rowan/hellaswag"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
@@ -48,13 +48,13 @@ class HELLASWAG(BaseTask[str]):
         return [f" {self._preprocess(ending)}" for ending in item["endings"]]
 
 
-class HELLASWAG_OLMES(HELLASWAG):
-    NAME = "HellaSwag_OLMES"
+class HellaSwag_Rowan_EN_Cloze_OLMES(HellaSwag_Rowan_EN_Cloze):
+    NAME = "HellaSwag_Rowan_EN_Cloze_OLMES"
     SAMPLE_SPLIT = "train"
 
 
-class HELLASWAG_IDK(HELLASWAG):
-    NAME = "HellaSwag_IDK"
+class HellaSwag_Rowan_EN_Cloze_IDK(HellaSwag_Rowan_EN_Cloze):
+    NAME = "HellaSwag_Rowan_EN_Cloze_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

@@ -30,15 +30,8 @@ MATH_SUBJECTS = [
 logger = logging.getLogger(__name__)
 
 
-class MATHReasoning(BaseTask[str]):
-    """AIME 2024 dataset: https://huggingface.co/datasets/HuggingFaceH4/aime_2024
-
-    This dataset contains a single train split of 30 questions.
-    Data contains
-        ID | Problem | Solution | Answer
-
-    pass@1 evaluation
-    """
+class _MathReasoning_Base(BaseTask[str]):
+    """Base class for Math Reasoning tasks."""
 
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [MathReasoningCompletion]
@@ -321,7 +314,7 @@ class MATHReasoning(BaseTask[str]):
         return string
 
 
-class AIME2024(MATHReasoning):
+class AIME2024_HuggingFaceH4_EN(_MathReasoning_Base):
     """AIME 2024 dataset: https://huggingface.co/datasets/HuggingFaceH4/aime_2024
 
     This dataset contains a single train split of 30 questions.
@@ -331,7 +324,7 @@ class AIME2024(MATHReasoning):
     pass@1 evaluation
     """
 
-    NAME = "AIME2024"
+    NAME = "AIME2024_HuggingFaceH4_EN"
     DATASET_PATH = "HuggingFaceH4/aime_2024"
     SAMPLE_SPLIT = "train"
     FEWSHOT_SPLIT = "train"
@@ -377,7 +370,7 @@ class AIME2024(MATHReasoning):
         return item["answer"].lstrip("0")  # valid answers in this dataset range from 0-999 and have leading zeros
 
 
-class AIME2025(AIME2024):
+class AIME2025_MathAI_EN(AIME2024_HuggingFaceH4_EN):
     """AIME 2025 dataset: https://huggingface.co/datasets/math-ai/aime25
 
     This dataset contains a single test split of 30 questions.
@@ -387,7 +380,7 @@ class AIME2025(AIME2024):
     pass@1 evaluation
     """
 
-    NAME = "AIME2025"
+    NAME = "AIME2025_MathAI_EN"
     DATASET_PATH = "math-ai/aime25"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
@@ -396,7 +389,7 @@ class AIME2025(AIME2024):
         return item["answer"]
 
 
-class AIME2026(AIME2024):
+class AIME2026_MathAI_EN(AIME2024_HuggingFaceH4_EN):
     """AIME 2026 dataset: https://huggingface.co/datasets/math-ai/aime26
 
     This dataset contains a single test split of 30 questions.
@@ -406,7 +399,7 @@ class AIME2026(AIME2024):
     pass@1 evaluation
     """
 
-    NAME = "AIME2026"
+    NAME = "AIME2026_MathAI_EN"
     DATASET_PATH = "math-ai/aime26"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
@@ -415,7 +408,7 @@ class AIME2026(AIME2024):
         return item["answer"]
 
 
-class MATH500(MATHReasoning):
+class MATH500_HuggingFaceH4_EN(_MathReasoning_Base):
     """MATH500 dataset: https://huggingface.co/datasets/HuggingFaceH4/MATH-500
 
     This dataset contains a single test split of 500 questions.
@@ -426,7 +419,7 @@ class MATH500(MATHReasoning):
     pass@1 evaluation
     """
 
-    NAME = "MATH500"
+    NAME = "MATH500_HuggingFaceH4_EN"
     DATASET_PATH = "HuggingFaceH4/MATH-500"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
@@ -470,10 +463,10 @@ class MATH500(MATHReasoning):
         return item["answer"]
 
 
-class MATH(MATHReasoning):
+class HendrycksMath_EleutherAI_EN(_MathReasoning_Base):
     """MATH dataset: https://huggingface.co/datasets/EleutherAI/hendrycks_math"""
 
-    NAME = "Math"
+    NAME = "HendrycksMath_EleutherAI_EN"
     DATASET_PATH = "EleutherAI/hendrycks_math"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -541,7 +534,7 @@ class MATH(MATHReasoning):
         return self._extract_answer(item["solution"])
 
 
-class MATHMinervaEvalHarness(MATHReasoning):
+class HendrycksMath_EleutherAI_EN_EvalHarness(_MathReasoning_Base):
     """
     MATH with Minerva-style prompt and scoring (lm-evaluation-harness / oe_eval parity).
     Uses strict final-answer string matching: "Final Answer: The final answer is ... I hope it is correct."
@@ -550,7 +543,7 @@ class MATHMinervaEvalHarness(MATHReasoning):
     Metrics: Exact Match, Exact Match (Flex) via MathMinervaCompletion.
     """
 
-    NAME = "MATHMinervaEvalHarness"
+    NAME = "HendrycksMath_EleutherAI_EN_EvalHarness"
     DATASET_PATH = "EleutherAI/hendrycks_math"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -579,14 +572,14 @@ class MATHMinervaEvalHarness(MATHReasoning):
         return candidates[0] if candidates else "[no_answer]"
 
 
-class MATHMinerva(MATHMinervaEvalHarness):
+class HendrycksMath_EleutherAI_EN_EvalHarnessRelaxed(HendrycksMath_EleutherAI_EN_EvalHarness):
     """
     MATH with Minerva-style prompt and relaxed final-answer string matching.
     Same as MATHMinervaEvalHarness but allows flexible whitespace and case for variations of
     "(The )Final Answer: The (final )answer is ...( I hope it is correct.)", where parentheses are optional.
     """
 
-    NAME = "MATHMinerva"
+    NAME = "HendrycksMath_EleutherAI_EN_EvalHarnessRelaxed"
     METRICS = [MathMinervaCompletionRelaxed]
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
@@ -595,13 +588,13 @@ class MATHMinerva(MATHMinervaEvalHarness):
         return candidates[0] if candidates else "[no_answer]"
 
 
-class MATH500Minerva(MATHMinerva):
+class MATH500_HuggingFaceH4_EN_OLMES(HendrycksMath_EleutherAI_EN_EvalHarnessRelaxed):
     """
     MATH-500 with Minerva-style prompt and scoring (OLMES minerva_math_500 parity).
     Uses HuggingFaceH4/MATH-500 which has a single 'default' config (no subject splits).
     """
 
-    NAME = "MATH500Minerva"
+    NAME = "MATH500_HuggingFaceH4_EN_OLMES"
     DATASET_PATH = "HuggingFaceH4/MATH-500"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
@@ -612,14 +605,14 @@ class MATH500Minerva(MATHMinerva):
         super().__init__(num_fewshot)
 
 
-class MATHMinervaBPB(MATHReasoning):
+class HendrycksMath_EleutherAI_EN_BPB(_MathReasoning_Base):
     """
     MATH (Hendrycks) with Minerva-style prompt, evaluated via loglikelihood of the
     gold answer string (bits-per-byte).
     Same prompt as MATHMinerva; scores P(normalized_gold_answer | prompt).
     """
 
-    NAME = "MATHMinervaBPB"
+    NAME = "HendrycksMath_EleutherAI_EN_BPB"
     DATASET_PATH = "EleutherAI/hendrycks_math"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -650,8 +643,8 @@ class MATHMinervaBPB(MATHReasoning):
         return normalized_gold_from_solution(solution)
 
 
-class MATHLvl5(MATH):
-    NAME = "Math Lvl 5"
+class HendrycksMath_EleutherAI_EN_Level5(HendrycksMath_EleutherAI_EN):
+    NAME = "HendrycksMath_EleutherAI_EN_Level5"
 
     def _load_dataset(self, subject: SubjectType) -> None:
         name = subject if subject != NO_SUBJECT else None
@@ -674,13 +667,13 @@ class MATHLvl5(MATH):
         return self._extract_answer(item["solution"])
 
 
-class GSM8KReasoning(MATHReasoning):
+class GSM8K_OpenAI_EN_Reasoning(_MathReasoning_Base):
     """GSM8K dataset with reasoning prompt: https://huggingface.co/datasets/openai/gsm8k
 
     Zero-shot reasoning version that expects answers in boxed format.
     """
 
-    NAME = "GSM8KReasoning"
+    NAME = "GSM8K_OpenAI_EN_Reasoning"
     DATASET_PATH = "openai/gsm8k"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
@@ -779,13 +772,13 @@ _OLMES_FEWSHOTS = [
 ]
 
 
-class MATHMinerva_OLMES(MATHMinerva):
-    NAME = "MATHMinerva_OLMES"
+class HendrycksMath_EleutherAI_EN_OLMES(HendrycksMath_EleutherAI_EN_EvalHarnessRelaxed):
+    NAME = "HendrycksMath_EleutherAI_EN_OLMES"
     METRICS = [MathMinervaCompletion, MathMinervaCompletionRelaxed]
 
     def __init__(self, num_fewshot: int = 4) -> None:
         if num_fewshot != 4:
-            logger.warning("MATHMinerva_OLMES supports a fixed num_fewshot of 4.")
+            logger.warning(f"{self.NAME} supports a fixed num_fewshot of 4.")
         super().__init__(num_fewshot=4)
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:

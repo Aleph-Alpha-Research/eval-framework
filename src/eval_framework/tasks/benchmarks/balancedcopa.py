@@ -1,7 +1,7 @@
 from datasets import Dataset, DatasetDict
 
 from eval_framework.tasks.base import NO_SUBJECT, SubjectType
-from eval_framework.tasks.benchmarks.copa import COPA
+from eval_framework.tasks.benchmarks.copa import COPA_SuperGLUE_EN_Cloze
 
 
 def split_dataset_by_id_ranges(
@@ -25,7 +25,7 @@ def split_dataset_by_id_ranges(
     return dataset.select(in_indices), dataset.select(not_in_indices)
 
 
-class BalancedCOPA(COPA):
+class BalancedCOPA(COPA_SuperGLUE_EN_Cloze):
     """Balanced-COPA dataset: https://huggingface.co/datasets/pkavumba/balanced-copa"""
 
     NAME = "BalancedCOPA"

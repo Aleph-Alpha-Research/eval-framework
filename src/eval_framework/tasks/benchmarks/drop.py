@@ -68,13 +68,13 @@ def _tuple_to_display(tup: tuple[str, ...]) -> str:
     return ", ".join(str(x) for x in tup) if tup else ""
 
 
-class DropCompletion(BaseTask[str]):
+class DROP_EleutherAI_EN(BaseTask[str]):
     """DROP completion benchmark (EleutherAI/drop): passage, question, model generates answer.
 
     Uses DROP F1 and exact match. Stop at new paragraph or repeated prefixes.
     """
 
-    NAME = "DropCompletion"
+    NAME = "DROP_EleutherAI_EN"
     DATASET_PATH = "EleutherAI/drop"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
@@ -136,10 +136,10 @@ class DropCompletion(BaseTask[str]):
         return f"{self._get_cue_text(item)}{ground_truth}"
 
 
-class DropCompletion_OLMES(DropCompletion):
+class DROP_EleutherAI_EN_OLMES(DROP_EleutherAI_EN):
     """DropCompletion matching OLMES, using train split for fewshot and max tokens 100."""
 
-    NAME = "DropCompletion_OLMES"
+    NAME = "DROP_EleutherAI_EN_OLMES"
     FEWSHOT_SPLIT = "train"
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -157,10 +157,10 @@ class DropCompletion_OLMES(DropCompletion):
         return context
 
 
-class DropMC(BaseTask[str]):
+class DROP_AllenAI_EN_MC(BaseTask[str]):
     """Multiple-choice variant using allenai/drop-gen2mc (passage_original, question_original, choices, answerKey)."""
 
-    NAME = "DropMC"
+    NAME = "DROP_AllenAI_EN_MC"
     DATASET_PATH = "allenai/drop-gen2mc"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
@@ -205,12 +205,12 @@ class DropMC(BaseTask[str]):
         return f"{self._get_cue_text(item)}{ground_truth}"
 
 
-class DropMC_OLMES(DropMC):
+class DROP_AllenAI_EN_MC_OLMES(DROP_AllenAI_EN_MC):
     """
     DropMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
     """
 
-    NAME = "DropMC_OLMES"
+    NAME = "DROP_AllenAI_EN_MC_OLMES"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         passage = (item.get("passage_original") or "").strip()
@@ -221,14 +221,14 @@ class DropMC_OLMES(DropMC):
         return f"Passage: {passage}\nQuestion: {question}\n{options}\n"
 
 
-class DropCloze(BaseTask[str]):
+class DROP_AllenAI_EN_Cloze(BaseTask[str]):
     """Cloze variant: loglikelihood ranking over full choice texts (allenai/drop-gen2mc).
 
     Same dataset as DropMC; options not shown in prompt; model scores full text of each choice.
     Includes BitsPerByte on the correct choice.
     """
 
-    NAME = "DropCloze"
+    NAME = "DROP_AllenAI_EN_Cloze"
     DATASET_PATH = "allenai/drop-gen2mc"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"

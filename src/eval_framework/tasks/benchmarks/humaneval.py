@@ -24,10 +24,10 @@ class HumanEvalMetricContext(BaseMetricContext):
     prompt: str
 
 
-class HumanEval(BaseTask[str]):
+class HumanEval_OpenAI_EN(BaseTask[str]):
     """HumanEval dataset: https://huggingface.co/datasets/openai/openai_humaneval/"""
 
-    NAME = "Human Eval"
+    NAME = "HumanEval_OpenAI_EN"
     DATASET_PATH = "openai/openai_humaneval"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"  # (there is no dedicated split, few-shot is not expected for this dataset)
@@ -78,13 +78,13 @@ class HumanEval(BaseTask[str]):
         return formatted_code
 
 
-class HumanEvalBPB(HumanEval):
+class HumanEval_OpenAI_EN_BPB(HumanEval_OpenAI_EN):
     """
     HumanEval variant that scores loglikelihood of the gold canonical solution.
     Reports bits-per-byte on the reference completion.
     """
 
-    NAME = "Human Eval BPB"
+    NAME = "HumanEval_OpenAI_EN_BPB"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [BitsPerByteLoglikelihood]
 
@@ -99,7 +99,7 @@ class HumanEvalBPB(HumanEval):
         return [gt] if gt else None
 
 
-class HumanEval_OLMES(HumanEval):
+class HumanEval_OpenAI_EN_OLMES(HumanEval_OpenAI_EN):
     """HumanEval OLMES variant replicating codex_humaneval:3shot::olmo3:n32:v2 from oe_eval.
 
     Recommended EvalConfig settings for full replication:
@@ -107,7 +107,7 @@ class HumanEval_OLMES(HumanEval):
         llm_args: {sampling_params: {temperature: 0.6, top_p: 0.6}}
     """
 
-    NAME = "Human Eval OLMES"
+    NAME = "HumanEval_OpenAI_EN_OLMES"
 
     def __init__(self, num_fewshot: int = 3) -> None:
         super().__init__(num_fewshot)
@@ -121,9 +121,9 @@ class HumanEval_OLMES(HumanEval):
         return item["canonical_solution"] + "```"
 
 
-class HumanEvalInstruct(HumanEval):
+class HumanEval_OpenAI_EN_Instruct(HumanEval_OpenAI_EN):
     # See https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/humaneval/humaneval_instruct.yaml
-    NAME = "Human Eval Instruct"
+    NAME = "HumanEval_OpenAI_EN_Instruct"
     CUE_PREFIX = "Here is the completed function:\n```python\n"
 
     def __init__(self, num_fewshot: int = 0) -> None:

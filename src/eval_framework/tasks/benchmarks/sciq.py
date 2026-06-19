@@ -31,10 +31,10 @@ def _shuffled_choices_and_correct_index(item: dict[str, Any]) -> tuple[list[str]
     return shuffled, correct_index
 
 
-class SCIQ(BaseTask[str]):
+class SciQ_AllenAI_EN_Cloze(BaseTask[str]):
     """SciQ dataset: https://huggingface.co/datasets/allenai/sciq"""
 
-    NAME = "SciQ"
+    NAME = "SciQ_AllenAI_EN_Cloze"
     DATASET_PATH = "allenai/sciq"
     SAMPLE_SPLIT = "validation"  # 1000 examples (same split as lm-eval)
     FEWSHOT_SPLIT = "test"  # 1000 examples
@@ -63,13 +63,13 @@ class SCIQ(BaseTask[str]):
         return [f" {choice}" for choice in shuffled]
 
 
-class SCIQ_OLMES(SCIQ):
+class SciQ_AllenAI_EN_MC(SciQ_AllenAI_EN_Cloze):
     """
     SciQ with OLMES-style prompt: options shown with space-prefixed labels (" A.", " B.", " C.", " D.");
     loglikelihood over " A"/" B"/" C"/" D". Answer choices are deterministically shuffled per example.
     """
 
-    NAME = "SciQ_OLMES"
+    NAME = "SciQ_AllenAI_EN_MC"
     SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
     FEWSHOT_SPLIT = "train"
 
@@ -91,8 +91,8 @@ class SCIQ_OLMES(SCIQ):
         return [f" {key}" for key in self.keys]
 
 
-class SCIQ_IDK(SCIQ):
-    NAME = "SciQ_IDK"
+class SciQ_AllenAI_EN_Cloze_IDK(SciQ_AllenAI_EN_Cloze):
+    NAME = "SciQ_AllenAI_EN_Cloze_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
@@ -112,14 +112,14 @@ class SCIQ_IDK(SCIQ):
         return (completions or []) + [" don't know"]
 
 
-class SCIQEvalHarness(SCIQ):
+class SciQ_AllenAI_EN_Cloze_EvalHarness(SciQ_AllenAI_EN_Cloze):
     """Based on
     https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/sciq/sciq.yaml#L8
     In the Eval Harness implementation, the instruction text includes a context passage.
     This passage often contains the answer, reducing the benchmark to a straightforward copy-and-paste task.
     """
 
-    NAME = "SciQ Eval Harness"
+    NAME = "SciQ_AllenAI_EN_Cloze_EvalHarness"
     DATASET_PATH = "allenai/sciq"
     SAMPLE_SPLIT = "validation"  # 1000 examples (same split as lm-eval)
     FEWSHOT_SPLIT = "test"  # 1000 examples
@@ -133,8 +133,8 @@ class SCIQEvalHarness(SCIQ):
         return f"{item['support'].lstrip()}\nQuestion: {item['question']}\n"
 
 
-class SCIQEvalHarness_IDK(SCIQEvalHarness):
-    NAME = "SciQ Eval Harness_IDK"
+class SciQ_AllenAI_EN_Cloze_IDK_EvalHarness(SciQ_AllenAI_EN_Cloze_EvalHarness):
+    NAME = "SciQ_AllenAI_EN_Cloze_IDK_EvalHarness"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

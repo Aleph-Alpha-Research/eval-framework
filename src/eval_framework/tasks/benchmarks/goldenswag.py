@@ -7,21 +7,21 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
 from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
-from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
+from eval_framework.tasks.benchmarks.hellaswag import HellaSwag_Rowan_EN_Cloze
 
 
-class GOLDENSWAG(HELLASWAG):
+class GoldenSwag_PleIAs_EN_Cloze(HellaSwag_Rowan_EN_Cloze):
     """GoldenSwag dataset: https://huggingface.co/datasets/PleIAs/GoldenSwag
     available data set sections: validation"""
 
-    NAME = "GoldenSwag"
+    NAME = "GoldenSwag_PleIAs_EN_Cloze"
     DATASET_PATH = "PleIAs/GoldenSwag"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
 
 
-class GOLDENSWAG_IDK(GOLDENSWAG):
-    NAME = "GoldenSwag_IDK"
+class GoldenSwag_PleIAs_EN_Cloze_IDK(GoldenSwag_PleIAs_EN_Cloze):
+    NAME = "GoldenSwag_PleIAs_EN_Cloze_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

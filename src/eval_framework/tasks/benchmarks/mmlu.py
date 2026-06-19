@@ -74,10 +74,10 @@ MMLU_SUBJECTS = [
 ]
 
 
-class MMLU(BaseTask[str]):
+class MMLU_CAIS_EN_MC(BaseTask[str]):
     """MMLU dataset: https://huggingface.co/datasets/cais/mmlu"""
 
-    NAME = "MMLU"
+    NAME = "MMLU_CAIS_EN_MC"
     DATASET_PATH = "cais/mmlu"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "dev"
@@ -118,12 +118,12 @@ class MMLU(BaseTask[str]):
         return [f" {key}" for key in self.keys]
 
 
-class MMLU_OLMES(MMLU):
+class MMLU_CAIS_EN_MC_OLMES(MMLU_CAIS_EN_MC):
     """
     MMLU with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
     """
 
-    NAME = "MMLU_OLMES"
+    NAME = "MMLU_CAIS_EN_MC_OLMES"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         question = item["question"].strip()
@@ -131,10 +131,10 @@ class MMLU_OLMES(MMLU):
         return f"Question: {question}\n{choices}"
 
 
-class FullTextMMLU(MMLU):
+class MMLU_CAIS_EN_Cloze(MMLU_CAIS_EN_MC):
     """MMLU dataset but where the model is expected to replicate choice text, rather than just the key."""
 
-    NAME = "Full Text MMLU"
+    NAME = "MMLU_CAIS_EN_Cloze"
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "answers"] + get_n_letters(4)
 
@@ -155,8 +155,8 @@ Answer with the full text of the correct answer."""
         return [f" {choice}" for choice in item["choices"]]
 
 
-class MMLU_IDK(MMLU):
-    NAME = "MMLU_IDK"
+class MMLU_CAIS_EN_MC_IDK(MMLU_CAIS_EN_MC):
+    NAME = "MMLU_CAIS_EN_MC_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
@@ -177,13 +177,13 @@ class MMLU_IDK(MMLU):
         return (completions or []) + [" ?"]
 
 
-class MMLU_COT(MMLU):
+class MMLU_CAIS_EN_COTMC(MMLU_CAIS_EN_MC):
     """
     MMLU dataset with instruction to summarize reasoning and conclude with answer.
     Inspired by https://arxiv.org/pdf/2411.15124 (Table 44)
     """
 
-    NAME = "MMLU_COT"
+    NAME = "MMLU_CAIS_EN_COTMC"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Therefore", "the", "answer", "is", "ANSWER_LETTER"] + get_n_letters(

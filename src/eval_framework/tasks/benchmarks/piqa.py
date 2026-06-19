@@ -12,10 +12,10 @@ from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseTy
 from eval_framework.tasks.utils import get_n_letters
 
 
-class PIQA(BaseTask[str]):
+class PIQA_YBisk_EN_Cloze(BaseTask[str]):
     """PIQA dataset: https://huggingface.co/datasets/ybisk/piqa"""
 
-    NAME = "PIQA"
+    NAME = "PIQA_YBisk_EN_Cloze"
     DATASET_PATH = "ybisk/piqa"
     HF_REVISION = "6b3aceb3276e5ab7e51895d73151a718690af38c"
     SAMPLE_SPLIT = "validation"  # 1838 examples (same split as lm-eval)
@@ -45,13 +45,13 @@ class PIQA(BaseTask[str]):
         return [f" {choice}" for choice in [item["sol1"], item["sol2"]]]
 
 
-class PIQA_OLMES(PIQA):
+class PIQA_YBisk_EN_MC(PIQA_YBisk_EN_Cloze):
     """
     PIQA with OLMES-style prompt: options shown with space-prefixed labels (" A.", " B.");
     loglikelihood over " A"/" B".
     """
 
-    NAME = "PIQA_OLMES"
+    NAME = "PIQA_YBisk_EN_MC"
     SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
     FEWSHOT_SPLIT = "train"
 
@@ -73,8 +73,8 @@ class PIQA_OLMES(PIQA):
         return [f" {key}" for key in self.keys]
 
 
-class PIQA_IDK(PIQA):
-    NAME = "PIQA_IDK"
+class PIQA_YBisk_EN_Cloze_IDK(PIQA_YBisk_EN_Cloze):
+    NAME = "PIQA_YBisk_EN_Cloze_IDK"
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,

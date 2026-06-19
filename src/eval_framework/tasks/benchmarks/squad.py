@@ -14,10 +14,10 @@ from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglik
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
 
 
-class SQUAD2(BaseTask[str]):
+class SQuAD2_Stanford_EN(BaseTask[str]):
     """Squad v2 dataset: https://huggingface.co/datasets/rajpurkar/squad_v2"""
 
-    NAME = "SQuAD2"
+    NAME = "SQuAD2_Stanford_EN"
     DATASET_PATH = "rajpurkar/squad_v2"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
@@ -185,13 +185,13 @@ class SQUAD2(BaseTask[str]):
         return target
 
 
-class SQUAD2BPB(SQUAD2):
+class SQuAD2_Stanford_EN_BPB(SQuAD2_Stanford_EN):
     """
     SQuAD2 variant that scores loglikelihood of the gold answer text.
     Reports bits-per-byte on the reference answer (first acceptable answer).
     """
 
-    NAME = "SQuAD2 BPB"
+    NAME = "SQuAD2_Stanford_EN_BPB"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [BitsPerByteLoglikelihood]
 
@@ -210,10 +210,10 @@ class SQUAD2BPB(SQUAD2):
         return gt_list[0]
 
 
-class SQUAD(SQUAD2):
+class SQuAD_Stanford_EN(SQuAD2_Stanford_EN):
     """Squad dataset: https://huggingface.co/datasets/rajpurkar/squad"""
 
-    NAME = "SQuAD"
+    NAME = "SQuAD_Stanford_EN"
     DATASET_PATH = "rajpurkar/squad"
 
     def _get_squad_urls(self) -> dict[str, str]:
@@ -236,10 +236,10 @@ class SQUAD(SQUAD2):
         return item["answers"]["text"]
 
 
-class SQuAD_OLMES(SQUAD):
+class SQuAD_Stanford_EN_OLMES(SQuAD_Stanford_EN):
     """SQuAD variant matching OLMES implementation."""
 
-    NAME = "SQuAD_OLMES"
+    NAME = "SQuAD_Stanford_EN_OLMES"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
     PERTURBATION_UNMODIFIABLE_WORDS = ["Title", "Background", "Question", "Answer"]
