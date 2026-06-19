@@ -13,6 +13,7 @@ For detailed information about implementing each task type, please refer to:
 
 - [Completion Task Guide](completion_task_guide.md) - Comprehensive guide for text generation tasks
 - [Loglikelihood Task Guide](loglikelihood_task_guide.md) - Detailed guide for multiple choice tasks
+- [Task Naming Convention](task_naming.md) - How to name your task's class (the identifier passed to `--task-name`)
 
 ## Understanding the Base Task Structure
 

@@ -235,6 +235,7 @@ if __name__ == "__main__":
 
 - **[Understanding Model Arguments](https://aleph-alpha-research.github.io/eval-framework/model_arguments.html)** - Thorough guide on each constructor argument for salient model classes
 - **[Adding New Benchmarks](https://aleph-alpha-research.github.io/eval-framework/add_new_benchmark_guide.html)** - Complete guide with practical examples for adding new benchmarks
+- **[Task Naming Convention](https://aleph-alpha-research.github.io/eval-framework/task_naming.html)** - How task class names are structured (the identifier passed to `--task-name`)
 - **[Benchmarks and Metrics](https://aleph-alpha-research.github.io/eval-framework/benchmarks_and_metrics.html)** - Comprehensive overview of all available benchmarks and evaluation metrics
 - **[Overview of Dataloading](https://aleph-alpha-research.github.io/eval-framework/overview_dataloading.html)** - Explanation of dataloading and task/sample/message structure
 
