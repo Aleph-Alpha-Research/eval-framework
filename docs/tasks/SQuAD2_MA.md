@@ -1,7 +1,7 @@
-# SQuAD2MA
+# SQuAD2_MA
 
 ````
-NAME = SQuAD2MA
+NAME = SQuAD2_MA
 DATASET_PATH = rajpurkar/squad_v2
 SAMPLE_SPLIT = validation
 FEWSHOT_SPLIT = train
@@ -17,4 +17,4 @@ LANGUAGE = <Language.ENG: 'English'>
 
 - Link to dataset: [https://huggingface.co/datasets/rajpurkar/squad_v2](https://huggingface.co/datasets/rajpurkar/squad_v2)
 
-More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "SQuAD2MA"`.
+More detailed documentation, with prompt examples and ground truth completions, can be generated with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples --only-tasks "SQuAD2_MA"`.

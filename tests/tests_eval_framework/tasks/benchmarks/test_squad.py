@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.tasks.benchmarks.squad import SQuAD2MA
+from eval_framework.tasks.benchmarks.squad import SQuAD2_MA
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
 
@@ -24,18 +24,18 @@ _UNANSWERABLE = {
 }
 
 
-def test_squad2_rag_system_prompt_instructs_reject() -> None:
-    system = SQuAD2MA()._get_system_prompt_text(_ANSWERABLE)
+def test_squad2_ma_system_prompt_instructs_reject() -> None:
+    system = SQuAD2_MA()._get_system_prompt_text(_ANSWERABLE)
     assert system is not None
-    assert f"respond with '{SQuAD2MA.UNANSWERABLE_STR}'" in system
+    assert f"respond with '{SQuAD2_MA.UNANSWERABLE_STR}'" in system
 
 
-def test_squad2_rag_instruction_is_context_question_answer_only() -> None:
-    instruction = SQuAD2MA()._get_instruction_text(_ANSWERABLE)
-    assert instruction == ("Context:\nParis is the capital of France.\n\nQuestion:\nWhat is the capital of France?\n")
+def test_squad2_ma_instruction_is_context_question_answer_only() -> None:
+    instruction = SQuAD2_MA()._get_instruction_text(_ANSWERABLE)
+    assert instruction == ("Context:\nParis is the capital of France.\n\nQuestion:\nWhat is the capital of France?")
 
 
-def test_squad2_rag_reject_ground_truth_matches_instruction() -> None:
-    task = SQuAD2MA()
+def test_squad2_ma_reject_ground_truth_matches_instruction() -> None:
+    task = SQuAD2_MA()
     assert task._get_ground_truth(_ANSWERABLE) == [" Paris"]
     assert f" {task.UNANSWERABLE_STR}" in task._get_ground_truth(_UNANSWERABLE)

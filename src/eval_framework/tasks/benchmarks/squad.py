@@ -236,7 +236,7 @@ class SQUAD(SQUAD2):
         return item["answers"]["text"]
 
 
-class SQuAD2MA(SQUAD2):
+class SQuAD2_MA(SQUAD2):
     """SQuAD v2 with the exact system prompt used in MA training"""
 
     NAME = "SQuAD2_MA"
