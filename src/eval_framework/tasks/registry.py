@@ -1,11 +1,9 @@
 import contextlib
-import importlib.util
+import importlib
 import re
+from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterator, Sequence
-from typing import Annotated, Any
-
-import pydantic
-from pydantic import AfterValidator
+from typing import Any
 
 from eval_framework.tasks.base import BaseTask
 from eval_framework.utils.packaging import is_extra_installed, validate_package_extras
@@ -13,6 +11,7 @@ from eval_framework.utils.packaging import is_extra_installed, validate_package_
 __all__ = [
     "register_task",
     "register_lazy_task",
+    "BenchmarkFactory",
     "Registry",
     "with_registry",
     "get_task",
@@ -23,34 +22,70 @@ __all__ = [
 ]
 
 
-def validate_import_path(import_path: str) -> str:
-    if importlib.util.find_spec(import_path) is None:
-        raise ValueError(f"Invalid import path: {import_path}")
-    return import_path
+class BenchmarkFactory(ABC):
+    """Produces a registered benchmark's task.
+
+    The registry stores one factory per benchmark. This allows the factory to be
+    constructed without constructing all benchmarks. Going via this ABC allows
+    the factory instances to contain state specifically relevant to the
+    benchmark, as well as supporting different strategies for instantiating it.
+    E.g. eager vs lazy loading of the required dependencies.
+    """
+
+    @abstractmethod
+    def task_class(self) -> type[BaseTask]:
+        """Return the task class, importing it on first access if necessary."""
+
+    @property
+    @abstractmethod
+    def source_module(self) -> str:
+        """Module the task class is defined in, resolvable without importing it."""
 
 
-class TaskPlaceholder(pydantic.BaseModel, extra="forbid", frozen=True):
-    name: Annotated[
-        str,
-        "The name of the Task class that we want to import",
-    ]
-    module: Annotated[
-        str,
-        "The module from where to import the task",
-        validate_import_path,
-    ]
-    extras: Annotated[
-        tuple[str, ...],
-        "Extra dependencies that are required for the task",
-        AfterValidator(validate_package_extras),
-    ] = ()
+class _Lazy(BenchmarkFactory):
+    """
+    Create benchmark from qualified class path; Delays importing modules until
+    benchmark is constructed.
+    """
 
-    def load(self) -> type[BaseTask]:
-        for extra in self.extras:
-            if not is_extra_installed(extra):
-                raise ImportError(f"The required package eval_framework[{extra}] is not installed.")
-        module = importlib.import_module(self.module)
-        return getattr(module, self.name)
+    def __init__(self, class_name: str, module: str, extras: Sequence[str] = ()) -> None:
+        """
+        Args:
+            class_name: The name of the task class to import.
+            module: The module to import the task class from.
+            extras: Extra dependencies of `eval_framework` required for this task.
+        """
+        self._class_name = class_name
+        self._module = module
+        self._extras = tuple(validate_package_extras(extras))
+        self._loaded: type[BaseTask] | None = None
+
+    @property
+    def source_module(self) -> str:
+        return self._module
+
+    def task_class(self) -> type[BaseTask]:
+        if self._loaded is None:
+            for extra in self._extras:
+                if not is_extra_installed(extra):
+                    raise ImportError(f"The required package eval_framework[{extra}] is not installed.")
+            module = importlib.import_module(self._module)
+            self._loaded = getattr(module, self._class_name)
+        return self._loaded
+
+
+class _Eager(BenchmarkFactory):
+    """Wraps an already-imported task class."""
+
+    def __init__(self, task: type[BaseTask]) -> None:
+        self._task = task
+
+    @property
+    def source_module(self) -> str:
+        return self._task.__module__
+
+    def task_class(self) -> type[BaseTask]:
+        return self._task
 
 
 class Registry:
@@ -62,7 +97,7 @@ class Registry:
 
     def __init__(self) -> None:
         # TODO: Lookup only with upper names
-        self._registry: dict[str, tuple[str, type[BaseTask] | TaskPlaceholder]] = dict()
+        self._registry: dict[str, tuple[str, BenchmarkFactory]] = dict()
 
     def __iter__(self) -> Iterator[str]:
         for name, _ in self._registry.values():
@@ -84,25 +119,22 @@ class Registry:
     def __getitem__(self, name: str, /) -> type[BaseTask]:
         task_key = self._task_key(name)
         try:
-            name, task = self._registry[task_key]
+            _, factory = self._registry[task_key]
         except KeyError:
             raise KeyError(f"Task not found: {name}")
 
-        if isinstance(task, TaskPlaceholder):
-            task = task.load()
-            self._registry[task_key] = (name, task)
-        return task
+        return factory.task_class()
 
     def add(self, task: type[BaseTask]) -> None:
         task_key = self._task_key(task.NAME)
-        self._registry[task_key] = (task.NAME, task)
+        self._registry[task_key] = (task.NAME, _Eager(task))
 
-    def __setitem__(self, name: str, task: type[BaseTask] | TaskPlaceholder) -> None:
+    def __setitem__(self, name: str, factory: BenchmarkFactory) -> None:
         task_key = self._task_key(name)
         if task_key in self._registry:
             raise ValueError(f"Cannot register duplicate task with key: {task_key}")
 
-        self._registry[task_key] = (name, task)
+        self._registry[task_key] = (name, factory)
 
 
 _REGISTRY = Registry()
@@ -159,7 +191,7 @@ def register_task(task: type[BaseTask]) -> str:
     if not issubclass(task, BaseTask):
         raise ValueError(f"Can only register subclasses of BaseTask, got {task}")
     name = task.__name__
-    _REGISTRY[name] = task
+    _REGISTRY[name] = _Eager(task)
     return name
 
 
@@ -182,5 +214,4 @@ def register_lazy_task(class_path: str, /, *, extras: Sequence[str] = ()) -> Non
         )
 
     base_module, class_name = class_path.rsplit(".", maxsplit=1)
-    placeholder = TaskPlaceholder(name=class_name, module=base_module, extras=extras)
-    _REGISTRY[class_name] = placeholder
+    _REGISTRY[class_name] = _Lazy(class_name=class_name, module=base_module, extras=extras)
