@@ -165,6 +165,7 @@ test_outputs/
 outputs/
 comet_model/
 eval/
+eval_results/
 
 # WandB files and folders
 wandb
