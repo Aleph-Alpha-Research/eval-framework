@@ -44,7 +44,7 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore: pin dataset revisions"
-          branch: automated/dataset-revisions-${{ github.run_id }}
+          branch: automated/dataset-revisions
           delete-branch: true
           title: "chore: pin dataset revisions"
           body: |
