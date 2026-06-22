@@ -314,6 +314,8 @@
     "TRUTHFULQA_OLMES.Llama3Formatter": "e7a7d05d90ec61fcda899d2607daeb91",
     "TableBench.ConcatFormatter": "7b84c0babf1f35c0b0731ff2cd24b4ac",
     "TableBench.Llama3Formatter": "a680461759830990b74c6764a95ea842",
+    "TriviaQA_MA.ConcatFormatter": "9ffdced51573e22702c45a4b1c834e5f",
+    "TriviaQA_MA.Llama3Formatter": "c50b88b1367ec4fb20b78ee9e6beb6f3",
     "WINOGENDER.ConcatFormatter": "e3328a895331b95b18f0e37a584e4ad4",
     "WINOGENDER.Llama3Formatter": "21fa513e259a293785b34e54b84f007e",
     "WINOGENDER_IDK.ConcatFormatter": "fd4f4115fa54be138826a5538447931e",

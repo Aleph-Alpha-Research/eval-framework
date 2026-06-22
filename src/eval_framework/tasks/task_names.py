@@ -70,6 +70,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.squad.SQuAD_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.squad.SQuAD2_MA")
     register_lazy_task("eval_framework.tasks.benchmarks.triviaqa.TRIVIAQA")
+    register_lazy_task("eval_framework.tasks.benchmarks.triviaqa.TriviaQA_MA")
     register_lazy_task("eval_framework.tasks.benchmarks.winogrande.WINOGRANDECloze")
     register_lazy_task("eval_framework.tasks.benchmarks.csqa.CommonsenseQAMC_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.drop.DropCompletion_OLMES")
