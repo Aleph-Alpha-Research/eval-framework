@@ -231,6 +231,8 @@ class MMLU_COT(MMLU):
 
 
 class MMLUSpaceInPrompt(MMLU_OLMES):
+    NAME = "MMLUSpaceInPrompt"
+
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f"{self.keys[item['answer']]}"]
 
@@ -239,3 +241,16 @@ class MMLUSpaceInPrompt(MMLU_OLMES):
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "Answer: "
+
+
+class MMLUSpaceInAnswer(MMLU_OLMES):
+    NAME = "MMLUSpaceInAnswer"
+
+    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+        return [f" {self.keys[item['answer']]}"]
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        return f" {self.keys[item['answer']]}"
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return "Answer:"
