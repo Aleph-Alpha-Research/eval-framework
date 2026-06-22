@@ -222,18 +222,12 @@ class GSM8KBPB(GSM8K_OLMES):
     NAME = "GSM8KBPB"
     TASK_STYLER = BPBStyle(cue_text="Answer:", leading_space_continuations=False)
 
-    # We want "Answer:" to be its own assistant message instead of being glued to the end of the
-    # user's question. This matches how MMLU_DE puts its cue in a separate assistant turn, so chat
-    # formatters know the model's answer starts right after the cue.
-    #
     # BPBStyle already adds "Answer:" as that separate assistant message. But the methods we inherit
     # still put "Answer:" at the end of the question text and leave it out of the fewshot answer.
     # So we override them here: remove "Answer:" from the question, and add it back in front of the
     # fewshot answer. Without this, the question ends in "Answer:Answer:" and fewshot answers have
     # no "Answer:" label at all.
-    #
-    # If we were happy leaving the cue inside the user's question, none of this would be needed.
-    # But the prompt tests end up looking weird.
+
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"Question: {item['question']}\n"
 
