@@ -612,44 +612,6 @@ class MATH500Minerva(MATHMinerva):
         super().__init__(num_fewshot)
 
 
-# class MATHMinervaBPB(MATHReasoning):
-#     """
-#     MATH (Hendrycks) with Minerva-style prompt, evaluated via loglikelihood of the
-#     gold answer string (bits-per-byte).
-#     Same prompt as MATHMinerva; scores P(normalized_gold_answer | prompt).
-#     """
-
-#     NAME = "MATHMinervaBPB"
-#     DATASET_PATH = "EleutherAI/hendrycks_math"
-#     SAMPLE_SPLIT = "test"
-#     FEWSHOT_SPLIT = "train"
-#     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-#     METRICS = [BitsPerByteLoglikelihood]
-#     SUBJECTS = MATH_SUBJECTS
-#     LANGUAGE = Language.ENG
-
-#     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-#         return "Problem:\n" + item["problem"] + "\n\n" + "Solution:"
-
-#     def _get_cue_text(self, item: dict[str, Any]) -> str:
-#         return ""
-
-#     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-#         normalized = self._normalized_gold_from_solution(item["solution"])
-#         if normalized is None:
-#             return None
-#         return " " + normalized
-
-#     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-#         normalized = self._normalized_gold_from_solution(item["solution"])
-#         if normalized is None:
-#             return None
-#         return [" " + normalized]
-
-#     def _normalized_gold_from_solution(self, solution: str) -> str | None:
-#         return normalized_gold_from_solution(solution)
-
-
 class MATHLvl5(MATH):
     NAME = "Math Lvl 5"
 
@@ -742,7 +704,7 @@ Answer:"""
 
 
 _OLMES_FEWSHOTS = [
-    ## https://github.com/huggingface/lm-evaluation-harness/blob/add_leaderboard_tasks/lm_eval/tasks/leaderboard/math/utils.py
+    # https://github.com/huggingface/lm-evaluation-harness/blob/add_leaderboard_tasks/lm_eval/tasks/leaderboard/math/utils.py
     {
         "problem": "Find the domain of the expression  $\\frac{\\sqrt{x-2}}{\\sqrt{5-x}}$.}",
         "solution": "The expressions inside each square root must be non-negative. Therefore, $x-2 \\ge 0$, so "
