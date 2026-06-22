@@ -220,15 +220,16 @@ class GSM8K_OLMES(GSM8K):
 
 class GSM8KBPB(GSM8K_OLMES):
     NAME = "GSM8KBPB"
-    TASK_STYLER = BPBStyle(cue_text="")
+    TASK_STYLER = BPBStyle(cue_text="", leading_space_continuations=False)
 
     def _get_raw_question(self, item: dict[str, Any]) -> str:
         return item["question"]
 
     def _get_choices(self, item: dict[str, Any]) -> list[str]:
-        answer = self.normalize_answer_str(item)
-        gnd_truth = self._get_ground_truth(item)
-        return [answer + gnd_truth]
+        return [self.normalize_answer_str(item)]
 
     def _get_correct_index(self, item: dict[str, Any]) -> int:
         return 0
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str:
+        return self._get_choices(item)[0]

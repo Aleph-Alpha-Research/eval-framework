@@ -769,3 +769,6 @@ class MATHMinervaBPB(MATHMinerva_OLMES):
 
     def _get_raw_question(self, item: dict[str, Any]) -> str:
         return item["problem"]
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+        return self._get_choices(item)[0]
