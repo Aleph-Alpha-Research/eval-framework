@@ -109,7 +109,7 @@ flash-attn = [
 ]
 
 [build-system]
-requires = ["uv_build>=0.11.19,<0.11.20"]
+requires = ["uv_build>=0.11.22,<0.11.23"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
