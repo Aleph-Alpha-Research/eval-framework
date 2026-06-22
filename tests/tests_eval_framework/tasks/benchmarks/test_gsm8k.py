@@ -33,17 +33,23 @@ _FEWSHOT_ROW: dict[str, str] = {
     "answer": "There are 5 cats and 2 dogs. So there are 5 + 2 = 7 pets. #### 7",
 }
 
-_EVAL_Q = f"Question: {_EVAL_ROW['question']}\nAnswer:"
-_FEWSHOT_Q = f"Question: {_FEWSHOT_ROW['question']}\nAnswer:"
+_CUE = "Answer:"
+# _get_instruction_text no longer embeds the cue; it becomes its own ASSISTANT message.
+_EVAL_Q = f"Question: {_EVAL_ROW['question']}\n"
+_FEWSHOT_Q = f"Question: {_FEWSHOT_ROW['question']}\n"
 
 _EVAL_COMPLETION = " There are 2 apples and 3 oranges. So there are 2 + 3 = 5 fruits. So the answer is 5."
-_FEWSHOT_ANSWER = " There are 5 cats and 2 dogs. So there are 5 + 2 = 7 pets. So the answer is 7."
+_FEWSHOT_ANSWER = f"{_CUE} There are 5 cats and 2 dogs. So there are 5 + 2 = 7 pets. So the answer is 7."
 _GROUND_TRUTH = _EVAL_COMPLETION
 _COMPLETIONS = [_EVAL_COMPLETION]
 
+# Concat strings are identical to before; structure just moves the cue to an ASSISTANT turn.
 _ZEROSHOT = ExpectedPrompt(
-    messages=[Message(role=Role.USER, content=_EVAL_Q)],
-    concat=_EVAL_Q,
+    messages=[
+        Message(role=Role.USER, content=_EVAL_Q),
+        Message(role=Role.ASSISTANT, content=_CUE),
+    ],
+    concat=f"{_EVAL_Q}{_CUE}",
     ground_truth=_GROUND_TRUTH,
     completions=_COMPLETIONS,
 )
@@ -53,8 +59,9 @@ _ONESHOT = ExpectedPrompt(
         Message(role=Role.USER, content=_FEWSHOT_Q),
         Message(role=Role.ASSISTANT, content=_FEWSHOT_ANSWER),
         Message(role=Role.USER, content=_EVAL_Q),
+        Message(role=Role.ASSISTANT, content=_CUE),
     ],
-    concat=f"{_FEWSHOT_Q}{_FEWSHOT_ANSWER}\n\n{_EVAL_Q}",
+    concat=f"{_FEWSHOT_Q}{_FEWSHOT_ANSWER}\n\n{_EVAL_Q}{_CUE}",
     ground_truth=_GROUND_TRUTH,
     completions=_COMPLETIONS,
 )

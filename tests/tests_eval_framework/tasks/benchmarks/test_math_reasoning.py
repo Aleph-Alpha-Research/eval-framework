@@ -134,20 +134,27 @@ _FEWSHOT_ROW: dict[str, str] = {
     "solution": "1 + 1 = 2. Final Answer: The final answer is $2$. I hope it is correct.",
 }
 
-# Expected prompt structure for zeroshot
-_EVAL_PROBLEM = f"Problem:\nWhat is 2 + 3?\n\n{_CUE}"
+# _get_instruction_text no longer embeds the cue; it becomes its own ASSISTANT message.
+_EVAL_PROBLEM = "Problem:\nWhat is 2 + 3?\n\n"
+_FEWSHOT_PROBLEM = f"Problem:\n{_FEWSHOT_ROW['problem']}\n\n"
+_FEWSHOT_ANSWER = f"{_CUE} {_FEWSHOT_ROW['solution']}"
+
 # _get_ground_truth returns _get_choices()[0] — no leading space
 _GROUND_TRUTH = "2 + 3 = 5. So the answer is $\\boxed{5}$.\nFinal Answer: The final answer is 5. I hope it is correct."
 # BPBStyle.get_possible_completions adds a leading space
 _EVAL_COMPLETION = " " + _GROUND_TRUTH
-_EXPECTED_CONCAT_0SHOT = _EVAL_PROBLEM
 _COMPLETIONS = [_EVAL_COMPLETION]
 
-_EXPECTED_CONCAT_1SHOT = f"Problem:\n{_FEWSHOT_ROW['problem']}\n\n{_CUE} {_FEWSHOT_ROW['solution']}\n\n{_EVAL_PROBLEM}"
+# Concat strings are identical to before; structure just moves the cue to an ASSISTANT turn.
+_EXPECTED_CONCAT_0SHOT = f"{_EVAL_PROBLEM}{_CUE}"
+_EXPECTED_CONCAT_1SHOT = f"{_FEWSHOT_PROBLEM}{_FEWSHOT_ANSWER}\n\n{_EVAL_PROBLEM}{_CUE}"
 
 
 _ZEROSHOT = ExpectedPrompt(
-    messages=[Message(role=Role.USER, content=_EVAL_PROBLEM)],
+    messages=[
+        Message(role=Role.USER, content=_EVAL_PROBLEM),
+        Message(role=Role.ASSISTANT, content=_CUE),
+    ],
     concat=_EXPECTED_CONCAT_0SHOT,
     ground_truth=_GROUND_TRUTH,
     completions=_COMPLETIONS,
@@ -155,9 +162,10 @@ _ZEROSHOT = ExpectedPrompt(
 
 _ONESHOT = ExpectedPrompt(
     messages=[
-        Message(role=Role.USER, content=f"Problem:\n{_FEWSHOT_ROW['problem']}\n\n{_CUE}"),
-        Message(role=Role.ASSISTANT, content=f" {_FEWSHOT_ROW['solution']}"),
+        Message(role=Role.USER, content=_FEWSHOT_PROBLEM),
+        Message(role=Role.ASSISTANT, content=_FEWSHOT_ANSWER),
         Message(role=Role.USER, content=_EVAL_PROBLEM),
+        Message(role=Role.ASSISTANT, content=_CUE),
     ],
     concat=_EXPECTED_CONCAT_1SHOT,
     ground_truth=_GROUND_TRUTH,
