@@ -11,7 +11,6 @@ from datasets import Dataset, DatasetDict
 from eval_framework.tasks.base import BaseTask, Sample
 from eval_framework.tasks.registry import (
     _REGISTRY,
-    TaskPlaceholder,
     get_task,
     registered_task_names,
 )
@@ -21,10 +20,8 @@ from tests.tests_eval_framework.utils import assert_hash_string
 
 def _module_of_registered_task(task_name: str) -> str:
     task_key = _REGISTRY._task_key(task_name)
-    _, value = _REGISTRY._registry[task_key]
-    if isinstance(value, TaskPlaceholder):
-        return value.module
-    return value.__module__
+    _, factory = _REGISTRY._registry[task_key]
+    return factory.source_module
 
 
 def get_task_names_for_module(module_name: str, skip_tasks: list[str] | None = None) -> list[str]:
