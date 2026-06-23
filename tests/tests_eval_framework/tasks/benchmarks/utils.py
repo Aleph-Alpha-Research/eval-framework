@@ -11,8 +11,8 @@ from datasets import Dataset, DatasetDict
 from eval_framework.tasks.base import BaseTask, Sample
 from eval_framework.tasks.registry import (
     _REGISTRY,
-    get_task,
     registered_task_names,
+    registry,
 )
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Message
 from tests.tests_eval_framework.utils import assert_hash_string
@@ -63,10 +63,8 @@ def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], 
     """
     _seed_for_determinism()
 
-    task_class = get_task(task_name)
-
     def _instantiate(num_fewshot_value: int) -> object:
-        task_instance = task_class.with_overwrite(
+        task_instance = registry()[task_name].create(
             num_fewshot=num_fewshot_value,
             custom_subjects=None,
             custom_hf_revision=None,
@@ -85,14 +83,14 @@ def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], 
         sample = next(iter(task_instance.iterate_samples(1)))
     except Exception as e:
         print(
-            f"Failed to instantiate task {task_class.__name__}: {e}; retrying with 0-shot",
+            f"Failed to instantiate task {task_name=}: {e}; retrying with 0-shot",
             file=sys.stderr,
         )
         try:
             task_instance = _instantiate(0)
             sample = next(iter(task_instance.iterate_samples(1)))
         except Exception as inner:
-            pytest.fail(f"Could not instantiate {task_class.__name__}: {inner}")
+            pytest.fail(f"Could not instantiate {task_name=}: {inner}")
 
     formatter = formatter_cls()
     formatted_sample = formatter.format(sample.messages, output_mode="string")
@@ -118,7 +116,7 @@ def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], 
     )
 
     assert_hash_string(
-        task_name=task_class.__name__,
+        task_name=task_name,
         suffix_key=formatter_cls.__name__,
         tested_string=formatted_sample_with_completions,
     )
