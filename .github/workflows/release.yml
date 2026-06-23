@@ -10,6 +10,9 @@ env:
   REPO_OWNER: research/public-registry
   IMAGE_NAME: eval_framework
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -71,6 +74,26 @@ jobs:
           skip-existing: true
           print-hash: true
 
+  deploy-gitlab:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    needs: ["build"]
+
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v8
+        with:
+          name: 'pypi-dist'
+          path: './dist'
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          version: "~=0.9.16"
+
+      - name: Publish to GitLab Package Registry
+        run: uv publish dist/*
+
   # Deploy to our pypi test instance
   deploy-pypi-test:
     if: github.event_name == 'workflow_dispatch'
@@ -103,7 +126,7 @@ jobs:
     if: github.event_name == 'release'
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
-    needs: ["deploy-pypi"]
+    needs: ["deploy-pypi", "deploy-gitlab"]
     permissions:
       contents: read
 
