@@ -22,7 +22,7 @@ def _load_model_mock(llm_name: str, models_path, *, info: str = ""):
 
 @patch("argparse.ArgumentParser.parse_args")
 @patch("eval_framework.context.local._load_model", side_effect=_load_model_mock)
-@patch("eval_framework.response_generator.create_perturbation_class")
+@patch("eval_framework.tasks.registry.create_perturbation_class")
 def test_run(
     mock_create_perturbation_class: Mock,
     _mock_load_model: Mock,
@@ -78,7 +78,7 @@ def test_run(
 
 @patch("argparse.ArgumentParser.parse_args")
 @patch("eval_framework.context.local._load_model", side_effect=_load_model_mock)
-@patch("eval_framework.response_generator.create_perturbation_class")
+@patch("eval_framework.tasks.registry.create_perturbation_class")
 def test_run_path(
     mock_create_perturbation_class: Mock,
     _mock_load_model: Mock,

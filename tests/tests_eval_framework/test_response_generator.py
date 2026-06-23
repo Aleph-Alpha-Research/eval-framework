@@ -436,7 +436,7 @@ def test_repeat_samples() -> None:
         assert other.possible_completions == repeated[0].possible_completions
 
 
-@patch("eval_framework.response_generator.create_perturbation_class")
+@patch("eval_framework.tasks.registry.create_perturbation_class")
 def test_with_wrong_loaded_metadata(mock_create_perturbation_class: Mock, tmp_path: Path) -> None:
     class OtherMockLLM(MockLLM):
         pass

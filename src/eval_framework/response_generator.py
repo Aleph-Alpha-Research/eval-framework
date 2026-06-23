@@ -5,7 +5,7 @@ from collections.abc import Callable, Iterable
 from datetime import UTC, datetime
 from functools import partial
 
-from eval_framework.tasks.registry import get_task
+from eval_framework.tasks.registry import registry
 
 try:
     from determined._info import get_cluster_info
@@ -28,7 +28,6 @@ from eval_framework.shared.types import (
 )
 from eval_framework.tasks.base import Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.perturbation import create_perturbation_class
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag, safe_tqdm_write
@@ -54,7 +53,6 @@ def map_language_to_value(
 
 class ResponseGenerator:
     def __init__(self, llm: BaseLLM, config: EvalConfig, result_processor: ResultsFileProcessor) -> None:
-        self.few_shot = config.num_fewshot
         self.task_name = config.task_name
         self.llm = llm
         self.config = config
@@ -62,20 +60,16 @@ class ResponseGenerator:
         self.num_samples = config.num_samples
         self.save_intermediate_results = config.save_intermediate_results
 
-        task_class = get_task(config.task_name)
-
         if config.perturbation_config is not None:
-            perturbation_task_class = create_perturbation_class(task_class, config.perturbation_config)
-            self.task = perturbation_task_class.with_overwrite(
-                self.few_shot,
-                custom_subjects=self.config.task_subjects,
-                custom_hf_revision=self.config.hf_revision,
+            self.task = registry()[config.task_name].create_perturbation(
+                config.perturbation_config,
+                config.num_fewshot,
+                config.task_subjects,
+                config.hf_revision,
             )
         else:
-            self.task = task_class.with_overwrite(
-                self.few_shot,
-                custom_subjects=self.config.task_subjects,
-                custom_hf_revision=self.config.hf_revision,
+            self.task = registry()[config.task_name].create(
+                config.num_fewshot, config.task_subjects, config.hf_revision
             )
 
         self.response_type = self.task.get_response_type()
