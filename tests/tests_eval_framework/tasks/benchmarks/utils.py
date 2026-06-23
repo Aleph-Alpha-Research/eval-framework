@@ -3,6 +3,7 @@
 import random
 import sys
 from dataclasses import dataclass
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -14,7 +15,7 @@ from eval_framework.tasks.registry import (
     get_task,
     registered_task_names,
 )
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, Message
+from template_formatting.formatter import BaseFormatter, Message
 from tests.tests_eval_framework.utils import assert_hash_string
 
 
@@ -125,66 +126,185 @@ def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], 
 
 
 # ---------------------------------------------------------------------------
-# Shared util functions for offline prompt tests
+# Declarative framework for offline prompt-assembly tests
 # ---------------------------------------------------------------------------
+#
+# These tests verify the ONE thing each task is responsible for: the list of
+# ``Message``s it assembles (plus ``ground_truth`` and ``possible_completions``).
+#
+# Rendering those messages into a final prompt string is the *formatter's* job and
+# is already covered exhaustively in
+# ``tests/tests_template_formatting/test_formatter_eval.py`` (ConcatFormatter,
+# Llama3Formatter, cue/prefilling, whitespace, multi-turn, ...). Re-asserting the
+# concatenated string here would just re-test the formatter and couple these tests
+# to formatter implementation details, so we deliberately do NOT do it.
+#
+# Adding coverage for a new task is declarative -- see ``OfflinePromptCase``. The data is
+# OPTIONAL: by default you only declare the ``columns`` the task reads, and the framework
+# synthesizes a deterministic template row for them (see ``template_row``). The framework
+# then drives the real production path (``iterate_samples``) with only the HuggingFace
+# download patched out.
+#
+# How much the *content* of the data matters depends on the task:
+#
+#   * Passthrough tasks -- the row text flows verbatim into the messages, so the data has no
+#     sanctity (it could be lorem ipsum). Just pass ``columns`` and let the template row be
+#     generated; the test pins assembly structure: roles, ordering, intro line, prefixes,
+#     cue-as-assistant-turn, few-shot interleaving. Build the expected messages by calling
+#     ``template_value(column)`` so you never hard-code the placeholder text.
+#
+#   * Transformation tasks -- the row is *processed* before it becomes messages (e.g. gsm8k
+#     strips ``<<...>>`` calculator spans from the question and rewrites the answer via
+#     ``normalize_answer_str``: drop the ``#### N`` tail, collapse whitespace, capitalize,
+#     append "So the answer is N.", space out operators). Template data would not exercise any
+#     of that, so pass explicit ``eval_row``/``fewshot_row``: the row is the *input* and
+#     ``ExpectedPrompt`` is the *transformed output*, with the row carrying the markers the
+#     processing acts on (``<<...>>``, ``####``, bare operators like ``2+3``, ...). Heavy or
+#     standalone transforms are also worth covering with direct unit tests (cf. the
+#     ``_find_closing_bracket`` / ``_split_text_command`` tests in test_math_reasoning.py).
+
+
+def template_value(column: str, *, variant: str = "eval") -> str:
+    """Deterministic placeholder text for a passthrough column in template mode.
+
+    Recognizable and unique per ``(column, variant)`` so that expected messages can be built
+    by calling this same helper instead of hard-coding the placeholder text. ``variant``
+    distinguishes the eval row from the few-shot row so they are visibly different in a prompt.
+    """
+    return f"lorem ipsum {column} ({variant})"
+
+
+def template_row(columns: list[str], *, variant: str = "eval") -> dict[str, str]:
+    """Synthesize a fictional row for the given column names (see ``template_value``)."""
+    return {column: template_value(column, variant=variant) for column in columns}
+
+
+def _resolve_row(row: dict[str, Any] | None, columns: list[str] | None, *, variant: str) -> dict[str, Any]:
+    if row is not None:
+        return row
+    if not columns:
+        raise ValueError("Provide an explicit row or `columns` so a template row can be synthesized.")
+    return template_row(columns, variant=variant)
 
 
 @dataclass(frozen=True)
 class ExpectedPrompt:
+    """Expected output of a task's sample construction (the task's own responsibility)."""
+
     messages: list[Message]
-    concat: str
     ground_truth: str | list[str] | None
     completions: list[str] | None
 
 
 def _iterate_samples_over_mock_dataset(task: BaseTask, fictional_dataset: DatasetDict) -> Sample:
-    """Same entry points as production: ``iterate_samples`` over a patched HF load."""
+    """Same entry point as production: ``iterate_samples`` over a patched HF load."""
     with patch.object(task, "_load_hf_dataset", return_value=fictional_dataset):
         return next(iter(task.iterate_samples(1)))
 
 
 def _assert_sample_matches(sample: Sample, expected: ExpectedPrompt) -> None:
     assert sample.messages == expected.messages
-    assert ConcatFormatter().format(sample.messages, output_mode="string") == expected.concat
     assert sample.ground_truth == expected.ground_truth
     assert sample.possible_completions == expected.completions
 
 
 def assert_offline_zeroshot_prompt(
     task_cls: type[BaseTask],
-    eval_row: dict,
+    eval_row: dict[str, Any] | None = None,
     *,
-    subjects: list[str],
+    columns: list[str] | None = None,
+    subjects: list[str] | None = None,
     expected: ExpectedPrompt,
 ) -> None:
-    """Assert the 0-shot prompt. Only ``eval_row`` is needed with ``num_fewshot=0`` so a dataset
-    with just the sample split suffices."""
+    """Assert the 0-shot messages. Pass ``eval_row`` for transformation tasks, or ``columns``
+    to fall back to a synthesized template row. With ``num_fewshot=0`` a dataset with just the
+    sample split suffices."""
     task = task_cls.with_overwrite(num_fewshot=0, custom_subjects=subjects, custom_hf_revision=None)
-    mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([eval_row])})
+    row = _resolve_row(eval_row, columns, variant="eval")
+    mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([row])})
     _assert_sample_matches(_iterate_samples_over_mock_dataset(task, mock_dataset), expected)
 
 
 def assert_offline_oneshot_prompt(
     task_cls: type[BaseTask],
-    eval_row: dict,
-    fewshot_row: dict,
+    eval_row: dict[str, Any] | None = None,
+    fewshot_row: dict[str, Any] | None = None,
     *,
-    subjects: list[str],
+    columns: list[str] | None = None,
+    subjects: list[str] | None = None,
     expected: ExpectedPrompt,
 ) -> None:
-    """Assert the 1-shot prompt. The dataset layout depends on whether the task draws
-    fewshot examples from a separate split (``FEWSHOT_SPLIT != SAMPLE_SPLIT``) or the same one."""
+    """Assert the 1-shot messages. Pass explicit ``eval_row``/``fewshot_row`` for transformation
+    tasks, or ``columns`` to fall back to synthesized template rows (the few-shot row uses a
+    different ``variant`` so it is distinguishable from the eval row).
+
+    The single few-shot example is injected by overriding ``_sample_fewshot_examples`` to
+    return the few-shot row directly. This keeps the test independent of each task's sampling
+    strategy (separate vs. shared split, predefined example pools, RNG seeding), so the SAME
+    helper works for every task -- here we only care about prompt assembly, not sampling.
+    """
     task = task_cls.with_overwrite(num_fewshot=1, custom_subjects=subjects, custom_hf_revision=None)
-    if task.FEWSHOT_SPLIT != task.SAMPLE_SPLIT:
-        mock_dataset = DatasetDict(
-            {
-                task.SAMPLE_SPLIT: Dataset.from_list([eval_row]),
-                task.FEWSHOT_SPLIT: Dataset.from_list([fewshot_row]),
-            }
-        )
-    else:
-        mock_dataset = DatasetDict(
-            # Use fewshot row first such that after shuffling (with seed 42) the eval row is the first item
-            {task.SAMPLE_SPLIT: Dataset.from_list([fewshot_row, eval_row])},
-        )
+    eval_data = _resolve_row(eval_row, columns, variant="eval")
+    fewshot_data = _resolve_row(fewshot_row, columns, variant="fewshot")
+    mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([eval_data])})
+    # A fresh copy per call: _get_example_messages mutates the row (sets ``subject``).
+    task._sample_fewshot_examples = lambda item, _row=fewshot_data: [dict(_row)]  # type: ignore[method-assign]
     _assert_sample_matches(_iterate_samples_over_mock_dataset(task, mock_dataset), expected)
+
+
+@dataclass(frozen=True)
+class OfflinePromptCase:
+    """Declarative spec for a task's offline prompt-assembly test.
+
+    To cover a new task, append one of these to the module's ``CASES`` list:
+      * ``task_cls``    -- the task class under test
+      * ``zeroshot``    -- expected messages/ground_truth/completions with ``num_fewshot=0``
+      * ``columns``     -- the dataset columns the task reads. In template mode (no explicit
+                           ``eval_row``) the framework synthesizes the row data from these names;
+                           build the expected messages with ``template_value(column)``.
+      * ``eval_row``    -- OPTIONAL explicit row, overriding template generation. Needed for
+                           transformation tasks: it is the *input* and must carry the markers
+                           the task processes; the expected messages hold the *processed* output.
+      * ``fewshot_row`` -- OPTIONAL explicit few-shot row (falls back to a template row when
+                           ``columns`` is given and ``oneshot`` is set).
+      * ``oneshot``     -- expected messages/ground_truth/completions with ``num_fewshot=1``
+      * ``subjects``    -- restrict to these subjects (defaults to the task's own ``SUBJECTS``)
+
+    Provide either ``columns`` or ``eval_row`` (or both -- explicit rows win).
+    """
+
+    task_cls: type[BaseTask]
+    zeroshot: ExpectedPrompt
+    columns: list[str] | None = None
+    eval_row: dict[str, Any] | None = None
+    fewshot_row: dict[str, Any] | None = None
+    oneshot: ExpectedPrompt | None = None
+    subjects: list[str] | None = None
+
+    def __post_init__(self) -> None:
+        if self.eval_row is None and not self.columns:
+            raise ValueError(f"{self.test_id}: provide `columns` (template mode) or an explicit `eval_row`.")
+
+    @property
+    def test_id(self) -> str:
+        return self.task_cls.__name__
+
+
+def run_offline_prompt_case(case: OfflinePromptCase) -> None:
+    """Run the 0-shot (and, when specified, 1-shot) assembly assertions for one task."""
+    assert_offline_zeroshot_prompt(
+        case.task_cls,
+        case.eval_row,
+        columns=case.columns,
+        subjects=case.subjects,
+        expected=case.zeroshot,
+    )
+    if case.oneshot is not None:
+        assert_offline_oneshot_prompt(
+            case.task_cls,
+            case.eval_row,
+            case.fewshot_row,
+            columns=case.columns,
+            subjects=case.subjects,
+            expected=case.oneshot,
+        )
