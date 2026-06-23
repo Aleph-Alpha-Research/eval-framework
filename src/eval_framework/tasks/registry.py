@@ -6,12 +6,13 @@ from collections.abc import Generator, Iterator, Sequence
 from typing import Any
 
 from eval_framework.tasks.base import BaseTask
+from eval_framework.tasks.perturbation import PerturbationConfig, create_perturbation_class
 from eval_framework.utils.packaging import is_extra_installed, validate_package_extras
 
 __all__ = [
     "register_task",
     "register_lazy_task",
-    "BenchmarkFactory",
+    "EvalFactory",
     "Registry",
     "with_registry",
     "get_task",
@@ -22,13 +23,13 @@ __all__ = [
 ]
 
 
-class BenchmarkFactory(ABC):
-    """Produces a registered benchmark's task.
+class EvalFactory(ABC):
+    """Produces a registered benchmark's eval.
 
-    The registry stores one factory per benchmark. This allows the factory to be
-    constructed without constructing all benchmarks. Going via this ABC allows
+    The registry stores one factory per eval. This allows the factory to be
+    constructed without constructing all evals. Going via this ABC allows
     the factory instances to contain state specifically relevant to the
-    benchmark, as well as supporting different strategies for instantiating it.
+    eval, as well as supporting different strategies for instantiating it.
     E.g. eager vs lazy loading of the required dependencies.
     """
 
@@ -41,11 +42,25 @@ class BenchmarkFactory(ABC):
     def source_module(self) -> str:
         """Module the task class is defined in, resolvable without importing it."""
 
+    @abstractmethod
+    def create(
+        self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None
+    ) -> BaseTask: ...
 
-class _Lazy(BenchmarkFactory):
+    @abstractmethod
+    def create_perturbation(
+        self,
+        perturbation_config: PerturbationConfig,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+    ) -> BaseTask: ...
+
+
+class _Lazy(EvalFactory):
     """
-    Create benchmark from qualified class path; Delays importing modules until
-    benchmark is constructed.
+    Create eval from qualified class path; Delays importing modules until
+    eval is constructed.
     """
 
     def __init__(self, class_name: str, module: str, extras: Sequence[str] = ()) -> None:
@@ -73,8 +88,27 @@ class _Lazy(BenchmarkFactory):
             self._loaded = getattr(module, self._class_name)
         return self._loaded
 
+    def create(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> BaseTask:
+        return self.task_class().with_overwrite(
+            num_fewshot=num_fewshot, custom_subjects=custom_subjects, custom_hf_revision=custom_hf_revision
+        )
 
-class _Eager(BenchmarkFactory):
+    def create_perturbation(
+        self,
+        perturbation_config: PerturbationConfig,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+    ) -> BaseTask:
+        perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
+        return perturbation_task_class.with_overwrite(
+            num_fewshot=num_fewshot,
+            custom_subjects=custom_subjects,
+            custom_hf_revision=custom_hf_revision,
+        )
+
+
+class _Eager(EvalFactory):
     """Wraps an already-imported task class."""
 
     def __init__(self, task: type[BaseTask]) -> None:
@@ -87,6 +121,25 @@ class _Eager(BenchmarkFactory):
     def task_class(self) -> type[BaseTask]:
         return self._task
 
+    def create(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> BaseTask:
+        return self.task_class().with_overwrite(
+            num_fewshot=num_fewshot, custom_subjects=custom_subjects, custom_hf_revision=custom_hf_revision
+        )
+
+    def create_perturbation(
+        self,
+        perturbation_config: PerturbationConfig,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+    ) -> BaseTask:
+        perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
+        return perturbation_task_class.with_overwrite(
+            num_fewshot=num_fewshot,
+            custom_subjects=custom_subjects,
+            custom_hf_revision=custom_hf_revision,
+        )
+
 
 class Registry:
     """A registry for tasks with support for lazy loading.
@@ -97,7 +150,7 @@ class Registry:
 
     def __init__(self) -> None:
         # TODO: Lookup only with upper names
-        self._registry: dict[str, tuple[str, BenchmarkFactory]] = dict()
+        self._registry: dict[str, tuple[str, EvalFactory]] = dict()
 
     def __iter__(self) -> Iterator[str]:
         for name, _ in self._registry.values():
@@ -116,20 +169,21 @@ class Registry:
         task_key = self._task_key(name)
         return task_key in self._registry
 
-    def __getitem__(self, name: str, /) -> type[BaseTask]:
+    def __getitem__(self, name: str, /) -> EvalFactory:
         task_key = self._task_key(name)
+        print(f"task_key: {task_key}")
         try:
             _, factory = self._registry[task_key]
         except KeyError:
-            raise KeyError(f"Task not found: {name}")
+            raise KeyError(f"Task not found: {name=} with task_key {task_key=}")
 
-        return factory.task_class()
+        return factory
 
     def add(self, task: type[BaseTask]) -> None:
         task_key = self._task_key(task.NAME)
         self._registry[task_key] = (task.NAME, _Eager(task))
 
-    def __setitem__(self, name: str, factory: BenchmarkFactory) -> None:
+    def __setitem__(self, name: str, factory: EvalFactory) -> None:
         task_key = self._task_key(name)
         if task_key in self._registry:
             raise ValueError(f"Cannot register duplicate task with key: {task_key}")
@@ -138,6 +192,10 @@ class Registry:
 
 
 _REGISTRY = Registry()
+
+
+def registry() -> Registry:
+    return _REGISTRY
 
 
 @contextlib.contextmanager
@@ -183,7 +241,7 @@ def get_task(name: str, /) -> type[BaseTask]:
 
     Note: This method will import any lazily registered task.
     """
-    return _REGISTRY[name]
+    return _REGISTRY[name].task_class()
 
 
 def register_task(task: type[BaseTask]) -> str:
