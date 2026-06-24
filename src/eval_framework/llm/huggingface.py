@@ -6,7 +6,7 @@ import warnings
 from collections.abc import Callable, Sequence
 from functools import partial
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import torch
 from tokenizers import Tokenizer
@@ -133,7 +133,7 @@ class BaseHFLLM(BaseLLM):
 
     def __del__(self) -> None:
         if hasattr(self, "model"):
-            num_gpus = len(self.model.hf_device_map)
+            num_gpus = len(cast(dict[str, Any], self.model.hf_device_map))
             del self.model
             if num_gpus > 1 and torch.distributed.is_initialized():
                 torch.distributed.destroy_process_group()

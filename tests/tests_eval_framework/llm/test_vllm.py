@@ -288,7 +288,7 @@ def test_seq_length_priority_order() -> None:
 def test_vllm_load_from_invalid_checkpoint() -> None:
     invalid_path = "/fake/path/to/model"
 
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(OSError) as exc_info:
         Qwen3_0_6B_VLLM(
             checkpoint_path=invalid_path,
             checkpoint_name="fake",
@@ -296,7 +296,7 @@ def test_vllm_load_from_invalid_checkpoint() -> None:
         )
 
     error_msg = str(exc_info.value).lower()
-    assert "invalid repository id or local directory specified" in error_msg
+    assert "can't load the configuration of '/fake/path/to/model'" in error_msg
     assert invalid_path.lower() in error_msg
 
 
