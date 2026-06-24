@@ -43,6 +43,9 @@ def safe_vllm_setup[T: VLLMModel](model_fn: type[T], kwargs: Any) -> T:
     kwargs.setdefault("gpu_memory_utilization", 0.3)
     kwargs.setdefault("swap_space", 0)
     kwargs.setdefault("enforce_eager", True)
+    # Force the Triton attention backend. vLLM otherwise auto-selects FlashInfer,
+    # which requires nvcc at runtime (absent in CI), causing model init to fail.
+    kwargs.setdefault("attention_backend", "TRITON_ATTN")
 
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
