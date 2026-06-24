@@ -80,7 +80,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **protobuf** 4.25.8 - https://developers.google.com/protocol-buffers/
 - **Pygments** 2.19.2 - https://pygments.org
 - **python-dotenv** 1.2.2 - https://github.com/theskumar/python-dotenv
-- **scipy** 1.17.1 - https://scipy.org/
+- **scipy** 1.18.0 - https://scipy.org/
 - **sentry-sdk** 2.44.0 - https://github.com/getsentry/sentry-python
 - **smmap** 5.0.2 - https://github.com/gitpython-developers/smmap
 - **sympy** 1.13.1 - https://sympy.org
@@ -17478,7 +17478,7 @@ Apache License
    limitations under the License.
 ```
 
-### scipy 1.17.1 (BSD-3-Clause)
+### scipy 1.18.0 (BSD-3-Clause)
 
 ```text
 Copyright (c) 2001-2002 Enthought, Inc. 2003, SciPy Developers.
@@ -17511,6 +17511,9 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----
+
 
 ----
 
