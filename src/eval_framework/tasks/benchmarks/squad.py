@@ -244,6 +244,11 @@ class SQuAD2_MA(SQUAD2):
 
     METRICS = [AccuracyCompletion, F1, F1SquadNormalized]
 
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.stop_sequences = []
+        self.max_tokens = None
+
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
         return (
             "You are a helpful assistant and will answer the user's questions carefully, "
