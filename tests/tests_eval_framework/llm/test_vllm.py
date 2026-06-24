@@ -890,8 +890,8 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
     if min(generator_gpus, evaluator_gpus) >= num_gpus:
         pytest.skip("GPUs not available")
 
-    class Qwen8B(VLLMModel):
-        LLM_NAME = "Qwen/Qwen3-8B"
+    class Qwen06B(VLLMModel):
+        LLM_NAME = "Qwen/Qwen3-0.6B"
 
     try:
         model_config = cast(
@@ -900,11 +900,12 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
                 "max_model_len": 1000,
                 "enforce_eager": True,
                 "tensor_parallel_size": generator_gpus,
-                "formatter": HFFormatter("Qwen/Qwen3-8B", chat_template_kwargs={"enable_thinking": True}),
+                "gpu_memory_utilization": 0.7,
+                "formatter": HFFormatter("Qwen/Qwen3-0.6B", chat_template_kwargs={"enable_thinking": True}),
             },
         )
 
-        response_generator_model = Qwen8B(**model_config)
+        response_generator_model = Qwen06B(**model_config)
         response_generator_model.generate_from_messages(
             messages=[[Message(role=Role.USER, content="What is capital of Germany ?")]],
             max_tokens=100,
@@ -912,7 +913,7 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
         )
         del response_generator_model
         model_config["tensor_parallel_size"] = evaluator_gpus
-        judge_model = Qwen8B(**model_config)
+        judge_model = Qwen06B(**model_config)
         judge_model.generate_from_messages(
             messages=[
                 [
