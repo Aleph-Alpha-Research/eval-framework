@@ -18,7 +18,7 @@ from eval_framework.result_processors.base import Result, ResultProcessor
 from eval_framework.shared.types import Completion, Loglikelihood
 from eval_framework.tasks.base import ResponseType
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.registry import get_task
+from eval_framework.tasks.registry import registry
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag, safe_tqdm_write
 
@@ -36,13 +36,9 @@ class EvaluationGenerator:
         self.result_processor = result_processor
         self.save_intermediate_results = config.save_intermediate_results
 
-        task_class = get_task(config.task_name)
-        if hasattr(task_class, "TASK_STYLER"):
-            response_type = task_class.TASK_STYLER.response_type
-            task_metrics = list(task_class.TASK_STYLER.metrics)
-        else:
-            response_type = task_class.RESPONSE_TYPE
-            task_metrics = task_class.METRICS
+        eval_ = registry()[config.task_name]
+        response_type = eval_.response_type()
+        task_metrics = eval_.metrics()
 
         if response_type == ResponseType.COMPLETION:
             self.metrics = task_metrics + [BytesCompletion, SequencePositionsCompletion]
@@ -51,7 +47,7 @@ class EvaluationGenerator:
         else:
             raise NotImplementedError
 
-        self.task_name = task_class.NAME
+        self.task_name = eval_.task_class().NAME
 
     def _run_metric_calculators(self, responses: list[Completion | Loglikelihood]) -> list[Result]:
         results: list[Result] = self.result_processor.load_metrics_results()

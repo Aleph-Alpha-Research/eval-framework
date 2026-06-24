@@ -3,11 +3,14 @@ import importlib
 import re
 from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterator, Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from eval_framework.tasks.base import BaseTask
+from eval_framework.tasks.base import BaseTask, ResponseType
 from eval_framework.tasks.perturbation import PerturbationConfig, create_perturbation_class
 from eval_framework.utils.packaging import is_extra_installed, validate_package_extras
+
+if TYPE_CHECKING:
+    from eval_framework.metrics.base import BaseMetric
 
 __all__ = [
     "register_task",
@@ -41,6 +44,14 @@ class EvalFactory(ABC):
     @abstractmethod
     def source_module(self) -> str:
         """Module the task class is defined in, resolvable without importing it."""
+
+    @abstractmethod
+    def response_type(self) -> ResponseType:
+        """The eval's response type"""
+
+    @abstractmethod
+    def metrics(self) -> list[type["BaseMetric"]]:
+        """The eval's metrics"""
 
     @abstractmethod
     def create(
@@ -107,6 +118,14 @@ class _Lazy(EvalFactory):
             custom_hf_revision=custom_hf_revision,
         )
 
+    def response_type(self) -> ResponseType:
+        """The eval's response type"""
+        return self.task_class().get_response_type()
+
+    def metrics(self) -> list[type["BaseMetric"]]:
+        """The eval's metrics"""
+        return self.task_class().get_metrics()
+
 
 class _Eager(EvalFactory):
     """Wraps an already-imported task class."""
@@ -140,6 +159,14 @@ class _Eager(EvalFactory):
             custom_hf_revision=custom_hf_revision,
         )
 
+    def response_type(self) -> ResponseType:
+        """The eval's response type"""
+        return self.task_class().get_response_type()
+
+    def metrics(self) -> list[type["BaseMetric"]]:
+        """The eval's metrics"""
+        return self.task_class().get_metrics()
+
 
 class Registry:
     """A registry for tasks with support for lazy loading.
@@ -171,7 +198,6 @@ class Registry:
 
     def __getitem__(self, name: str, /) -> EvalFactory:
         task_key = self._task_key(name)
-        print(f"task_key: {task_key}")
         try:
             _, factory = self._registry[task_key]
         except KeyError:

@@ -10,7 +10,7 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.perturbation import PerturbationConfig
-from eval_framework.tasks.registry import get_task, validate_task_name
+from eval_framework.tasks.registry import get_task, registry, validate_task_name
 from eval_framework.utils.constants import ROOT_DIR
 
 # Keys that don't impact actual evaluation results and should be excluded from config dumps for hashing purposes.
@@ -115,8 +115,7 @@ class EvalConfig(BaseConfig):
 
     @model_validator(mode="after")
     def validate_llm_judge_defined(self) -> "EvalConfig":
-        task = get_task(self.task_name)
-        task_metrics = task(num_fewshot=0).get_metrics()
+        task_metrics = registry()[self.task_name].metrics()
         for metric_class in task_metrics:
             if issubclass(metric_class, BaseLLMJudgeMetric):
                 assert self.llm_judge_class is not None, "The LLM Judge must be defined for this evaluation task."
