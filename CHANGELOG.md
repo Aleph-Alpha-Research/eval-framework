@@ -14,6 +14,19 @@
 
 ### Bug Fixes
 
+## [0.5.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.0...v0.5.1) (2026-06-24)
+
+
+### Features
+
+* math english bpb tasks ([#383](https://github.com/Aleph-Alpha-Research/eval-framework/issues/383)) ([4fd7ff6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4fd7ff6b8849aeddfbfd27a6a5d9c8c3294d50ba))
+
+
+### Bug Fixes
+
+* add reasoning fixes to Squad_ma and TriviaQA_ma tasks ([#406](https://github.com/Aleph-Alpha-Research/eval-framework/issues/406)) ([f5ffb6d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f5ffb6d47ce28ba074e200c8b3cf5b65b1bced1f))
+* **deps:** update dependency scipy to &gt;=1.18.0,&lt;2 ([#398](https://github.com/Aleph-Alpha-Research/eval-framework/issues/398)) ([519441e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/519441e0710b9efccb5faf8887d586d240479b4e))
+
 ## [0.4.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.8...v0.4.0) (2026-06-19)
 
 
