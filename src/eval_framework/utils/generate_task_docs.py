@@ -6,7 +6,7 @@ from pathlib import Path
 
 import tqdm
 
-from eval_framework.tasks.registry import get_task, registered_task_names
+from eval_framework.tasks.registry import registered_task_names, registry
 from eval_framework.tasks.task_loader import load_extra_tasks
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 
@@ -69,7 +69,8 @@ def generate_docs_for_task(
     output_docs_directory: Path, task_name: str, formatters: list[BaseFormatter], add_prompt_examples: bool
 ) -> None:
     """Generate documentation for a specific task."""
-    task_class = get_task(task_name)
+    eval_ = registry()[task_name]
+    task_class = eval_.task_class()
 
     try:
         num_fewshot = 1
@@ -98,16 +99,9 @@ def generate_docs_for_task(
             f.write(f"SAMPLE_SPLIT = {task.SAMPLE_SPLIT}".strip() + "\n")
         if hasattr(task, "FEWSHOT_SPLIT"):
             f.write(f"FEWSHOT_SPLIT = {task.FEWSHOT_SPLIT}".strip() + "\n")
-        if hasattr(task, "TASK_STYLER"):
-            f.write(f"RESPONSE_TYPE = {task.TASK_STYLER.response_type.name}".strip() + "\n")
-            metrics_list = [f"{m.__name__}" for m in task.TASK_STYLER.metrics]
-            f.write(f"METRICS = [{', '.join(metrics_list)}]".strip() + "\n")
-        else:
-            if hasattr(task, "RESPONSE_TYPE"):
-                f.write(f"RESPONSE_TYPE = {task.RESPONSE_TYPE.name}".strip() + "\n")
-            if hasattr(task, "METRICS"):
-                metrics_list = [f"{m.__name__}" for m in task.METRICS]
-                f.write(f"METRICS = [{', '.join(metrics_list)}]".strip() + "\n")
+        f.write(f"RESPONSE_TYPE = {eval_.response_type().name}".strip() + "\n")
+        metrics_list = [f"{m.__name__}" for m in eval_.metrics()]
+        f.write(f"METRICS = [{', '.join(metrics_list)}]".strip() + "\n")
         if hasattr(task, "SUBJECTS"):
             f.write(f"SUBJECTS = {repr(task.SUBJECTS)}".strip() + "\n")
         if hasattr(task, "LANGUAGE"):

@@ -107,6 +107,7 @@ class VLLMLocalServerModel(BaseLLM):
         max_model_len: int | None = None,
         gpu_memory_utilization: float | None = None,
         enforce_eager: bool | None = None,
+        attention_backend: str | None = "TRITON_ATTN",
         # Escape hatch:
         vllm_command: str | None = None,
         vllm_extra_args: list[str] | None = None,
@@ -136,6 +137,10 @@ class VLLMLocalServerModel(BaseLLM):
             # vLLM exposes this as a boolean flag; passing a value breaks CLI parsing.
             if enforce_eager:
                 cmd += ["--enforce-eager"]
+        if attention_backend is not None:
+            # Force a specific attention backend. vLLM otherwise auto-selects FlashInfer,
+            # which requires nvcc at runtime (absent in CI), causing the server to fail to start.
+            cmd += ["--attention-backend", str(attention_backend)]
 
         if vllm_extra_args:
             cmd += list(vllm_extra_args)

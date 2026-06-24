@@ -1,6 +1,6 @@
 [project]
 name = "eval-framework"
-version = "0.5.0"
+version = "0.5.1"
 description = "Evaluation Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -66,7 +66,7 @@ transformers = [
 ]
 accelerate = ["accelerate"]
 vllm = [
-  "vllm>=0.8.5,<0.9",
+  "vllm>=0.22,<0.23",
   "torch>=2.5,<3"
 ]
 mistral = [

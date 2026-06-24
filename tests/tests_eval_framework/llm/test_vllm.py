@@ -43,6 +43,9 @@ def safe_vllm_setup[T: VLLMModel](model_fn: type[T], kwargs: Any) -> T:
     kwargs.setdefault("gpu_memory_utilization", 0.3)
     kwargs.setdefault("swap_space", 0)
     kwargs.setdefault("enforce_eager", True)
+    # Force the Triton attention backend. vLLM otherwise auto-selects FlashInfer,
+    # which requires nvcc at runtime (absent in CI), causing model init to fail.
+    kwargs.setdefault("attention_backend", "TRITON_ATTN")
 
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
@@ -288,7 +291,7 @@ def test_seq_length_priority_order() -> None:
 def test_vllm_load_from_invalid_checkpoint() -> None:
     invalid_path = "/fake/path/to/model"
 
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(OSError) as exc_info:
         Qwen3_0_6B_VLLM(
             checkpoint_path=invalid_path,
             checkpoint_name="fake",
@@ -296,7 +299,7 @@ def test_vllm_load_from_invalid_checkpoint() -> None:
         )
 
     error_msg = str(exc_info.value).lower()
-    assert "invalid repository id or local directory specified" in error_msg
+    assert "can't load the configuration of '/fake/path/to/model'" in error_msg
     assert invalid_path.lower() in error_msg
 
 
@@ -890,8 +893,8 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
     if min(generator_gpus, evaluator_gpus) >= num_gpus:
         pytest.skip("GPUs not available")
 
-    class Qwen8B(VLLMModel):
-        LLM_NAME = "Qwen/Qwen3-8B"
+    class Qwen06B(VLLMModel):
+        LLM_NAME = "Qwen/Qwen3-0.6B"
 
     try:
         model_config = cast(
@@ -900,11 +903,12 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
                 "max_model_len": 1000,
                 "enforce_eager": True,
                 "tensor_parallel_size": generator_gpus,
-                "formatter": HFFormatter("Qwen/Qwen3-8B", chat_template_kwargs={"enable_thinking": True}),
+                "gpu_memory_utilization": 0.7,
+                "formatter": HFFormatter("Qwen/Qwen3-0.6B", chat_template_kwargs={"enable_thinking": True}),
             },
         )
 
-        response_generator_model = Qwen8B(**model_config)
+        response_generator_model = Qwen06B(**model_config)
         response_generator_model.generate_from_messages(
             messages=[[Message(role=Role.USER, content="What is capital of Germany ?")]],
             max_tokens=100,
@@ -912,7 +916,7 @@ def test_resource_cleanup(generator_gpus: int, evaluator_gpus: int) -> None:
         )
         del response_generator_model
         model_config["tensor_parallel_size"] = evaluator_gpus
-        judge_model = Qwen8B(**model_config)
+        judge_model = Qwen06B(**model_config)
         judge_model.generate_from_messages(
             messages=[
                 [
