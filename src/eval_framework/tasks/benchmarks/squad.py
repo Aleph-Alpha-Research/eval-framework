@@ -11,7 +11,7 @@ from huggingface_hub.errors import RevisionNotFoundError
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1, F1SquadNormalized
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
-from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
+from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 
 
 class SQUAD2(BaseTask[str]):
@@ -260,6 +260,14 @@ class SQuAD2_MA(SQUAD2):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"Context:\n{item['context']}\n\nQuestion:\n{item['question']}\n"
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        """Clean up the generated answer."""
+        # Remove common prefixes and clean whitespace
+        cleaned = completion_text.strip()
+        if cleaned.startswith("Answer:"):
+            cleaned = cleaned[7:].strip()
+        return cleaned
 
 
 class SQuAD_OLMES(SQUAD):
