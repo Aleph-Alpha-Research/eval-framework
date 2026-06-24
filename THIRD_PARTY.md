@@ -29,7 +29,7 @@ and first-party/internal packages are excluded.
 | `python-iso639` | `>=2026.4.20` |
 | `pyyaml` | `>=6.0.3,<7` |
 | `sacrebleu` | `>=2.6.0,<3` |
-| `scipy` | `>=1.17.1,<2` |
+| `scipy` | `>=1.18.0,<2` |
 | `spacy` | `>=3.8.14,<4` |
 | `sympy` | `>=1.13.1,<2` |
 | `wandb` | `>=0.27.2,<1` |
