@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.5.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.0...v0.5.1) (2026-06-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency scipy to &gt;=1.18.0,&lt;2 ([#398](https://github.com/Aleph-Alpha-Research/eval-framework/issues/398)) ([519441e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/519441e0710b9efccb5faf8887d586d240479b4e))
+
 ## [0.4.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.3.8...v0.4.0) (2026-06-19)
 
 
