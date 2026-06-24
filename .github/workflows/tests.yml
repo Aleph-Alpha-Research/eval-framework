@@ -367,6 +367,7 @@ jobs:
           VLLM_WORKER_MULTIPROC_METHOD: spawn
           VLLM_USE_MODELSCOPE: "False"
           VLLM_NCCL_SO_PATH: ""
+          VLLM_ATTENTION_BACKEND: TRITON_ATTN
         run: |
           uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
           uv run --all-extras pytest --log-cli-level=INFO -v -m "vllm"
