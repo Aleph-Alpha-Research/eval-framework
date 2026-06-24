@@ -4,6 +4,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion, AccuracyCompletionOLMES
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.task_style import BPBStyle
 
 logger = logging.getLogger(__name__)
 
@@ -215,3 +216,32 @@ class GSM8K_OLMES(GSM8K):
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         return self._clean_short_answer(completion_text)
+
+
+class GSM8KBPB(GSM8K_OLMES):
+    NAME = "GSM8KBPB"
+    TASK_STYLER = BPBStyle(cue_text="Answer:", leading_space_continuations=False)
+
+    # BPBStyle already adds "Answer:" as that separate assistant message. But the methods we inherit
+    # still put "Answer:" at the end of the question text and leave it out of the fewshot answer.
+    # So we override them here: remove "Answer:" from the question, and add it back in front of the
+    # fewshot answer. Without this, the question ends in "Answer:Answer:" and fewshot answers have
+    # no "Answer:" label at all.
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return f"Question: {item['question']}\n"
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return f"Answer:{self.normalize_answer_str(item)}"
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        return item["question"]
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return [self.normalize_answer_str(item)]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return 0
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str:
+        return self._get_choices(item)[0]

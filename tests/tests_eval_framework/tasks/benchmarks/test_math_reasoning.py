@@ -1,8 +1,16 @@
+from unittest.mock import patch
+
 import pytest
 
-from eval_framework.tasks.benchmarks.math_reasoning import MATH
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
-from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
+from eval_framework.tasks.benchmarks.math_reasoning import MATH, MATHMinervaBPB
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
+from tests.tests_eval_framework.tasks.benchmarks.utils import (
+    ExpectedPrompt,
+    assert_offline_oneshot_prompt,
+    assert_offline_zeroshot_prompt,
+    get_task_names_for_module,
+    run_formatter_hash_test,
+)
 from tests.tests_eval_framework.utils import DatasetPatcher
 
 _NUM_FEWSHOT = {
@@ -107,3 +115,85 @@ def test_split_text_command_with_search(
 @pytest.mark.parametrize("task_name", get_task_names_for_module("math_reasoning"))
 def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
     run_formatter_hash_test(task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1))
+
+
+# ---------------------------------------------------------------------------
+# Offline prompt tests for MATHMinervaBPB (patched HF load; production task API otherwise)
+# ---------------------------------------------------------------------------
+
+_SUBJECT = "algebra"
+
+_CUE = "Solution:"
+_EVAL_ROW: dict[str, str] = {
+    "problem": "What is 2 + 3?",
+    "solution": "2 + 3 = 5. So the answer is $\\boxed{5}$.",
+}
+
+_FEWSHOT_ROW: dict[str, str] = {
+    "problem": "What is 1 + 1?",
+    "solution": "1 + 1 = 2. Final Answer: The final answer is $2$. I hope it is correct.",
+}
+
+# _get_instruction_text no longer embeds the cue; it becomes its own ASSISTANT message.
+_EVAL_PROBLEM = "Problem:\nWhat is 2 + 3?\n\n"
+_FEWSHOT_PROBLEM = f"Problem:\n{_FEWSHOT_ROW['problem']}\n\n"
+_FEWSHOT_ANSWER = f"{_CUE} {_FEWSHOT_ROW['solution']}"
+
+# _get_ground_truth returns _get_choices()[0] — no leading space
+_GROUND_TRUTH = "2 + 3 = 5. So the answer is $\\boxed{5}$.\nFinal Answer: The final answer is 5. I hope it is correct."
+# BPBStyle.get_possible_completions adds a leading space
+_EVAL_COMPLETION = " " + _GROUND_TRUTH
+_COMPLETIONS = [_EVAL_COMPLETION]
+
+# Concat strings are identical to before; structure just moves the cue to an ASSISTANT turn.
+_EXPECTED_CONCAT_0SHOT = f"{_EVAL_PROBLEM}{_CUE}"
+_EXPECTED_CONCAT_1SHOT = f"{_FEWSHOT_PROBLEM}{_FEWSHOT_ANSWER}\n\n{_EVAL_PROBLEM}{_CUE}"
+
+
+_ZEROSHOT = ExpectedPrompt(
+    messages=[
+        Message(role=Role.USER, content=_EVAL_PROBLEM),
+        Message(role=Role.ASSISTANT, content=_CUE),
+    ],
+    concat=_EXPECTED_CONCAT_0SHOT,
+    ground_truth=_GROUND_TRUTH,
+    completions=_COMPLETIONS,
+)
+
+_ONESHOT = ExpectedPrompt(
+    messages=[
+        Message(role=Role.USER, content=_FEWSHOT_PROBLEM),
+        Message(role=Role.ASSISTANT, content=_FEWSHOT_ANSWER),
+        Message(role=Role.USER, content=_EVAL_PROBLEM),
+        Message(role=Role.ASSISTANT, content=_CUE),
+    ],
+    concat=_EXPECTED_CONCAT_1SHOT,
+    ground_truth=_GROUND_TRUTH,
+    completions=_COMPLETIONS,
+)
+
+
+def test_mathminervabpb_offline_prompt_formatting_zeroshot() -> None:
+
+    # Patch _sample_fewshot_examples to return empty list for zeroshot
+    def mock_zero_fewshot_examples(self, item):
+        return []
+
+    with patch.object(MATHMinervaBPB, "_sample_fewshot_examples", mock_zero_fewshot_examples):
+        assert_offline_zeroshot_prompt(
+            MATHMinervaBPB,
+            eval_row=_EVAL_ROW,
+            subjects=[_SUBJECT],
+            expected=_ZEROSHOT,
+        )
+
+
+def test_mathminervabpb_offline_prompt_formatting_oneshot() -> None:
+
+    def mock_one_fewshot_example(self, item):
+        return [_FEWSHOT_ROW]
+
+    with patch.object(MATHMinervaBPB, "_sample_fewshot_examples", mock_one_fewshot_example):
+        assert_offline_oneshot_prompt(
+            MATHMinervaBPB, eval_row=_EVAL_ROW, fewshot_row=_FEWSHOT_ROW, subjects=[_SUBJECT], expected=_ONESHOT
+        )

@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 62**
+**Total number of tasks: 64**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -25,6 +25,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [GOLDENSWAG](GOLDENSWAG.md)
 - [GOLDENSWAG_IDK](GOLDENSWAG_IDK.md)
 - [GPQA_OLMES](GPQA_OLMES.md)
+- [GSM8KBPB](GSM8KBPB.md)
 - [GSM8KReasoning](GSM8KReasoning.md)
 - [GSM8K_OLMES](GSM8K_OLMES.md)
 - [GlobalMMLU](GlobalMMLU.md)
@@ -36,6 +37,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [IFEval](IFEval.md)
 - [IFEvalDe](IFEvalDe.md)
 - [MATH500](MATH500.md)
+- [MATHMinervaBPB](MATHMinervaBPB.md)
 - [MATHMinerva_OLMES](MATHMinerva_OLMES.md)
 - [MBPPBPB](MBPPBPB.md)
 - [MBPP_OLMES](MBPP_OLMES.md)
