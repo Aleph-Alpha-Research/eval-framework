@@ -52,6 +52,11 @@ class TriviaQA_MA(TRIVIAQA):
     METRICS = [AccuracyCompletion, F1, F1SquadNormalized]
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer", "Context", "unanswerable"]
 
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.stop_sequences = []
+        self.max_tokens = None
+
     def _get_context_text(self, item: dict[str, Any]) -> str:
         return "\n\n".join(item["entity_pages"]["wiki_context"])
 
