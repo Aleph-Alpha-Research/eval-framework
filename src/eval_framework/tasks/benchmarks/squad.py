@@ -266,6 +266,14 @@ class SQuAD2_MA(SQUAD2):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"Context:\n{item['context']}\n\nQuestion:\n{item['question']}\n"
 
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        """Clean up the generated answer."""
+        # Remove common prefixes and clean whitespace
+        cleaned = completion_text.strip()
+        if cleaned.startswith("Answer:"):
+            cleaned = cleaned[7:].strip()
+        return cleaned
+
 
 class SQuAD_OLMES(SQUAD):
     """SQuAD variant matching OLMES implementation."""
