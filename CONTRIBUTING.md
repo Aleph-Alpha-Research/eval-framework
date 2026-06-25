@@ -108,11 +108,15 @@ aim for backwards-compatible changes within minor version changes and compatibil
 ### Automated Release
 
 We use [release-please](https://github.com/googleapis/release-please) to automate our package releases.
-Automatically, release-please will create a PR that logs changes committed after the last release and updates it for each merge. To release, the contributor must merge the release-please PR to main. This will take care of running [release-please.yml](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/workflows/release_please.yml), pushing to PyPI and GitLab. However, tests will not automatically run on the release-please PR. Please follow these steps to release:
+[release-please.yml](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/workflows/release_please.yml) runs on every push to `main`. It opens or updates a PR that logs changes committed since the last release. To release:
 
-1. Add a tag to the PR: this will trigger CI tests
-2. Approve the PR
-3. Merge the PR
+1. Wait for the release-please PR to reflect your changes (CI runs automatically when the PR is opened or updated)
+2. Approve and merge the PR to `main`
+3. [release.yml](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/workflows/release.yml) publishes to PyPI and the Docker registry
+
+Behind the scenes, merging also runs [release-please.yml](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/workflows/release_please.yml) once more to create the GitHub release and tag; that event is what triggers `release.yml`. You do not need to run or trigger anything yourself beyond the merge.
+
+Release cadence is controlled by when the release PR is merged. To release at most once per day with no manual steps, add a scheduled workflow that auto-merges the release-please PR when CI passes.
 
 ### Manual Release
 

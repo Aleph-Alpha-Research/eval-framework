@@ -10,6 +10,9 @@ env:
   REPO_OWNER: research/public-registry
   IMAGE_NAME: eval_framework
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -46,8 +49,7 @@ jobs:
           path: './dist'
           if-no-files-found: 'error'
 
-  # Deploy to our pypi main instance
-  deploy-pypi:
+  publish-pypi:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
     needs: ["build"]
@@ -71,8 +73,7 @@ jobs:
           skip-existing: true
           print-hash: true
 
-  # Deploy to our pypi test instance
-  deploy-pypi-test:
+  publish-testpypi:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     needs: ["build"]
@@ -89,7 +90,7 @@ jobs:
           name: 'pypi-dist'
           path: './dist'
 
-      - name: Publish to PyPI
+      - name: Publish to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
@@ -98,12 +99,11 @@ jobs:
           skip-existing: false
           print-hash: true
 
-  # Deploy Docker images with version tags
-  deploy-docker:
+  publish-docker-image:
     if: github.event_name == 'release'
     runs-on: cpu-runner-8c-32gb-01
     container: docker:dind
-    needs: ["deploy-pypi"]
+    needs: ["build"]
     permissions:
       contents: read
 
