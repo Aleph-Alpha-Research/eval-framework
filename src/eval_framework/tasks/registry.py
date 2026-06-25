@@ -54,6 +54,10 @@ class EvalFactory(ABC):
         """The eval's metrics"""
 
     @abstractmethod
+    def display_name(self) -> str:
+        """Human-readable display name. Is allowed to have special characters and whitespaces."""
+
+    @abstractmethod
     def create(
         self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None
     ) -> BaseTask: ...
@@ -126,6 +130,10 @@ class _Lazy(EvalFactory):
         """The eval's metrics"""
         return self.task_class().get_metrics()
 
+    def display_name(self) -> str:
+        """The eval's human-readable display name (the task's ``NAME``)."""
+        return self.task_class().NAME
+
 
 class _Eager(EvalFactory):
     """Wraps an already-imported task class."""
@@ -166,6 +174,10 @@ class _Eager(EvalFactory):
     def metrics(self) -> list[type["BaseMetric"]]:
         """The eval's metrics"""
         return self.task_class().get_metrics()
+
+    def display_name(self) -> str:
+        """The eval's human-readable display name (the task's ``NAME``)."""
+        return self.task_class().NAME
 
 
 class Registry:
