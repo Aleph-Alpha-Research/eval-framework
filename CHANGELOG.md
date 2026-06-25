@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.5.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.1...v0.5.2) (2026-06-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency vllm to &gt;=0.20,&lt;0.21 [security] ([#340](https://github.com/Aleph-Alpha-Research/eval-framework/issues/340)) ([e713438](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e713438dd8b18c73e74024daa57d073a18cd06b5))
+
 ## [0.5.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.0...v0.5.1) (2026-06-24)
 
 
