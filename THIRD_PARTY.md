@@ -78,7 +78,7 @@ and first-party/internal packages are excluded.
 | `platformdirs` | `4.5.0` |
 | `portalocker` | `3.2.0` |
 | `preshed` | `3.0.10` |
-| `protobuf` | `4.25.8` |
+| `protobuf` | `6.33.6` |
 | `pyarrow` | `22.0.0` |
 | `pydantic-core` | `2.46.4` |
 | `pygments` | `2.19.2` |
