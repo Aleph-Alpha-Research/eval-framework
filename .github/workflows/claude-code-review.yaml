@@ -11,8 +11,11 @@ on:
 jobs:
   claude:
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude'))
+      (github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'OWNER') &&
+      (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude'))
+      )
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -35,7 +38,10 @@ jobs:
             --max-turns 80
 
   claude-review:
-    if: ${{ github.event_name == 'pull_request' && !endsWith(github.event.pull_request.user.login, '[bot]') }}
+    if: >
+      github.event_name == 'pull_request' &&
+      !endsWith(github.event.pull_request.user.login, '[bot]') &&
+      (github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'OWNER')
     runs-on: ubuntu-latest
     concurrency:
       group: claude-review-${{ github.event.pull_request.number }}
