@@ -1,6 +1,6 @@
 [project]
 name = "eval-framework"
-version = "0.3.8"
+version = "0.5.1"
 description = "Evaluation Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -44,7 +44,7 @@ dependencies = [
   # is a dependency of sympy, but not explicitly listed in the requirements.txt
   # https://github.com/sympy/sympy/blob/0204fa34e8f6f6f8ccb4de01209be9a2345c9d6e/doc/src/contributing/dependencies.md?plain=1#L125
   "antlr4-python3-runtime==4.11.0",
-  "scipy>=1.17.1,<2",  # required for the aggregation of pass@k metrics
+  "scipy>=1.18.0,<2",  # required for the aggregation of pass@k metrics
 ]
 
 [project.optional-dependencies]
@@ -62,11 +62,11 @@ openai = [
 transformers = [
   "transformers>=4.45.2,<5",
   "torch>=2.5,<3",
-  "accelerate>=1.13.0,<2",
+  "accelerate>=1.14.0,<2",
 ]
 accelerate = ["accelerate"]
 vllm = [
-  "vllm>=0.8.5,<0.9",
+  "vllm>=0.22,<0.23",
   "torch>=2.5,<3"
 ]
 mistral = [
@@ -92,7 +92,7 @@ eval_framework = "eval_framework.run:run"
 [dependency-groups]
 dev = [
   "mypy>=2.1.0,<3",
-  "pytest>=9.0.3,<10",
+  "pytest>=9.1.1,<10",
   "pytest-mock>=3.15.1",
   "pytest-xdist>=3.8.0,<4",
   "pytest-sugar>1.1,<2",
@@ -100,16 +100,16 @@ dev = [
   "types-python-dateutil>=2.9.0.20260518,<3",
   "types-requests>=2.33.0.20260518,<3",
   "plotly>=6.8.0,<7",
-  "ruff>=0.15.16",
+  "ruff>=0.15.18",
   "pip-licenses>=5.5.5",
 ]
 flash-attn = [
-  "flash-attn>=2.8.3,<2.9",
+  "flash-attn>=2.8.3.post1,<2.9",
   "torch"
 ]
 
 [build-system]
-requires = ["uv_build>=0.11.19,<0.11.20"]
+requires = ["uv_build>=0.11.23,<0.11.24"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]

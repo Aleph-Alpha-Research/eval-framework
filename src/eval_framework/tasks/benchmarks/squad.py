@@ -236,6 +236,32 @@ class SQUAD(SQUAD2):
         return item["answers"]["text"]
 
 
+class SQuAD2_MA(SQUAD2):
+    """SQuAD v2 with the exact system prompt used in MA training"""
+
+    NAME = "SQuAD2_MA"
+    UNANSWERABLE_STR = "unanswerable"
+
+    METRICS = [AccuracyCompletion, F1, F1SquadNormalized]
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.stop_sequences = []
+        self.max_tokens = None
+
+    def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
+        return (
+            "You are a helpful assistant and will answer the user's questions carefully, "
+            "logically, accurately and well-reasoned.\n"
+            "Use the given context to answer the question faithfully. Answer only if the "
+            f"answer is present in the given context, otherwise respond with '{self.UNANSWERABLE_STR}' "
+            "if the answer is not present in the context."
+        )
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return f"Context:\n{item['context']}\n\nQuestion:\n{item['question']}\n"
+
+
 class SQuAD_OLMES(SQUAD):
     """SQuAD variant matching OLMES implementation."""
 

@@ -77,13 +77,13 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **numpy** 2.2.6 - https://numpy.org
 - **pandas** 2.3.3 - https://pandas.pydata.org
 - **portalocker** 3.2.0 - https://github.com/wolph/portalocker/
-- **protobuf** 4.25.8 - https://developers.google.com/protocol-buffers/
+- **protobuf** 6.33.6 - https://developers.google.com/protocol-buffers/
 - **Pygments** 2.19.2 - https://pygments.org
 - **python-dotenv** 1.2.2 - https://github.com/theskumar/python-dotenv
-- **scipy** 1.17.1 - https://scipy.org/
+- **scipy** 1.18.0 - https://scipy.org/
 - **sentry-sdk** 2.44.0 - https://github.com/getsentry/sentry-python
 - **smmap** 5.0.2 - https://github.com/gitpython-developers/smmap
-- **sympy** 1.13.1 - https://sympy.org
+- **sympy** 1.14.0 - https://sympy.org
 - **xxhash** 3.6.0 - https://github.com/ifduyue/python-xxhash
 
 ## Copyright (c) 2013-2025, Graham Dumpleton
@@ -13302,7 +13302,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### protobuf 4.25.8 (BSD-3-Clause)
+### protobuf 6.33.6 (BSD-3-Clause)
 
 ```text
 Copyright 2008 Google Inc.  All rights reserved.
@@ -17478,7 +17478,7 @@ Apache License
    limitations under the License.
 ```
 
-### scipy 1.17.1 (BSD-3-Clause)
+### scipy 1.18.0 (BSD-3-Clause)
 
 ```text
 Copyright (c) 2001-2002 Enthought, Inc. 2003, SciPy Developers.
@@ -17511,6 +17511,9 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+----
+
 
 ----
 
@@ -18656,7 +18659,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### sympy 1.13.1 (BSD-3-Clause)
+### sympy 1.14.0 (BSD-3-Clause)
 
 ```text
 Copyright (c) 2006-2023 SymPy Development Team

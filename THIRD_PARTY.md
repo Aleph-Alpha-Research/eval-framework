@@ -29,7 +29,7 @@ and first-party/internal packages are excluded.
 | `python-iso639` | `>=2026.4.20` |
 | `pyyaml` | `>=6.0.3,<7` |
 | `sacrebleu` | `>=2.6.0,<3` |
-| `scipy` | `>=1.17.1,<2` |
+| `scipy` | `>=1.18.0,<2` |
 | `spacy` | `>=3.8.14,<4` |
 | `sympy` | `>=1.13.1,<2` |
 | `wandb` | `>=0.27.2,<1` |
@@ -78,7 +78,7 @@ and first-party/internal packages are excluded.
 | `platformdirs` | `4.5.0` |
 | `portalocker` | `3.2.0` |
 | `preshed` | `3.0.10` |
-| `protobuf` | `4.25.8` |
+| `protobuf` | `6.33.6` |
 | `pyarrow` | `22.0.0` |
 | `pydantic-core` | `2.46.4` |
 | `pygments` | `2.19.2` |

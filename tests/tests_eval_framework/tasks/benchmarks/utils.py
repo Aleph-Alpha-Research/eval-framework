@@ -2,25 +2,26 @@
 
 import random
 import sys
+from dataclasses import dataclass
+from unittest.mock import patch
 
 import pytest
+from datasets import Dataset, DatasetDict
 
+from eval_framework.tasks.base import BaseTask, Sample
 from eval_framework.tasks.registry import (
     _REGISTRY,
-    TaskPlaceholder,
-    get_task,
     registered_task_names,
+    registry,
 )
-from template_formatting.formatter import BaseFormatter
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Message
 from tests.tests_eval_framework.utils import assert_hash_string
 
 
 def _module_of_registered_task(task_name: str) -> str:
     task_key = _REGISTRY._task_key(task_name)
-    _, value = _REGISTRY._registry[task_key]
-    if isinstance(value, TaskPlaceholder):
-        return value.module
-    return value.__module__
+    _, factory = _REGISTRY._registry[task_key]
+    return factory.source_module
 
 
 def get_task_names_for_module(module_name: str, skip_tasks: list[str] | None = None) -> list[str]:
@@ -62,10 +63,8 @@ def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], 
     """
     _seed_for_determinism()
 
-    task_class = get_task(task_name)
-
     def _instantiate(num_fewshot_value: int) -> object:
-        task_instance = task_class.with_overwrite(
+        task_instance = registry()[task_name].create(
             num_fewshot=num_fewshot_value,
             custom_subjects=None,
             custom_hf_revision=None,
@@ -84,14 +83,14 @@ def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], 
         sample = next(iter(task_instance.iterate_samples(1)))
     except Exception as e:
         print(
-            f"Failed to instantiate task {task_class.__name__}: {e}; retrying with 0-shot",
+            f"Failed to instantiate task {task_name=}: {e}; retrying with 0-shot",
             file=sys.stderr,
         )
         try:
             task_instance = _instantiate(0)
             sample = next(iter(task_instance.iterate_samples(1)))
         except Exception as inner:
-            pytest.fail(f"Could not instantiate {task_class.__name__}: {inner}")
+            pytest.fail(f"Could not instantiate {task_name=}: {inner}")
 
     formatter = formatter_cls()
     formatted_sample = formatter.format(sample.messages, output_mode="string")
@@ -117,7 +116,73 @@ def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], 
     )
 
     assert_hash_string(
-        task_name=task_class.__name__,
+        task_name=task_name,
         suffix_key=formatter_cls.__name__,
         tested_string=formatted_sample_with_completions,
     )
+
+
+# ---------------------------------------------------------------------------
+# Shared util functions for offline prompt tests
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ExpectedPrompt:
+    messages: list[Message]
+    concat: str
+    ground_truth: str | list[str] | None
+    completions: list[str] | None
+
+
+def _iterate_samples_over_mock_dataset(task: BaseTask, fictional_dataset: DatasetDict) -> Sample:
+    """Same entry points as production: ``iterate_samples`` over a patched HF load."""
+    with patch.object(task, "_load_hf_dataset", return_value=fictional_dataset):
+        return next(iter(task.iterate_samples(1)))
+
+
+def _assert_sample_matches(sample: Sample, expected: ExpectedPrompt) -> None:
+    assert sample.messages == expected.messages
+    assert ConcatFormatter().format(sample.messages, output_mode="string") == expected.concat
+    assert sample.ground_truth == expected.ground_truth
+    assert sample.possible_completions == expected.completions
+
+
+def assert_offline_zeroshot_prompt(
+    task_cls: type[BaseTask],
+    eval_row: dict,
+    *,
+    subjects: list[str],
+    expected: ExpectedPrompt,
+) -> None:
+    """Assert the 0-shot prompt. Only ``eval_row`` is needed with ``num_fewshot=0`` so a dataset
+    with just the sample split suffices."""
+    task = task_cls.with_overwrite(num_fewshot=0, custom_subjects=subjects, custom_hf_revision=None)
+    mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([eval_row])})
+    _assert_sample_matches(_iterate_samples_over_mock_dataset(task, mock_dataset), expected)
+
+
+def assert_offline_oneshot_prompt(
+    task_cls: type[BaseTask],
+    eval_row: dict,
+    fewshot_row: dict,
+    *,
+    subjects: list[str],
+    expected: ExpectedPrompt,
+) -> None:
+    """Assert the 1-shot prompt. The dataset layout depends on whether the task draws
+    fewshot examples from a separate split (``FEWSHOT_SPLIT != SAMPLE_SPLIT``) or the same one."""
+    task = task_cls.with_overwrite(num_fewshot=1, custom_subjects=subjects, custom_hf_revision=None)
+    if task.FEWSHOT_SPLIT != task.SAMPLE_SPLIT:
+        mock_dataset = DatasetDict(
+            {
+                task.SAMPLE_SPLIT: Dataset.from_list([eval_row]),
+                task.FEWSHOT_SPLIT: Dataset.from_list([fewshot_row]),
+            }
+        )
+    else:
+        mock_dataset = DatasetDict(
+            # Use fewshot row first such that after shuffling (with seed 42) the eval row is the first item
+            {task.SAMPLE_SPLIT: Dataset.from_list([fewshot_row, eval_row])},
+        )
+    _assert_sample_matches(_iterate_samples_over_mock_dataset(task, mock_dataset), expected)

@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v8.2.0
@@ -44,7 +44,7 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore: pin dataset revisions"
-          branch: automated/dataset-revisions-${{ github.run_id }}
+          branch: automated/dataset-revisions
           delete-branch: true
           title: "chore: pin dataset revisions"
           body: |

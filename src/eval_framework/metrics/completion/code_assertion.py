@@ -1,7 +1,7 @@
 from llm_sandbox.exceptions import SandboxTimeoutError
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
-from eval_framework.shared.types import Completion, Error
+from eval_framework.shared.types import Completion
 from eval_framework.tasks.utils import run_python_code
 
 
@@ -16,7 +16,7 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
         code = response.completion
         try:
             output = run_python_code(code, image="python:3.12-slim")
-        except SandboxTimeoutError as e:
+        except SandboxTimeoutError:
             # The submitted code timed out (e.g. an infinite loop) -- a failing sample, not an infra
             # problem.
             import traceback
@@ -26,7 +26,7 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
                     metric_name=self.NAME,
                     value=0.0,
                     higher_is_better=True,
-                    error=Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc()),
+                    code_execution_trace=traceback.format_exc(),
                 )
             ]
         except Exception as e:
@@ -42,22 +42,12 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
             last_output = output_parts[-1]
 
         success = last_output == "True"
-        error = (
-            None
-            if success
-            else Error(
-                error_class="CodeCompletionAssertionError",
-                message=f"Expected 'True' but got '{last_output}'",
-                traceback=output,
-            )
-        )
-
         return [
             MetricResult(
                 metric_name=self.NAME,
                 value=1.0 if success else 0.0,
                 higher_is_better=True,
-                error=error,
+                error=None,
                 code_execution_trace=output,
             )
         ]

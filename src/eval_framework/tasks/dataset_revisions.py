@@ -25,12 +25,35 @@ def _pinned_revisions(revisions_file: Path) -> dict[str, str]:
     return json.loads(revisions_file.read_text(encoding="utf-8"))
 
 
-def get_pinned_dataset_revision(
-    task_class_name: str,
-    *,
-    revisions_file: Path | None = None,
-) -> str | None:
-    return _pinned_revisions(revisions_file or REVISIONS_FILE).get(task_class_name)
+class DatasetRevision:
+    _INSTANCE: "DatasetRevision | None" = None
+
+    def __init__(self) -> None:
+        self._cache: dict[str, str] = {}
+
+    @classmethod
+    def _get_instance(cls) -> "DatasetRevision":
+        if cls._INSTANCE is None:
+            cls._INSTANCE = cls()
+        return cls._INSTANCE
+
+    @classmethod
+    def add_revision_file(cls, file_path: Path | str) -> None:
+        instance = cls._get_instance()
+        instance._append_revision_file(Path(file_path))
+
+    @classmethod
+    def pinned_revision(cls, task_class_name: str) -> str | None:
+        return cls._get_instance()._cache.get(task_class_name)
+
+    @classmethod
+    def reset(cls) -> None:
+        # for unit tests only.
+        cls._INSTANCE = None
+
+    def _append_revision_file(self, file_path: Path) -> None:
+        revisions = _pinned_revisions(file_path)
+        self._cache |= revisions
 
 
 def _repo_sha(api: HfApi, repo_id: str, cache: dict[str, str | None]) -> str | None:
@@ -73,7 +96,7 @@ def main() -> None:
     revisions = collect_dataset_revisions(registered_task_names(), HfApi())
     REVISIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
     REVISIONS_FILE.write_text(
-        json.dumps(dict(sorted(revisions.items())), indent=2, ensure_ascii=False) + "\n",
+        json.dumps(dict(sorted(revisions.items())), indent=4, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
     logger.info("Wrote %d revisions to %s", len(revisions), REVISIONS_FILE)

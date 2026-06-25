@@ -13,9 +13,9 @@ from typing import Any, Literal, Protocol, cast, override
 import torch
 from vllm import LLM, SamplingParams
 from vllm.distributed.parallel_state import cleanup_dist_env_and_memory
-from vllm.inputs.data import TokensPrompt
+from vllm.inputs import TokensPrompt
 from vllm.outputs import RequestOutput
-from vllm.transformers_utils.tokenizer import get_tokenizer
+from vllm.tokenizers import get_tokenizer
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import (

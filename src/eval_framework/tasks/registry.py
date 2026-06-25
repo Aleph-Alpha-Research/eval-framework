@@ -1,18 +1,21 @@
 import contextlib
-import importlib.util
+import importlib
 import re
+from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterator, Sequence
-from typing import Annotated, Any
+from typing import TYPE_CHECKING, Any
 
-import pydantic
-from pydantic import AfterValidator
-
-from eval_framework.tasks.base import BaseTask
+from eval_framework.tasks.base import BaseTask, ResponseType
+from eval_framework.tasks.perturbation import PerturbationConfig, create_perturbation_class
 from eval_framework.utils.packaging import is_extra_installed, validate_package_extras
+
+if TYPE_CHECKING:
+    from eval_framework.metrics.base import BaseMetric
 
 __all__ = [
     "register_task",
     "register_lazy_task",
+    "EvalFactory",
     "Registry",
     "with_registry",
     "get_task",
@@ -23,34 +26,146 @@ __all__ = [
 ]
 
 
-def validate_import_path(import_path: str) -> str:
-    if importlib.util.find_spec(import_path) is None:
-        raise ValueError(f"Invalid import path: {import_path}")
-    return import_path
+class EvalFactory(ABC):
+    """Produces a registered benchmark's eval.
+
+    The registry stores one factory per eval. This allows the factory to be
+    constructed without constructing all evals. Going via this ABC allows
+    the factory instances to contain state specifically relevant to the
+    eval, as well as supporting different strategies for instantiating it.
+    E.g. eager vs lazy loading of the required dependencies.
+    """
+
+    @abstractmethod
+    def task_class(self) -> type[BaseTask]:
+        """Return the task class, importing it on first access if necessary."""
+
+    @property
+    @abstractmethod
+    def source_module(self) -> str:
+        """Module the task class is defined in, resolvable without importing it."""
+
+    @abstractmethod
+    def response_type(self) -> ResponseType:
+        """The eval's response type"""
+
+    @abstractmethod
+    def metrics(self) -> list[type["BaseMetric"]]:
+        """The eval's metrics"""
+
+    @abstractmethod
+    def create(
+        self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None
+    ) -> BaseTask: ...
+
+    @abstractmethod
+    def create_perturbation(
+        self,
+        perturbation_config: PerturbationConfig,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+    ) -> BaseTask: ...
 
 
-class TaskPlaceholder(pydantic.BaseModel, extra="forbid", frozen=True):
-    name: Annotated[
-        str,
-        "The name of the Task class that we want to import",
-    ]
-    module: Annotated[
-        str,
-        "The module from where to import the task",
-        validate_import_path,
-    ]
-    extras: Annotated[
-        tuple[str, ...],
-        "Extra dependencies that are required for the task",
-        AfterValidator(validate_package_extras),
-    ] = ()
+class _Lazy(EvalFactory):
+    """
+    Create eval from qualified class path; Delays importing modules until
+    eval is constructed.
+    """
 
-    def load(self) -> type[BaseTask]:
-        for extra in self.extras:
-            if not is_extra_installed(extra):
-                raise ImportError(f"The required package eval_framework[{extra}] is not installed.")
-        module = importlib.import_module(self.module)
-        return getattr(module, self.name)
+    def __init__(self, class_name: str, module: str, extras: Sequence[str] = ()) -> None:
+        """
+        Args:
+            class_name: The name of the task class to import.
+            module: The module to import the task class from.
+            extras: Extra dependencies of `eval_framework` required for this task.
+        """
+        self._class_name = class_name
+        self._module = module
+        self._extras = tuple(validate_package_extras(extras))
+        self._loaded: type[BaseTask] | None = None
+
+    @property
+    def source_module(self) -> str:
+        return self._module
+
+    def task_class(self) -> type[BaseTask]:
+        if self._loaded is None:
+            for extra in self._extras:
+                if not is_extra_installed(extra):
+                    raise ImportError(f"The required package eval_framework[{extra}] is not installed.")
+            module = importlib.import_module(self._module)
+            self._loaded = getattr(module, self._class_name)
+        return self._loaded
+
+    def create(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> BaseTask:
+        return self.task_class().with_overwrite(
+            num_fewshot=num_fewshot, custom_subjects=custom_subjects, custom_hf_revision=custom_hf_revision
+        )
+
+    def create_perturbation(
+        self,
+        perturbation_config: PerturbationConfig,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+    ) -> BaseTask:
+        perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
+        return perturbation_task_class.with_overwrite(
+            num_fewshot=num_fewshot,
+            custom_subjects=custom_subjects,
+            custom_hf_revision=custom_hf_revision,
+        )
+
+    def response_type(self) -> ResponseType:
+        """The eval's response type"""
+        return self.task_class().get_response_type()
+
+    def metrics(self) -> list[type["BaseMetric"]]:
+        """The eval's metrics"""
+        return self.task_class().get_metrics()
+
+
+class _Eager(EvalFactory):
+    """Wraps an already-imported task class."""
+
+    def __init__(self, task: type[BaseTask]) -> None:
+        self._task = task
+
+    @property
+    def source_module(self) -> str:
+        return self._task.__module__
+
+    def task_class(self) -> type[BaseTask]:
+        return self._task
+
+    def create(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> BaseTask:
+        return self.task_class().with_overwrite(
+            num_fewshot=num_fewshot, custom_subjects=custom_subjects, custom_hf_revision=custom_hf_revision
+        )
+
+    def create_perturbation(
+        self,
+        perturbation_config: PerturbationConfig,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+    ) -> BaseTask:
+        perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
+        return perturbation_task_class.with_overwrite(
+            num_fewshot=num_fewshot,
+            custom_subjects=custom_subjects,
+            custom_hf_revision=custom_hf_revision,
+        )
+
+    def response_type(self) -> ResponseType:
+        """The eval's response type"""
+        return self.task_class().get_response_type()
+
+    def metrics(self) -> list[type["BaseMetric"]]:
+        """The eval's metrics"""
+        return self.task_class().get_metrics()
 
 
 class Registry:
@@ -62,7 +177,7 @@ class Registry:
 
     def __init__(self) -> None:
         # TODO: Lookup only with upper names
-        self._registry: dict[str, tuple[str, type[BaseTask] | TaskPlaceholder]] = dict()
+        self._registry: dict[str, tuple[str, EvalFactory]] = dict()
 
     def __iter__(self) -> Iterator[str]:
         for name, _ in self._registry.values():
@@ -81,31 +196,32 @@ class Registry:
         task_key = self._task_key(name)
         return task_key in self._registry
 
-    def __getitem__(self, name: str, /) -> type[BaseTask]:
+    def __getitem__(self, name: str, /) -> EvalFactory:
         task_key = self._task_key(name)
         try:
-            name, task = self._registry[task_key]
+            _, factory = self._registry[task_key]
         except KeyError:
-            raise KeyError(f"Task not found: {name}")
+            raise KeyError(f"Task not found: {name=} with task_key {task_key=}")
 
-        if isinstance(task, TaskPlaceholder):
-            task = task.load()
-            self._registry[task_key] = (name, task)
-        return task
+        return factory
 
     def add(self, task: type[BaseTask]) -> None:
         task_key = self._task_key(task.NAME)
-        self._registry[task_key] = (task.NAME, task)
+        self._registry[task_key] = (task.NAME, _Eager(task))
 
-    def __setitem__(self, name: str, task: type[BaseTask] | TaskPlaceholder) -> None:
+    def __setitem__(self, name: str, factory: EvalFactory) -> None:
         task_key = self._task_key(name)
         if task_key in self._registry:
             raise ValueError(f"Cannot register duplicate task with key: {task_key}")
 
-        self._registry[task_key] = (name, task)
+        self._registry[task_key] = (name, factory)
 
 
 _REGISTRY = Registry()
+
+
+def registry() -> Registry:
+    return _REGISTRY
 
 
 @contextlib.contextmanager
@@ -151,7 +267,7 @@ def get_task(name: str, /) -> type[BaseTask]:
 
     Note: This method will import any lazily registered task.
     """
-    return _REGISTRY[name]
+    return _REGISTRY[name].task_class()
 
 
 def register_task(task: type[BaseTask]) -> str:
@@ -159,7 +275,7 @@ def register_task(task: type[BaseTask]) -> str:
     if not issubclass(task, BaseTask):
         raise ValueError(f"Can only register subclasses of BaseTask, got {task}")
     name = task.__name__
-    _REGISTRY[name] = task
+    _REGISTRY[name] = _Eager(task)
     return name
 
 
@@ -182,5 +298,4 @@ def register_lazy_task(class_path: str, /, *, extras: Sequence[str] = ()) -> Non
         )
 
     base_module, class_name = class_path.rsplit(".", maxsplit=1)
-    placeholder = TaskPlaceholder(name=class_name, module=base_module, extras=extras)
-    _REGISTRY[class_name] = placeholder
+    _REGISTRY[class_name] = _Lazy(class_name=class_name, module=base_module, extras=extras)

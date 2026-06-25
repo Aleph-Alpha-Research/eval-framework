@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Skip PR title check (non-PR)
         if: github.event_name != 'pull_request'
@@ -61,7 +61,7 @@ jobs:
     needs: [lint-pr-title]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v8.2.0
@@ -80,7 +80,7 @@ jobs:
   hf-datasets-cache:
     runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v8.2.0
@@ -110,7 +110,7 @@ jobs:
       image: ${{ steps.set-tag.outputs.image }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
     - name: Set Tag
       id: set-tag
       run: |
@@ -139,7 +139,7 @@ jobs:
     container: docker:dind
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Registry Authentication
         uses: docker/login-action@v4
@@ -180,7 +180,7 @@ jobs:
         extras: ['', 'determined', 'api', 'openai', 'transformers', 'accelerate', 'optional']
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v8.2.0
@@ -202,7 +202,7 @@ jobs:
     container: derskythe/github-runner-base:ubuntu-noble
     needs: [hf-datasets-cache, test-extras]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v8.2.0
@@ -229,7 +229,7 @@ jobs:
     container: derskythe/github-runner-base:ubuntu-noble
     needs: [hf-datasets-cache, test-extras]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v8.2.0
@@ -258,7 +258,7 @@ jobs:
     permissions:
       pull-requests: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
@@ -319,7 +319,7 @@ jobs:
     needs: [tag, hf-datasets-cache, test-cpu, test-cpu-slow, test-formatter-hash]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -367,8 +367,7 @@ jobs:
           VLLM_WORKER_MULTIPROC_METHOD: spawn
           VLLM_USE_MODELSCOPE: "False"
           VLLM_NCCL_SO_PATH: ""
-          VLLM_USE_TRITON_FLASH_ATTN: "0"
-          VLLM_DISABLE_CUSTOM_ALL_REDUCE: "1"
+          VLLM_ATTENTION_BACKEND: TRITON_ATTN
         run: |
           uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
           uv run --all-extras pytest --log-cli-level=INFO -v -m "vllm"
@@ -380,7 +379,7 @@ jobs:
     needs: [build, tag, hf-datasets-cache, test-cpu, test-cpu-slow, test-formatter-hash]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Registry Authentication
         uses: docker/login-action@v4

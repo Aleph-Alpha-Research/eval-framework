@@ -63,6 +63,7 @@ import random
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Self
 
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
@@ -115,8 +116,8 @@ class TaskStyler(ABC):
         """Return the ground-truth string for scoring."""
 
     @abstractmethod
-    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
-        """Return the list of completion strings to be evaluated.
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str] | None:
+        """Return completion candidates for scoring, or ``None`` for free generation tasks.
 
         ``correct_index`` is only required by ``BPBStyle``, which scores solely the
         ground-truth completion. ``MCStyle`` and ``ClozeStyle`` score all choices and
@@ -208,6 +209,67 @@ class MCStyle(TaskStyler):
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
         """Note: `correct_index` is ignored for `MCStyle` and only used for `BPBStyle`."""
         return [f" {label}" for label in get_n_letters(len(choices))]
+
+
+class MCCompletionStyle(TaskStyler):
+    """Multiple-choice prompt style with generative completion output.
+
+    Prompt formatting is identical to ``MCStyle`` (choices shown in prompt), but
+    ground truth is the full answer text (for example ``"Paris"`` instead of
+    ``"D"``). Responses are generated via ``ResponseType.COMPLETION`` and scored
+    with ``AccuracyCompletion``.
+
+    This style is useful for instruction-following or CoT prompts where the model
+    is expected to generate an answer text rather than be scored via loglikelihood
+    over fixed label candidates.
+
+    Args:
+        question_prefix:        Prepended to the raw question (default ``"Question: "``).
+        cue_text:               Assistant cue after the prompt (default ``"Answer:"``).
+        space_prefixed_labels:  When ``True``, each option line starts with a space
+                                (``" A. choice"`` — OLMES-style). Default ``False``.
+
+    Assembled prompt example (default settings, 4 choices)::
+
+        "Question: What is the capital of France?\\nA. Munich\\nB. Stuttgart\\nC. Berlin\\nD. Paris\\nAnswer:"
+
+        Ground truth: "Paris"
+    """
+
+    response_type = ResponseType.COMPLETION
+    metrics: list[type["BaseMetric"]] = [AccuracyCompletion]
+    task_style = TaskStyle.MULTIPLE_CHOICE
+
+    def __init__(
+        self,
+        question_prefix: str = "Question: ",
+        cue_text: str = "Answer:",
+        space_prefixed_labels: bool = False,
+    ) -> None:
+        self.question_prefix = question_prefix
+        self._cue_text = cue_text
+        self.space_prefixed_labels = space_prefixed_labels
+
+    def get_cue_text(self) -> str:
+        return self._cue_text
+
+    def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
+        return format_mc_prompt(
+            self.get_question_text(raw_question),
+            choices,
+            space_prefixed_labels=self.space_prefixed_labels,
+        )
+
+    def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
+        return choices[correct_index]
+
+    def get_fewshot_target_text(self, choices: list[str], correct_index: int) -> str:
+        """Override to insert a space between cue and answer text."""
+        return f"{self.get_cue_text()} {self.get_ground_truth(choices, correct_index)}"
+
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str] | None:
+        """Completion-mode tasks do not provide fixed candidate completions."""
+        return None
 
 
 class ClozeStyle(TaskStyler):

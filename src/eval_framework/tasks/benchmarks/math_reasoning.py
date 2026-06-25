@@ -14,8 +14,8 @@ from eval_framework.metrics.completion.minerva_math_utils import (
     extract_answers,
     normalized_gold_from_solution,
 )
-from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
+from eval_framework.tasks.task_style import BPBStyle
 
 # Hendrycks MATH subject splits (shared by MATH, MATHMinervaEvalHarness, MATHMinervaBPB)
 MATH_SUBJECTS = [
@@ -612,44 +612,6 @@ class MATH500Minerva(MATHMinerva):
         super().__init__(num_fewshot)
 
 
-class MATHMinervaBPB(MATHReasoning):
-    """
-    MATH (Hendrycks) with Minerva-style prompt, evaluated via loglikelihood of the
-    gold answer string (bits-per-byte).
-    Same prompt as MATHMinerva; scores P(normalized_gold_answer | prompt).
-    """
-
-    NAME = "MATHMinervaBPB"
-    DATASET_PATH = "EleutherAI/hendrycks_math"
-    SAMPLE_SPLIT = "test"
-    FEWSHOT_SPLIT = "train"
-    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [BitsPerByteLoglikelihood]
-    SUBJECTS = MATH_SUBJECTS
-    LANGUAGE = Language.ENG
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return "Problem:\n" + item["problem"] + "\n\n" + "Solution:"
-
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
-        return ""
-
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        normalized = self._normalized_gold_from_solution(item["solution"])
-        if normalized is None:
-            return None
-        return " " + normalized
-
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        normalized = self._normalized_gold_from_solution(item["solution"])
-        if normalized is None:
-            return None
-        return [" " + normalized]
-
-    def _normalized_gold_from_solution(self, solution: str) -> str | None:
-        return normalized_gold_from_solution(solution)
-
-
 class MATHLvl5(MATH):
     NAME = "Math Lvl 5"
 
@@ -742,7 +704,7 @@ Answer:"""
 
 
 _OLMES_FEWSHOTS = [
-    ## https://github.com/huggingface/lm-evaluation-harness/blob/add_leaderboard_tasks/lm_eval/tasks/leaderboard/math/utils.py
+    # https://github.com/huggingface/lm-evaluation-harness/blob/add_leaderboard_tasks/lm_eval/tasks/leaderboard/math/utils.py
     {
         "problem": "Find the domain of the expression  $\\frac{\\sqrt{x-2}}{\\sqrt{5-x}}$.}",
         "solution": "The expressions inside each square root must be non-negative. Therefore, $x-2 \\ge 0$, so "
@@ -790,3 +752,35 @@ class MATHMinerva_OLMES(MATHMinerva):
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         return _OLMES_FEWSHOTS[: self.num_fewshot]
+
+
+class MATHMinervaBPB(MATHMinerva_OLMES):
+    NAME = "MATHMinervaBPB"
+    TASK_STYLER = BPBStyle(cue_text="Solution:")
+
+    # BPBStyle already adds "Solution:" as that separate assistant message. But the methods we inherit
+    # still put "Solution:" at the end of the question text and leave it out of the fewshot answer.
+    # So we override them here: remove "Solution:" from the question, and add it back in front of the
+    # fewshot answer. Without this, the question ends in "Solution:Solution:" and fewshot answers have
+    # no "Solution:" label at all.
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return "Problem:\n" + item["problem"] + "\n\n"
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return f"Solution: {item['solution']}"
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        answer = normalized_gold_from_solution(item["solution"])
+        template = f"\nFinal Answer: The final answer is {answer}. I hope it is correct."
+
+        return [item["solution"] + template]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return 0
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        return item["problem"]
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
+        return self._get_choices(item)[0]
