@@ -112,7 +112,7 @@ We use [release-please](https://github.com/googleapis/release-please) to automat
 
 1. Wait for the release-please PR to reflect your changes (CI runs automatically when the PR is opened or updated)
 2. Approve and merge the PR to `main`
-3. [release.yml](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/workflows/release.yml) publishes to PyPI, GitLab, and the Docker registry
+3. [release.yml](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/workflows/release.yml) publishes to PyPI and the Docker registry
 
 Behind the scenes, merging also runs [release-please.yml](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/workflows/release_please.yml) once more to create the GitHub release and tag; that event is what triggers `release.yml`. You do not need to run or trigger anything yourself beyond the merge.
 
