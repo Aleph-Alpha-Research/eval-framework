@@ -269,6 +269,17 @@ class SQuAD2_MA(SQUAD2):
             cleaned = cleaned[7:].strip()
         return cleaned
 
+    def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+        text_ = item["answers"]["text"]
+        ground_truth_for_unanswerable = [
+            self.UNANSWERABLE_STR,
+            self.UNANSWERABLE_STR + " ",
+            self.UNANSWERABLE_STR.capitalize(),
+        ]
+        ground_truths = text_ if text_ else ground_truth_for_unanswerable
+        return ground_truths
+
+
 
 class SQuAD_OLMES(SQUAD):
     """SQuAD variant matching OLMES implementation."""
