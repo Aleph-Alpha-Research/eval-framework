@@ -1,6 +1,6 @@
 # Unlike scaling, a slim cuda container (without pre-packaged pytorch, etc.) is sufficient and gives us flexibility
 # But note: CUDA version matches the one in scaling and dev-nodes for good compatibility
-FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
+FROM nvidia/cuda:13.0.0-devel-ubuntu22.04
 
 ENV LC_ALL="en_US.UTF-8"
 ENV LANG="en_US.UTF-8"
