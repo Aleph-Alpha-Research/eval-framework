@@ -36,7 +36,7 @@ jobs:
         run: |
           uv run python -c "
           import eval_framework.tasks  # registers all benchmark tasks
-          from eval_framework.tasks.benchmarks.dataset_revisions import main
+          from eval_framework.tasks.dataset_revisions import main
           main()
           "
 
