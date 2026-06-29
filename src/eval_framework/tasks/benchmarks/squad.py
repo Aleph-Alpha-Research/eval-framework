@@ -294,7 +294,7 @@ class SQuAD2_MA(SQUAD2):
         ground_truths = text_ if text_ else ground_truth_for_unanswerable
         return ground_truths
 
-class SQuAD2_MA_NO_SYSPROMT(SQuAD2_MA):
+class SQuAD2_MA_NO_SYSPROMPT(SQuAD2_MA):
     SYSTEM_PROMPT = ""
 
 class SQuAD_OLMES(SQUAD):
