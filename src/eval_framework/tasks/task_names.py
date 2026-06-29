@@ -4,7 +4,12 @@ import time
 from enum import Enum
 
 from eval_framework.tasks.base import BaseTask
-from eval_framework.tasks.registry import register_lazy_task, registered_tasks_iter
+from eval_framework.tasks.registry import (
+    register_lazy_task,
+    registered_task_names,
+    registered_tasks_iter,
+    registry,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -112,8 +117,8 @@ def get_datasets_needing_update() -> tuple[bool, set[str]]:
     datasets_needing_update: set[str] = set()
 
     print("Checking HuggingFace dataset versions...")
-    for task_name, task_class in registered_tasks_iter():
-        dataset_path = getattr(task_class, "DATASET_PATH", None)
+    for task_name in registered_task_names():
+        dataset_path = registry()[task_name].dataset_path()
         if dataset_path and dataset_path not in current_commits:
             try:
                 info = api.dataset_info(dataset_path)
@@ -158,7 +163,7 @@ def make_sure_all_hf_datasets_are_in_cache(only_datasets: set[str] | None = None
                        If None, process all tasks.
     """
     for task_name, task_class in registered_tasks_iter():
-        dataset_path = getattr(task_class, "DATASET_PATH", None)
+        dataset_path = registry()[task_name].dataset_path()
 
         # Skip if filtering is enabled and this dataset isn't in the update list
         if only_datasets is not None and dataset_path not in only_datasets:
@@ -228,8 +233,8 @@ def save_hf_dataset_commits() -> None:
     commits = {}
 
     print("Saving dataset commit hashes...")
-    for task_name, task_class in registered_tasks_iter():
-        dataset_path = getattr(task_class, "DATASET_PATH", None)
+    for task_name in registered_task_names():
+        dataset_path = registry()[task_name].dataset_path()
 
         if dataset_path and dataset_path not in commits:
             try:
