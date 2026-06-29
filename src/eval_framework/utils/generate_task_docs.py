@@ -89,12 +89,13 @@ def generate_docs_for_task(
 
     with open(f"{output_docs_directory}/{task_name}.md", "w") as f:
         f.write(f"# {task_name}\n\n")
-        http_path = f"https://huggingface.co/datasets/{task.DATASET_PATH}" if task.DATASET_PATH else None
+        dataset_path = eval_.dataset_path()
+        http_path = f"https://huggingface.co/datasets/{dataset_path}" if dataset_path else None
 
         f.write("````\n")  # fence with 4 thicks because some prompts have code blocks with 3 thicks
         f.write(f"NAME = {task_name}".strip() + "\n")
-        if hasattr(task, "DATASET_PATH"):
-            f.write(f"DATASET_PATH = {task.DATASET_PATH}".strip() + "\n")
+        if dataset_path is not None:
+            f.write(f"DATASET_PATH = {dataset_path}".strip() + "\n")
         if hasattr(task, "SAMPLE_SPLIT"):
             f.write(f"SAMPLE_SPLIT = {task.SAMPLE_SPLIT}".strip() + "\n")
         if hasattr(task, "FEWSHOT_SPLIT"):

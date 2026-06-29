@@ -73,19 +73,19 @@ def collect_dataset_revisions(
     api: HfApi,
 ) -> dict[str, str]:
     """Return task class name → latest dataset commit SHA for tasks with a Hugging Face path."""
-    from eval_framework.tasks.registry import get_task
+    from eval_framework.tasks.registry import registry
 
     cache: dict[str, str | None] = {}
     revisions: dict[str, str] = {}
     for name in task_names:
         try:
-            cls = get_task(name)
+            factory = registry()[name]
+            path = (factory.dataset_path() or "").strip()
         except Exception as exc:
             logger.warning("Skipping task %s: %s", name, exc)
             continue
-        path = (getattr(cls, "DATASET_PATH", None) or "").strip()
         if path and (sha := _repo_sha(api, path, cache)):
-            revisions[cls.__name__] = sha
+            revisions[factory.task_class().__name__] = sha
     return revisions
 
 

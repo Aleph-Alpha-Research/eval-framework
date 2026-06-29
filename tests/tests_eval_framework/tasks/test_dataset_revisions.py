@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from eval_framework.tasks import dataset_revisions as dr
+from eval_framework.tasks.registry import Registry
 from tests.tests_eval_framework.tasks.conftest import FIXTURE_REVISIONS
 
 
@@ -19,13 +20,16 @@ def test_collect_dataset_revisions_fetches_sha_for_hf_task() -> None:
     """A task with a DATASET_PATH should appear in the result keyed by class name."""
 
     class CoQA:
-        __name__ = "CoQA"
+        NAME = "CoQA"
         DATASET_PATH = "EleutherAI/coqa"
+
+    TEST_REGISTRY = Registry()
+    TEST_REGISTRY.add(CoQA)
 
     api = MagicMock()
     api.dataset_info.return_value = SimpleNamespace(sha="abc123")
 
-    with patch("eval_framework.tasks.registry.get_task", return_value=CoQA):
+    with patch("eval_framework.tasks.registry.registry", return_value=TEST_REGISTRY):
         revisions = dr.collect_dataset_revisions(["CoQA"], api)
 
     assert revisions == {"CoQA": "abc123"}
@@ -36,12 +40,15 @@ def test_collect_dataset_revisions_skips_task_without_dataset_path() -> None:
     """Tasks with an empty DATASET_PATH are omitted from the output."""
 
     class NoDataset:
-        __name__ = "NoDataset"
+        NAME = "NoDataset"
         DATASET_PATH = ""
+
+    TEST_REGISTRY = Registry()
+    TEST_REGISTRY.add(NoDataset)
 
     api = MagicMock()
 
-    with patch("eval_framework.tasks.registry.get_task", return_value=NoDataset):
+    with patch("eval_framework.tasks.registry.registry", return_value=TEST_REGISTRY):
         revisions = dr.collect_dataset_revisions(["NoDataset"], api)
 
     assert revisions == {}
@@ -93,20 +100,21 @@ def test_collect_dataset_revisions_reuses_sha_for_shared_dataset() -> None:
     """Multiple tasks sharing one DATASET_PATH should trigger a single API call."""
 
     class CoQA:
-        __name__ = "CoQA"
+        NAME = "CoQA"
         DATASET_PATH = "EleutherAI/coqa"
 
     class CoQAMC:
-        __name__ = "CoQAMC"
+        NAME = "CoQAMC"
         DATASET_PATH = "EleutherAI/coqa"
+
+    TEST_REGISTRY = Registry()
+    TEST_REGISTRY.add(CoQA)
+    TEST_REGISTRY.add(CoQAMC)
 
     api = MagicMock()
     api.dataset_info.return_value = SimpleNamespace(sha="shared-sha")
 
-    with patch(
-        "eval_framework.tasks.registry.get_task",
-        side_effect=lambda name: CoQA if name == "CoQA" else CoQAMC,
-    ):
+    with patch("eval_framework.tasks.registry.registry", return_value=TEST_REGISTRY):
         revisions = dr.collect_dataset_revisions(["CoQA", "CoQAMC"], api)
 
     assert revisions == {"CoQA": "shared-sha", "CoQAMC": "shared-sha"}
