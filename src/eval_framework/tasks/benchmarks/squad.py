@@ -241,6 +241,26 @@ class SQuAD2_MA(SQUAD2):
 
     NAME = "SQuAD2_MA"
     UNANSWERABLE_STR = "unanswerable"
+    # Merlin-Arthur RAG-specific instruction. The context shown to the model may be
+    # partially masked (during training, masks are produced by probing the policy),
+    # so this tells the model how to treat hidden spans. It lives in the serving
+    # system prompt so masking probes and rollouts share identical conditions.
+    MASKED_RAG_PROMPT = (
+        "Parts of the context may be hidden and replaced with '...'. Base your answer "
+        "only on the information that remains visible; do not guess at hidden content."
+    )
+
+    SYSTEM_PROMPT = (
+        "You are given a context and a question. Answer the question based ONLY on the "
+        "information provided in the context. If the context does not contain enough "
+        "information to answer the question, say 'I don't know'.\n\n"
+        f"{MASKED_RAG_PROMPT}\n\n"
+        "Think step by step inside <think>...</think> tags, then provide your final answer "
+        f"after '{UNANSWERABLE_STR}'.\n\n"
+        "Format your response as:\n"
+        "<think>\n[your reasoning]\n</think>\n"
+        f"{UNANSWERABLE_STR} [your answer]"
+    )
 
     METRICS = [AccuracyCompletion, F1, F1SquadNormalized]
 
@@ -249,14 +269,9 @@ class SQuAD2_MA(SQUAD2):
         self.stop_sequences = []
         self.max_tokens = 30_000
 
+
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
-        return (
-            "You are a helpful assistant and will answer the user's questions carefully, "
-            "logically, accurately and well-reasoned.\n"
-            "Use the given context to answer the question faithfully. Answer only if the "
-            f"answer is present in the given context, otherwise respond with '{self.UNANSWERABLE_STR}' "
-            "if the answer is not present in the context."
-        )
+        return self.SYSTEM_PROMPT
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"Context:\n{item['context']}\n\nQuestion:\n{item['question']}\n"
@@ -279,7 +294,8 @@ class SQuAD2_MA(SQUAD2):
         ground_truths = text_ if text_ else ground_truth_for_unanswerable
         return ground_truths
 
-
+class SQuAD2_MA_NO_SYSPROMT(SQuAD2_MA):
+    SYSTEM_PROMPT = ""
 
 class SQuAD_OLMES(SQUAD):
     """SQuAD variant matching OLMES implementation."""
