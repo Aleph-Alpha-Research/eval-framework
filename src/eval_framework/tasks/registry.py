@@ -58,6 +58,10 @@ class EvalFactory(ABC):
         """Human-readable display name. Is allowed to have special characters and whitespaces."""
 
     @abstractmethod
+    def dataset_path(self) -> str | None:
+        """Identifier of the eval's data source (e.g. a HuggingFace repo id), or None if it has none."""
+
+    @abstractmethod
     def create(
         self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None
     ) -> BaseTask: ...
@@ -134,6 +138,9 @@ class _Lazy(EvalFactory):
         """The eval's human-readable display name (the task's ``NAME``)."""
         return self.task_class().NAME
 
+    def dataset_path(self) -> str | None:
+        return getattr(self.task_class(), "DATASET_PATH", None)
+
 
 class _Eager(EvalFactory):
     """Wraps an already-imported task class."""
@@ -178,6 +185,9 @@ class _Eager(EvalFactory):
     def display_name(self) -> str:
         """The eval's human-readable display name (the task's ``NAME``)."""
         return self.task_class().NAME
+
+    def dataset_path(self) -> str | None:
+        return getattr(self.task_class(), "DATASET_PATH", None)
 
 
 class Registry:
