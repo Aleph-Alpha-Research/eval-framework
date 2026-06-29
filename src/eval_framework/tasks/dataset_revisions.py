@@ -4,7 +4,7 @@ Overwrites ``task-dataset-revisions.json`` in this package with task class name 
 
 Usage::
 
-    uv run python -m eval_framework.tasks.benchmarks.dataset_revisions
+    uv run python -m eval_framework.tasks.dataset_revisions
 """
 
 import json
