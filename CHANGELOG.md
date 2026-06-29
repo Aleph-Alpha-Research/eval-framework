@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.5.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.2...v0.5.3) (2026-06-29)
+
+
+### Bug Fixes
+
+* corrected path to dataset_revisions ([#419](https://github.com/Aleph-Alpha-Research/eval-framework/issues/419)) ([3f10a3d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3f10a3daa1bc05ff17328771fcf6b09845b40ea0))
+
 ## [0.5.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.1...v0.5.2) (2026-06-25)
 
 
