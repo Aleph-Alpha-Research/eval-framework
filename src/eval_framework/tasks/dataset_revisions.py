@@ -11,8 +11,12 @@ import json
 import logging
 from functools import lru_cache
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from huggingface_hub import HfApi
+
+if TYPE_CHECKING:
+    from eval_framework.tasks.registry import EvalFactory
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +88,21 @@ def collect_dataset_revisions(
         except Exception as exc:
             logger.warning("Skipping task %s: %s", name, exc)
             continue
+        if path and (sha := _repo_sha(api, path, cache)):
+            revisions[factory.task_class().__name__] = sha
+    return revisions
+
+
+def dataset_revision_collection(
+    eval_factories: list["EvalFactory"],
+    api: HfApi,
+) -> dict[str, str]:
+    """Return task class name → latest dataset commit SHA for tasks with a Hugging Face path."""
+
+    cache: dict[str, str | None] = {}
+    revisions: dict[str, str] = {}
+    for factory in eval_factories:
+        path = (factory.dataset_path() or "").strip()
         if path and (sha := _repo_sha(api, path, cache)):
             revisions[factory.task_class().__name__] = sha
     return revisions
