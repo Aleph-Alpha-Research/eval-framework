@@ -119,3 +119,23 @@ def test_collect_dataset_revisions_reuses_sha_for_shared_dataset() -> None:
 
     assert revisions == {"CoQA": "shared-sha", "CoQAMC": "shared-sha"}
     api.dataset_info.assert_called_once()
+
+
+def test_dataset_revision_collection_contains_hf_sha() -> None:
+    """A task with a DATASET_PATH should appear in the result keyed by class name."""
+
+    class CoQA:
+        NAME = "CoQA"
+        DATASET_PATH = "EleutherAI/coqa"
+
+    TEST_REGISTRY = Registry()
+    TEST_REGISTRY.add(CoQA)
+
+    api = MagicMock()
+    api.dataset_info.return_value = SimpleNamespace(sha="abc123")
+
+    with patch("eval_framework.tasks.registry.registry", return_value=TEST_REGISTRY):
+        revisions = dr.collect_dataset_revisions(["CoQA"], api)
+
+    assert revisions == {"CoQA": "abc123"}
+    api.dataset_info.assert_called_once_with("EleutherAI/coqa", timeout=100.0)
