@@ -11,7 +11,7 @@ from huggingface_hub.errors import RevisionNotFoundError
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1, F1SquadNormalized
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
-from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
+from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 
 
 class SQUAD2(BaseTask[str]):
@@ -241,26 +241,61 @@ class SQuAD2_MA(SQUAD2):
 
     NAME = "SQuAD2_MA"
     UNANSWERABLE_STR = "unanswerable"
+    # Merlin-Arthur RAG-specific instruction. The context shown to the model may be
+    # partially masked (during training, masks are produced by probing the policy),
+    # so this tells the model how to treat hidden spans. It lives in the serving
+    # system prompt so masking probes and rollouts share identical conditions.
+    MASKED_RAG_PROMPT = (
+        "Parts of the context may be hidden and replaced with '...'. Base your answer "
+        "only on the information that remains visible; do not guess at hidden content."
+    )
+
+    SYSTEM_PROMPT = (
+        "You are given a context and a question. Answer the question based ONLY on the "
+        "information provided in the context. If the context does not contain enough "
+        "information to answer the question, say 'I don't know'.\n\n"
+        f"{MASKED_RAG_PROMPT}\n\n"
+        "Think step by step inside <think>...</think> tags, then provide your final answer "
+        f"after '{UNANSWERABLE_STR}'.\n\n"
+        "Format your response as:\n"
+        "<think>\n[your reasoning]\n</think>\n"
+        f"{UNANSWERABLE_STR} [your answer]"
+    )
 
     METRICS = [AccuracyCompletion, F1, F1SquadNormalized]
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
         self.stop_sequences = []
-        self.max_tokens = None
+        self.max_tokens = 30_000
+
 
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
-        return (
-            "You are a helpful assistant and will answer the user's questions carefully, "
-            "logically, accurately and well-reasoned.\n"
-            "Use the given context to answer the question faithfully. Answer only if the "
-            f"answer is present in the given context, otherwise respond with '{self.UNANSWERABLE_STR}' "
-            "if the answer is not present in the context."
-        )
+        return self.SYSTEM_PROMPT
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"Context:\n{item['context']}\n\nQuestion:\n{item['question']}\n"
 
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        """Clean up the generated answer."""
+        # Remove common prefixes and clean whitespace
+        cleaned = completion_text.strip()
+        if cleaned.startswith("Answer:"):
+            cleaned = cleaned[7:].strip()
+        return cleaned
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+        text_ = item["answers"]["text"]
+        ground_truth_for_unanswerable = [
+            self.UNANSWERABLE_STR,
+            self.UNANSWERABLE_STR + " ",
+            self.UNANSWERABLE_STR.capitalize(),
+        ]
+        ground_truths = text_ if text_ else ground_truth_for_unanswerable
+        return ground_truths
+
+class SQuAD2_MA_NO_SYSPROMPT(SQuAD2_MA):
+    SYSTEM_PROMPT = ""
 
 class SQuAD_OLMES(SQUAD):
     """SQuAD variant matching OLMES implementation."""
