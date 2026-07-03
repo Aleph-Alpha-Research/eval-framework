@@ -246,6 +246,7 @@ class SQuAD2_MA(SQUAD2):
 
     NAME = "SQuAD2_MA"
     UNANSWERABLE_STR = "unanswerable"
+    FINAL_ANSWER_MARKER = "Final answer:"
     # Merlin-Arthur RAG-specific instruction. The context shown to the model may be
     # partially masked (during training, masks are produced by probing the policy),
     # so this tells the model how to treat hidden spans. It lives in the serving
@@ -258,13 +259,13 @@ class SQuAD2_MA(SQUAD2):
     SYSTEM_PROMPT = (
         "You are given a context and a question. Answer the question based ONLY on the "
         "information provided in the context. If the context does not contain enough "
-        "information to answer the question, say 'I don't know'.\n\n"
+        f"information to answer the question, say '{UNANSWERABLE_STR}'.\n\n"
         f"{MASKED_RAG_PROMPT}\n\n"
         "Think step by step inside <think>...</think> tags, then provide your final answer "
-        f"after '{UNANSWERABLE_STR}'.\n\n"
+        f"after '{FINAL_ANSWER_MARKER}'.\n\n"
         "Format your response as:\n"
         "<think>\n[your reasoning]\n</think>\n"
-        f"{UNANSWERABLE_STR} [your answer]"
+        f"{FINAL_ANSWER_MARKER} [your answer]"
     )
 
     METRICS = [AccuracyCompletion, F1, F1SquadNormalized]
