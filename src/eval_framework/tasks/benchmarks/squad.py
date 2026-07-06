@@ -239,6 +239,7 @@ class SQUAD(SQUAD2):
         return item["answers"]["text"]
 
 
+
 class SQuAD2_MA(SQUAD2):
     """SQuAD v2 with the exact system prompt used in MA training"""
 
@@ -246,27 +247,6 @@ class SQuAD2_MA(SQUAD2):
 
     NAME = "SQuAD2_MA"
     UNANSWERABLE_STR = "unanswerable"
-    FINAL_ANSWER_MARKER = "Final answer:"
-    # Merlin-Arthur RAG-specific instruction. The context shown to the model may be
-    # partially masked (during training, masks are produced by probing the policy),
-    # so this tells the model how to treat hidden spans. It lives in the serving
-    # system prompt so masking probes and rollouts share identical conditions.
-    MASKED_RAG_PROMPT = (
-        "Parts of the context may be hidden and replaced with '...'. Base your answer "
-        "only on the information that remains visible; do not guess at hidden content."
-    )
-
-    SYSTEM_PROMPT = (
-        "You are given a context and a question. Answer the question based ONLY on the "
-        "information provided in the context. If the context does not contain enough "
-        f"information to answer the question, say '{UNANSWERABLE_STR}'.\n\n"
-        f"{MASKED_RAG_PROMPT}\n\n"
-        "Think step by step inside <think>...</think> tags, then provide your final answer "
-        f"after '{FINAL_ANSWER_MARKER}'.\n\n"
-        "Format your response as:\n"
-        "<think>\n[your reasoning]\n</think>\n"
-        f"{FINAL_ANSWER_MARKER} [your answer]"
-    )
 
     METRICS = [AccuracyCompletion, F1, F1SquadNormalized]
 
@@ -275,9 +255,14 @@ class SQuAD2_MA(SQUAD2):
         self.stop_sequences = []
         self.max_tokens = 30_000
 
-
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
-        return self.SYSTEM_PROMPT
+        return (
+            "You are a helpful assistant and will answer the user's questions carefully, "
+            "logically, accurately and well-reasoned.\n"
+            "Use the given context to answer the question faithfully. Answer only if the "
+            f"answer is present in the given context, otherwise respond with '{self.UNANSWERABLE_STR}' "
+            "if the answer is not present in the context."
+        )
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"Context:\n{item['context']}\n\nQuestion:\n{item['question']}\n"
@@ -286,8 +271,16 @@ class SQuAD2_MA(SQUAD2):
         """Clean up the generated answer."""
         # Remove common prefixes and clean whitespace
         cleaned = completion_text.strip()
-        if cleaned.startswith("Answer:"):
-            cleaned = cleaned[7:].strip()
+        common_prefixes = ["Answer","Final answer"]
+        common_prefixes.extend(f"**{prefix}**" for prefix in common_prefixes)
+        common_prefixes.reverse()
+
+        # Search for the last occurrence of any common prefix, and take only what's after it.
+        for prefix in common_prefixes:
+            idx = cleaned.rfind(prefix + ":")
+            if idx != -1:
+                cleaned = cleaned[idx + len(prefix) + 1 :].strip()
+                break
         return cleaned
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
@@ -301,7 +294,8 @@ class SQuAD2_MA(SQUAD2):
         return ground_truths
 
 class SQuAD2_MA_NO_SYSPROMPT(SQuAD2_MA):
-    SYSTEM_PROMPT = ""
+    def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
+        return ""
 
 class SQuAD_OLMES(SQUAD):
     """SQuAD variant matching OLMES implementation."""
