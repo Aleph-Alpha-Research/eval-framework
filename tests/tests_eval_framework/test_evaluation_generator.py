@@ -1,16 +1,32 @@
 from collections.abc import Callable
 from pathlib import Path
 
+import pandas as pd
 import pytest
 import wandb
 
-from eval_framework.evaluation_generator import EvaluationGenerator
+from eval_framework.evaluation_generator import (
+    EvaluationGenerator,
+    error_free_ratio,
+    mean_over_key_subject,
+    mean_treating_errors_as_zero,
+    needs_std_err,
+    select_metrics,
+    std_and_num_samples,
+)
 from eval_framework.metrics.aggregators.aggregators import IdentifierMean, PassAtK
 from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
+    BytesCompletion,
+    BytesLoglikelihood,
+    SequencePositionsCompletion,
+    SequencePositionsLoglikelihood,
+)
 from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.base import Result
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, Error, Loglikelihood
+from eval_framework.tasks.base import ResponseType
 from eval_framework.tasks.benchmarks.humaneval import HumanEval_OLMES
 from eval_framework.tasks.eval_config import EvalConfig
 from tests.tests_eval_framework.conftest import MockLLM
@@ -37,6 +53,121 @@ class MockIdentifierMeanMetric(BaseMetric):
 
     def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
         return []
+
+
+class _DummyMetric(BaseMetric):
+    NAME = "Dummy"
+
+    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
+        return []
+
+
+def _err() -> Error:
+    return Error(error_class="AssertionError", message="boom", traceback="trace")
+
+
+def test_error_free_ratio() -> None:
+    df = pd.DataFrame(
+        {
+            "value": [1.0, 2.0, None, 4.0, 5.0],
+            "error": [None, None, _err(), None, None],
+        }
+    )
+    assert error_free_ratio(df) == 0.8
+
+
+def test_error_free_ratio_all_clean() -> None:
+    df = pd.DataFrame({"value": [1.0, 2.0], "error": [None, None]})
+    assert error_free_ratio(df) == 1.0
+
+
+def test_mean_over_key_subject_weights_groups_equally() -> None:
+    # groups: (k, s1) -> mean(4, 2) = 3.0 ; (k, s2) -> 1.0 ; overall mean of group means = 2.0
+    df = pd.DataFrame(
+        {
+            "key": ["k", "k", "k"],
+            "subject": ["s1", "s1", "s2"],
+            "value": [4.0, 2.0, 1.0],
+        }
+    )
+    assert mean_over_key_subject(df) == 2.0
+
+
+def test_mean_treating_errors_as_zero() -> None:
+    # (k, s1) -> mean(4, 2) = 3.0 ; (k, s2) -> error filled with 0.0 = 0.0 ; overall = 1.5
+    df = pd.DataFrame(
+        {
+            "key": ["k", "k", "k"],
+            "subject": ["s1", "s1", "s2"],
+            "value": [4.0, 2.0, None],
+            "error": [None, None, _err()],
+        }
+    )
+    assert mean_treating_errors_as_zero(df) == 1.5
+
+
+def test_std_and_num_samples() -> None:
+    df = pd.DataFrame({"key": ["k", "k"], "subject": ["s1", "s1"], "value": [4.0, 2.0]})
+    std, n = std_and_num_samples(df)
+    assert std == pytest.approx(2**0.5)  # sample std of [4, 2]
+    assert n == 2
+
+
+def test_needs_std_err() -> None:
+    assert needs_std_err("ExactMatch") is True
+    assert needs_std_err("Bytes") is False
+    assert needs_std_err("SequencePositions foo") is False
+
+
+def test_select_metrics_completion_appends_completion_efficiency_metrics() -> None:
+    result = select_metrics(ResponseType.COMPLETION, [_DummyMetric])
+    assert result == [_DummyMetric, BytesCompletion, SequencePositionsCompletion]
+
+
+def test_select_metrics_loglikelihoods_appends_loglikelihood_efficiency_metrics() -> None:
+    result = select_metrics(ResponseType.LOGLIKELIHOODS, [_DummyMetric])
+    assert result == [_DummyMetric, BytesLoglikelihood, SequencePositionsLoglikelihood]
+
+
+def test_select_metrics_does_not_mutate_input_list() -> None:
+    task_metrics = [_DummyMetric]
+    select_metrics(ResponseType.COMPLETION, task_metrics)
+    assert task_metrics == [_DummyMetric]
+
+
+def test_select_metrics_rejects_unknown_response_type() -> None:
+    with pytest.raises(ValueError):
+        select_metrics("not_a_response_type", [_DummyMetric])  # type: ignore[arg-type]
+
+
+def test_find_metric_class_returns_matching_class(tmp_path: Path) -> None:
+    config = EvalConfig(
+        output_dir=tmp_path,
+        num_fewshot=0,
+        num_samples=2,
+        task_name=HumanEval_OLMES.NAME,
+        llm_class=MockLLM,
+    )
+    evaluator = EvaluationGenerator(config, ResultsFileProcessor(tmp_path))
+    evaluator.metrics = [MockPassAtKMetric, MockIdentifierMeanMetric]
+
+    assert evaluator._find_metric_class("MockPassAtKMetric") is MockPassAtKMetric
+    assert evaluator._find_metric_class("MockIdentifierMeanMetric") is MockIdentifierMeanMetric
+
+
+def test_find_metric_class_raises_for_unknown_class(tmp_path: Path) -> None:
+    config = EvalConfig(
+        output_dir=tmp_path,
+        num_fewshot=0,
+        num_samples=2,
+        task_name=HumanEval_OLMES.NAME,
+        llm_class=MockLLM,
+    )
+    evaluator = EvaluationGenerator(config, ResultsFileProcessor(tmp_path))
+    evaluator.metrics = [MockPassAtKMetric]
+
+    with pytest.raises(ValueError):
+        evaluator._find_metric_class("DoesNotExist")
 
 
 def test_evaluator_run_completions(tmp_path: Path, should_preempt_callable: Callable) -> None:

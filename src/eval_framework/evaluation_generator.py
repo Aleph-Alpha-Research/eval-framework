@@ -25,6 +25,57 @@ from eval_framework.utils.tqdm_handler import get_disable_bar_flag, safe_tqdm_wr
 logger = logging.getLogger(__name__)
 
 
+def needs_std_err(metric_name: str) -> bool:
+    """Standard error is only computed for non-efficiency metrics."""
+    return not ("SequencePositions" in metric_name or "Bytes" in metric_name)
+
+
+def error_free_ratio(df: pd.DataFrame) -> float:
+    """Fraction of rows in ``df`` whose ``error`` column is null."""
+    return float(len(df[df["error"].isnull()]) / len(df))
+
+
+def mean_over_key_subject(df: pd.DataFrame) -> float:
+    """Mean of per-(key, subject) means, giving every key/subject group equal weight.
+
+    ``df`` is expected to be error-free and contain ``key``, ``subject`` and ``value`` columns.
+    """
+    key_subject_mean = df.groupby(["key", "subject"]).mean()
+    return float(key_subject_mean[["value"]].mean()["value"])
+
+
+def mean_treating_errors_as_zero(df: pd.DataFrame) -> float:
+    """Like :func:`mean_over_key_subject` but errored samples contribute a value of ``0.0``.
+
+    ``df`` must contain ``key``, ``subject``, ``value`` and ``error`` columns. Only rows with an
+    error have their (``None``) value replaced by ``0.0``; genuinely missing values stay ``NaN``.
+    """
+    with_errors = df[["key", "subject", "value", "error"]].copy()
+    error_mask = with_errors["error"].notna()
+    with_errors.loc[error_mask, "value"] = with_errors.loc[error_mask, "value"].fillna(0.0)
+    key_subject_mean = with_errors.groupby(["key", "subject"])["value"].mean()
+    return float(key_subject_mean.mean())
+
+
+def std_and_num_samples(df: pd.DataFrame) -> tuple[float, int]:
+    """Return the mean per-(key, subject) standard deviation and the sample count of ``df``.
+
+    ``df`` is expected to be error-free and contain ``key``, ``subject`` and ``value`` columns.
+    """
+    key_subject_std = df.groupby(["key", "subject"]).std()
+    std = float(key_subject_std[["value"]].mean()["value"])
+    return std, len(df)
+
+
+def select_metrics(response_type: ResponseType, task_metrics: list[type[BaseMetric]]) -> list[type[BaseMetric]]:
+    """Return the task metrics plus the efficiency metrics matching the response type."""
+    if response_type == ResponseType.COMPLETION:
+        return task_metrics + [BytesCompletion, SequencePositionsCompletion]
+    elif response_type == ResponseType.LOGLIKELIHOODS:
+        return task_metrics + [BytesLoglikelihood, SequencePositionsLoglikelihood]
+    raise ValueError(f"Unsupported response type: {response_type!r}")
+
+
 class EvaluationGenerator:
     def __init__(self, config: EvalConfig, result_processor: ResultProcessor) -> None:
         logger.info("EvaluationGenerator initialized")
@@ -37,17 +88,15 @@ class EvaluationGenerator:
         self.save_intermediate_results = config.save_intermediate_results
 
         eval_ = registry()[config.task_name]
-        response_type = eval_.response_type()
-        task_metrics = eval_.metrics()
-
-        if response_type == ResponseType.COMPLETION:
-            self.metrics = task_metrics + [BytesCompletion, SequencePositionsCompletion]
-        elif response_type == ResponseType.LOGLIKELIHOODS:
-            self.metrics = task_metrics + [BytesLoglikelihood, SequencePositionsLoglikelihood]
-        else:
-            raise NotImplementedError
-
+        self.metrics = select_metrics(eval_.response_type(), eval_.metrics())
         self.task_name = eval_.display_name()
+
+    def _find_metric_class(self, metric_class_name: str) -> type[BaseMetric]:
+        """Return the metric class in ``self.metrics`` whose name matches ``metric_class_name``."""
+        for metric_class in self.metrics:
+            if metric_class.__name__ == metric_class_name:
+                return metric_class
+        raise ValueError(f"Metric class {metric_class_name!r} not found in metrics list.")
 
     def _run_metric_calculators(self, responses: list[Completion | Loglikelihood]) -> list[Result]:
         results: list[Result] = self.result_processor.load_metrics_results()
@@ -147,28 +196,19 @@ class EvaluationGenerator:
             data_subset = data[data["metric_name"] == metric][["subject", "key", "value", "error"]]
 
             # filter and count errors
-            total_count = len(data_subset)
-
             mask = data_subset["error"].isnull()
             data_subset_error_free = data_subset.loc[mask, ["subject", "key", "value"]]
 
-            error_free_ratio = float(len(data_subset_error_free) / total_count)
-            aggregated_results[f"ErrorFreeRatio {metric}"] = error_free_ratio
+            metric_error_free_ratio = error_free_ratio(data_subset)
+            aggregated_results[f"ErrorFreeRatio {metric}"] = metric_error_free_ratio
 
             # aggregate by key and subject first to have equal weights for all key / subject combinations
             key_subject_mean = data_subset_error_free.groupby(["key", "subject"]).mean()
-            aggregated_results[f"Average {metric}"] = float(key_subject_mean[["value"]].mean()["value"])
+            aggregated_results[f"Average {metric}"] = mean_over_key_subject(data_subset_error_free)
 
-            if error_free_ratio < 1.0:
+            if metric_error_free_ratio < 1.0:
                 # Treat error samples (with value=None) as 0 for the "including errors" average
-                data_subset_with_errors = data_subset[["key", "subject", "value", "error"]].copy()
-                # Only fill value with 0 where there's an error (not for all None values)
-                error_mask = data_subset_with_errors["error"].notna()
-                data_subset_with_errors.loc[error_mask, "value"] = data_subset_with_errors.loc[
-                    error_mask, "value"
-                ].fillna(0.0)
-                key_subject_mean_with_errors = data_subset_with_errors.groupby(["key", "subject"])["value"].mean()
-                aggregated_results[f"Average {metric} (including Errors)"] = float(key_subject_mean_with_errors.mean())
+                aggregated_results[f"Average {metric} (including Errors)"] = mean_treating_errors_as_zero(data_subset)
 
             std_err_mean_sum_of_squares = 0.0
             std_err_mean_total_num_samples = 0.0
@@ -179,37 +219,23 @@ class EvaluationGenerator:
                     for name, _group in key_subject_mean.groupby([column]):
                         mask = data_subset[column] == name[0]
                         group = data_subset.loc[mask, ["subject", "key", "value", "error"]]
-                        # group = data_subset[data[column] == name][["subject", "key", "value", "error"]]
-                        group_total_count = len(group)
                         group_error_free = group[group["error"].isnull()][["subject", "key", "value"]]
-                        group_error_free_ratio = float(len(group_error_free) / group_total_count)
+                        group_error_free_ratio = error_free_ratio(group)
                         aggregated_results[f"ErrorFreeRatio {metric} - {name[0]}"] = group_error_free_ratio
 
-                        group_key_subject_mean = group_error_free.groupby(["key", "subject"]).mean()
-                        value = float(group_key_subject_mean[["value"]].mean()["value"])
+                        value = mean_over_key_subject(group_error_free)
                         aggregated_results[f"Average {metric} - {name[0]}"] = value if not math.isnan(value) else None
 
                         if group_error_free_ratio < 1.0:
                             # Treat error samples (with value=None) as 0 for the "including errors" average
-                            group_with_errors = group[["key", "subject", "value", "error"]].copy()
-                            # Only fill value with 0 where there's an error (not for all None values)
-                            error_mask = group_with_errors["error"].notna()
-                            group_with_errors.loc[error_mask, "value"] = group_with_errors.loc[
-                                error_mask, "value"
-                            ].fillna(0.0)
-                            group_key_subject_mean_with_errors = group_with_errors.groupby(["key", "subject"])[
-                                "value"
-                            ].mean()
-                            value_with_errors = float(group_key_subject_mean_with_errors.mean())
+                            value_with_errors = mean_treating_errors_as_zero(group)
                             aggregated_results[f"Average {metric} (including Errors) - {name[0]}"] = (
                                 value_with_errors if not math.isnan(value_with_errors) else None
                             )
 
-                        if not ("SequencePositions" in metric or "Bytes" in metric):
+                        if needs_std_err(metric):
                             # calculate standard error for selected  metrics
-                            group_key_subject_std = group_error_free.groupby(["key", "subject"]).std()
-                            std = float(group_key_subject_std[["value"]].mean()["value"])
-                            num_samples = len(group_error_free)
+                            std, num_samples = std_and_num_samples(group_error_free)
 
                             if math.isnan(std) or num_samples == 0:
                                 aggregated_results[f"StdErr {metric} - {name[0]}"] = None
@@ -221,7 +247,7 @@ class EvaluationGenerator:
                             std_err_mean_total_num_samples += num_samples
                             std_err_mean_num_subjects += 1
 
-            if not ("SequencePositions" in metric or "Bytes" in metric):
+            if needs_std_err(metric):
                 # calculate standard error for selected  metrics
                 if std_err_mean_total_num_samples > 0:
                     # calculate the standard error of the mean (SEM) for the aggregated results (eg. add in quadrature)
@@ -237,9 +263,7 @@ class EvaluationGenerator:
                     aggregated_results[f"NumSamples {metric}"] = std_err_mean_total_num_samples
                 else:
                     # if there are no sub-groups to combine, calculate the SEM here directly
-                    key_subject_std = data_subset_error_free.groupby(["key", "subject"]).std()
-                    std = float(key_subject_std[["value"]].mean()["value"])
-                    num_samples = len(data_subset_error_free)
+                    std, num_samples = std_and_num_samples(data_subset_error_free)
                     if math.isnan(std) or num_samples == 0:
                         aggregated_results[f"StdErr {metric}"] = None
                     else:
@@ -284,14 +308,7 @@ class EvaluationGenerator:
             # results for a single metric. Two metric classes can implement the same metric name. We want to separate
             # those cases. We cannot group over only metric_class_name because each metric class can implement
             # multiple metrics with different names.
-            current_metric = None
-            # now loop over the self.metrics list and find the metric class that matches the current_metric_class
-            for metric_class in self.metrics:
-                if metric_class.__name__ == current_metric_class:
-                    current_metric = metric_class
-                    break
-            if current_metric is None:
-                raise ValueError(f"Metric {metric_name} not found in metrics list")
+            current_metric = self._find_metric_class(current_metric_class)
 
             for aggregator in current_metric.AGGREGATORS:
                 aggregated_results[f"{aggregator.name} {current_metric_class}.{metric_name}"] = (
@@ -306,15 +323,7 @@ class EvaluationGenerator:
         for (key, subject, metric_name, current_metric_class), ksm_group in data.groupby(
             ["key", "subject", "metric_name", "metric_class_name"]
         ):
-            current_metric = None
-            # now loop over the self.metrics list and find the metric class that matches the current_metric_class
-            for metric_class in self.metrics:
-                if metric_class.__name__ == current_metric_class:
-                    current_metric = metric_class
-                    break
-
-            if current_metric is None:
-                raise ValueError(f"Metric {metric_name} not found in metrics list. This should never happen.")
+            current_metric = self._find_metric_class(current_metric_class)
 
             for aggregator in current_metric.AGGREGATORS:
                 save_string = (
