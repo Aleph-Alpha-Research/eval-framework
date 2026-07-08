@@ -257,6 +257,7 @@ class SQuAD2_MA(SQUAD2):
             "Use the given context to answer the question faithfully. Answer only if the "
             f"answer is present in the given context, otherwise respond with '{self.UNANSWERABLE_STR}' "
             "if the answer is not present in the context."
+            "Always begin your answer with 'Final answer:'"
         )
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
