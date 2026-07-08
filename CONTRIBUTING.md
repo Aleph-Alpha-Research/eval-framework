@@ -116,7 +116,7 @@ We use [release-please](https://github.com/googleapis/release-please) to automat
 
 Behind the scenes, merging also runs [release-please.yml](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/workflows/release_please.yml) once more to create the GitHub release and tag; that event is what triggers `release.yml`. You do not need to run or trigger anything yourself beyond the merge.
 
-Release cadence is controlled by when the release PR is merged. To release at most once per day with no manual steps, add a scheduled workflow that auto-merges the release-please PR when CI passes.
+Release cadence is controlled by when the release PR is merged. [release_please_auto_merge.yml](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/workflows/release_please_auto_merge.yml) runs daily at 03:00 UTC (and on manual dispatch) and enables GitHub auto-merge on any open release-please PR, so it lands once required CI checks pass. This caps releases at at most one per day with no manual steps, and mirrors the `automerge: true` behavior already configured for Renovate in [`.github/renovate.json`](https://github.com/Aleph-Alpha-Research/eval-framework/blob/main/.github/renovate.json).
 
 ### Manual Release
 

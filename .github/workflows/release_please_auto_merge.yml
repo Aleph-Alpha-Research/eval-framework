@@ -1,0 +1,63 @@
+# release-please opens/updates a PR on every push to `main` (see
+# `release_please.yml`). Merging that PR is what cuts a public
+# release: `release.yml` then publishes to PyPI and the Docker
+# registry. Landing every release-please update immediately would
+# publish many releases per day, so this workflow runs once per
+# night to enable GitHub auto-merge on any open release-please PR.
+# It then merges as soon as required CI checks pass, capping
+# public releases at at most one per day.
+#
+# After the merge, the rest of the lifecycle is handled by our
+# existing automation. `release.yml` ships the artifacts, and
+# Renovate (the other automated PR author in this repo) keeps
+# dependencies moving via `automerge: true` in `renovate.json`.
+# So both bots have a symmetric path from open → merge without
+# manual intervention; release-please is just batched nightly.
+
+name: Auto-merge release-please PRs
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # daily at 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Create bot token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: bot-token
+        with:
+          app-id: ${{ vars.AAR_PUBLIC_VERSION_BUMP_BOT_APP_ID }}
+          private-key: ${{ secrets.AAR_PUBLIC_VERSION_BUMP_BOT_PRIVATE_KEY }}
+          repositories: eval-framework
+
+      - name: Enable auto-merge on open release-please PRs
+        env:
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          prs=$(gh pr list \
+            --state open \
+            --label "autorelease: pending" \
+            --json number,headRefName,author \
+            --jq '.[]
+              | select(.author.login == "app/aar-public-version-bump-bot")
+              | select(.headRefName | startswith("release-please--"))
+              | .number')
+          if [ -z "$prs" ]; then
+            echo "No open release-please PRs found."
+            exit 0
+          fi
+          for pr in $prs; do
+            echo "Enabling auto-merge for PR #$pr"
+            gh pr merge --auto --squash "$pr"
+          done
