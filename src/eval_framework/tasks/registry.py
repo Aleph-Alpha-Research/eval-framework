@@ -308,7 +308,7 @@ def register_lazy_task(class_path: str, /, *, extras: Sequence[str] = ()) -> Non
 
     Args:
         class_path: The full path to the task class. For example,
-            `eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA`.
+            `eval_framework.tasks.benchmarks.mmlu.MMLU`.
         extras: Any extra dependencies of `eval_framework` that need to be installed for this task.
     """
     if isinstance(extras, str):
@@ -316,7 +316,7 @@ def register_lazy_task(class_path: str, /, *, extras: Sequence[str] = ()) -> Non
     if "." not in class_path:
         raise ValueError(
             f"Invalid class path `{class_path}`. This needs to be a global path like "
-            "`eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA`): "
+            "`eval_framework.tasks.benchmarks.mmlu.MMLU`): "
         )
 
     base_module, class_name = class_path.rsplit(".", maxsplit=1)
