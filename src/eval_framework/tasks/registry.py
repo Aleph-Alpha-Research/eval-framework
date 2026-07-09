@@ -202,8 +202,18 @@ class Registry:
         self._registry: dict[str, tuple[str, EvalFactory]] = dict()
 
     def __iter__(self) -> Iterator[str]:
+        """Iterate over all task names in the registry."""
         for name, _ in self._registry.values():
             yield name
+
+    def values(self) -> Iterator[EvalFactory]:
+        """Iterate over all `EvalFactory` items in the registry."""
+        for _, factory in self._registry.values():
+            yield factory
+
+    def items(self) -> Iterator[tuple[str, EvalFactory]]:
+        """Iterate over `(task name, EvalFactory)` pairs in the registry."""
+        yield from self._registry.values()
 
     @staticmethod
     def _task_key(name: str, /) -> str:
@@ -263,6 +273,11 @@ def registered_task_names() -> list[str]:
     return list(_REGISTRY)
 
 
+def registered_eval_factories() -> list[EvalFactory]:
+    """Return all registered `EvalFactory` instances."""
+    return list(_REGISTRY.values())
+
+
 def is_registered(name: str, /) -> bool:
     """Return True if a task is registered."""
     return name in _REGISTRY
@@ -280,8 +295,8 @@ def registered_tasks_iter() -> Iterator[tuple[str, type[BaseTask]]]:
 
     Note: This method will import any lazily registered task.
     """
-    for name in registered_task_names():
-        yield name, get_task(name)
+    for name, factory in _REGISTRY.items():
+        yield name, factory.task_class()
 
 
 def get_task(name: str, /) -> type[BaseTask]:
