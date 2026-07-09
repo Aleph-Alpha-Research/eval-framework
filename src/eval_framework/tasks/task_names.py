@@ -260,7 +260,7 @@ def _ensure_sacrebleu_datasets_cached() -> None:
     """
     import sacrebleu
 
-    # WMT datasets used by the framework (from wmt.py)
+    # Sacrebleu WMT test sets used by translation metrics
     WMT_DATASETS = {
         "wmt14": ["en-fr", "fr-en"],
         "wmt16": ["de-en", "en-de"],
