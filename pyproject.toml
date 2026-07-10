@@ -70,7 +70,7 @@ vllm = [
   "torch>=2.5,<3"
 ]
 mistral = [
-  "mistral-common>=1.11.3,<2",
+  "mistral-common>=1.11.5,<2",
   "huggingface-hub>=0.36.2,<0.37",
   "eval_framework[vllm]",
 ]
