@@ -253,7 +253,7 @@ class SQuAD2_MA(SQUAD2):
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
         self.stop_sequences = []
-        self.max_tokens = 30_000
+        self.max_tokens = 10_000
 
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
         return (
