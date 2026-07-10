@@ -14,6 +14,22 @@
 
 ### Bug Fixes
 
+## [0.6.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.3...v0.6.0) (2026-07-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove dead code from unused benchmarks ([#430](https://github.com/Aleph-Alpha-Research/eval-framework/issues/430))
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=1.109.1,&lt;3 ([#397](https://github.com/Aleph-Alpha-Research/eval-framework/issues/397)) ([543aeb7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/543aeb72a684218522a06d1c0525c29fef31f6a1))
+
+
+### Code Refactoring
+
+* remove dead code from unused benchmarks ([#430](https://github.com/Aleph-Alpha-Research/eval-framework/issues/430)) ([4d3d963](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4d3d96392cf4cfd43ca1238d253931bdebb1bc4e))
+
 ## [0.5.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.2...v0.5.3) (2026-06-29)
 
 
