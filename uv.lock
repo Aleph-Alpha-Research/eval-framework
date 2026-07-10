@@ -1088,7 +1088,7 @@ requires-dist = [
     { name = "lingua-language-detector", specifier = ">=2.2.0,<3" },
     { name = "llm-sandbox", extras = ["docker"], specifier = "==0.3.39" },
     { name = "lxml", specifier = ">=6.1.1,<7" },
-    { name = "mistral-common", marker = "extra == 'mistral'", specifier = ">=1.11.3,<2" },
+    { name = "mistral-common", marker = "extra == 'mistral'", specifier = ">=1.11.5,<2" },
     { name = "mysql-connector-python", specifier = ">=9.7.0,<10" },
     { name = "nltk", specifier = ">=3.9.4,<4" },
     { name = "numpy", specifier = ">=2.2.6" },
