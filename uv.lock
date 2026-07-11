@@ -1118,7 +1118,7 @@ provides-extras = ["determined", "api", "openai", "transformers", "accelerate", 
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "mypy", specifier = ">=2.1.0,<3" },
+    { name = "mypy", specifier = ">=2.2.0,<3" },
     { name = "pip-licenses", specifier = ">=5.5.5" },
     { name = "plotly", specifier = ">=6.8.0,<7" },
     { name = "pytest", specifier = ">=9.1.1,<10" },
