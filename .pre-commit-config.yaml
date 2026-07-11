@@ -18,6 +18,6 @@ repos:
       - id: ruff-format
   - repo: https://github.com/astral-sh/uv-pre-commit
     # uv version.
-    rev: 0.11.27
+    rev: 0.11.28
     hooks:
       - id: uv-lock
