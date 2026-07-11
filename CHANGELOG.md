@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.6.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.0...v0.6.1) (2026-07-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mistral-common to &gt;=1.11.5,&lt;2 ([#436](https://github.com/Aleph-Alpha-Research/eval-framework/issues/436)) ([ffe398a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ffe398af910d3120b3912464c6550988ed4c7a4b))
+* **deps:** update dependency wandb to &gt;=0.28.0,&lt;1 ([#439](https://github.com/Aleph-Alpha-Research/eval-framework/issues/439)) ([43b6a83](https://github.com/Aleph-Alpha-Research/eval-framework/commit/43b6a83b69509a8796594ae075c1e2f5e9ccbdd8))
+
 ## [0.6.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.3...v0.6.0) (2026-07-10)
 
 
