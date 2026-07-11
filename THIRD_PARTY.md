@@ -32,7 +32,7 @@ and first-party/internal packages are excluded.
 | `scipy` | `>=1.18.0,<2` |
 | `spacy` | `>=3.8.14,<4` |
 | `sympy` | `>=1.13.1,<2` |
-| `wandb` | `>=0.27.2,<1` |
+| `wandb` | `>=0.28.0,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
 ## Transitive
