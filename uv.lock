@@ -1111,7 +1111,7 @@ requires-dist = [
     { name = "transformers", marker = "extra == 'optional'", specifier = ">=4.45.2,<5" },
     { name = "transformers", marker = "extra == 'transformers'", specifier = ">=4.45.2,<5" },
     { name = "vllm", marker = "extra == 'vllm'", specifier = ">=0.22,<0.23" },
-    { name = "wandb", specifier = ">=0.27.2,<1" },
+    { name = "wandb", specifier = ">=0.28.0,<1" },
     { name = "xmltodict", specifier = ">=1.0.4,<1.1" },
 ]
 provides-extras = ["determined", "api", "openai", "transformers", "accelerate", "vllm", "mistral", "optional", "all"]
