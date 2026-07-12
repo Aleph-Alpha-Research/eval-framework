@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.6.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.1...v0.6.2) (2026-07-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency nltk to &gt;=3.10.0,&lt;4 ([#444](https://github.com/Aleph-Alpha-Research/eval-framework/issues/444)) ([74ecafb](https://github.com/Aleph-Alpha-Research/eval-framework/commit/74ecafbaff3dde1bdf89ac4e905fc034f9d77e32))
+* **deps:** update dependency tensorboard to v2.21.0 ([#447](https://github.com/Aleph-Alpha-Research/eval-framework/issues/447)) ([acab6da](https://github.com/Aleph-Alpha-Research/eval-framework/commit/acab6da911a4e859441e24448b49802a8edc6eeb))
+
 ## [0.6.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.0...v0.6.1) (2026-07-11)
 
 
