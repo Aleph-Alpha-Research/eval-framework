@@ -20,7 +20,7 @@ and first-party/internal packages are excluded.
 | `llm-sandbox` | `==0.3.39` |
 | `lxml` | `>=6.1.1,<7` |
 | `mysql-connector-python` | `>=9.7.0,<10` |
-| `nltk` | `>=3.9.4,<4` |
+| `nltk` | `>=3.10.0,<4` |
 | `numpy` | `>=2.2.6` |
 | `psycopg2-binary` | `>=2.9.12,<3` |
 | `pycountry` | `>=26.2.16,<27` |
