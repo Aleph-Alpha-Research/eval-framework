@@ -64,7 +64,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
@@ -183,7 +183,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
@@ -205,7 +205,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
@@ -232,7 +232,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
@@ -291,7 +291,7 @@ jobs:
 
       - name: Setup uv
         if: steps.should_run.outputs.value == 'true'
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
@@ -327,7 +327,7 @@ jobs:
           python-version: "3.11"
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
