@@ -48,7 +48,9 @@ class DatasetRevision:
 
     @classmethod
     def pinned_revision(cls, task_class_name: str) -> str | None:
-        return cls._get_instance()._cache.get(task_class_name)
+        if cls._INSTANCE is None:
+            raise RuntimeError("No revision file added; call add_revision_file() before pinned_revision().")
+        return cls._INSTANCE._cache.get(task_class_name)
 
     @classmethod
     def reset(cls) -> None:
