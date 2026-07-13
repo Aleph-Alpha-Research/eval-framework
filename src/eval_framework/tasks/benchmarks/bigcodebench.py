@@ -16,6 +16,7 @@ from eval_framework.tasks.base import (
     Sample,
     SubjectType,
 )
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import (
     BIG_CODE_BENCH_PACKAGE_MAPPING,
     CallableSerializer,
@@ -122,6 +123,8 @@ class BigCodeBench_OLMES(BigCodeBench):
     Recommended run settings for parity with oe_eval: temperature=0.6, top_p=0.6, repeats=5 (n=5),
     then compute pass@1 over the 5 samples per problem (post-process if needed).
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "BigCodeBench_OLMES"
     SAMPLE_SPLIT = "v0.1.2"

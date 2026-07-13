@@ -15,6 +15,7 @@ from eval_framework.metrics.completion.minerva_math_utils import (
     normalized_gold_from_solution,
 )
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import BPBStyle
 
 # Hendrycks MATH subject splits (shared by MATH, MATHMinervaEvalHarness, MATHMinervaBPB)
@@ -331,6 +332,8 @@ class AIME2024(MATHReasoning):
     pass@1 evaluation
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "AIME2024"
     DATASET_PATH = "HuggingFaceH4/aime_2024"
     SAMPLE_SPLIT = "train"
@@ -387,6 +390,8 @@ class AIME2025(AIME2024):
     pass@1 evaluation
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "AIME2025"
     DATASET_PATH = "math-ai/aime25"
     SAMPLE_SPLIT = "test"
@@ -405,6 +410,8 @@ class AIME2026(AIME2024):
 
     pass@1 evaluation
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "AIME2026"
     DATASET_PATH = "math-ai/aime26"
@@ -425,6 +432,8 @@ class MATH500(MATHReasoning):
 
     pass@1 evaluation
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MATH500"
     DATASET_PATH = "HuggingFaceH4/MATH-500"
@@ -642,6 +651,8 @@ class GSM8KReasoning(MATHReasoning):
     Zero-shot reasoning version that expects answers in boxed format.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "GSM8KReasoning"
     DATASET_PATH = "openai/gsm8k"
     SAMPLE_SPLIT = "test"
@@ -742,6 +753,7 @@ _OLMES_FEWSHOTS = [
 
 
 class MATHMinerva_OLMES(MATHMinerva):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "MATHMinerva_OLMES"
     METRICS = [MathMinervaCompletion, MathMinervaCompletionRelaxed]
 
@@ -755,6 +767,7 @@ class MATHMinerva_OLMES(MATHMinerva):
 
 
 class MATHMinervaBPB(MATHMinerva_OLMES):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "MATHMinervaBPB"
     TASK_STYLER = BPBStyle(cue_text="Solution:")
 

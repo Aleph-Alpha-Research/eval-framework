@@ -95,6 +95,12 @@ class BaseTask[SubjectType](ABC):
     SUBJECTS: list[SubjectType]
     HF_REVISION: str | None = None  # tag name, or branch name, or commit hash to ensure reproducibility
 
+    # The lock file this task resolves its pinned dataset revision from, keyed by ``DATASET_PATH``.
+    # Each task sets this explicitly: point it at a lock file (e.g. ``HF_REVISIONS_LOCKFILE`` or a
+    # frozen one), or ``None`` to opt out of pinning. Deliberately not defaulted so it is never
+    # inherited implicitly (a subclass in another package would otherwise resolve the wrong file).
+    REVISION_LOCKFILE: Path | None
+
     # Words in _get_instruction_text() not to be perturbed. List of words is case insensitive. No special characters
     # or whitespace should be included.
     PERTURBATION_UNMODIFIABLE_WORDS: list[str] | None

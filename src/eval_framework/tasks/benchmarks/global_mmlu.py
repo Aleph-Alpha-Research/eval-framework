@@ -9,6 +9,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType
 from eval_framework.tasks.benchmarks.mmlu import MMLU_SUBJECTS
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 GLOBAL_MMLU_LANGUAGES = ["fr", "de", "es", "it", "pt", "ar"]
@@ -469,6 +470,8 @@ class GlobalMMLU(BaseTask[tuple[str, str]]):
     https://github.com/aisingapore/SEA-HELM/blob/main/seahelm_tasks/knowledge/global_mmlu/abstract_algebra/config.yaml
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "GlobalMMLU"
     DATASET_PATH = "CohereLabs/Global-MMLU"
     SAMPLE_SPLIT = "test"
@@ -534,6 +537,7 @@ class GlobalMMLU(BaseTask[tuple[str, str]]):
 
 
 class GlobalMMLU_German(GlobalMMLU):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "GlobalMMLU_German"
     SUBJECTS = [("de", subject) for subject in MMLU_SUBJECTS]
     LANGUAGE = Language.DEU

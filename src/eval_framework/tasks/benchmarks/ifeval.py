@@ -3,10 +3,13 @@ from typing import Any
 from eval_framework.metrics.completion.ifeval import IFEvalMetric, IFEvalMetricContext
 from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
 
 class IFEval(BaseTask[str]):
     """IFEval: Instruction Following Eval (https://arxiv.org/pdf/2311.07911)."""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "IFEval"
     DATASET_PATH = "google/IFEval"
@@ -72,6 +75,8 @@ class IFEvalFiSv(IFEval):
 
 class IFEvalDe(IFEval):
     """German version of the Instruction Following Evaluation (IFEval) benchmark."""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "IFEval German"
     DATASET_PATH = "jzhang86/de_ifeval"
