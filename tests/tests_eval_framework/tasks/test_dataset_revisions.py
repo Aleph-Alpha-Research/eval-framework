@@ -2,11 +2,47 @@
 
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
+from eval_framework.metrics.base import BaseMetric
 from eval_framework.tasks import dataset_revisions as dr
-from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.base import BaseTask, ResponseType
+from eval_framework.tasks.perturbation import PerturbationConfig
+from eval_framework.tasks.registry import EvalFactory
 from tests.tests_eval_framework.tasks.conftest import FIXTURE_REVISIONS
+
+
+class EvalFactoryDouble(EvalFactory):
+    def task_class(self) -> type[BaseTask]:
+        raise NotImplementedError
+
+    @property
+    def source_module(self) -> str:
+        raise NotImplementedError
+
+    def response_type(self) -> ResponseType:
+        raise NotImplementedError
+
+    def metrics(self) -> list[type["BaseMetric"]]:
+        raise NotImplementedError
+
+    def display_name(self) -> str:
+        raise NotImplementedError
+
+    def dataset_path(self) -> str | None:
+        raise NotImplementedError
+
+    def create(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> BaseTask:
+        raise NotImplementedError
+
+    def create_perturbation(
+        self,
+        perturbation_config: PerturbationConfig,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+    ) -> BaseTask:
+        raise NotImplementedError
 
 
 def test_revisions_file_lives_next_to_module() -> None:
@@ -16,68 +52,63 @@ def test_revisions_file_lives_next_to_module() -> None:
     assert dr.DEFAULT_REVISIONS_FILE.parent == module_dir
 
 
-def test_collect_dataset_revisions_fetches_sha_for_hf_task() -> None:
+def test_dataset_revision_collection_fetches_sha_for_hf_task() -> None:
     """A task with a DATASET_PATH should appear in the result keyed by class name."""
 
-    class CoQA:
-        NAME = "CoQA"
-        DATASET_PATH = "EleutherAI/coqa"
+    class SomeEvalTask(BaseTask): ...
 
-    TEST_REGISTRY = Registry()
-    TEST_REGISTRY.add(CoQA)
+    class SomeEvalTaskFactory(EvalFactoryDouble):
+        def task_class(self) -> type[BaseTask]:
+            return SomeEvalTask
+
+        def dataset_path(self) -> str | None:
+            return "Some/evaltask"
 
     api = MagicMock()
     api.dataset_info.return_value = SimpleNamespace(sha="abc123")
 
-    with patch("eval_framework.tasks.registry.registry", return_value=TEST_REGISTRY):
-        revisions = dr.collect_dataset_revisions(["CoQA"], api)
+    revisions = dr.dataset_revision_collection([SomeEvalTaskFactory()], api)
 
-    assert revisions == {"CoQA": "abc123"}
-    api.dataset_info.assert_called_once_with("EleutherAI/coqa", timeout=100.0)
+    assert revisions == {"SomeEvalTask": "abc123"}
+    api.dataset_info.assert_called_once_with("Some/evaltask", timeout=100.0)
 
 
-def test_collect_dataset_revisions_skips_task_without_dataset_path() -> None:
+def test_dataset_revision_collection_skips_task_without_dataset_path() -> None:
     """Tasks with an empty DATASET_PATH are omitted from the output."""
 
-    class NoDataset:
-        NAME = "NoDataset"
-        DATASET_PATH = ""
+    class NoDataSetEvalTask(BaseTask): ...
 
-    TEST_REGISTRY = Registry()
-    TEST_REGISTRY.add(NoDataset)
+    class NoDataSetEvalTaskFactory(EvalFactoryDouble):
+        def task_class(self) -> type[BaseTask]:
+            return NoDataSetEvalTask
+
+        def dataset_path(self) -> str | None:
+            return ""
 
     api = MagicMock()
 
-    with patch("eval_framework.tasks.registry.registry", return_value=TEST_REGISTRY):
-        revisions = dr.collect_dataset_revisions(["NoDataset"], api)
+    revisions = dr.dataset_revision_collection([NoDataSetEvalTaskFactory()], api)
 
     assert revisions == {}
     api.dataset_info.assert_not_called()
 
 
-def test_collect_dataset_revisions_skips_failed_task_load() -> None:
-    """If loading a task class fails, the script continues without that task."""
-    api = MagicMock()
-
-    with patch("eval_framework.tasks.registry.get_task", side_effect=ImportError("broken import")):
-        revisions = dr.collect_dataset_revisions(["BrokenTask"], api)
-
-    assert revisions == {}
-    api.dataset_info.assert_not_called()
-
-
-def test_collect_dataset_revisions_skips_failed_dataset_lookup() -> None:
+def test_dataset_revision_collection_skips_failed_dataset_lookup() -> None:
     """If the Hugging Face API fails for a dataset, that task is omitted."""
 
-    class CoQA:
-        __name__ = "CoQA"
-        DATASET_PATH = "EleutherAI/coqa"
+    class SomeEvalTask(BaseTask): ...
+
+    class SomeEvalTaskFactory(EvalFactoryDouble):
+        def task_class(self) -> type[BaseTask]:
+            return SomeEvalTask
+
+        def dataset_path(self) -> str | None:
+            return "Some/evaltask"
 
     api = MagicMock()
     api.dataset_info.side_effect = RuntimeError("not found")
 
-    with patch("eval_framework.tasks.registry.get_task", return_value=CoQA):
-        revisions = dr.collect_dataset_revisions(["CoQA"], api)
+    revisions = dr.dataset_revision_collection([SomeEvalTaskFactory()], api)
 
     assert revisions == {}
 
@@ -96,46 +127,32 @@ def test_get_pinned_dataset_revision_returns_none_for_unknown_task(fixture_revis
     assert dr.DatasetRevision.pinned_revision("NotARegisteredTask") is None
 
 
-def test_collect_dataset_revisions_reuses_sha_for_shared_dataset() -> None:
+def test_dataset_revision_collection_reuses_sha_for_shared_dataset() -> None:
     """Multiple tasks sharing one DATASET_PATH should trigger a single API call."""
 
-    class CoQA:
-        NAME = "CoQA"
-        DATASET_PATH = "EleutherAI/coqa"
+    class SomeEvalTask(BaseTask): ...
 
-    class CoQAMC:
-        NAME = "CoQAMC"
-        DATASET_PATH = "EleutherAI/coqa"
+    class SomeEvalTaskFactory(EvalFactoryDouble):
+        def task_class(self) -> type[BaseTask]:
+            return SomeEvalTask
 
-    TEST_REGISTRY = Registry()
-    TEST_REGISTRY.add(CoQA)
-    TEST_REGISTRY.add(CoQAMC)
+        def dataset_path(self) -> str | None:
+            return "Some/evaltask"
+
+    # Based on same dataset but different task styler
+    class SomeEvalTaskMC(BaseTask): ...
+
+    class SomeEvalTaskMCFactory(EvalFactoryDouble):
+        def task_class(self) -> type[BaseTask]:
+            return SomeEvalTaskMC
+
+        def dataset_path(self) -> str | None:
+            return "Some/evaltask"
 
     api = MagicMock()
     api.dataset_info.return_value = SimpleNamespace(sha="shared-sha")
 
-    with patch("eval_framework.tasks.registry.registry", return_value=TEST_REGISTRY):
-        revisions = dr.collect_dataset_revisions(["CoQA", "CoQAMC"], api)
+    revisions = dr.dataset_revision_collection([SomeEvalTaskFactory(), SomeEvalTaskMCFactory()], api)
 
-    assert revisions == {"CoQA": "shared-sha", "CoQAMC": "shared-sha"}
+    assert revisions == {"SomeEvalTask": "shared-sha", "SomeEvalTaskMC": "shared-sha"}
     api.dataset_info.assert_called_once()
-
-
-def test_dataset_revision_collection_contains_hf_sha() -> None:
-    """A task with a DATASET_PATH should appear in the result keyed by class name."""
-
-    class CoQA:
-        NAME = "CoQA"
-        DATASET_PATH = "EleutherAI/coqa"
-
-    TEST_REGISTRY = Registry()
-    TEST_REGISTRY.add(CoQA)
-
-    api = MagicMock()
-    api.dataset_info.return_value = SimpleNamespace(sha="abc123")
-
-    with patch("eval_framework.tasks.registry.registry", return_value=TEST_REGISTRY):
-        revisions = dr.collect_dataset_revisions(["CoQA"], api)
-
-    assert revisions == {"CoQA": "abc123"}
-    api.dataset_info.assert_called_once_with("EleutherAI/coqa", timeout=100.0)
