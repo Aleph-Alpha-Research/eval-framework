@@ -14,6 +14,38 @@
 
 ### Bug Fixes
 
+## [0.6.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.1...v0.6.2) (2026-07-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency nltk to &gt;=3.10.0,&lt;4 ([#444](https://github.com/Aleph-Alpha-Research/eval-framework/issues/444)) ([74ecafb](https://github.com/Aleph-Alpha-Research/eval-framework/commit/74ecafbaff3dde1bdf89ac4e905fc034f9d77e32))
+* **deps:** update dependency tensorboard to v2.21.0 ([#447](https://github.com/Aleph-Alpha-Research/eval-framework/issues/447)) ([acab6da](https://github.com/Aleph-Alpha-Research/eval-framework/commit/acab6da911a4e859441e24448b49802a8edc6eeb))
+
+## [0.6.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.0...v0.6.1) (2026-07-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mistral-common to &gt;=1.11.5,&lt;2 ([#436](https://github.com/Aleph-Alpha-Research/eval-framework/issues/436)) ([ffe398a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ffe398af910d3120b3912464c6550988ed4c7a4b))
+* **deps:** update dependency wandb to &gt;=0.28.0,&lt;1 ([#439](https://github.com/Aleph-Alpha-Research/eval-framework/issues/439)) ([43b6a83](https://github.com/Aleph-Alpha-Research/eval-framework/commit/43b6a83b69509a8796594ae075c1e2f5e9ccbdd8))
+
+## [0.6.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.3...v0.6.0) (2026-07-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove dead code from unused benchmarks ([#430](https://github.com/Aleph-Alpha-Research/eval-framework/issues/430))
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=1.109.1,&lt;3 ([#397](https://github.com/Aleph-Alpha-Research/eval-framework/issues/397)) ([543aeb7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/543aeb72a684218522a06d1c0525c29fef31f6a1))
+
+
+### Code Refactoring
+
+* remove dead code from unused benchmarks ([#430](https://github.com/Aleph-Alpha-Research/eval-framework/issues/430)) ([4d3d963](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4d3d96392cf4cfd43ca1238d253931bdebb1bc4e))
+
 ## [0.5.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.2...v0.5.3) (2026-06-29)
 
 

@@ -1,6 +1,5 @@
 import pytest
 
-import eval_framework.tasks.benchmarks.sphyr as sphyr
 from eval_framework.metrics.completion.grid_difference import GridDifference
 from eval_framework.shared.types import Completion
 from template_formatting.formatter import Message, Role
@@ -17,6 +16,25 @@ GRID = """0 0 L L L 0 0 0 0 0
 0 0 1 1 1 0 0 0 0 0
 S S S S S S S S S 0"""
 
+SYSTEM_PROMPT = """You are given a structural material distribution represented as a grid. Each cell can have one of the following states:
+- 'L' indicates applied load.
+- 'V' indicates void.
+- 'S' indicates support.
+
+The goal is to predict the correct material distribution by filling in all {FILL_INSTRUCTION}, based on the surrounding structure and implicit physical reasoning (such as load paths, supports, and forces).
+
+Important: The completed structure should use as little material as possible while remaining stable and plausible for carrying the applied forces. Minimize material usage unless necessary for structural support."""  # noqa: E501
+
+PROMPT_TEMPLATE = """Below is the input grid with masked regions:
+
+{GRID}
+
+Please output the completed grid by replacing all {FILL_INSTRUCTION}.
+Maintain the same format as the input: one row per line, cells separated by spaces, and the total number of rows and columns unchanged.
+Return only the completed grid without any additional explanation."""  # noqa: E501
+
+EASY_FILL_INSTRUCTION = "'V' cells with either '1' (solid) or '0' (empty)"
+
 
 class TestGridDifference:
     @pytest.fixture
@@ -25,9 +43,7 @@ class TestGridDifference:
 
     def test_extract_grid_from_prompt(self, grid_difference_metric: GridDifference) -> None:
         EXPECTED_CONCAT_PROMPT = (
-            sphyr.SYSTEM_PROMPT
-            + "\n\n"
-            + sphyr.PROMPT_TEMPLATE.format(GRID=GRID, FILL_INSTRUCTION=sphyr.EASY_FILL_INSTRUCTION)
+            SYSTEM_PROMPT + "\n\n" + PROMPT_TEMPLATE.format(GRID=GRID, FILL_INSTRUCTION=EASY_FILL_INSTRUCTION)
         )
         grid = grid_difference_metric.extract_grid_from_prompt(EXPECTED_CONCAT_PROMPT)
         assert_hash_string(

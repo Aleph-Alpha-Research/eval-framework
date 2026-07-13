@@ -1,6 +1,6 @@
 [project]
 name = "eval-framework"
-version = "0.5.3"
+version = "0.6.2"
 description = "Evaluation Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -24,7 +24,7 @@ dependencies = [
   "datasets>=5.0.0,<6",
   "sacrebleu>=2.6.0,<3",
   "pycountry>=26.2.16,<27",
-  "nltk>=3.9.4,<4",
+  "nltk>=3.10.0,<4",
   "python-dotenv>=1.2.2,<2",
   "lingua-language-detector>=2.2.0,<3",
   "google-crc32c>=1.8.0,<2",
@@ -38,7 +38,7 @@ dependencies = [
   "jsonlines>=4,<5",
   "lxml>=6.1.1,<7",
   "python-iso639>=2026.4.20",
-  "wandb>=0.27.2,<1",
+  "wandb>=0.28.0,<1",
   "boto3>=1.43.19,<2",
   "numpy>=2.2.6",
   # is a dependency of sympy, but not explicitly listed in the requirements.txt
@@ -51,11 +51,11 @@ dependencies = [
 # Model-specific extras
 determined = [
   "determined>=0.38.1,<0.39",
-  "tensorboard==2.20.0"
+  "tensorboard==2.21.0"
 ]
 api = ["aleph-alpha-client>=11.5.1"]
 openai = [
-  "openai>=1.62,<3",
+  "openai>=1.109.1,<3",
   "tiktoken>=0.13.0,<1",
   "transformers>=4.45.2,<5",
 ]
@@ -70,7 +70,7 @@ vllm = [
   "torch>=2.5,<3"
 ]
 mistral = [
-  "mistral-common>=1.11.3,<2",
+  "mistral-common>=1.11.5,<2",
   "huggingface-hub>=0.36.2,<0.37",
   "eval_framework[vllm]",
 ]
@@ -91,7 +91,7 @@ eval_framework = "eval_framework.run:run"
 
 [dependency-groups]
 dev = [
-  "mypy>=2.1.0,<3",
+  "mypy>=2.2.0,<3",
   "pytest>=9.1.1,<10",
   "pytest-mock>=3.15.1",
   "pytest-xdist>=3.8.0,<4",
@@ -109,7 +109,7 @@ flash-attn = [
 ]
 
 [build-system]
-requires = ["uv_build>=0.11.24,<0.11.25"]
+requires = ["uv_build>=0.11.28,<0.11.29"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -145,7 +145,6 @@ known-third-party = ["wandb"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "__init__.py" = ["F401"]
-"tests/tests_eval_framework/tasks/benchmarks/test_mmlu_de.py" = ["E501"]
 
 [tool.mypy]
 plugins = "pydantic.mypy"

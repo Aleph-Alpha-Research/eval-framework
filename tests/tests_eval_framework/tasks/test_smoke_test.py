@@ -2,7 +2,6 @@ import pytest
 from datasets.exceptions import DatasetNotFoundError
 
 from eval_framework.tasks.benchmarks.arc import ARC_OLMES
-from eval_framework.tasks.benchmarks.balancedcopa import BalancedCOPA
 from eval_framework.tasks.benchmarks.copa import COPA_OLMES, COPA_IDKEvalHarness, COPAEvalHarness
 from eval_framework.tasks.benchmarks.csqa import (
     CommonsenseQACloze,
@@ -15,7 +14,6 @@ from eval_framework.tasks.benchmarks.global_mmlu import GlobalMMLU
 from eval_framework.tasks.benchmarks.goldenswag import GOLDENSWAG, GOLDENSWAG_IDK
 from eval_framework.tasks.benchmarks.gpqa import GPQA_OLMES
 from eval_framework.tasks.benchmarks.humaneval import HumanEvalBPB
-from eval_framework.tasks.benchmarks.lab_bench import LabBenchCloze, LabBenchMC, LabBenchMC_OLMES
 from eval_framework.tasks.benchmarks.math_reasoning import (
     MATH500Minerva,
     MATHMinerva,
@@ -32,15 +30,10 @@ from eval_framework.tasks.benchmarks.naturalqs_open import (
     NaturalQsOpenMC,
     NaturalQsOpenMC_OLMES,
 )
-from eval_framework.tasks.benchmarks.openbookqa import (
-    OPENBOOKQA_EVAL_HARNESS_OLMES,
-    OPENBOOKQA_OLMES,
-)
 from eval_framework.tasks.benchmarks.piqa import PIQA_OLMES
 from eval_framework.tasks.benchmarks.sciq import SCIQ_IDK, SCIQ_OLMES, SCIQEvalHarness_IDK
 from eval_framework.tasks.benchmarks.social_iqa import SocialIQACloze, SocialIQAMC, SocialIQAMC_OLMES
 from eval_framework.tasks.benchmarks.squad import SQUAD2BPB
-from eval_framework.tasks.benchmarks.truthfulqa import TRUTHFULQA_OLMES
 from eval_framework.tasks.benchmarks.winogrande import WINOGRANDE_OLMES
 
 
@@ -69,14 +62,6 @@ def test_drop_tasks_smoke() -> None:
     _smoke_test_task(DropMC)
     _smoke_test_task(DropMC_OLMES)
     _smoke_test_task(DropCloze)
-
-
-@pytest.mark.cpu_slow
-@pytest.mark.slow_download
-def test_lab_bench_tasks_smoke() -> None:
-    _smoke_test_task(LabBenchCloze)
-    _smoke_test_task(LabBenchMC)
-    _smoke_test_task(LabBenchMC_OLMES)
 
 
 @pytest.mark.cpu_slow
@@ -124,10 +109,7 @@ def test_olmes_variants_smoke() -> None:
         GPQA_OLMES,  # gated; skipped when not authenticated
         MMLU_OLMES,
         MMLU_PRO_OLMES,
-        OPENBOOKQA_OLMES,
-        OPENBOOKQA_EVAL_HARNESS_OLMES,
         PIQA_OLMES,
-        TRUTHFULQA_OLMES,
         WINOGRANDE_OLMES,
     ):
         try:
@@ -139,8 +121,7 @@ def test_olmes_variants_smoke() -> None:
 
 
 @pytest.mark.cpu_slow
-def test_balanced_copa_and_copa_harness_smoke() -> None:
-    _smoke_test_task(BalancedCOPA)
+def test_copa_harness_smoke() -> None:
     _smoke_test_task(COPAEvalHarness)
     _smoke_test_task(COPA_IDKEvalHarness)
 

@@ -196,8 +196,18 @@ class Registry:
         self._registry: dict[str, tuple[str, EvalFactory]] = dict()
 
     def __iter__(self) -> Iterator[str]:
+        """Iterate over all task names in the registry."""
         for name, _ in self._registry.values():
             yield name
+
+    def values(self) -> Iterator[EvalFactory]:
+        """Iterate over all `EvalFactory` items in the registry."""
+        for _, factory in self._registry.values():
+            yield factory
+
+    def items(self) -> Iterator[tuple[str, EvalFactory]]:
+        """Iterate over `(task name, EvalFactory)` pairs in the registry."""
+        yield from self._registry.values()
 
     @staticmethod
     def _task_key(name: str, /) -> str:
@@ -257,6 +267,11 @@ def registered_task_names() -> list[str]:
     return list(_REGISTRY)
 
 
+def registered_eval_factories() -> list[EvalFactory]:
+    """Return all registered `EvalFactory` instances."""
+    return list(_REGISTRY.values())
+
+
 def is_registered(name: str, /) -> bool:
     """Return True if a task is registered."""
     return name in _REGISTRY
@@ -274,8 +289,8 @@ def registered_tasks_iter() -> Iterator[tuple[str, type[BaseTask]]]:
 
     Note: This method will import any lazily registered task.
     """
-    for name in registered_task_names():
-        yield name, get_task(name)
+    for name, factory in _REGISTRY.items():
+        yield name, factory.task_class()
 
 
 def get_task(name: str, /) -> type[BaseTask]:
@@ -302,12 +317,13 @@ def register_lazy_task(class_path: str, /) -> None:
 
     Args:
         class_path: The full path to the task class. For example,
-            `eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA`.
+            `eval_framework.tasks.benchmarks.mmlu.MMLU`.
+        extras: Any extra dependencies of `eval_framework` that need to be installed for this task.
     """
     if "." not in class_path:
         raise ValueError(
             f"Invalid class path `{class_path}`. This needs to be a global path like "
-            "`eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA`): "
+            "`eval_framework.tasks.benchmarks.mmlu.MMLU`): "
         )
 
     base_module, class_name = class_path.rsplit(".", maxsplit=1)
