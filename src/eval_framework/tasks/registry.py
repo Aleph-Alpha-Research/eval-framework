@@ -2,12 +2,11 @@ import contextlib
 import importlib
 import re
 from abc import ABC, abstractmethod
-from collections.abc import Generator, Iterator, Sequence
+from collections.abc import Generator, Iterator
 from typing import TYPE_CHECKING, Any
 
 from eval_framework.tasks.base import BaseTask, ResponseType
 from eval_framework.tasks.perturbation import PerturbationConfig, create_perturbation_class
-from eval_framework.utils.packaging import is_extra_installed, validate_package_extras
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -82,16 +81,14 @@ class _Lazy(EvalFactory):
     eval is constructed.
     """
 
-    def __init__(self, class_name: str, module: str, extras: Sequence[str] = ()) -> None:
+    def __init__(self, class_name: str, module: str) -> None:
         """
         Args:
             class_name: The name of the task class to import.
             module: The module to import the task class from.
-            extras: Extra dependencies of `eval_framework` required for this task.
         """
         self._class_name = class_name
         self._module = module
-        self._extras = tuple(validate_package_extras(extras))
         self._loaded: type[BaseTask] | None = None
 
     @property
@@ -100,9 +97,6 @@ class _Lazy(EvalFactory):
 
     def task_class(self) -> type[BaseTask]:
         if self._loaded is None:
-            for extra in self._extras:
-                if not is_extra_installed(extra):
-                    raise ImportError(f"The required package eval_framework[{extra}] is not installed.")
             module = importlib.import_module(self._module)
             self._loaded = getattr(module, self._class_name)
         return self._loaded
@@ -316,7 +310,7 @@ def register_task(task: type[BaseTask]) -> str:
     return name
 
 
-def register_lazy_task(class_path: str, /, *, extras: Sequence[str] = ()) -> None:
+def register_lazy_task(class_path: str, /) -> None:
     """Register a task without importing it.
 
     Lazily register a task without importing the module.
@@ -326,8 +320,6 @@ def register_lazy_task(class_path: str, /, *, extras: Sequence[str] = ()) -> Non
             `eval_framework.tasks.benchmarks.mmlu.MMLU`.
         extras: Any extra dependencies of `eval_framework` that need to be installed for this task.
     """
-    if isinstance(extras, str):
-        extras = [extras]
     if "." not in class_path:
         raise ValueError(
             f"Invalid class path `{class_path}`. This needs to be a global path like "
@@ -335,4 +327,4 @@ def register_lazy_task(class_path: str, /, *, extras: Sequence[str] = ()) -> Non
         )
 
     base_module, class_name = class_path.rsplit(".", maxsplit=1)
-    _REGISTRY[class_name] = _Lazy(class_name=class_name, module=base_module, extras=extras)
+    _REGISTRY[class_name] = _Lazy(class_name=class_name, module=base_module)
