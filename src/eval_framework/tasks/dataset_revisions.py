@@ -72,27 +72,6 @@ def _repo_sha(api: HfApi, repo_id: str, cache: dict[str, str | None]) -> str | N
     return cache[repo_id]
 
 
-def collect_dataset_revisions(
-    task_names: list[str],
-    api: HfApi,
-) -> dict[str, str]:
-    """Return task class name → latest dataset commit SHA for tasks with a Hugging Face path."""
-    from eval_framework.tasks.registry import registry
-
-    cache: dict[str, str | None] = {}
-    revisions: dict[str, str] = {}
-    for name in task_names:
-        try:
-            factory = registry()[name]
-            path = (factory.dataset_path() or "").strip()
-        except Exception as exc:
-            logger.warning("Skipping task %s: %s", name, exc)
-            continue
-        if path and (sha := _repo_sha(api, path, cache)):
-            revisions[factory.task_class().__name__] = sha
-    return revisions
-
-
 def dataset_revision_collection(
     eval_factories: list["EvalFactory"],
     api: HfApi,
@@ -109,10 +88,10 @@ def dataset_revision_collection(
 
 
 def main() -> None:
-    from eval_framework.tasks.registry import registered_task_names
+    from eval_framework.tasks.registry import registered_eval_factories
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    revisions = collect_dataset_revisions(registered_task_names(), HfApi())
+    revisions = dataset_revision_collection(registered_eval_factories(), HfApi())
     REVISIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
     REVISIONS_FILE.write_text(
         json.dumps(dict(sorted(revisions.items())), indent=4, ensure_ascii=False) + "\n",
