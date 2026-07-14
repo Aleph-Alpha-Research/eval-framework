@@ -9,11 +9,14 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 
 class PIQA(BaseTask[str]):
     """PIQA dataset: https://huggingface.co/datasets/ybisk/piqa"""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "PIQA"
     DATASET_PATH = "ybisk/piqa"
@@ -51,6 +54,8 @@ class PIQA_OLMES(PIQA):
     loglikelihood over " A"/" B".
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "PIQA_OLMES"
     SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
     FEWSHOT_SPLIT = "train"
@@ -74,6 +79,7 @@ class PIQA_OLMES(PIQA):
 
 
 class PIQA_IDK(PIQA):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "PIQA_IDK"
     METRICS = [
         AccuracyLoglikelihood,

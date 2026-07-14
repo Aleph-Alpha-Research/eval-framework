@@ -2,6 +2,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.drop_completion import DropF1ExactMatch, DropMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import (
     BPBStyle,
     ClozeStyle,
@@ -11,6 +12,7 @@ from eval_framework.tasks.task_style import (
 
 
 class NaturalQsOpen(BaseTask[str]):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "NaturalQsOpen"
     DATASET_PATH = "google-research-datasets/nq_open"
     SAMPLE_SPLIT = "validation"
@@ -91,6 +93,8 @@ class NaturalQsOpenMC(_NaturalQsOpenChoice_Base):
 
 class NaturalQsOpenMC_OLMES(_NaturalQsOpenChoice_Base):
     """NaturalQsOpenMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...)."""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "NaturalQsOpenMC_OLMES"
     TASK_STYLER = MCStyle(space_prefixed_labels=True)

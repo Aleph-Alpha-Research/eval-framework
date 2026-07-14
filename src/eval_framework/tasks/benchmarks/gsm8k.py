@@ -4,6 +4,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion, AccuracyCompletionOLMES
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import BPBStyle
 
 logger = logging.getLogger(__name__)
@@ -155,6 +156,7 @@ class GSM8K(GSM8KEvalHarness):
 
 
 class GSM8K_OLMES(GSM8K):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "GSM8K_OLMES"
     METRICS = [AccuracyCompletionOLMES]
 
@@ -219,6 +221,7 @@ class GSM8K_OLMES(GSM8K):
 
 
 class GSM8KBPB(GSM8K_OLMES):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "GSM8KBPB"
     TASK_STYLER = BPBStyle(cue_text="Answer:", leading_space_continuations=False)
 

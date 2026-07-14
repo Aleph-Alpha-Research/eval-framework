@@ -9,11 +9,14 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 
 class ARC(BaseTask[str]):
     """ARC dataset: https://huggingface.co/datasets/allenai/ai2_arc"""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "ARC"
     DATASET_PATH = "allenai/ai2_arc"
@@ -55,6 +58,8 @@ class ARC_OLMES(ARC):
     loglikelihood over " A"/" B"/ etc.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "ARC_OLMES"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -76,6 +81,7 @@ class ARC_OLMES(ARC):
 
 
 class ARC_IDK(ARC):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "ARC_IDK"
     METRICS = [
         AccuracyLoglikelihood,

@@ -4,6 +4,7 @@ from eval_framework.metrics.completion.code_assertion import CodeCompletionAsser
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
 CODE_TO_EXECUTE = """
 {start_of_code}
@@ -84,6 +85,8 @@ class HumanEvalBPB(HumanEval):
     Reports bits-per-byte on the reference completion.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "Human Eval BPB"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [BitsPerByteLoglikelihood]
@@ -106,6 +109,8 @@ class HumanEval_OLMES(HumanEval):
         repeats: 32
         llm_args: {sampling_params: {temperature: 0.6, top_p: 0.6}}
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "Human Eval OLMES"
 

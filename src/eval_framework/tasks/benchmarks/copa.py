@@ -8,6 +8,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 
@@ -50,6 +51,8 @@ class COPA_OLMES(COPAEvalHarness):
     COPA multiple choice (OLMES/oe_eval style): prompt shows premise + connector and options with
     space-prefixed labels (" A.", " B."); loglikelihood over " A"/" B".
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "COPA_OLMES"
 

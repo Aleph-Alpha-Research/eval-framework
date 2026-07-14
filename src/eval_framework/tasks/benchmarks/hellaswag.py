@@ -10,11 +10,14 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
 
 class HELLASWAG(BaseTask[str]):
     """Hellaswag dataset: https://huggingface.co/datasets/Rowan/hellaswag
     available data set sections: train, validation, test"""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "HellaSwag"
     DATASET_PATH = "Rowan/hellaswag"
@@ -49,6 +52,7 @@ class HELLASWAG(BaseTask[str]):
 
 
 class HELLASWAG_OLMES(HELLASWAG):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "HellaSwag_OLMES"
     SAMPLE_SPLIT = "train"
 

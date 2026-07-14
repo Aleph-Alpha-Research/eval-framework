@@ -11,6 +11,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 MMLU_PRO_SUBJECTS = [
@@ -33,6 +34,8 @@ MMLU_PRO_SUBJECTS = [
 
 class MMLU_PRO(BaseTask[str]):
     """MMLU_PRO dataset: https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro"""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MMLU Pro"
     DATASET_PATH = "TIGER-Lab/MMLU-Pro"
@@ -96,6 +99,8 @@ class MMLU_PRO_OLMES(MMLU_PRO):
     MMLU Pro with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MMLU Pro_OLMES"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -105,6 +110,7 @@ class MMLU_PRO_OLMES(MMLU_PRO):
 
 
 class MMLU_PRO_IDK(MMLU_PRO):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "MMLU Pro_IDK"
     METRICS = [
         AccuracyLoglikelihood,
@@ -127,6 +133,7 @@ class MMLU_PRO_IDK(MMLU_PRO):
 
 
 class MMLU_PRO_COT(MMLU_PRO):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "MMLU_PRO_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]
