@@ -9,6 +9,7 @@ from eval_framework.metrics.completion.code_assertion import (
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
 logger = logging.getLogger(__name__)
 
@@ -123,6 +124,8 @@ class MBPPBPB(MBPP):
     MBPP variant that scores loglikelihood of the gold reference code.
     Reports bits-per-byte on the reference solution.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MBPP BPB"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
@@ -270,6 +273,8 @@ class MBPP_OLMES(MBPP):
         top_p: 0.6
         repeats: 32
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MBPP_OLMES"
     FEWSHOT_SPLIT = "test"

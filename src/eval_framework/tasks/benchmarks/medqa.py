@@ -10,6 +10,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 
@@ -78,6 +79,8 @@ class MedQAMC_OLMES(MedQAMC):
     """
     MedQA multiple choice with OLMES-style prompt: space before each label (" A.", " B.", ...).
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MedQAMC_OLMES"
     FEWSHOT_SPLIT = "train"

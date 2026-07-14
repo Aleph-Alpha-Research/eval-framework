@@ -23,6 +23,10 @@ logger = logging.getLogger(__name__)
 DEFAULT_REVISIONS_FILE = Path(__file__).resolve().parent / "task-dataset-revisions.json"
 REVISIONS_FILE = DEFAULT_REVISIONS_FILE
 
+# The revision of the datasets used by the benchmarks is declared in a file, so we can automatically
+# update them in CI without having to parse python code.
+HF_REVISIONS_LOCKFILE = Path(__file__).resolve().parent / "hf-dataset-revisions.json"
+
 
 @lru_cache
 def _pinned_revisions(revisions_file: Path) -> dict[str, str]:

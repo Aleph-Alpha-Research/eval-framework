@@ -11,6 +11,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 MMLU_SUBJECTS = [
@@ -77,6 +78,8 @@ MMLU_SUBJECTS = [
 class MMLU(BaseTask[str]):
     """MMLU dataset: https://huggingface.co/datasets/cais/mmlu"""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MMLU"
     DATASET_PATH = "cais/mmlu"
     SAMPLE_SPLIT = "test"
@@ -123,6 +126,8 @@ class MMLU_OLMES(MMLU):
     MMLU with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MMLU_OLMES"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -156,6 +161,7 @@ Answer with the full text of the correct answer."""
 
 
 class MMLU_IDK(MMLU):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "MMLU_IDK"
     METRICS = [
         AccuracyLoglikelihood,
@@ -182,6 +188,8 @@ class MMLU_COT(MMLU):
     MMLU dataset with instruction to summarize reasoning and conclude with answer.
     Inspired by https://arxiv.org/pdf/2411.15124 (Table 44)
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MMLU_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION

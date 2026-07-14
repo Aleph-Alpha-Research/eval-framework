@@ -13,6 +13,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 logger = logging.getLogger(__name__)
@@ -125,6 +126,8 @@ class GPQA_OLMES(GPQA):
     GPQA multiple choice (OLMES/oe_eval style): prompt shows options with space-prefixed labels
     (" A.", " B.", " C.", " D."); loglikelihood over " A"/" B"/" C"/" D".
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "GPQA_OLMES"
 
