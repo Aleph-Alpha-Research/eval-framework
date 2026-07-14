@@ -10,6 +10,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 
@@ -139,6 +140,8 @@ class DropCompletion(BaseTask[str]):
 class DropCompletion_OLMES(DropCompletion):
     """DropCompletion matching OLMES, using train split for fewshot and max tokens 100."""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "DropCompletion_OLMES"
     FEWSHOT_SPLIT = "train"
 
@@ -209,6 +212,8 @@ class DropMC_OLMES(DropMC):
     """
     DropMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "DropMC_OLMES"
 

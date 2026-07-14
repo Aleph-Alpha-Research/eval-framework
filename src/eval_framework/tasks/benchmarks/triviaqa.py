@@ -4,10 +4,13 @@ from typing import Any
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1, F1SquadNormalized
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
 
 class TRIVIAQA(BaseTask[str]):
     """Trivia QA dataset: https://huggingface.co/datasets/mandarjoshi/trivia_qa"""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "TriviaQA"
     DATASET_PATH = "mandarjoshi/trivia_qa"
@@ -44,6 +47,8 @@ class TRIVIAQA(BaseTask[str]):
 
 class TriviaQA_MA(TRIVIAQA):
     """TriviaQA with the exact system prompt used in MA training"""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "TriviaQA_MA"
     SUBJECTS = ["rc.wikipedia"]

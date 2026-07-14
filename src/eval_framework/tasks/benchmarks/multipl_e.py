@@ -21,6 +21,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.multipl_e_assertion import MultiPLECodeAssertion, MultiPLEMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
 MULTIPL_E_STOP_TOKENS: dict[str, list[str]] = {
     "cpp": ["\n}", "}\n//"],
@@ -105,6 +106,8 @@ class MultiPLEHumanEvalCpp(_BaseMPLEHumanEval):
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MultiPL-E HumanEval C++ OLMES"
     MULTIPL_E_LANGUAGE = "cpp"
 
@@ -115,6 +118,8 @@ class MultiPLEHumanEvalJava(_BaseMPLEHumanEval):
     Corresponds to ``multipl_e_humaneval:java::olmo3:n32:v2`` in oe_eval.
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MultiPL-E HumanEval Java OLMES"
     MULTIPL_E_LANGUAGE = "java"
@@ -127,6 +132,8 @@ class MultiPLEHumanEvalJs(_BaseMPLEHumanEval):
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MultiPL-E HumanEval JS OLMES"
     MULTIPL_E_LANGUAGE = "js"
 
@@ -137,6 +144,8 @@ class MultiPLEHumanEvalPhp(_BaseMPLEHumanEval):
     Corresponds to ``multipl_e_humaneval:php::olmo3:n32:v2`` in oe_eval.
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MultiPL-E HumanEval PHP OLMES"
     MULTIPL_E_LANGUAGE = "php"
@@ -149,6 +158,8 @@ class MultiPLEHumanEvalRs(_BaseMPLEHumanEval):
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MultiPL-E HumanEval Rust OLMES"
     MULTIPL_E_LANGUAGE = "rs"
 
@@ -159,6 +170,8 @@ class MultiPLEHumanEvalSh(_BaseMPLEHumanEval):
     Corresponds to ``multipl_e_humaneval:sh::olmo3:n32:v2`` in oe_eval.
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MultiPL-E HumanEval Bash OLMES"
     MULTIPL_E_LANGUAGE = "sh"
@@ -175,6 +188,8 @@ class MultiPLEMBPPCpp(_BaseMPLEMBPP):
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MultiPL-E MBPP C++ OLMES"
     MULTIPL_E_LANGUAGE = "cpp"
 
@@ -185,6 +200,8 @@ class MultiPLEMBPPJava(_BaseMPLEMBPP):
     Corresponds to ``multipl_e_mbpp:java::olmo3:n32:v2`` in oe_eval.
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MultiPL-E MBPP Java OLMES"
     MULTIPL_E_LANGUAGE = "java"
@@ -197,6 +214,8 @@ class MultiPLEMBPPJs(_BaseMPLEMBPP):
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MultiPL-E MBPP JS OLMES"
     MULTIPL_E_LANGUAGE = "js"
 
@@ -207,6 +226,8 @@ class MultiPLEMBPPPhp(_BaseMPLEMBPP):
     Corresponds to ``multipl_e_mbpp:php::olmo3:n32:v2`` in oe_eval.
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MultiPL-E MBPP PHP OLMES"
     MULTIPL_E_LANGUAGE = "php"
@@ -219,6 +240,8 @@ class MultiPLEMBPPRs(_BaseMPLEMBPP):
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MultiPL-E MBPP Rust OLMES"
     MULTIPL_E_LANGUAGE = "rs"
 
@@ -229,6 +252,8 @@ class MultiPLEMBPPSh(_BaseMPLEMBPP):
     Corresponds to ``multipl_e_mbpp:sh::olmo3:n32:v2`` in oe_eval.
     Recommended: 0-shot, temp=0.6, top_p=0.6, repeats=32.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MultiPL-E MBPP Bash OLMES"
     MULTIPL_E_LANGUAGE = "sh"
