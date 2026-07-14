@@ -33,12 +33,7 @@ jobs:
       - name: Update pinned dataset revisions
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: |
-          uv run python -c "
-          import eval_framework.tasks  # registers all benchmark tasks
-          from eval_framework.tasks.dataset_revisions import main
-          main()
-          "
+        run: uv run python -m eval_framework.tasks.dataset_revisions
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
@@ -51,7 +46,7 @@ jobs:
             ## Summary
 
             Automated weekly update of pinned Hugging Face dataset commit SHAs in
-            `task-dataset-revisions.json`.
+            `hf-dataset-revisions.json`.
 
             ## Review
 

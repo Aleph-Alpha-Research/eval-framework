@@ -1,6 +1,7 @@
-"""Fetch latest Hugging Face dataset commit SHAs for registered tasks.
+"""Refresh the pinned Hugging Face dataset revisions in ``hf-dataset-revisions.json``.
 
-Overwrites ``task-dataset-revisions.json`` in this package with task class name → SHA.
+The lock file's keys (dataset paths) define which datasets are pinned; refreshing updates
+each pin to the latest commit SHA.
 
 Usage::
 
@@ -93,17 +94,51 @@ def dataset_revision_collection(
     return revisions
 
 
-def main() -> None:
-    from eval_framework.tasks.registry import registered_eval_factories
+class HfDatasetRevisions:
+    """Pinned revisions of Hugging Face datasets, mapping dataset path → commit SHA."""
 
+    def __init__(self, revisions: dict[str, str]) -> None:
+        self._revisions = dict(revisions)
+
+    @classmethod
+    def from_file(cls, path: Path) -> "HfDatasetRevisions":
+        return cls(json.loads(path.read_text(encoding="utf-8")))
+
+    def to_dict(self) -> dict[str, str]:
+        return dict(self._revisions)
+
+    def to_file(self, path: Path) -> None:
+        path.write_text(
+            json.dumps(dict(sorted(self._revisions.items())), indent=4, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+
+    def num_revisions(self) -> int:
+        return len(self._revisions)
+
+    def update_to_latest(self, api: HfApi) -> None:
+        """Update every pin to its dataset's latest commit SHA.
+
+        Intended to run on CI to ensure the pinned revisions are up-to-date. If the lookup for a
+        dataset fails, its existing pin is kept.
+        """
+        for path, sha in self._revisions.items():
+            try:
+                latest = api.dataset_info(path, timeout=100.0).sha
+            except Exception as exc:
+                logger.warning("Could not refresh %s (%s); keeping pinned revision %s", path, exc, sha)
+                continue
+            if latest and latest != sha:
+                logger.info("%s: %s -> %s", path, sha, latest)
+            self._revisions[path] = latest or sha
+
+
+def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    revisions = dataset_revision_collection(registered_eval_factories(), HfApi())
-    REVISIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    REVISIONS_FILE.write_text(
-        json.dumps(dict(sorted(revisions.items())), indent=4, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
-    logger.info("Wrote %d revisions to %s", len(revisions), REVISIONS_FILE)
+    revisions = HfDatasetRevisions.from_file(HF_REVISIONS_LOCKFILE)
+    revisions.update_to_latest(HfApi())
+    revisions.to_file(HF_REVISIONS_LOCKFILE)
+    logger.info("Refreshed %d pinned revisions in %s", revisions.num_revisions(), HF_REVISIONS_LOCKFILE)
 
 
 if __name__ == "__main__":
