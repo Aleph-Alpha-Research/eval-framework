@@ -142,4 +142,7 @@ class EvalConfig(BaseConfig):
 
     def model_json_robust_subset_dump(self) -> str:
         model_dump = self.model_dump(mode="json", exclude=KEYS_UNRELATED_TO_RESULTS)
+        # Preserve hashes for evaluations created before this optional field existed.
+        if self.user_prompt_suffix is None:
+            model_dump.pop("user_prompt_suffix", None)
         return json.dumps(model_dump, sort_keys=True)
