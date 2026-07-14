@@ -57,6 +57,7 @@ class EvalContext(AbstractContextManager):
         task_name: str | None = None,
         task_subjects: list[str] | None = None,
         hf_revision: str | None = None,
+        user_prompt_suffix: str | None = None,
         output_dir: Path | None = None,
         wandb_project: str | None = None,
         wandb_entity: str | None = None,
@@ -86,6 +87,7 @@ class EvalContext(AbstractContextManager):
         self.task_name = task_name
         self.task_subjects = task_subjects
         self.hf_revision = hf_revision
+        self.user_prompt_suffix = user_prompt_suffix
         self.output_dir = output_dir
         self.wandb_project = wandb_project
         self.wandb_entity = wandb_entity

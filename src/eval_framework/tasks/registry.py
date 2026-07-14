@@ -62,7 +62,11 @@ class EvalFactory(ABC):
 
     @abstractmethod
     def create(
-        self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None
+        self,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
     ) -> BaseTask: ...
 
     @abstractmethod
@@ -72,6 +76,7 @@ class EvalFactory(ABC):
         num_fewshot: int,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
     ) -> BaseTask: ...
 
 
@@ -101,9 +106,18 @@ class _Lazy(EvalFactory):
             self._loaded = getattr(module, self._class_name)
         return self._loaded
 
-    def create(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> BaseTask:
+    def create(
+        self,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
+    ) -> BaseTask:
         return self.task_class().with_overwrite(
-            num_fewshot=num_fewshot, custom_subjects=custom_subjects, custom_hf_revision=custom_hf_revision
+            num_fewshot=num_fewshot,
+            custom_subjects=custom_subjects,
+            custom_hf_revision=custom_hf_revision,
+            user_prompt_suffix=user_prompt_suffix,
         )
 
     def create_perturbation(
@@ -112,12 +126,14 @@ class _Lazy(EvalFactory):
         num_fewshot: int,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
     ) -> BaseTask:
         perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
         return perturbation_task_class.with_overwrite(
             num_fewshot=num_fewshot,
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,
+            user_prompt_suffix=user_prompt_suffix,
         )
 
     def response_type(self) -> ResponseType:
@@ -149,9 +165,18 @@ class _Eager(EvalFactory):
     def task_class(self) -> type[BaseTask]:
         return self._task
 
-    def create(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> BaseTask:
+    def create(
+        self,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
+    ) -> BaseTask:
         return self.task_class().with_overwrite(
-            num_fewshot=num_fewshot, custom_subjects=custom_subjects, custom_hf_revision=custom_hf_revision
+            num_fewshot=num_fewshot,
+            custom_subjects=custom_subjects,
+            custom_hf_revision=custom_hf_revision,
+            user_prompt_suffix=user_prompt_suffix,
         )
 
     def create_perturbation(
@@ -160,12 +185,14 @@ class _Eager(EvalFactory):
         num_fewshot: int,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
     ) -> BaseTask:
         perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
         return perturbation_task_class.with_overwrite(
             num_fewshot=num_fewshot,
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,
+            user_prompt_suffix=user_prompt_suffix,
         )
 
     def response_type(self) -> ResponseType:

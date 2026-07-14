@@ -47,6 +47,7 @@ class EvalConfig(BaseConfig):
     task_name: Annotated[str, AfterValidator(validate_task_name)]
     task_subjects: list[str] | None = None
     hf_revision: str | None = None
+    user_prompt_suffix: str | None = None
     llm_class: type[BaseLLM]
     llm_args: dict[str, Any] = Field(default_factory=dict)
     llm_judge_class: type[BaseLLM] | None = None
