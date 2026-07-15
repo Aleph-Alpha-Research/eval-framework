@@ -58,6 +58,7 @@ def get_or_create_pool(
     lang: str = "python",
     min_pool_size: int = 1,
     max_pool_size: int = 1,
+    runtime_configs: dict[str, str] | None = None,
 ) -> ContainerPoolManager:
     assert image or dockerfile, "Either image or dockerfile must be provided"
     key = (image or dockerfile, tuple(packages) if packages else None)
@@ -70,6 +71,7 @@ def get_or_create_pool(
                 dockerfile=dockerfile,
                 keep_template=True,
                 libraries=packages,
+                runtime_configs=runtime_configs,
             )
             _pools[key] = pool
         return _pools[key]
@@ -107,6 +109,7 @@ def run_python_code(
     input_files: list[tuple[str, str]] | None = None,
     timeout: int = 60,
     packages: list[str] | None = None,
+    runtime_configs: dict[str, str] | None = None,
 ) -> str:
     """
     Run code in a sandboxed environment.
@@ -122,7 +125,12 @@ def run_python_code(
     # Only one of image or dockerfile should be provided.
     # we fallback to the default python image if no dockerfile is provided.
     resolved_image = image or (DefaultImage.PYTHON if not dockerfile else None)
-    pool = get_or_create_pool(resolved_image, packages=packages, dockerfile=dockerfile)
+    pool = get_or_create_pool(
+        resolved_image,
+        packages=packages,
+        dockerfile=dockerfile,
+        runtime_configs=runtime_configs,
+    )
     with SandboxSession(pool=pool, lang="python") as session:
         for host_file, docker_file in input_files or []:
             session.copy_to_runtime(host_file, docker_file)
