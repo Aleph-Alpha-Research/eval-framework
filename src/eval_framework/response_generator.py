@@ -66,10 +66,14 @@ class ResponseGenerator:
                 config.num_fewshot,
                 config.task_subjects,
                 config.hf_revision,
+                user_prompt_suffix=config.user_prompt_suffix,
             )
         else:
             self.task = registry()[config.task_name].create(
-                config.num_fewshot, config.task_subjects, config.hf_revision
+                config.num_fewshot,
+                config.task_subjects,
+                config.hf_revision,
+                user_prompt_suffix=config.user_prompt_suffix,
             )
 
         self.response_type = self.task.get_response_type()
@@ -345,9 +349,10 @@ class ResponseGenerator:
             "llm_args",
             "perturbation_config",
             "repeats",
+            "user_prompt_suffix",
         ]
         for key in keys:
-            if loaded_metadata[key] != current_metadata[key]:
+            if loaded_metadata.get(key) != current_metadata[key]:
                 raise ValueError(f"Existing metadata does not match current metadata for {key}.")
 
     def __del__(self) -> None:

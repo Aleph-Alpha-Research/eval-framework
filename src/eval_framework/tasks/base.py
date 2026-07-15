@@ -115,6 +115,7 @@ class BaseTask[SubjectType](ABC):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         self.num_fewshot = num_fewshot
+        self.user_prompt_suffix: str | None = None
         self.stop_sequences: list[str] | None = None
         self.max_tokens: int | None = None
         self._apply_hf_revision()
@@ -129,9 +130,17 @@ class BaseTask[SubjectType](ABC):
 
     @classmethod
     def with_overwrite(
-        cls, num_fewshot: int, *, custom_subjects: list[str] | None, custom_hf_revision: str | None
+        cls,
+        num_fewshot: int,
+        *,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
     ) -> Self:
         instance = cls(num_fewshot=num_fewshot)
+        if user_prompt_suffix is not None and instance.get_response_type() != ResponseType.COMPLETION:
+            raise ValueError("user_prompt_suffix is only supported for completion tasks.")
+        instance.user_prompt_suffix = user_prompt_suffix
 
         # If custom subjects were provided during initialization, they take precedence over the class-level SUBJECTS.
         filtered_subjects = instance._filter_task_subjects(custom_subjects=custom_subjects)
@@ -241,7 +250,7 @@ class BaseTask[SubjectType](ABC):
 
     def _get_messages(self, item: dict[str, Any]) -> list[Message]:
         example_messages = self._get_example_messages(item)
-        instruction_message = self._get_instruction_messages(item)
+        instruction_message = self._apply_user_prompt_suffix(self._get_instruction_messages(item))
         cue_text = self._get_cue_text(item)
         cue_message = [Message(role=Role.ASSISTANT, content=cue_text)] if cue_text else []
         messages = example_messages + instruction_message + cue_message
@@ -253,6 +262,18 @@ class BaseTask[SubjectType](ABC):
         if system_prompt_text := self._get_system_prompt_text(item):
             return [Message(role=Role.SYSTEM, content=system_prompt_text)] + messages
         return messages
+
+    def _apply_user_prompt_suffix(self, instruction_messages: list[Message]) -> list[Message]:
+        """Append the configured suffix verbatim to the evaluated user turn."""
+        if self.user_prompt_suffix is None:
+            return instruction_messages
+
+        for message in reversed(instruction_messages):
+            if message.role == Role.USER:
+                message.content = f"{message.content}{self.user_prompt_suffix}"
+                return instruction_messages
+
+        raise ValueError("Cannot append user_prompt_suffix: evaluated instruction contains no user message.")
 
     def _get_instruction_messages(self, item: dict[str, Any]) -> list[Message]:
         return [Message(role=Role.USER, content=self._get_instruction_text(item))]

@@ -52,6 +52,7 @@ class LocalContext(EvalContext):
             task_name=self.task_name,
             task_subjects=self.task_subjects,
             hf_revision=self.hf_revision,
+            user_prompt_suffix=self.user_prompt_suffix,
             output_dir=self.output_dir,
             hf_upload_dir=self.hf_upload_dir,
             hf_upload_repo=self.hf_upload_repo,
