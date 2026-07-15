@@ -1,9 +1,10 @@
-"""Refresh the pinned Hugging Face dataset revisions in ``hf-dataset-revisions.json``.
+"""Pinned Hugging Face dataset revisions.
 
-The lock file's keys (dataset paths) define which datasets are pinned; refreshing updates
-each pin to the latest commit SHA.
+A lock file maps dataset paths to pinned commit SHAs. Tasks declare the lock file that
+governs them via their ``REVISION_LOCKFILE`` attribute and resolve their pin from it at
+construction time.
 
-Usage::
+Running this module refreshes every pin in ``hf-dataset-revisions.json``::
 
     uv run python -m eval_framework.tasks.dataset_revisions
 """
@@ -32,6 +33,12 @@ def _pinned_revisions(revisions_file: Path) -> dict[str, str]:
 
 
 class DatasetRevision:
+    """Task class name → SHA pins, merged across registered revision files.
+
+    Only consumed by the companion package; scheduled for removal once it migrates to
+    ``REVISION_LOCKFILE``-based pinning.
+    """
+
     _INSTANCE: "DatasetRevision | None" = None
 
     def __init__(self) -> None:
@@ -83,6 +90,10 @@ class HfDatasetRevisions:
             encoding="utf-8",
         )
 
+    def revision_for(self, dataset_path: str) -> str:
+        """The pinned commit SHA for a dataset. Raises ``KeyError`` if it is not pinned."""
+        return self._revisions[dataset_path]
+
     def num_revisions(self) -> int:
         return len(self._revisions)
 
@@ -101,6 +112,24 @@ class HfDatasetRevisions:
             if latest and latest != sha:
                 logger.info("%s: %s -> %s", path, sha, latest)
             self._revisions[path] = latest or sha
+
+
+@lru_cache
+def _revisions_from_file(lockfile: Path) -> HfDatasetRevisions:
+    return HfDatasetRevisions.from_file(lockfile)
+
+
+def pinned_revision(lockfile: Path, dataset_path: str) -> str:
+    """The commit SHA pinned for ``dataset_path`` in ``lockfile``.
+
+    Resolves the exact dataset revision an eval runs against, so results stay reproducible
+    across dataset updates. Every dataset used by a task is expected to be pinned; a missing
+    entry is a bug in the lock file and raises ``KeyError``.
+    """
+    try:
+        return _revisions_from_file(lockfile).revision_for(dataset_path)
+    except KeyError:
+        raise KeyError(f"Dataset '{dataset_path}' is not pinned in {lockfile}") from None
 
 
 def main() -> None:

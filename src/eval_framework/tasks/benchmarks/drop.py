@@ -75,6 +75,8 @@ class DropCompletion(BaseTask[str]):
     Uses DROP F1 and exact match. Stop at new paragraph or repeated prefixes.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "DropCompletion"
     DATASET_PATH = "EleutherAI/drop"
     SAMPLE_SPLIT = "validation"
@@ -163,6 +165,8 @@ class DropCompletion_OLMES(DropCompletion):
 class DropMC(BaseTask[str]):
     """Multiple-choice variant using allenai/drop-gen2mc (passage_original, question_original, choices, answerKey)."""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "DropMC"
     DATASET_PATH = "allenai/drop-gen2mc"
     SAMPLE_SPLIT = "validation"
@@ -232,6 +236,8 @@ class DropCloze(BaseTask[str]):
     Same dataset as DropMC; options not shown in prompt; model scores full text of each choice.
     Includes BitsPerByte on the correct choice.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "DropCloze"
     DATASET_PATH = "allenai/drop-gen2mc"

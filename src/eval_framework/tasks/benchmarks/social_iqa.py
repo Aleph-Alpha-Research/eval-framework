@@ -151,6 +151,8 @@ class SocialIQACloze(BaseTask[str]):
     Social IQA cloze: loglikelihood over full answer text.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "SocialIQACloze"
     DATASET_PATH = SOCIAL_I_QA_DATASET_PATH
     SAMPLE_SPLIT = "validation"

@@ -4,8 +4,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+import pytest
+
 from eval_framework.tasks import dataset_revisions as dr
-from tests.tests_eval_framework.tasks.conftest import FIXTURE_REVISIONS
 
 
 def test_revisions_file_lives_next_to_module() -> None:
@@ -15,18 +16,35 @@ def test_revisions_file_lives_next_to_module() -> None:
     assert dr.HF_REVISIONS_LOCKFILE.parent == module_dir
 
 
-def test_get_pinned_dataset_revision_returns_sha_for_known_task(fixture_revisions_file: Path) -> None:
+def test_dataset_revision_returns_sha_for_known_task_name(tmp_path: Path) -> None:
+    # Given a registered revision file pinning a task by class name
+    revision_file = tmp_path / "task-dataset-revisions.json"
+    revision_file.write_text('{"SomeTask": "pinned-sha"}', encoding="utf-8")
     dr.DatasetRevision.reset()
-    dr.DatasetRevision.add_revision_file(fixture_revisions_file)
+    dr.DatasetRevision.add_revision_file(revision_file)
 
-    assert dr.DatasetRevision.pinned_revision("COPA") == FIXTURE_REVISIONS["COPA"]
-
-
-def test_get_pinned_dataset_revision_returns_none_for_unknown_task(fixture_revisions_file: Path) -> None:
-    dr.DatasetRevision.reset()
-    dr.DatasetRevision.add_revision_file(fixture_revisions_file)
-
+    # When resolving a known task name, then its pin is returned; unknown names resolve to None
+    assert dr.DatasetRevision.pinned_revision("SomeTask") == "pinned-sha"
     assert dr.DatasetRevision.pinned_revision("NotARegisteredTask") is None
+
+
+def test_pinned_revision_returns_sha_for_pinned_dataset(tmp_path: Path) -> None:
+    # Given a lock file pinning a dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({"org/data": "pinned-sha"}).to_file(lockfile)
+
+    # When resolving the dataset's pin, then the pinned SHA is returned
+    assert dr.pinned_revision(lockfile, "org/data") == "pinned-sha"
+
+
+def test_pinned_revision_raises_for_unpinned_dataset(tmp_path: Path) -> None:
+    # Given a lock file without a pin for the dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({}).to_file(lockfile)
+
+    # Then resolving the dataset's pin fails, naming the lock file
+    with pytest.raises(KeyError, match="not pinned in .*hf-dataset-revisions.json"):
+        dr.pinned_revision(lockfile, "org/data")
 
 
 def test_update_to_latest_updates_sha() -> None:
@@ -70,5 +88,3 @@ def test_hf_dataset_revisions_file_is_sorted_by_dataset_path(tmp_path: Path) -> 
     dr.HfDatasetRevisions({"org/b": "sha-b", "org/a": "sha-a"}).to_file(lockfile)
 
     assert lockfile.read_text(encoding="utf-8").index('"org/a"') < lockfile.read_text(encoding="utf-8").index('"org/b"')
-
-

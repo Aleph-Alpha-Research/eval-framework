@@ -17,6 +17,8 @@ class COPAEvalHarness(BaseTask[str]):
     This version uses samples from the validation split as evaluation examples (same as lm-eval-harness).
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "COPAEvalHarness"
     DATASET_PATH = "aps/super_glue"
     SAMPLE_SPLIT = "validation"  # 100 examples (same split as lm-eval)
@@ -88,6 +90,7 @@ class COPA(COPAEvalHarness):
 
 
 class COPA_IDKEvalHarness(COPAEvalHarness):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "COPA_IDKEvalHarness"
     METRICS = [
         AccuracyLoglikelihood,

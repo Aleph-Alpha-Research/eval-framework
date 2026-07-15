@@ -58,6 +58,8 @@ class WINOGRANDE_OLMES(WINOGRANDE):
     loglikelihood over " A"/" B".
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "Winogrande_OLMES"
 
     def __init__(self, num_fewshot: int = 0) -> None:
