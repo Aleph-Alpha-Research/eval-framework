@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.6.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.3...v0.6.4) (2026-07-15)
+
+
+### Features
+
+* allow user prompt suffix ([#452](https://github.com/Aleph-Alpha-Research/eval-framework/issues/452)) ([48975fb](https://github.com/Aleph-Alpha-Research/eval-framework/commit/48975fb4f8b29239dd061452489829069a665802))
+* register FullTextMMLU task for use in data ablations ([#459](https://github.com/Aleph-Alpha-Research/eval-framework/issues/459)) ([80644d1](https://github.com/Aleph-Alpha-Research/eval-framework/commit/80644d1c6913796e981276a4cee04c07f4d9ba3e))
+
 ## [0.6.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.2...v0.6.3) (2026-07-15)
 
 
