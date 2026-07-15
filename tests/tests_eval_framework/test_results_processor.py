@@ -15,6 +15,18 @@ from template_formatting.formatter import Message, Role
 # here no tests are listed that would need a GPU runner -> no pytest markers set
 
 
+def test_user_prompt_suffix_only_affects_config_hash_when_set() -> None:
+    config = EvalConfig(task_name=MMLU.NAME, llm_class=Qwen3_0_6B)
+    config_with_suffix = config.model_copy(update={"user_prompt_suffix": "/think_long"})
+
+    config_json = config.model_json_robust_subset_dump()
+    config_with_suffix_json = config_with_suffix.model_json_robust_subset_dump()
+
+    assert "user_prompt_suffix" not in config_json
+    assert config_with_suffix_json != config_json
+    assert '"user_prompt_suffix": "/think_long"' in config_with_suffix_json
+
+
 def test_generate_output_dir_with_valid_values() -> None:
     llm_name = "llama-3.1"
     task_name = MMLU.NAME

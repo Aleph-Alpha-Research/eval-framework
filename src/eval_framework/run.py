@@ -151,6 +151,13 @@ def parse_args() -> argparse.Namespace:
         help="A tag name, a branch name, or commit hash for the task HF dataset.",
     )
     parser.add_argument(
+        "--user-prompt-suffix",
+        type=str,
+        required=False,
+        default=None,
+        help="Text appended verbatim to the evaluated user prompt before formatting.",
+    )
+    parser.add_argument(
         "--judge-models",
         type=Path,
         required=False,
@@ -343,6 +350,7 @@ def _run_single_task(kwargs: dict) -> None:
         task_name=kwargs["task_name"],
         task_subjects=kwargs["task_subjects"],
         hf_revision=kwargs["hf_revision"],
+        user_prompt_suffix=kwargs.get("user_prompt_suffix"),
         output_dir=kwargs["output_dir"],
         wandb_project=kwargs["wandb_project"],
         wandb_entity=kwargs["wandb_entity"],
