@@ -15,7 +15,7 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
         # this will always be a list, if return is "" this will be an empty list
         code = response.completion
         try:
-            output = run_python_code(code, image="python:3.12-slim")
+            output = run_python_code(code, image="python:3.12-slim", runtime_configs={"mem_limit": "512m"})
         except SandboxTimeoutError:
             # The submitted code timed out (e.g. an infinite loop) -- a failing sample, not an infra
             # problem.
