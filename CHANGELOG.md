@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.6.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.2...v0.6.3) (2026-07-15)
+
+
+### Bug Fixes
+
+* limit memory used by code exec sandbox ([#457](https://github.com/Aleph-Alpha-Research/eval-framework/issues/457)) ([c1a154e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c1a154e04ea9e545a2eb13268939fc8ec0543a6b))
+* space prefixing mathminerva bpb tasks ([#454](https://github.com/Aleph-Alpha-Research/eval-framework/issues/454)) ([f8cb91c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f8cb91c1dce05dc6b7f76cb9930a8f889b1d7029))
+
 ## [0.6.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.1...v0.6.2) (2026-07-12)
 
 
