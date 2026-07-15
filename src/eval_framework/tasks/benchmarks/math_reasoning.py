@@ -769,31 +769,27 @@ class MATHMinerva_OLMES(MATHMinerva):
 class MATHMinervaBPB(MATHMinerva_OLMES):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "MATHMinervaBPB"
-    TASK_STYLER = BPBStyle(cue_text="Solution:")
+    TASK_STYLER = BPBStyle(cue_text="Solution:", question_prefix="Problem:\n")
 
-    # BPBStyle already adds "Solution:" as that separate assistant message. But the methods we inherit
-    # still put "Solution:" at the end of the question text and leave it out of the fewshot answer.
-    # So we override them here: remove "Solution:" from the question, and add it back in front of the
-    # fewshot answer. Without this, the question ends in "Solution:Solution:" and fewshot answers have
-    # no "Solution:" label at all.
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return "Problem:\n" + item["problem"] + "\n\n"
-
-    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        return f"Solution: {item['solution']}"
-
-    def _get_choices(self, item: dict[str, Any]) -> list[str]:
-        answer = normalized_gold_from_solution(item["solution"])
-        template = f"\nFinal Answer: The final answer is {answer}. I hope it is correct."
-
-        return [item["solution"] + template]
-
-    def _get_correct_index(self, item: dict[str, Any]) -> int:
-        return 0
+    # MATHMinervaEvalHarness (an ancestor) overrides _get_instruction_text/_get_fewshot_target_text/
+    # _get_ground_truth directly instead of going through a TASK_STYLER, so we re-override them here to
+    # opt back into TASK_STYLER-driven formatting. _get_raw_question/_get_choices are the required data
+    # hooks the styler reads from; they have no styler-based default and must supply the raw text.
 
     def _get_raw_question(self, item: dict[str, Any]) -> str:
         return item["problem"]
 
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return [item["solution"]]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return 0
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return self.TASK_STYLER.get_instruction_text(self._get_raw_question(item), self._get_choices(item))
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return self.TASK_STYLER.get_fewshot_target_text(self._get_choices(item), self._get_correct_index(item))
+
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
-        return self._get_choices(item)[0]
+        return self.TASK_STYLER.get_ground_truth(self._get_choices(item), self._get_correct_index(item))
