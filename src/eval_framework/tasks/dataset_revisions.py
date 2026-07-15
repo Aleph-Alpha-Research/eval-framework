@@ -21,6 +21,10 @@ logger = logging.getLogger(__name__)
 # update them in CI without having to parse python code.
 HF_REVISIONS_LOCKFILE = Path(__file__).resolve().parent / "hf-dataset-revisions.json"
 
+# Hand-maintained pins for datasets that must not move, e.g. because newer revisions are
+# incompatible with the task implementation. Never updated by the refresh job.
+FROZEN_HF_REVISIONS_LOCKFILE = Path(__file__).resolve().parent / "frozen-hf-dataset-revisions.json"
+
 
 @lru_cache
 def _pinned_revisions(revisions_file: Path) -> dict[str, str]:
