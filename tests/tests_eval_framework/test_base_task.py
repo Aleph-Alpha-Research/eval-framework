@@ -170,7 +170,6 @@ def test_cli_user_prompt_suffix_parsing() -> None:
 
 def test_pinned_hf_revision_applied_when_unset(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     fixture_path = write_fixture_revisions_file(tmp_path)
-    monkeypatch.setattr(dr, "REVISIONS_FILE", fixture_path)
     dr._pinned_revisions.cache_clear()
     monkeypatch.setattr(dr.DatasetRevision, "_INSTANCE", None)
     dr.DatasetRevision.add_revision_file(fixture_path)

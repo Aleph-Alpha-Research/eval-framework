@@ -12,17 +12,10 @@ import json
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from huggingface_hub import HfApi
 
-if TYPE_CHECKING:
-    from eval_framework.tasks.registry import EvalFactory
-
 logger = logging.getLogger(__name__)
-
-DEFAULT_REVISIONS_FILE = Path(__file__).resolve().parent / "task-dataset-revisions.json"
-REVISIONS_FILE = DEFAULT_REVISIONS_FILE
 
 # The revision of the datasets used by the benchmarks is declared in a file, so we can automatically
 # update them in CI without having to parse python code.
@@ -65,33 +58,6 @@ class DatasetRevision:
     def _append_revision_file(self, file_path: Path) -> None:
         revisions = _pinned_revisions(file_path)
         self._cache |= revisions
-
-
-def _repo_sha(api: HfApi, repo_id: str, cache: dict[str, str | None]) -> str | None:
-    if repo_id in cache:
-        return cache[repo_id]
-    try:
-        cache[repo_id] = api.dataset_info(repo_id, timeout=100.0).sha
-        logger.info("%s -> %s", repo_id, cache[repo_id])
-    except Exception as exc:
-        logger.warning("Skipping %s: %s", repo_id, exc)
-        cache[repo_id] = None
-    return cache[repo_id]
-
-
-def dataset_revision_collection(
-    eval_factories: list["EvalFactory"],
-    api: HfApi,
-) -> dict[str, str]:
-    """Return task class name → latest dataset commit SHA for tasks with a Hugging Face path."""
-
-    cache: dict[str, str | None] = {}
-    revisions: dict[str, str] = {}
-    for factory in eval_factories:
-        path = (factory.dataset_path() or "").strip()
-        if path and (sha := _repo_sha(api, path, cache)):
-            revisions[factory.task_class().__name__] = sha
-    return revisions
 
 
 class HfDatasetRevisions:
