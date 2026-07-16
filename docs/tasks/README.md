@@ -2,7 +2,7 @@
 
 This directory contains the generated documentation for all benchmark tasks available in the package.
 
-**Total number of tasks: 64**
+**Total number of tasks: 65**
 
 The documentation can be generated or updated with `uv run -m eval_framework.utils.generate_task_docs`.
 
@@ -22,6 +22,7 @@ NOTE: This is an automatically generated file. Any manual modifications will not
 - [CommonsenseQAMC_OLMES](CommonsenseQAMC_OLMES.md)
 - [DropCompletion_OLMES](DropCompletion_OLMES.md)
 - [DropMC_OLMES](DropMC_OLMES.md)
+- [FullTextMMLU](FullTextMMLU.md)
 - [GOLDENSWAG](GOLDENSWAG.md)
 - [GOLDENSWAG_IDK](GOLDENSWAG_IDK.md)
 - [GPQA_OLMES](GPQA_OLMES.md)
