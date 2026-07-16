@@ -88,16 +88,16 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
           restore-keys: |
             hf-datasets-
 
-      - name: Download only updated datasets
+      - name: Warm dataset cache
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          echo "Updating changed datasets"
-          uv run --extra=openai python tests/tests_eval_framework/utils/update_datasets.py update
+          echo "Warming dataset cache at pinned revisions"
+          uv run python tests/tests_eval_framework/utils/update_datasets.py
 
   test-extras:
     # Test uv installs (CPU)
@@ -142,7 +142,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
           restore-keys: |
             hf-datasets-
 
@@ -169,7 +169,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
           restore-keys: |
             hf-datasets-
 
@@ -229,7 +229,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
           restore-keys: |
             hf-datasets-
 
@@ -264,7 +264,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
           restore-keys: |
             hf-datasets-
 
