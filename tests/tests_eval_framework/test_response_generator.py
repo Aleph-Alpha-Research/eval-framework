@@ -592,6 +592,8 @@ class NoopResultProcessor(ResultProcessor):
 class StubTask(BaseTask[str]):
     """Minimal task that yields a single sample, no HF dataset loader."""
 
+    REVISION_LOCKFILE = None
+
     NAME = "StubTask"
     DATASET_PATH = "stub"
     SAMPLE_SPLIT = "test"

@@ -13,6 +13,8 @@ from eval_framework.tasks.utils import get_n_letters
 class CommonsenseQACloze(BaseTask[str]):
     """CommonsenseQA dataset: https://huggingface.co/datasets/tau/commonsense_qa"""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "CommonsenseQACloze"
     DATASET_PATH = "tau/commonsense_qa"
     SAMPLE_SPLIT = "validation"
@@ -53,6 +55,8 @@ class CommonsenseQAFullTextCloze(CommonsenseQACloze):
     Scores loglikelihood over the full correct choice text; includes bits-per-byte.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "CommonsenseQAFullTextCloze"
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
 
@@ -64,6 +68,8 @@ class CommonsenseQAFullTextCloze(CommonsenseQACloze):
 
 class CommonsenseQAMC(CommonsenseQACloze):
     """Multiple-choice variant of CommonsenseQA where the model selects a letter (A-E)."""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "CommonsenseQAMC"
 

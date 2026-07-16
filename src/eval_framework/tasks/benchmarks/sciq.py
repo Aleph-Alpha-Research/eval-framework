@@ -95,6 +95,7 @@ class SCIQ_OLMES(SCIQ):
 
 
 class SCIQ_IDK(SCIQ):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "SciQ_IDK"
     METRICS = [
         AccuracyLoglikelihood,
@@ -137,6 +138,7 @@ class SCIQEvalHarness(SCIQ):
 
 
 class SCIQEvalHarness_IDK(SCIQEvalHarness):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "SciQ Eval Harness_IDK"
     METRICS = [
         AccuracyLoglikelihood,

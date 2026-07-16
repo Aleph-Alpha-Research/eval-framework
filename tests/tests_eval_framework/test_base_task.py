@@ -7,11 +7,8 @@ import pytest
 from eval_framework.run import parse_args
 from eval_framework.tasks import dataset_revisions as dr
 from eval_framework.tasks.base import BaseTask, ResponseType
-from eval_framework.tasks.benchmarks.copa import COPA
-from eval_framework.tasks.benchmarks.piqa import PIQA
 from eval_framework.tasks.registry import register_task
 from template_formatting.formatter import Message, Role
-from tests.tests_eval_framework.tasks.conftest import FIXTURE_REVISIONS, write_fixture_revisions_file
 from tests.tests_eval_framework.tasks.test_registry import temporary_registry
 
 
@@ -65,6 +62,7 @@ def test_task_custom_subjects(
     subjects: list[str] | list[tuple], custom_subjects: list[str] | None, expected_value: list[str] | list[tuple] | str
 ) -> None:
     class MyTask(BaseTask):
+        REVISION_LOCKFILE = None
         SUBJECTS = subjects
         NAME = "MyTask"
 
@@ -87,6 +85,7 @@ def test_task_custom_subjects(
 @temporary_registry
 def test_base_task() -> None:
     class MyTask1(BaseTask):
+        REVISION_LOCKFILE = None
         NAME = "MyTask1"
 
         def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -96,6 +95,7 @@ def test_base_task() -> None:
             return []
 
     class MyTask2(BaseTask):
+        REVISION_LOCKFILE = None
         NAME = "MyTask2"
 
         def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -116,6 +116,7 @@ def test_base_task() -> None:
 def test_user_prompt_suffix_only_applies_to_evaluated_user_turn() -> None:
     class MyTask(BaseTask):
         RESPONSE_TYPE = ResponseType.COMPLETION
+        REVISION_LOCKFILE = None
 
         def _get_example_messages(self, item: dict[str, Any]) -> list[Message]:
             return [
@@ -151,6 +152,7 @@ def test_user_prompt_suffix_only_applies_to_evaluated_user_turn() -> None:
 def test_user_prompt_suffix_rejected_for_loglikelihood_task() -> None:
     class MyTask(BaseTask):
         RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
+        REVISION_LOCKFILE = None
 
     with pytest.raises(ValueError, match="only supported for completion tasks"):
         MyTask.with_overwrite(
@@ -168,21 +170,75 @@ def test_cli_user_prompt_suffix_parsing() -> None:
     assert args.user_prompt_suffix == "/think_short"
 
 
-def test_pinned_hf_revision_applied_when_unset(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    fixture_path = write_fixture_revisions_file(tmp_path)
-    monkeypatch.setattr(dr, "REVISIONS_FILE", fixture_path)
-    dr._pinned_revisions.cache_clear()
-    monkeypatch.setattr(dr.DatasetRevision, "_INSTANCE", None)
-    dr.DatasetRevision.add_revision_file(fixture_path)
-    task = COPA.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
-    assert task.HF_REVISION == FIXTURE_REVISIONS["COPA"]
+def _pinned_task(lockfile: Path | None, class_hf_revision: str | None = None) -> type[BaseTask]:
+    """Test double declaring its own revision lock file, like any real task would."""
+
+    class PinnedTask(BaseTask):
+        NAME = "PinnedTask"
+        DATASET_PATH = "my/dataset"
+        REVISION_LOCKFILE = lockfile
+        HF_REVISION = class_hf_revision
+
+        def _get_instruction_text(self, item: dict[str, Any]) -> str:
+            return ""
+
+        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+            return []
+
+    return PinnedTask
 
 
-def test_custom_hf_revision_overrides_pinned() -> None:
-    task = COPA.with_overwrite(0, custom_subjects=None, custom_hf_revision="custom-sha")
+def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
+    # Given a task whose lock file pins its dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
+
+    # When constructing the task without a revision override
+    task = _pinned_task(lockfile).with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+
+    # Then the pinned revision is applied
+    assert task.HF_REVISION == "pinned-sha"
+
+
+def test_task_without_lockfile_is_not_pinned() -> None:
+    # Given a task that opted out of pinning, when constructing it
+    task = _pinned_task(None).with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+
+    # Then no revision is pinned
+    assert task.HF_REVISION is None
+
+
+def test_missing_pin_in_declared_lockfile_raises(tmp_path: Path) -> None:
+    # Given a task whose lock file has no pin for its dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({}).to_file(lockfile)
+
+    # Then constructing the task fails
+    with pytest.raises(KeyError, match="not pinned"):
+        _pinned_task(lockfile).with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+
+
+def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
+    # Given a task whose lock file pins its dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
+
+    # When constructing the task with a revision override
+    task = _pinned_task(lockfile).with_overwrite(0, custom_subjects=None, custom_hf_revision="custom-sha")
+
+    # Then the override beats the pin
     assert task.HF_REVISION == "custom-sha"
 
 
-def test_class_hf_revision_not_overridden_by_pin_file() -> None:
-    task = PIQA.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
-    assert task.HF_REVISION == "6b3aceb3276e5ab7e51895d73151a718690af38c"
+def test_class_hf_revision_not_overridden_by_pin_file(tmp_path: Path) -> None:
+    # Given a task with a class-level revision and a lock file pinning a different one
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
+
+    # When constructing the task without a revision override
+    task = _pinned_task(lockfile, class_hf_revision="frozen-sha").with_overwrite(
+        0, custom_subjects=None, custom_hf_revision=None
+    )
+
+    # Then the class-level revision wins
+    assert task.HF_REVISION == "frozen-sha"

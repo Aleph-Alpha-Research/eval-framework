@@ -31,6 +31,5 @@
     "openai/openai_humaneval": "7dce6050a7d6d172f3cc5c32aa97f52fa1a2e544",
     "rajpurkar/squad": "7b6d24c440a36b6815f21b70d25016731768db1f",
     "rajpurkar/squad_v2": "3ffb306f725f7d2ce8394bc1873b24868140c412",
-    "tau/commonsense_qa": "94630fe30dad47192a8546eb75f094926d47e155",
-    "ybisk/piqa": "2e8ac2dffd59bac8c3c6714948f4c551a0848bb0"
+    "tau/commonsense_qa": "94630fe30dad47192a8546eb75f094926d47e155"
 }

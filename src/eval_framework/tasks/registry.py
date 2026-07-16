@@ -227,11 +227,6 @@ class Registry:
         for name, _ in self._registry.values():
             yield name
 
-    def values(self) -> Iterator[EvalFactory]:
-        """Iterate over all `EvalFactory` items in the registry."""
-        for _, factory in self._registry.values():
-            yield factory
-
     def items(self) -> Iterator[tuple[str, EvalFactory]]:
         """Iterate over `(task name, EvalFactory)` pairs in the registry."""
         yield from self._registry.values()
@@ -292,11 +287,6 @@ def with_registry(registry: Registry) -> Generator[None, Any, None]:
 def registered_task_names() -> list[str]:
     """Return the names of all registered tasks."""
     return list(_REGISTRY)
-
-
-def registered_eval_factories() -> list[EvalFactory]:
-    """Return all registered `EvalFactory` instances."""
-    return list(_REGISTRY.values())
 
 
 def is_registered(name: str, /) -> bool:

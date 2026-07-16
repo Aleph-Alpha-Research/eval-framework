@@ -269,6 +269,8 @@ class TestMCCompletionStyle:
 class _ConcreteMCTask(BaseTask[str]):
     """Minimal concrete task for testing BaseTask with MCStyle."""
 
+    REVISION_LOCKFILE = None
+
     NAME = "TestMCTask"
     DATASET_PATH = "test/dataset"
     SAMPLE_SPLIT = "test"
@@ -291,6 +293,8 @@ class _ConcreteMCTask(BaseTask[str]):
 class _ConcreteClozeTask(BaseTask[str]):
     """Minimal concrete task for testing BaseTask with ClozeStyle."""
 
+    REVISION_LOCKFILE = None
+
     NAME = "TestClozeTask"
     DATASET_PATH = "test/dataset"
     SAMPLE_SPLIT = "test"
@@ -312,6 +316,8 @@ class _ConcreteClozeTask(BaseTask[str]):
 
 class _ConcreteMCCompletionTask(BaseTask[str]):
     """Minimal concrete task for testing BaseTask with MCCompletionStyle."""
+
+    REVISION_LOCKFILE = None
 
     NAME = "TestMCCompletionTask"
     DATASET_PATH = "test/dataset"
@@ -435,6 +441,7 @@ class TestBaseTaskStylerVariants:
 
     def test_shared_base_mc_variant(self) -> None:
         class _Base(BaseTask[str]):
+            REVISION_LOCKFILE = None
             NAME = "BaseTask"
             DATASET_PATH = "test/data"
             SAMPLE_SPLIT = "test"
@@ -547,6 +554,8 @@ class TestBPBStyle:
 
 class _ConcreteBPBTask(BaseTask[str]):
     """Minimal concrete task for testing BaseTask with BPBStyle."""
+
+    REVISION_LOCKFILE = None
 
     NAME = "TestBPBTask"
     DATASET_PATH = "test/dataset"
