@@ -93,7 +93,6 @@ class BaseTask[SubjectType](ABC):
     SAMPLE_SPLIT: str
     FEWSHOT_SPLIT: str
     SUBJECTS: list[SubjectType]
-    HF_REVISION: str | None = None  # tag name, or branch name, or commit hash to ensure reproducibility
 
     # The lock file this task resolves its pinned dataset revision from, keyed by ``DATASET_PATH``.
     # Each task sets this explicitly: point it at a lock file (e.g. ``HF_REVISIONS_LOCKFILE`` or a
@@ -118,15 +117,18 @@ class BaseTask[SubjectType](ABC):
         self.user_prompt_suffix: str | None = None
         self.stop_sequences: list[str] | None = None
         self.max_tokens: int | None = None
-        self._apply_hf_revision()
+        self.hf_revision: str | None = self._apply_hf_revision()
 
-    def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> None:
-        # Precedence: CLI/config override > class HF_REVISION > REVISION_LOCKFILE pin.
+    def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> str | None:
+        # Precedence: CLI/config override > REVISION_LOCKFILE pin.
         # Tasks without a Hugging Face dataset set REVISION_LOCKFILE to None and are not pinned.
         if custom_hf_revision:
-            self.HF_REVISION = custom_hf_revision
-        elif self.HF_REVISION is None and self.REVISION_LOCKFILE is not None:
-            self.HF_REVISION = pinned_revision(self.REVISION_LOCKFILE, self.DATASET_PATH)
+            hf_revision = custom_hf_revision
+        elif self.REVISION_LOCKFILE is not None:
+            hf_revision = pinned_revision(self.REVISION_LOCKFILE, self.DATASET_PATH)
+        else:
+            hf_revision = None
+        return hf_revision
 
     @classmethod
     def with_overwrite(
@@ -148,7 +150,7 @@ class BaseTask[SubjectType](ABC):
             logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {instance.__class__.__name__}")
             instance.SUBJECTS = filtered_subjects  # type: ignore[assignment]
 
-        instance._apply_hf_revision(custom_hf_revision)
+        instance.hf_revision = instance._apply_hf_revision(custom_hf_revision)
 
         return instance
 
@@ -187,10 +189,10 @@ class BaseTask[SubjectType](ABC):
             return custom_subjects  # type: ignore[return-value]
 
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
-        # Check if the HF_REVISION is valid before loading the dataset
-        if self.HF_REVISION:
+        # Check if the revision is valid before loading the dataset
+        if self.hf_revision:
             try:
-                _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=self.HF_REVISION, timeout=100.0)
+                _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=self.hf_revision, timeout=100.0)
             except Exception as e:
                 if isinstance(e, RevisionNotFoundError):
                     raise e
@@ -200,14 +202,14 @@ class BaseTask[SubjectType](ABC):
         try:
             return load_dataset(
                 **kwargs,
-                revision=self.HF_REVISION,
+                revision=self.hf_revision,
                 cache_dir=cache_dir,
                 download_config=download_config,
             )
         except Exception:
             return load_dataset(
                 **kwargs,
-                revision=self.HF_REVISION,
+                revision=self.hf_revision,
                 cache_dir=f"{Path.home()}/.cache/eval-framework",
             )
 
