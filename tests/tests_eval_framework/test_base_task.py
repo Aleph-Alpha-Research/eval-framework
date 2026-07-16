@@ -170,14 +170,13 @@ def test_cli_user_prompt_suffix_parsing() -> None:
     assert args.user_prompt_suffix == "/think_short"
 
 
-def _pinned_task(lockfile: Path | None, class_hf_revision: str | None = None) -> type[BaseTask]:
+def _pinned_task(lockfile: Path | None) -> type[BaseTask]:
     """Test double declaring its own revision lock file, like any real task would."""
 
     class PinnedTask(BaseTask):
         NAME = "PinnedTask"
         DATASET_PATH = "my/dataset"
         REVISION_LOCKFILE = lockfile
-        HF_REVISION = class_hf_revision
 
         def _get_instruction_text(self, item: dict[str, Any]) -> str:
             return ""
@@ -197,7 +196,7 @@ def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
     task = _pinned_task(lockfile).with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
 
     # Then the pinned revision is applied
-    assert task.HF_REVISION == "pinned-sha"
+    assert task.hf_revision == "pinned-sha"
 
 
 def test_task_without_lockfile_is_not_pinned() -> None:
@@ -205,7 +204,7 @@ def test_task_without_lockfile_is_not_pinned() -> None:
     task = _pinned_task(None).with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
 
     # Then no revision is pinned
-    assert task.HF_REVISION is None
+    assert task.hf_revision is None
 
 
 def test_missing_pin_in_declared_lockfile_raises(tmp_path: Path) -> None:
@@ -227,18 +226,4 @@ def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
     task = _pinned_task(lockfile).with_overwrite(0, custom_subjects=None, custom_hf_revision="custom-sha")
 
     # Then the override beats the pin
-    assert task.HF_REVISION == "custom-sha"
-
-
-def test_class_hf_revision_not_overridden_by_pin_file(tmp_path: Path) -> None:
-    # Given a task with a class-level revision and a lock file pinning a different one
-    lockfile = tmp_path / "hf-dataset-revisions.json"
-    dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
-
-    # When constructing the task without a revision override
-    task = _pinned_task(lockfile, class_hf_revision="frozen-sha").with_overwrite(
-        0, custom_subjects=None, custom_hf_revision=None
-    )
-
-    # Then the class-level revision wins
-    assert task.HF_REVISION == "frozen-sha"
+    assert task.hf_revision == "custom-sha"
