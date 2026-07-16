@@ -16,18 +16,6 @@ def test_revisions_file_lives_next_to_module() -> None:
     assert dr.HF_REVISIONS_LOCKFILE.parent == module_dir
 
 
-def test_dataset_revision_returns_sha_for_known_task_name(tmp_path: Path) -> None:
-    # Given a registered revision file pinning a task by class name
-    revision_file = tmp_path / "task-dataset-revisions.json"
-    revision_file.write_text('{"SomeTask": "pinned-sha"}', encoding="utf-8")
-    dr.DatasetRevision.reset()
-    dr.DatasetRevision.add_revision_file(revision_file)
-
-    # When resolving a known task name, then its pin is returned; unknown names resolve to None
-    assert dr.DatasetRevision.pinned_revision("SomeTask") == "pinned-sha"
-    assert dr.DatasetRevision.pinned_revision("NotARegisteredTask") is None
-
-
 def test_pinned_revision_returns_sha_for_pinned_dataset(tmp_path: Path) -> None:
     # Given a lock file pinning a dataset
     lockfile = tmp_path / "hf-dataset-revisions.json"

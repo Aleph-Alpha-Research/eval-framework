@@ -63,9 +63,9 @@ class SQUAD2(BaseTask[str]):
 
     def _validate_hf_revision(self, dataset_path: str) -> None:
         """Validate HuggingFace revision if specified."""
-        if self.HF_REVISION:
+        if self.hf_revision:
             try:
-                HfApi().dataset_info(repo_id=dataset_path, revision=self.HF_REVISION, timeout=100.0)
+                HfApi().dataset_info(repo_id=dataset_path, revision=self.hf_revision, timeout=100.0)
             except RevisionNotFoundError:
                 raise
 
@@ -76,7 +76,7 @@ class SQUAD2(BaseTask[str]):
 
         return load_dataset(
             **kwargs,
-            revision=self.HF_REVISION,
+            revision=self.hf_revision,
             cache_dir=cache_dir,
             download_config=download_config,
         )
