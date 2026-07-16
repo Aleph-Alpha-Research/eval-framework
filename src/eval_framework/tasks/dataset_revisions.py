@@ -27,50 +27,6 @@ HF_REVISIONS_LOCKFILE = Path(__file__).resolve().parent / "hf-dataset-revisions.
 FROZEN_HF_REVISIONS_LOCKFILE = Path(__file__).resolve().parent / "frozen-hf-dataset-revisions.json"
 
 
-@lru_cache
-def _pinned_revisions(revisions_file: Path) -> dict[str, str]:
-    return json.loads(revisions_file.read_text(encoding="utf-8"))
-
-
-class DatasetRevision:
-    """Task class name → SHA pins, merged across registered revision files.
-
-    Only consumed by the companion package; scheduled for removal once it migrates to
-    ``REVISION_LOCKFILE``-based pinning.
-    """
-
-    _INSTANCE: "DatasetRevision | None" = None
-
-    def __init__(self) -> None:
-        self._cache: dict[str, str] = {}
-
-    @classmethod
-    def _get_instance(cls) -> "DatasetRevision":
-        if cls._INSTANCE is None:
-            cls._INSTANCE = cls()
-        return cls._INSTANCE
-
-    @classmethod
-    def add_revision_file(cls, file_path: Path | str) -> None:
-        instance = cls._get_instance()
-        instance._append_revision_file(Path(file_path))
-
-    @classmethod
-    def pinned_revision(cls, task_class_name: str) -> str | None:
-        if cls._INSTANCE is None:
-            raise RuntimeError("No revision file added; call add_revision_file() before pinned_revision().")
-        return cls._INSTANCE._cache.get(task_class_name)
-
-    @classmethod
-    def reset(cls) -> None:
-        # for unit tests only.
-        cls._INSTANCE = None
-
-    def _append_revision_file(self, file_path: Path) -> None:
-        revisions = _pinned_revisions(file_path)
-        self._cache |= revisions
-
-
 class HfDatasetRevisions:
     """Pinned revisions of Hugging Face datasets, mapping dataset path → commit SHA."""
 
