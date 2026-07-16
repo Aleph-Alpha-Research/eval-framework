@@ -1,9 +1,10 @@
-"""Refresh the pinned Hugging Face dataset revisions in ``hf-dataset-revisions.json``.
+"""Pinned Hugging Face dataset revisions.
 
-The lock file's keys (dataset paths) define which datasets are pinned; refreshing updates
-each pin to the latest commit SHA.
+A lock file maps dataset paths to pinned commit SHAs. Tasks declare the lock file that
+governs them via their ``REVISION_LOCKFILE`` attribute and resolve their pin from it at
+construction time.
 
-Usage::
+Running this module refreshes every pin in ``hf-dataset-revisions.json``::
 
     uv run python -m eval_framework.tasks.dataset_revisions
 """
@@ -12,21 +13,18 @@ import json
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from huggingface_hub import HfApi
 
-if TYPE_CHECKING:
-    from eval_framework.tasks.registry import EvalFactory
-
 logger = logging.getLogger(__name__)
-
-DEFAULT_REVISIONS_FILE = Path(__file__).resolve().parent / "task-dataset-revisions.json"
-REVISIONS_FILE = DEFAULT_REVISIONS_FILE
 
 # The revision of the datasets used by the benchmarks is declared in a file, so we can automatically
 # update them in CI without having to parse python code.
 HF_REVISIONS_LOCKFILE = Path(__file__).resolve().parent / "hf-dataset-revisions.json"
+
+# Hand-maintained pins for datasets that must not move, e.g. because newer revisions are
+# incompatible with the task implementation. Never updated by the refresh job.
+FROZEN_HF_REVISIONS_LOCKFILE = Path(__file__).resolve().parent / "frozen-hf-dataset-revisions.json"
 
 
 @lru_cache
@@ -35,6 +33,12 @@ def _pinned_revisions(revisions_file: Path) -> dict[str, str]:
 
 
 class DatasetRevision:
+    """Task class name → SHA pins, merged across registered revision files.
+
+    Only consumed by the companion package; scheduled for removal once it migrates to
+    ``REVISION_LOCKFILE``-based pinning.
+    """
+
     _INSTANCE: "DatasetRevision | None" = None
 
     def __init__(self) -> None:
@@ -67,33 +71,6 @@ class DatasetRevision:
         self._cache |= revisions
 
 
-def _repo_sha(api: HfApi, repo_id: str, cache: dict[str, str | None]) -> str | None:
-    if repo_id in cache:
-        return cache[repo_id]
-    try:
-        cache[repo_id] = api.dataset_info(repo_id, timeout=100.0).sha
-        logger.info("%s -> %s", repo_id, cache[repo_id])
-    except Exception as exc:
-        logger.warning("Skipping %s: %s", repo_id, exc)
-        cache[repo_id] = None
-    return cache[repo_id]
-
-
-def dataset_revision_collection(
-    eval_factories: list["EvalFactory"],
-    api: HfApi,
-) -> dict[str, str]:
-    """Return task class name → latest dataset commit SHA for tasks with a Hugging Face path."""
-
-    cache: dict[str, str | None] = {}
-    revisions: dict[str, str] = {}
-    for factory in eval_factories:
-        path = (factory.dataset_path() or "").strip()
-        if path and (sha := _repo_sha(api, path, cache)):
-            revisions[factory.task_class().__name__] = sha
-    return revisions
-
-
 class HfDatasetRevisions:
     """Pinned revisions of Hugging Face datasets, mapping dataset path → commit SHA."""
 
@@ -113,6 +90,10 @@ class HfDatasetRevisions:
             encoding="utf-8",
         )
 
+    def revision_for(self, dataset_path: str) -> str:
+        """The pinned commit SHA for a dataset. Raises ``KeyError`` if it is not pinned."""
+        return self._revisions[dataset_path]
+
     def num_revisions(self) -> int:
         return len(self._revisions)
 
@@ -131,6 +112,24 @@ class HfDatasetRevisions:
             if latest and latest != sha:
                 logger.info("%s: %s -> %s", path, sha, latest)
             self._revisions[path] = latest or sha
+
+
+@lru_cache
+def _revisions_from_file(lockfile: Path) -> HfDatasetRevisions:
+    return HfDatasetRevisions.from_file(lockfile)
+
+
+def pinned_revision(lockfile: Path, dataset_path: str) -> str:
+    """The commit SHA pinned for ``dataset_path`` in ``lockfile``.
+
+    Resolves the exact dataset revision an eval runs against, so results stay reproducible
+    across dataset updates. Every dataset used by a task is expected to be pinned; a missing
+    entry is a bug in the lock file and raises ``KeyError``.
+    """
+    try:
+        return _revisions_from_file(lockfile).revision_for(dataset_path)
+    except KeyError:
+        raise KeyError(f"Dataset '{dataset_path}' is not pinned in {lockfile}") from None
 
 
 def main() -> None:

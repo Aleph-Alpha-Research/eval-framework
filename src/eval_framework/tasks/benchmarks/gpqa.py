@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 class GPQA(BaseTask[str]):
     """GPQA dataset: https://huggingface.co/datasets/Idavidrein/gpqa"""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "GPQA"
     DATASET_PATH = "Idavidrein/gpqa"
     SAMPLE_SPLIT = "train"
@@ -172,6 +174,7 @@ class GPQA_IDK(GPQA):
 
 
 class GPQA_COT(GPQA):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "GPQA_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]

@@ -28,6 +28,8 @@ class HumanEvalMetricContext(BaseMetricContext):
 class HumanEval(BaseTask[str]):
     """HumanEval dataset: https://huggingface.co/datasets/openai/openai_humaneval/"""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "Human Eval"
     DATASET_PATH = "openai/openai_humaneval"
     SAMPLE_SPLIT = "test"
@@ -128,6 +130,7 @@ class HumanEval_OLMES(HumanEval):
 
 class HumanEvalInstruct(HumanEval):
     # See https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/humaneval/humaneval_instruct.yaml
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "Human Eval Instruct"
     CUE_PREFIX = "Here is the completed function:\n```python\n"
 

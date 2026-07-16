@@ -192,6 +192,8 @@ class SQUAD2BPB(SQUAD2):
     Reports bits-per-byte on the reference answer (first acceptable answer).
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "SQuAD2 BPB"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [BitsPerByteLoglikelihood]

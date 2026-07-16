@@ -17,6 +17,8 @@ from eval_framework.tasks.utils import get_n_letters
 class MedQACloze(BaseTask[str]):
     """MedQA cloze (loglikelihood over choice text)."""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MedQACloze"
     DATASET_PATH = "davidheineman/medqa-en"
     SAMPLE_SPLIT = "test"
@@ -52,6 +54,8 @@ class MedQACloze(BaseTask[str]):
 
 class MedQAMC(MedQACloze):
     """MedQA multiple choice (loglikelihood over A/B/C/D/...)."""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MedQAMC"
 

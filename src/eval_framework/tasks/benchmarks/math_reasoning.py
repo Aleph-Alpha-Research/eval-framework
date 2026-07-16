@@ -482,6 +482,8 @@ class MATH500(MATHReasoning):
 class MATH(MATHReasoning):
     """MATH dataset: https://huggingface.co/datasets/EleutherAI/hendrycks_math"""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "Math"
     DATASET_PATH = "EleutherAI/hendrycks_math"
     SAMPLE_SPLIT = "test"
@@ -559,6 +561,8 @@ class MATHMinervaEvalHarness(MATHReasoning):
     Metrics: Exact Match, Exact Match (Flex) via MathMinervaCompletion.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MATHMinervaEvalHarness"
     DATASET_PATH = "EleutherAI/hendrycks_math"
     SAMPLE_SPLIT = "test"
@@ -595,6 +599,8 @@ class MATHMinerva(MATHMinervaEvalHarness):
     "(The )Final Answer: The (final )answer is ...( I hope it is correct.)", where parentheses are optional.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MATHMinerva"
     METRICS = [MathMinervaCompletionRelaxed]
 
@@ -610,6 +616,8 @@ class MATH500Minerva(MATHMinerva):
     Uses HuggingFaceH4/MATH-500 which has a single 'default' config (no subject splits).
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MATH500Minerva"
     DATASET_PATH = "HuggingFaceH4/MATH-500"
     SAMPLE_SPLIT = "test"
@@ -622,6 +630,7 @@ class MATH500Minerva(MATHMinerva):
 
 
 class MATHLvl5(MATH):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "Math Lvl 5"
 
     def _load_dataset(self, subject: SubjectType) -> None:

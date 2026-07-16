@@ -82,11 +82,13 @@ class _NaturalQsOpenChoice_Base(BaseTask[str]):
 
 
 class NaturalQsOpenCloze(_NaturalQsOpenChoice_Base):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "NaturalQsOpenCloze"
     TASK_STYLER = ClozeStyle()
 
 
 class NaturalQsOpenMC(_NaturalQsOpenChoice_Base):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "NaturalQsOpenMC"
     TASK_STYLER = MCStyle()
 
