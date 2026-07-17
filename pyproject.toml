@@ -22,7 +22,6 @@ dependencies = [
   "xmltodict>=1.0.4,<1.1",
   "pydantic>=2.13.4,<3",
   "datasets>=5.0.0,<6",
-  "sacrebleu>=2.6.0,<3",
   "pycountry>=26.2.16,<27",
   "nltk>=3.10.0,<4",
   "python-dotenv>=1.2.2,<2",
