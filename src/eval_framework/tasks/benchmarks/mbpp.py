@@ -33,6 +33,7 @@ class MBPP(BaseTask[str]):
 
     NAME = "MBPP"
     DATASET_PATH = "google-research-datasets/mbpp"
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
