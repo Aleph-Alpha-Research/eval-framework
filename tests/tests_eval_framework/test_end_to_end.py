@@ -23,7 +23,6 @@ NUM_FEWSHOT = 2
 NUM_SAMPLES = 10
 
 # A small subset of tasks to test end-to-end:
-# A loglikelihood task, a completion accuracy task, and a BLEU task
 experiment_setups = [
     (
         "SmolLM135M",

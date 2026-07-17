@@ -125,10 +125,7 @@ from eval_framework.metrics.completion.accuracy_completion import AccuracyComple
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
 from eval_framework.metrics.completion.cwe_accuracy import CWEAccuracy
 
-# Translation and similarity metrics
-from eval_framework.metrics.completion.bleu import BLEU
-from eval_framework.metrics.completion.chrf import CHRF
-from eval_framework.metrics.completion.ter import TER
+# Text similarity metrics
 from eval_framework.metrics.completion.rouge_1 import ROUGE_1
 from eval_framework.metrics.completion.rouge_2 import ROUGE_2
 from eval_framework.metrics.completion.rouge_l import ROUGE_L
