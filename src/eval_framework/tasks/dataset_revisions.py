@@ -49,6 +49,12 @@ class HfDatasetRevisions:
     def num_revisions(self) -> int:
         return len(self._revisions)
 
+    def download_datasets(self, api: HfApi) -> None:
+        """Ensures every pinned dataset at its pinned revision is in the local Hugging Face cache."""
+        for path, sha in self._revisions.items():
+            api.snapshot_download(repo_id=path, repo_type="dataset", revision=sha)
+            logger.info("Cached %s @ %s", path, sha)
+
     def update_to_latest(self, api: HfApi) -> None:
         """Update every pin to its dataset's latest commit SHA.
 

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 
 import pytest
 
@@ -33,6 +33,21 @@ def test_pinned_revision_raises_for_unpinned_dataset(tmp_path: Path) -> None:
     # Then resolving the dataset's pin fails, naming the lock file
     with pytest.raises(KeyError, match="not pinned in .*hf-dataset-revisions.json"):
         dr.pinned_revision(lockfile, "org/data")
+
+
+def test_download_datasets_fetches_every_pin_at_its_revision() -> None:
+    # Given two pinned datasets
+    api = MagicMock()
+    revisions = dr.HfDatasetRevisions({"org/a": "sha-a", "org/b": "sha-b"})
+
+    # When downloading them
+    revisions.download_datasets(api)
+
+    # Then each dataset snapshot is fetched at exactly its pinned revision
+    assert api.snapshot_download.call_args_list == [
+        call(repo_id="org/a", repo_type="dataset", revision="sha-a"),
+        call(repo_id="org/b", repo_type="dataset", revision="sha-b"),
+    ]
 
 
 def test_update_to_latest_updates_sha() -> None:

@@ -18,7 +18,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # <- single source of truth
+  # Raw dataset snapshots. The warm job downloads them at the pinned revisions and they are
+  # shared across jobs via the actions cache; load_dataset reads its files from here.
+  HF_HUB_CACHE: /tmp/huggingface_hub
+  # Datasets prepared for loading, derived per job from the snapshots. Not cached.
+  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets
   UV_LINK_MODE: symlink
   UV_LOCKED: 1
 
@@ -74,7 +78,7 @@ jobs:
       - name: Run MyPy
         run: uv run --all-extras mypy
 
-  hf-datasets-cache:
+  hf-snapshots-cache:
     runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
     steps:
       - uses: actions/checkout@v7
@@ -87,17 +91,17 @@ jobs:
       - name: Restore and save cache
         uses: actions/cache@v6
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
+          path: ${{ env.HF_HUB_CACHE }}
+          key: hf-snapshots-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
           restore-keys: |
-            hf-datasets-
+            hf-snapshots-
 
       - name: Warm dataset cache
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
           echo "Warming dataset cache at pinned revisions"
-          uv run python tests/tests_eval_framework/utils/update_datasets.py
+          uv run python scripts/warm_dataset_cache.py
 
   test-extras:
     # Test uv installs (CPU)
@@ -129,7 +133,7 @@ jobs:
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+    needs: [hf-snapshots-cache, test-extras]
     steps:
       - uses: actions/checkout@v7
 
@@ -141,10 +145,10 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v6
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
+          path: ${{ env.HF_HUB_CACHE }}
+          key: hf-snapshots-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
           restore-keys: |
-            hf-datasets-
+            hf-snapshots-
 
       - name: Run tests
         env:
@@ -156,7 +160,7 @@ jobs:
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+    needs: [hf-snapshots-cache, test-extras]
     steps:
       - uses: actions/checkout@v7
 
@@ -168,10 +172,10 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v6
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
+          path: ${{ env.HF_HUB_CACHE }}
+          key: hf-snapshots-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
           restore-keys: |
-            hf-datasets-
+            hf-snapshots-
 
       - name: Run tests
         env:
@@ -183,7 +187,7 @@ jobs:
   test-formatter-hash:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+    needs: [hf-snapshots-cache, test-extras]
     permissions:
       pull-requests: read
     steps:
@@ -228,10 +232,10 @@ jobs:
         if: steps.should_run.outputs.value == 'true'
         uses: actions/cache/restore@v6
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
+          path: ${{ env.HF_HUB_CACHE }}
+          key: hf-snapshots-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
           restore-keys: |
-            hf-datasets-
+            hf-snapshots-
 
       - name: Run formatter hashing tests
         if: steps.should_run.outputs.value == 'true'
@@ -245,7 +249,7 @@ jobs:
     # PRs: run GPU tests directly on the GPU runner (no Docker image).
     if: github.event_name == 'pull_request'
     runs-on: EvalFrameworkGPURunner
-    needs: [hf-datasets-cache, test-cpu, test-cpu-slow, test-formatter-hash]
+    needs: [hf-snapshots-cache, test-cpu, test-cpu-slow, test-formatter-hash]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -263,10 +267,10 @@ jobs:
       - name: Huggingface datasets cache
         uses: actions/cache/restore@v6
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
+          path: ${{ env.HF_HUB_CACHE }}
+          key: hf-snapshots-${{ hashFiles('src/eval_framework/tasks/hf-dataset-revisions.json', 'src/eval_framework/tasks/frozen-hf-dataset-revisions.json') }}
           restore-keys: |
-            hf-datasets-
+            hf-snapshots-
 
       - name: Verify GPU installs via uv --exact
         run: |
