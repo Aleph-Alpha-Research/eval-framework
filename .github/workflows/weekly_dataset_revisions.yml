@@ -33,7 +33,7 @@ jobs:
       - name: Update pinned dataset revisions
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: uv run python -m eval_framework.tasks.dataset_revisions
+        run: uv run python scripts/update_hf_datasets.py
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
