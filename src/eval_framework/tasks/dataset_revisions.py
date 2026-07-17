@@ -3,10 +3,6 @@
 A lock file maps dataset paths to pinned commit SHAs. Tasks declare the lock file that
 governs them via their ``REVISION_LOCKFILE`` attribute and resolve their pin from it at
 construction time.
-
-Running this module refreshes every pin in ``hf-dataset-revisions.json``::
-
-    uv run python -m eval_framework.tasks.dataset_revisions
 """
 
 import json
@@ -86,15 +82,3 @@ def pinned_revision(lockfile: Path, dataset_path: str) -> str:
         return _revisions_from_file(lockfile).revision_for(dataset_path)
     except KeyError:
         raise KeyError(f"Dataset '{dataset_path}' is not pinned in {lockfile}") from None
-
-
-def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    revisions = HfDatasetRevisions.from_file(HF_REVISIONS_LOCKFILE)
-    revisions.update_to_latest(HfApi())
-    revisions.to_file(HF_REVISIONS_LOCKFILE)
-    logger.info("Refreshed %d pinned revisions in %s", revisions.num_revisions(), HF_REVISIONS_LOCKFILE)
-
-
-if __name__ == "__main__":
-    main()
