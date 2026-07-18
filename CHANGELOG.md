@@ -14,6 +14,22 @@
 
 ### Bug Fixes
 
+## [0.7.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.4...v0.7.0) (2026-07-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* sacrebleu completly removed ([#469](https://github.com/Aleph-Alpha-Research/eval-framework/issues/469))
+
+### Features
+
+* sacrebleu completly removed ([#469](https://github.com/Aleph-Alpha-Research/eval-framework/issues/469)) ([c880eab](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c880eab08ede43c22fb59577a9c3bf6b571a43c0))
+
+
+### Bug Fixes
+
+* missing revision lockfile declared for mbpp ([#465](https://github.com/Aleph-Alpha-Research/eval-framework/issues/465)) ([e764eba](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e764eba2c2c61fdf03ec0fd2c8224a729a90d601))
+
 ## [0.6.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.3...v0.6.4) (2026-07-15)
 
 
