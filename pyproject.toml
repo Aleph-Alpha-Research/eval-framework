@@ -37,7 +37,7 @@ dependencies = [
   "jsonlines>=4,<5",
   "lxml>=6.1.1,<7",
   "python-iso639>=2026.4.20",
-  "wandb>=0.28.0,<1",
+  "wandb>=0.28.1,<1",
   "boto3>=1.43.19,<2",
   "numpy>=2.2.6",
   # is a dependency of sympy, but not explicitly listed in the requirements.txt
