@@ -1,6 +1,3 @@
-import logging
-import random
-import time
 from enum import Enum
 
 from eval_framework.tasks.base import BaseTask
@@ -8,8 +5,6 @@ from eval_framework.tasks.registry import (
     register_lazy_task,
     registered_tasks_iter,
 )
-
-logger = logging.getLogger(__name__)
 
 
 class TaskNameEnum(Enum):
@@ -91,25 +86,6 @@ def register_all_tasks() -> None:
         import eval_framework_companion  # noqa
     except ImportError:
         pass
-
-
-def make_sure_all_hf_datasets_are_in_cache() -> None:
-    """Download every registered task's dataset at its pinned revision into the local cache.
-
-    Datasets already cached at the pinned revision are cheap no-ops, so this doubles as an
-    incremental top-up after a pin change.
-    """
-    for task_name, task_class in registered_tasks_iter():
-        task = task_class()
-        for attempt in range(10):
-            try:
-                for _ in task.iterate_samples(num_samples=1):
-                    pass
-                break
-            except Exception as e:
-                logger.info(f"{e} Will retry loading {task_name} in a few seconds, attempt #{attempt + 1}.")
-                time.sleep(random.randint(1, 5))
-        logger.info(f"Processed {task_name}")
 
 
 if __name__ == "__main__":
