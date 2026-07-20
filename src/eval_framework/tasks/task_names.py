@@ -1,10 +1,7 @@
 from enum import Enum
 
 from eval_framework.tasks.base import BaseTask
-from eval_framework.tasks.registry import (
-    register_lazy_task,
-    registered_tasks_iter,
-)
+from eval_framework.tasks.registry import register_lazy_task
 
 
 class TaskNameEnum(Enum):
@@ -86,7 +83,3 @@ def register_all_tasks() -> None:
         import eval_framework_companion  # noqa
     except ImportError:
         pass
-
-
-if __name__ == "__main__":
-    print(list(registered_tasks_iter()))

@@ -18,7 +18,6 @@ __all__ = [
     "Registry",
     "with_registry",
     "get_task",
-    "registered_tasks_iter",
     "is_registered",
     "validate_task_name",
     "registered_task_names",
@@ -299,15 +298,6 @@ def validate_task_name(name: str) -> str:
     if not is_registered(name):
         raise ValueError(f"Task not registered: {name}")
     return name
-
-
-def registered_tasks_iter() -> Iterator[tuple[str, type[BaseTask]]]:
-    """Iterate over the names and classes of all registered tasks.
-
-    Note: This method will import any lazily registered task.
-    """
-    for name, factory in _REGISTRY.items():
-        yield name, factory.task_class()
 
 
 def get_task(name: str, /) -> type[BaseTask]:
