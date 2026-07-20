@@ -273,7 +273,10 @@ class SQuAD2_MA(SQUAD2):
         # Remove common prefixes and clean whitespace
         cleaned = completion_text.strip()
         common_prefixes = ["Answer","Final answer"]
-        common_prefixes.extend(f"**{prefix}**" for prefix in common_prefixes)
+        # A list comprehension (not a generator) is required here: list.extend
+        # consumes lazily, so a generator over the list being extended never
+        # terminates and grows the list unboundedly until OOM.
+        common_prefixes.extend([f"**{prefix}**" for prefix in common_prefixes])
         common_prefixes.reverse()
 
         # Search for the last occurrence of any common prefix, and take only what's after it.
