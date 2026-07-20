@@ -189,19 +189,12 @@ class BaseTask[SubjectType](ABC):
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
         cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
         download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
-        try:
-            return load_dataset(
-                **kwargs,
-                revision=self.hf_revision,
-                cache_dir=cache_dir,
-                download_config=download_config,
-            )
-        except Exception:
-            return load_dataset(
-                **kwargs,
-                revision=self.hf_revision,
-                cache_dir=f"{Path.home()}/.cache/eval-framework",
-            )
+        return load_dataset(
+            **kwargs,
+            revision=self.hf_revision,
+            cache_dir=cache_dir,
+            download_config=download_config,
+        )
 
     def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, Any]:
         dataset = {}
