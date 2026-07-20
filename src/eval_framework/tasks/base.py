@@ -10,8 +10,6 @@ from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 import iso639
 from datasets import DatasetDict, DownloadConfig, load_dataset
-from huggingface_hub import HfApi
-from huggingface_hub.errors import RevisionNotFoundError
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
@@ -189,14 +187,6 @@ class BaseTask[SubjectType](ABC):
             return custom_subjects  # type: ignore[return-value]
 
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
-        # Check if the revision is valid before loading the dataset
-        if self.hf_revision:
-            try:
-                _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=self.hf_revision, timeout=100.0)
-            except Exception as e:
-                if isinstance(e, RevisionNotFoundError):
-                    raise e
-
         cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
         download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
         try:
