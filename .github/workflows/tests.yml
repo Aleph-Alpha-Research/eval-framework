@@ -246,12 +246,6 @@ jobs:
       - name: Verify GPU installs via uv --exact
         run: |
           set -e
-          echo "Testing vllm extra"
-          uv run --exact --extra vllm pytest -v --noconftest tests/tests_eval_framework/installs/test_vllm.py
-
-          echo "Testing mistral extra"
-          uv run --exact --extra mistral pytest -v --noconftest tests/tests_eval_framework/installs/test_mistral.py
-
           echo "Testing all extras together"
           uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
 
