@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.7.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.7.0...v0.7.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency wandb to &gt;=0.28.1,&lt;1 ([#480](https://github.com/Aleph-Alpha-Research/eval-framework/issues/480)) ([beba946](https://github.com/Aleph-Alpha-Research/eval-framework/commit/beba946f1af25b19fc46d857d349451a2bbb6bb4))
+
 ## [0.7.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.4...v0.7.0) (2026-07-18)
 
 
