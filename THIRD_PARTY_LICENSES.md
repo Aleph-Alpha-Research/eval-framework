@@ -8,7 +8,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 | License (SPDX) | Count |
 |---|---|
 | `MIT` | 40 |
-| `BSD-3-Clause` | 24 |
+| `BSD-3-Clause` | 21 |
 | `Apache-2.0` | 12 |
 | `BSD-2-Clause` | 3 |
 | `PSF-2.0` | 2 |
@@ -63,8 +63,6 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **click** 8.4.2 - https://github.com/pallets/click/
 - **dill** 0.4.1 - https://github.com/uqfoundation/dill
 - **fsspec** 2026.4.0 - https://github.com/fsspec/filesystem_spec
-- **gitdb** 4.0.12 - https://github.com/gitpython-developers/gitdb
-- **GitPython** 3.1.50 - https://github.com/gitpython-developers/GitPython
 - **httpcore** 1.0.9 - https://www.encode.io/httpcore/
 - **httpx** 0.28.1 - https://github.com/encode/httpx
 - **idna** 3.18 - https://github.com/kjd/idna
@@ -80,7 +78,6 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **protobuf** 7.35.1 - https://developers.google.com/protocol-buffers/
 - **python-dotenv** 1.2.2 - https://github.com/theskumar/python-dotenv
 - **scipy** 1.18.0 - https://scipy.org/
-- **smmap** 5.0.3 - https://github.com/gitpython-developers/smmap
 - **sympy** 1.14.0 - https://sympy.org
 
 ## GNU General Public License (GPL)
@@ -137,7 +134,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **typer** 0.26.8 - https://github.com/fastapi/typer
 - **typing-inspection** 0.4.2 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.7.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
-- **wandb** 0.28.0 - https://github.com/wandb/wandb
+- **wandb** 0.28.1 - https://github.com/wandb/wandb
 - **wasabi** 1.1.3 - https://github.com/explosion/wasabi
 - **weasel** 1.0.0 - https://github.com/explosion/weasel/
 - **xmltodict** 1.0.4 - https://github.com/martinblech/xmltodict
@@ -1219,87 +1216,6 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-```
-
-### gitdb 4.0.12 (BSD-3-Clause)
-
-```text
-Copyright (C) 2010, 2011 Sebastian Thiel and contributors
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-* Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-
-* Neither the name of the GitDB project nor the names of
-its contributors may be used to endorse or promote products derived
-from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-Additional Licenses
--------------------
-The files at
-gitdb/test/fixtures/packs/pack-11fdfa9e156ab73caae3b6da867192221f2089c2.idx
-and
-gitdb/test/fixtures/packs/pack-11fdfa9e156ab73caae3b6da867192221f2089c2.pack
-are licensed under GNU GPL as part of the git source repository,
-see http://en.wikipedia.org/wiki/Git_%28software%29 for more information.
-
-They are not required for the actual operation, which is why they are not found
-in the distribution package.
-```
-
-### GitPython 3.1.50 (BSD-3-Clause)
-
-```text
-Copyright (C) 2008, 2009 Michael Trier and contributors
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-* Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-
-* Neither the name of the GitPython project nor the names of
-its contributors may be used to endorse or promote products derived
-from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
 ### google-crc32c 1.8.0 (UNKNOWN)
@@ -18095,40 +18011,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### smmap 5.0.3 (BSD-3-Clause)
-
-```text
-Copyright (C) 2010, 2011 Sebastian Thiel and contributors
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-* Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright
-notice, this list of conditions and the following disclaimer in the
-documentation and/or other materials provided with the distribution.
-
-* Neither the name of the async project nor the names of
-its contributors may be used to endorse or promote products derived
-from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-```
-
 ### spacy 3.8.14 (MIT)
 
 ```text
@@ -18833,7 +18715,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### wandb 0.28.0 (MIT)
+### wandb 0.28.1 (MIT)
 
 ```text
 MIT License
