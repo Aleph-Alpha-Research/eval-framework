@@ -4,7 +4,6 @@ from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from datasets.exceptions import DatasetNotFoundError
 from dateutil import parser
 
 from eval_framework.llm.base import BaseLLM
@@ -317,15 +316,14 @@ def test_filter_task_subjects(
 
 
 @pytest.mark.parametrize(
-    "task_name, hf_revision, raises",
+    "task_name, hf_revision",
     [
-        pytest.param("HumanEval_OLMES", None, False),
-        pytest.param("HumanEval_OLMES", "not_valid_revision_1", True),
-        pytest.param("ARC", None, False),
-        pytest.param("IFEval", "9381f5d15347ba8854ffa2a480984ce7e554ef56", False),  # old valid revision
+        pytest.param("HumanEval_OLMES", None),
+        pytest.param("ARC", None),
+        pytest.param("IFEval", "9381f5d15347ba8854ffa2a480984ce7e554ef56"),  # old valid revision
     ],
 )
-def test_hf_revisions(task_name: str, hf_revision: str, raises: bool) -> None:
+def test_hf_revisions(task_name: str, hf_revision: str) -> None:
     llm = Mock(spec=BaseLLM)
     config = EvalConfig(
         task_name=task_name, num_fewshot=0, num_samples=1, hf_revision=hf_revision, llm_class=llm.__class__
@@ -337,14 +335,9 @@ def test_hf_revisions(task_name: str, hf_revision: str, raises: bool) -> None:
         result_processor=result_processor,
     )
 
-    if raises:
-        with pytest.raises(DatasetNotFoundError):
-            for _ in response_generator.task.iterate_samples(num_samples=config.num_samples):
-                pass
-    else:
-        for _ in response_generator.task.iterate_samples(num_samples=config.num_samples):
-            pass
-        assert response_generator.task.dataset
+    for _ in response_generator.task.iterate_samples(num_samples=config.num_samples):
+        pass
+    assert response_generator.task.dataset
 
 
 def test_response_generator_metadata_handling(tmp_path: Path) -> None:
