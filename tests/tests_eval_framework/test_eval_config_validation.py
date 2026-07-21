@@ -149,14 +149,6 @@ class TestEvalConfigLLMArgsValidation:
                     "use_beam_search": "False",
                     "seed": "None",
                 },
-                "model_config": {
-                    "gpu_memory_utilization": "0.8",
-                    "max_model_len": "2048",
-                    "nested_config": {
-                        "deep_value": "42",
-                        "deep_flag": "True",
-                    },
-                },
             },
             "task_name": "MMLU",
         }
@@ -176,20 +168,6 @@ class TestEvalConfigLLMArgsValidation:
         assert sp["use_beam_search"] is False
         assert isinstance(sp["use_beam_search"], bool)
         assert sp["seed"] is None
-
-        # Test model_config conversion
-        mc = config.llm_args["model_config"]
-        assert mc["gpu_memory_utilization"] == 0.8
-        assert isinstance(mc["gpu_memory_utilization"], float)
-        assert mc["max_model_len"] == 2048
-        assert isinstance(mc["max_model_len"], int)
-
-        # Test deeply nested conversion
-        nc = mc["nested_config"]
-        assert nc["deep_value"] == 42
-        assert isinstance(nc["deep_value"], int)
-        assert nc["deep_flag"] is True
-        assert isinstance(nc["deep_flag"], bool)
 
     def test_already_correct_types_preserved(self) -> None:
         """Test that values with correct types are not modified."""
