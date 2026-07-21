@@ -13,6 +13,7 @@ except ImportError:
 from eval_framework.context.local import LocalContext
 from eval_framework.main import main
 from eval_framework.tasks.task_loader import load_extra_tasks
+from eval_framework.tasks.utils import close_pools
 from eval_framework.utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -392,19 +393,22 @@ def _run_single_task(kwargs: dict) -> None:
 def run_with_kwargs(kwargs: dict) -> None:
     task_suite_path = kwargs.pop("task_suite", None)
 
-    if task_suite_path is not None:
-        from eval_framework.suite import TaskSuite, run_suite
+    try:
+        if task_suite_path is not None:
+            from eval_framework.suite import TaskSuite, run_suite
 
-        output_dir = kwargs.get("output_dir", "outputs")
-        log_level = kwargs.get("verbosity", 1)
-        setup_logging(output_dir, log_level=log_level)
+            output_dir = kwargs.get("output_dir", "outputs")
+            log_level = kwargs.get("verbosity", 1)
+            setup_logging(output_dir, log_level=log_level)
 
-        suite = TaskSuite.load(task_suite_path)
-        logger.info(f"Loaded task suite '{suite.name}' from {task_suite_path}")
-        result = run_suite(suite, kwargs)
-        logger.info(f"Suite '{suite.name}' completed. Aggregates: {result.aggregates}")
-    else:
-        _run_single_task(kwargs)
+            suite = TaskSuite.load(task_suite_path)
+            logger.info(f"Loaded task suite '{suite.name}' from {task_suite_path}")
+            result = run_suite(suite, kwargs)
+            logger.info(f"Suite '{suite.name}' completed. Aggregates: {result.aggregates}")
+        else:
+            _run_single_task(kwargs)
+    finally:
+        close_pools()
 
 
 def run() -> None:
