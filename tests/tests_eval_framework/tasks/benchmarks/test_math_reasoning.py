@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import pytest
+from datasets import Dataset, DatasetDict
 
 from eval_framework.tasks.benchmarks.math_reasoning import MATH, MATHMinervaBPB
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
@@ -134,15 +135,17 @@ _FEWSHOT_ROW: dict[str, str] = {
     "solution": "1 + 1 = 2. Final Answer: The final answer is $2$. I hope it is correct.",
 }
 
-# _get_instruction_text no longer embeds the cue; it becomes its own ASSISTANT message.
-_EVAL_PROBLEM = "Problem:\nWhat is 2 + 3?\n\n"
-_FEWSHOT_PROBLEM = f"Problem:\n{_FEWSHOT_ROW['problem']}\n\n"
+# _get_instruction_text delegates fully to TASK_STYLER (BPBStyle with question_prefix="Problem:\n"),
+# which renders "{question_prefix}{raw_question}\n"; the cue becomes its own ASSISTANT message.
+_EVAL_PROBLEM = f"Problem:\n{_EVAL_ROW['problem']}\n"
+_FEWSHOT_PROBLEM = f"Problem:\n{_FEWSHOT_ROW['problem']}\n"
 _FEWSHOT_ANSWER = f"{_CUE} {_FEWSHOT_ROW['solution']}"
 
-# _get_ground_truth returns _get_choices()[0] — no leading space
-_GROUND_TRUTH = "2 + 3 = 5. So the answer is $\\boxed{5}$.\nFinal Answer: The final answer is 5. I hope it is correct."
-# BPBStyle.get_possible_completions adds a leading space
-_EVAL_COMPLETION = " " + _GROUND_TRUTH
+# _get_choices returns the raw solution untouched; _get_ground_truth delegates to
+# TASK_STYLER.get_ground_truth, which adds a leading space.
+_GROUND_TRUTH = " " + _EVAL_ROW["solution"]
+# BPBStyle.get_possible_completions adds that same leading space to the same (single) choice.
+_EVAL_COMPLETION = _GROUND_TRUTH
 _COMPLETIONS = [_EVAL_COMPLETION]
 
 # Concat strings are identical to before; structure just moves the cue to an ASSISTANT turn.
@@ -197,3 +200,15 @@ def test_mathminervabpb_offline_prompt_formatting_oneshot() -> None:
         assert_offline_oneshot_prompt(
             MATHMinervaBPB, eval_row=_EVAL_ROW, fewshot_row=_FEWSHOT_ROW, subjects=[_SUBJECT], expected=_ONESHOT
         )
+
+
+def test_mathminervabpb_loglikelihood_keys_match_ground_truth() -> None:
+    def mock_zero_fewshot_examples(self, item):
+        return []
+
+    with patch.object(MATHMinervaBPB, "_sample_fewshot_examples", mock_zero_fewshot_examples):
+        task = MATHMinervaBPB.with_overwrite(num_fewshot=0, custom_subjects=[_SUBJECT], custom_hf_revision=None)
+        mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([_EVAL_ROW])})
+        with patch.object(task, "_load_hf_dataset", return_value=mock_dataset):
+            sample = next(iter(task.iterate_samples(1)))
+            assert sample.ground_truth in sample.possible_completions

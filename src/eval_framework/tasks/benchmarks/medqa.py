@@ -10,11 +10,14 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 
 class MedQACloze(BaseTask[str]):
     """MedQA cloze (loglikelihood over choice text)."""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MedQACloze"
     DATASET_PATH = "davidheineman/medqa-en"
@@ -52,6 +55,8 @@ class MedQACloze(BaseTask[str]):
 class MedQAMC(MedQACloze):
     """MedQA multiple choice (loglikelihood over A/B/C/D/...)."""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MedQAMC"
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -78,6 +83,8 @@ class MedQAMC_OLMES(MedQAMC):
     """
     MedQA multiple choice with OLMES-style prompt: space before each label (" A.", " B.", ...).
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MedQAMC_OLMES"
     FEWSHOT_SPLIT = "train"

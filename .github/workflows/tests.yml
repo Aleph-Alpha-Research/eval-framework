@@ -18,10 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REGISTRY: registry.gitlab.aleph-alpha.de
-  REPO_OWNER: research/public-registry
-  IMAGE_NAME: eval_framework
-  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # <- single source of truth
+  HF_DATASET_CACHE_DIR: /tmp/huggingface_datasets  # each job lazily caches its own subset here
   UV_LINK_MODE: symlink
   UV_LOCKED: 1
 
@@ -64,7 +61,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
@@ -76,99 +73,6 @@ jobs:
 
       - name: Run MyPy
         run: uv run --all-extras mypy
-
-  hf-datasets-cache:
-    runs-on: cpu-runner-8c-32gb-01  # default runner runs out of disk space, unfortunately
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
-        with:
-          version: "~=0.8.16"
-
-      - name: Restore and save cache
-        uses: actions/cache@v5
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
-          restore-keys: |
-            hf-datasets-
-
-      - name: Download only updated datasets
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: |
-          echo "Updating changed datasets"
-          uv run --extra=openai python tests/tests_eval_framework/utils/update_datasets.py update
-
-  tag:
-    # Set Docker Tag and Image Name for Docker Build and Push (GPU Runs)
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.set-tag.outputs.tag }}
-      image: ${{ steps.set-tag.outputs.image }}
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v7
-    - name: Set Tag
-      id: set-tag
-      run: |
-        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          TAG='latest'
-        else
-          # head_ref is the correct branch name for PRs
-          BRANCH_NAME=${{ github.head_ref || github.ref_name }}
-          # Convert slashes with hyphens and ensure valid Docker tag format
-          TAG=$(echo "${BRANCH_NAME}" | sed 's/[^a-zA-Z0-9._-]/-/g' | cut -c1-20)
-        fi
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
-        echo "image=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
-
-    - name: Output Docker Tag
-      run: |
-        echo "Docker Tag: ${{ steps.set-tag.outputs.tag }}"
-        echo "Docker image: ${{ steps.set-tag.outputs.image }}"
-
-  build:
-    # Build and push image only on main / merge_group, to keep :latest and :buildcache warm
-    # for the GPU job's cache-from. PRs build locally on the GPU runner instead.
-    if: github.event_name == 'push' || github.event_name == 'merge_group'
-    needs: [lint, tag]
-    runs-on: cpu-runner-8c-32gb-01
-    container: docker:dind
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v7
-
-      - name: Registry Authentication
-        uses: docker/login-action@v4
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: token
-          password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
-
-      - name: Setup Docker BuildX
-        uses: docker/setup-buildx-action@v4
-
-      - name: Build and Push Image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: Dockerfile
-
-          push: true
-          tags: ${{ needs.tag.outputs.image }}
-
-          build-args: BUILDKIT_INLINE_CACHE=1
-
-          cache-from: |
-            type=gha,scope=shared
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:buildcache
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:latest
-            type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO_OWNER }}/${{ env.IMAGE_NAME }}:${{ needs.tag.outputs.tag }}
-          cache-to: |
-            type=gha,scope=shared,mode=max
 
   test-extras:
     # Test uv installs (CPU)
@@ -183,7 +87,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
@@ -200,22 +104,22 @@ jobs:
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+    needs: [test-extras]
     steps:
       - uses: actions/checkout@v7
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
       - name: Huggingface datasets cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache@v6
         with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}        # <- shared path
-          key: hf-datasets-${{ github.run_id }}
+          path: ${{ env.HF_DATASET_CACHE_DIR }}
+          key: hf-datasets-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            hf-datasets-
+            hf-datasets-${{ github.job }}-
 
       - name: Run tests
         env:
@@ -227,22 +131,22 @@ jobs:
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+    needs: [test-extras]
     steps:
       - uses: actions/checkout@v7
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
       - name: Huggingface datasets cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache@v6
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            hf-datasets-
+            hf-datasets-${{ github.job }}-
 
       - name: Run tests
         env:
@@ -254,7 +158,7 @@ jobs:
   test-formatter-hash:
     runs-on: cpu-runner-8c-32gb-01
     container: derskythe/github-runner-base:ubuntu-noble
-    needs: [hf-datasets-cache, test-extras]
+    needs: [test-extras]
     permissions:
       pull-requests: read
     steps:
@@ -291,18 +195,18 @@ jobs:
 
       - name: Setup uv
         if: steps.should_run.outputs.value == 'true'
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
       - name: Huggingface datasets cache
         if: steps.should_run.outputs.value == 'true'
-        uses: actions/cache/restore@v5
+        uses: actions/cache@v6
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            hf-datasets-
+            hf-datasets-${{ github.job }}-
 
       - name: Run formatter hashing tests
         if: steps.should_run.outputs.value == 'true'
@@ -316,7 +220,7 @@ jobs:
     # PRs: run GPU tests directly on the GPU runner (no Docker image).
     if: github.event_name == 'pull_request'
     runs-on: EvalFrameworkGPURunner
-    needs: [tag, hf-datasets-cache, test-cpu, test-cpu-slow, test-formatter-hash]
+    needs: [test-cpu, test-cpu-slow, test-formatter-hash]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -327,17 +231,17 @@ jobs:
           python-version: "3.11"
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
       - name: Huggingface datasets cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache@v6
         with:
           path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
+          key: hf-datasets-${{ github.job }}-${{ github.run_id }}
           restore-keys: |
-            hf-datasets-
+            hf-datasets-${{ github.job }}-
 
       - name: Verify GPU installs via uv --exact
         run: |
@@ -371,77 +275,3 @@ jobs:
         run: |
           uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
           uv run --all-extras pytest --log-cli-level=INFO -v -m "vllm"
-
-  test-docker-gpu:
-    # main/merge queue: run GPU tests against the just-built image.
-    if: github.event_name == 'push' || github.event_name == 'merge_group'
-    runs-on: EvalFrameworkGPURunner
-    needs: [build, tag, hf-datasets-cache, test-cpu, test-cpu-slow, test-formatter-hash]
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v7
-
-      - name: Registry Authentication
-        uses: docker/login-action@v4
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: token
-          password: ${{ secrets.GL_PUBLIC_REGISTRY_READ_WRITE_TOKEN }}
-
-      - name: Pull image built in this workflow
-        run: docker pull ${{ needs.tag.outputs.image }}
-
-      - name: Huggingface datasets cache
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.run_id }}
-          restore-keys: |
-            hf-datasets-
-
-      - name: Verify GPU installs via uv --exact
-        run: |
-          set -e
-          docker run --rm --gpus all -w /eval_framework ${{ needs.tag.outputs.image }} bash -c '
-            set -e
-            echo "Testing vllm extra"
-            uv run --exact --extra vllm pytest -v --noconftest tests/tests_eval_framework/installs/test_vllm.py
-
-            echo "Testing mistral extra"
-            uv run --exact --extra mistral pytest -v --noconftest tests/tests_eval_framework/installs/test_mistral.py
-
-            echo "Testing all extras together"
-            uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
-          '
-
-      - name: Test GPU
-        timeout-minutes: 20
-        run: |
-          docker run --rm --gpus all \
-            -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
-            -v ${{ env.HF_DATASET_CACHE_DIR }}:${{ env.HF_DATASET_CACHE_DIR }} \
-            -w /eval_framework \
-            ${{ needs.tag.outputs.image }} \
-            bash -c '
-              uv run --all-extras python -c "import nltk; nltk.download(\"punkt_tab\")" &&
-              uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
-            '
-
-      - name: Test VLLM
-        timeout-minutes: 20
-        run: |
-          docker run --rm --gpus all \
-            -e HF_TOKEN=${{ secrets.HUGGINGFACE_API_KEY }} \
-            -e VLLM_LOGGING_LEVEL=DEBUG \
-            -e VLLM_WORKER_MULTIPROC_METHOD=spawn \
-            -e VLLM_USE_MODELSCOPE=False \
-            -e VLLM_NCCL_SO_PATH="" \
-            -e VLLM_USE_TRITON_FLASH_ATTN=0 \
-            -e VLLM_DISABLE_CUSTOM_ALL_REDUCE=1 \
-            -v ${{ env.HF_DATASET_CACHE_DIR }}:${{ env.HF_DATASET_CACHE_DIR }} \
-            -w /eval_framework \
-            ${{ needs.tag.outputs.image }} \
-            bash -c '
-              python -c "import nltk; nltk.download(\"punkt_tab\")" &&
-              pytest --log-cli-level=INFO -v -m "vllm"
-            '

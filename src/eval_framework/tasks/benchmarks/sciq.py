@@ -11,6 +11,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 
@@ -69,6 +70,8 @@ class SCIQ_OLMES(SCIQ):
     loglikelihood over " A"/" B"/" C"/" D". Answer choices are deterministically shuffled per example.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "SciQ_OLMES"
     SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
     FEWSHOT_SPLIT = "train"
@@ -92,6 +95,7 @@ class SCIQ_OLMES(SCIQ):
 
 
 class SCIQ_IDK(SCIQ):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "SciQ_IDK"
     METRICS = [
         AccuracyLoglikelihood,
@@ -134,6 +138,7 @@ class SCIQEvalHarness(SCIQ):
 
 
 class SCIQEvalHarness_IDK(SCIQEvalHarness):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "SciQ Eval Harness_IDK"
     METRICS = [
         AccuracyLoglikelihood,

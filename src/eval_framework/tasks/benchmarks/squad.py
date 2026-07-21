@@ -12,6 +12,7 @@ from eval_framework.metrics.completion.accuracy_completion import AccuracyComple
 from eval_framework.metrics.completion.f1 import F1, F1SquadNormalized
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
 
 class SQUAD2(BaseTask[str]):
@@ -62,9 +63,9 @@ class SQUAD2(BaseTask[str]):
 
     def _validate_hf_revision(self, dataset_path: str) -> None:
         """Validate HuggingFace revision if specified."""
-        if self.HF_REVISION:
+        if self.hf_revision:
             try:
-                HfApi().dataset_info(repo_id=dataset_path, revision=self.HF_REVISION, timeout=100.0)
+                HfApi().dataset_info(repo_id=dataset_path, revision=self.hf_revision, timeout=100.0)
             except RevisionNotFoundError:
                 raise
 
@@ -75,7 +76,7 @@ class SQUAD2(BaseTask[str]):
 
         return load_dataset(
             **kwargs,
-            revision=self.HF_REVISION,
+            revision=self.hf_revision,
             cache_dir=cache_dir,
             download_config=download_config,
         )
@@ -191,6 +192,8 @@ class SQUAD2BPB(SQUAD2):
     Reports bits-per-byte on the reference answer (first acceptable answer).
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "SQuAD2 BPB"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [BitsPerByteLoglikelihood]
@@ -239,6 +242,8 @@ class SQUAD(SQUAD2):
 class SQuAD2_MA(SQUAD2):
     """SQuAD v2 with the exact system prompt used in MA training"""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "SQuAD2_MA"
     UNANSWERABLE_STR = "unanswerable"
 
@@ -264,6 +269,8 @@ class SQuAD2_MA(SQUAD2):
 
 class SQuAD_OLMES(SQUAD):
     """SQuAD variant matching OLMES implementation."""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "SQuAD_OLMES"
     SAMPLE_SPLIT = "validation"

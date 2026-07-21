@@ -15,6 +15,7 @@ from eval_framework.metrics.completion.minerva_math_utils import (
     normalized_gold_from_solution,
 )
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import BPBStyle
 
 # Hendrycks MATH subject splits (shared by MATH, MATHMinervaEvalHarness, MATHMinervaBPB)
@@ -331,6 +332,8 @@ class AIME2024(MATHReasoning):
     pass@1 evaluation
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "AIME2024"
     DATASET_PATH = "HuggingFaceH4/aime_2024"
     SAMPLE_SPLIT = "train"
@@ -387,6 +390,8 @@ class AIME2025(AIME2024):
     pass@1 evaluation
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "AIME2025"
     DATASET_PATH = "math-ai/aime25"
     SAMPLE_SPLIT = "test"
@@ -405,6 +410,8 @@ class AIME2026(AIME2024):
 
     pass@1 evaluation
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "AIME2026"
     DATASET_PATH = "math-ai/aime26"
@@ -425,6 +432,8 @@ class MATH500(MATHReasoning):
 
     pass@1 evaluation
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MATH500"
     DATASET_PATH = "HuggingFaceH4/MATH-500"
@@ -472,6 +481,8 @@ class MATH500(MATHReasoning):
 
 class MATH(MATHReasoning):
     """MATH dataset: https://huggingface.co/datasets/EleutherAI/hendrycks_math"""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "Math"
     DATASET_PATH = "EleutherAI/hendrycks_math"
@@ -550,6 +561,8 @@ class MATHMinervaEvalHarness(MATHReasoning):
     Metrics: Exact Match, Exact Match (Flex) via MathMinervaCompletion.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MATHMinervaEvalHarness"
     DATASET_PATH = "EleutherAI/hendrycks_math"
     SAMPLE_SPLIT = "test"
@@ -586,6 +599,8 @@ class MATHMinerva(MATHMinervaEvalHarness):
     "(The )Final Answer: The (final )answer is ...( I hope it is correct.)", where parentheses are optional.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MATHMinerva"
     METRICS = [MathMinervaCompletionRelaxed]
 
@@ -601,6 +616,8 @@ class MATH500Minerva(MATHMinerva):
     Uses HuggingFaceH4/MATH-500 which has a single 'default' config (no subject splits).
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "MATH500Minerva"
     DATASET_PATH = "HuggingFaceH4/MATH-500"
     SAMPLE_SPLIT = "test"
@@ -613,6 +630,7 @@ class MATH500Minerva(MATHMinerva):
 
 
 class MATHLvl5(MATH):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "Math Lvl 5"
 
     def _load_dataset(self, subject: SubjectType) -> None:
@@ -641,6 +659,8 @@ class GSM8KReasoning(MATHReasoning):
 
     Zero-shot reasoning version that expects answers in boxed format.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "GSM8KReasoning"
     DATASET_PATH = "openai/gsm8k"
@@ -742,6 +762,7 @@ _OLMES_FEWSHOTS = [
 
 
 class MATHMinerva_OLMES(MATHMinerva):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "MATHMinerva_OLMES"
     METRICS = [MathMinervaCompletion, MathMinervaCompletionRelaxed]
 
@@ -755,32 +776,29 @@ class MATHMinerva_OLMES(MATHMinerva):
 
 
 class MATHMinervaBPB(MATHMinerva_OLMES):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "MATHMinervaBPB"
-    TASK_STYLER = BPBStyle(cue_text="Solution:")
+    TASK_STYLER = BPBStyle(cue_text="Solution:", question_prefix="Problem:\n")
 
-    # BPBStyle already adds "Solution:" as that separate assistant message. But the methods we inherit
-    # still put "Solution:" at the end of the question text and leave it out of the fewshot answer.
-    # So we override them here: remove "Solution:" from the question, and add it back in front of the
-    # fewshot answer. Without this, the question ends in "Solution:Solution:" and fewshot answers have
-    # no "Solution:" label at all.
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return "Problem:\n" + item["problem"] + "\n\n"
-
-    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        return f"Solution: {item['solution']}"
-
-    def _get_choices(self, item: dict[str, Any]) -> list[str]:
-        answer = normalized_gold_from_solution(item["solution"])
-        template = f"\nFinal Answer: The final answer is {answer}. I hope it is correct."
-
-        return [item["solution"] + template]
-
-    def _get_correct_index(self, item: dict[str, Any]) -> int:
-        return 0
+    # MATHMinervaEvalHarness (an ancestor) overrides _get_instruction_text/_get_fewshot_target_text/
+    # _get_ground_truth directly instead of going through a TASK_STYLER, so we re-override them here to
+    # opt back into TASK_STYLER-driven formatting. _get_raw_question/_get_choices are the required data
+    # hooks the styler reads from; they have no styler-based default and must supply the raw text.
 
     def _get_raw_question(self, item: dict[str, Any]) -> str:
         return item["problem"]
 
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return [item["solution"]]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return 0
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return self.TASK_STYLER.get_instruction_text(self._get_raw_question(item), self._get_choices(item))
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return self.TASK_STYLER.get_fewshot_target_text(self._get_choices(item), self._get_correct_index(item))
+
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
-        return self._get_choices(item)[0]
+        return self.TASK_STYLER.get_ground_truth(self._get_choices(item), self._get_correct_index(item))

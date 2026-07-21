@@ -8,11 +8,14 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
 
 class GOLDENSWAG(HELLASWAG):
     """GoldenSwag dataset: https://huggingface.co/datasets/PleIAs/GoldenSwag
     available data set sections: validation"""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "GoldenSwag"
     DATASET_PATH = "PleIAs/GoldenSwag"
@@ -21,6 +24,7 @@ class GOLDENSWAG(HELLASWAG):
 
 
 class GOLDENSWAG_IDK(GOLDENSWAG):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "GoldenSwag_IDK"
     METRICS = [
         AccuracyLoglikelihood,

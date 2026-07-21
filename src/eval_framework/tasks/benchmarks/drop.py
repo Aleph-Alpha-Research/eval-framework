@@ -10,6 +10,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 
@@ -73,6 +74,8 @@ class DropCompletion(BaseTask[str]):
 
     Uses DROP F1 and exact match. Stop at new paragraph or repeated prefixes.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "DropCompletion"
     DATASET_PATH = "EleutherAI/drop"
@@ -139,6 +142,8 @@ class DropCompletion(BaseTask[str]):
 class DropCompletion_OLMES(DropCompletion):
     """DropCompletion matching OLMES, using train split for fewshot and max tokens 100."""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "DropCompletion_OLMES"
     FEWSHOT_SPLIT = "train"
 
@@ -159,6 +164,8 @@ class DropCompletion_OLMES(DropCompletion):
 
 class DropMC(BaseTask[str]):
     """Multiple-choice variant using allenai/drop-gen2mc (passage_original, question_original, choices, answerKey)."""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "DropMC"
     DATASET_PATH = "allenai/drop-gen2mc"
@@ -210,6 +217,8 @@ class DropMC_OLMES(DropMC):
     DropMC with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "DropMC_OLMES"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -227,6 +236,8 @@ class DropCloze(BaseTask[str]):
     Same dataset as DropMC; options not shown in prompt; model scores full text of each choice.
     Includes BitsPerByte on the correct choice.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "DropCloze"
     DATASET_PATH = "allenai/drop-gen2mc"

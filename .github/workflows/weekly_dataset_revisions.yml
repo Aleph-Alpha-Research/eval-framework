@@ -26,19 +26,14 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
           version: "~=0.8.16"
 
       - name: Update pinned dataset revisions
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: |
-          uv run python -c "
-          import eval_framework.tasks  # registers all benchmark tasks
-          from eval_framework.tasks.benchmarks.dataset_revisions import main
-          main()
-          "
+        run: uv run python scripts/update_hf_datasets.py
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
@@ -51,7 +46,7 @@ jobs:
             ## Summary
 
             Automated weekly update of pinned Hugging Face dataset commit SHAs in
-            `task-dataset-revisions.json`.
+            `hf-dataset-revisions.json`.
 
             ## Review
 

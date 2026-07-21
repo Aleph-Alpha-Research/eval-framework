@@ -14,6 +14,91 @@
 
 ### Bug Fixes
 
+## [0.7.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.7.0...v0.7.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency wandb to &gt;=0.28.1,&lt;1 ([#480](https://github.com/Aleph-Alpha-Research/eval-framework/issues/480)) ([beba946](https://github.com/Aleph-Alpha-Research/eval-framework/commit/beba946f1af25b19fc46d857d349451a2bbb6bb4))
+
+## [0.7.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.4...v0.7.0) (2026-07-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* sacrebleu completly removed ([#469](https://github.com/Aleph-Alpha-Research/eval-framework/issues/469))
+
+### Features
+
+* sacrebleu completly removed ([#469](https://github.com/Aleph-Alpha-Research/eval-framework/issues/469)) ([c880eab](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c880eab08ede43c22fb59577a9c3bf6b571a43c0))
+
+
+### Bug Fixes
+
+* missing revision lockfile declared for mbpp ([#465](https://github.com/Aleph-Alpha-Research/eval-framework/issues/465)) ([e764eba](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e764eba2c2c61fdf03ec0fd2c8224a729a90d601))
+
+## [0.6.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.3...v0.6.4) (2026-07-15)
+
+
+### Features
+
+* allow user prompt suffix ([#452](https://github.com/Aleph-Alpha-Research/eval-framework/issues/452)) ([48975fb](https://github.com/Aleph-Alpha-Research/eval-framework/commit/48975fb4f8b29239dd061452489829069a665802))
+* register FullTextMMLU task for use in data ablations ([#459](https://github.com/Aleph-Alpha-Research/eval-framework/issues/459)) ([80644d1](https://github.com/Aleph-Alpha-Research/eval-framework/commit/80644d1c6913796e981276a4cee04c07f4d9ba3e))
+
+## [0.6.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.2...v0.6.3) (2026-07-15)
+
+
+### Bug Fixes
+
+* limit memory used by code exec sandbox ([#457](https://github.com/Aleph-Alpha-Research/eval-framework/issues/457)) ([c1a154e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c1a154e04ea9e545a2eb13268939fc8ec0543a6b))
+* space prefixing mathminerva bpb tasks ([#454](https://github.com/Aleph-Alpha-Research/eval-framework/issues/454)) ([f8cb91c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f8cb91c1dce05dc6b7f76cb9930a8f889b1d7029))
+
+## [0.6.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.1...v0.6.2) (2026-07-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency nltk to &gt;=3.10.0,&lt;4 ([#444](https://github.com/Aleph-Alpha-Research/eval-framework/issues/444)) ([74ecafb](https://github.com/Aleph-Alpha-Research/eval-framework/commit/74ecafbaff3dde1bdf89ac4e905fc034f9d77e32))
+* **deps:** update dependency tensorboard to v2.21.0 ([#447](https://github.com/Aleph-Alpha-Research/eval-framework/issues/447)) ([acab6da](https://github.com/Aleph-Alpha-Research/eval-framework/commit/acab6da911a4e859441e24448b49802a8edc6eeb))
+
+## [0.6.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.0...v0.6.1) (2026-07-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mistral-common to &gt;=1.11.5,&lt;2 ([#436](https://github.com/Aleph-Alpha-Research/eval-framework/issues/436)) ([ffe398a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ffe398af910d3120b3912464c6550988ed4c7a4b))
+* **deps:** update dependency wandb to &gt;=0.28.0,&lt;1 ([#439](https://github.com/Aleph-Alpha-Research/eval-framework/issues/439)) ([43b6a83](https://github.com/Aleph-Alpha-Research/eval-framework/commit/43b6a83b69509a8796594ae075c1e2f5e9ccbdd8))
+
+## [0.6.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.3...v0.6.0) (2026-07-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove dead code from unused benchmarks ([#430](https://github.com/Aleph-Alpha-Research/eval-framework/issues/430))
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=1.109.1,&lt;3 ([#397](https://github.com/Aleph-Alpha-Research/eval-framework/issues/397)) ([543aeb7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/543aeb72a684218522a06d1c0525c29fef31f6a1))
+
+
+### Code Refactoring
+
+* remove dead code from unused benchmarks ([#430](https://github.com/Aleph-Alpha-Research/eval-framework/issues/430)) ([4d3d963](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4d3d96392cf4cfd43ca1238d253931bdebb1bc4e))
+
+## [0.5.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.2...v0.5.3) (2026-06-29)
+
+
+### Bug Fixes
+
+* corrected path to dataset_revisions ([#419](https://github.com/Aleph-Alpha-Research/eval-framework/issues/419)) ([3f10a3d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3f10a3daa1bc05ff17328771fcf6b09845b40ea0))
+
+## [0.5.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.1...v0.5.2) (2026-06-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency vllm to &gt;=0.20,&lt;0.21 [security] ([#340](https://github.com/Aleph-Alpha-Research/eval-framework/issues/340)) ([e713438](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e713438dd8b18c73e74024daa57d073a18cd06b5))
+
 ## [0.5.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.5.0...v0.5.1) (2026-06-24)
 
 

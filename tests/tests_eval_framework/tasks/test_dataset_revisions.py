@@ -2,112 +2,77 @@
 
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
+import pytest
 
 from eval_framework.tasks import dataset_revisions as dr
-from tests.tests_eval_framework.tasks.conftest import FIXTURE_REVISIONS
 
 
 def test_revisions_file_lives_next_to_module() -> None:
-    """The default output path should be the checked-in JSON in tasks/benchmarks."""
+    """The lock file path should be the checked-in JSON in the tasks package."""
     module_dir = Path(dr.__file__).resolve().parent
-    assert dr.DEFAULT_REVISIONS_FILE.name == "task-dataset-revisions.json"
-    assert dr.DEFAULT_REVISIONS_FILE.parent == module_dir
+    assert dr.HF_REVISIONS_LOCKFILE.name == "hf-dataset-revisions.json"
+    assert dr.HF_REVISIONS_LOCKFILE.parent == module_dir
 
 
-def test_collect_dataset_revisions_fetches_sha_for_hf_task() -> None:
-    """A task with a DATASET_PATH should appear in the result keyed by class name."""
+def test_pinned_revision_returns_sha_for_pinned_dataset(tmp_path: Path) -> None:
+    # Given a lock file pinning a dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({"org/data": "pinned-sha"}).to_file(lockfile)
 
-    class CoQA:
-        __name__ = "CoQA"
-        DATASET_PATH = "EleutherAI/coqa"
+    # When resolving the dataset's pin, then the pinned SHA is returned
+    assert dr.pinned_revision(lockfile, "org/data") == "pinned-sha"
 
+
+def test_pinned_revision_raises_for_unpinned_dataset(tmp_path: Path) -> None:
+    # Given a lock file without a pin for the dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({}).to_file(lockfile)
+
+    # Then resolving the dataset's pin fails, naming the lock file
+    with pytest.raises(KeyError, match="not pinned in .*hf-dataset-revisions.json"):
+        dr.pinned_revision(lockfile, "org/data")
+
+
+def test_update_to_latest_updates_sha() -> None:
+    """Each pinned dataset is refreshed to the latest commit SHA."""
     api = MagicMock()
-    api.dataset_info.return_value = SimpleNamespace(sha="abc123")
+    api.dataset_info.return_value = SimpleNamespace(sha="new-sha")
+    revisions = dr.HfDatasetRevisions({"Some/evaltask": "old-sha"})
 
-    with patch("eval_framework.tasks.registry.get_task", return_value=CoQA):
-        revisions = dr.collect_dataset_revisions(["CoQA"], api)
+    revisions.update_to_latest(api)
 
-    assert revisions == {"CoQA": "abc123"}
-    api.dataset_info.assert_called_once_with("EleutherAI/coqa", timeout=100.0)
+    assert revisions.to_dict() == {"Some/evaltask": "new-sha"}
+    api.dataset_info.assert_called_once_with("Some/evaltask", timeout=100.0)
 
 
-def test_collect_dataset_revisions_skips_task_without_dataset_path() -> None:
-    """Tasks with an empty DATASET_PATH are omitted from the output."""
-
-    class NoDataset:
-        __name__ = "NoDataset"
-        DATASET_PATH = ""
-
+def test_update_to_latest_keeps_pin_when_lookup_fails() -> None:
+    """A failing lookup must not drop the dataset or change its pin."""
     api = MagicMock()
+    api.dataset_info.side_effect = RuntimeError("hf outage")
+    revisions = dr.HfDatasetRevisions({"Some/evaltask": "old-sha"})
 
-    with patch("eval_framework.tasks.registry.get_task", return_value=NoDataset):
-        revisions = dr.collect_dataset_revisions(["NoDataset"], api)
+    revisions.update_to_latest(api)
 
-    assert revisions == {}
-    api.dataset_info.assert_not_called()
-
-
-def test_collect_dataset_revisions_skips_failed_task_load() -> None:
-    """If loading a task class fails, the script continues without that task."""
-    api = MagicMock()
-
-    with patch("eval_framework.tasks.registry.get_task", side_effect=ImportError("broken import")):
-        revisions = dr.collect_dataset_revisions(["BrokenTask"], api)
-
-    assert revisions == {}
-    api.dataset_info.assert_not_called()
+    assert revisions.to_dict() == {"Some/evaltask": "old-sha"}
 
 
-def test_collect_dataset_revisions_skips_failed_dataset_lookup() -> None:
-    """If the Hugging Face API fails for a dataset, that task is omitted."""
+def test_hf_dataset_revisions_file_round_trip(tmp_path: Path) -> None:
+    """Revisions written with ``to_file`` load back identically with ``from_file``."""
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    pinned = {"org/b": "sha-b", "org/a": "sha-a"}
 
-    class CoQA:
-        __name__ = "CoQA"
-        DATASET_PATH = "EleutherAI/coqa"
+    dr.HfDatasetRevisions(pinned).to_file(lockfile)
+    loaded = dr.HfDatasetRevisions.from_file(lockfile)
 
-    api = MagicMock()
-    api.dataset_info.side_effect = RuntimeError("not found")
-
-    with patch("eval_framework.tasks.registry.get_task", return_value=CoQA):
-        revisions = dr.collect_dataset_revisions(["CoQA"], api)
-
-    assert revisions == {}
+    assert loaded.to_dict() == pinned
 
 
-def test_get_pinned_dataset_revision_returns_sha_for_known_task(fixture_revisions_file: Path) -> None:
-    dr.DatasetRevision.reset()
-    dr.DatasetRevision.add_revision_file(fixture_revisions_file)
+def test_hf_dataset_revisions_file_is_sorted_by_dataset_path(tmp_path: Path) -> None:
+    """The lock file is written sorted, so refreshing produces stable diffs."""
+    lockfile = tmp_path / "hf-dataset-revisions.json"
 
-    assert dr.DatasetRevision.pinned_revision("COPA") == FIXTURE_REVISIONS["COPA"]
+    dr.HfDatasetRevisions({"org/b": "sha-b", "org/a": "sha-a"}).to_file(lockfile)
 
-
-def test_get_pinned_dataset_revision_returns_none_for_unknown_task(fixture_revisions_file: Path) -> None:
-    dr.DatasetRevision.reset()
-    dr.DatasetRevision.add_revision_file(fixture_revisions_file)
-
-    assert dr.DatasetRevision.pinned_revision("NotARegisteredTask") is None
-
-
-def test_collect_dataset_revisions_reuses_sha_for_shared_dataset() -> None:
-    """Multiple tasks sharing one DATASET_PATH should trigger a single API call."""
-
-    class CoQA:
-        __name__ = "CoQA"
-        DATASET_PATH = "EleutherAI/coqa"
-
-    class CoQAMC:
-        __name__ = "CoQAMC"
-        DATASET_PATH = "EleutherAI/coqa"
-
-    api = MagicMock()
-    api.dataset_info.return_value = SimpleNamespace(sha="shared-sha")
-
-    with patch(
-        "eval_framework.tasks.registry.get_task",
-        side_effect=lambda name: CoQA if name == "CoQA" else CoQAMC,
-    ):
-        revisions = dr.collect_dataset_revisions(["CoQA", "CoQAMC"], api)
-
-    assert revisions == {"CoQA": "shared-sha", "CoQAMC": "shared-sha"}
-    api.dataset_info.assert_called_once()
+    assert lockfile.read_text(encoding="utf-8").index('"org/a"') < lockfile.read_text(encoding="utf-8").index('"org/b"')

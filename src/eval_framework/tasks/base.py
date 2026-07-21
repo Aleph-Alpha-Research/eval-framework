@@ -10,12 +10,10 @@ from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 import iso639
 from datasets import DatasetDict, DownloadConfig, load_dataset
-from huggingface_hub import HfApi
-from huggingface_hub.errors import RevisionNotFoundError
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
-from eval_framework.tasks.dataset_revisions import DatasetRevision
+from eval_framework.tasks.dataset_revisions import pinned_revision
 from eval_framework.tasks.utils import classproperty, raise_errors
 from template_formatting.formatter import Message, Role
 
@@ -93,7 +91,12 @@ class BaseTask[SubjectType](ABC):
     SAMPLE_SPLIT: str
     FEWSHOT_SPLIT: str
     SUBJECTS: list[SubjectType]
-    HF_REVISION: str | None = None  # tag name, or branch name, or commit hash to ensure reproducibility
+
+    # The lock file this task resolves its pinned dataset revision from, keyed by ``DATASET_PATH``.
+    # Each task sets this explicitly: point it at a lock file (e.g. ``HF_REVISIONS_LOCKFILE`` or a
+    # frozen one), or ``None`` to opt out of pinning. Deliberately not defaulted so it is never
+    # inherited implicitly (a subclass in another package would otherwise resolve the wrong file).
+    REVISION_LOCKFILE: Path | None
 
     # Words in _get_instruction_text() not to be perturbed. List of words is case insensitive. No special characters
     # or whitespace should be included.
@@ -109,23 +112,35 @@ class BaseTask[SubjectType](ABC):
 
     def __init__(self, num_fewshot: int = 0) -> None:
         self.num_fewshot = num_fewshot
+        self.user_prompt_suffix: str | None = None
         self.stop_sequences: list[str] | None = None
         self.max_tokens: int | None = None
-        self._apply_hf_revision()
+        self.hf_revision: str | None = self._apply_hf_revision()
 
-    def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> None:
-        # Precedence: CLI/config override > class HF_REVISION > task-dataset-revisions.json pin.
-        # Applied once at instance creation; not refreshed if the pin file changes mid-run.
+    def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> str | None:
+        # Precedence: CLI/config override > REVISION_LOCKFILE pin.
+        # Tasks without a Hugging Face dataset set REVISION_LOCKFILE to None and are not pinned.
         if custom_hf_revision:
-            self.HF_REVISION = custom_hf_revision
-        elif self.HF_REVISION is None and (pinned := DatasetRevision.pinned_revision(self.__class__.__name__)):
-            self.HF_REVISION = pinned
+            hf_revision = custom_hf_revision
+        elif self.REVISION_LOCKFILE is not None:
+            hf_revision = pinned_revision(self.REVISION_LOCKFILE, self.DATASET_PATH)
+        else:
+            hf_revision = None
+        return hf_revision
 
     @classmethod
     def with_overwrite(
-        cls, num_fewshot: int, *, custom_subjects: list[str] | None, custom_hf_revision: str | None
+        cls,
+        num_fewshot: int,
+        *,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
     ) -> Self:
         instance = cls(num_fewshot=num_fewshot)
+        if user_prompt_suffix is not None and instance.get_response_type() != ResponseType.COMPLETION:
+            raise ValueError("user_prompt_suffix is only supported for completion tasks.")
+        instance.user_prompt_suffix = user_prompt_suffix
 
         # If custom subjects were provided during initialization, they take precedence over the class-level SUBJECTS.
         filtered_subjects = instance._filter_task_subjects(custom_subjects=custom_subjects)
@@ -133,7 +148,7 @@ class BaseTask[SubjectType](ABC):
             logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {instance.__class__.__name__}")
             instance.SUBJECTS = filtered_subjects  # type: ignore[assignment]
 
-        instance._apply_hf_revision(custom_hf_revision)
+        instance.hf_revision = instance._apply_hf_revision(custom_hf_revision)
 
         return instance
 
@@ -172,27 +187,19 @@ class BaseTask[SubjectType](ABC):
             return custom_subjects  # type: ignore[return-value]
 
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
-        # Check if the HF_REVISION is valid before loading the dataset
-        if self.HF_REVISION:
-            try:
-                _ = HfApi().dataset_info(repo_id=kwargs["path"], revision=self.HF_REVISION, timeout=100.0)
-            except Exception as e:
-                if isinstance(e, RevisionNotFoundError):
-                    raise e
-
         cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
         download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
         try:
             return load_dataset(
                 **kwargs,
-                revision=self.HF_REVISION,
+                revision=self.hf_revision,
                 cache_dir=cache_dir,
                 download_config=download_config,
             )
         except Exception:
             return load_dataset(
                 **kwargs,
-                revision=self.HF_REVISION,
+                revision=self.hf_revision,
                 cache_dir=f"{Path.home()}/.cache/eval-framework",
             )
 
@@ -235,7 +242,7 @@ class BaseTask[SubjectType](ABC):
 
     def _get_messages(self, item: dict[str, Any]) -> list[Message]:
         example_messages = self._get_example_messages(item)
-        instruction_message = self._get_instruction_messages(item)
+        instruction_message = self._apply_user_prompt_suffix(self._get_instruction_messages(item))
         cue_text = self._get_cue_text(item)
         cue_message = [Message(role=Role.ASSISTANT, content=cue_text)] if cue_text else []
         messages = example_messages + instruction_message + cue_message
@@ -247,6 +254,18 @@ class BaseTask[SubjectType](ABC):
         if system_prompt_text := self._get_system_prompt_text(item):
             return [Message(role=Role.SYSTEM, content=system_prompt_text)] + messages
         return messages
+
+    def _apply_user_prompt_suffix(self, instruction_messages: list[Message]) -> list[Message]:
+        """Append the configured suffix verbatim to the evaluated user turn."""
+        if self.user_prompt_suffix is None:
+            return instruction_messages
+
+        for message in reversed(instruction_messages):
+            if message.role == Role.USER:
+                message.content = f"{message.content}{self.user_prompt_suffix}"
+                return instruction_messages
+
+        raise ValueError("Cannot append user_prompt_suffix: evaluated instruction contains no user message.")
 
     def _get_instruction_messages(self, item: dict[str, Any]) -> list[Message]:
         return [Message(role=Role.USER, content=self._get_instruction_text(item))]

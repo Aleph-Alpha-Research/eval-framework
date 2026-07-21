@@ -100,3 +100,15 @@ def test_gsm8kbpb_offline_prompt_formatting_oneshot() -> None:
             sample = next(iter(task.iterate_samples(1)))
 
     _assert_sample_matches(sample, _ONESHOT)
+
+
+def test_gsm8kbpb_loglikelihood_keys_match_ground_truth() -> None:
+    def mock_zero_fewshot_examples(self, item):
+        return []
+
+    with patch.object(GSM8KBPB, "_sample_fewshot_examples", mock_zero_fewshot_examples):
+        task = GSM8KBPB.with_overwrite(num_fewshot=0, custom_subjects=[_SUBJECT], custom_hf_revision=None)
+        mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([_EVAL_ROW])})
+        with patch.object(task, "_load_hf_dataset", return_value=mock_dataset):
+            sample = next(iter(task.iterate_samples(1)))
+            assert sample.ground_truth in sample.possible_completions

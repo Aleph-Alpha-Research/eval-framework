@@ -13,6 +13,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 class GPQA(BaseTask[str]):
     """GPQA dataset: https://huggingface.co/datasets/Idavidrein/gpqa"""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "GPQA"
     DATASET_PATH = "Idavidrein/gpqa"
@@ -126,6 +129,8 @@ class GPQA_OLMES(GPQA):
     (" A.", " B.", " C.", " D."); loglikelihood over " A"/" B"/" C"/" D".
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "GPQA_OLMES"
 
     def _get_possible_completions_marked(self, item: dict[str, Any]) -> tuple[list[str], int]:
@@ -169,6 +174,7 @@ class GPQA_IDK(GPQA):
 
 
 class GPQA_COT(GPQA):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "GPQA_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]

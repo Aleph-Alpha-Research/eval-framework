@@ -4,8 +4,8 @@ from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from datasets.exceptions import DatasetNotFoundError
 from dateutil import parser
-from huggingface_hub.errors import RevisionNotFoundError
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator, repeat_samples
@@ -338,7 +338,7 @@ def test_hf_revisions(task_name: str, hf_revision: str, raises: bool) -> None:
     )
 
     if raises:
-        with pytest.raises(RevisionNotFoundError):
+        with pytest.raises(DatasetNotFoundError):
             for _ in response_generator.task.iterate_samples(num_samples=config.num_samples):
                 pass
     else:
@@ -591,6 +591,8 @@ class NoopResultProcessor(ResultProcessor):
 
 class StubTask(BaseTask[str]):
     """Minimal task that yields a single sample, no HF dataset loader."""
+
+    REVISION_LOCKFILE = None
 
     NAME = "StubTask"
     DATASET_PATH = "stub"

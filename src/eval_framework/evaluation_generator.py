@@ -47,7 +47,7 @@ class EvaluationGenerator:
         else:
             raise NotImplementedError
 
-        self.task_name = eval_.task_class().NAME
+        self.task_name = eval_.display_name()
 
     def _run_metric_calculators(self, responses: list[Completion | Loglikelihood]) -> list[Result]:
         results: list[Result] = self.result_processor.load_metrics_results()

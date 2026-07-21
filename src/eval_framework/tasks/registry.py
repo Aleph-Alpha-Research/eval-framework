@@ -2,12 +2,11 @@ import contextlib
 import importlib
 import re
 from abc import ABC, abstractmethod
-from collections.abc import Generator, Iterator, Sequence
+from collections.abc import Generator, Iterator
 from typing import TYPE_CHECKING, Any
 
 from eval_framework.tasks.base import BaseTask, ResponseType
 from eval_framework.tasks.perturbation import PerturbationConfig, create_perturbation_class
-from eval_framework.utils.packaging import is_extra_installed, validate_package_extras
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -19,7 +18,6 @@ __all__ = [
     "Registry",
     "with_registry",
     "get_task",
-    "registered_tasks_iter",
     "is_registered",
     "validate_task_name",
     "registered_task_names",
@@ -54,8 +52,20 @@ class EvalFactory(ABC):
         """The eval's metrics"""
 
     @abstractmethod
+    def display_name(self) -> str:
+        """Human-readable display name. Is allowed to have special characters and whitespaces."""
+
+    @abstractmethod
+    def dataset_path(self) -> str | None:
+        """Identifier of the eval's data source (e.g. a HuggingFace repo id), or None if it has none."""
+
+    @abstractmethod
     def create(
-        self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None
+        self,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
     ) -> BaseTask: ...
 
     @abstractmethod
@@ -65,6 +75,7 @@ class EvalFactory(ABC):
         num_fewshot: int,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
     ) -> BaseTask: ...
 
 
@@ -74,16 +85,14 @@ class _Lazy(EvalFactory):
     eval is constructed.
     """
 
-    def __init__(self, class_name: str, module: str, extras: Sequence[str] = ()) -> None:
+    def __init__(self, class_name: str, module: str) -> None:
         """
         Args:
             class_name: The name of the task class to import.
             module: The module to import the task class from.
-            extras: Extra dependencies of `eval_framework` required for this task.
         """
         self._class_name = class_name
         self._module = module
-        self._extras = tuple(validate_package_extras(extras))
         self._loaded: type[BaseTask] | None = None
 
     @property
@@ -92,16 +101,22 @@ class _Lazy(EvalFactory):
 
     def task_class(self) -> type[BaseTask]:
         if self._loaded is None:
-            for extra in self._extras:
-                if not is_extra_installed(extra):
-                    raise ImportError(f"The required package eval_framework[{extra}] is not installed.")
             module = importlib.import_module(self._module)
             self._loaded = getattr(module, self._class_name)
         return self._loaded
 
-    def create(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> BaseTask:
+    def create(
+        self,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
+    ) -> BaseTask:
         return self.task_class().with_overwrite(
-            num_fewshot=num_fewshot, custom_subjects=custom_subjects, custom_hf_revision=custom_hf_revision
+            num_fewshot=num_fewshot,
+            custom_subjects=custom_subjects,
+            custom_hf_revision=custom_hf_revision,
+            user_prompt_suffix=user_prompt_suffix,
         )
 
     def create_perturbation(
@@ -110,12 +125,14 @@ class _Lazy(EvalFactory):
         num_fewshot: int,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
     ) -> BaseTask:
         perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
         return perturbation_task_class.with_overwrite(
             num_fewshot=num_fewshot,
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,
+            user_prompt_suffix=user_prompt_suffix,
         )
 
     def response_type(self) -> ResponseType:
@@ -125,6 +142,13 @@ class _Lazy(EvalFactory):
     def metrics(self) -> list[type["BaseMetric"]]:
         """The eval's metrics"""
         return self.task_class().get_metrics()
+
+    def display_name(self) -> str:
+        """The eval's human-readable display name (the task's ``NAME``)."""
+        return self.task_class().NAME
+
+    def dataset_path(self) -> str | None:
+        return getattr(self.task_class(), "DATASET_PATH", None)
 
 
 class _Eager(EvalFactory):
@@ -140,9 +164,18 @@ class _Eager(EvalFactory):
     def task_class(self) -> type[BaseTask]:
         return self._task
 
-    def create(self, num_fewshot: int, custom_subjects: list[str] | None, custom_hf_revision: str | None) -> BaseTask:
+    def create(
+        self,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
+    ) -> BaseTask:
         return self.task_class().with_overwrite(
-            num_fewshot=num_fewshot, custom_subjects=custom_subjects, custom_hf_revision=custom_hf_revision
+            num_fewshot=num_fewshot,
+            custom_subjects=custom_subjects,
+            custom_hf_revision=custom_hf_revision,
+            user_prompt_suffix=user_prompt_suffix,
         )
 
     def create_perturbation(
@@ -151,12 +184,14 @@ class _Eager(EvalFactory):
         num_fewshot: int,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
+        user_prompt_suffix: str | None = None,
     ) -> BaseTask:
         perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
         return perturbation_task_class.with_overwrite(
             num_fewshot=num_fewshot,
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,
+            user_prompt_suffix=user_prompt_suffix,
         )
 
     def response_type(self) -> ResponseType:
@@ -166,6 +201,13 @@ class _Eager(EvalFactory):
     def metrics(self) -> list[type["BaseMetric"]]:
         """The eval's metrics"""
         return self.task_class().get_metrics()
+
+    def display_name(self) -> str:
+        """The eval's human-readable display name (the task's ``NAME``)."""
+        return self.task_class().NAME
+
+    def dataset_path(self) -> str | None:
+        return getattr(self.task_class(), "DATASET_PATH", None)
 
 
 class Registry:
@@ -180,8 +222,13 @@ class Registry:
         self._registry: dict[str, tuple[str, EvalFactory]] = dict()
 
     def __iter__(self) -> Iterator[str]:
+        """Iterate over all task names in the registry."""
         for name, _ in self._registry.values():
             yield name
+
+    def items(self) -> Iterator[tuple[str, EvalFactory]]:
+        """Iterate over `(task name, EvalFactory)` pairs in the registry."""
+        yield from self._registry.values()
 
     @staticmethod
     def _task_key(name: str, /) -> str:
@@ -253,15 +300,6 @@ def validate_task_name(name: str) -> str:
     return name
 
 
-def registered_tasks_iter() -> Iterator[tuple[str, type[BaseTask]]]:
-    """Iterate over the names and classes of all registered tasks.
-
-    Note: This method will import any lazily registered task.
-    """
-    for name in registered_task_names():
-        yield name, get_task(name)
-
-
 def get_task(name: str, /) -> type[BaseTask]:
     """Return a registered task for a given name.
 
@@ -279,23 +317,21 @@ def register_task(task: type[BaseTask]) -> str:
     return name
 
 
-def register_lazy_task(class_path: str, /, *, extras: Sequence[str] = ()) -> None:
+def register_lazy_task(class_path: str, /) -> None:
     """Register a task without importing it.
 
     Lazily register a task without importing the module.
 
     Args:
         class_path: The full path to the task class. For example,
-            `eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA`.
+            `eval_framework.tasks.benchmarks.mmlu.MMLU`.
         extras: Any extra dependencies of `eval_framework` that need to be installed for this task.
     """
-    if isinstance(extras, str):
-        extras = [extras]
     if "." not in class_path:
         raise ValueError(
             f"Invalid class path `{class_path}`. This needs to be a global path like "
-            "`eval_framework.tasks.benchmarks.truthfulqa.TRUTHFULQA`): "
+            "`eval_framework.tasks.benchmarks.mmlu.MMLU`): "
         )
 
     base_module, class_name = class_path.rsplit(".", maxsplit=1)
-    _REGISTRY[class_name] = _Lazy(class_name=class_name, module=base_module, extras=extras)
+    _REGISTRY[class_name] = _Lazy(class_name=class_name, module=base_module)

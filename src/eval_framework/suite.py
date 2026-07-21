@@ -34,6 +34,7 @@ _EVAL_CONFIG_FIELDS = {
     "batch_size",
     "task_subjects",
     "hf_revision",
+    "user_prompt_suffix",
 }
 
 _HYPERPARAM_FIELDS = _LLM_ARG_FIELDS | _EVAL_CONFIG_FIELDS
@@ -100,6 +101,7 @@ class TaskSuite(BaseModel):
     batch_size: int | None = None
     task_subjects: list[str] | None = None
     hf_revision: str | None = None
+    user_prompt_suffix: str | None = None
 
     @model_validator(mode="after")
     def validate_suite(self) -> Self:

@@ -8,6 +8,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 
@@ -15,6 +16,8 @@ class COPAEvalHarness(BaseTask[str]):
     """COPA dataset: https://huggingface.co/datasets/aps/super_glue
     This version uses samples from the validation split as evaluation examples (same as lm-eval-harness).
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "COPAEvalHarness"
     DATASET_PATH = "aps/super_glue"
@@ -51,6 +54,8 @@ class COPA_OLMES(COPAEvalHarness):
     space-prefixed labels (" A.", " B."); loglikelihood over " A"/" B".
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "COPA_OLMES"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -85,6 +90,7 @@ class COPA(COPAEvalHarness):
 
 
 class COPA_IDKEvalHarness(COPAEvalHarness):
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "COPA_IDKEvalHarness"
     METRICS = [
         AccuracyLoglikelihood,

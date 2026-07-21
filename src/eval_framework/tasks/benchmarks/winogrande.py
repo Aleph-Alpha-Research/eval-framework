@@ -10,6 +10,7 @@ from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import Co
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 from template_formatting.formatter import Message, Role
 
@@ -56,6 +57,8 @@ class WINOGRANDE_OLMES(WINOGRANDE):
     Winogrande with OLMES-style prompt: options shown with space-prefixed labels (" A.", " B.");
     loglikelihood over " A"/" B".
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "Winogrande_OLMES"
 
@@ -118,6 +121,8 @@ class WINOGRANDECloze(WINOGRANDE):
     In this implementation, we fix this by having `_create_samples` create two samples per dataset item,
     and then use a custom metric (`PartialEvalAccuracy`) that pairs them up and compares them.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "WinograndeCloze"
     SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits

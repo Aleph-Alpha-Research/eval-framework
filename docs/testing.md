@@ -1,6 +1,6 @@
 # Testing
 
-This repository contains a large and diverse test suite. To keep iteration fast, tests are split into **fast PR tests**, **slow/advanced tests**, and **nightly workflows**. Contributors should generally run only the fast tests locally unless reproducing a specific failure.
+This repository contains a large and diverse test suite. To keep iteration fast, tests are split into **fast PR tests** and **slow/advanced tests**. Contributors should generally run only the fast tests locally unless reproducing a specific failure.
 
 ---
 
@@ -51,35 +51,16 @@ uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/in
 
 ---
 
-### 3. Nightly Workflows
-
-* **Nightly HuggingFace dataset cache rebuild**
-
-  * **Runtime:** ~20 min
-  * **Purpose:** Rebuild the full dataset cache for CI and experiments
-  * **Command:** `uv run --extra=openai python tests/tests_eval_framework/utils/update_datasets.py rebuild`
-
-* **Nightly Docker build cache**
-
-  * **Runtime:** ~30 sec
-  * **Purpose:** Refresh Docker build cache for PR workflows
-
-> Nightly workflows are **not expected to be run locally**. They ensure CI has up-to-date datasets and Docker cache.
-
----
-
 ## CI as Source of Truth
 
 The authoritative definition of which tests belong to each tier is encoded in the GitHub workflows:
 
 * `tests.yml` → PR tests, CPU and GPU tests, linting
-* `nightly_hf_cache_build.yml` → full dataset cache rebuild
-* `nightly_docker_cache_build.yml` → Docker cache refresh
 
 ---
 
 ## Tips for Contributors
 
 * Run **fast PR tests** before pushing code.
-* Do **not** attempt to run the full suite unless reproducing a nightly/CI failure.
-* CI automatically runs GPU and slow tests on PRs; nightly workflows cover the rest.
+* Do **not** attempt to run the full suite unless reproducing a CI failure.
+* CI automatically runs GPU and slow tests on PRs.

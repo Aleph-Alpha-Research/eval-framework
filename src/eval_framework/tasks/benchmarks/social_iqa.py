@@ -19,6 +19,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
+from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 
 SOCIAL_I_QA_DATASET_PATH = "allenai/social_i_qa"
@@ -150,6 +151,8 @@ class SocialIQACloze(BaseTask[str]):
     Social IQA cloze: loglikelihood over full answer text.
     """
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
     NAME = "SocialIQACloze"
     DATASET_PATH = SOCIAL_I_QA_DATASET_PATH
     SAMPLE_SPLIT = "validation"
@@ -196,6 +199,8 @@ class SocialIQAMC_OLMES(SocialIQACloze):
     Social IQA multiple choice (OLMES/oe_eval style): loglikelihood over " A"/" B"/" C".
     Uses space-prefixed labels in prompt (" A.", " B.", " C.") for tokenization parity with oe_eval.
     """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "SocialIQAMC_OLMES"
     SAMPLE_SPLIT = "train"  # Use train split (largest) to best match OLMES, which evaluates all splits
