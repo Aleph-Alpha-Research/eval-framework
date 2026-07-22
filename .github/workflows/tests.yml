@@ -221,9 +221,20 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: EvalFrameworkGPURunner
     needs: [test-cpu, test-cpu-slow, test-formatter-hash]
+    permissions:
+      pull-requests: read
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            local_vllm_server:
+              - 'local-vllm-server/**'
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -255,10 +266,20 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
           uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api and not vllm"
+          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api"
 
-      - name: Test VLLM
+      - name: Skip local vLLM server tests (no relevant changes)
+        if: steps.filter.outputs.local_vllm_server != 'true'
+        run: echo "Skipping local vLLM server tests — no local-vllm-server paths changed."
+
+      - name: Test local vLLM server
+        # The sibling `local-vllm-server` package owns the vLLM dependency
+        # (kept out of eval-framework because vLLM's dep tree frequently
+        # conflicts with the rest of the framework). Install and test it in
+        # its own environment. Only runs when the sibling package changed.
+        if: steps.filter.outputs.local_vllm_server == 'true'
         timeout-minutes: 20
+        working-directory: local-vllm-server
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
           VLLM_LOGGING_LEVEL: DEBUG
@@ -267,5 +288,8 @@ jobs:
           VLLM_NCCL_SO_PATH: ""
           VLLM_ATTENTION_BACKEND: TRITON_ATTN
         run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest --log-cli-level=INFO -v -m "vllm"
+          # No committed uv.lock for this package yet; unset the workflow-level
+          # UV_LOCKED=1 so uv can resolve fresh.
+          unset UV_LOCKED
+          uv sync --dev
+          uv run pytest --log-cli-level=INFO -v

@@ -1,0 +1,37 @@
+[project]
+name = "local-vllm-server"
+version = "0.1.0"
+description = "Local vLLM OpenAI-compatible server wrapper for eval-framework. Kept out of eval-framework itself because vLLM dependencies frequently conflict with the rest of the framework."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+authors = [
+  { name = "Aleph Alpha Research" }
+]
+dependencies = [
+  "eval-framework[openai]",
+  "vllm>=0.22,<0.23",
+  "torch>=2.5,<3",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=9.1.1,<10",
+  "pytest-mock>=3.15.1",
+]
+
+[tool.uv.sources]
+eval-framework = { path = "..", editable = true }
+
+[build-system]
+requires = ["uv_build>=0.11.29,<0.11.30"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "local_vllm_server"
+
+[tool.pytest.ini_options]
+testpaths = ["./tests"]
+minversion = 8.0
+markers = [
+    "gpu: needs a GPU runner, otherwise test can not be run",
+]
