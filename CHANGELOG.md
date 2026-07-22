@@ -14,6 +14,21 @@
 
 ### Bug Fixes
 
+## [0.7.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.7.1...v0.7.2) (2026-07-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mistral-common to &gt;=1.11.6,&lt;2 ([#501](https://github.com/Aleph-Alpha-Research/eval-framework/issues/501)) ([5b1e606](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5b1e6061295bdcc76810827a17d9b50ee0dc78ff))
+* **deps:** update dependency openai to &gt;=2.46.0,&lt;3 ([#498](https://github.com/Aleph-Alpha-Research/eval-framework/issues/498)) ([34bc6a6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/34bc6a6f3cd5fdaa47b07d0623abe4ec63ba3bdc))
+* do not include language consistency metric results for empty completions ([#343](https://github.com/Aleph-Alpha-Research/eval-framework/issues/343)) ([0e0139d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0e0139d62a3fd13a89109a40d5b083176e4364a9))
+* **tests:** expect DatasetNotFoundError for invalid hf revision ([#486](https://github.com/Aleph-Alpha-Research/eval-framework/issues/486)) ([097c5bf](https://github.com/Aleph-Alpha-Research/eval-framework/commit/097c5bff263448b49b63dd6f1ac1818dc3f7df6f))
+
+
+### Documentation
+
+* update citation year and add version+author to README ([#159](https://github.com/Aleph-Alpha-Research/eval-framework/issues/159)) ([6a2e232](https://github.com/Aleph-Alpha-Research/eval-framework/commit/6a2e232cb61189525d5c6d57a09299432c6ebbc8))
+
 ## [0.7.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.7.0...v0.7.1) (2026-07-20)
 
 
