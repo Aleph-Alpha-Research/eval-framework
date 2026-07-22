@@ -74,10 +74,9 @@ def generate_docs_for_task(
 
     try:
         num_fewshot = 1
-        task = task_class(num_fewshot=num_fewshot)
+        task = task_class(num_fewshot=1)
     except (TypeError, ValueError, AssertionError):
-        num_fewshot = 0
-        task = task_class(num_fewshot=num_fewshot)
+        task = task_class(num_fewshot=0)
 
     with open(f"{output_docs_directory}/{task_name}.md", "w") as f:
         f.write(f"# {task_name}\n\n")
@@ -102,21 +101,6 @@ def generate_docs_for_task(
         f.write("````\n\n")
 
         f.write(f"- Module: `{task_class.__module__}`\n\n")
-
-        try:
-            raw_file_path = inspect.getfile(task_class)
-            # Find the package root 'eval_framework' in the path
-            match = re.search(r"eval_framework.*", raw_file_path)
-            if match:
-                # Reconstruct relative path assuming standard 'src' structure
-                task_file = f"src/{match.group(0)}"
-                # Provide a local relative link (for VS Code) and an absolute link (for GitHub/Web)
-                f.write(f"- File: [{task_file}](../../{task_file}) | [View on GitHub]({REPO_URL}/{task_file})\n\n")
-            else:
-                # Fallback for tasks defined outside the main package (e.g., custom local tasks)
-                f.write(f"- File: `{raw_file_path}`\n\n")
-        except Exception:
-            f.write("- File: `Dynamic or Built-in`\n\n")
 
         if http_path:
             f.write(f"- Link to dataset: [{http_path}]({http_path})\n\n")
