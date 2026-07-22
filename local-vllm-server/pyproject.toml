@@ -10,7 +10,6 @@ authors = [
 dependencies = [
   "eval-framework[openai]",
   "vllm>=0.22,<0.23",
-  "torch>=2.5,<3",
 ]
 
 [dependency-groups]
@@ -21,6 +20,12 @@ dev = [
 
 [tool.uv.sources]
 eval-framework = { path = "..", editable = true }
+
+[tool.uv]
+# vllm pull this. I'm not sure why.
+constraint-dependencies = [
+  "xgrammar<0.2.4",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.29,<0.11.30"]
