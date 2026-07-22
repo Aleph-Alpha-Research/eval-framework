@@ -76,12 +76,8 @@ def generate_docs_for_task(
         num_fewshot = 1
         task = task_class(num_fewshot=num_fewshot)
     except (TypeError, ValueError, AssertionError):
-        try:
-            num_fewshot = 0
-            task = task_class(num_fewshot=num_fewshot)
-        except (TypeError, ValueError, AssertionError):
-            task = task_class()
-            num_fewshot = task.num_fewshot
+        num_fewshot = 0
+        task = task_class(num_fewshot=num_fewshot)
 
     with open(f"{output_docs_directory}/{task_name}.md", "w") as f:
         f.write(f"# {task_name}\n\n")
