@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-import pytest
+from collections.abc import Iterator
 
-from eval_framework.llm.vllm_local_server import VLLMLocalServerModel
+import pytest
+from local_vllm_server import VLLMLocalServerModel
+
 from template_formatting.formatter import Message, Role
 
 
 @pytest.fixture(scope="session")
-def vllm_local_http() -> VLLMLocalServerModel:
+def vllm_local_http() -> Iterator[VLLMLocalServerModel]:
     """
     Start one local `vllm serve` instance for the whole test session.
     This keeps GPU CI fast while still exercising the HTTP boundary.
@@ -29,7 +31,6 @@ def vllm_local_http() -> VLLMLocalServerModel:
     llm._cleanup()
 
 
-@pytest.mark.vllm
 @pytest.mark.gpu
 def test_vllm_local_server_single_prompt(vllm_local_http: VLLMLocalServerModel) -> None:
     out = vllm_local_http.generate_from_messages(
@@ -40,7 +41,6 @@ def test_vllm_local_server_single_prompt(vllm_local_http: VLLMLocalServerModel) 
     assert out[0].completion.strip() != ""
 
 
-@pytest.mark.vllm
 @pytest.mark.gpu
 def test_vllm_local_server_batching(vllm_local_http: VLLMLocalServerModel) -> None:
     out = vllm_local_http.generate_from_messages(
@@ -54,7 +54,6 @@ def test_vllm_local_server_batching(vllm_local_http: VLLMLocalServerModel) -> No
     assert all(o.completion.strip() != "" for o in out)
 
 
-@pytest.mark.vllm
 @pytest.mark.gpu
 def test_vllm_local_server_stop_sequences(vllm_local_http: VLLMLocalServerModel) -> None:
     out = vllm_local_http.generate_from_messages(
@@ -66,7 +65,6 @@ def test_vllm_local_server_stop_sequences(vllm_local_http: VLLMLocalServerModel)
     assert out[0].completion.strip() != ""
 
 
-@pytest.mark.vllm
 @pytest.mark.gpu
 def test_vllm_local_server_temperature_and_top_p_override(vllm_local_http: VLLMLocalServerModel) -> None:
     out = vllm_local_http.generate_from_messages(
@@ -79,7 +77,6 @@ def test_vllm_local_server_temperature_and_top_p_override(vllm_local_http: VLLML
     assert out[0].completion.strip() != ""
 
 
-@pytest.mark.vllm
 @pytest.mark.gpu
 def test_vllm_local_server_cleanup_is_idempotent(vllm_local_http: VLLMLocalServerModel) -> None:
     # Should be safe to call multiple times (best-effort cleanup).

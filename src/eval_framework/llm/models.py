@@ -18,11 +18,6 @@ if is_extra_installed(extra="transformers"):
         Qwen3_0_6B,
     )
 
-if is_extra_installed("mistral"):
-    from eval_framework.llm.mistral import MagistralVLLM  # noqa F401
 
 if is_extra_installed("openai"):
     from eval_framework.llm.openai import OpenAIModel  # noqa F401
-
-if is_extra_installed("vllm"):
-    from eval_framework.llm.vllm import VLLMRegistryModel, Qwen3_0_6B_VLLM, Qwen3_0_6B_VLLM_No_Thinking  # noqa F401
