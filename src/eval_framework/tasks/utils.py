@@ -78,11 +78,14 @@ def get_or_create_pool(
 
 
 def close_pools() -> None:
-    for pool in _pools.values():
+    with _pools_lock:
+        pools = list(_pools.values())
+        _pools.clear()
+    for pool in pools:
         try:
             pool.close()
         except Exception:
-            pass
+            logger.exception("Error closing sandbox container pool")
 
 
 atexit.register(close_pools)
