@@ -27,7 +27,7 @@ def parse_args(cli_args: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         default=False,
         required=False,
-        help="If set, examples prompts for each of the formatters will be added in the generated docs.",
+        help="Unused. Only there for backwards compatibility",
     )
     parser.add_argument(
         "--exclude-tasks",
@@ -66,7 +66,7 @@ def parse_args(cli_args: list[str] | None = None) -> argparse.Namespace:
 
 
 def generate_docs_for_task(
-    output_docs_directory: Path, task_name: str, formatters: list[BaseFormatter], add_prompt_examples: bool
+    output_docs_directory: Path, task_name: str, formatters: list[BaseFormatter]
 ) -> None:
     """Generate documentation for a specific task."""
     eval_ = registry()[task_name]
@@ -104,13 +104,6 @@ def generate_docs_for_task(
 
         if http_path:
             f.write(f"- Link to dataset: [{http_path}]({http_path})\n\n")
-
-        if not add_prompt_examples:
-            f.write(
-                f"More detailed documentation, with prompt examples and ground truth completions, can be generated "
-                f"with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples "
-                f'--only-tasks "{task_name}"`.\n'
-            )
 
         else:
             s = next(iter(task.iterate_samples(1)))
@@ -203,7 +196,6 @@ def generate_all_docs(args: argparse.Namespace, output_docs_directory: Path) -> 
                 output_docs_directory=output_docs_directory,
                 task_name=task_name,
                 formatters=formatters,
-                add_prompt_examples=args.add_prompt_examples,
             )
 
         except Exception as e:
