@@ -30,7 +30,7 @@ from eval_framework.tasks.base import Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
-from eval_framework.utils.tqdm_handler import get_disable_bar_flag, safe_tqdm_write
+from eval_framework.utils.tqdm_handler import get_disable_bar_flag
 
 logger = logging.getLogger(__name__)
 
@@ -232,9 +232,7 @@ class ResponseGenerator:
             if not samples_batch:
                 return
             if len(samples_batch) > 1:
-                log_msg = "Processing batch..."
-                logger.info(log_msg)  # For log files
-                safe_tqdm_write(log_msg)  # For console display with tqdm
+                logger.info("Processing batch...")
 
             responses_batch = generative_output_function(samples_batch)
             responses.extend(responses_batch)
@@ -268,17 +266,13 @@ class ResponseGenerator:
                 sample_index = i + 1
 
                 if sample.id in subject_response_id_mapping.get(sample.subject, []):
-                    log_msg = (
+                    logger.info(
                         f"Task: {self.response_type.value}{subject} - Sample: {sample_index} - skipping, already done."
                     )
-                    logger.info(log_msg)  # For log files
-                    safe_tqdm_write(log_msg)  # For console display with tqdm
                     pbar.update(1)
                     continue
 
-                log_msg = f"Task: {self.response_type.value}{subject} - Sample: {sample_index}/{total_num_samples}"
-                logger.info(log_msg)  # For log files
-                safe_tqdm_write(log_msg)  # For console display with tqdm
+                logger.info(f"Task: {self.response_type.value}{subject} - Sample: {sample_index}/{total_num_samples}")
                 pbar.set_postfix_str(f"Sample {sample_index}/{total_num_samples}")
                 pbar.update(1)
 
@@ -289,9 +283,7 @@ class ResponseGenerator:
                     samples_batch = []
 
                 if should_preempt_callable():
-                    log_msg = "Preempt"
-                    logger.info(log_msg)  # For log files
-                    safe_tqdm_write(log_msg)  # For console display with tqdm
+                    logger.info("Preempt")
                     if not self.save_intermediate_results:
                         self.result_processor.save_responses(responses)
                     return responses, True

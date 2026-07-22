@@ -1,5 +1,4 @@
 import logging
-import sys
 from pathlib import Path
 
 VERBOSITY_MAP = {
@@ -16,7 +15,7 @@ def setup_logging(
     Set up centralized logging configuration for the entire framework.
 
     Args:
-        output_dir: Directory to save log files. If None, logs only to console.
+        output_dir: Directory to save log files. If None, no file handler is attached.
         log_level: Logging level (default: INFO)
         log_filename: Name of the log file
 
@@ -26,9 +25,6 @@ def setup_logging(
     # Map verbosity integer to logging level
     mapped_log_level = VERBOSITY_MAP.get(log_level, logging.INFO)
 
-    # Basic configuration
-    logging.basicConfig(level=mapped_log_level)
-
     # Create formatter
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
@@ -37,13 +33,7 @@ def setup_logging(
     root_logger.handlers.clear()
     root_logger.setLevel(mapped_log_level)
 
-    # Console handler (always present)
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(mapped_log_level)
-    console_handler.setFormatter(formatter)
-    root_logger.addHandler(console_handler)
-
-    # File handler (if output directory provided)
+    # File handler (if output directory provided). No console handler: keeps stdout free for tqdm.
     if output_dir:
         output_dir.mkdir(parents=True, exist_ok=True)
         log_file = output_dir / log_filename
@@ -54,9 +44,5 @@ def setup_logging(
         root_logger.addHandler(file_handler)
 
         root_logger.info(f"Logging configured. File: {log_file}")
-    else:
-        root_logger.info("Logging configured (console only)")
-
-    root_logger.info(f"Output directory for logs: {output_dir if output_dir else 'None'}")
 
     return root_logger
