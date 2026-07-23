@@ -10,6 +10,7 @@ from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglik
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
+from eval_framework.tasks.task_style import BPBStyle
 
 logger = logging.getLogger(__name__)
 
@@ -343,11 +344,11 @@ class MBPP_EvalPlus(MBPP):
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return (
             "Below is a Python script with a self-contained function that solves the problem"
-            " and passes corresponding tests:\n```python\n"
+            " and passes corresponding tests:\n```python"
         )
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        return self._get_cue_text(item) + item["code"] + "\n```"
+        return self._get_cue_text(item) + "\n" + item["code"] + "\n```"
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         return list(_OLMES_FEWSHOT_EXAMPLES)
@@ -363,3 +364,47 @@ class MBPP_EvalPlus(MBPP):
         mbpp_ground_truth = str(sample.ground_truth)
         code = self._code_expander(extracted_code, mbpp_ground_truth)
         return code
+
+
+class MBPP_BPB_EvalPlus(BaseTask[str]):
+    """BPB (loglikelihood) counterpart of MBPP_EvalPlus."""
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
+    NAME = "MBPP_BPB_EvalPlus"
+    DATASET_PATH = "google-research-datasets/mbpp"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "test"
+    SUBJECTS = ["full"]
+    LANGUAGE = Language.ENG
+    TASK_STYLER = BPBStyle(
+        question_prefix="",
+        trailing_newline=False,
+        cue_text=(
+            "Below is a Python script with a self-contained function that solves the problem"
+            f" and passes corresponding tests:\n{BEGIN}"
+        ),
+        leading_space_continuations=False,
+    )
+
+    def __init__(self, num_fewshot: int = 3) -> None:
+        super().__init__(num_fewshot)
+        if num_fewshot != 3:
+            logger.warning(f"MBPP_BPB_EvalPlus supports only 3-shot, got {num_fewshot}")
+
+    def _get_raw_question(self, item: dict[str, Any]) -> str:
+        text = item["text"] if "text" in item else item["prompt"]
+        test = item["test_list"][0]
+        return (
+            "Please provide a self-contained Python script that solves the following problem"
+            f" in a markdown code block:\n```\n{text.strip()}\n{test}\n```\n"
+        )
+
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return ["\n" + item["code"] + f"\n{END}"]
+
+    def _get_correct_index(self, item: dict[str, Any]) -> int:
+        return 0
+
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+        return list(_OLMES_FEWSHOT_EXAMPLES)

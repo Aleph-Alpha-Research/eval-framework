@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from datasets import Dataset, DatasetDict
 
-from eval_framework.tasks.benchmarks.mbpp import _OLMES_FEWSHOT_EXAMPLES, MBPP_OLMES, MBPP_EvalPlus
+from eval_framework.tasks.benchmarks.mbpp import _OLMES_FEWSHOT_EXAMPLES, MBPP_OLMES, MBPP_BPB_EvalPlus, MBPP_EvalPlus
 from eval_framework.tasks.utils import run_python_code
 from template_formatting.formatter import ConcatFormatter, Message, Role
 from tests.tests_eval_framework.tasks.benchmarks.utils import ExpectedPrompt
@@ -219,7 +219,7 @@ _EVALPLUS_EXPECTED = ExpectedPrompt(
             role=Role.ASSISTANT,
             content=(
                 "Below is a Python script with a self-contained function that solves the problem"
-                " and passes corresponding tests:\n```python\n"
+                " and passes corresponding tests:\n```python"
             ),
         ),
     ],
@@ -259,3 +259,29 @@ def test_mbpp_evalplus_offline_prompt_formatting() -> None:
             sample = next(iter(task.iterate_samples(1)))
 
     _assert_sample_matches(sample, _EVALPLUS_EXPECTED)
+
+
+# ---------------------------------------------------------------------------
+# MBPP_BPB_EvalPlus
+# ---------------------------------------------------------------------------
+
+_BPB_EVALPLUS_EXPECTED = ExpectedPrompt(
+    messages=_EVALPLUS_EXPECTED.messages,
+    concat=_EVALPLUS_EXPECTED.concat,
+    ground_truth="\ndef two():\n    return 2\n```",
+    completions=["\ndef two():\n    return 2\n```"],
+)
+
+
+def test_mbpp_bpb_evalplus_offline_prompt_formatting() -> None:
+    def mock_fewshot_examples(self, item):
+        return list(_FEWSHOT_EXAMPLES)
+
+    task = MBPP_BPB_EvalPlus.with_overwrite(num_fewshot=3, custom_subjects=[_SUBJECT], custom_hf_revision=None)
+    mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([_EVAL_ROW])})
+
+    with patch.object(MBPP_BPB_EvalPlus, "_sample_fewshot_examples", mock_fewshot_examples):
+        with patch.object(task, "_load_hf_dataset", return_value=mock_dataset):
+            sample = next(iter(task.iterate_samples(1)))
+
+    _assert_sample_matches(sample, _BPB_EVALPLUS_EXPECTED)
