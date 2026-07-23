@@ -8,7 +8,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 | License (SPDX) | Count |
 |---|---|
 | `MIT` | 40 |
-| `BSD-3-Clause` | 21 |
+| `BSD-3-Clause` | 20 |
 | `Apache-2.0` | 12 |
 | `BSD-2-Clause` | 3 |
 | `PSF-2.0` | 2 |
@@ -16,6 +16,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 | `Apache-2.0 AND CNRI-Python` | 1 |
 | `Apache-2.0 OR BSD-2-Clause` | 1 |
 | `Apache-2.0 OR BSD-3-Clause` | 1 |
+| `BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0` | 1 |
 | `GNU General Public License (GPL)` | 1 |
 | `GNU Library or Lesser General Public License (LGPL)` | 1 |
 | `ISC` | 1 |
@@ -25,22 +26,22 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.43 - https://github.com/boto/boto3
-- **botocore** 1.43.43 - https://github.com/boto/botocore
+- **boto3** 1.43.54 - https://github.com/boto/boto3
+- **botocore** 1.43.54 - https://github.com/boto/botocore
 - **datasets** 5.0.0 - https://github.com/huggingface/datasets
-- **hf-xet** 1.5.1 - https://github.com/huggingface/xet-core
+- **hf-xet** 1.5.2 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.0 - https://www.nltk.org/
-- **pyarrow** 24.0.0 - https://arrow.apache.org/
+- **pyarrow** 25.0.0 - https://arrow.apache.org/
 - **python-iso639** 2026.4.20 - https://github.com/jacksonllee/iso639
 - **requests** 2.34.2 - https://github.com/psf/requests
-- **s3transfer** 0.19.0 - https://github.com/boto/s3transfer
+- **s3transfer** 0.19.2 - https://github.com/boto/s3transfer
 
 ## Apache-2.0 AND CNRI-Python
 
-- **regex** 2026.6.28 - https://github.com/mrabarnett/mrab-regex
+- **regex** 2026.7.19 - https://github.com/mrabarnett/mrab-regex
 
 ## Apache-2.0 OR BSD-2-Clause
 
@@ -73,12 +74,15 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **MarkupSafe** 3.0.3 - https://github.com/pallets/markupsafe/
 - **mpmath** 1.3.0 - http://mpmath.org/
 - **multiprocess** 0.70.19 - https://github.com/uqfoundation/multiprocess
-- **numpy** 2.3.5 - https://numpy.org
-- **pandas** 3.0.3 - https://pandas.pydata.org
+- **pandas** 3.0.5 - https://pandas.pydata.org
 - **protobuf** 7.35.1 - https://developers.google.com/protocol-buffers/
 - **python-dotenv** 1.2.2 - https://github.com/theskumar/python-dotenv
 - **scipy** 1.18.0 - https://scipy.org/
 - **sympy** 1.14.0 - https://sympy.org
+
+## BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
+
+- **numpy** 2.5.1 - https://numpy.org
 
 ## GNU General Public License (GPL)
 
@@ -100,14 +104,14 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 - **annotated-doc** 0.0.4 - https://github.com/fastapi/annotated-doc
 - **annotated-types** 0.7.0 - https://github.com/annotated-types/annotated-types
-- **anyio** 4.14.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
+- **anyio** 4.14.2 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **catalogue** 2.0.10 - https://github.com/explosion/catalogue
 - **charset-normalizer** 3.4.9 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
 - **cloudpathlib** 0.24.0 - https://github.com/drivendataorg/cloudpathlib
 - **confection** 1.3.3 - https://github.com/explosion/confection
 - **cymem** 2.0.13 - https://github.com/explosion/cymem
-- **filelock** 3.29.7 - https://github.com/tox-dev/py-filelock
+- **filelock** 3.32.0 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -115,7 +119,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **markdown-it-py** 4.2.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
 - **murmurhash** 1.0.15 - https://github.com/explosion/murmurhash
-- **platformdirs** 4.10.0 - https://github.com/tox-dev/platformdirs
+- **platformdirs** 4.11.0 - https://github.com/tox-dev/platformdirs
 - **preshed** 3.0.13 - https://github.com/explosion/preshed
 - **pydantic** 2.13.4 - https://github.com/pydantic/pydantic
 - **pydantic_core** 2.46.4 - https://github.com/pydantic
@@ -123,15 +127,15 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
 - **rich** 15.0.0 - https://github.com/Textualize/rich
 - **rpds-py** 2026.6.3 - https://github.com/crate-py/rpds
-- **sentry-sdk** 2.64.0 - https://github.com/getsentry/sentry-python
+- **sentry-sdk** 2.66.1 - https://github.com/getsentry/sentry-python
 - **six** 1.17.0 - https://github.com/benjaminp/six
-- **smart_open** 8.0.0 - https://github.com/piskvorky/smart_open
+- **smart_open** 8.0.1 - https://github.com/piskvorky/smart_open
 - **spacy** 3.8.14 - https://spacy.io
 - **spacy-legacy** 3.0.12 - https://spacy.io
 - **spacy-loggers** 1.0.5 - https://github.com/explosion/spacy-loggers
 - **srsly** 2.5.3 - https://github.com/explosion/srsly
 - **thinc** 8.3.13 - https://github.com/explosion/thinc
-- **typer** 0.26.8 - https://github.com/fastapi/typer
+- **typer** 0.27.0 - https://github.com/fastapi/typer
 - **typing-inspection** 0.4.2 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.7.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
 - **wandb** 0.28.1 - https://github.com/wandb/wandb
@@ -141,11 +145,11 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## MPL-2.0
 
-- **certifi** 2026.6.17 - https://github.com/certifi/python-certifi
+- **certifi** 2026.7.22 - https://github.com/certifi/python-certifi
 
 ## MPL-2.0 AND MIT
 
-- **tqdm** 4.68.4 - https://tqdm.github.io
+- **tqdm** 4.69.0 - https://tqdm.github.io
 
 ## PSF-2.0
 
@@ -211,7 +215,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### anyio 4.14.1 (MIT)
+### anyio 4.14.2 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -310,7 +314,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.43.43 (Apache-2.0)
+### boto3 1.43.54 (Apache-2.0)
 
 ```text
 Apache License
@@ -491,7 +495,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.43 (Apache-2.0)
+### botocore 1.43.54 (Apache-2.0)
 
 ```text
 Apache License
@@ -698,7 +702,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### certifi 2026.6.17 (MPL-2.0)
+### certifi 2026.7.22 (MPL-2.0)
 
 ```text
 This package contains a modified version of ca-bundle.crt:
@@ -1158,7 +1162,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### filelock 3.29.7 (MIT)
+### filelock 3.32.0 (MIT)
 
 ```text
 MIT License
@@ -1451,7 +1455,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### hf-xet 1.5.1 (Apache-2.0)
+### hf-xet 1.5.2 (Apache-2.0)
 
 ```text
 Apache License
@@ -10947,7 +10951,7 @@ Apache License
    limitations under the License.
 ```
 
-### numpy 2.3.5 (BSD-3-Clause)
+### numpy 2.5.1 (BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0)
 
 ```text
 Copyright (c) 2005-2025, NumPy Developers.
@@ -10983,42 +10987,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ----
 
-The NumPy repository and source distributions bundle several libraries that are
-compatibly licensed.  We list these here.
-
-Name: lapack-lite
-Files: numpy/linalg/lapack_lite/*
-License: BSD-3-Clause
-  For details, see numpy/linalg/lapack_lite/LICENSE.txt
-
-Name: dragon4
-Files: numpy/_core/src/multiarray/dragon4.c
-License: MIT
-  For license text, see numpy/_core/src/multiarray/dragon4.c
-
-Name: libdivide
-Files: numpy/_core/include/numpy/libdivide/*
-License: Zlib
-  For license text, see numpy/_core/include/numpy/libdivide/LICENSE.txt
-
-
-Note that the following files are vendored in the repository and sdist but not
-installed in built numpy packages:
-
-Name: Meson
-Files: vendored-meson/meson/*
-License: Apache 2.0
-  For license text, see vendored-meson/meson/COPYING
-
-Name: spin
-Files: .spin/cmds.py
-License: BSD-3
-  For license text, see .spin/LICENSE
-
-Name: tempita
-Files: numpy/_build_utils/tempita/*
-License: MIT
-  For details, see numpy/_build_utils/tempita/LICENCE.txt
 
 ----
 
@@ -11931,7 +11899,7 @@ found in LICENSE.APACHE or LICENSE.BSD. Contributions to this software is made
 under the terms of *both* these licenses.
 ```
 
-### pandas 3.0.3 (BSD-3-Clause)
+### pandas 3.0.5 (BSD-3-Clause)
 
 ```text
 BSD 3-Clause License
@@ -12996,7 +12964,7 @@ https://opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
   terms specified in this license.
 ```
 
-### platformdirs 4.10.0 (MIT)
+### platformdirs 4.11.0 (MIT)
 
 ```text
 MIT License
@@ -13139,7 +13107,7 @@ the pattern ``psycopg/adapter*.{h,c}`` and ``psycopg/microprotocol*.{h,c}``:
  3. This notice may not be removed or altered from any source distribution.
 ```
 
-### pyarrow 24.0.0 (Apache-2.0)
+### pyarrow 25.0.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -16330,7 +16298,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### regex 2026.6.28 (Apache-2.0 AND CNRI-Python)
+### regex 2026.7.19 (Apache-2.0 AND CNRI-Python)
 
 ```text
 This work was derived from the 're' module of CPython 2.6 and CPython 3.1,
@@ -16770,7 +16738,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### s3transfer 0.19.0 (Apache-2.0)
+### s3transfer 0.19.2 (Apache-2.0)
 
 ```text
 Apache License
@@ -17918,7 +17886,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### sentry-sdk 2.64.0 (MIT)
+### sentry-sdk 2.66.1 (MIT)
 
 ```text
 MIT License
@@ -17985,7 +17953,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### smart_open 8.0.0 (MIT)
+### smart_open 8.0.1 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -18299,7 +18267,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### tqdm 4.68.4 (MPL-2.0 AND MIT)
+### tqdm 4.69.0 (MPL-2.0 AND MIT)
 
 ```text
 `tqdm` is a product of collaborative work.
@@ -18353,7 +18321,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### typer 0.26.8 (MIT)
+### typer 0.27.0 (MIT)
 
 ```text
 The MIT License (MIT)
