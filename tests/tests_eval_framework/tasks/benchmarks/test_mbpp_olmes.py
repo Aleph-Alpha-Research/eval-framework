@@ -1,8 +1,12 @@
+from unittest.mock import patch
+
 import pytest
+from datasets import Dataset, DatasetDict
 
 from eval_framework.tasks.benchmarks.mbpp import _OLMES_FEWSHOT_EXAMPLES, MBPP_OLMES
 from eval_framework.tasks.utils import run_python_code
-from template_formatting.formatter import ConcatFormatter
+from template_formatting.formatter import ConcatFormatter, Message, Role
+from tests.tests_eval_framework.tasks.benchmarks.utils import ExpectedPrompt
 from tests.tests_eval_framework.utils import DatasetPatcher
 
 
@@ -98,3 +102,87 @@ class TestMBPP_OLMES:
 
         fewshot_count = formatted.count("Please provide a self-contained Python script")
         assert fewshot_count == 4, f"Expected 4 occurrences (3 fewshot + 1 eval), got {fewshot_count}"
+
+
+# ---------------------------------------------------------------------------
+# Offline prompt assembly test (uses fictional dataset + fictional fewshot)
+# ---------------------------------------------------------------------------
+
+_SUBJECT = "full"
+
+# Fictional rows following the MBPP format. NOT real examples from the MBPP dataset.
+# The fewshot examples are normally hardcoded in the task (``_OLMES_FEWSHOT_EXAMPLES``);
+# we patch ``_sample_fewshot_examples`` to inject these short fakes instead.
+_FEWSHOT_EXAMPLES: list[dict] = [
+    {"text": "Return the number one.", "code": "def one():\n    return 1", "test_list": ["assert one() == 1"]},
+]
+
+_EVAL_ROW: dict = {
+    "text": "Return the number two.",
+    "code": "def two():\n    return 2",
+    "test_list": ["assert two() == 2", "assert two() != 0"],
+}
+
+# Expected prompt (messages, flat concat, ground truth, completions).
+# MBPP_OLMES is normally 3-shot (here reduced to 1 fake shot for readability)
+_EXPECTED = ExpectedPrompt(
+    messages=[
+        Message(
+            role=Role.USER,
+            content=(
+                "Please provide a self-contained Python script that solves the following problem"
+                " in a markdown code block:\n```\nReturn the number one.\nassert one() == 1\n```\n"
+            ),
+        ),
+        Message(role=Role.ASSISTANT, content="def one():\n    return 1\n"),
+        Message(
+            role=Role.USER,
+            content=(
+                "Please provide a self-contained Python script that solves the following problem"
+                " in a markdown code block:\n```\nReturn the number two.\nassert two() == 2\n```\n"
+            ),
+        ),
+        Message(role=Role.ASSISTANT, content="Here is the completed function:\n\n```python\n"),
+    ],
+    concat="""\
+Please provide a self-contained Python script that solves the following problem in a markdown code block:
+```
+Return the number one.
+assert one() == 1
+```
+def one():
+    return 1
+
+
+Please provide a self-contained Python script that solves the following problem in a markdown code block:
+```
+Return the number two.
+assert two() == 2
+```
+Here is the completed function:
+
+```python""",
+    ground_truth="['assert two() == 2', 'assert two() != 0']",
+    completions=None,
+)
+
+
+def _assert_sample_matches(sample, expected: ExpectedPrompt) -> None:
+    assert sample.messages == expected.messages
+    assert ConcatFormatter().format(sample.messages, output_mode="string") == expected.concat
+    assert sample.ground_truth == expected.ground_truth
+    assert sample.possible_completions == expected.completions
+
+
+def test_mbpp_olmes_offline_prompt_formatting() -> None:
+    def mock_fewshot_examples(self, item):
+        return list(_FEWSHOT_EXAMPLES)
+
+    task = MBPP_OLMES.with_overwrite(num_fewshot=3, custom_subjects=[_SUBJECT], custom_hf_revision=None)
+    mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([_EVAL_ROW])})
+
+    with patch.object(MBPP_OLMES, "_sample_fewshot_examples", mock_fewshot_examples):
+        with patch.object(task, "_load_hf_dataset", return_value=mock_dataset):
+            sample = next(iter(task.iterate_samples(1)))
+
+    _assert_sample_matches(sample, _EXPECTED)
