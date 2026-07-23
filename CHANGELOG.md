@@ -14,6 +14,56 @@
 
 ### Bug Fixes
 
+## [0.8.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.0...v0.8.1) (2026-07-23)
+
+
+### Features
+
+* add mathminerva version without double-new-line stop sequence ([#515](https://github.com/Aleph-Alpha-Research/eval-framework/issues/515)) ([ef06284](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ef06284b9b246d0d0905e0334fada29f1d325617))
+
+
+### Bug Fixes
+
+* **deps:** update dependency torch to &gt;=2.13.0,&lt;3 ([#448](https://github.com/Aleph-Alpha-Research/eval-framework/issues/448)) ([ae5b571](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ae5b571ea279e3b1e383aa46e68b19f4e246fe6b))
+
+## [0.8.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.7.2...v0.8.0) (2026-07-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove vLLM dependency and mistral model class ([#494](https://github.com/Aleph-Alpha-Research/eval-framework/issues/494))
+
+### Bug Fixes
+
+* close sandbox container pools instead of at exit ([#495](https://github.com/Aleph-Alpha-Research/eval-framework/issues/495)) ([4f46de2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4f46de269a875acd0873bd68b5fe254f48c1c3ea))
+
+
+### Code Refactoring
+
+* remove vLLM dependency and mistral model class ([#494](https://github.com/Aleph-Alpha-Research/eval-framework/issues/494)) ([05c5a1c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/05c5a1cb5a62a00f4b954570566024e2bc733539))
+
+## [0.7.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.7.1...v0.7.2) (2026-07-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mistral-common to &gt;=1.11.6,&lt;2 ([#501](https://github.com/Aleph-Alpha-Research/eval-framework/issues/501)) ([5b1e606](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5b1e6061295bdcc76810827a17d9b50ee0dc78ff))
+* **deps:** update dependency openai to &gt;=2.46.0,&lt;3 ([#498](https://github.com/Aleph-Alpha-Research/eval-framework/issues/498)) ([34bc6a6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/34bc6a6f3cd5fdaa47b07d0623abe4ec63ba3bdc))
+* do not include language consistency metric results for empty completions ([#343](https://github.com/Aleph-Alpha-Research/eval-framework/issues/343)) ([0e0139d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0e0139d62a3fd13a89109a40d5b083176e4364a9))
+* **tests:** expect DatasetNotFoundError for invalid hf revision ([#486](https://github.com/Aleph-Alpha-Research/eval-framework/issues/486)) ([097c5bf](https://github.com/Aleph-Alpha-Research/eval-framework/commit/097c5bff263448b49b63dd6f1ac1818dc3f7df6f))
+
+
+### Documentation
+
+* update citation year and add version+author to README ([#159](https://github.com/Aleph-Alpha-Research/eval-framework/issues/159)) ([6a2e232](https://github.com/Aleph-Alpha-Research/eval-framework/commit/6a2e232cb61189525d5c6d57a09299432c6ebbc8))
+
+## [0.7.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.7.0...v0.7.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency wandb to &gt;=0.28.1,&lt;1 ([#480](https://github.com/Aleph-Alpha-Research/eval-framework/issues/480)) ([beba946](https://github.com/Aleph-Alpha-Research/eval-framework/commit/beba946f1af25b19fc46d857d349451a2bbb6bb4))
+
 ## [0.7.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.6.4...v0.7.0) (2026-07-18)
 
 

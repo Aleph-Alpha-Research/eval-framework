@@ -8,10 +8,14 @@ from _pytest.fixtures import FixtureRequest
 
 from eval_framework.llm.base import BaseLLM, Sample
 from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MInstruct
-from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
+from eval_framework.tasks.utils import close_pools
 from template_formatting.formatter import Message
 from tests.tests_eval_framework.mock_wandb import MockArtifact, MockWandb, MockWandbApi, MockWandbRun
+
+
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int | pytest.ExitCode) -> None:
+    close_pools()
 
 
 class MockLLM(BaseLLM):
@@ -64,7 +68,6 @@ model_dict = {
     "Pythia410m": Pythia410m,
     "SmolLM135M": SmolLM135M,
     "Smollm135MInstruct": Smollm135MInstruct,
-    "Qwen3_0_6B_VLLM": Qwen3_0_6B_VLLM,
     "MockLLM": MockLLM,
 }
 

@@ -1,10 +1,7 @@
 from enum import Enum
 
 from eval_framework.tasks.base import BaseTask
-from eval_framework.tasks.registry import (
-    register_lazy_task,
-    registered_tasks_iter,
-)
+from eval_framework.tasks.registry import register_lazy_task
 
 
 class TaskNameEnum(Enum):
@@ -39,6 +36,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.ifeval.IFEvalDe")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATH500")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHMinerva_OLMES")
+    register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHMinerva_OLMES_NONL")
     register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalCpp")
     register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalJava")
     register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalJs")
@@ -87,7 +85,3 @@ def register_all_tasks() -> None:
         import eval_framework_companion  # noqa
     except ImportError:
         pass
-
-
-if __name__ == "__main__":
-    print(list(registered_tasks_iter()))

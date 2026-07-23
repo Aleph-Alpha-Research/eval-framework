@@ -2,7 +2,7 @@
 Tests for EvalConfig validation logic, specifically the ast.literal_eval() functionality.
 """
 
-from eval_framework.llm.vllm import Qwen3_0_6B_VLLM
+from eval_framework.llm.openai import OpenAIModel
 from eval_framework.tasks.eval_config import EvalConfig
 
 
@@ -12,7 +12,7 @@ class TestEvalConfigLLMArgsValidation:
     def test_int_conversion(self) -> None:
         """Test string to int conversion."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {"max_tokens": "42", "batch_size": "10"},
             "task_name": "MMLU",
         }
@@ -27,7 +27,7 @@ class TestEvalConfigLLMArgsValidation:
     def test_float_conversion(self) -> None:
         """Test string to float conversion."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {"temperature": "0.7", "top_p": "0.95", "learning_rate": "1e-4"},
             "task_name": "MMLU",
         }
@@ -44,7 +44,7 @@ class TestEvalConfigLLMArgsValidation:
     def test_boolean_conversion(self) -> None:
         """Test string to boolean conversion."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {"use_cache": "True", "verbose": "False"},
             "task_name": "MMLU",
         }
@@ -59,7 +59,7 @@ class TestEvalConfigLLMArgsValidation:
     def test_none_conversion(self) -> None:
         """Test string to None conversion."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {"seed": "None", "checkpoint": "None"},
             "task_name": "MMLU",
         }
@@ -72,7 +72,7 @@ class TestEvalConfigLLMArgsValidation:
     def test_list_conversion(self) -> None:
         """Test string to list conversion."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {
                 "stop_tokens": '["<|end|>", "\\n", "END"]',
                 "numbers": "[1, 2, 3, 4]",
@@ -93,7 +93,7 @@ class TestEvalConfigLLMArgsValidation:
     def test_dict_conversion(self) -> None:
         """Test string to dict conversion."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {
                 "config": '{"temperature": 0.8, "max_tokens": 100}',
                 "nested": '{"outer": {"inner": 42, "flag": True}}',
@@ -111,7 +111,7 @@ class TestEvalConfigLLMArgsValidation:
     def test_string_preservation(self) -> None:
         """Test that regular strings are preserved as strings."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {
                 "model_name": "gpt-4",
                 "api_key": "sk-1234567890",
@@ -139,7 +139,7 @@ class TestEvalConfigLLMArgsValidation:
     def test_nested_dict_recursive_conversion(self) -> None:
         """Test that nested dictionaries are converted recursively."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {
                 "sampling_params": {
                     "temperature": "0.7",
@@ -148,14 +148,6 @@ class TestEvalConfigLLMArgsValidation:
                     "stop": '["<|end|>", "\\n"]',
                     "use_beam_search": "False",
                     "seed": "None",
-                },
-                "model_config": {
-                    "gpu_memory_utilization": "0.8",
-                    "max_model_len": "2048",
-                    "nested_config": {
-                        "deep_value": "42",
-                        "deep_flag": "True",
-                    },
                 },
             },
             "task_name": "MMLU",
@@ -177,24 +169,10 @@ class TestEvalConfigLLMArgsValidation:
         assert isinstance(sp["use_beam_search"], bool)
         assert sp["seed"] is None
 
-        # Test model_config conversion
-        mc = config.llm_args["model_config"]
-        assert mc["gpu_memory_utilization"] == 0.8
-        assert isinstance(mc["gpu_memory_utilization"], float)
-        assert mc["max_model_len"] == 2048
-        assert isinstance(mc["max_model_len"], int)
-
-        # Test deeply nested conversion
-        nc = mc["nested_config"]
-        assert nc["deep_value"] == 42
-        assert isinstance(nc["deep_value"], int)
-        assert nc["deep_flag"] is True
-        assert isinstance(nc["deep_flag"], bool)
-
     def test_already_correct_types_preserved(self) -> None:
         """Test that values with correct types are not modified."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {
                 "already_int": 42,
                 "already_float": 3.14,
@@ -234,7 +212,7 @@ class TestEvalConfigLLMArgsValidation:
     def test_edge_cases(self) -> None:
         """Test edge cases and potential problematic inputs."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {
                 "empty_string": "",
                 "whitespace": "   ",
@@ -275,7 +253,7 @@ class TestEvalConfigLLMArgsValidation:
 
     def test_repeats_none_falls_back_to_one(self) -> None:
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
             "llm_args": {},
             "task_name": "MMLU",
             "repeats": None,
@@ -292,8 +270,8 @@ class TestEvalConfigJudgeModelArgsValidation:
     def test_judge_model_args_conversion(self) -> None:
         """Test that judge_model_args still uses the old conversion approach."""
         config_data = {
-            "llm_class": Qwen3_0_6B_VLLM,
-            "llm_judge_class": Qwen3_0_6B_VLLM,
+            "llm_class": OpenAIModel,
+            "llm_judge_class": OpenAIModel,
             "judge_model_args": {
                 "temperature": "0.7",
                 "max_tokens": "100",

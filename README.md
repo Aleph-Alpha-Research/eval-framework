@@ -48,11 +48,12 @@ pip install eval_framework
 There are optional extras available to unlock specific features of the library:
 - `api` for inference using the aleph-alpha client.
 - `determined` for running jobs via determined.
-- `mistral` for inference on Mistral models.
+- `openai` for inference against OpenAI-compatible HTTP endpoints.
 - `transformers` for inference using the transformers library.
-- `vllm` for inference via VLLM.
 
 As a short hand, the `all` extra installs all of the above.
+
+For local vLLM inference, see the sibling [`local-vllm-server/`](./local-vllm-server/README.md) package.
 
 We use `uv` to better resolve dependencies when downloading the extras. You can install uv with:
 ```bash
@@ -254,8 +255,10 @@ If you use `eval-framework` in your research, please cite:
 
 ```bibtex
 @software{eval_framework,
+  author={Aleph Alpha Research},
   title={Aleph Alpha Eval Framework},
-  year={2025},
+  year={2026},
+  version = {x.y.z},
   url={https://github.com/Aleph-Alpha-Research/eval-framework}
 }
 ```
@@ -263,6 +266,8 @@ If you use `eval-framework` in your research, please cite:
 ### License
 
 This project is licensed under the [Apache License 2.0](LICENSE).
+
+The constituent tasks' datasets can be subject to specific, more restrictive license terms by third parties. By using `eval-framework` you agree to adhere to and be bound by such license terms in the individual case.
 
 <br><br>
 ---

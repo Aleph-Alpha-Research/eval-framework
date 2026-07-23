@@ -10,10 +10,7 @@ from eval_framework.metrics.completion.math_minerva_completion import (
     MathMinervaCompletionRelaxed,
 )
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
-from eval_framework.metrics.completion.minerva_math_utils import (
-    extract_answers,
-    normalized_gold_from_solution,
-)
+from eval_framework.metrics.completion.minerva_math_utils import extract_answers, normalized_gold_from_solution
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import BPBStyle
@@ -773,6 +770,16 @@ class MATHMinerva_OLMES(MATHMinerva):
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         return _OLMES_FEWSHOTS[: self.num_fewshot]
+
+
+class MATHMinerva_OLMES_NONL(MATHMinerva_OLMES):
+    NAME = "MATHMinerva_OLMES_NONL"
+
+    def __init__(self, num_fewshot: int = 4) -> None:
+        if num_fewshot != 4:
+            logger.warning("MATHMinerva_OLMES_NONL supports a fixed num_fewshot of 4.")
+        super().__init__(num_fewshot=4)
+        self.stop_sequences = ["Problem:"]
 
 
 class MATHMinervaBPB(MATHMinerva_OLMES):

@@ -1,6 +1,6 @@
 [project]
 name = "eval-framework"
-version = "0.7.0"
+version = "0.8.1"
 description = "Evaluation Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -54,32 +54,25 @@ determined = [
 ]
 api = ["aleph-alpha-client>=11.5.1"]
 openai = [
-  "openai>=1.109.1,<3",
+  "openai>=2.46.0,<3",
   "tiktoken>=0.13.0,<1",
   "transformers>=4.45.2,<5",
 ]
 transformers = [
   "transformers>=4.45.2,<5",
-  "torch>=2.5,<3",
+  "torch>=2.13.0,<3",
   "accelerate>=1.14.0,<2",
 ]
 accelerate = ["accelerate"]
-vllm = [
-  "vllm>=0.22,<0.23",
-  "torch>=2.5,<3"
-]
-mistral = [
-  "mistral-common>=1.11.5,<2",
-  "huggingface-hub>=0.36.2,<0.37",
-  "eval_framework[vllm]",
-]
+
+
 # from template-formatting
 optional = [
   "transformers>=4.45.2,<5",
   "jinja2>=3.1.6,<4"
 ]
 all = [
-  "eval_framework[determined,api,openai,transformers,accelerate,vllm,optional,mistral]"
+  "eval_framework[determined,api,openai,transformers,accelerate,optional]"
 ]
 
 [project.urls]
@@ -90,15 +83,15 @@ eval_framework = "eval_framework.run:run"
 
 [dependency-groups]
 dev = [
-  "mypy>=2.2.0,<3",
+  "mypy>=2.3.0,<3",
   "pytest>=9.1.1,<10",
   "pytest-mock>=3.15.1",
   "pytest-xdist>=3.8.0,<4",
   "pytest-sugar>1.1,<2",
   "types-pyyaml>=6.0.12.20260518,<7",
-  "types-python-dateutil>=2.9.0.20260518,<3",
-  "types-requests>=2.33.0.20260518,<3",
-  "plotly>=6.8.0,<7",
+  "types-python-dateutil>=2.9.0.20260716,<3",
+  "types-requests>=2.33.0.20260712,<3",
+  "plotly>=6.9.0,<7",
   "ruff>=0.15.22",
   "pip-licenses>=5.5.5",
 ]
@@ -160,7 +153,6 @@ markers = [
     "cpu_slow: runs for a long time (on CPU)",
     "slow_download: smoke tests that download large datasets (>15s); excluded from CI, run manually with -m slow_download",
     "external_api: needs external services for execution",
-    "vllm: tests that specifically require vLLM functionality",
     "formatter_hash: formatter consistency tests using hash comparisons",
 ]
 filterwarnings = [
