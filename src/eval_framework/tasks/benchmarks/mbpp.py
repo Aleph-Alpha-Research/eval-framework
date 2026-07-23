@@ -354,12 +354,6 @@ class MBPP_EvalPlus(MBPP):
         return list(_OLMES_FEWSHOT_EXAMPLES)
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample) -> str:  # type: ignore[override]
-        assert self.stop_sequences is not None
-
-        for stop_seq in self.stop_sequences:
-            if stop_seq in completion_text:
-                completion_text = completion_text.split(stop_seq)[0]
-
         extracted_code = completion_text + "\n"
         mbpp_ground_truth = str(sample.ground_truth)
         code = self._code_expander(extracted_code, mbpp_ground_truth)
