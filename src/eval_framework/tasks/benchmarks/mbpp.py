@@ -314,3 +314,52 @@ class MBPP_OLMES(MBPP):
         mbpp_ground_truth = str(sample.ground_truth)
         code = self._code_expander(extracted_code, mbpp_ground_truth)
         return code
+
+
+class MBPP_EvalPlus(MBPP):
+    """
+    Version that actually uses the EvalPlus prompt format. OLMES version was slightly off.
+    """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
+    NAME = "MBPP_EvalPlus"
+    FEWSHOT_SPLIT = "test"
+
+    def __init__(self, num_fewshot: int = 3) -> None:
+        super().__init__(num_fewshot)
+        if num_fewshot != 3:
+            logger.warning(f"MBPP_EvalPlus supports only 3-shot, got {num_fewshot}")
+        self.stop_sequences = ["```", '\n"""', "\nassert", "\n#"]
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        text = item["text"] if "text" in item else item["prompt"]
+        test = item["test_list"][0]
+        return (
+            "Please provide a self-contained Python script that solves the following problem"
+            f" in a markdown code block:\n```\n{text.strip()}\n{test}\n```\n"
+        )
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return (
+            "Below is a Python script with a self-contained function that solves the problem"
+            " and passes corresponding tests:\n```python\n"
+        )
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return self._get_cue_text(item) + item["code"] + "\n```"
+
+    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+        return list(_OLMES_FEWSHOT_EXAMPLES)
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample) -> str:  # type: ignore[override]
+        assert self.stop_sequences is not None
+
+        for stop_seq in self.stop_sequences:
+            if stop_seq in completion_text:
+                completion_text = completion_text.split(stop_seq)[0]
+
+        extracted_code = completion_text + "\n"
+        mbpp_ground_truth = str(sample.ground_truth)
+        code = self._code_expander(extracted_code, mbpp_ground_truth)
+        return code

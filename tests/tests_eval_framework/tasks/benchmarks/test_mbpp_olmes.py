@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from datasets import Dataset, DatasetDict
 
-from eval_framework.tasks.benchmarks.mbpp import _OLMES_FEWSHOT_EXAMPLES, MBPP_OLMES
+from eval_framework.tasks.benchmarks.mbpp import _OLMES_FEWSHOT_EXAMPLES, MBPP_OLMES, MBPP_EvalPlus
 from eval_framework.tasks.utils import run_python_code
 from template_formatting.formatter import ConcatFormatter, Message, Role
 from tests.tests_eval_framework.tasks.benchmarks.utils import ExpectedPrompt
@@ -186,3 +186,76 @@ def test_mbpp_olmes_offline_prompt_formatting() -> None:
             sample = next(iter(task.iterate_samples(1)))
 
     _assert_sample_matches(sample, _EXPECTED)
+
+
+# ---------------------------------------------------------------------------
+# MBPP_EvalPlus
+# ---------------------------------------------------------------------------
+
+_EVALPLUS_EXPECTED = ExpectedPrompt(
+    messages=[
+        Message(
+            role=Role.USER,
+            content=(
+                "Please provide a self-contained Python script that solves the following problem"
+                " in a markdown code block:\n```\nReturn the number one.\nassert one() == 1\n```\n"
+            ),
+        ),
+        Message(
+            role=Role.ASSISTANT,
+            content=(
+                "Below is a Python script with a self-contained function that solves the problem"
+                " and passes corresponding tests:\n```python\ndef one():\n    return 1\n```"
+            ),
+        ),
+        Message(
+            role=Role.USER,
+            content=(
+                "Please provide a self-contained Python script that solves the following problem"
+                " in a markdown code block:\n```\nReturn the number two.\nassert two() == 2\n```\n"
+            ),
+        ),
+        Message(
+            role=Role.ASSISTANT,
+            content=(
+                "Below is a Python script with a self-contained function that solves the problem"
+                " and passes corresponding tests:\n```python\n"
+            ),
+        ),
+    ],
+    concat="""\
+Please provide a self-contained Python script that solves the following problem in a markdown code block:
+```
+Return the number one.
+assert one() == 1
+```
+Below is a Python script with a self-contained function that solves the problem and passes corresponding tests:
+```python
+def one():
+    return 1
+```
+
+Please provide a self-contained Python script that solves the following problem in a markdown code block:
+```
+Return the number two.
+assert two() == 2
+```
+Below is a Python script with a self-contained function that solves the problem and passes corresponding tests:
+```python""",
+    ground_truth="['assert two() == 2', 'assert two() != 0']",
+    completions=None,
+)
+
+
+def test_mbpp_evalplus_offline_prompt_formatting() -> None:
+    def mock_fewshot_examples(self, item):
+        return list(_FEWSHOT_EXAMPLES)
+
+    task = MBPP_EvalPlus.with_overwrite(num_fewshot=3, custom_subjects=[_SUBJECT], custom_hf_revision=None)
+    mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([_EVAL_ROW])})
+
+    with patch.object(MBPP_EvalPlus, "_sample_fewshot_examples", mock_fewshot_examples):
+        with patch.object(task, "_load_hf_dataset", return_value=mock_dataset):
+            sample = next(iter(task.iterate_samples(1)))
+
+    _assert_sample_matches(sample, _EVALPLUS_EXPECTED)
