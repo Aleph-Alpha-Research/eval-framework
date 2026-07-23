@@ -267,6 +267,8 @@ If you use `eval-framework` in your research, please cite:
 
 This project is licensed under the [Apache License 2.0](LICENSE).
 
+The constituent tasks' datasets can be subject to specific, more restrictive license terms by third parties. By using `eval-framework` you agree to adhere to and be bound by such license terms in the individual case.
+
 <br><br>
 ---
 
