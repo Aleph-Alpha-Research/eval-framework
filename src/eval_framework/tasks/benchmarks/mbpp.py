@@ -318,9 +318,7 @@ class MBPP_OLMES(MBPP):
 
 
 class MBPP_EvalPlus(MBPP):
-    """
-    Version that actually uses the EvalPlus prompt format. OLMES version was slightly off.
-    """
+    """Version that faithfully follows the EvalPlus prompt format, which OLMES only approximated."""
 
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
@@ -331,7 +329,7 @@ class MBPP_EvalPlus(MBPP):
         super().__init__(num_fewshot)
         if num_fewshot != 3:
             logger.warning(f"MBPP_EvalPlus supports only 3-shot, got {num_fewshot}")
-        self.stop_sequences = ["```", '\n"""', "\nassert", "\n#"]
+        self.stop_sequences = ["```", "\nassert", "\nPlease provide"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         text = item["text"] if "text" in item else item["prompt"]
@@ -348,6 +346,8 @@ class MBPP_EvalPlus(MBPP):
         )
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        # The cue ends at ```python (no trailing newline, since it is stripped as the final eval
+        # message); the fewshot target adds the newline before the code explicitly.
         return self._get_cue_text(item) + "\n" + item["code"] + "\n```"
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
