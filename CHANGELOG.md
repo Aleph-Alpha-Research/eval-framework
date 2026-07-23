@@ -14,6 +14,22 @@
 
 ### Bug Fixes
 
+## [0.8.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.7.2...v0.8.0) (2026-07-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove vLLM dependency and mistral model class ([#494](https://github.com/Aleph-Alpha-Research/eval-framework/issues/494))
+
+### Bug Fixes
+
+* close sandbox container pools instead of at exit ([#495](https://github.com/Aleph-Alpha-Research/eval-framework/issues/495)) ([4f46de2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4f46de269a875acd0873bd68b5fe254f48c1c3ea))
+
+
+### Code Refactoring
+
+* remove vLLM dependency and mistral model class ([#494](https://github.com/Aleph-Alpha-Research/eval-framework/issues/494)) ([05c5a1c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/05c5a1cb5a62a00f4b954570566024e2bc733539))
+
 ## [0.7.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.7.1...v0.7.2) (2026-07-22)
 
 
