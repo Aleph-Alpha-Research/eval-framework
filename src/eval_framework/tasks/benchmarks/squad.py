@@ -239,7 +239,6 @@ class SQUAD(SQUAD2):
         return item["answers"]["text"]
 
 
-
 class SQuAD2_MA(SQUAD2):
     """SQuAD v2 with the exact system prompt used in MA training"""
 
@@ -272,7 +271,7 @@ class SQuAD2_MA(SQUAD2):
         """Clean up the generated answer."""
         # Remove common prefixes and clean whitespace
         cleaned = completion_text.strip()
-        common_prefixes = ["Answer","Final answer"]
+        common_prefixes = ["Answer", "Final answer"]
         # A list comprehension (not a generator) is required here: list.extend
         # consumes lazily, so a generator over the list being extended never
         # terminates and grows the list unboundedly until OOM.
@@ -297,9 +296,11 @@ class SQuAD2_MA(SQUAD2):
         ground_truths = text_ if text_ else ground_truth_for_unanswerable
         return ground_truths
 
+
 class SQuAD2_MA_NO_SYSPROMPT(SQuAD2_MA):
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
         return ""
+
 
 class SQuAD_OLMES(SQUAD):
     """SQuAD variant matching OLMES implementation."""
