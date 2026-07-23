@@ -14,6 +14,18 @@
 
 ### Bug Fixes
 
+## [0.8.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.1...v0.8.2) (2026-07-23)
+
+
+### Features
+
+* add MBPP variants following the EvalPlus prompt format ([#518](https://github.com/Aleph-Alpha-Research/eval-framework/issues/518)) ([4c71597](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4c7159709aac3ec44bd3fe24ce04cf046709cb2e))
+
+
+### Documentation
+
+* clarify dataset license terms in readme ([#516](https://github.com/Aleph-Alpha-Research/eval-framework/issues/516)) ([64f7ad6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/64f7ad6165396686bab2c8b537ffee6c0bb06564))
+
 ## [0.8.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.0...v0.8.1) (2026-07-23)
 
 
