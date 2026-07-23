@@ -51,6 +51,8 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPSh")
     register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPPBPB")
     register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPP_OLMES")
+    register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPP_EvalPlus")
+    register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPP_BPB_EvalPlus")
     register_lazy_task("eval_framework.tasks.benchmarks.mmlu.MMLU")
     register_lazy_task("eval_framework.tasks.benchmarks.mmlu.MMLU_IDK")
     register_lazy_task("eval_framework.tasks.benchmarks.mmlu.MMLU_OLMES")
