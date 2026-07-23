@@ -14,6 +14,18 @@
 
 ### Bug Fixes
 
+## [0.8.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.0...v0.8.1) (2026-07-23)
+
+
+### Features
+
+* add mathminerva version without double-new-line stop sequence ([#515](https://github.com/Aleph-Alpha-Research/eval-framework/issues/515)) ([ef06284](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ef06284b9b246d0d0905e0334fada29f1d325617))
+
+
+### Bug Fixes
+
+* **deps:** update dependency torch to &gt;=2.13.0,&lt;3 ([#448](https://github.com/Aleph-Alpha-Research/eval-framework/issues/448)) ([ae5b571](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ae5b571ea279e3b1e383aa46e68b19f4e246fe6b))
+
 ## [0.8.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.7.2...v0.8.0) (2026-07-23)
 
 
