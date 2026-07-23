@@ -3,7 +3,7 @@ import os
 import random
 import traceback
 from abc import ABC
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self, TypeVar
@@ -14,8 +14,9 @@ from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
 from eval_framework.tasks.dataset_revisions import pinned_revision
+from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
 from eval_framework.tasks.utils import classproperty, raise_errors
-from template_formatting.formatter import Message, Role
+from template_formatting.formatter import BaseFormatter, Message, Role
 
 if TYPE_CHECKING:
     from eval_framework.llm.base import BaseLLM
@@ -279,6 +280,35 @@ class BaseTask[SubjectType](ABC):
                     if index == num_samples:
                         done = True
                         break
+
+    def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
+        """Render this task's documentation as markdown."""
+        dataset_path = getattr(self, "DATASET_PATH", None)
+        example_messages = split_sizes = possible_completions = ground_truth = None
+        if dataset_path is None:
+            sample = next(iter(self.iterate_samples(1)))
+            example_messages = sample.messages
+            split_sizes = {split: len(self.dataset[split]) for split in self.dataset}
+            possible_completions = sample.possible_completions
+            ground_truth = sample.ground_truth
+
+        return render_markdown_doc(
+            name=self.NAME,
+            module=type(self).__module__,
+            dataset_path=dataset_path,
+            sample_split=getattr(self, "SAMPLE_SPLIT", None),
+            fewshot_split=getattr(self, "FEWSHOT_SPLIT", None),
+            response_type=self.get_response_type().name,
+            metrics=[m.__name__ for m in self.get_metrics()],
+            subjects=getattr(self, "SUBJECTS", None),
+            language=getattr(self, "LANGUAGE", None),
+            num_fewshot=self.num_fewshot,
+            formatters=formatters,
+            example_messages=example_messages,
+            split_sizes=split_sizes,
+            possible_completions=possible_completions,
+            ground_truth=ground_truth,
+        )
 
     def _create_samples(self, item: dict[str, Any], index: int, subject: str) -> list[Sample]:
         """Creates one or more samples from a single dataset item. Default implementation returns single sample."""
