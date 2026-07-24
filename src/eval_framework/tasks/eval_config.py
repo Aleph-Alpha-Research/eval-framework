@@ -63,7 +63,7 @@ class EvalConfig(BaseConfig):
     repeats: Annotated[int, BeforeValidator(lambda v: 1 if v is None else v), Field(ge=1)] = 1
     # When True, request/sample errors (e.g. unreachable inference endpoint, exhausted retries)
     # propagate instead of being captured into a blank Error result.
-    fail_on_error: Annotated[bool, BeforeValidator(lambda v: False if v is None else v)] = False
+    fail_on_error: Annotated[bool, BeforeValidator(lambda v: False if v is None else v)] = True
     # Adding a new member? Remember to update KEYS_UNRELATED_TO_RESULTS if it doesn't impact eval results.
 
     @property
