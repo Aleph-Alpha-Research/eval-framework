@@ -1,0 +1,221 @@
+eval\_framework.tasks.benchmarks package
+========================================
+
+Submodules
+----------
+
+eval\_framework.tasks.benchmarks.arc module
+-------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.arc
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.arc\_de module
+-----------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.arc_de
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.bigcodebench module
+----------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.bigcodebench
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.copa module
+--------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.copa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.csqa module
+--------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.csqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.drop module
+--------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.drop
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.global\_mmlu module
+----------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.global_mmlu
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.goldenswag module
+--------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.goldenswag
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.gpqa module
+--------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.gpqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.gsm8k module
+---------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.gsm8k
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.hellaswag module
+-------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.hellaswag
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.humaneval module
+-------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.humaneval
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.ifeval module
+----------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.ifeval
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.math\_reasoning module
+-------------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.math_reasoning
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.mbpp module
+--------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.mbpp
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.medqa module
+---------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.medqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.mmlu module
+--------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.mmlu
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.mmlu\_pro module
+-------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.mmlu_pro
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.multipl\_e module
+--------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.multipl_e
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.naturalqs\_open module
+-------------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.naturalqs_open
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.piqa module
+--------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.piqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.sciq module
+--------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.sciq
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.social\_iqa module
+---------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.social_iqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.squad module
+---------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.squad
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.triviaqa module
+------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.triviaqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.tasks.benchmarks.winogrande module
+--------------------------------------------------
+
+.. automodule:: eval_framework.tasks.benchmarks.winogrande
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: eval_framework.tasks.benchmarks
+   :members:
+   :show-inheritance:
+   :undoc-members:
