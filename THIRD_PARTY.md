@@ -39,11 +39,11 @@ and first-party/internal packages are excluded.
 | Package | Version |
 |---|---|
 | `annotated-doc` | `0.0.4` |
-| `annotated-types` | `0.7.0` |
+| `annotated-types` | `0.8.0` |
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
 | `blis` | `1.3.3` |
-| `botocore` | `1.43.54` |
+| `botocore` | `1.43.55` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.4.9` |

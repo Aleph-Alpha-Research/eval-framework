@@ -26,8 +26,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.54 - https://github.com/boto/boto3
-- **botocore** 1.43.54 - https://github.com/boto/botocore
+- **boto3** 1.43.55 - https://github.com/boto/boto3
+- **botocore** 1.43.55 - https://github.com/boto/botocore
 - **datasets** 5.0.0 - https://github.com/huggingface/datasets
 - **hf-xet** 1.5.2 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -35,7 +35,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.0 - https://www.nltk.org/
 - **pyarrow** 25.0.0 - https://arrow.apache.org/
-- **python-iso639** 2026.4.20 - https://github.com/jacksonllee/iso639
+- **python-iso639** 2026.7.23 - https://github.com/jacksonllee/iso639
 - **requests** 2.34.2 - https://github.com/psf/requests
 - **s3transfer** 0.19.2 - https://github.com/boto/s3transfer
 
@@ -103,7 +103,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## MIT
 
 - **annotated-doc** 0.0.4 - https://github.com/fastapi/annotated-doc
-- **annotated-types** 0.7.0 - https://github.com/annotated-types/annotated-types
+- **annotated-types** 0.8.0 - https://github.com/annotated-types/annotated-types
 - **anyio** 4.14.2 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **catalogue** 2.0.10 - https://github.com/explosion/catalogue
@@ -189,7 +189,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### annotated-types 0.7.0 (MIT)
+### annotated-types 0.8.0 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -314,7 +314,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.43.54 (Apache-2.0)
+### boto3 1.43.55 (Apache-2.0)
 
 ```text
 Apache License
@@ -495,7 +495,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.54 (Apache-2.0)
+### botocore 1.43.55 (Apache-2.0)
 
 ```text
 Apache License
@@ -16054,7 +16054,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### python-iso639 2026.4.20 (Apache-2.0)
+### python-iso639 2026.7.23 (Apache-2.0)
 
 ```text
 Apache License
