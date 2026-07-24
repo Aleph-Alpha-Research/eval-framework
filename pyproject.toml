@@ -39,7 +39,7 @@ dependencies = [
   "python-iso639>=2026.4.20",
   "wandb>=0.28.1,<1",
   "boto3>=1.43.19,<2",
-  "numpy>=2.2.6",
+  "numpy>=2.5.1",
   # is a dependency of sympy, but not explicitly listed in the requirements.txt
   # https://github.com/sympy/sympy/blob/0204fa34e8f6f6f8ccb4de01209be9a2345c9d6e/doc/src/contributing/dependencies.md?plain=1#L125
   "antlr4-python3-runtime==4.11.0",
