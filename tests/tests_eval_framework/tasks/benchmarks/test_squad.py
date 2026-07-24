@@ -37,5 +37,5 @@ def test_squad2_ma_instruction_is_context_question_answer_only() -> None:
 
 def test_squad2_ma_reject_ground_truth_matches_instruction() -> None:
     task = SQuAD2_MA()
-    assert task._get_ground_truth(_ANSWERABLE) == [" Paris"]
-    assert f" {task.UNANSWERABLE_STR}" in task._get_ground_truth(_UNANSWERABLE)
+    assert task._get_ground_truth(_ANSWERABLE) == ["Paris"]
+    assert task.UNANSWERABLE_STR in task._get_ground_truth(_UNANSWERABLE)
