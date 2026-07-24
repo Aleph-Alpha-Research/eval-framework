@@ -14,6 +14,16 @@
 
 ### Bug Fixes
 
+## [0.8.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.2...v0.8.3) (2026-07-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency numpy to &gt;=2.5.1 ([#525](https://github.com/Aleph-Alpha-Research/eval-framework/issues/525)) ([3f4d814](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3f4d81465d8b3a1689f14c85a7a3d67d0f4e4457))
+* **deps:** update dependency openai to &gt;=2.48.0,&lt;3 ([#532](https://github.com/Aleph-Alpha-Research/eval-framework/issues/532)) ([c1cb942](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c1cb942274c7ebae759ace46c226c127e78a2594))
+* **deps:** update dependency python-iso639 to &gt;=2026.7.23 ([#533](https://github.com/Aleph-Alpha-Research/eval-framework/issues/533)) ([ba1ad4e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ba1ad4e7b74417ec47a0b3a41946ca66c9bf9ca5))
+* revert 0e0139d, do not include language consistency metric results for empty completions ([#529](https://github.com/Aleph-Alpha-Research/eval-framework/issues/529)) ([b5451c4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b5451c42f257fe7b1f83baa977503416020ecaa6))
+
 ## [0.8.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.1...v0.8.2) (2026-07-23)
 
 
