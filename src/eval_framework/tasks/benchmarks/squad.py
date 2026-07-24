@@ -11,7 +11,7 @@ from huggingface_hub.errors import RevisionNotFoundError
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1, F1SquadNormalized
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
-from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, SubjectType
+from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
 
@@ -239,6 +239,7 @@ class SQUAD(SQUAD2):
         return item["answers"]["text"]
 
 
+
 class SQuAD2_MA(SQUAD2):
     """SQuAD v2 with the exact system prompt used in MA training"""
 
@@ -252,7 +253,7 @@ class SQuAD2_MA(SQUAD2):
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
         self.stop_sequences = []
-        self.max_tokens = None
+        self.max_tokens = 10_000
 
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
         return (
@@ -261,11 +262,44 @@ class SQuAD2_MA(SQUAD2):
             "Use the given context to answer the question faithfully. Answer only if the "
             f"answer is present in the given context, otherwise respond with '{self.UNANSWERABLE_STR}' "
             "if the answer is not present in the context."
+            "Always begin your answer with 'Final answer:'"
         )
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"Context:\n{item['context']}\n\nQuestion:\n{item['question']}\n"
 
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        """Clean up the generated answer."""
+        # Remove common prefixes and clean whitespace
+        cleaned = completion_text.strip()
+        common_prefixes = ["Answer","Final answer"]
+        # A list comprehension (not a generator) is required here: list.extend
+        # consumes lazily, so a generator over the list being extended never
+        # terminates and grows the list unboundedly until OOM.
+        common_prefixes.extend([f"**{prefix}**" for prefix in common_prefixes])
+        common_prefixes.reverse()
+
+        # Search for the last occurrence of any common prefix, and take only what's after it.
+        for prefix in common_prefixes:
+            idx = cleaned.rfind(prefix + ":")
+            if idx != -1:
+                cleaned = cleaned[idx + len(prefix) + 1 :].strip()
+                break
+        return cleaned
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+        text_ = item["answers"]["text"]
+        ground_truth_for_unanswerable = [
+            self.UNANSWERABLE_STR,
+            self.UNANSWERABLE_STR + " ",
+            self.UNANSWERABLE_STR.capitalize(),
+        ]
+        ground_truths = text_ if text_ else ground_truth_for_unanswerable
+        return ground_truths
+
+class SQuAD2_MA_NO_SYSPROMPT(SQuAD2_MA):
+    def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
+        return ""
 
 class SQuAD_OLMES(SQUAD):
     """SQuAD variant matching OLMES implementation."""
