@@ -202,6 +202,8 @@
     "SQUAD2BPB.Llama3Formatter": "097cea2ecf27f0d24b52633fa3ce363a",
     "SQuAD2_MA.ConcatFormatter": "ebb793d8100834a75e72ade3695a1c89",
     "SQuAD2_MA.Llama3Formatter": "2c7beb233a9d5c22eea934a18c147455",
+    "SQuAD2_MA_NO_SYSPROMPT.ConcatFormatter": "ad3e185144784c8f7e4ac62e866468ed",
+    "SQuAD2_MA_NO_SYSPROMPT.Llama3Formatter": "b47859831e752b421c376e6a905263bf",
     "SQuAD_OLMES.ConcatFormatter": "f8130572b33a2bcbe5c4d594b64cedb7",
     "SQuAD_OLMES.Llama3Formatter": "66449151618804f27071ebc3b3774c1a",
     "SocialIQACloze.ConcatFormatter": "e20a2c81592da55f2d6e6c88d3a7104f",
