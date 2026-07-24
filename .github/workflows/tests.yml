@@ -39,7 +39,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/setup-python@v7
         with:
-          python-version: "3.11"
+          python-version: "3.14.6"
 
       - name: Install commitizen
         if: github.event_name == 'pull_request'
@@ -239,7 +239,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version: "3.11"
+          python-version: "3.14.6"
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v9.0.0
