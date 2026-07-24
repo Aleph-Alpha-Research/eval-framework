@@ -36,7 +36,7 @@ dependencies = [
   "llm-sandbox[docker]==0.3.39",
   "jsonlines>=4,<5",
   "lxml>=6.1.1,<7",
-  "python-iso639>=2026.4.20",
+  "python-iso639>=2026.7.23",
   "wandb>=0.28.1,<1",
   "boto3>=1.43.19,<2",
   "numpy>=2.5.1",
