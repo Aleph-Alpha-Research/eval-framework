@@ -862,7 +862,7 @@ requires-dist = [
     { name = "mysql-connector-python", specifier = ">=9.7.0,<10" },
     { name = "nltk", specifier = ">=3.10.0,<4" },
     { name = "numpy", specifier = ">=2.5.1" },
-    { name = "openai", marker = "extra == 'openai'", specifier = ">=2.46.0,<3" },
+    { name = "openai", marker = "extra == 'openai'", specifier = ">=2.48.0,<3" },
     { name = "psycopg2-binary", specifier = ">=2.9.12,<3" },
     { name = "pycountry", specifier = ">=26.2.16,<27" },
     { name = "pydantic", specifier = ">=2.13.4,<3" },
