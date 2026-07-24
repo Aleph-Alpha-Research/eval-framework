@@ -9,7 +9,7 @@ authors = [
 ]
 dependencies = [
   "eval-framework[openai]",
-  "vllm>=0.22,<0.23",
+  "vllm>=0.25.1,<0.26",
 ]
 
 [dependency-groups]
