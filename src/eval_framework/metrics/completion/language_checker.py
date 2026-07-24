@@ -41,9 +41,6 @@ class LanguageConsistencyChecker(BaseMetric[Completion]):
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
 
-        if not response.completion:
-            return []  # No completion means no language to detect, so it is excluded from aggregation
-
         completion_language = response.get_completion_language()
         target_language = response.get_instruction_language()
         if completion_language == target_language == "":
@@ -59,9 +56,6 @@ class LanguageRawConsistencyChecker(BaseMetric[Completion]):
     def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error is not None:
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
-        if not response.raw_completion:
-            return []  # No completion means no language to detect, so it is excluded from aggregation
 
         raw_completion_language = response.get_raw_completion_language()
         target_language = response.get_instruction_language()
