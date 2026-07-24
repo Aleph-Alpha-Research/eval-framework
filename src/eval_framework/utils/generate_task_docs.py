@@ -1,7 +1,5 @@
 import argparse
-import inspect
 import os
-import re
 from pathlib import Path
 
 import tqdm
@@ -27,7 +25,7 @@ def parse_args(cli_args: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         default=False,
         required=False,
-        help="If set, examples prompts for each of the formatters will be added in the generated docs.",
+        help="Unused. Only there for backwards compatibility",
     )
     parser.add_argument(
         "--exclude-tasks",
@@ -65,108 +63,16 @@ def parse_args(cli_args: list[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(args=cli_args)
 
 
-def generate_docs_for_task(
-    output_docs_directory: Path, task_name: str, formatters: list[BaseFormatter], add_prompt_examples: bool
-) -> None:
+def generate_docs_for_task(output_docs_directory: Path, task_name: str, formatters: list[BaseFormatter]) -> None:
     """Generate documentation for a specific task."""
-    eval_ = registry()[task_name]
-    task_class = eval_.task_class()
+    task_class = registry()[task_name].task_class()
 
     try:
-        num_fewshot = 1
-        task = task_class(num_fewshot=num_fewshot)
+        task = task_class(num_fewshot=1)
     except (TypeError, ValueError, AssertionError):
-        try:
-            num_fewshot = 0
-            task = task_class(num_fewshot=num_fewshot)
-        except (TypeError, ValueError, AssertionError):
-            try:
-                task = task_class()
-                num_fewshot = task.num_fewshot
-            except Exception as e:
-                print(f"Failed to instantiate task {task_name}: {e}")
-                return
+        task = task_class(num_fewshot=0)
 
-    with open(f"{output_docs_directory}/{task_name}.md", "w") as f:
-        f.write(f"# {task_name}\n\n")
-        dataset_path = eval_.dataset_path()
-        http_path = f"https://huggingface.co/datasets/{dataset_path}" if dataset_path else None
-
-        f.write("````\n")  # fence with 4 thicks because some prompts have code blocks with 3 thicks
-        f.write(f"NAME = {task_name}".strip() + "\n")
-        if dataset_path is not None:
-            f.write(f"DATASET_PATH = {dataset_path}".strip() + "\n")
-        if hasattr(task, "SAMPLE_SPLIT"):
-            f.write(f"SAMPLE_SPLIT = {task.SAMPLE_SPLIT}".strip() + "\n")
-        if hasattr(task, "FEWSHOT_SPLIT"):
-            f.write(f"FEWSHOT_SPLIT = {task.FEWSHOT_SPLIT}".strip() + "\n")
-        f.write(f"RESPONSE_TYPE = {eval_.response_type().name}".strip() + "\n")
-        metrics_list = [f"{m.__name__}" for m in eval_.metrics()]
-        f.write(f"METRICS = [{', '.join(metrics_list)}]".strip() + "\n")
-        if hasattr(task, "SUBJECTS"):
-            f.write(f"SUBJECTS = {repr(task.SUBJECTS)}".strip() + "\n")
-        if hasattr(task, "LANGUAGE"):
-            f.write(f"LANGUAGE = {repr(task.LANGUAGE)}".strip() + "\n")
-        f.write("````\n\n")
-
-        f.write(f"- Module: `{task_class.__module__}`\n\n")
-
-        try:
-            raw_file_path = inspect.getfile(task_class)
-            # Find the package root 'eval_framework' in the path
-            match = re.search(r"eval_framework.*", raw_file_path)
-            if match:
-                # Reconstruct relative path assuming standard 'src' structure
-                task_file = f"src/{match.group(0)}"
-                # Provide a local relative link (for VS Code) and an absolute link (for GitHub/Web)
-                f.write(f"- File: [{task_file}](../../{task_file}) | [View on GitHub]({REPO_URL}/{task_file})\n\n")
-            else:
-                # Fallback for tasks defined outside the main package (e.g., custom local tasks)
-                f.write(f"- File: `{raw_file_path}`\n\n")
-        except Exception:
-            f.write("- File: `Dynamic or Built-in`\n\n")
-
-        if http_path:
-            f.write(f"- Link to dataset: [{http_path}]({http_path})\n\n")
-
-        if not add_prompt_examples:
-            f.write(
-                f"More detailed documentation, with prompt examples and ground truth completions, can be generated "
-                f"with `uv run -m eval_framework.utils.generate_task_docs --add-prompt-examples "
-                f'--only-tasks "{task_name}"`.\n'
-            )
-
-        else:
-            s = next(iter(task.iterate_samples(1)))
-            for split in task.dataset:
-                f.write(f"- `{split}` has {len(task.dataset[split])} samples\n\n")
-
-            for formatter in formatters:
-                f.write(f"## Example prompt with {formatter.__class__.__name__} ({num_fewshot}-shot)\n\n")
-                formatted_sample = formatter.format(s.messages, output_mode="string")
-                f.write("````\n")
-                f.write(f'"{formatted_sample}"')
-                f.write("\n````\n\n")
-
-            f.write("## Possible completions:\n\n")
-            f.write("````\n")
-            if s.possible_completions:
-                for item in (
-                    s.possible_completions if isinstance(s.possible_completions, list) else [s.possible_completions]
-                ):
-                    f.write(f'- "{item}"\n')
-            else:
-                f.write("None\n")
-            f.write("````\n\n")
-
-            f.write("## Ground truth:\n\n")
-            f.write("````\n")
-            if s.ground_truth:
-                for item in s.ground_truth if isinstance(s.ground_truth, list) else [s.ground_truth]:
-                    f.write(f'- "{item}"\n')
-            else:
-                f.write("None\n")
-            f.write("````\n")
+    (output_docs_directory / f"{task_name}.md").write_text(task.markdown_doc(formatters), encoding="utf-8")
 
 
 def generate_readme_list(output_docs_directory: Path, total_tasks: int) -> None:
@@ -227,7 +133,6 @@ def generate_all_docs(args: argparse.Namespace, output_docs_directory: Path) -> 
                 output_docs_directory=output_docs_directory,
                 task_name=task_name,
                 formatters=formatters,
-                add_prompt_examples=args.add_prompt_examples,
             )
 
         except Exception as e:
