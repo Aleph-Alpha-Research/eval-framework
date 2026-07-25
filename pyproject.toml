@@ -127,6 +127,7 @@ select = [
     "UP", # Auto-upgrading of new Python features
     "I", # Sort imports
     "B", # flake8-bugbear
+    "ARG", # flake8-unused-arguments
 ]
 
 [tool.ruff.lint.isort]
