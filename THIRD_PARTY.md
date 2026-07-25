@@ -21,12 +21,12 @@ and first-party/internal packages are excluded.
 | `lxml` | `>=6.1.1,<7` |
 | `mysql-connector-python` | `>=9.7.0,<10` |
 | `nltk` | `>=3.10.0,<4` |
-| `numpy` | `>=2.2.6` |
+| `numpy` | `>=2.5.1` |
 | `psycopg2-binary` | `>=2.9.12,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.13.4,<3` |
 | `python-dotenv` | `>=1.2.2,<2` |
-| `python-iso639` | `>=2026.4.20` |
+| `python-iso639` | `>=2026.7.23` |
 | `pyyaml` | `>=6.0.3,<7` |
 | `scipy` | `>=1.18.0,<2` |
 | `spacy` | `>=3.8.14,<4` |
@@ -43,7 +43,7 @@ and first-party/internal packages are excluded.
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
 | `blis` | `1.3.3` |
-| `botocore` | `1.43.55` |
+| `botocore` | `1.43.56` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.4.9` |
@@ -96,7 +96,7 @@ and first-party/internal packages are excluded.
 | `spacy-loggers` | `1.0.5` |
 | `srsly` | `2.5.3` |
 | `thinc` | `8.3.13` |
-| `tqdm` | `4.69.0` |
+| `tqdm` | `4.69.1` |
 | `typer` | `0.27.0` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.2` |

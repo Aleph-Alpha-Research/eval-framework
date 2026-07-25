@@ -26,8 +26,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.55 - https://github.com/boto/boto3
-- **botocore** 1.43.55 - https://github.com/boto/botocore
+- **boto3** 1.43.56 - https://github.com/boto/boto3
+- **botocore** 1.43.56 - https://github.com/boto/botocore
 - **datasets** 5.0.0 - https://github.com/huggingface/datasets
 - **hf-xet** 1.5.2 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -149,7 +149,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## MPL-2.0 AND MIT
 
-- **tqdm** 4.69.0 - https://tqdm.github.io
+- **tqdm** 4.69.1 - https://tqdm.github.io
 
 ## PSF-2.0
 
@@ -314,7 +314,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.43.55 (Apache-2.0)
+### boto3 1.43.56 (Apache-2.0)
 
 ```text
 Apache License
@@ -495,7 +495,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.55 (Apache-2.0)
+### botocore 1.43.56 (Apache-2.0)
 
 ```text
 Apache License
@@ -18267,7 +18267,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### tqdm 4.69.0 (MPL-2.0 AND MIT)
+### tqdm 4.69.1 (MPL-2.0 AND MIT)
 
 ```text
 `tqdm` is a product of collaborative work.
