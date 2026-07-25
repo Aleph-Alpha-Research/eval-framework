@@ -135,5 +135,5 @@ class Identity:
     def __init__(self) -> None:
         self.name = "Identity"
 
-    def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame:
+    def __call__(self, response_df: pd.DataFrame, _identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame:
         return response_df

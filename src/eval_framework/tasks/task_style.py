@@ -206,7 +206,7 @@ class MCStyle(TaskStyler):
         labels = get_n_letters(len(choices))
         return f" {labels[correct_index]}"
 
-    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:  # noqa: ARG002
         """Note: `correct_index` is ignored for `MCStyle` and only used for `BPBStyle`."""
         return [f" {label}" for label in get_n_letters(len(choices))]
 
@@ -267,7 +267,7 @@ class MCCompletionStyle(TaskStyler):
         """Override to insert a space between cue and answer text."""
         return f"{self.get_cue_text()} {self.get_ground_truth(choices, correct_index)}"
 
-    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str] | None:
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str] | None:  # noqa: ARG002
         """Completion-mode tasks do not provide fixed candidate completions."""
         return None
 
@@ -323,14 +323,14 @@ class ClozeStyle(TaskStyler):
     def get_cue_text(self) -> str:
         return self._cue_text
 
-    def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
+    def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:  # noqa: ARG002
         text = self.get_question_text(raw_question)
         return f"{text}\n" if self.trailing_newline else text
 
     def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
         return f" {choices[correct_index]}" if self.leading_space_continuations else choices[correct_index]
 
-    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:  # noqa: ARG002
         return [f" {c}" for c in choices] if self.leading_space_continuations else [f"{c}" for c in choices]
 
 

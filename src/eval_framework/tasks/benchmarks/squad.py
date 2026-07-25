@@ -255,7 +255,7 @@ class SQuAD2_MA(SQUAD2):
         self.stop_sequences = []
         self.max_tokens = 10_000
 
-    def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
+    def _get_system_prompt_text(self, _item: dict[str, Any]) -> str | None:
         return (
             "You are a helpful assistant and will answer the user's questions carefully, "
             "logically, accurately and well-reasoned.\n"
@@ -268,7 +268,7 @@ class SQuAD2_MA(SQUAD2):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"Context:\n{item['context']}\n\nQuestion:\n{item['question']}\n"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         """Clean up the generated answer."""
         # Remove common prefixes and clean whitespace
         cleaned = completion_text.strip()
@@ -299,7 +299,7 @@ class SQuAD2_MA(SQUAD2):
 
 
 class SQuAD2_MA_NO_SYSPROMPT(SQuAD2_MA):
-    def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
+    def _get_system_prompt_text(self, _item: dict[str, Any]) -> str | None:
         return ""
 
 
@@ -319,13 +319,13 @@ class SQuAD_OLMES(SQUAD):
         self.stop_sequences = ["Title:", "\n\n"]
         self.max_tokens = 50
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, _item: dict[str, Any]) -> str:
         return (
             "The following are reading comprehension questions, "
             "where the answer to each question is a segment of text from the corresponding background text."
         )
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, _item: dict[str, Any]) -> str:
         return "Answer:"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:

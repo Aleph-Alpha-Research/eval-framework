@@ -41,7 +41,7 @@ class TRIVIAQA(BaseTask[str]):
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         return item["answer"]["aliases"]
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         return completion_text.strip().rstrip(".")
 
 
@@ -65,7 +65,7 @@ class TriviaQA_MA(TRIVIAQA):
     def _get_context_text(self, item: dict[str, Any]) -> str:
         return "\n\n".join(item["entity_pages"]["wiki_context"])
 
-    def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
+    def _get_system_prompt_text(self, _item: dict[str, Any]) -> str | None:
         return (
             "You are a helpful assistant and will answer the user's questions carefully, "
             "logically, accurately and well-reasoned.\n"

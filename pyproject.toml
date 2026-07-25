@@ -137,8 +137,18 @@ select = [
 # this needs to be added to prevent isort from incorrectly sorting
 known-third-party = ["wandb"]
 
+[tool.ruff.lint.flake8-unused-arguments]
+# *args/**kwargs are frequently required to satisfy an overridden signature
+# without being used by a given implementation; don't flag them.
+ignore-variadic-names = true
+
 [tool.ruff.lint.extend-per-file-ignores]
 "__init__.py" = ["F401"]
+# Mock/fixture/template signatures intentionally mirror real ones and leave
+# arguments unused; ARG adds noise there rather than catching dead code.
+"tests/**" = ["ARG"]
+"changelog/tests/**" = ["ARG"]
+"examples/**" = ["ARG"]
 
 [tool.mypy]
 plugins = "pydantic.mypy"

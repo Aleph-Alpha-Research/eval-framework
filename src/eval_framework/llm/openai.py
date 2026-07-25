@@ -416,9 +416,9 @@ class DeepseekModel(OpenAIModel):
         model_name: str | None = None,
         formatter: BaseFormatter | None = None,
         temperature: float | None = None,
-        api_key: str | None = None,
+        _api_key: str | None = None,
         organization: str | None = None,
-        base_url: str | None = None,
+        _base_url: str | None = None,
         tokenizer_name: str | None = None,
     ) -> None:
         super().__init__(

@@ -167,7 +167,7 @@ class SocialIQACloze(BaseTask[str]):
     PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
 
-    def _load_dataset(self, subject: Any) -> None:
+    def _load_dataset(self, _subject: Any) -> None:
         hf_dataset = _load_social_i_qa()
         self.dataset = self._shuffle_splits(hf_dataset=hf_dataset)
 
@@ -186,7 +186,7 @@ class SocialIQACloze(BaseTask[str]):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, _item: dict[str, Any]) -> str:
         return "Answer:"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
@@ -217,7 +217,7 @@ class SocialIQAMC_OLMES(SocialIQACloze):
         labels = get_n_letters(3)
         return f" {labels[idx]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, _item: dict[str, Any]) -> list[str] | None:
         return [f" {label}" for label in get_n_letters(3)]
 
 
@@ -243,5 +243,5 @@ class SocialIQAMC(SocialIQAMC_OLMES):
         labels = get_n_letters(3)
         return f" {labels[idx]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, _item: dict[str, Any]) -> list[str] | None:
         return [f" {label}" for label in get_n_letters(3)]

@@ -37,7 +37,7 @@ class CommonsenseQACloze(BaseTask[str]):
         correct_index = self.keys.index(correct_label)
         return f" {self.keys[correct_index]}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, _item: dict[str, Any]) -> str:
         return "Answer:"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:

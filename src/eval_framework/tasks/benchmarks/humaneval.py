@@ -46,7 +46,7 @@ class HumanEval(BaseTask[str]):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"```python\n{item['prompt'].lstrip()}"
 
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+    def _get_ground_truth(self, _item: dict[str, Any]) -> str | None:
         return "Success"
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
@@ -93,7 +93,7 @@ class HumanEvalBPB(HumanEval):
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [BitsPerByteLoglikelihood]
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, _item: dict[str, Any]) -> str:
         return ""
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:

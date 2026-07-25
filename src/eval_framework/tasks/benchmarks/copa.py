@@ -73,7 +73,7 @@ class COPA_OLMES(COPAEvalHarness):
         labels = get_n_letters(2)
         return f" {labels[item['label']]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, _item: dict[str, Any]) -> list[str] | None:
         return [f" {label}" for label in get_n_letters(2)]
 
 
@@ -100,7 +100,7 @@ class COPA_IDKEvalHarness(COPAEvalHarness):
         TernaryScore,
     ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, _item: dict[str, Any]) -> str:
         return (
             "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
             "answers receive points. It is acceptable to answer with 'I do not know' if you are unsure, and "

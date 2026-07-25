@@ -353,7 +353,7 @@ def strip_string_hendrycks(string: str) -> str:
 def is_equiv_minerva(x1: str, x2: str, timeout_seconds: int = 5) -> bool:
     """Sympy-based equivalence (Minerva)."""
 
-    def _timeout_handler(signum: Any, frame: Any) -> None:
+    def _timeout_handler(_signum: Any, _frame: Any) -> None:
         raise TimeoutError()
 
     try:

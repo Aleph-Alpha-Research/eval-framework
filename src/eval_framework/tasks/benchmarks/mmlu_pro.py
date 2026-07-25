@@ -86,13 +86,13 @@ class MMLU_PRO(BaseTask[str]):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, _item: dict[str, Any]) -> str:
         return "Answer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return f" {self.keys[item['answer_index']]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
+    def _get_possible_completions(self, _item: dict[str, Any]) -> list[str] | None:
         return [f" {key}" for key in self.keys]
 
 
@@ -160,13 +160,13 @@ class MMLU_PRO_COT(MMLU_PRO):
         else:
             return "[invalid]"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, _item: dict[str, Any]) -> str:
         return ""
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         return self.keys[item["answer_index"]]
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]

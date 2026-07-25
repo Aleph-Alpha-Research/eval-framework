@@ -95,7 +95,7 @@ class MATHReasoning(BaseTask[str]):
 
         return None
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         assert isinstance(completion_text, str)
         extracted_answer = self._extract_answer(completion_text)
         if extracted_answer is None:
@@ -456,7 +456,7 @@ class MATH500(MATHReasoning):
         assert num_fewshot == 0, "MATH-500 evaluation does not include few shot"
         super().__init__(num_fewshot)
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         extracted_answer_boxed = self._extract_answer(completion_text)
         extracted_answer_unboxed = self._extract_answer(
             completion_text, extract_from_boxed=False, extract_regex=self.ANSWER_PATTERN
@@ -515,7 +515,7 @@ class MATH(MATHReasoning):
         match = "" if len(finds) == 0 else finds[-1]
         return match
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         """
         post_process_generated_completion extracts via flex extraction/matching.
         if there is a boxed answer, then this gets used first
@@ -583,7 +583,7 @@ class MATHMinervaEvalHarness(MATHReasoning):
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
         return " " + item["solution"]
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         """Primary answer for storage; metric uses raw_completion for exact_match_flex (strict matching)."""
         candidates = extract_answers(completion_text, use_cot=True, cot_style="minerva", relaxed=False)
         return candidates[0] if candidates else "[no_answer]"
@@ -601,7 +601,7 @@ class MATHMinerva(MATHMinervaEvalHarness):
     NAME = "MATHMinerva"
     METRICS = [MathMinervaCompletionRelaxed]
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         """Primary answer for storage; uses relaxed final-answer extraction."""
         candidates = extract_answers(completion_text, use_cot=True, cot_style="minerva", relaxed=True)
         return candidates[0] if candidates else "[no_answer]"
@@ -684,7 +684,7 @@ Answer:"""
         super().__init__(num_fewshot)
         self.stop_sequences: list[str] = []
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -768,7 +768,7 @@ class MATHMinerva_OLMES(MATHMinerva):
             logger.warning("MATHMinerva_OLMES supports a fixed num_fewshot of 4.")
         super().__init__(num_fewshot=4)
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, _item: dict[str, Any]) -> list[dict]:
         return _OLMES_FEWSHOTS[: self.num_fewshot]
 
 
@@ -798,7 +798,7 @@ class MATHMinervaBPB(MATHMinerva_OLMES):
     def _get_choices(self, item: dict[str, Any]) -> list[str]:
         return [item["solution"]]
 
-    def _get_correct_index(self, item: dict[str, Any]) -> int:
+    def _get_correct_index(self, _item: dict[str, Any]) -> int:
         return 0
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

@@ -39,7 +39,7 @@ class MedQACloze(BaseTask[str]):
             return None
         return f" {choices[int(answer_idx)]}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, _item: dict[str, Any]) -> str:
         return "Answer:"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
@@ -75,7 +75,7 @@ class MedQAMC(MedQACloze):
             return None
         return f" {self.keys[int(answer_idx)]}"
 
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
+    def _get_possible_completions(self, _item: dict[str, Any]) -> list[str]:
         return [f" {label}" for label in self.keys]
 
 

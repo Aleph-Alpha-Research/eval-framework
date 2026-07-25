@@ -31,7 +31,7 @@ class NaturalQsOpen(BaseTask[str]):
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return f"Question: {item.get('question', '')}\n"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, _item: dict[str, Any]) -> str:
         return "Answer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:

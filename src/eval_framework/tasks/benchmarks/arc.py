@@ -41,7 +41,7 @@ class ARC(BaseTask[str]):
         assert ground_truth is not None
         return f"{self._get_cue_text(item)}{ground_truth}"
 
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
+    def _get_cue_text(self, _item: dict[str, Any]) -> str:
         return "Answer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
@@ -91,7 +91,7 @@ class ARC_IDK(ARC):
         TernaryScore,
     ]
 
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
+    def _get_initial_prompt_text(self, _item: dict[str, Any]) -> str:
         return (
             "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
             "It is acceptable to answer with 'I do not know' if you are unsure, and you will receive 0 points."

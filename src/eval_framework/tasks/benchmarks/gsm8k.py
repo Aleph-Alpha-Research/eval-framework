@@ -121,7 +121,7 @@ class GSM8KEvalHarness(BaseTask[str]):
         else:
             return "[invalid]"
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         for stop_sequence in self.stop_sequences:
             if stop_sequence in completion_text:
                 completion_text = completion_text.split(stop_sequence)[0]
@@ -150,7 +150,7 @@ class GSM8K(GSM8KEvalHarness):
         question = re.sub(r"<<.*?>>", "", item["question"])
         return f"Question: {question}\nAnswer:"
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, _item: dict[str, Any]) -> list[dict]:
         """Override to use predefined fewshot examples instead of sampling from dataset"""
         return FEWSHOT_ITEMS[: self.num_fewshot]
 
@@ -216,7 +216,7 @@ class GSM8K_OLMES(GSM8K):
         numbers = re.findall(r"[-+]?\d*\.\d+|\d+", output)
         return numbers[-1] if numbers else output
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:  # noqa: ARG002
         return self._clean_short_answer(completion_text)
 
 
@@ -243,7 +243,7 @@ class GSM8KBPB(GSM8K_OLMES):
     def _get_choices(self, item: dict[str, Any]) -> list[str]:
         return [self.normalize_answer_str(item)]
 
-    def _get_correct_index(self, item: dict[str, Any]) -> int:
+    def _get_correct_index(self, _item: dict[str, Any]) -> int:
         return 0
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
