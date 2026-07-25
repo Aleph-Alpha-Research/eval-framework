@@ -126,6 +126,7 @@ select = [
     "F", # Pyflakes
     "UP", # Auto-upgrading of new Python features
     "I", # Sort imports
+    "B", # flake8-bugbear
 ]
 
 [tool.ruff.lint.isort]
