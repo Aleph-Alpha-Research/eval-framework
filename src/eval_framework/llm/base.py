@@ -110,7 +110,7 @@ class BaseLLM(ABC):
         """
         return completion
 
-    def __del__(self) -> None:
+    def __del__(self) -> None:  # noqa: B027 - optional cleanup hook; subclasses override only if needed
         """
         Method for custom resource cleanup (particularly GPUs)
         """

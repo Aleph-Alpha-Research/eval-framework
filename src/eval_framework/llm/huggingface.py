@@ -364,7 +364,7 @@ class HFLLM_from_name(HFLLM):  # deprecated
     """
 
     def __init__(self, model_name: str, formatter: str = "Llama3Formatter", **kwargs: Any) -> None:
-        warnings.warn("`HFLLM_from_name` is deprecated, please use `HFLLM`.", DeprecationWarning)
+        warnings.warn("`HFLLM_from_name` is deprecated, please use `HFLLM`.", DeprecationWarning, stacklevel=2)
         super().__init__(
             model_name=model_name,
             formatter_name=formatter,
@@ -395,7 +395,7 @@ class HFLLMRegistryModel(HFLLM):  # deprecated
             formatter: Type of formatter to use (default: "")
             **kwargs: Additional arguments passed to the parent class
         """
-        warnings.warn("`HFLLMRegistryModel` is deprecated, please use `HFLLM`.", DeprecationWarning)
+        warnings.warn("`HFLLMRegistryModel` is deprecated, please use `HFLLM`.", DeprecationWarning, stacklevel=2)
 
         download_path = kwargs.pop("download_path", None)
         if download_path is not None and os.getenv("WANDB_ARTIFACT_DIR") is None:

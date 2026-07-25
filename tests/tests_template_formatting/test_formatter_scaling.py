@@ -159,7 +159,7 @@ def test_llama3_formatter_with_system_and_assistant_simple(
         "Bonjour! The capital of France is Paris!<|eot_id|>",
     ]
 
-    for formatted_message, expected in zip(formatted_conversation, expected_contents):
+    for formatted_message, expected in zip(formatted_conversation, expected_contents, strict=False):
         assert formatted_message.content == expected
 
     # stringify the list
@@ -227,7 +227,7 @@ def test_llama3_formatter_without_system_multiple_rounds_list(
         ("<|start_header_id|>user<|end_header_id|>\n\nWhat else?<|eot_id|>"),
     ]
 
-    for formatted_message, expected in zip(formatted_conversation, expected_contents):
+    for formatted_message, expected in zip(formatted_conversation, expected_contents, strict=False):
         assert formatted_message.content == expected
 
     # stringify the list

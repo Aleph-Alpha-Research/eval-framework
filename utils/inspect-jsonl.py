@@ -7,10 +7,14 @@ from colorama import Back, Fore, Style, init
 init()
 
 
-def colorize_json(data: str | dict | list, indent: int = 0, highlights: list = [], strip_keys: list = []) -> str:
+def colorize_json(
+    data: str | dict | list, indent: int = 0, highlights: list | None = None, strip_keys: list | None = None
+) -> str:
     """
     Colorize JSON keys and values for terminal output with indentation.
     """
+    highlights = highlights or []
+    strip_keys = strip_keys or []
     indentation = " " * indent
     if isinstance(data, dict):
         items = []

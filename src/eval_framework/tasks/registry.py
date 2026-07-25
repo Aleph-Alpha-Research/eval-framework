@@ -248,7 +248,7 @@ class Registry:
         try:
             _, factory = self._registry[task_key]
         except KeyError:
-            raise KeyError(f"Task not found: {name=} with task_key {task_key=}")
+            raise KeyError(f"Task not found: {name=} with task_key {task_key=}") from None
 
         return factory
 

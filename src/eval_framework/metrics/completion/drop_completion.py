@@ -52,5 +52,5 @@ class DropF1ExactMatch(BaseMetric[Completion]):
                 higher_is_better=True,
                 error=response.error,
             )
-            for name, key in zip(self.NAMES, self.KEYS)
+            for name, key in zip(self.NAMES, self.KEYS, strict=False)
         ]
