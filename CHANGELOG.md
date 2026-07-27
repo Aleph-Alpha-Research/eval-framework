@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.8.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.3...v0.8.4) (2026-07-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency sympy to &gt;=1.14.0,&lt;2 ([#541](https://github.com/Aleph-Alpha-Research/eval-framework/issues/541)) ([17cde8c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/17cde8c0bd9406672a4af4a310d3f5945cac1127))
+
 ## [0.8.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.2...v0.8.3) (2026-07-26)
 
 
