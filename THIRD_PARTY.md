@@ -30,7 +30,7 @@ and first-party/internal packages are excluded.
 | `pyyaml` | `>=6.0.3,<7` |
 | `scipy` | `>=1.18.0,<2` |
 | `spacy` | `>=3.8.14,<4` |
-| `sympy` | `>=1.13.1,<2` |
+| `sympy` | `>=1.14.0,<2` |
 | `wandb` | `>=0.28.1,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
