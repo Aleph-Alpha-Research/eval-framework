@@ -62,33 +62,7 @@ To help with development, enable pre-commit hooks:
 uv tool install pre-commit
 uv run pre-commit install
 ```
-
-### 3. Generate Task Documentation
-
-The framework provides a utility script to generate task documentation automatically.
-
-```bash
-uv run python -m eval_framework.utils.generate_task_docs
-``` -->
-<!--
-#### Command-Line Options
-
-| Option                  | Description                                                                       |
-| ----------------------- | --------------------------------------------------------------------------------- |
-| `--only-tasks`          | Comma-separated list of task names to include. If empty, all tasks are processed. |
-| `--exclude-tasks`       | List of task names to exclude.                                                    |
-| `--extra-task-modules`  | Additional files or folders containing task definitions.                          |
-| `--add-prompt-examples` | Include example prompts for each formatter.                                       |
-| `--formatter`           | Specify a formatter to use for task samples. Defaults to framework defaults.      |
-
-> The generated documentation is saved in the `docs/tasks` directory. Each task will have its own markdown file.
-> A `README.md` file listing all tasks and linking to their documentation is also generated.
-
-Example with formatted prompt examples:
-
-```bash
-uv run python -m eval_framework.utils.generate_task_docs --add-prompt-examples
-``` -->
+-->
 
 ## Environment Configuration
 
