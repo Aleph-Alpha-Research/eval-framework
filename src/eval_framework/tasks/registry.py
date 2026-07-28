@@ -2,11 +2,12 @@ import contextlib
 import importlib
 import re
 from abc import ABC, abstractmethod
-from collections.abc import Generator, Iterator
+from collections.abc import Generator, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
 from eval_framework.tasks.base import BaseTask, ResponseType
 from eval_framework.tasks.perturbation import PerturbationConfig, create_perturbation_class
+from template_formatting.formatter import BaseFormatter
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -73,6 +74,14 @@ class EvalFactory(ABC):
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
     ) -> BaseTask: ...
+
+    def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
+        """Render the eval's documentation as markdown."""
+        try:
+            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None)
+        except (TypeError, ValueError, AssertionError):
+            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
+        return task.markdown_doc(formatters)
 
 
 class _Lazy(EvalFactory):
