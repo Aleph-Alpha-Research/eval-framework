@@ -225,6 +225,10 @@ class Registry:
         for name, _ in self._registry.values():
             yield name
 
+    def task_names(self) -> list[str]:
+        """The names of all registered tasks."""
+        return list(self)
+
     def items(self) -> Iterator[tuple[str, EvalFactory]]:
         """Iterate over `(task name, EvalFactory)` pairs in the registry."""
         yield from self._registry.values()
