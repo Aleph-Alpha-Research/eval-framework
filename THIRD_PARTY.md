@@ -43,7 +43,7 @@ and first-party/internal packages are excluded.
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
 | `blis` | `1.3.3` |
-| `botocore` | `1.43.56` |
+| `botocore` | `1.43.57` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.4.9` |
@@ -96,7 +96,7 @@ and first-party/internal packages are excluded.
 | `spacy-loggers` | `1.0.5` |
 | `srsly` | `2.5.3` |
 | `thinc` | `8.3.13` |
-| `tqdm` | `4.69.1` |
+| `tqdm` | `4.70.0` |
 | `typer` | `0.27.0` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.2` |
