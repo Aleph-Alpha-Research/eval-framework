@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.8.5](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.4...v0.8.5) (2026-07-29)
+
+
+### Features
+
+* add registry task_names ([c9f93fe](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c9f93fea14824d6f16a8ad261898c5286baf2ce0))
+* construction for markdown documentation moved to factory ([39d448e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/39d448e47a1ca6b899ff8920dfaf1c6c4cbc8b4a))
+
 ## [0.8.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.3...v0.8.4) (2026-07-27)
 
 
