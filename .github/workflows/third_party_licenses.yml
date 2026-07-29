@@ -64,4 +64,4 @@ jobs:
         if: steps.pr.outputs.pull-request-number != ''
         env:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
-        run: gh pr merge --auto --squash "${{ steps.pr.outputs.pull-request-number }}"
+        run: gh pr merge --auto --rebase "${{ steps.pr.outputs.pull-request-number }}"
