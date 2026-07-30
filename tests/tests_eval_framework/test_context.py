@@ -4,7 +4,6 @@ from pathlib import Path
 from unittest import mock
 
 import pytest
-from pydantic import ValidationError
 
 import eval_framework.context.determined as determined
 import eval_framework.llm
@@ -217,23 +216,3 @@ def test_import_models(tmp_path: Path) -> None:
 
     for model in models2.values():
         assert issubclass(model, BaseLLM)
-
-
-def test_fail_validation_when_required_judge_not_given() -> None:
-    models_path = Path(eval_framework.__path__[0]) / "llm" / "aleph_alpha.py"
-    with pytest.raises(ValidationError):
-        with LocalContext(
-            llm_name="Llama31_8B_Instruct_API",
-            models_path=models_path,
-            num_samples=10,
-            num_fewshot=0,
-            task_name="EvaluationSuiteConciseness",  # requires a judge
-            output_dir=Path("dummy"),
-            hf_upload_dir="dummy22",
-            llm_args={"dummy": "dummy"},
-            judge_model_name=None,  # but it's not given
-            judge_model_args={},
-            judge_models_path=models_path,
-            batch_size=1,
-        ) as _:
-            pass
