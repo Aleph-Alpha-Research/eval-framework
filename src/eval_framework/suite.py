@@ -18,7 +18,7 @@ from eval_framework.context.local import _load_model
 from eval_framework.result_processors.result_processor import generate_output_dir
 from eval_framework.run import _run_single_task
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.registry import is_registered
+from eval_framework.tasks.registry import registry
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ class TaskSuite(BaseModel):
         if isinstance(self.tasks, str):
             if self.name is None:
                 self.name = self.tasks
-            if not is_registered(self.tasks):
+            if self.tasks not in registry():
                 raise ValueError(f"Task '{self.tasks}' is not registered.")
         elif not self.tasks:
             raise ValueError(f"TaskSuite '{self.name}': 'tasks' must not be empty.")

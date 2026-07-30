@@ -4,15 +4,7 @@ from collections.abc import Callable
 import pytest
 
 from eval_framework.tasks.benchmarks.math_reasoning import MATH, MATHLvl5
-from eval_framework.tasks.registry import (
-    Registry,
-    get_task,
-    is_registered,
-    register_lazy_task,
-    register_task,
-    registered_task_names,
-    with_registry,
-)
+from eval_framework.tasks.registry import Registry, with_registry
 
 
 def temporary_registry[**P, T](fun: Callable[P, T]) -> Callable[P, T]:
@@ -27,41 +19,43 @@ def temporary_registry[**P, T](fun: Callable[P, T]) -> Callable[P, T]:
     return wrapper
 
 
-@temporary_registry
 def test_case_insensitive_lookup() -> None:
-    register_task(MATH)
+    registry = Registry()
 
-    assert is_registered("MATH")
-    assert set(registered_task_names()) == {"MATH"}
-    assert get_task("MATH") is MATH
-    assert get_task("Math") is MATH
-    assert get_task("math") is MATH
+    registry.register(MATH)
 
-    register_task(MATHLvl5)
-    assert set(registered_task_names()) == {"MATH", "MATHLvl5"}
-    assert get_task("math lvl 5") is MATHLvl5
-    assert get_task("MATH LVL 5") is MATHLvl5
-    assert get_task("Math Lvl 5") is MATHLvl5
-    assert get_task("Math Lvl     5") is MATHLvl5
-    assert get_task("Math-Lvl_5") is MATHLvl5
+    assert "MATH" in registry
+    assert set(registry.task_names()) == {"MATH"}
+    assert registry["MATH"].task_class() is MATH
+    assert registry["Math"].task_class() is MATH
+    assert registry["math"].task_class() is MATH
+
+    registry.register(MATHLvl5)
+    assert set(registry.task_names()) == {"MATH", "MATHLvl5"}
+    assert registry["math lvl 5"].task_class() is MATHLvl5
+    assert registry["MATH LVL 5"].task_class() is MATHLvl5
+    assert registry["Math Lvl 5"].task_class() is MATHLvl5
+    assert registry["Math Lvl     5"].task_class() is MATHLvl5
+    assert registry["Math-Lvl_5"].task_class() is MATHLvl5
 
     with pytest.raises(ValueError):
-        get_task("Math.Lvl.5")
+        registry["Math.Lvl.5"]
 
 
-@temporary_registry
 def test_register_non_task() -> None:
+    registry = Registry()
+
     with pytest.raises(ValueError):
-        register_task(int)  # type: ignore[arg-type]
+        registry.register(int)  # type: ignore[arg-type]
 
     class MyTask:
         pass
 
     with pytest.raises(ValueError):
-        register_task(MyTask)  # type: ignore[arg-type]
+        registry.register(MyTask)  # type: ignore[arg-type]
 
 
-@temporary_registry
 def test_lazy_registration() -> None:
-    register_lazy_task(f"{MATH.__module__}.{MATH.__name__}")
-    assert get_task("Math") is MATH
+    registry = Registry()
+    registry.register_lazy(f"{MATH.__module__}.{MATH.__name__}")
+    assert registry["Math"].task_class() is MATH

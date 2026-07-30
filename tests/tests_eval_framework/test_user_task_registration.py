@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 
 from eval_framework.tasks.base import BaseTask
-from eval_framework.tasks.registry import get_task, is_registered, registered_task_names
+from eval_framework.tasks.benchmarks.copa import COPA
+from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_loader import find_all_python_files, load_extra_tasks
-from tests.tests_eval_framework.tasks.test_registry import temporary_registry
 
 TASK1 = """\
 from eval_framework.tasks.base import BaseTask, Language
@@ -37,34 +37,34 @@ class MySecondCustomTask(BaseTask):
 """
 
 
-@temporary_registry
 def test_user_task_registration(tmp_path: Path) -> None:
+    registry = Registry()
     task_file = tmp_path / "my_custom_task.py"
     with open(task_file, "w") as f:
         f.write(TASK1)
-    load_extra_tasks([task_file])
-    assert is_registered("MyCustomTask")
-    task1 = get_task("MyCustomTask")
+    load_extra_tasks([task_file], registry=registry)
+    assert "MyCustomTask" in registry
+    task1 = registry["MyCustomTask"].task_class()
     assert issubclass(task1, BaseTask)
     assert task1.NAME == "MyCustomTask"
-    assert set(registered_task_names()) == {"MyCustomTask"}
+    assert set(registry.task_names()) == {"MyCustomTask"}
 
     task_file = tmp_path / "my_second_custom_task.py"
     with open(task_file, "w") as f:
         f.write(TASK2)
-    load_extra_tasks([task_file])
-    assert is_registered("MySecondCustomTask")
-    assert is_registered("MySecondCustomTask".upper())
-    task2 = get_task("MySecondCustomTask".upper())
+    load_extra_tasks([task_file], registry=registry)
+    assert "MySecondCustomTask" in registry
+    assert "MySecondCustomTask".upper() in registry
+    task2 = registry["MySecondCustomTask".upper()].task_class()
     assert issubclass(task2, BaseTask)
     assert task2.NAME == "MySecondCustomTask"
-    assert set(registered_task_names()) == {"MyCustomTask", "MySecondCustomTask"}
+    assert set(registry.task_names()) == {"MyCustomTask", "MySecondCustomTask"}
 
     assert task1 is not task2
 
 
-@temporary_registry
 def test_directory(tmp_path: Path) -> None:
+    registry = Registry()
     subdir = tmp_path / "my_custom_tasks"
     subdir.mkdir()
 
@@ -73,13 +73,16 @@ def test_directory(tmp_path: Path) -> None:
     with open(subdir / "task2.py", "w") as f:
         f.write(TASK2)
 
-    load_extra_tasks([tmp_path])
-    assert set(registered_task_names()) == {"MyCustomTask", "MySecondCustomTask"}
-    assert get_task("MyCustomTask") != get_task("MySecondCustomTask")
+    load_extra_tasks([tmp_path], registry=registry)
+    assert set(registry.task_names()) == {"MyCustomTask", "MySecondCustomTask"}
+    assert registry["MyCustomTask"].task_class() != registry["MySecondCustomTask"].task_class()
 
 
-@temporary_registry
 def test_derived_user_task_registration(tmp_path: Path) -> None:
+    # With the built-in COPA already registered, loading a task derived from it must skip
+    # re-registering COPA and register only the derived task.
+    registry = Registry()
+    registry.register(COPA)
     task_file = tmp_path / "my_derived_task.py"
     with open(task_file, "w") as f:
         f.write(
@@ -89,14 +92,14 @@ def test_derived_user_task_registration(tmp_path: Path) -> None:
                 NAME = "MyCOPA"
         """)
         )
-    load_extra_tasks([task_file])
-    assert is_registered("MyCOPA")
-    get_task("MyCOPA")
+    load_extra_tasks([task_file], registry=registry)
+    assert "MyCOPA" in registry
+    registry["MyCOPA"].task_class()
 
 
-@temporary_registry
 def test_user_task_registration_with_repeated_names(tmp_path: Path) -> None:
     """Test that loading user tasks with duplicate names raises an error."""
+    registry = Registry()
     task_file = tmp_path / "my_custom_task.py"
     with open(task_file, "w") as f:
         f.write(
@@ -125,7 +128,7 @@ def test_user_task_registration_with_repeated_names(tmp_path: Path) -> None:
         )
 
     with pytest.raises(ValueError, match="Duplicate user task"):
-        load_extra_tasks([task_file])
+        load_extra_tasks([task_file], registry=registry)
 
 
 def test_find_all_python_files(tmp_path: Path) -> None:
