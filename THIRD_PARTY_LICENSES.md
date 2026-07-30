@@ -26,9 +26,9 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.57 - https://github.com/boto/boto3
-- **botocore** 1.43.57 - https://github.com/boto/botocore
-- **datasets** 5.0.0 - https://github.com/huggingface/datasets
+- **boto3** 1.43.59 - https://github.com/boto/boto3
+- **botocore** 1.43.59 - https://github.com/boto/botocore
+- **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.5.2 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
@@ -54,7 +54,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## BSD-2-Clause
 
 - **Pygments** 2.20.0 - https://pygments.org
-- **wrapt** 2.2.2 - https://github.com/GrahamDumpleton/wrapt
+- **wrapt** 2.3.0 - https://github.com/GrahamDumpleton/wrapt
 - **xxhash** 3.8.1 - https://github.com/ifduyue/python-xxhash
 
 ## BSD-3-Clause
@@ -63,7 +63,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **blis** 1.3.3 - https://github.com/explosion/cython-blis
 - **click** 8.4.2 - https://github.com/pallets/click/
 - **dill** 0.4.1 - https://github.com/uqfoundation/dill
-- **fsspec** 2026.4.0 - https://github.com/fsspec/filesystem_spec
+- **fsspec** 2026.6.0 - https://github.com/fsspec/filesystem_spec
 - **httpcore** 1.0.9 - https://www.encode.io/httpcore/
 - **httpx** 0.28.1 - https://github.com/encode/httpx
 - **idna** 3.18 - https://github.com/kjd/idna
@@ -102,7 +102,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## MIT
 
-- **annotated-doc** 0.0.4 - https://github.com/fastapi/annotated-doc
+- **annotated-doc** 0.0.5 - https://github.com/fastapi/annotated-doc
 - **annotated-types** 0.8.0 - https://github.com/annotated-types/annotated-types
 - **anyio** 4.14.2 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
@@ -111,7 +111,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **cloudpathlib** 0.24.0 - https://github.com/drivendataorg/cloudpathlib
 - **confection** 1.3.3 - https://github.com/explosion/confection
 - **cymem** 2.0.13 - https://github.com/explosion/cymem
-- **filelock** 3.32.0 - https://github.com/tox-dev/py-filelock
+- **filelock** 3.32.2 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -163,7 +163,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Full license texts
 
-### annotated-doc 0.0.4 (MIT)
+### annotated-doc 0.0.5 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -314,7 +314,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.43.57 (Apache-2.0)
+### boto3 1.43.59 (Apache-2.0)
 
 ```text
 Apache License
@@ -495,7 +495,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.57 (Apache-2.0)
+### botocore 1.43.59 (Apache-2.0)
 
 ```text
 Apache License
@@ -864,7 +864,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### datasets 5.0.0 (Apache-2.0)
+### datasets 5.0.1 (Apache-2.0)
 
 ```text
 Apache License
@@ -1162,7 +1162,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### filelock 3.32.0 (MIT)
+### filelock 3.32.2 (MIT)
 
 ```text
 MIT License
@@ -1188,7 +1188,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### fsspec 2026.4.0 (BSD-3-Clause)
+### fsspec 2026.6.0 (BSD-3-Clause)
 
 ```text
 BSD 3-Clause License
@@ -18761,7 +18761,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### wrapt 2.2.2 (BSD-2-Clause)
+### wrapt 2.3.0 (BSD-2-Clause)
 
 ```text
 Copyright (c) 2013-2026, Graham Dumpleton

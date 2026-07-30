@@ -38,12 +38,12 @@ and first-party/internal packages are excluded.
 
 | Package | Version |
 |---|---|
-| `annotated-doc` | `0.0.4` |
+| `annotated-doc` | `0.0.5` |
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
 | `blis` | `1.3.3` |
-| `botocore` | `1.43.57` |
+| `botocore` | `1.43.59` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.4.9` |
@@ -54,8 +54,8 @@ and first-party/internal packages are excluded.
 | `cymem` | `2.0.13` |
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
-| `filelock` | `3.32.0` |
-| `fsspec` | `2026.4.0` |
+| `filelock` | `3.32.2` |
+| `fsspec` | `2026.6.0` |
 | `h11` | `0.16.0` |
 | `hf-xet` | `1.5.2` |
 | `httpcore` | `1.0.9` |
@@ -104,5 +104,5 @@ and first-party/internal packages are excluded.
 | `urllib3` | `2.7.0` |
 | `wasabi` | `1.1.3` |
 | `weasel` | `1.0.0` |
-| `wrapt` | `2.2.2` |
+| `wrapt` | `2.3.0` |
 | `xxhash` | `3.8.1` |
