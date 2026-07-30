@@ -18,7 +18,9 @@ from eval_framework.suite import (
 @pytest.fixture(autouse=True)
 def _skip_registry_check():
     # This is a hack to skip the check for whether the task is registered.
-    with patch("eval_framework.suite.is_registered", return_value=True):
+    fake_registry = MagicMock()
+    fake_registry.__contains__.return_value = True
+    with patch("eval_framework.suite.registry", return_value=fake_registry):
         yield
 
 

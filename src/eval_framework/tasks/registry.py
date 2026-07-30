@@ -255,16 +255,30 @@ class Registry:
 
         return factory
 
-    def add(self, task: type[BaseTask]) -> None:
-        task_key = self._task_key(task.NAME)
-        self._registry[task_key] = (task.NAME, _Eager(task))
-
     def __setitem__(self, name: str, factory: EvalFactory) -> None:
         task_key = self._task_key(name)
         if task_key in self._registry:
             raise ValueError(f"Cannot register duplicate task with key: {task_key}")
 
         self._registry[task_key] = (name, factory)
+
+    def register(self, task: type[BaseTask]) -> str:
+        """The class name is used as the task name."""
+        if not issubclass(task, BaseTask):
+            raise ValueError(f"Can only register subclasses of BaseTask, got {task}")
+        name = task.__name__
+        self[name] = _Eager(task)
+        return name
+
+    def register_lazy(self, class_path: str, /) -> None:
+        """Register a task by its dotted class path, without importing its module."""
+        if "." not in class_path:
+            raise ValueError(
+                f"Invalid class path `{class_path}`. This needs to be a global path like "
+                "`eval_framework.tasks.benchmarks.mmlu.MMLU`): "
+            )
+        base_module, class_name = class_path.rsplit(".", maxsplit=1)
+        self[class_name] = _Lazy(class_name=class_name, module=base_module)
 
 
 _REGISTRY = Registry()
@@ -298,7 +312,7 @@ def is_registered(name: str, /) -> bool:
 
 def validate_task_name(name: str) -> str:
     """Pydantic-style validator for task names."""
-    if not is_registered(name):
+    if name not in registry():
         raise ValueError(f"Task not registered: {name}")
     return name
 
@@ -313,28 +327,9 @@ def get_task(name: str, /) -> type[BaseTask]:
 
 def register_task(task: type[BaseTask]) -> str:
     """The class name is used as the task name."""
-    if not issubclass(task, BaseTask):
-        raise ValueError(f"Can only register subclasses of BaseTask, got {task}")
-    name = task.__name__
-    _REGISTRY[name] = _Eager(task)
-    return name
+    return registry().register(task)
 
 
 def register_lazy_task(class_path: str, /) -> None:
-    """Register a task without importing it.
-
-    Lazily register a task without importing the module.
-
-    Args:
-        class_path: The full path to the task class. For example,
-            `eval_framework.tasks.benchmarks.mmlu.MMLU`.
-        extras: Any extra dependencies of `eval_framework` that need to be installed for this task.
-    """
-    if "." not in class_path:
-        raise ValueError(
-            f"Invalid class path `{class_path}`. This needs to be a global path like "
-            "`eval_framework.tasks.benchmarks.mmlu.MMLU`): "
-        )
-
-    base_module, class_name = class_path.rsplit(".", maxsplit=1)
-    _REGISTRY[class_name] = _Lazy(class_name=class_name, module=base_module)
+    """Register a task by its dotted class path, without importing its module."""
+    registry().register_lazy(class_path)

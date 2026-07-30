@@ -8,7 +8,8 @@ from types import ModuleType
 from typing import Any
 
 from eval_framework.tasks.base import BaseTask
-from eval_framework.tasks.registry import is_registered, register_task
+from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.registry import registry as global_registry
 
 logger = logging.getLogger(__name__)
 
@@ -46,14 +47,13 @@ def import_file(f: str | os.PathLike, /) -> Any:
     return user_module
 
 
-def load_extra_tasks(module_paths: Sequence[str | os.PathLike]) -> None:
+def load_extra_tasks(module_paths: Sequence[str | os.PathLike], registry: Registry | None = None) -> None:
     """Dynamically load and register user-defined tasks from a list of files or directories.
 
-    Each .py file found will be imported, and any BaseTask subclass will be registered
-    in the TaskName enum for use by name.
-    Provides clear error messages for missing/invalid files or import errors.
+    Each .py file found is imported, and any BaseTask subclass is registered
     """
     assert not (isinstance(module_paths, str)), "module_paths must be a sequence of strings / os.PathLike objects"
+    registry = registry if registry is not None else global_registry()
     for file_path in find_all_python_files(*module_paths):
         user_module = import_file(file_path)
 
@@ -63,7 +63,7 @@ def load_extra_tasks(module_paths: Sequence[str | os.PathLike]) -> None:
                 if not hasattr(obj, "NAME"):
                     logger.info(f"[User Task Loader] Skipping {obj.__module__} - no NAME attribute present.")
                 else:
-                    if is_registered(obj.NAME):
+                    if obj.NAME in registry:
                         # two classes with the same NAME attribute
                         logger.info(obj.__module__)
 
@@ -77,5 +77,5 @@ def load_extra_tasks(module_paths: Sequence[str | os.PathLike]) -> None:
                     else:
                         # if there is no duplicate name conflict then register the new task
                         class_obj = getattr(user_module, name)
-                        register_task(class_obj)
+                        registry.register(class_obj)
                         logger.info(f"[User Task Loader] Registered task: {class_obj.NAME}")
