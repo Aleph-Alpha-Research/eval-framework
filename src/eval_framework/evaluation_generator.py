@@ -68,8 +68,7 @@ class EvaluationGenerator:
             metric: BaseMetric
             if issubclass(metric_class, BaseLLMJudgeMetric):
                 if llm_judge is None:
-                    assert self.config.llm_judge_class is not None, "The llm_judge_class must be defined in the config."
-                    llm_judge = self.config.llm_judge_class(**self.config.judge_model_args)
+                    llm_judge = self.config.llm_judge()
                 metric = metric_class(
                     llm_judge=llm_judge,
                     randomize_order=self.config.randomize_judge_order,
