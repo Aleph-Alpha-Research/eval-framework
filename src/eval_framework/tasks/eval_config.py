@@ -135,6 +135,12 @@ class EvalConfig(BaseConfig):
             return value.__name__
         return None
 
+    @field_serializer("judge_model_args")
+    def serialize_judge_model_args(self, value: dict[str, Any]) -> dict[str, Any]:
+        value.pop("api_key", None)
+        value.pop("base_url", None)
+        return value
+
     def model_json_dump(self) -> str:
         model_dump = self.model_dump(mode="json")
         return json.dumps(model_dump, sort_keys=True)

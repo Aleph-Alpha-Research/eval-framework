@@ -292,3 +292,25 @@ class TestEvalConfigJudgeModelArgsValidation:
         # Note: The old approach doesn't convert booleans
         assert config.judge_model_args["use_cache"] == "True"
         assert isinstance(config.judge_model_args["use_cache"], str)
+
+    def test_judge_model_args_serialization(self) -> None:
+        config_data = {
+            "llm_class": OpenAIModel,
+            "llm_judge_class": OpenAIModel,
+            "judge_model_args": {
+                "temperature": "0.7",
+                "max_tokens": "100",
+                "model_name": "gpt-4",
+                "api_key": "sk-1234567890",
+                "base_url": "https://api.openai.com",
+            },
+            "task_name": "MMLU",
+        }
+
+        config = EvalConfig(**config_data)
+        config_dump = config.model_dump()
+        assert config_dump["judge_model_args"] == {
+            "temperature": 0.7,
+            "max_tokens": 100,
+            "model_name": "gpt-4",
+        }
