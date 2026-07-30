@@ -65,6 +65,10 @@ class EvalConfig(BaseConfig):
     fail_on_error: Annotated[bool, BeforeValidator(lambda v: False if v is None else v)] = False
     # Adding a new member? Remember to update KEYS_UNRELATED_TO_RESULTS if it doesn't impact eval results.
 
+    def llm_judge(self) -> BaseLLM:
+        assert self.llm_judge_class is not None, "The llm_judge_class must be defined in the config."
+        return self.llm_judge_class(**self.judge_model_args)
+
     @field_serializer("output_dir")
     def serialize_output_dir(self, value: Path) -> str:
         return str(value)
