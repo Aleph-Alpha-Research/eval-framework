@@ -3,14 +3,13 @@ import json
 from pathlib import Path
 from typing import Annotated, Any
 
-from pydantic import AfterValidator, BeforeValidator, Field, field_serializer, field_validator, model_validator
+from pydantic import BeforeValidator, Field, field_serializer, field_validator, model_validator
 
 from eval_framework.base_config import BaseConfig
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
-from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.perturbation import PerturbationConfig
-from eval_framework.tasks.registry import get_task, registry, validate_task_name
+from eval_framework.tasks.registry import registry
 from eval_framework.utils.constants import ROOT_DIR
 
 # Keys that don't impact actual evaluation results and should be excluded from config dumps for hashing purposes.
@@ -44,7 +43,7 @@ class EvalConfig(BaseConfig):
     num_samples: Annotated[int | None, Field(ge=1)] = 10  # Allows None or int
     max_tokens: int | None = None
     perturbation_config: PerturbationConfig | None = None
-    task_name: Annotated[str, AfterValidator(validate_task_name)]
+    task_name: str
     task_subjects: list[str] | None = None
     hf_revision: str | None = None
     user_prompt_suffix: str | None = None
@@ -65,10 +64,6 @@ class EvalConfig(BaseConfig):
     # propagate instead of being captured into a blank Error result.
     fail_on_error: Annotated[bool, BeforeValidator(lambda v: False if v is None else v)] = False
     # Adding a new member? Remember to update KEYS_UNRELATED_TO_RESULTS if it doesn't impact eval results.
-
-    @property
-    def task_class(self) -> type[BaseTask]:
-        return get_task(self.task_name)
 
     @field_serializer("output_dir")
     def serialize_output_dir(self, value: Path) -> str:
