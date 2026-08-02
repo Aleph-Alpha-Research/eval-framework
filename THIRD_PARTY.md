@@ -19,7 +19,7 @@ and first-party/internal packages are excluded.
 | `lingua-language-detector` | `>=2.2.0,<3` |
 | `llm-sandbox` | `==0.3.39` |
 | `lxml` | `>=6.1.1,<7` |
-| `mysql-connector-python` | `>=9.7.0,<10` |
+| `mysql-connector-python` | `>=26.7.0,<27` |
 | `nltk` | `>=3.10.0,<4` |
 | `numpy` | `>=2.5.1` |
 | `psycopg2-binary` | `>=2.9.12,<3` |
