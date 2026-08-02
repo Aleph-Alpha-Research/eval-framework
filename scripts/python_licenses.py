@@ -8,9 +8,9 @@ Thin wrapper around `pip-licenses` plus the boring glue:
 
 Usage:
 
-    uv run python_licenses.py deps        # writes THIRD_PARTY.md
-    uv run python_licenses.py licenses    # writes THIRD_PARTY_LICENSES.md
-    uv run python_licenses.py both        # do both
+    uv run scripts/python_licenses.py deps        # writes THIRD_PARTY.md
+    uv run scripts/python_licenses.py licenses    # writes THIRD_PARTY_LICENSES.md
+    uv run scripts/python_licenses.py both        # do both
 
 Requirements:
 
