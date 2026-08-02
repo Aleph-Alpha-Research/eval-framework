@@ -33,7 +33,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
-- **nltk** 3.10.0 - https://www.nltk.org/
+- **nltk** 3.10.1 - https://www.nltk.org/
 - **pyarrow** 25.0.0 - https://arrow.apache.org/
 - **python-iso639** 2026.7.23 - https://github.com/jacksonllee/iso639
 - **requests** 2.34.2 - https://github.com/psf/requests
@@ -86,7 +86,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## GNU General Public License (GPL)
 
-- **mysql-connector-python** 9.7.0 - https://dev.mysql.com/doc/connector-python/en/
+- **mysql-connector-python** 26.7.0 - https://dev.mysql.com/doc/connector-python/en/
 
 ## GNU Library or Lesser General Public License (LGPL)
 
@@ -2615,12 +2615,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### mysql-connector-python 9.7.0 (GNU General Public License (GPL))
+### mysql-connector-python 26.7.0 (GNU General Public License (GPL))
 
 ```text
 Licensing Information User Manual
 
-MySQL Connector/Python 9.7.0 Community
+MySQL Connector/Python 26.7.0 Community
      __________________________________________________________________
 
 Introduction
@@ -2628,25 +2628,25 @@ Introduction
    This License Information User Manual contains Oracle's product license
    and other licensing information, including licensing information for
    third-party software which may be included in this distribution of
-   MySQL Connector/Python 9.7.0 Community.
+   MySQL Connector/Python 26.7.0 Community.
 
-   Last updated: February 2026
+   Last updated: June 2026
 
 Licensing Information
 
-   This release of MySQL Connector/Python 9.7.0 Community is brought to
+   This release of MySQL Connector/Python 26.7.0 Community is brought to
    you by the MySQL team at Oracle. This software is released under
    version 2 of the GNU General Public License (GPLv2), as set forth
    below, with the following additional permissions:
 
-   This distribution of MySQL Connector/Python 9.7.0 Community is designed
-   to work with certain software (including but not limited to OpenSSL)
-   that is licensed under separate terms, as designated in a particular
-   file or component or in the license documentation. Without limiting
-   your rights under the GPLv2, the authors of MySQL hereby grant you an
-   additional permission to link the program and your derivative works
-   with the separately licensed software that they have either included
-   with the program or referenced in the documentation.
+   This distribution of MySQL Connector/Python 26.7.0 Community is
+   designed to work with certain software (including but not limited to
+   OpenSSL) that is licensed under separate terms, as designated in a
+   particular file or component or in the license documentation. Without
+   limiting your rights under the GPLv2, the authors of MySQL hereby grant
+   you an additional permission to link the program and your derivative
+   works with the separately licensed software that they have either
+   included with the program or referenced in the documentation.
 
    Without limiting the foregoing grant of rights under the GPLv2 and
    additional permission as to separately licensed software, this
@@ -10745,7 +10745,7 @@ Written Offer for Source Code
        offers spare parts or customer support for that product model.
 ```
 
-### nltk 3.10.0 (Apache-2.0)
+### nltk 3.10.1 (Apache-2.0)
 
 ```text
 Apache License
