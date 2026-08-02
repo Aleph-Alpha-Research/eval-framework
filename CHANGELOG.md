@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.8.8](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.7...v0.8.8) (2026-08-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mysql-connector-python to v26 ([d7be9f6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d7be9f645bb1f55e5d18a10484e6cdcebea9bf62))
+
 ## [0.8.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.6...v0.8.7) (2026-08-01)
 
 
