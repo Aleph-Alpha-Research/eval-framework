@@ -8,18 +8,14 @@ jobs:
   # Claude must never run if externals are involved in the PR in any way, so
   # that they cannot consume API tokens or inject instructions into the
   # review. Two layers:
-  #   1. The `if:` gate requires the PR author to be an org member and the
-  #      head branch to live in this repo (no forks). Pushing to in-repo
-  #      branches requires write access, so commits can only come from people
-  #      we granted access.
-  #   2. The gate job checks every PR participant (comments, review comments,
-  #      reviews), since anyone can comment on a public repo and the event
-  #      payload does not contain that data.
+  #   1. The `if:` gate rejects drafts, bot-authored PRs, and fork PRs cheaply.
+  #   2. The gate step verifies the PR author and every commenter/reviewer has
+  #      write access to this repo (org membership visibility is unreliable in
+  #      the event payload, and anyone can comment on a public repo).
   gate:
     if: >
       !github.event.pull_request.draft &&
       !endsWith(github.event.pull_request.user.login, '[bot]') &&
-      (github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'OWNER') &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
@@ -27,31 +23,57 @@ jobs:
       pull-requests: read
       issues: read
     outputs:
-      internal-only: ${{ steps.participants.outputs.internal-only }}
+      internal-only: ${{ steps.check.outputs.internal-only }}
     steps:
-      - name: Check that all PR participants are org members
-        id: participants
+      - name: Check that PR author and all participants have repo write access
+        id: check
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          jq_filter='.[]
-            | select(.author_association != "MEMBER" and .author_association != "OWNER")
-            | (.user.login // "ghost")
-            | select(endswith("[bot]") | not)'
-          externals=$(
+          set -euo pipefail
+
+          # Returns "internal" if login has write/maintain/admin on this repo,
+          # "bot" for bot logins, "external" otherwise. Fails closed.
+          classify() {
+            local login="$1"
+            if [[ "$login" == *'[bot]' ]] || [[ "$login" == "ghost" ]]; then
+              echo "bot"; return
+            fi
+            local perm
+            perm=$(gh api "repos/$REPO/collaborators/$login/permission" --jq '.permission' 2>/dev/null || echo "none")
+            case "$perm" in
+              admin|maintain|write) echo "internal" ;;
+              *) echo "external" ;;
+            esac
+          }
+
+          participants=$(
             {
-              gh api --paginate "repos/$REPO/issues/$PR/comments" --jq "$jq_filter"
-              gh api --paginate "repos/$REPO/pulls/$PR/comments" --jq "$jq_filter"
-              gh api --paginate "repos/$REPO/pulls/$PR/reviews" --jq "$jq_filter"
+              printf '%s\n' "$AUTHOR"
+              gh api --paginate "repos/$REPO/issues/$PR/comments" --jq '.[].user.login // "ghost"'
+              gh api --paginate "repos/$REPO/pulls/$PR/comments"  --jq '.[].user.login // "ghost"'
+              gh api --paginate "repos/$REPO/pulls/$PR/reviews"   --jq '.[].user.login // "ghost"'
             } | sort -u
           )
+
+          externals=""
+          while IFS= read -r login; do
+            [ -z "$login" ] && continue
+            kind=$(classify "$login")
+            echo "  $login -> $kind"
+            if [ "$kind" = "external" ]; then
+              externals="$externals $login"
+            fi
+          done <<< "$participants"
+
           if [ -n "$externals" ]; then
-            echo "Skipping Claude review, externals participate in this PR:"
-            echo "$externals"
+            echo "Skipping Claude review, externals participate in this PR:$externals"
             echo "internal-only=false" >> "$GITHUB_OUTPUT"
           else
+            echo "All participants have write access, proceeding."
             echo "internal-only=true" >> "$GITHUB_OUTPUT"
           fi
 
