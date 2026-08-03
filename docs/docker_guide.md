@@ -201,7 +201,7 @@ docker run --gpus all \
 
 ```bash
 #!/bin/bash
-for task in MMLU HellaSwag ARC TriviaQA; do
+for task in MMLU HellaSwag ARC; do
   docker run --gpus all \
     -v $(pwd)/results:/results \
     eval_framework:v0.2.3 \
