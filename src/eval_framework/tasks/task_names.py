@@ -81,9 +81,3 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.naturalqs_open.NaturalQsOpenMC_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.social_iqa.SocialIQAMC_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.medqa.MedQAMC_OLMES")
-    try:
-        # Importing the companion registers the additional tasks from the module.
-        # This is mostly for convenience for internal use-cases
-        import eval_framework_companion  # noqa
-    except ImportError:
-        pass
