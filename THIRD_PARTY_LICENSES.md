@@ -26,10 +26,10 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.62 - https://github.com/boto/boto3
-- **botocore** 1.43.62 - https://github.com/boto/botocore
+- **boto3** 1.43.63 - https://github.com/boto/boto3
+- **botocore** 1.43.63 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
-- **hf-xet** 1.5.2 - https://github.com/huggingface/xet-core
+- **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
@@ -135,7 +135,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **spacy-loggers** 1.0.5 - https://github.com/explosion/spacy-loggers
 - **srsly** 2.5.3 - https://github.com/explosion/srsly
 - **thinc** 8.3.13 - https://github.com/explosion/thinc
-- **typer** 0.27.0 - https://github.com/fastapi/typer
+- **typer** 0.27.1 - https://github.com/fastapi/typer
 - **typing-inspection** 0.4.2 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.7.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
 - **wandb** 0.28.1 - https://github.com/wandb/wandb
@@ -314,7 +314,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.43.62 (Apache-2.0)
+### boto3 1.43.63 (Apache-2.0)
 
 ```text
 Apache License
@@ -495,7 +495,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.62 (Apache-2.0)
+### botocore 1.43.63 (Apache-2.0)
 
 ```text
 Apache License
@@ -1455,7 +1455,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### hf-xet 1.5.2 (Apache-2.0)
+### hf-xet 1.6.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -18321,7 +18321,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### typer 0.27.0 (MIT)
+### typer 0.27.1 (MIT)
 
 ```text
 The MIT License (MIT)

@@ -43,7 +43,7 @@ and first-party/internal packages are excluded.
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
 | `blis` | `1.3.3` |
-| `botocore` | `1.43.62` |
+| `botocore` | `1.43.63` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.4.9` |
@@ -57,7 +57,7 @@ and first-party/internal packages are excluded.
 | `filelock` | `3.32.2` |
 | `fsspec` | `2026.6.0` |
 | `h11` | `0.16.0` |
-| `hf-xet` | `1.5.2` |
+| `hf-xet` | `1.6.0` |
 | `httpcore` | `1.0.9` |
 | `httpx` | `0.28.1` |
 | `huggingface-hub` | `0.36.2` |
@@ -97,7 +97,7 @@ and first-party/internal packages are excluded.
 | `srsly` | `2.5.3` |
 | `thinc` | `8.3.13` |
 | `tqdm` | `4.70.0` |
-| `typer` | `0.27.0` |
+| `typer` | `0.27.1` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.2` |
 | `tzdata` | `2026.3` |
