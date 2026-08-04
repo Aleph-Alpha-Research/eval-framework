@@ -137,6 +137,16 @@ known-third-party = ["wandb"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "__init__.py" = ["F401"]
+# Prompt strings are too long for:
+"tests/tests_eval_framework/tasks/benchmarks/test_csqa_ellamind.py" = ["E501"]
+"tests/tests_eval_framework/tasks/benchmarks/test_gpqa_ellamind.py" = ["E501"]
+"tests/tests_eval_framework/tasks/benchmarks/test_gsm8k_ellamind.py" = ["E501"]
+"tests/tests_eval_framework/tasks/benchmarks/test_hendrycks_math_ellamind.py" = ["E501"]
+"tests/tests_eval_framework/tasks/benchmarks/test_hle_ellamind.py" = ["E501"]
+"tests/tests_eval_framework/tasks/benchmarks/test_mbpp_ellamind.py" = ["E501"]
+"tests/tests_eval_framework/tasks/benchmarks/test_piqa_ellamind.py" = ["E501"]
+"tests/tests_eval_framework/tasks/benchmarks/test_siqa_ellamind.py" = ["E501"]
+"tests/tests_eval_framework/tasks/benchmarks/test_winogrande_ellamind.py" = ["E501"]
 
 [tool.mypy]
 plugins = "pydantic.mypy"
