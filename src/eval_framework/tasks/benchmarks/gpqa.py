@@ -232,3 +232,8 @@ class GPQA_COT(GPQA):
         # index 1 selects the letter
         answer_key = choices[correct_answer_position][1]
         return answer_key
+
+
+class GPQA_DIAMOND_COT(GPQA_COT):
+    NAME = "GPQA_DIAMOND_COT"
+    SUBJECTS = ["gpqa_diamond"]
