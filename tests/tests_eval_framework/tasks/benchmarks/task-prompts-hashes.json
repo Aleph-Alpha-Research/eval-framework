@@ -55,6 +55,8 @@
     "GPQA.Llama3Formatter": "6705de7618a446147d263a8d73355603",
     "GPQA_COT.ConcatFormatter": "18aa0d783c0047205791e9d61b0deeef",
     "GPQA_COT.Llama3Formatter": "b821534cc47354f27e5c0457a96135bd",
+    "GPQA_DIAMOND_COT.ConcatFormatter": "02dab00b8b83f736a40318e1bd1dfe07",
+    "GPQA_DIAMOND_COT.Llama3Formatter": "528f1dd854a642a0f7ca5ecd3e14c330",
     "GPQA_IDK.ConcatFormatter": "b560e4914d11f7a06c6c034b9892fa57",
     "GPQA_IDK.Llama3Formatter": "8b84a0ecf9e7a87bb428f4fe5155cad5",
     "GSM8K.ConcatFormatter": "54e67d8623e8c6f52d5387bdb0044645",

@@ -24,6 +24,7 @@ def register_all_tasks() -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.goldenswag.GOLDENSWAG")
     register_lazy_task("eval_framework.tasks.benchmarks.goldenswag.GOLDENSWAG_IDK")
     register_lazy_task("eval_framework.tasks.benchmarks.gpqa.GPQA_OLMES")
+    register_lazy_task("eval_framework.tasks.benchmarks.gpqa.GPQA_DIAMOND_COT")
     register_lazy_task("eval_framework.tasks.benchmarks.gsm8k.GSM8K_OLMES")
     register_lazy_task("eval_framework.tasks.benchmarks.gsm8k.GSM8KBPB")
     register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHMinervaBPB")
