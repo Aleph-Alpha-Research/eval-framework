@@ -43,6 +43,19 @@ def register_all_tasks(registry: Registry | None = None) -> None:
     register_naturalqs_open_tasks(registry=registry)
     register_social_iqa_tasks(registry=registry)
     register_medqa_tasks(registry=registry)
+    register_arc_ellamind_tasks(registry=registry)
+    register_csqa_ellamind_tasks(registry=registry)
+    register_gpqa_ellamind_tasks(registry=registry)
+    register_gsm8k_ellamind_tasks(registry=registry)
+    register_hellaswag_ellamind_tasks(registry=registry)
+    register_hendrycks_math_ellamind_tasks(registry=registry)
+    register_hle_ellamind_tasks(registry=registry)
+    register_humaneval_ellamind_tasks(registry=registry)
+    register_mbpp_ellamind_tasks(registry=registry)
+    register_piqa_ellamind_tasks(registry=registry)
+    register_simpleqa_ellamind_tasks(registry=registry)
+    register_siqa_ellamind_tasks(registry=registry)
+    register_winogrande_ellamind_tasks(registry=registry)
 
 
 def register_arc_tasks(registry: Registry) -> None:
@@ -211,3 +224,134 @@ def register_social_iqa_tasks(registry: Registry) -> None:
 def register_medqa_tasks(registry: Registry) -> None:
     """Register medqa benchmark tasks."""
     register_lazy_task("eval_framework.tasks.benchmarks.medqa.MedQAMC_OLMES", registry=registry)
+
+
+def register_arc_ellamind_tasks(registry: Registry) -> None:
+    """Register arc_ellamind benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.arc_ellamind.ARC_ELLAMIND_CLOZE_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.arc_ellamind.ARC_ELLAMIND_MC_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.arc_ellamind.ARC_ELLAMIND_BPB_DE", registry=registry)
+
+
+def register_csqa_ellamind_tasks(registry: Registry) -> None:
+    """Register csqa_ellamind benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.csqa_ellamind.CSQA_ELLAMIND_MC_EASY_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.csqa_ellamind.CSQA_ELLAMIND_MC_HARD_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.csqa_ellamind.CSQA_ELLAMIND_CLOZE_EASY_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.csqa_ellamind.CSQA_ELLAMIND_CLOZE_HARD_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.csqa_ellamind.CSQA_ELLAMIND_BPB_DE", registry=registry)
+
+
+def register_gpqa_ellamind_tasks(registry: Registry) -> None:
+    """Register gpqa_ellamind benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_MC_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_CLOZE_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_DIAMOND_MC_DE", registry=registry)
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_DIAMOND_CLOZE_DE", registry=registry
+    )
+    register_lazy_task("eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_BPB_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_DIAMOND_BPB_DE", registry=registry)
+
+
+def register_gsm8k_ellamind_tasks(registry: Registry) -> None:
+    """Register gsm8k_ellamind benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.gsm8k_ellamind.GSM8K_Ellamind_DE_Platinum", registry=registry)
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.gsm8k_ellamind.GSM8K_Ellamind_DE_BPB_Platinum", registry=registry
+    )
+
+
+def register_hellaswag_ellamind_tasks(registry: Registry) -> None:
+    """Register hellaswag_ellamind benchmark tasks."""
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.hellaswag_ellamind.HELLASWAG_ELLAMIND_EASY_DE", registry=registry
+    )
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.hellaswag_ellamind.HELLASWAG_ELLAMIND_HARD_DE", registry=registry
+    )
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.hellaswag_ellamind.HELLASWAG_ELLAMIND_BPB_DE", registry=registry
+    )
+
+
+def register_hendrycks_math_ellamind_tasks(registry: Registry) -> None:
+    """Register hendrycks_math_ellamind benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.hendrycks_math_ellamind.MATHMinervaDE_OLMES", registry=registry)
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.hendrycks_math_ellamind.MATHMinervaDE_BPB_OLMES", registry=registry
+    )
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.hendrycks_math_ellamind.MATHMinervaDE_OLMES_NONL", registry=registry
+    )
+
+
+def register_hle_ellamind_tasks(registry: Registry) -> None:
+    """Register hle_ellamind benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.hle_ellamind.HLE_ELLAMIND_MC_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.hle_ellamind.HLE_ELLAMIND_CLOZE_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.hle_ellamind.HLE_ELLAMIND_MC_NATIVE_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.hle_ellamind.HLE_ELLAMIND_CLOZE_NATIVE_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.hle_ellamind.HLE_ELLAMIND_BPB_DE", registry=registry)
+
+
+def register_humaneval_ellamind_tasks(registry: Registry) -> None:
+    """Register humaneval_ellamind benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_OLMES", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_BPB_OLMES", registry=registry)
+
+
+def register_mbpp_ellamind_tasks(registry: Registry) -> None:
+    """Register mbpp_ellamind benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_OLMES", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_BPB_OLMES", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_EvalPlus", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_BPB_EvalPlus", registry=registry)
+
+
+def register_piqa_ellamind_tasks(registry: Registry) -> None:
+    """Register piqa_ellamind benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.piqa_ellamind.PIQA_ELLAMIND_CLOZE_EASY_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.piqa_ellamind.PIQA_ELLAMIND_CLOZE_HARD_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.piqa_ellamind.PIQA_ELLAMIND_MC_EASY_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.piqa_ellamind.PIQA_ELLAMIND_MC_HARD_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.piqa_ellamind.PIQA_ELLAMIND_BPB_DE", registry=registry)
+
+
+def register_simpleqa_ellamind_tasks(registry: Registry) -> None:
+    """Register simpleqa_ellamind benchmark tasks."""
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.simpleqa_ellamind.SIMPLEQA_ELLAMIND_MC_EASY_DE", registry=registry
+    )
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.simpleqa_ellamind.SIMPLEQA_ELLAMIND_MC_HARD_DE", registry=registry
+    )
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.simpleqa_ellamind.SIMPLEQA_ELLAMIND_CLOZE_EASY_DE", registry=registry
+    )
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.simpleqa_ellamind.SIMPLEQA_ELLAMIND_CLOZE_HARD_DE", registry=registry
+    )
+    register_lazy_task("eval_framework.tasks.benchmarks.simpleqa_ellamind.SIMPLEQA_ELLAMIND_BPB_DE", registry=registry)
+
+
+def register_siqa_ellamind_tasks(registry: Registry) -> None:
+    """Register siqa_ellamind benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.siqa_ellamind.SIQA_ELLAMIND_MC_EASY_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.siqa_ellamind.SIQA_ELLAMIND_MC_HARD_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.siqa_ellamind.SIQA_ELLAMIND_CLOZE_EASY_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.siqa_ellamind.SIQA_ELLAMIND_CLOZE_HARD_DE", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.siqa_ellamind.SIQA_ELLAMIND_BPB_DE", registry=registry)
+
+
+def register_winogrande_ellamind_tasks(registry: Registry) -> None:
+    """Register winogrande_ellamind benchmark tasks."""
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.winogrande_ellamind.WINOGRANDE_ELLAMIND_CLOZE_DE", registry=registry
+    )
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.winogrande_ellamind.WINOGRANDE_ELLAMIND_MC_DE", registry=registry
+    )
+    register_lazy_task(
+        "eval_framework.tasks.benchmarks.winogrande_ellamind.WINOGRANDE_ELLAMIND_PARTIAL_EVAL_DE", registry=registry
+    )
