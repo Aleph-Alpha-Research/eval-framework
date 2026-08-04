@@ -68,3 +68,44 @@ SUBJECTS = ['no_subject']
 ````
 """
     )
+
+
+def test_markdown_doc_with_dataset_link() -> None:
+    doc = markdown_doc(
+        name="MyTask",
+        module="eval_framework.tasks.benchmarks.mytask",
+        dataset_path="datasets/mytask",
+        sample_split="test",
+        fewshot_split="train",
+        response_type="COMPLETION",
+        metrics=["Accuracy", "F1"],
+        subjects=["no_subject"],
+        language=None,
+        num_fewshot=1,
+        formatters=[ExampleFormatter()],
+        example_messages=[Message(role=Role.USER, content="Q")],
+        split_sizes={"test": 3, "train": 5},
+        possible_completions=["A", "B"],
+        ground_truth="A",
+    )
+
+    assert (
+        doc
+        == """\
+# MyTask
+
+````
+NAME = MyTask
+DATASET_PATH = datasets/mytask
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = train
+RESPONSE_TYPE = COMPLETION
+METRICS = [Accuracy, F1]
+SUBJECTS = ['no_subject']
+````
+
+- Module: `eval_framework.tasks.benchmarks.mytask`
+
+- Link to dataset: [https://huggingface.co/datasets/datasets/mytask](https://huggingface.co/datasets/datasets/mytask)
+"""
+    )
