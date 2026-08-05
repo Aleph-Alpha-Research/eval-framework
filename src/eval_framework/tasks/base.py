@@ -90,16 +90,6 @@ class Task(ABC):
     """The contract a caller relies on to run an evaluation"""
 
     @abstractmethod
-    def display_name(self) -> str:
-        """Human-readable identifier of the eval."""
-
-    @abstractmethod
-    def get_response_type(self) -> ResponseType: ...
-
-    @abstractmethod
-    def get_metrics(self) -> list[type["BaseMetric"]]: ...
-
-    @abstractmethod
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]: ...
 
     @abstractmethod
@@ -413,9 +403,6 @@ class BaseTask[SubjectType](Task):
 
     def _get_context(self, item: dict[str, Any]) -> BaseMetricContext | list[BaseMetricContext] | None:
         return None
-
-    def display_name(self) -> str:
-        return self.NAME
 
     def get_metadata(self) -> dict[str, str | list[str]]:
         meta: dict[str, str | list[str]] = {
