@@ -2,7 +2,7 @@ import logging
 import os
 import random
 import traceback
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from enum import Enum
 from pathlib import Path
@@ -86,7 +86,39 @@ SubjectType = TypeVar("SubjectType")
 logger = logging.getLogger(__name__)
 
 
-class BaseTask[SubjectType](ABC):
+class Task(ABC):
+    """The contract a caller relies on to run an evaluation"""
+
+    @abstractmethod
+    def display_name(self) -> str:
+        """Human-readable identifier of the eval."""
+
+    @abstractmethod
+    def get_response_type(self) -> ResponseType: ...
+
+    @abstractmethod
+    def get_metrics(self) -> list[type["BaseMetric"]]: ...
+
+    @abstractmethod
+    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]: ...
+
+    @abstractmethod
+    def generate_completions(
+        self,
+        llm: "BaseLLM",
+        samples: list[Sample],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        fail_on_error: bool = True,
+    ) -> list[Completion]:
+        """Run ``llm`` over ``samples`` and return their completions."""
+
+    @abstractmethod
+    def get_metadata(self) -> dict[str, str | list[str]]:
+        """Descriptive metadata about the eval for result reporting."""
+
+
+class BaseTask[SubjectType](Task):
     NAME: str
     DATASET_PATH: str
     SAMPLE_SPLIT: str
@@ -381,6 +413,9 @@ class BaseTask[SubjectType](ABC):
 
     def _get_context(self, item: dict[str, Any]) -> BaseMetricContext | list[BaseMetricContext] | None:
         return None
+
+    def display_name(self) -> str:
+        return self.NAME
 
     def get_metadata(self) -> dict[str, str | list[str]]:
         meta: dict[str, str | list[str]] = {
