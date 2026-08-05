@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.8.11](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.10...v0.8.11) (2026-08-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency nltk to &gt;=3.10.1,&lt;4 ([bb2216c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/bb2216c6473f30539334c42813dc0a2ed480bd2c))
+
 ## [0.8.10](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.9...v0.8.10) (2026-08-04)
 
 
