@@ -20,7 +20,7 @@ and first-party/internal packages are excluded.
 | `llm-sandbox` | `==0.3.39` |
 | `lxml` | `>=6.1.1,<7` |
 | `mysql-connector-python` | `>=26.7.0,<27` |
-| `nltk` | `>=3.10.0,<4` |
+| `nltk` | `>=3.10.1,<4` |
 | `numpy` | `>=2.5.1` |
 | `psycopg2-binary` | `>=2.9.12,<3` |
 | `pycountry` | `>=26.2.16,<27` |
@@ -43,7 +43,7 @@ and first-party/internal packages are excluded.
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
 | `blis` | `1.3.3` |
-| `botocore` | `1.43.63` |
+| `botocore` | `1.43.64` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.4.9` |
@@ -72,7 +72,7 @@ and first-party/internal packages are excluded.
 | `mpmath` | `1.3.0` |
 | `multiprocess` | `0.70.19` |
 | `murmurhash` | `1.0.15` |
-| `packaging` | `26.2` |
+| `packaging` | `26.3` |
 | `pandas` | `3.0.5` |
 | `platformdirs` | `4.11.0` |
 | `preshed` | `3.0.13` |
