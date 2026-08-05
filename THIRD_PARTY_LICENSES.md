@@ -26,8 +26,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.63 - https://github.com/boto/boto3
-- **botocore** 1.43.63 - https://github.com/boto/botocore
+- **boto3** 1.43.64 - https://github.com/boto/boto3
+- **botocore** 1.43.64 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -45,7 +45,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0 OR BSD-2-Clause
 
-- **packaging** 26.2 - https://github.com/pypa/packaging
+- **packaging** 26.3 - https://github.com/pypa/packaging
 
 ## Apache-2.0 OR BSD-3-Clause
 
@@ -314,7 +314,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.43.63 (Apache-2.0)
+### boto3 1.43.64 (Apache-2.0)
 
 ```text
 Apache License
@@ -495,7 +495,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.63 (Apache-2.0)
+### botocore 1.43.64 (Apache-2.0)
 
 ```text
 Apache License
@@ -11891,7 +11891,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### packaging 26.2 (Apache-2.0 OR BSD-2-Clause)
+### packaging 26.3 (Apache-2.0 OR BSD-2-Clause)
 
 ```text
 This software is made available under the terms of *either* of the licenses
