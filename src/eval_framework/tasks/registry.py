@@ -36,6 +36,10 @@ class EvalFactory(ABC):
     """
 
     @abstractmethod
+    def key(self) -> str:
+        "Canonical key used to register this benchmark"
+
+    @abstractmethod
     def task_class(self) -> type[BaseTask]:
         """Return the task class, importing it on first access if necessary."""
 
@@ -104,6 +108,9 @@ class _Lazy(EvalFactory):
     def source_module(self) -> str:
         return self._module
 
+    def key(self) -> str:
+        return self._class_name
+
     def task_class(self) -> type[BaseTask]:
         if self._loaded is None:
             module = importlib.import_module(self._module)
@@ -162,6 +169,9 @@ class _Eager(EvalFactory):
     @property
     def source_module(self) -> str:
         return self._task.__module__
+
+    def key(self) -> str:
+        return self._task.__class__.__name__
 
     def task_class(self) -> type[BaseTask]:
         return self._task
