@@ -26,14 +26,14 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.64 - https://github.com/boto/boto3
-- **botocore** 1.43.64 - https://github.com/boto/botocore
+- **boto3** 1.43.65 - https://github.com/boto/boto3
+- **botocore** 1.43.65 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
-- **nltk** 3.10.1 - https://www.nltk.org/
+- **nltk** 3.10.2 - https://www.nltk.org/
 - **pyarrow** 25.0.0 - https://arrow.apache.org/
 - **python-iso639** 2026.7.23 - https://github.com/jacksonllee/iso639
 - **requests** 2.34.2 - https://github.com/psf/requests
@@ -159,7 +159,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## UNKNOWN
 
 - **google-crc32c** 1.8.0 - https://github.com/googleapis/python-crc32c
-- **llm-sandbox** 0.3.39 - https://vndee.github.io/llm-sandbox/
+- **llm-sandbox** 0.3.42 - https://vndee.github.io/llm-sandbox/
 
 ## Full license texts
 
@@ -314,7 +314,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.43.64 (Apache-2.0)
+### boto3 1.43.65 (Apache-2.0)
 
 ```text
 Apache License
@@ -495,7 +495,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.64 (Apache-2.0)
+### botocore 1.43.65 (Apache-2.0)
 
 ```text
 Apache License
@@ -2352,7 +2352,7 @@ Apache License
    limitations under the License.
 ```
 
-### llm-sandbox 0.3.39 (UNKNOWN)
+### llm-sandbox 0.3.42 (UNKNOWN)
 
 ```text
 MIT License
@@ -10745,7 +10745,7 @@ Written Offer for Source Code
        offers spare parts or customer support for that product model.
 ```
 
-### nltk 3.10.1 (Apache-2.0)
+### nltk 3.10.2 (Apache-2.0)
 
 ```text
 Apache License
