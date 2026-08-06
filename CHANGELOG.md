@@ -14,6 +14,19 @@
 
 ### Bug Fixes
 
+## [0.8.12](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.11...v0.8.12) (2026-08-06)
+
+
+### Features
+
+* gpqa diamond COT task ([3f31908](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3f31908f1c5c2efd06a7c74f7cdbe88549a1b451))
+
+
+### Bug Fixes
+
+* **deps:** update dependency llm-sandbox to v0.3.42 ([94205be](https://github.com/Aleph-Alpha-Research/eval-framework/commit/94205bec1eb02c0fab298e04e2d28ec9190d927a))
+* removes a second newline in markdown doc when dataset path is provided ([9804b24](https://github.com/Aleph-Alpha-Research/eval-framework/commit/9804b240ea40b7bf97e4b4de7513c8435fc17021))
+
 ## [0.8.11](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.10...v0.8.11) (2026-08-05)
 
 
