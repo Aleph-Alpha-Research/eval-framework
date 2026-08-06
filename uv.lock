@@ -857,7 +857,7 @@ requires-dist = [
     { name = "jsonschema", specifier = ">=4.26.0,<5" },
     { name = "langdetect", specifier = ">=1.0.9,<2" },
     { name = "lingua-language-detector", specifier = ">=2.2.0,<3" },
-    { name = "llm-sandbox", extras = ["docker"], specifier = "==0.3.42" },
+    { name = "llm-sandbox", extras = ["docker"], specifier = "==0.3.43" },
     { name = "lxml", specifier = ">=6.1.1,<7" },
     { name = "mysql-connector-python", specifier = ">=26.7.0,<27" },
     { name = "nltk", specifier = ">=3.10.1,<4" },
@@ -1445,14 +1445,14 @@ wheels = [
 
 [[package]]
 name = "llm-sandbox"
-version = "0.3.42"
+version = "0.3.43"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2a/48/7b9ab550578b7ae822b9faea683822f5371245bf6c73a7428a37b0a00efd/llm_sandbox-0.3.42.tar.gz", hash = "sha256:56e7ddefd174c92c8996ceedefd96335007d10c90384a195cef4ad4ca9d635c2", size = 619215, upload-time = "2026-08-02T15:27:37.139Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f9/76/789a30b71ef5389b9bdd3548ebe2bc02ee8138543953344ca5bd8000c026/llm_sandbox-0.3.43.tar.gz", hash = "sha256:9a2b32474636002ee9df2d321b4edd6782e0c09cea7638f4880b26d48d44893f", size = 629210, upload-time = "2026-08-03T04:13:36.258Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b6/28/480df6fed90e81a21d876c94f7e8da61c21689c82c26385943e4e1178b6a/llm_sandbox-0.3.42-py3-none-any.whl", hash = "sha256:edb2dcfc1dc015f74131c07a42d587a1ad5a4e8cc149b19566f782cb67a97a73", size = 109421, upload-time = "2026-08-02T15:27:35.527Z" },
+    { url = "https://files.pythonhosted.org/packages/ec/51/c292a1e9e6dd10b0062265b82ba254ba763b65bfef948227e213e642b5ea/llm_sandbox-0.3.43-py3-none-any.whl", hash = "sha256:28767638d47a62aaa3614b840369c61b30b2cd6a790a766f5c3da8e5c4d7aa98", size = 109425, upload-time = "2026-08-03T04:13:35.093Z" },
 ]
 
 [package.optional-dependencies]
