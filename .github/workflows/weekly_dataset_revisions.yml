@@ -35,9 +35,6 @@ jobs:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: uv run python scripts/update_hf_datasets.py
 
-      - name: Bump benchmark versions
-        run: uv run python scripts/bump_benchmark_versions.py --fix
-
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8
         with:
@@ -49,13 +46,13 @@ jobs:
             ## Summary
 
             Automated weekly update of pinned Hugging Face dataset commit SHAs in
-            `hf-dataset-revisions.json`. Tasks whose pin moved have their integer
-            in `benchmark-versions.json` bumped in the same commit so downstream
-            consumers can distinguish results across the change.
+            `hf-dataset-revisions.json`.
 
             ## Review
 
             Please review the dataset SHA diffs before merging. This PR is **not** auto-merged.
+            If a pin moves, bump the corresponding entry's `version` in
+            `benchmark-versions.json` by hand in the same PR.
 
             Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           labels: automated

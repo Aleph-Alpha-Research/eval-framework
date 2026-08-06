@@ -1,9 +1,9 @@
-"""Per-benchmark version integers, bumped when a benchmark's behaviour changes.
+"""Per-benchmark version integers, bumped by hand when a benchmark's behaviour changes.
 
-A benchmark's version lives in ``benchmark-versions.json`` next to the
-``REVISION_LOCKFILE`` a task resolves against. Today only a pinned HF dataset
-revision change triggers a bump; further behaviour dimensions can be added
-without touching task classes.
+Each task's version lives in ``benchmark-versions.json`` next to the
+``REVISION_LOCKFILE`` it resolves against. Bumps are manual: when a pinned HF
+dataset revision is updated for a task, increment its ``version`` in the same
+PR so downstream consumers can tell the two runs apart.
 """
 
 import json
@@ -12,13 +12,12 @@ from pathlib import Path
 
 VERSIONS_FILENAME = "benchmark-versions.json"
 
-# Version returned when a task has no entry (or no lockfile). Every task starts
-# here on first observation.
+# Version returned for tasks with no recorded entry (or no lockfile).
 DEFAULT_VERSION = 1
 
 
 class BenchmarkVersions:
-    """Recorded ``{task_name: {"version": int, "hf_revision": str}}`` entries."""
+    """Recorded ``{task_name: {"hf_revision": str, "version": int}}`` entries."""
 
     def __init__(self, entries: dict[str, dict[str, object]]) -> None:
         self._entries = dict(entries)
@@ -39,22 +38,6 @@ class BenchmarkVersions:
             return DEFAULT_VERSION
         return int(entry["version"])
 
-    def recorded_revision(self, task_name: str) -> str | None:
-        entry = self._entries.get(task_name)
-        if entry is None:
-            return None
-        revision = entry.get("hf_revision")
-        return str(revision) if revision is not None else None
-
-    def record(self, task_name: str, *, version: int, hf_revision: str | None) -> None:
-        self._entries[task_name] = {"version": version, "hf_revision": hf_revision}
-
-    def drop(self, task_name: str) -> None:
-        self._entries.pop(task_name, None)
-
-    def task_names(self) -> list[str]:
-        return sorted(self._entries)
-
 
 @lru_cache
 def _load(versions_file: Path) -> BenchmarkVersions:
@@ -66,11 +49,7 @@ def versions_file_for(revision_lockfile: Path) -> Path:
 
 
 def version_for(task_name: str, revision_lockfile: Path | None) -> int:
-    """The recorded version for ``task_name``, or the default if unrecorded.
-
-    Tasks without a HF revision lockfile have no behaviour dimension we track
-    today, so they always return the default version.
-    """
+    """The recorded version for ``task_name``, or the default if unrecorded."""
     if revision_lockfile is None:
         return DEFAULT_VERSION
     return _load(versions_file_for(revision_lockfile)).version_of(task_name)
