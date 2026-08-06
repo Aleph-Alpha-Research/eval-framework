@@ -13,6 +13,7 @@ from datasets import DatasetDict, DownloadConfig, load_dataset
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
+from eval_framework.tasks.benchmark_versions import version_for
 from eval_framework.tasks.dataset_revisions import pinned_revision
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
 from eval_framework.tasks.utils import classproperty, raise_errors
@@ -104,7 +105,7 @@ class Task(ABC):
         """Run ``llm`` over ``samples`` and return their completions."""
 
     @abstractmethod
-    def get_metadata(self) -> dict[str, str | list[str]]:
+    def get_metadata(self) -> dict[str, str | int | list[str]]:
         """Descriptive metadata about the eval for result reporting."""
 
     @abstractmethod
@@ -412,14 +413,25 @@ class BaseTask[SubjectType](Task):
     def _get_context(self, item: dict[str, Any]) -> BaseMetricContext | list[BaseMetricContext] | None:
         return None
 
-    def get_metadata(self) -> dict[str, str | list[str]]:
-        meta: dict[str, str | list[str]] = {
+    @classmethod
+    def benchmark_version(cls) -> int:
+        """Integer identifying the benchmark's behavioural version.
+
+        Bumped by ``scripts/bump_benchmark_versions.py`` when the pinned HF
+        dataset revision changes, so downstream consumers can distinguish
+        results produced against different data.
+        """
+        return version_for(cls.NAME, cls.REVISION_LOCKFILE)
+
+    def get_metadata(self) -> dict[str, str | int | list[str]]:
+        meta: dict[str, str | int | list[str]] = {
             "dataset_path": self.DATASET_PATH,
             "sample_split": self.SAMPLE_SPLIT,
             "fewshot_split": self.FEWSHOT_SPLIT,
             "response_type": self.get_response_type().value,
             "metrics": [m.NAME for m in self.get_metrics()],
             "subjects": [str(s) for s in self.SUBJECTS],
+            "benchmark_version": self.benchmark_version(),
         }
         if hasattr(self, "TASK_STYLER"):
             meta.update(self.TASK_STYLER.get_extra_metadata())

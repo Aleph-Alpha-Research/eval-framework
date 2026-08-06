@@ -1,0 +1,270 @@
+{
+    "AIME2024": {
+        "hf_revision": "2fe88a2f1091d5048c0f36abc874fb997b3dd99a",
+        "version": 1
+    },
+    "AIME2025": {
+        "hf_revision": "563bb8404243c5f09de6ec262f2db674fe5bce9b",
+        "version": 1
+    },
+    "AIME2026": {
+        "hf_revision": "79037aebdb6580008fb960d17cb21fd3099083e3",
+        "version": 1
+    },
+    "ARC": {
+        "hf_revision": "210d026faf9955653af8916fad021475a3f00453",
+        "version": 1
+    },
+    "ARC German": {
+        "hf_revision": "0e3e3c8804a5c8285d8e551512553f8bbfe710fe",
+        "version": 1
+    },
+    "ARC_IDK": {
+        "hf_revision": "210d026faf9955653af8916fad021475a3f00453",
+        "version": 1
+    },
+    "ARC_OLMES": {
+        "hf_revision": "210d026faf9955653af8916fad021475a3f00453",
+        "version": 1
+    },
+    "BigCodeBench_OLMES": {
+        "hf_revision": "b74c0d0bf70d2c0bc459be537895cca163007f1a",
+        "version": 1
+    },
+    "COPA_OLMES": {
+        "hf_revision": "3de24cf8022e94f4ee4b9d55a6f539891524d646",
+        "version": 1
+    },
+    "CommonsenseQAMC_OLMES": {
+        "hf_revision": "94630fe30dad47192a8546eb75f094926d47e155",
+        "version": 1
+    },
+    "DropCompletion_OLMES": {
+        "hf_revision": "619386fc7ffe6dace3cc6d3483c69b164ebf6bf3",
+        "version": 1
+    },
+    "DropMC_OLMES": {
+        "hf_revision": "33191ccb7014f77bc6dc3f59792acd43f658eb06",
+        "version": 1
+    },
+    "Full Text MMLU": {
+        "hf_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+        "version": 1
+    },
+    "GPQA_DIAMOND_COT": {
+        "hf_revision": "633f5ee89ab8ad4522a9f850766b73f62147ffdd",
+        "version": 1
+    },
+    "GPQA_OLMES": {
+        "hf_revision": "633f5ee89ab8ad4522a9f850766b73f62147ffdd",
+        "version": 1
+    },
+    "GSM8KBPB": {
+        "hf_revision": "740312add88f781978c0658806c59bc2815b9866",
+        "version": 1
+    },
+    "GSM8KReasoning": {
+        "hf_revision": "740312add88f781978c0658806c59bc2815b9866",
+        "version": 1
+    },
+    "GSM8K_OLMES": {
+        "hf_revision": "740312add88f781978c0658806c59bc2815b9866",
+        "version": 1
+    },
+    "GlobalMMLU": {
+        "hf_revision": "0e619dbeb34206cd48705a1a0ea7fb21cae09993",
+        "version": 1
+    },
+    "GlobalMMLU_German": {
+        "hf_revision": "0e619dbeb34206cd48705a1a0ea7fb21cae09993",
+        "version": 1
+    },
+    "GoldenSwag": {
+        "hf_revision": "f98259e4185c9ab868cf695ac98e9d863eba7986",
+        "version": 1
+    },
+    "GoldenSwag_IDK": {
+        "hf_revision": "f98259e4185c9ab868cf695ac98e9d863eba7986",
+        "version": 1
+    },
+    "HellaSwag": {
+        "hf_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+        "version": 1
+    },
+    "HellaSwag_OLMES": {
+        "hf_revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+        "version": 1
+    },
+    "Human Eval BPB": {
+        "hf_revision": "7dce6050a7d6d172f3cc5c32aa97f52fa1a2e544",
+        "version": 1
+    },
+    "Human Eval OLMES": {
+        "hf_revision": "7dce6050a7d6d172f3cc5c32aa97f52fa1a2e544",
+        "version": 1
+    },
+    "IFEval": {
+        "hf_revision": "966cd89545d6b6acfd7638bc708b98261ca58e84",
+        "version": 1
+    },
+    "IFEval German": {
+        "hf_revision": "4f52d847003b3c83cc282e9d296853a24b34b19a",
+        "version": 1
+    },
+    "MATH500": {
+        "hf_revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+        "version": 1
+    },
+    "MATHMinervaBPB": {
+        "hf_revision": "21a5633873b6a120296cce3e2df9d5550074f4a3",
+        "version": 1
+    },
+    "MATHMinerva_OLMES": {
+        "hf_revision": "21a5633873b6a120296cce3e2df9d5550074f4a3",
+        "version": 1
+    },
+    "MATHMinerva_OLMES_NONL": {
+        "hf_revision": "21a5633873b6a120296cce3e2df9d5550074f4a3",
+        "version": 1
+    },
+    "MBPP BPB": {
+        "hf_revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+        "version": 1
+    },
+    "MBPP_BPB_EvalPlus": {
+        "hf_revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+        "version": 1
+    },
+    "MBPP_EvalPlus": {
+        "hf_revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+        "version": 1
+    },
+    "MBPP_OLMES": {
+        "hf_revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+        "version": 1
+    },
+    "MMLU": {
+        "hf_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+        "version": 1
+    },
+    "MMLU Pro": {
+        "hf_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+        "version": 1
+    },
+    "MMLU Pro_IDK": {
+        "hf_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+        "version": 1
+    },
+    "MMLU Pro_OLMES": {
+        "hf_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+        "version": 1
+    },
+    "MMLU_COT": {
+        "hf_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+        "version": 1
+    },
+    "MMLU_IDK": {
+        "hf_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+        "version": 1
+    },
+    "MMLU_OLMES": {
+        "hf_revision": "c30699e8356da336a370243923dbaf21066bb9fe",
+        "version": 1
+    },
+    "MMLU_PRO_COT": {
+        "hf_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+        "version": 1
+    },
+    "MedQAMC_OLMES": {
+        "hf_revision": "a9cc2ff94f0444e1970fd785c986f4b1571239c0",
+        "version": 1
+    },
+    "MultiPL-E HumanEval Bash OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E HumanEval C++ OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E HumanEval JS OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E HumanEval Java OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E HumanEval PHP OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E HumanEval Rust OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E MBPP Bash OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E MBPP C++ OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E MBPP JS OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E MBPP Java OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E MBPP PHP OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "MultiPL-E MBPP Rust OLMES": {
+        "hf_revision": "28441b6024e71d4a1c1c0f6bf171c935cd5a43f2",
+        "version": 1
+    },
+    "NaturalQsOpen": {
+        "hf_revision": "5dd9790a83002ad084ddeb7c420dc716852c6f28",
+        "version": 1
+    },
+    "NaturalQsOpenMC_OLMES": {
+        "hf_revision": "a7e553744f28cb673bf25b734513c41e3f413840",
+        "version": 1
+    },
+    "PIQA": {
+        "hf_revision": "6b3aceb3276e5ab7e51895d73151a718690af38c",
+        "version": 1
+    },
+    "PIQA_IDK": {
+        "hf_revision": "6b3aceb3276e5ab7e51895d73151a718690af38c",
+        "version": 1
+    },
+    "PIQA_OLMES": {
+        "hf_revision": "6b3aceb3276e5ab7e51895d73151a718690af38c",
+        "version": 1
+    },
+    "SQuAD2_MA": {
+        "hf_revision": "3ffb306f725f7d2ce8394bc1873b24868140c412",
+        "version": 1
+    },
+    "SQuAD_OLMES": {
+        "hf_revision": "7b6d24c440a36b6815f21b70d25016731768db1f",
+        "version": 1
+    },
+    "SciQ_OLMES": {
+        "hf_revision": "2c94ad3e1aafab77146f384e23536f97a4849815",
+        "version": 1
+    },
+    "SocialIQAMC_OLMES": {
+        "hf_revision": "8835ceb9141d7896d9d968634a9b21ae440e3ec5",
+        "version": 1
+    },
+    "WinograndeCloze": {
+        "hf_revision": "01e74176c63542e6b0bcb004dcdea22d94fb67b5",
+        "version": 1
+    }
+}
