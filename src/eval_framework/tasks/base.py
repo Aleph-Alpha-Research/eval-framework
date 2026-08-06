@@ -141,8 +141,9 @@ class BaseTask[SubjectType](Task):
     # `TaskClass.*` or `task.*` (or `task.get_metrics()`). This avoids mypy conflicts from re-declaring class vars.
     # By default, these values come from TASK_STYLER if set, otherwise from legacy class attributes.
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, num_fewshot: int = 0, seed: int | None = RANDOM_SEED) -> None:
         self.num_fewshot = num_fewshot
+        self.rnd = random.Random(seed)
         self.user_prompt_suffix: str | None = None
         self.stop_sequences: list[str] | None = None
         self.max_tokens: int | None = None
@@ -167,8 +168,9 @@ class BaseTask[SubjectType](Task):
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
+        seed: int | None = RANDOM_SEED,
     ) -> Self:
-        instance = cls(num_fewshot=num_fewshot)
+        instance = cls(num_fewshot=num_fewshot, seed=seed)
         if user_prompt_suffix is not None and instance.get_response_type() != ResponseType.COMPLETION:
             raise ValueError("user_prompt_suffix is only supported for completion tasks.")
         instance.user_prompt_suffix = user_prompt_suffix
@@ -229,7 +231,6 @@ class BaseTask[SubjectType](Task):
 
     def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, Any]:
         dataset = {}
-        self.rnd = random.Random(RANDOM_SEED)
 
         for split, data in hf_dataset.items():
             if split not in [self.SAMPLE_SPLIT, self.FEWSHOT_SPLIT]:

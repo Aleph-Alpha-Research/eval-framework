@@ -63,23 +63,10 @@ def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], 
     """
     _seed_for_determinism()
 
-    def _instantiate(num_fewshot_value: int) -> object:
-        task_instance = registry()[task_name].create(
-            num_fewshot=num_fewshot_value,
-            custom_subjects=None,
-            custom_hf_revision=None,
-        )
-        original_method = task_instance._sample_fewshot_examples
-
-        def deterministic_fewshot(item: dict) -> list:
-            task_instance.rnd = random.Random(42)
-            return original_method(item)
-
-        task_instance._sample_fewshot_examples = deterministic_fewshot
-        return task_instance
-
     try:
-        task_instance = _instantiate(num_fewshot)
+        task_instance = registry()[task_name].create(
+            num_fewshot=num_fewshot, custom_subjects=None, custom_hf_revision=None, seed=42
+        )
         sample = next(iter(task_instance.iterate_samples(1)))
     except Exception as e:
         print(
@@ -87,7 +74,7 @@ def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], 
             file=sys.stderr,
         )
         try:
-            task_instance = _instantiate(0)
+            task_instance = registry()[task_name].create(num_fewshot=0)
             sample = next(iter(task_instance.iterate_samples(1)))
         except Exception as inner:
             pytest.fail(f"Could not instantiate {task_name=}: {inner}")
