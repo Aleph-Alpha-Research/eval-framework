@@ -2,8 +2,11 @@
 
 Each task's version lives in ``benchmark-versions.json`` next to the
 ``REVISION_LOCKFILE`` it resolves against. Bumps are manual: when a pinned HF
-dataset revision is updated for a task, increment its ``version`` in the same
-PR so downstream consumers can tell the two runs apart.
+dataset revision is updated for a task in ``hf-dataset-revisions.json``,
+increment its ``version`` in the same PR so downstream consumers can tell
+the two runs apart. Entries are ``{task_name: {"version": int}}``; the dict
+wrapper leaves room to record further version dimensions later without
+another schema churn.
 """
 
 import json
@@ -17,7 +20,7 @@ DEFAULT_VERSION = 1
 
 
 class BenchmarkVersions:
-    """Recorded ``{task_name: {"hf_revision": str, "version": int}}`` entries."""
+    """Recorded ``{task_name: {"version": int}}`` entries."""
 
     def __init__(self, entries: dict[str, dict[str, object]]) -> None:
         self._entries = dict(entries)

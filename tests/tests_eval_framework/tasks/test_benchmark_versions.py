@@ -36,7 +36,7 @@ def test_version_for_returns_default_when_task_absent(tmp_path: Path) -> None:
 
 def test_version_for_returns_recorded_version(tmp_path: Path) -> None:
     # Given a versions file with a recorded task version
-    entries = {"AnyTask": {"version": 3, "hf_revision": "abc"}}
+    entries = {"AnyTask": {"version": 3}}
     bv.BenchmarkVersions(entries).to_file(tmp_path / bv.VERSIONS_FILENAME)
     bv._load.cache_clear()
 
