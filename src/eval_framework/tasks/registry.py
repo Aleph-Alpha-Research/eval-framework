@@ -38,10 +38,6 @@ class EvalFactory(ABC):
     def id(self) -> str:
         "Canonical key used to register this benchmark"
 
-    @abstractmethod
-    def task_class(self) -> type[BaseTask]:
-        """Return the task class, importing it on first access if necessary."""
-
     @property
     @abstractmethod
     def source_module(self) -> str:
@@ -172,9 +168,6 @@ class _Eager(EvalFactory):
     def id(self) -> str:
         return self._task.__name__
 
-    def task_class(self) -> type[BaseTask]:
-        return self._task
-
     def create(
         self,
         num_fewshot: int,
@@ -182,7 +175,7 @@ class _Eager(EvalFactory):
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
     ) -> BaseTask:
-        return self.task_class().with_overwrite(
+        return self._task.with_overwrite(
             num_fewshot=num_fewshot,
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,
