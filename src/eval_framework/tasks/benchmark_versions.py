@@ -12,6 +12,7 @@ another schema churn.
 import json
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 VERSIONS_FILENAME = "benchmark-versions.json"
 
@@ -22,7 +23,7 @@ DEFAULT_VERSION = 1
 class BenchmarkVersions:
     """Recorded ``{task_name: {"version": int}}`` entries."""
 
-    def __init__(self, entries: dict[str, dict[str, object]]) -> None:
+    def __init__(self, entries: dict[str, dict[str, Any]]) -> None:
         self._entries = dict(entries)
 
     @classmethod

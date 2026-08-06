@@ -56,6 +56,10 @@ class EvalFactory(ABC):
         """Human-readable display name. Is allowed to have special characters and whitespaces."""
 
     @abstractmethod
+    def benchmark_version(self) -> int:
+        """The eval's recorded behaviour version (see ``benchmark_versions``)."""
+
+    @abstractmethod
     def create(
         self,
         num_fewshot: int,
@@ -158,6 +162,10 @@ class _Lazy(EvalFactory):
             task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
         return task.markdown_doc(formatters)
 
+    def benchmark_version(self) -> int:
+        """The eval's recorded behaviour version."""
+        return self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None).benchmark_version()
+
 
 class _Eager(EvalFactory):
     """Wraps an already-imported task class."""
@@ -220,6 +228,10 @@ class _Eager(EvalFactory):
         except (TypeError, ValueError, AssertionError):
             task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
         return task.markdown_doc(formatters)
+
+    def benchmark_version(self) -> int:
+        """The eval's recorded behaviour version."""
+        return self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None).benchmark_version()
 
 
 class Registry:
