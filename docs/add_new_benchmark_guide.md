@@ -270,7 +270,7 @@ Add a registration call for your new benchmark to `register_all_tasks` in `src/e
 register_lazy_task("eval_framework.tasks.benchmarks.geographyqa.GeographyQA")
 ```
 
-The task will now be available through `get_task("GeographyQA")`.
+The task will now be available through `registry()["GeographyQA"]`.
 
 ### Testing your benchmark
 
