@@ -14,24 +14,9 @@ from eval_framework.main import main
 from eval_framework.result_processors.base import Result
 from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.registry import get_task
 from eval_framework.tasks.task_names import TaskNameEnum
 from eval_framework.utils.constants import GREEN, RED, RESET
 from tests.tests_eval_framework.conftest import MockLLM
-
-NUM_FEWSHOT = 2
-NUM_SAMPLES = 10
-
-# A small subset of tasks to test end-to-end:
-experiment_setups = [
-    (
-        "SmolLM135M",
-        HELLASWAG.NAME,
-        {"Accuracy Loglikelihood": 0.4, "Accuracy Normalized Loglikelihood": 0.6},
-        NUM_FEWSHOT,
-        NUM_SAMPLES,
-    ),
-]
 
 
 def pretty_print_results(results: list[Result]) -> None:
@@ -50,24 +35,14 @@ def _almost_equal(x: float, y: float) -> bool:
 
 
 @pytest.mark.gpu
-@pytest.mark.parametrize(
-    "test_llms, task_name, expected_results, num_fewshot, num_samples",
-    experiment_setups,
-    indirect=["test_llms"],
-)
-def test_automatic_tasks(
-    tmp_path: Path,
-    test_llms: BaseLLM,
-    task_name: str,
-    expected_results: dict[str, float],
-    num_fewshot: int,
-    num_samples: int,
-) -> None:
+@pytest.mark.parametrize("test_llms", ["SmolLM135M"], indirect=["test_llms"])
+def test_automatic_tasks(tmp_path: Path, test_llms: BaseLLM) -> None:
     output_dir = tmp_path / "eval"
 
-    task = get_task(task_name)
-    task_subjects = getattr(task, "SUBJECTS", None)
-    subjects_subset = task_subjects[:3] if task_subjects else None  # limit number of subjects to three
+    task_name = HELLASWAG.NAME
+    expected_results = {"Accuracy Loglikelihood": 0.4, "Accuracy Normalized Loglikelihood": 0.6}
+    num_fewshot = 2
+    num_samples = 10
 
     eval_config = EvalConfig(
         task_name=task_name,
@@ -76,7 +51,7 @@ def test_automatic_tasks(
         output_dir=output_dir,
         llm_class=test_llms.__class__,
         save_intermediate_results=False,
-        task_subjects=subjects_subset,
+        task_subjects=None,
     )
 
     results = main(test_llms, eval_config)
@@ -107,11 +82,6 @@ def test_automatic_tasks(
 def pytest_generate_tests(metafunc: Any) -> None:
     # dynamic parameterization for test_all_tasks_with_all_samples: go over all tasks
     if "full_task_name" in metafunc.fixturenames:
-        # for performance reasons, we only test a small subset of tasks
-        task_names = [setup[1] for setup in experiment_setups]
-        ids = [setup[1] for setup in experiment_setups]
-
-        # if you need to test all tasks, uncomment the following lines
         task_names = [task.value for task in TaskNameEnum]
         ids = [task.name for task in TaskNameEnum]
 
