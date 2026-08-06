@@ -15,7 +15,7 @@ from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig, PerturbationType
-from eval_framework.tasks.registry import get_task, register_task
+from eval_framework.tasks.registry import register_task, registry
 from template_formatting.formatter import Message, Role
 from tests.tests_eval_framework.conftest import MockLLM
 from tests.tests_eval_framework.tasks.test_registry import temporary_registry
@@ -481,8 +481,9 @@ def test_perturbed_response_differs(tmp_path: Path, perturbation_type: Perturbat
         save_intermediate_results=False,
     )
 
-    task_class = get_task(perturbed_eval_config.task_name)
-    task = task_class()
+    task = registry()[perturbed_eval_config.task_name].create(
+        num_fewshot=0, custom_subjects=None, custom_hf_revision=None
+    )
     perturbed_response_generator = ResponseGenerator(MockLLM(), perturbed_eval_config, Mock(spec=ResultsFileProcessor))
 
     assert len(task.SUBJECTS) > 0
