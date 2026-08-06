@@ -102,6 +102,7 @@ class MBPP(BaseTask[str]):
         return f"{BEGIN}\n" + target + f"\n{END}"
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+        assert self.rnd is not None
         fewshot_examples = self.rnd.sample(self.dataset[self.FEWSHOT_SPLIT], self.num_fewshot)
         return fewshot_examples
 

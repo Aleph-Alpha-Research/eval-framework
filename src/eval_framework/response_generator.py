@@ -26,7 +26,7 @@ from eval_framework.shared.types import (
     Loglikelihood,
     RawLoglikelihood,
 )
-from eval_framework.tasks.base import Language, ResponseType, Sample
+from eval_framework.tasks.base import RANDOM_SEED, Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
@@ -67,6 +67,7 @@ class ResponseGenerator:
                 config.task_subjects,
                 config.hf_revision,
                 user_prompt_suffix=config.user_prompt_suffix,
+                seed=RANDOM_SEED,
             )
         else:
             self.task = registry()[config.task_name].create(
@@ -74,6 +75,7 @@ class ResponseGenerator:
                 config.task_subjects,
                 config.hf_revision,
                 user_prompt_suffix=config.user_prompt_suffix,
+                seed=RANDOM_SEED,
             )
 
         self.response_type = self.task.get_response_type()
