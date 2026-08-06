@@ -107,6 +107,14 @@ class Task(ABC):
     def get_metadata(self) -> dict[str, str | list[str]]:
         """Descriptive metadata about the eval for result reporting."""
 
+    @abstractmethod
+    def get_response_type(self) -> ResponseType: ...
+
+    @abstractmethod
+    def display_name(self) -> str:
+        """Human-readable display name. Is allowed to have special characters and whitespaces."""
+        ...
+
 
 class BaseTask[SubjectType](Task):
     NAME: str
@@ -519,3 +527,6 @@ class BaseTask[SubjectType](Task):
     def METRICS(cls) -> list[type["BaseMetric"]]:
         """For backwards compatibility."""
         return cls.get_metrics()
+
+    def display_name(self) -> str:
+        return self.NAME

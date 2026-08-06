@@ -179,7 +179,7 @@ class ResponseGenerator:
         :param should_preempt_callable: function to check if preempt is called
         :return: list of responses, preempted
         """
-        logger.info(f"{RED}[ Running task {self.task.NAME} against model ------------ ]{RESET}")
+        logger.info(f"{RED}[ Running task {self.task.display_name()} against model ------------ ]{RESET}")
         self.start_time, monotonic_start = time.time(), time.monotonic()
         run_fn = self._generative_output_type_selector()
         self._verify_loaded_metadata_compatibility()

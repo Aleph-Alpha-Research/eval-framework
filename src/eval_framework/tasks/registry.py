@@ -74,13 +74,10 @@ class EvalFactory(ABC):
         user_prompt_suffix: str | None = None,
     ) -> BaseTask: ...
 
+    @abstractmethod
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         """Render the eval's documentation as markdown."""
-        try:
-            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None)
-        except (TypeError, ValueError, AssertionError):
-            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
-        return task.markdown_doc(formatters)
+        ...
 
 
 class _Lazy(EvalFactory):
@@ -154,6 +151,13 @@ class _Lazy(EvalFactory):
         """The eval's human-readable display name (the task's ``NAME``)."""
         return self.task_class().NAME
 
+    def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
+        try:
+            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None)
+        except (TypeError, ValueError, AssertionError):
+            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
+        return task.markdown_doc(formatters)
+
 
 class _Eager(EvalFactory):
     """Wraps an already-imported task class."""
@@ -190,7 +194,7 @@ class _Eager(EvalFactory):
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
     ) -> BaseTask:
-        perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
+        perturbation_task_class = create_perturbation_class(self._task, perturbation_config)
         return perturbation_task_class.with_overwrite(
             num_fewshot=num_fewshot,
             custom_subjects=custom_subjects,
@@ -200,15 +204,22 @@ class _Eager(EvalFactory):
 
     def response_type(self) -> ResponseType:
         """The eval's response type"""
-        return self.task_class().get_response_type()
+        return self._task.get_response_type()
 
     def metrics(self) -> list[type["BaseMetric"]]:
         """The eval's metrics"""
-        return self.task_class().get_metrics()
+        return self._task.get_metrics()
 
     def display_name(self) -> str:
         """The eval's human-readable display name (the task's ``NAME``)."""
-        return self.task_class().NAME
+        return self._task.NAME
+
+    def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
+        try:
+            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None)
+        except (TypeError, ValueError, AssertionError):
+            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
+        return task.markdown_doc(formatters)
 
 
 class Registry:
