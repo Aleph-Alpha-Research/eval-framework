@@ -147,6 +147,7 @@ class BaseTask[SubjectType](Task):
         self.stop_sequences: list[str] | None = None
         self.max_tokens: int | None = None
         self.hf_revision: str | None = self._apply_hf_revision()
+        self.rnd: random.Random | None = None
 
     def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> str | None:
         # Precedence: CLI/config override > REVISION_LOCKFILE pin.
@@ -167,12 +168,13 @@ class BaseTask[SubjectType](Task):
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
+        seed: int | None = RANDOM_SEED,
     ) -> Self:
         instance = cls(num_fewshot=num_fewshot)
         if user_prompt_suffix is not None and instance.get_response_type() != ResponseType.COMPLETION:
             raise ValueError("user_prompt_suffix is only supported for completion tasks.")
         instance.user_prompt_suffix = user_prompt_suffix
-
+        instance.rnd = random.Random(seed)
         # If custom subjects were provided during initialization, they take precedence over the class-level SUBJECTS.
         filtered_subjects = instance._filter_task_subjects(custom_subjects=custom_subjects)
         if filtered_subjects:
@@ -244,8 +246,8 @@ class BaseTask[SubjectType](Task):
         )
 
     def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, Any]:
+        assert self.rnd is not None, "Task RNG is unseeded; build tasks via `with_overwrite`."
         dataset = {}
-        self.rnd = random.Random(RANDOM_SEED)
 
         for split, data in hf_dataset.items():
             if split not in [self.SAMPLE_SPLIT, self.FEWSHOT_SPLIT]:
@@ -413,6 +415,7 @@ class BaseTask[SubjectType](Task):
         return None
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+        assert self.rnd is not None, "Task RNG is unseeded; build tasks via `with_overwrite`."
         if self.FEWSHOT_SPLIT == self.SAMPLE_SPLIT:
             # If the fewshot and sample splits are the same, we risk including the current eval item
             # as a fewshot example (leaking the answer). To prevent this, sample one extra example,

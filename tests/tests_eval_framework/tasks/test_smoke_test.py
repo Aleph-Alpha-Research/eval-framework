@@ -37,8 +37,13 @@ from eval_framework.tasks.benchmarks.squad import SQUAD2BPB
 from eval_framework.tasks.benchmarks.winogrande import WINOGRANDE_OLMES
 
 
-def _smoke_test_task(task_cls) -> None:
-    task = task_cls()
+def _smoke_test_task(task_cls, num_fewshot: int = 0) -> None:
+    # Tasks must be built via `with_overwrite`, which is what seeds `task.rnd`.
+    task = task_cls.with_overwrite(
+        num_fewshot=num_fewshot,
+        custom_subjects=None,
+        custom_hf_revision=None,
+    )
     samples = list(task.iterate_samples(num_samples=2))
     assert len(samples) > 0
     for sample in samples:
@@ -77,7 +82,7 @@ def test_naturalqs_open_tasks_smoke() -> None:
 def test_math_minerva_tasks_smoke() -> None:
     _smoke_test_task(MATHMinervaEvalHarness)
     _smoke_test_task(MATHMinerva)
-    _smoke_test_task(MATHMinervaBPB)
+    _smoke_test_task(MATHMinervaBPB, num_fewshot=4)  # class default, kept explicit
     _smoke_test_task(MATH500Minerva)
 
 

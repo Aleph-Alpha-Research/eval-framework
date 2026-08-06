@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
-from eval_framework.tasks.base import BaseTask, ResponseType
+from eval_framework.tasks.base import RANDOM_SEED, BaseTask, ResponseType
 from eval_framework.tasks.perturbation import PerturbationConfig, create_perturbation_class
 from template_formatting.formatter import BaseFormatter
 
@@ -62,6 +62,7 @@ class EvalFactory(ABC):
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
+        seed: int | None = None,
     ) -> BaseTask: ...
 
     @abstractmethod
@@ -72,6 +73,7 @@ class EvalFactory(ABC):
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
+        seed: int | None = None,
     ) -> BaseTask: ...
 
     @abstractmethod
@@ -115,12 +117,14 @@ class _Lazy(EvalFactory):
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
+        seed: int | None = None,
     ) -> BaseTask:
         return self.task_class().with_overwrite(
             num_fewshot=num_fewshot,
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,
             user_prompt_suffix=user_prompt_suffix,
+            seed=seed,
         )
 
     def create_perturbation(
@@ -130,6 +134,7 @@ class _Lazy(EvalFactory):
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
+        seed: int | None = None,
     ) -> BaseTask:
         perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
         return perturbation_task_class.with_overwrite(
@@ -137,6 +142,7 @@ class _Lazy(EvalFactory):
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,
             user_prompt_suffix=user_prompt_suffix,
+            seed=seed,
         )
 
     def response_type(self) -> ResponseType:
@@ -153,9 +159,9 @@ class _Lazy(EvalFactory):
 
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         try:
-            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None)
+            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED)
         except (TypeError, ValueError, AssertionError):
-            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
+            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED)
         return task.markdown_doc(formatters)
 
 
@@ -178,12 +184,14 @@ class _Eager(EvalFactory):
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
+        seed: int | None = None,
     ) -> BaseTask:
         return self._task.with_overwrite(
             num_fewshot=num_fewshot,
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,
             user_prompt_suffix=user_prompt_suffix,
+            seed=seed,
         )
 
     def create_perturbation(
@@ -193,6 +201,7 @@ class _Eager(EvalFactory):
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
+        seed: int | None = None,
     ) -> BaseTask:
         perturbation_task_class = create_perturbation_class(self._task, perturbation_config)
         return perturbation_task_class.with_overwrite(
@@ -200,6 +209,7 @@ class _Eager(EvalFactory):
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,
             user_prompt_suffix=user_prompt_suffix,
+            seed=seed,
         )
 
     def response_type(self) -> ResponseType:
@@ -216,9 +226,9 @@ class _Eager(EvalFactory):
 
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         try:
-            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None)
+            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED)
         except (TypeError, ValueError, AssertionError):
-            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
+            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED)
         return task.markdown_doc(formatters)
 
 

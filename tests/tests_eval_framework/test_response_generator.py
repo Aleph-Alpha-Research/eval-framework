@@ -11,7 +11,7 @@ from eval_framework.response_generator import ResponseGenerator, repeat_samples
 from eval_framework.result_processors.base import ResultProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, RawCompletion, RawLoglikelihood
-from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
+from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.perturbation import PerturbationConfig, PerturbationType
@@ -482,7 +482,7 @@ def test_perturbed_response_differs(tmp_path: Path, perturbation_type: Perturbat
     )
 
     task = registry()[perturbed_eval_config.task_name].create(
-        num_fewshot=0, custom_subjects=None, custom_hf_revision=None
+        num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
     )
     perturbed_response_generator = ResponseGenerator(MockLLM(), perturbed_eval_config, Mock(spec=ResultsFileProcessor))
 
