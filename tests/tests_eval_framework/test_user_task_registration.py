@@ -3,7 +3,6 @@ from pathlib import Path
 
 import pytest
 
-from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.benchmarks.copa import COPA
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_loader import find_all_python_files, load_extra_tasks
@@ -44,9 +43,7 @@ def test_user_task_registration(tmp_path: Path) -> None:
         f.write(TASK1)
     load_extra_tasks([task_file], registry=registry)
     assert "MyCustomTask" in registry
-    task1 = registry["MyCustomTask"].task_class()
-    assert issubclass(task1, BaseTask)
-    assert task1.NAME == "MyCustomTask"
+    assert registry["MyCustomTask"].display_name() == "MyCustomTask"
     assert set(registry.task_names()) == {"MyCustomTask"}
 
     task_file = tmp_path / "my_second_custom_task.py"
@@ -55,12 +52,10 @@ def test_user_task_registration(tmp_path: Path) -> None:
     load_extra_tasks([task_file], registry=registry)
     assert "MySecondCustomTask" in registry
     assert "MySecondCustomTask".upper() in registry
-    task2 = registry["MySecondCustomTask".upper()].task_class()
-    assert issubclass(task2, BaseTask)
-    assert task2.NAME == "MySecondCustomTask"
+    assert registry["MySecondCustomTask".upper()].display_name() == "MySecondCustomTask"
     assert set(registry.task_names()) == {"MyCustomTask", "MySecondCustomTask"}
 
-    assert task1 is not task2
+    assert registry["MyCustomTask"] is not registry["MySecondCustomTask"]
 
 
 def test_directory(tmp_path: Path) -> None:
@@ -75,7 +70,7 @@ def test_directory(tmp_path: Path) -> None:
 
     load_extra_tasks([tmp_path], registry=registry)
     assert set(registry.task_names()) == {"MyCustomTask", "MySecondCustomTask"}
-    assert registry["MyCustomTask"].task_class() != registry["MySecondCustomTask"].task_class()
+    assert registry["MyCustomTask"] is not registry["MySecondCustomTask"]
 
 
 def test_derived_user_task_registration(tmp_path: Path) -> None:
@@ -94,7 +89,7 @@ def test_derived_user_task_registration(tmp_path: Path) -> None:
         )
     load_extra_tasks([task_file], registry=registry)
     assert "MyCOPA" in registry
-    registry["MyCOPA"].task_class()
+    assert registry["MyCOPA"].id() == "MyCOPA"
 
 
 def test_user_task_registration_with_repeated_names(tmp_path: Path) -> None:

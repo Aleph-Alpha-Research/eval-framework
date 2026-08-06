@@ -26,17 +26,17 @@ def test_case_insensitive_lookup() -> None:
 
     assert "MATH" in registry
     assert set(registry.task_names()) == {"MATH"}
-    assert registry["MATH"].task_class() is MATH
-    assert registry["Math"].task_class() is MATH
-    assert registry["math"].task_class() is MATH
+    assert registry["MATH"].id() == MATH.__name__
+    assert registry["Math"].id() == MATH.__name__
+    assert registry["math"].id() == MATH.__name__
 
     registry.register(MATHLvl5)
     assert set(registry.task_names()) == {"MATH", "MATHLvl5"}
-    assert registry["math lvl 5"].task_class() is MATHLvl5
-    assert registry["MATH LVL 5"].task_class() is MATHLvl5
-    assert registry["Math Lvl 5"].task_class() is MATHLvl5
-    assert registry["Math Lvl     5"].task_class() is MATHLvl5
-    assert registry["Math-Lvl_5"].task_class() is MATHLvl5
+    assert registry["math lvl 5"].id() == MATHLvl5.__name__
+    assert registry["MATH LVL 5"].id() == MATHLvl5.__name__
+    assert registry["Math Lvl 5"].id() == MATHLvl5.__name__
+    assert registry["Math Lvl     5"].id() == MATHLvl5.__name__
+    assert registry["Math-Lvl_5"].id() == MATHLvl5.__name__
 
     with pytest.raises(ValueError):
         registry["Math.Lvl.5"]
@@ -58,4 +58,4 @@ def test_register_non_task() -> None:
 def test_lazy_registration() -> None:
     registry = Registry()
     registry.register_lazy(f"{MATH.__module__}.{MATH.__name__}")
-    assert registry["Math"].task_class() is MATH
+    assert registry["Math"].display_name() == MATH.NAME
