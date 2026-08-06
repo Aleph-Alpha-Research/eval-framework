@@ -18,7 +18,6 @@ __all__ = [
     "EvalFactory",
     "Registry",
     "with_registry",
-    "get_task",
     "is_registered",
     "validate_task_name",
     "registered_task_names",
@@ -325,14 +324,6 @@ def validate_task_name(name: str) -> str:
     if name not in registry():
         raise ValueError(f"Task not registered: {name}")
     return name
-
-
-def get_task(name: str, /) -> type[BaseTask]:
-    """Return a registered task for a given name.
-
-    Note: This method will import any lazily registered task.
-    """
-    return _REGISTRY[name].task_class()
 
 
 def register_task(task: type[BaseTask]) -> str:
