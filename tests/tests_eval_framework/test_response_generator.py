@@ -308,7 +308,7 @@ def test_filter_task_subjects(
     result_processor = Mock(spec=ResultsFileProcessor)
 
     if raises:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             generator = ResponseGenerator(llm, config, result_processor)
     else:
         generator = ResponseGenerator(llm, config, result_processor)
