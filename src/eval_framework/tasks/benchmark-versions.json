@@ -1,0 +1,203 @@
+{
+    "AIME2024": {
+        "version": 1
+    },
+    "AIME2025": {
+        "version": 1
+    },
+    "AIME2026": {
+        "version": 1
+    },
+    "ARC": {
+        "version": 1
+    },
+    "ARC German": {
+        "version": 1
+    },
+    "ARC_IDK": {
+        "version": 1
+    },
+    "ARC_OLMES": {
+        "version": 1
+    },
+    "BigCodeBench_OLMES": {
+        "version": 1
+    },
+    "COPA_OLMES": {
+        "version": 1
+    },
+    "CommonsenseQAMC_OLMES": {
+        "version": 1
+    },
+    "DropCompletion_OLMES": {
+        "version": 1
+    },
+    "DropMC_OLMES": {
+        "version": 1
+    },
+    "Full Text MMLU": {
+        "version": 1
+    },
+    "GPQA_DIAMOND_COT": {
+        "version": 1
+    },
+    "GPQA_OLMES": {
+        "version": 1
+    },
+    "GSM8KBPB": {
+        "version": 1
+    },
+    "GSM8KReasoning": {
+        "version": 1
+    },
+    "GSM8K_OLMES": {
+        "version": 1
+    },
+    "GlobalMMLU": {
+        "version": 1
+    },
+    "GlobalMMLU_German": {
+        "version": 1
+    },
+    "GoldenSwag": {
+        "version": 1
+    },
+    "GoldenSwag_IDK": {
+        "version": 1
+    },
+    "HellaSwag": {
+        "version": 1
+    },
+    "HellaSwag_OLMES": {
+        "version": 1
+    },
+    "Human Eval BPB": {
+        "version": 1
+    },
+    "Human Eval OLMES": {
+        "version": 1
+    },
+    "IFEval": {
+        "version": 1
+    },
+    "IFEval German": {
+        "version": 1
+    },
+    "MATH500": {
+        "version": 1
+    },
+    "MATHMinervaBPB": {
+        "version": 1
+    },
+    "MATHMinerva_OLMES": {
+        "version": 1
+    },
+    "MATHMinerva_OLMES_NONL": {
+        "version": 1
+    },
+    "MBPP BPB": {
+        "version": 1
+    },
+    "MBPP_BPB_EvalPlus": {
+        "version": 1
+    },
+    "MBPP_EvalPlus": {
+        "version": 1
+    },
+    "MBPP_OLMES": {
+        "version": 1
+    },
+    "MMLU": {
+        "version": 1
+    },
+    "MMLU Pro": {
+        "version": 1
+    },
+    "MMLU Pro_IDK": {
+        "version": 1
+    },
+    "MMLU Pro_OLMES": {
+        "version": 1
+    },
+    "MMLU_COT": {
+        "version": 1
+    },
+    "MMLU_IDK": {
+        "version": 1
+    },
+    "MMLU_OLMES": {
+        "version": 1
+    },
+    "MMLU_PRO_COT": {
+        "version": 1
+    },
+    "MedQAMC_OLMES": {
+        "version": 1
+    },
+    "MultiPL-E HumanEval Bash OLMES": {
+        "version": 1
+    },
+    "MultiPL-E HumanEval C++ OLMES": {
+        "version": 1
+    },
+    "MultiPL-E HumanEval JS OLMES": {
+        "version": 1
+    },
+    "MultiPL-E HumanEval Java OLMES": {
+        "version": 1
+    },
+    "MultiPL-E HumanEval PHP OLMES": {
+        "version": 1
+    },
+    "MultiPL-E HumanEval Rust OLMES": {
+        "version": 1
+    },
+    "MultiPL-E MBPP Bash OLMES": {
+        "version": 1
+    },
+    "MultiPL-E MBPP C++ OLMES": {
+        "version": 1
+    },
+    "MultiPL-E MBPP JS OLMES": {
+        "version": 1
+    },
+    "MultiPL-E MBPP Java OLMES": {
+        "version": 1
+    },
+    "MultiPL-E MBPP PHP OLMES": {
+        "version": 1
+    },
+    "MultiPL-E MBPP Rust OLMES": {
+        "version": 1
+    },
+    "NaturalQsOpen": {
+        "version": 1
+    },
+    "NaturalQsOpenMC_OLMES": {
+        "version": 1
+    },
+    "PIQA": {
+        "version": 1
+    },
+    "PIQA_IDK": {
+        "version": 1
+    },
+    "PIQA_OLMES": {
+        "version": 1
+    },
+    "SQuAD2_MA": {
+        "version": 1
+    },
+    "SQuAD_OLMES": {
+        "version": 1
+    },
+    "SciQ_OLMES": {
+        "version": 1
+    },
+    "SocialIQAMC_OLMES": {
+        "version": 1
+    },
+    "WinograndeCloze": {
+        "version": 1
+    }
+}

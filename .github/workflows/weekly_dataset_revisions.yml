@@ -51,6 +51,8 @@ jobs:
             ## Review
 
             Please review the dataset SHA diffs before merging. This PR is **not** auto-merged.
+            If a pin moves, bump the corresponding entry's `version` in
+            `benchmark-versions.json` by hand in the same PR.
 
             Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           labels: automated
