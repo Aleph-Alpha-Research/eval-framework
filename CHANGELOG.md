@@ -14,6 +14,31 @@
 
 ### Bug Fixes
 
+## [0.9.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.12...v0.9.0) (2026-08-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* removing task_class from factory
+* get_task removed
+
+### Features
+
+* EvalFramework now has key method ([4af2a54](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4af2a545ae761f0dc61146a415d1a27cae336e7e))
+
+
+### Bug Fixes
+
+* **deps:** update dependency llm-sandbox to v0.3.43 ([41c7e11](https://github.com/Aleph-Alpha-Research/eval-framework/commit/41c7e11fc0335265f0635009175ea3b91c4f6ecb))
+* **deps:** update dependency llm-sandbox to v0.3.44 ([fa1bfac](https://github.com/Aleph-Alpha-Research/eval-framework/commit/fa1bfac8276fda0bb7565078cac8eaf0d8a496cf))
+* **deps:** update dependency openai to &gt;=2.53.0,&lt;3 ([cec9936](https://github.com/Aleph-Alpha-Research/eval-framework/commit/cec9936dbef2e4971c40078e25ca223966f40557))
+
+
+### Code Refactoring
+
+* get_task removed ([387d5d2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/387d5d272c9781036d5520cb3fe9fb3a17c0d7e6))
+* removing task_class from factory ([c3710bb](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c3710bb54f9e8320476bcd8042c0044010245902))
+
 ## [0.8.12](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.11...v0.8.12) (2026-08-06)
 
 
