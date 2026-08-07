@@ -223,20 +223,16 @@ class _Eager(EvalFactory):
 
 
 class Registry:
-    """A registry for tasks with support for lazy loading.
-
-    Task names are hashed based on the upper-case name, to avoid issues with
-    ambiguous naming.
+    """A registry for Tasks
     """
 
     def __init__(self) -> None:
-        # TODO: Lookup only with upper names
-        self._registry: dict[str, tuple[str, EvalFactory]] = dict()
+        self._registry: dict[str, EvalFactory] = dict()
 
     def __iter__(self) -> Iterator[str]:
         """Iterate over all task names in the registry."""
-        for name, _ in self._registry.values():
-            yield name
+        for factory in self._registry.values():
+            yield factory.id()
 
     def task_names(self) -> list[str]:
         """The names of all registered tasks."""
@@ -244,7 +240,8 @@ class Registry:
 
     def items(self) -> Iterator[tuple[str, EvalFactory]]:
         """Iterate over `(task name, EvalFactory)` pairs in the registry."""
-        yield from self._registry.values()
+        for factory in self._registry.values():
+            yield factory.id(), factory
 
     @staticmethod
     def _task_key(name: str, /) -> str:
@@ -262,26 +259,25 @@ class Registry:
     def __getitem__(self, name: str, /) -> EvalFactory:
         task_key = self._task_key(name)
         try:
-            _, factory = self._registry[task_key]
+            return self._registry[task_key]
         except KeyError:
             raise KeyError(f"Task not found: {name=} with task_key {task_key=}")
 
-        return factory
-
-    def __setitem__(self, name: str, factory: EvalFactory) -> None:
-        task_key = self._task_key(name)
+    def add(self, factory: EvalFactory) -> None:
+        """Register a factory under the key derived from its ``id()``."""
+        task_key = self._task_key(factory.id())
         if task_key in self._registry:
             raise ValueError(f"Cannot register duplicate task with key: {task_key}")
 
-        self._registry[task_key] = (name, factory)
+        self._registry[task_key] = factory
 
     def register(self, task: type[BaseTask]) -> str:
         """The class name is used as the task name."""
         if not issubclass(task, BaseTask):
             raise ValueError(f"Can only register subclasses of BaseTask, got {task}")
-        name = task.__name__
-        self[name] = _Eager(task)
-        return name
+        factory = _Eager(task)
+        self.add(factory)
+        return factory.id()
 
     def register_lazy(self, class_path: str, /) -> None:
         """Register a task by its dotted class path, without importing its module."""
@@ -291,7 +287,7 @@ class Registry:
                 "`eval_framework.tasks.benchmarks.mmlu.MMLU`): "
             )
         base_module, class_name = class_path.rsplit(".", maxsplit=1)
-        self[class_name] = _Lazy(class_name=class_name, module=base_module)
+        self.add(_Lazy(class_name=class_name, module=base_module))
 
 
 _REGISTRY = Registry()
