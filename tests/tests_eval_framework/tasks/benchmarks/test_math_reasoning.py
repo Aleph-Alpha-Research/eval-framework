@@ -4,12 +4,13 @@ import pytest
 from datasets import Dataset, DatasetDict
 
 from eval_framework.tasks.benchmarks.math_reasoning import MATH, MATHMinervaBPB
+from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.task_names import register_math_reasoning_tasks
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
 from tests.tests_eval_framework.tasks.benchmarks.utils import (
     ExpectedPrompt,
     assert_offline_oneshot_prompt,
     assert_offline_zeroshot_prompt,
-    get_task_names_for_module,
     run_formatter_hash_test,
 )
 from tests.tests_eval_framework.utils import DatasetPatcher
@@ -111,11 +112,18 @@ def test_split_text_command_with_search(
     assert math_reasoning._split_text_command(string, search) == expected
 
 
+# Registry for this test suite only holding math_reasoning tasks
+_math_reasoning_registry = Registry()
+register_math_reasoning_tasks(registry=_math_reasoning_registry)
+
+
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-@pytest.mark.parametrize("task_name", get_task_names_for_module("math_reasoning"))
+@pytest.mark.parametrize("task_name", _math_reasoning_registry.task_names())
 def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1))
+    run_formatter_hash_test(
+        task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1), registry=_math_reasoning_registry
+    )
 
 
 # ---------------------------------------------------------------------------

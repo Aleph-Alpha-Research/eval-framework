@@ -4,21 +4,28 @@ import pytest
 from datasets import Dataset, DatasetDict
 
 from eval_framework.tasks.benchmarks.gsm8k import GSM8KBPB
+from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.task_names import register_gsm8k_tasks
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
 from tests.tests_eval_framework.tasks.benchmarks.utils import (
     ExpectedPrompt,
-    get_task_names_for_module,
     run_formatter_hash_test,
 )
 
 _NUM_FEWSHOT = {"GSM8K_OLMES": 8}
 
+# Registry for this test suite only holding gsm8k tasks
+_gsm8k_registry = Registry()
+register_gsm8k_tasks(registry=_gsm8k_registry)
+
 
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-@pytest.mark.parametrize("task_name", get_task_names_for_module("gsm8k"))
+@pytest.mark.parametrize("task_name", _gsm8k_registry.task_names())
 def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1))
+    run_formatter_hash_test(
+        task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1), registry=_gsm8k_registry
+    )
 
 
 _SUBJECT = "main"

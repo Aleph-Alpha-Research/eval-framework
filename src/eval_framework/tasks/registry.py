@@ -331,6 +331,7 @@ def register_task(task: type[BaseTask]) -> str:
     return registry().register(task)
 
 
-def register_lazy_task(class_path: str, /) -> None:
+def register_lazy_task(class_path: str, /, registry: Registry | None = None) -> None:
     """Register a task by its dotted class path, without importing its module."""
-    registry().register_lazy(class_path)
+    r = registry if registry is not None else _REGISTRY
+    r.register_lazy(class_path)
