@@ -189,10 +189,12 @@ from eval_framework.main import main
 from eval_framework.tasks.eval_config import EvalConfig
 from template_formatting.formatter import HFFormatter
 
+
 # Define your model
 class MyHuggingFaceModel(HFLLM):
     LLM_NAME = "microsoft/DialoGPT-medium"
     DEFAULT_FORMATTER = partial(HFFormatter, "microsoft/DialoGPT-medium")
+
 
 if __name__ == "__main__":
     # Initialize your model

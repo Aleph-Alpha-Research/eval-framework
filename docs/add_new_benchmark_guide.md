@@ -23,16 +23,16 @@ All benchmarks inherit from `BaseTask[SubjectType]` and must implement several r
 ```python
 class YourBenchmark(BaseTask[str]):  # or BaseTask[Enum] for multiple subjects
     # === CORE CONFIGURATION ===
-    NAME: str                           # Display name for the benchmark
-    DATASET_PATH: str                   # HuggingFace dataset path or local path
-    SAMPLE_SPLIT: str                   # Dataset split for evaluation samples
-    FEWSHOT_SPLIT: str                  # Dataset split for few-shot examples
-    RESPONSE_TYPE: ResponseType         # COMPLETION or LOGLIKELIHOODS
-    METRICS: list[type[BaseMetric]]     # List of metric classes to compute
-    SUBJECTS: list[SubjectType]         # List of subjects/categories to evaluate
+    NAME: str  # Display name for the benchmark
+    DATASET_PATH: str  # HuggingFace dataset path or local path
+    SAMPLE_SPLIT: str  # Dataset split for evaluation samples
+    FEWSHOT_SPLIT: str  # Dataset split for few-shot examples
+    RESPONSE_TYPE: ResponseType  # COMPLETION or LOGLIKELIHOODS
+    METRICS: list[type[BaseMetric]]  # List of metric classes to compute
+    SUBJECTS: list[SubjectType]  # List of subjects/categories to evaluate
 
     # === OPTIONAL CONFIGURATION ===
-    HF_REVISION: str | None = None      # Git revision for reproducibility
+    HF_REVISION: str | None = None  # Git revision for reproducibility
     PERTURBATION_UNMODIFIABLE_WORDS: list[str] | None = None  # Words to protect from perturbation
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None = None  # Language(s) tested
 ```
@@ -43,6 +43,7 @@ class YourBenchmark(BaseTask[str]):  # or BaseTask[Enum] for multiple subjects
 def _get_instruction_text(self, item: dict[str, Any]) -> str:
     """Generate the instruction/question text for a sample."""
     pass
+
 
 def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
     """Extract the correct answer(s) from a dataset item."""
@@ -56,17 +57,21 @@ def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
     """Text to prepend to the first message."""
     return ""
 
+
 def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
     """System message content."""
     return None
+
 
 def _get_cue_text(self, item: dict[str, Any]) -> str:
     """Text to append as assistant cue (e.g., 'Answer:')."""
     return ""
 
+
 def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
     """For loglikelihood tasks: list of answer choices."""
     return None
+
 
 def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
     """Target text for few-shot examples."""
@@ -74,19 +79,23 @@ def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
     assert target is not None and isinstance(target, str)
     return target
 
+
 def _get_context(self, item: dict[str, Any]) -> BaseMetricContext | list[BaseMetricContext] | None:
     """Additional parameters for evaluation metrics."""
     return None
+
 
 def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
     """Custom few-shot sampling logic."""
     # Default implementation samples randomly from FEWSHOT_SPLIT
     pass
 
+
 def _create_samples(self, item: dict[str, Any], index: int, subject: str) -> list[Sample]:
     """Create one or more samples from a dataset item."""
     # Default creates single sample - override for multi-sample items
     pass
+
 
 def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
     """Post-process model completions (e.g., extract final answer)."""
@@ -151,7 +160,6 @@ from eval_framework.metrics.completion.niah_accuracy import NIAHAccuracy
 from eval_framework.metrics.completion.text_counter import WordCounter
 from eval_framework.metrics.completion.text_counter import ParagraphCounter
 from eval_framework.metrics.completion.text_counter import ResponseToOriginalLengthRatio
-
 ```
 
 #### Loglikelihood Metrics
@@ -214,7 +222,6 @@ from eval_framework.metrics.llm.llm_judge_sql import LLMJudgeSql
 
 from eval_framework.metrics.llm.llm_judge_world_knowledge import LLMJudgeWorldKnowledge
 # Evaluates whether a summary contains information that goes beyond the reference text (also known as "world knowledge"), returning a boolean classification with detailed reasoning for the assessment. (English, French and German)
-
 ```
 
 ## Implementation Examples and Patterns
@@ -230,6 +237,7 @@ from typing import Any
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+
 
 class GeographyQATask(BaseTask[str]):
     # Required class attributes

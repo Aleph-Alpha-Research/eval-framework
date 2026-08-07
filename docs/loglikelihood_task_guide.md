@@ -10,6 +10,7 @@ from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
 
+
 class YourLoglikelihoodTask(BaseTask[str]):
     # Required attributes
     NAME = "YourTaskName"
@@ -26,11 +27,11 @@ class YourLoglikelihoodTask(BaseTask[str]):
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
         """Return the correct answer choice."""
-        return item['correct_answer']
+        return item["correct_answer"]
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
         """Return all answer choices for ranking."""
-        return item['choices']
+        return item["choices"]
 ```
 
 ## Step-by-Step Implementation
@@ -43,6 +44,7 @@ Start with the minimal structure:
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
+
 
 class MultipleChoiceTask(BaseTask[str]):
     NAME = "Multiple Choice"
@@ -79,8 +81,8 @@ Return the correct answer choice:
 def _get_ground_truth(self, item: dict[str, Any]) -> str:
     """Return the correct answer choice."""
     # If dataset has answer index
-    correct_idx = item['answer_idx']
-    return item['choices'][correct_idx]
+    correct_idx = item["answer_idx"]
+    return item["choices"][correct_idx]
 
     # If dataset has answer directly
     # return item['correct_answer']
@@ -97,7 +99,7 @@ Return all answer choices:
 ```python
 def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
     """Return all answer choices for probability ranking."""
-    return item['choices']
+    return item["choices"]
 
     # If choices need formatting
     # return [f" {choice}" for choice in item['choices']]  # Add leading space
@@ -115,6 +117,7 @@ from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
 
+
 class StandardMCQTask(BaseTask[str]):
     NAME = "Standard MCQ"
     DATASET_PATH = "mcq_dataset"
@@ -128,11 +131,11 @@ class StandardMCQTask(BaseTask[str]):
         return f"Question: {item['question']}\nAnswer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
-        return item['choices'][item['answer_idx']]
+        return item["choices"][item["answer_idx"]]
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
         # Add leading space for better tokenization
-        return [f" {choice}" for choice in item['choices']]
+        return [f" {choice}" for choice in item["choices"]]
 ```
 
 #### Pattern 2: MMLU-style with Labeled Choices
@@ -147,12 +150,11 @@ class MMLUStyleTask(BaseTask[str]):
     SUBJECTS = ["abstract_algebra", "anatomy", "astronomy"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        choices_text = "\n".join([f"{label}. {choice}"
-                                 for label, choice in zip(['A', 'B', 'C', 'D'], item['choices'])])
+        choices_text = "\n".join([f"{label}. {choice}" for label, choice in zip(["A", "B", "C", "D"], item["choices"])])
         return f"Question: {item['question']}\n{choices_text}\nAnswer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
-        answer_key = item['answer']  # 'A', 'B', 'C', or 'D'
+        answer_key = item["answer"]  # 'A', 'B', 'C', or 'D'
         return f" {answer_key}"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
@@ -174,7 +176,7 @@ class TrueFalseTask(BaseTask[str]):
         return f"Statement: {item['statement']}\nTrue or False?"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
-        return " True" if item['is_true'] else " False"
+        return " True" if item["is_true"] else " False"
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str]:
         return [" True", " False"]
@@ -210,7 +212,7 @@ Format examples consistently:
 def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
     """Format the answer for few-shot examples."""
     # For MMLU-style: return the letter
-    return item['answer']  # 'A', 'B', 'C', or 'D'
+    return item["answer"]  # 'A', 'B', 'C', or 'D'
 
     # For true/false: return the word
     # return "True" if item['is_true'] else "False"
@@ -223,6 +225,7 @@ Add helpful context:
 def _get_system_prompt_text(self, item: dict[str, Any]) -> str:
     return "You are an expert in multiple choice questions. Choose the best answer."
 
+
 def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
     return "Instructions: Select the most appropriate answer from the given choices."
 ```
@@ -233,11 +236,13 @@ Handle different subjects:
 ```python
 from enum import Enum
 
+
 class MMLUSubject(Enum):
     ABSTRACT_ALGEBRA = "abstract_algebra"
     ANATOMY = "anatomy"
     ASTRONOMY = "astronomy"
     # ... more subjects
+
 
 class MMLUTask(BaseTask[MMLUSubject]):
     NAME = "MMLU"
@@ -249,9 +254,8 @@ class MMLUTask(BaseTask[MMLUSubject]):
     SUBJECTS = list(MMLUSubject)
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        subject = item['subject'].replace('_', ' ').title()
-        choices_text = "\n".join([f"{label}. {choice}"
-                                 for label, choice in zip(['A', 'B', 'C', 'D'], item['choices'])])
+        subject = item["subject"].replace("_", " ").title()
+        choices_text = "\n".join([f"{label}. {choice}" for label, choice in zip(["A", "B", "C", "D"], item["choices"])])
         return f"The following is a multiple choice question about {subject}.\n\n{item['question']}\n{choices_text}\nAnswer:"
 ```
 
@@ -276,6 +280,7 @@ from eval_framework.metrics.loglikelihood.probability_mass_norm import Probabili
 # Penalty-based metrics (N.B. requires inclusion of "IDK" response option in task implementation)
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
+
 
 class YourTask(BaseTask[str]):
     # Most common choice
@@ -307,10 +312,12 @@ from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
 
+
 class ScienceSubject(Enum):
     PHYSICS = "physics"
     CHEMISTRY = "chemistry"
     BIOLOGY = "biology"
+
 
 class ScienceQuizTask(BaseTask[ScienceSubject]):
     NAME = "Science Quiz"
@@ -323,9 +330,8 @@ class ScienceQuizTask(BaseTask[ScienceSubject]):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         """Format science question with choices."""
-        subject = item['subject'].replace('_', ' ').title()
-        choices_text = "\n".join([f"{label}. {choice}"
-                                 for label, choice in zip(['A', 'B', 'C', 'D'], item['choices'])])
+        subject = item["subject"].replace("_", " ").title()
+        choices_text = "\n".join([f"{label}. {choice}" for label, choice in zip(["A", "B", "C", "D"], item["choices"])])
         return f"Science ({subject}) Question:\n{item['question']}\n\n{choices_text}\n\nAnswer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
@@ -341,7 +347,7 @@ class ScienceQuizTask(BaseTask[ScienceSubject]):
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
         """Format target for few-shot examples."""
-        return item['answer_key']  # 'A', 'B', 'C', or 'D' (no leading space)
+        return item["answer_key"]  # 'A', 'B', 'C', or 'D' (no leading space)
 ```
 
 ## Testing Your Completion Task

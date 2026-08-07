@@ -10,23 +10,27 @@ The framework uses different data types based on the evaluation approach:
 from eval_framework.shared.types import Completion, Loglikelihood, RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message, Role
 
+
 # For completion tasks (text generation)
 class Completion(BaseModel):
-    completion_text: str                        # Generated text from the model
+    completion_text: str  # Generated text from the model
     # Additional fields based on actual implementation
+
 
 # For loglikelihood tasks (multiple choice)
 class Loglikelihood(BaseModel):
-    loglikelihoods: list[float]                 # Probability scores for each choice
+    loglikelihoods: list[float]  # Probability scores for each choice
     # Additional fields based on actual implementation
+
 
 # Raw response types from LLMs
 class RawCompletion(BaseModel):
-    text: str                                   # Raw generated text
+    text: str  # Raw generated text
     # Additional fields based on actual implementation
 
+
 class RawLoglikelihood(BaseModel):
-    loglikelihoods: list[float]                 # Raw probability scores
+    loglikelihoods: list[float]  # Raw probability scores
     # Additional fields based on actual implementation
 ```
 
@@ -37,9 +41,10 @@ Each prompt is structured as a sequence of messages using the template formattin
 ```python
 from template_formatting.formatter import Message, Role
 
+
 class Message(BaseModel):
-    role: Role                                  # SYSTEM, USER, or ASSISTANT
-    content: str                                # Message content
+    role: Role  # SYSTEM, USER, or ASSISTANT
+    content: str  # Message content
     # Additional fields based on actual formatter implementation
 ```
 
@@ -52,6 +57,7 @@ Custom tasks inherit from `BaseTask` and implement specific methods based on the
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
 
+
 class MyCompletionTask(BaseTask[str]):
     NAME = "My Task"
     DATASET_PATH = "dataset_name"
@@ -63,7 +69,7 @@ class MyCompletionTask(BaseTask[str]):
 
     def _get_ground_truth(self, item: dict) -> str:
         """Return the expected answer."""
-        return item['answer']
+        return item["answer"]
 ```
 
 #### For Loglikelihood Tasks:
@@ -79,11 +85,11 @@ class MyLoglikelihoodTask(BaseTask[str]):
 
     def _get_ground_truth(self, item: dict) -> str:
         """Return the correct answer choice."""
-        return item['choices'][item['answer_idx']]
+        return item["choices"][item["answer_idx"]]
 
     def _get_possible_completions(self, item: dict) -> list[str]:
         """Return all answer choices for ranking."""
-        return item['choices']
+        return item["choices"]
 ```
 
 ### Few-Shot Example Construction
@@ -103,21 +109,12 @@ def construct_prompt(self, item: dict) -> list[Message]:
     fewshot_examples = self._sample_fewshot_examples(item)
     for example in fewshot_examples:
         # User instruction
-        messages.append(Message(
-            role=Role.USER,
-            content=self._get_instruction_text(example)
-        ))
+        messages.append(Message(role=Role.USER, content=self._get_instruction_text(example)))
         # Assistant response
-        messages.append(Message(
-            role=Role.ASSISTANT,
-            content=self._get_fewshot_target_text(example)
-        ))
+        messages.append(Message(role=Role.ASSISTANT, content=self._get_fewshot_target_text(example)))
 
     # 3. Actual instruction
-    messages.append(Message(
-        role=Role.USER,
-        content=self._get_instruction_text(item)
-    ))
+    messages.append(Message(role=Role.USER, content=self._get_instruction_text(item)))
 
     # 4. Response cue (optional)
     if cue := self._get_cue_text(item):
@@ -138,7 +135,7 @@ messages = [
     Message(Role.USER, "Question: What is the capital of France?"),
     Message(Role.ASSISTANT, "Answer: Paris"),
     Message(Role.USER, "Question: What is the capital of Italy?"),
-    Message(Role.ASSISTANT, "Answer:")
+    Message(Role.ASSISTANT, "Answer:"),
 ]
 ```
 

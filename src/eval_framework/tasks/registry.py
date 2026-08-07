@@ -223,8 +223,7 @@ class _Eager(EvalFactory):
 
 
 class Registry:
-    """A registry for Tasks
-    """
+    """A registry for Tasks"""
 
     def __init__(self) -> None:
         self._registry: dict[str, EvalFactory] = dict()
