@@ -26,8 +26,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.65 - https://github.com/boto/boto3
-- **botocore** 1.43.65 - https://github.com/boto/botocore
+- **boto3** 1.43.66 - https://github.com/boto/boto3
+- **botocore** 1.43.66 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -159,7 +159,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## UNKNOWN
 
 - **google-crc32c** 1.8.0 - https://github.com/googleapis/python-crc32c
-- **llm-sandbox** 0.3.42 - https://vndee.github.io/llm-sandbox/
+- **llm-sandbox** 0.3.44 - https://vndee.github.io/llm-sandbox/
 
 ## Full license texts
 
@@ -314,7 +314,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.43.65 (Apache-2.0)
+### boto3 1.43.66 (Apache-2.0)
 
 ```text
 Apache License
@@ -495,7 +495,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.65 (Apache-2.0)
+### botocore 1.43.66 (Apache-2.0)
 
 ```text
 Apache License
@@ -2352,7 +2352,7 @@ Apache License
    limitations under the License.
 ```
 
-### llm-sandbox 0.3.42 (UNKNOWN)
+### llm-sandbox 0.3.44 (UNKNOWN)
 
 ```text
 MIT License
