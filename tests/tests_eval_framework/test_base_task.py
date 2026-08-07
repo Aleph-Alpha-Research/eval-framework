@@ -51,8 +51,23 @@ from template_formatting.formatter import Message, Role
             ["EN_US,topic1", "DE_DE,topic1"],
             [("EN_US", "topic1"), ("DE_DE", "topic1")],
         ),
+        # mixed-type tuple subjects, tuple[str, int, str]
+        (
+            [("ctx1", 4096, "single"), ("ctx1", 8192, "multi"), ("ctx2", 4096, "single")],
+            ["ctx1,4096,single"],
+            [("ctx1", 4096, "single")],
+        ),
+        (
+            [("ctx1", 4096, "single"), ("ctx1", 8192, "multi"), ("ctx2", 4096, "single")],
+            ["ctx1,*,*"],
+            [("ctx1", 4096, "single"), ("ctx1", 8192, "multi")],
+        ),
         (["subject1", "subject2"], ["invalid_subject"], "AssertionError"),
         ([("EN_US", "topic1"), ("EN_US", "topic2")], ["EN_US,invalid_topic"], "AssertionError"),
+        ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,9999,single"], "AssertionError"),
+        # a part that can't be parsed as its position's type (int here) is a malformed-input error, not
+        # a "valid but disallowed value" error, so it surfaces as ValueError rather than AssertionError.
+        ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,abc,single"], "ValueError"),
     ],
 )
 def test_task_custom_subjects(
@@ -69,8 +84,9 @@ def test_task_custom_subjects(
         def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
             return []
 
-    if expected_value == "AssertionError":
-        with pytest.raises(AssertionError):
+    expected_exceptions: dict[str, type[Exception]] = {"AssertionError": AssertionError, "ValueError": ValueError}
+    if isinstance(expected_value, str) and expected_value in expected_exceptions:
+        with pytest.raises(expected_exceptions[expected_value]):
             task = MyTask.with_overwrite(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)
     else:
         task = MyTask.with_overwrite(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)

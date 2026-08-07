@@ -190,11 +190,27 @@ class BaseTask[SubjectType](Task):
 
         assert hasattr(self, "SUBJECTS") and len(self.SUBJECTS) > 0
         if isinstance(self.SUBJECTS[0], tuple):
-            # subjects are specified as strings but we need tuples
-            filters = [tuple(item.strip() for item in subject.split(",")) for subject in custom_subjects]
+            # subjects are specified as comma-separated strings but tuple positions may each hold a
+            # different type (e.g. tuple[str, int, str]). Infer the expected type per position from an
+            # actual subject and cast each part back to it, so it compares equal to the real values
+            # below instead of just their str() form. "*" is a wildcard sentinel and stays a string.
+            num_items = len(self.SUBJECTS[0])
+            position_types = [type(self.SUBJECTS[0][i]) for i in range(num_items)]
+
+            def cast(raw: str, i: int) -> Any:
+                raw = raw.strip()
+                return raw if raw == "*" else position_types[i](raw)
+
+            filters = []
+            for custom_subject in custom_subjects:
+                parts = custom_subject.split(",")
+                assert len(parts) == num_items, (
+                    f"Subject '{custom_subject}' has {len(parts)} parts, expected {num_items} for "
+                    f"task {self.__class__.__name__}"
+                )
+                filters.append(tuple(cast(part, i) for i, part in enumerate(parts)))
 
             # check if all parts of custom subjects exists (* is a wildcard)
-            num_items = len(self.SUBJECTS[0])
             legal_values = [
                 set([s[i] for s in self.SUBJECTS if isinstance(s, tuple)] + ["*"]) for i in range(num_items)
             ]
@@ -204,18 +220,18 @@ class BaseTask[SubjectType](Task):
                     assert v in legal_values[i], f"Subject part {v} not found in task {self.__class__.__name__}"
 
             # filter task subjects. * is a supported wildcard for a specific item in a tuple, e.g. "DE_DE, *"
-            chosen_subjects = []
+            chosen_subjects: list[tuple] = []
             for subject in self.SUBJECTS:
                 subject_tuple = subject if isinstance(subject, tuple) else tuple(str(subject).split(","))
                 for filter in filters:
                     if all(filter[i] == "*" or filter[i] == subject_tuple[i] for i in range(num_items)):
                         chosen_subjects.append(subject_tuple)
                         break
-            return chosen_subjects  # type: ignore[return-value]
+            return chosen_subjects
         else:
             for cs in custom_subjects:
                 assert cs in self.SUBJECTS, f"Subject {cs} not found in task {self.__class__.__name__}"
-            return custom_subjects  # type: ignore[return-value]
+            return custom_subjects
 
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
         cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
