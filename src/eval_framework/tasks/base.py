@@ -206,7 +206,7 @@ class BaseTask[SubjectType](Task):
                 parts = custom_subject.split(",")
                 assert len(parts) == num_items, (
                     f"Subject '{custom_subject}' has {len(parts)} parts, expected {num_items} for "
-                    f"task {self.__class__.__name__}"
+                    f"task {self.display_name()}"
                 )
                 filters.append(tuple(cast(part, i) for i, part in enumerate(parts)))
 
