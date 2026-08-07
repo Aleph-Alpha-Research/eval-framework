@@ -17,7 +17,7 @@ and first-party/internal packages are excluded.
 | `jsonschema` | `>=4.26.0,<5` |
 | `langdetect` | `>=1.0.9,<2` |
 | `lingua-language-detector` | `>=2.2.0,<3` |
-| `llm-sandbox` | `==0.3.42` |
+| `llm-sandbox` | `==0.3.44` |
 | `lxml` | `>=6.1.1,<7` |
 | `mysql-connector-python` | `>=26.7.0,<27` |
 | `nltk` | `>=3.10.1,<4` |
@@ -43,7 +43,7 @@ and first-party/internal packages are excluded.
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
 | `blis` | `1.3.3` |
-| `botocore` | `1.43.65` |
+| `botocore` | `1.43.66` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.4.9` |
