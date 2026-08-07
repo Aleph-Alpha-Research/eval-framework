@@ -33,7 +33,7 @@ dependencies = [
   "mysql-connector-python>=26.7.0,<27", # required for sql-related tasks
   "psycopg2-binary>=2.9.12,<3", # required for sql-related tasks
   "sympy>=1.14.0,<2",
-  "llm-sandbox[docker]==0.3.43",
+  "llm-sandbox[docker]==0.3.44",
   "jsonlines>=4,<5",
   "lxml>=6.1.1,<7",
   "python-iso639>=2026.7.23",
