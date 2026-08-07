@@ -9,34 +9,10 @@ import pytest
 from datasets import Dataset, DatasetDict
 
 from eval_framework.tasks.base import BaseTask, Sample
-from eval_framework.tasks.registry import (
-    _REGISTRY,
-    registered_task_names,
-    registry,
-)
+from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.registry import registry as global_registry
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Message
 from tests.tests_eval_framework.utils import assert_hash_string
-
-
-def _module_of_registered_task(task_name: str) -> str:
-    task_key = _REGISTRY._task_key(task_name)
-    _, factory = _REGISTRY._registry[task_key]
-    return factory.source_module
-
-
-def get_task_names_for_module(module_name: str, skip_tasks: list[str] | None = None) -> list[str]:
-    """Return registered eval-framework task names declared in a given benchmark module.
-
-    Mirrors `eval_framework_companion.tests.tasks.benchmarks.utils.get_task_names_for_module`
-    so per-benchmark test files can parametrize over just the tasks they own.
-    """
-    target_module = f"eval_framework.tasks.benchmarks.{module_name}"
-    skip = set(skip_tasks or [])
-    return sorted(
-        name
-        for name in registered_task_names()
-        if _module_of_registered_task(name) == target_module and name not in skip
-    )
 
 
 def _seed_for_determinism() -> None:
@@ -55,16 +31,18 @@ def _seed_for_determinism() -> None:
         pass
 
 
-def run_formatter_hash_test(task_name: str, formatter_cls: type[BaseFormatter], num_fewshot: int = 1) -> None:
+def run_formatter_hash_test(
+    task_name: str, formatter_cls: type[BaseFormatter], num_fewshot: int = 1, registry: Registry | None = None
+) -> None:
     """Run the formatter hash consistency test for a single task x formatter combination.
 
-    Uses the full HuggingFace datasets with seed 42 and a deterministic few-shot sampler,
-    matching the prior `test_all_formatters.py` behaviour so existing hashes remain valid.
+    Uses the full HuggingFace datasets with seed 42 and a deterministic few-shot sampler.
     """
     _seed_for_determinism()
+    registry = registry if registry is not None else global_registry()
 
     def _instantiate(num_fewshot_value: int) -> object:
-        task_instance = registry()[task_name].create(
+        task_instance = registry[task_name].create(
             num_fewshot=num_fewshot_value,
             custom_subjects=None,
             custom_hf_revision=None,

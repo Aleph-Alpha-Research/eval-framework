@@ -2,17 +2,20 @@ import pytest
 from datasets import DownloadConfig, load_dataset
 
 from eval_framework.tasks.benchmarks.bigcodebench import extract_executable_code
+from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.task_names import register_bigcodebench_tasks
 from eval_framework.tasks.utils import BIG_CODE_BENCH_PACKAGE_MAPPING, extract_imports
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
-from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
+from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
 
-# BigCodeBenchHard / BigCodeBenchHardInstruct / BigCodeBenchInstruct have non-deterministic
-# dataset/sample selection across runs, so their formatter output hashes are not stable.
-_SKIPPED_TASKS = ["BigCodeBenchHard", "BigCodeBenchHardInstruct", "BigCodeBenchInstruct"]
 _NUM_FEWSHOT = {
     "BigCodeBench": 0,
     "BigCodeBench_OLMES": 3,
 }
+
+# Registry for this test suite only holding bigcodebench tasks
+_bigcodebench_registry = Registry()
+register_bigcodebench_tasks(registry=_bigcodebench_registry)
 
 
 class TestExtractExecutableCode:
@@ -333,6 +336,8 @@ def test_all_imports_in_mapping() -> None:
 
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-@pytest.mark.parametrize("task_name", get_task_names_for_module("bigcodebench", skip_tasks=_SKIPPED_TASKS))
+@pytest.mark.parametrize("task_name", _bigcodebench_registry.task_names())
 def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1))
+    run_formatter_hash_test(
+        task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1), registry=_bigcodebench_registry
+    )

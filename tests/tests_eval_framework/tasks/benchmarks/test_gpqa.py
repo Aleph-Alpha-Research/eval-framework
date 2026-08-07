@@ -3,8 +3,10 @@ import re
 import pytest
 
 from eval_framework.tasks.benchmarks.gpqa import GPQA, GPQA_COT
+from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.task_names import register_gpqa_tasks
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
-from tests.tests_eval_framework.tasks.benchmarks.utils import get_task_names_for_module, run_formatter_hash_test
+from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
 from tests.tests_eval_framework.utils import DatasetPatcher
 
 # GPQA_OLMES uses a gated HuggingFace dataset (Idavidrein/gpqa); hashes cannot be computed without auth.
@@ -91,8 +93,13 @@ class TestGPQA_COT:
             assert len(ground_truths) == 1
 
 
+# Registry for this test suite only holding gpqa tasks
+_gpqa_registry = Registry()
+register_gpqa_tasks(registry=_gpqa_registry)
+
+
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-@pytest.mark.parametrize("task_name", get_task_names_for_module("gpqa", skip_tasks=_SKIPPED_TASKS))
+@pytest.mark.parametrize("task_name", [name for name in _gpqa_registry.task_names() if name not in _SKIPPED_TASKS])
 def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(task_name, formatter_cls)
+    run_formatter_hash_test(task_name, formatter_cls, registry=_gpqa_registry)
