@@ -15,10 +15,12 @@ from eval_framework.main import main
 from eval_framework.tasks.eval_config import EvalConfig
 from template_formatting.formatter import HFFormatter
 
+
 # Define your model
 class MyHuggingFaceModel(HFLLM):
     LLM_NAME = "context-labs/meta-llama-Llama-3.2-3B-Instruct-FP16"
     DEFAULT_FORMATTER = partial(HFFormatter, "context-labs/meta-llama-Llama-3.2-3B-Instruct-FP16")
+
 
 if __name__ == "__main__":
     # Initialize your model
@@ -65,6 +67,7 @@ The formatter determines how prompts are structured for your model. Choose based
 ```python
 from template_formatting.formatter import ConcatFormatter
 
+
 class BaseModel(HFLLM):
     LLM_NAME = "meta-llama/Llama-3.2-3B"
     DEFAULT_FORMATTER = ConcatFormatter
@@ -74,6 +77,7 @@ class BaseModel(HFLLM):
 #### **Llama3 Formatter:**
 ```python
 from template_formatting.formatter import Llama3Formatter
+
 
 class Llama3Model(HFLLM):
     LLM_NAME = "meta-llama/Meta-Llama-3-8B-Instruct"
@@ -85,6 +89,7 @@ class Llama3Model(HFLLM):
 ```python
 from template_formatting.mistral_formatter import MistralFormatter
 
+
 class MistralModel(HFLLM):
     LLM_NAME = "mistralai/Mistral-7B-Instruct-v0.1"
     DEFAULT_FORMATTER = MistralFormatter
@@ -94,6 +99,7 @@ class MistralModel(HFLLM):
 ```python
 from template_formatting.formatter import HFFormatter
 from functools import partial
+
 
 class ChatModel(HFLLM):
     LLM_NAME = "meta-llama/Llama-3.2-3B-Instruct"
@@ -113,9 +119,11 @@ class Llama3_8B(HFLLM):
     LLM_NAME = "meta-llama/Meta-Llama-3-8B-Instruct"
     DEFAULT_FORMATTER = Llama3Formatter
 
+
 class Mistral7B(HFLLM):
     LLM_NAME = "mistralai/Mistral-7B-Instruct-v0.1"
     DEFAULT_FORMATTER = MistralFormatter
+
 
 class Qwen2_7B(HFLLM):
     LLM_NAME = "Qwen/Qwen2-7B-Instruct"
@@ -127,6 +135,7 @@ class Qwen2_7B(HFLLM):
 class SmolLM(HFLLM):
     LLM_NAME = "HuggingFaceTB/SmolLM-1.7B-Instruct"
     DEFAULT_FORMATTER = partial(HFFormatter, "HuggingFaceTB/SmolLM-1.7B-Instruct")
+
 
 class TinyLlama(HFLLM):
     LLM_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
@@ -144,15 +153,14 @@ from eval_framework.tasks.eval_config import EvalConfig
 
 config = EvalConfig(
     # Core settings
-    task_name="MMLU",                    # Benchmark to run
-    num_fewshot=5,                       # Number of examples in prompt
-    num_samples=100,                     # How many questions to evaluate
-    output_dir=Path("./eval_results"),        # Where to save results
-    llm_class=YourModelClass,            # Your model class
-
+    task_name="MMLU",  # Benchmark to run
+    num_fewshot=5,  # Number of examples in prompt
+    num_samples=100,  # How many questions to evaluate
+    output_dir=Path("./eval_results"),  # Where to save results
+    llm_class=YourModelClass,  # Your model class
     # Optional settings
-    task_subjects=["astronomy"],             # Specific subjects (if applicable)
-    batch_size=8,                        # Batch processing size
+    task_subjects=["astronomy"],  # Specific subjects (if applicable)
+    batch_size=8,  # Batch processing size
 )
 ```
 

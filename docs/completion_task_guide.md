@@ -27,7 +27,7 @@ class YourCompletionTask(BaseTask[str]):
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
         """Extract the correct answer from the dataset."""
-        return item['answer']
+        return item["answer"]
 ```
 
 ## Step-by-Step Implementation
@@ -40,6 +40,7 @@ Start with the minimal structure:
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+
 
 class MathQATask(BaseTask[str]):
     NAME = "MathQA"
@@ -76,7 +77,7 @@ This method extracts the correct answer:
 def _get_ground_truth(self, item: dict[str, Any]) -> str:
     """Extract the correct answer from the dataset item."""
     # Simple case - direct answer
-    return item['answer']
+    return item["answer"]
 
     # For numeric answers, you might want to normalize
     # return str(float(item['answer']))
@@ -102,7 +103,7 @@ class QATask(BaseTask[str]):
         return f"Question: {item['question']}\nAnswer:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
-        return item['answer']
+        return item["answer"]
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return "Answer:"  # Helps model start response correctly
@@ -123,13 +124,14 @@ class MathTask(BaseTask[str]):
         return f"Problem: {item['problem']}\nSolution:"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
-        return item['solution']
+        return item["solution"]
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         """Extract final numerical answer from solution."""
         import re
+
         # Look for "The answer is X" pattern
-        match = re.search(r'The answer is (\d+(?:\.\d+)?)', completion_text)
+        match = re.search(r"The answer is (\d+(?:\.\d+)?)", completion_text)
         if match:
             return match.group(1)
         return completion_text.strip()
@@ -140,10 +142,13 @@ class MathTask(BaseTask[str]):
 from eval_framework.metrics.completion.code_execution_pass_at_one import CodeExecutionPassAtOne
 from eval_framework.shared.types import BaseMetricContext
 
+
 class CodeTaskMetricContext(BaseMetricContext):
     """Will be passed to the metric for this task."""
+
     test_cases: list
     entry_point: str
+
 
 class CodeTask(BaseTask[str]):
     NAME = "Code Generation"
@@ -158,13 +163,13 @@ class CodeTask(BaseTask[str]):
         return f"Complete this function:\n{item['prompt']}"
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
-        return item['canonical_solution']
+        return item["canonical_solution"]
 
     def _get_context(self, item: dict[str, Any]) -> CodeTaskMetricContext:
         """Provide test cases for code execution."""
         return CodeTaskMetricContext(
-            test_cases=item['text_cases'],
-            entry_point=item['entry_point'],
+            test_cases=item["text_cases"],
+            entry_point=item["entry_point"],
         )
 ```
 
@@ -231,6 +236,7 @@ from eval_framework.metrics.completion.csv_format import CSVFormat
 # Custom metrics using LLM judges
 from eval_framework.metrics.llm.llm_judge_score import LLMJudgeScore
 
+
 class YourTask(BaseTask[str]):
     # Choose metrics appropriate for your task
     METRICS = [AccuracyCompletion, Rouge1, MathReasoningCompletion]
@@ -243,6 +249,7 @@ from typing import Any
 from eval_framework.tasks.base import BaseTask
 from eval_framework.models.sample import ResponseType
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+
 
 class GeographyQuizTask(BaseTask[str]):
     NAME = "Geography Quiz"
@@ -259,7 +266,7 @@ class GeographyQuizTask(BaseTask[str]):
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str:
         """Extract the correct capital city."""
-        return item['capital']
+        return item["capital"]
 
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str:
         """Provide context about the task."""
