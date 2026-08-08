@@ -16,6 +16,14 @@ from template_formatting.formatter import Message, Role
         (["subject1", "subject2"], [], ["subject1", "subject2"]),
         (["subject1", "subject2"], None, ["subject1", "subject2"]),
         (["subject1", "subject2", "subject3"], ["subject1", "subject3"], ["subject1", "subject3"]),
+        # result follows SUBJECTS' declared order, not the CLI argument order, and dedupes repeats --
+        # matches come from `accepted_subjects`, not from echoing `custom_subjects` back verbatim.
+        (["subject1", "subject2", "subject3"], ["subject3", "subject1"], ["subject1", "subject3"]),
+        (["subject1", "subject2"], ["subject1", "subject1"], ["subject1"]),
+        # "*" matches any scalar subject too, consistent with "*" already being a wildcard position
+        # within a tuple subject. Redundant with custom_subjects=None/[] for the top-level case, but
+        # the matching function treats scalar and tuple subjects the same way, so this falls out for free.
+        (["subject1", "subject2", "subject3"], ["*"], ["subject1", "subject2", "subject3"]),
         ([("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")], ["EN_US,topic1"], [("EN_US", "topic1")]),
         (
             [("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")],
@@ -62,11 +70,11 @@ from template_formatting.formatter import Message, Role
             ["ctx1,*,*"],
             [("ctx1", 4096, "single"), ("ctx1", 8192, "multi")],
         ),
-        (["subject1", "subject2"], ["invalid_subject"], "AssertionError"),
-        ([("EN_US", "topic1"), ("EN_US", "topic2")], ["EN_US,invalid_topic"], "AssertionError"),
-        ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,9999,single"], "AssertionError"),
-        # a part that can't be parsed as its position's type (int here) is a malformed-input error, not
-        # a "valid but disallowed value" error, so it surfaces as ValueError rather than AssertionError.
+        (["subject1", "subject2"], ["invalid_subject"], "ValueError"),
+        ([("EN_US", "topic1"), ("EN_US", "topic2")], ["EN_US,invalid_topic"], "ValueError"),
+        ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,9999,single"], "ValueError"),
+        # matching compares stringified subject fields, not a parsed native value, so a non-numeric
+        # part at an int position is just another "not a legal value" case, not a separate parse error.
         ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,abc,single"], "ValueError"),
     ],
 )
@@ -84,9 +92,8 @@ def test_task_custom_subjects(
         def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
             return []
 
-    expected_exceptions: dict[str, type[Exception]] = {"AssertionError": AssertionError, "ValueError": ValueError}
-    if isinstance(expected_value, str) and expected_value in expected_exceptions:
-        with pytest.raises(expected_exceptions[expected_value]):
+    if expected_value == "ValueError":
+        with pytest.raises(ValueError):
             task = MyTask.with_overwrite(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)
     else:
         task = MyTask.with_overwrite(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)

@@ -174,64 +174,18 @@ class BaseTask[SubjectType](Task):
         instance.user_prompt_suffix = user_prompt_suffix
 
         # If custom subjects were provided during initialization, they take precedence over the class-level SUBJECTS.
-        filtered_subjects = instance._filter_task_subjects(custom_subjects=custom_subjects)
-        if filtered_subjects:
-            logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {instance.__class__.__name__}")
-            instance.SUBJECTS = filtered_subjects  # type: ignore[assignment]
+        if custom_subjects:
+            filtered_subjects = resolve_overwrite_subjects(
+                custom_subjects=custom_subjects,
+                accepted_subjects=instance.SUBJECTS,
+                task_name=instance.display_name(),
+            )
+            logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {instance.display_name()}")
+            instance.SUBJECTS = filtered_subjects
 
         instance.hf_revision = instance._apply_hf_revision(custom_hf_revision)
 
         return instance
-
-    def _filter_task_subjects(self, custom_subjects: list[str] | None) -> list[str] | list[tuple] | None:
-        """Process custom subjects passed from EvalConfig. Check and returns restricted task subjects if specified."""
-        if not custom_subjects:
-            return None
-
-        assert hasattr(self, "SUBJECTS") and len(self.SUBJECTS) > 0
-        if isinstance(self.SUBJECTS[0], tuple):
-            # subjects are specified as comma-separated strings but tuple positions may each hold a
-            # different type (e.g. tuple[str, int, str]). Infer the expected type per position from an
-            # actual subject and cast each part back to it, so it compares equal to the real values
-            # below instead of just their str() form. "*" is a wildcard sentinel and stays a string.
-            num_items = len(self.SUBJECTS[0])
-            position_types = [type(self.SUBJECTS[0][i]) for i in range(num_items)]
-
-            def cast(raw: str, i: int) -> Any:
-                raw = raw.strip()
-                return raw if raw == "*" else position_types[i](raw)
-
-            filters = []
-            for custom_subject in custom_subjects:
-                parts = custom_subject.split(",")
-                assert len(parts) == num_items, (
-                    f"Subject '{custom_subject}' has {len(parts)} parts, expected {num_items} for "
-                    f"task {self.display_name()}"
-                )
-                filters.append(tuple(cast(part, i) for i, part in enumerate(parts)))
-
-            # check if all parts of custom subjects exists (* is a wildcard)
-            legal_values = [
-                set([s[i] for s in self.SUBJECTS if isinstance(s, tuple)] + ["*"]) for i in range(num_items)
-            ]
-
-            for tpl in filters:
-                for i, v in enumerate(tpl):
-                    assert v in legal_values[i], f"Subject part {v} not found in task {self.__class__.__name__}"
-
-            # filter task subjects. * is a supported wildcard for a specific item in a tuple, e.g. "DE_DE, *"
-            chosen_subjects: list[tuple] = []
-            for subject in self.SUBJECTS:
-                subject_tuple = subject if isinstance(subject, tuple) else tuple(str(subject).split(","))
-                for filter in filters:
-                    if all(filter[i] == "*" or filter[i] == subject_tuple[i] for i in range(num_items)):
-                        chosen_subjects.append(subject_tuple)
-                        break
-            return chosen_subjects
-        else:
-            for cs in custom_subjects:
-                assert cs in self.SUBJECTS, f"Subject {cs} not found in task {self.__class__.__name__}"
-            return custom_subjects
 
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
         cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
@@ -546,3 +500,51 @@ class BaseTask[SubjectType](Task):
 
     def display_name(self) -> str:
         return self.NAME
+
+
+def _subject_parts(subject: object) -> tuple[str, ...]:
+    """A subject as its stringified parts: tuple subjects keep their fields, scalars are a single part.
+
+    Comparing string forms means tuple fields of any type work (e.g. tuple[str, int, str]) without
+    having to parse the CLI token into each field's native type.
+    """
+    return tuple(str(field) for field in subject) if isinstance(subject, tuple) else (str(subject),)
+
+
+def resolve_overwrite_subjects[SubjectType](
+    custom_subjects: list[str], accepted_subjects: list[SubjectType], task_name: str
+) -> list[SubjectType]:
+    """Restrict `accepted_subjects` to the ones requested via --task-subjects.
+
+    A subject matches a token when their parts agree position by position, where "*" matches any one
+    part -- so "DE_DE,*" selects every German subject and "*" selects every scalar subject.
+    """
+    if not accepted_subjects:
+        raise ValueError(f"Task {task_name} has no SUBJECTS defined")
+
+    filters = {token: tuple(part.strip() for part in token.split(",")) for token in custom_subjects}
+
+    # Select and validate in one pass. Every filter is tried against every subject (no early exit), so
+    # a filter still counts as used when its subjects were already selected by an earlier filter --
+    # e.g. "a,*" after "a,1" is valid, not unused.
+    chosen_subjects: list[SubjectType] = []
+    used_filters: set[str] = set()
+    for subject in accepted_subjects:
+        fields = _subject_parts(subject)
+        matching = [
+            token
+            for token, parts in filters.items()
+            if len(parts) == len(fields) and all(p in ("*", f) for p, f in zip(parts, fields))
+        ]
+        if matching:
+            chosen_subjects.append(subject)
+            used_filters.update(matching)
+
+    for token in custom_subjects:
+        if token not in used_filters:
+            raise ValueError(
+                f"Subject '{token}' not found in task {task_name}. Subjects are matched by their "
+                f"string form, so check number and enum formatting."
+            )
+
+    return chosen_subjects
