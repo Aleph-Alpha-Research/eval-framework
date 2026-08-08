@@ -43,8 +43,9 @@ def test_run_python_code_timeout() -> None:
 def test_run_python_code_with_packages() -> None:
     output = run_python_code("import pytest", image="python:3.13-slim")
     assert "ModuleNotFoundError" in output
-    output = run_python_code("import pytest", image="python:3.13-slim", packages=["pytest"])
+    output = run_python_code("import pytest\nprint(pytest.__name__)", image="python:3.13-slim", packages=["pytest"])
     assert "ModuleNotFoundError" not in output
+    assert "pytest" in output
 
 
 class TestParseUnittestOutput:

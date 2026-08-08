@@ -5,6 +5,7 @@ from llm_sandbox.exceptions import ImagePullError, SandboxTimeoutError
 
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
 from eval_framework.shared.types import Completion, Error
+from eval_framework.tasks.utils import DockerReturnedEmptyOutput
 
 
 @pytest.mark.parametrize(
@@ -372,6 +373,19 @@ def test_code_assertion_scores_timeout_as_failure() -> None:
     with patch(
         "eval_framework.metrics.completion.code_assertion.run_python_code",
         side_effect=SandboxTimeoutError("too slow"),
+    ):
+        results = metric.calculate(_completion())
+    assert results[0].value == 0.0
+    assert results[0].error is None
+    assert results[0].code_execution_trace is not None
+
+
+def test_code_assertion_scores_empty_output_as_failure() -> None:
+    # A code-execution timeout is the model's fault and stays a per-sample value=0.
+    metric = CodeCompletionAssertion()
+    with patch(
+        "eval_framework.metrics.completion.code_assertion.run_python_code",
+        side_effect=DockerReturnedEmptyOutput("too slow"),
     ):
         results = metric.calculate(_completion())
     assert results[0].value == 0.0
