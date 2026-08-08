@@ -14,6 +14,18 @@
 
 ### Bug Fixes
 
+## [0.9.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.9.0...v0.9.1) (2026-08-08)
+
+
+### Features
+
+* registry allows for registering any EvalFactory using add ([a0d3da3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a0d3da3091f2fb0ca3545ee6cef03467951ae057))
+
+
+### Bug Fixes
+
+* cast subject filtration to their true types ([2d3dcb1](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2d3dcb1e0c1fb4546fa74482fce3cebbf44372dd))
+
 ## [0.9.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.8.12...v0.9.0) (2026-08-07)
 
 
