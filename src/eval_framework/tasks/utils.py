@@ -58,6 +58,7 @@ def get_or_create_pool(
     lang: str = "python",
     min_pool_size: int = 1,
     max_pool_size: int = 1,
+    max_container_uses: int = 100,
     runtime_configs: dict[str, str] | None = None,
 ) -> ContainerPoolManager:
     assert image or dockerfile, "Either image or dockerfile must be provided"
@@ -65,7 +66,9 @@ def get_or_create_pool(
     with _pools_lock:
         if key not in _pools:
             pool = create_pool_manager(
-                config=PoolConfig(min_pool_size=min_pool_size, max_pool_size=max_pool_size),
+                config=PoolConfig(
+                    min_pool_size=min_pool_size, max_container_uses=max_container_uses, max_pool_size=max_pool_size
+                ),
                 lang=lang,
                 image=image,
                 dockerfile=dockerfile,
