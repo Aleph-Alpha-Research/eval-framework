@@ -2,7 +2,7 @@ from llm_sandbox.exceptions import SandboxTimeoutError
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import Completion
-from eval_framework.tasks.utils import run_python_code
+from eval_framework.tasks.utils import DockerReturnedEmptyOutput, run_python_code
 
 
 class CodeCompletionAssertion(BaseMetric[Completion]):
@@ -16,7 +16,7 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
         code = response.completion
         try:
             output = run_python_code(code, image="python:3.12-slim", runtime_configs={"mem_limit": "512m"})
-        except SandboxTimeoutError:
+        except (SandboxTimeoutError, DockerReturnedEmptyOutput):
             # The submitted code timed out (e.g. an infinite loop) -- a failing sample, not an infra
             # problem.
             import traceback
