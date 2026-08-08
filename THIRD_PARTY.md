@@ -43,7 +43,7 @@ and first-party/internal packages are excluded.
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
 | `blis` | `1.3.3` |
-| `botocore` | `1.43.66` |
+| `botocore` | `1.43.67` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.4.9` |
@@ -74,7 +74,7 @@ and first-party/internal packages are excluded.
 | `murmurhash` | `1.0.15` |
 | `packaging` | `26.3` |
 | `pandas` | `3.0.5` |
-| `platformdirs` | `4.11.0` |
+| `platformdirs` | `4.11.1` |
 | `preshed` | `3.0.13` |
 | `protobuf` | `7.35.1` |
 | `pyarrow` | `25.0.0` |

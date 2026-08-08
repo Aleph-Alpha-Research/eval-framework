@@ -26,8 +26,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.66 - https://github.com/boto/boto3
-- **botocore** 1.43.66 - https://github.com/boto/botocore
+- **boto3** 1.43.67 - https://github.com/boto/boto3
+- **botocore** 1.43.67 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -119,7 +119,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **markdown-it-py** 4.2.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
 - **murmurhash** 1.0.15 - https://github.com/explosion/murmurhash
-- **platformdirs** 4.11.0 - https://github.com/tox-dev/platformdirs
+- **platformdirs** 4.11.1 - https://github.com/tox-dev/platformdirs
 - **preshed** 3.0.13 - https://github.com/explosion/preshed
 - **pydantic** 2.13.4 - https://github.com/pydantic/pydantic
 - **pydantic_core** 2.46.4 - https://github.com/pydantic
@@ -130,7 +130,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **sentry-sdk** 2.66.1 - https://github.com/getsentry/sentry-python
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **smart_open** 8.0.1 - https://github.com/piskvorky/smart_open
-- **spacy** 3.8.14 - https://spacy.io
+- **spacy** 3.8.15 - https://spacy.io
 - **spacy-legacy** 3.0.12 - https://spacy.io
 - **spacy-loggers** 1.0.5 - https://github.com/explosion/spacy-loggers
 - **srsly** 2.5.3 - https://github.com/explosion/srsly
@@ -314,7 +314,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.43.66 (Apache-2.0)
+### boto3 1.43.67 (Apache-2.0)
 
 ```text
 Apache License
@@ -495,7 +495,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.66 (Apache-2.0)
+### botocore 1.43.67 (Apache-2.0)
 
 ```text
 Apache License
@@ -12964,7 +12964,7 @@ https://opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
   terms specified in this license.
 ```
 
-### platformdirs 4.11.0 (MIT)
+### platformdirs 4.11.1 (MIT)
 
 ```text
 MIT License
@@ -17979,7 +17979,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### spacy 3.8.14 (MIT)
+### spacy 3.8.15 (MIT)
 
 ```text
 The MIT License (MIT)
