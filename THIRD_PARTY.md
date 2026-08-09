@@ -20,7 +20,7 @@ and first-party/internal packages are excluded.
 | `llm-sandbox` | `==0.3.44` |
 | `lxml` | `>=6.1.1,<7` |
 | `mysql-connector-python` | `>=26.7.0,<27` |
-| `nltk` | `>=3.10.1,<4` |
+| `nltk` | `>=3.10.2,<4` |
 | `numpy` | `>=2.5.1` |
 | `psycopg2-binary` | `>=2.9.12,<3` |
 | `pycountry` | `>=26.2.16,<27` |
@@ -88,7 +88,7 @@ and first-party/internal packages are excluded.
 | `rpds-py` | `2026.6.3` |
 | `s3transfer` | `0.19.2` |
 | `sentry-sdk` | `2.66.1` |
-| `setuptools` | `83.0.0` |
+| `setuptools` | `84.0.0` |
 | `shellingham` | `1.5.4` |
 | `six` | `1.17.0` |
 | `smart-open` | `8.0.1` |
