@@ -1,5 +1,7 @@
+import time
+
 from eval_framework.metrics.completion.math_minerva_completion import MathMinervaCompletion
-from eval_framework.metrics.completion.minerva_math_utils import extract_answers
+from eval_framework.metrics.completion.minerva_math_utils import extract_answers, is_equiv_minerva
 from eval_framework.shared.types import Completion
 
 
@@ -38,6 +40,21 @@ class TestMathMinervaCompletion:
 
         assert extract_answers(german, cot_style="minerva_de", relaxed=True)[0] == "24"
         assert extract_answers(german, relaxed=True)[0] != "24"
+
+    def test_is_equiv_minerva_refuses_implausibly_long_candidates_without_running_sympy(self) -> None:
+        # Unguarded, parsing this burns the full 5s timeout.
+        babble = "1.111011111011101111101111011011111111111011111111111.11111011" * 16
+
+        start = time.perf_counter()
+        result = is_equiv_minerva(babble, "\\sqrt{241}")
+
+        assert result is False
+        assert time.perf_counter() - start < 2.0
+
+    def test_is_equiv_minerva_still_checks_long_strings_of_similar_length(self) -> None:
+        long_expr = "+".join(["\\frac{1}{2}"] * 15)
+
+        assert is_equiv_minerva(long_expr, long_expr) is True
 
     def test_metric_defaults_to_english_but_can_select_german(self) -> None:
         german = "Finale Antwort: Die finale Antwort lautet 24. Ich hoffe, die Antwort ist korrekt."
