@@ -52,6 +52,10 @@ class EvalFactory(ABC):
         """The eval's metrics"""
 
     @abstractmethod
+    def subjects(self) -> list[Any]:
+        """The eval's subjects"""
+
+    @abstractmethod
     def display_name(self) -> str:
         """Human-readable display name. Is allowed to have special characters and whitespaces."""
 
@@ -153,6 +157,10 @@ class _Lazy(EvalFactory):
         """The eval's metrics"""
         return self.task_class().get_metrics()
 
+    def subjects(self) -> list[Any]:
+        """The eval's subjects"""
+        return self.task_class().SUBJECTS
+
     def display_name(self) -> str:
         """The eval's human-readable display name (the task's ``NAME``)."""
         return self.task_class().NAME
@@ -219,6 +227,10 @@ class _Eager(EvalFactory):
     def metrics(self) -> list[type["BaseMetric"]]:
         """The eval's metrics"""
         return self._task.get_metrics()
+
+    def subjects(self) -> list[Any]:
+        """The eval's subjects"""
+        return self._task.SUBJECTS
 
     def display_name(self) -> str:
         """The eval's human-readable display name (the task's ``NAME``)."""

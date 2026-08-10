@@ -59,3 +59,13 @@ def test_lazy_registration() -> None:
     registry = Registry()
     registry.register_lazy(f"{MATH.__module__}.{MATH.__name__}")
     assert registry["Math"].display_name() == MATH.NAME
+
+
+def test_subjects() -> None:
+    registry = Registry()
+    registry.register(MATH)
+    assert registry["MATH"].subjects() == MATH.SUBJECTS
+
+    registry = Registry()
+    registry.register_lazy(f"{MATH.__module__}.{MATH.__name__}")
+    assert registry["Math"].subjects() == MATH.SUBJECTS
