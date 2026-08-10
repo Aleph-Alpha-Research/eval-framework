@@ -14,6 +14,15 @@
 
 ### Bug Fixes
 
+## [0.9.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.9.1...v0.9.2) (2026-08-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency nltk to &gt;=3.10.2,&lt;4 ([f07bf95](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f07bf95f08ef897e36c80dd8fe85fa334b1ee194))
+* recycle pooled containers to prevent blank exec output ([e1fdb41](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e1fdb41737035f1973bb2e0708415ccb5f0d24ae))
+* skip sympy equivalence for candidates too long to be answers ([b45bcf5](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b45bcf581abb126f9de612ae38987c9a66224d6d))
+
 ## [0.9.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.9.0...v0.9.1) (2026-08-08)
 
 
