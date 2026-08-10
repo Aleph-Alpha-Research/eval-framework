@@ -53,8 +53,6 @@ There are optional extras available to unlock specific features of the library:
 
 As a short hand, the `all` extra installs all of the above.
 
-For local vLLM inference, see the sibling [`local-vllm-server/`](./local-vllm-server/README.md) package.
-
 We use `uv` to better resolve dependencies when downloading the extras. You can install uv with:
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
