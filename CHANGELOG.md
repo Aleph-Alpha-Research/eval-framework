@@ -14,6 +14,18 @@
 
 ### Bug Fixes
 
+## [0.9.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.9.2...v0.9.3) (2026-08-11)
+
+
+### Features
+
+* add ellamind tasks ([c78cb4a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c78cb4a353e60afcc3e5acc72529552594df50bd))
+
+
+### Bug Fixes
+
+* **deps:** update dependency spacy to &gt;=3.8.15,&lt;4 ([b9ed207](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b9ed20705c0cf5ad216a287c0d35d792be245c2f))
+
 ## [0.9.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.9.1...v0.9.2) (2026-08-10)
 
 
