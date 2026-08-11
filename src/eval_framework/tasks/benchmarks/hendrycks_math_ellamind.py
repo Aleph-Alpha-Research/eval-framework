@@ -43,7 +43,6 @@ class MATHMinervaDE_OLMES(MATHMinerva):
     FEWSHOT_SPLIT = "test"  # EllaMind only ships a test split
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Aufgabe", "Lösung", "Loesung", "Losung"]
     METRICS = [MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE]
 
     def __init__(self, num_fewshot: int = 4) -> None:

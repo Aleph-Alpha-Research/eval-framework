@@ -12,7 +12,6 @@ from eval_framework.context.eval import EvalContext
 from eval_framework.context.local import _load_model
 from eval_framework.llm.base import BaseLLM
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.perturbation import PerturbationConfig
 from eval_framework.tasks.registry import validate_task_name
 from eval_framework.tasks.task_loader import load_extra_tasks
 
@@ -31,7 +30,6 @@ class TaskArgs(BaseModel):
     task_subjects: list[str] | None = None
     hf_revision: str | None = None
     user_prompt_suffix: str | None = None
-    perturbation_config: PerturbationConfig | None = None
     repeats: int | None = None
 
 
@@ -112,7 +110,6 @@ class DeterminedContext(EvalContext):
             "user_prompt_suffix",
             "judge_model_name",
             "judge_model_args",
-            "perturbation_config",
             "repeats",
         ]:
             val_cli = getattr(self, name, None)
@@ -145,7 +142,6 @@ class DeterminedContext(EvalContext):
             task_subjects=self.hparams.task_args.task_subjects,
             hf_revision=self.hparams.task_args.hf_revision or self.hf_revision,
             user_prompt_suffix=user_prompt_suffix,
-            perturbation_config=self.hparams.task_args.perturbation_config or self.perturbation_config,
             output_dir=self.hparams.output_dir,
             llm_judge_class=llm_judge_class,
             judge_model_args=self.hparams.task_args.judge_model_args or self.judge_model_args,

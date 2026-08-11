@@ -164,7 +164,6 @@ class SocialIQACloze(BaseTask[str]):
         BitsPerByteLoglikelihood,
     ]
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
 
     def _load_dataset(self, subject: Any) -> None:

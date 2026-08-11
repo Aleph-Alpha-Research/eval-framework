@@ -32,7 +32,6 @@ class MBPPDE_OLMES(MBPP_OLMES):
     FEWSHOT_SPLIT = "test"  # EllaMind only ships a test split
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Aufgabe", "Lösung", "Loesung", "Losung"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         text = item["text"] if "text" in item else item["prompt"]
@@ -70,7 +69,6 @@ class MBPPDE_BPB_OLMES(BaseTask[str]):
     FEWSHOT_SPLIT = "test"
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = None
     TASK_STYLER = BPBStyle(
         question_prefix="",
         trailing_newline=False,
@@ -146,7 +144,6 @@ class MBPPDE_BPB_EvalPlus(MBPP_BPB_EvalPlus):
     DATASET_PATH = "ellamind/mbpp-multilingual"
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = None
     TASK_STYLER = BPBStyle(
         question_prefix="",
         trailing_newline=False,

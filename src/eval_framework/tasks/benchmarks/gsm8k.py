@@ -102,7 +102,6 @@ class GSM8KEvalHarness(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]
     SUBJECTS = ["main"]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:

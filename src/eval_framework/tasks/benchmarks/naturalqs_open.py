@@ -20,7 +20,6 @@ class NaturalQsOpen(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [DropF1ExactMatch]
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -68,7 +67,6 @@ class _NaturalQsOpenChoice_Base(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
     LANGUAGE = Language.ENG
 
     def _get_raw_question(self, item: dict[str, Any]) -> str:

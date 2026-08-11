@@ -9,7 +9,6 @@ from typing import Any
 import eval_framework
 from eval_framework.llm.base import BaseLLM
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.perturbation import PerturbationConfig
 
 
 def import_models(models_file: PathLike | str) -> dict[str, type[BaseLLM]]:
@@ -72,9 +71,6 @@ class EvalContext(AbstractContextManager):
         judge_model_args: dict[str, Any] | None = None,
         batch_size: int | None = None,
         description: str | None = None,
-        perturbation_type: str | None = None,
-        perturbation_probability: float | None = None,
-        perturbation_seed: int | None = None,
         randomize_judge_order: bool = False,
         delete_output_dir_after_upload: bool | None = None,
         repeats: int | None = None,
@@ -105,17 +101,6 @@ class EvalContext(AbstractContextManager):
         self.randomize_judge_order = randomize_judge_order
         self.delete_output_dir_after_upload = delete_output_dir_after_upload
         self.repeats = repeats
-        if perturbation_type or perturbation_probability is not None:
-            perturbation = {
-                "type": perturbation_type,
-                "probability": perturbation_probability,
-                "seed": perturbation_seed,
-            }
-            self.perturbation_config: PerturbationConfig | None = PerturbationConfig(
-                **{k: v for k, v in perturbation.items() if v is not None}
-            )
-        else:
-            self.perturbation_config = None
 
         self.config: EvalConfig | None = None
 

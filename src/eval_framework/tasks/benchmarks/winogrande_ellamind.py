@@ -31,7 +31,6 @@ class _WINOGRANDE_ELLAMIND_DE_Base(BaseTask[str]):
     FEWSHOT_SPLIT = "validation"
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = ["1", "2"]
 
     def _extract_prefix(self, item: dict[str, Any]) -> str:
         """Return the sentence fragment before the blank (stripped)."""

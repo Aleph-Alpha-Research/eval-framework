@@ -26,7 +26,6 @@ them (e.g. ``EvaluationGenerator``).
         SAMPLE_SPLIT = "test"
         FEWSHOT_SPLIT = "train"
         SUBJECTS = ["my_subject"]
-        PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
         TASK_STYLER = ClozeStyle(question_prefix="Question: ", cue_text="Answer:")
 
         def _get_raw_question(self, item): return item["question"]

@@ -12,7 +12,6 @@ from typing import Any, Literal
 from eval_framework.tasks.base import BaseTask, Language
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, shuffle_correct_with_distractors
-from eval_framework.tasks.utils import get_n_letters
 
 
 class _SIQA_ELLAMIND_DE_Base(BaseTask[str]):
@@ -26,7 +25,6 @@ class _SIQA_ELLAMIND_DE_Base(BaseTask[str]):
     FEWSHOT_SPLIT = "validation"
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Kontext", "Frage"] + get_n_letters(4)
     _DISTRACTOR_LEVEL: Literal["easy", "hard"] = "easy"
 
     def _shuffled(self, item: dict[str, Any]) -> tuple[list[str], int]:

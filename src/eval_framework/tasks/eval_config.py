@@ -8,7 +8,6 @@ from pydantic import BeforeValidator, Field, field_serializer, field_validator, 
 from eval_framework.base_config import BaseConfig
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
-from eval_framework.tasks.perturbation import PerturbationConfig
 from eval_framework.tasks.registry import registry
 from eval_framework.utils.constants import ROOT_DIR
 
@@ -42,7 +41,6 @@ class EvalConfig(BaseConfig):
     num_fewshot: Annotated[int, Field(ge=0)] = 0
     num_samples: Annotated[int | None, Field(ge=1)] = 10  # Allows None or int
     max_tokens: int | None = None
-    perturbation_config: PerturbationConfig | None = None
     task_name: str
     task_subjects: list[str] | None = None
     hf_revision: str | None = None
