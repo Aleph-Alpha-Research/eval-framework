@@ -911,7 +911,7 @@ dev = [
     { name = "pytest-mock", specifier = ">=3.15.1" },
     { name = "pytest-sugar", specifier = ">1.1,<2" },
     { name = "pytest-xdist", specifier = ">=3.8.0,<4" },
-    { name = "ruff", specifier = ">=0.16.1" },
+    { name = "ruff", specifier = ">=0.16.2" },
     { name = "types-python-dateutil", specifier = ">=2.9.0.20260807,<3" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20260724,<7" },
     { name = "types-requests", specifier = ">=2.33.0.20260712,<3" },
