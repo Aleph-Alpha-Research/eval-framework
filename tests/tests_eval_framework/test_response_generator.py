@@ -1,7 +1,7 @@
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock
 
 import pytest
 from dateutil import parser
@@ -11,11 +11,9 @@ from eval_framework.response_generator import ResponseGenerator, repeat_samples
 from eval_framework.result_processors.base import ResultProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, RawCompletion, RawLoglikelihood
-from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType, Sample
-from eval_framework.tasks.benchmarks.arc import ARC
+from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.perturbation import PerturbationConfig, PerturbationType
-from eval_framework.tasks.registry import register_task, registry
+from eval_framework.tasks.registry import register_task
 from template_formatting.formatter import Message, Role
 from tests.tests_eval_framework.conftest import MockLLM
 from tests.tests_eval_framework.tasks.test_registry import temporary_registry
@@ -429,8 +427,7 @@ def test_repeat_samples() -> None:
         assert other.possible_completions == repeated[0].possible_completions
 
 
-@patch("eval_framework.tasks.registry.create_perturbation_class")
-def test_with_wrong_loaded_metadata(mock_create_perturbation_class: Mock, tmp_path: Path) -> None:
+def test_with_wrong_loaded_metadata(tmp_path: Path) -> None:
     class OtherMockLLM(MockLLM):
         pass
 
@@ -441,15 +438,11 @@ def test_with_wrong_loaded_metadata(mock_create_perturbation_class: Mock, tmp_pa
         EvalConfig(task_name="ARC", num_fewshot=1, num_samples=1, llm_class=MockLLM),
         EvalConfig(task_name="ARC", num_fewshot=0, num_samples=2, llm_class=MockLLM),
         EvalConfig(task_name="ARC", num_fewshot=0, num_samples=1, llm_class=MockLLM, task_subjects=["ARC-Easy"]),
-        EvalConfig(
-            task_name="ARC", num_fewshot=0, num_samples=1, llm_class=MockLLM, perturbation_config=PerturbationConfig()
-        ),
     ]
     configs.append(configs[0])
 
     # WHEN trying to run the generator with two different configs in a single output dir
     for i, config in enumerate(configs):
-        mock_create_perturbation_class.side_effect = lambda x, _: x  # don't spin up docker here just for the test
         generator = ResponseGenerator(config.llm_class(), config, ResultsFileProcessor(tmp_path))
 
         if i == 0 or i == len(configs) - 1:
@@ -458,42 +451,6 @@ def test_with_wrong_loaded_metadata(mock_create_perturbation_class: Mock, tmp_pa
             # THEN the second generator should raise an error because intermediate results are not compatible
             with pytest.raises(ValueError):
                 generator.generate(lambda: False)
-
-
-@pytest.mark.gpu  # default CI worker can't handle large docker images
-@pytest.mark.parametrize("perturbation_type", list(PerturbationType))
-def test_perturbed_response_differs(tmp_path: Path, perturbation_type: PerturbationType) -> None:
-    """Test that perturbed responses differ from original samples for each perturbation type."""
-    output_dir = tmp_path / "eval"
-    perturbed_eval_config = EvalConfig(
-        task_name=ARC.NAME,  # Use a simple task for testing
-        num_fewshot=0,
-        num_samples=1,
-        output_dir=output_dir,
-        llm_class=MockLLM,
-        llm_judge_class=MockLLM,
-        judge_model_args={},
-        perturbation_config=PerturbationConfig(
-            type=perturbation_type,
-            probability=1.0,  # Always perturb
-            verbose=True,
-        ),
-        save_intermediate_results=False,
-    )
-
-    task = registry()[perturbed_eval_config.task_name].create(
-        num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
-    )
-    perturbed_response_generator = ResponseGenerator(MockLLM(), perturbed_eval_config, Mock(spec=ResultsFileProcessor))
-
-    assert len(task.SUBJECTS) > 0
-    task._load_dataset(task.SUBJECTS[0])
-    original_item = task.dataset[task.SAMPLE_SPLIT][0]
-    original_sample = task._get_instruction_text(original_item)
-    perturbed_sample = perturbed_response_generator.task._get_instruction_text(original_item)
-    assert original_sample != perturbed_sample, (
-        f"Original sample should differ from perturbed sample for perturbation type {perturbation_type}"
-    )
 
 
 def test_response_generator_applies_model_then_task_post_processing(tmp_path: Path) -> None:
@@ -596,7 +553,6 @@ class StubTask(BaseTask[str]):
     LANGUAGE = Language.ENG
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS: list = []
-    PERTURBATION_UNMODIFIABLE_WORDS: list = []
 
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
         yield Sample(

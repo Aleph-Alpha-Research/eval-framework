@@ -28,7 +28,6 @@ class HumanEvalDE_OLMES(HumanEval_OLMES):
     FEWSHOT_SPLIT = "test"
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Aufgabe", "Lösung", "Loesung", "Losung"]
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         # Ensure that the code completion starts on a new line.
@@ -53,7 +52,6 @@ class HumanEvalDE_BPB_OLMES(BaseTask[str]):
     FEWSHOT_SPLIT = "test"
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = None
     # No leading space: canonical solution is already indented by 4 spaces.
     TASK_STYLER = BPBStyle(question_prefix="", cue_text="", leading_space_continuations=False)
 

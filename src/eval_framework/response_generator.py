@@ -60,23 +60,13 @@ class ResponseGenerator:
         self.num_samples = config.num_samples
         self.save_intermediate_results = config.save_intermediate_results
 
-        if config.perturbation_config is not None:
-            self.task = registry()[config.task_name].create_perturbation(
-                config.perturbation_config,
-                config.num_fewshot,
-                config.task_subjects,
-                config.hf_revision,
-                user_prompt_suffix=config.user_prompt_suffix,
-                seed=RANDOM_SEED,
-            )
-        else:
-            self.task = registry()[config.task_name].create(
-                config.num_fewshot,
-                config.task_subjects,
-                config.hf_revision,
-                user_prompt_suffix=config.user_prompt_suffix,
-                seed=RANDOM_SEED,
-            )
+        self.task = registry()[config.task_name].create(
+            config.num_fewshot,
+            config.task_subjects,
+            config.hf_revision,
+            user_prompt_suffix=config.user_prompt_suffix,
+            seed=RANDOM_SEED,
+        )
 
         self.response_type = self.task.get_response_type()
 
@@ -341,7 +331,6 @@ class ResponseGenerator:
             "num_samples",
             "llm_name",
             "llm_args",
-            "perturbation_config",
             "repeats",
             "user_prompt_suffix",
         ]

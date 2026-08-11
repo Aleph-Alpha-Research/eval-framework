@@ -11,7 +11,6 @@ from typing import Any
 from eval_framework.tasks.base import BaseTask, Language
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, shuffle_correct_with_distractors
-from eval_framework.tasks.utils import get_n_letters
 
 
 class _GPQA_ELLAMIND_DE_Base(BaseTask[str]):
@@ -32,7 +31,6 @@ class _GPQA_ELLAMIND_DE_Base(BaseTask[str]):
     FEWSHOT_SPLIT = "train"
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Frage"] + get_n_letters(4)
     _DIAMOND_ONLY: bool = False
 
     def _load_dataset(self, subject: str) -> None:

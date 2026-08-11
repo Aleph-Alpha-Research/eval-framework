@@ -22,7 +22,6 @@ class ARC_DE(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Frage"] + get_n_letters(5)
     LANGUAGE = Language.DEU
 
     def __init__(self, num_fewshot: int = 0) -> None:

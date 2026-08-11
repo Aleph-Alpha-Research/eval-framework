@@ -22,7 +22,6 @@ class CommonsenseQACloze(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:

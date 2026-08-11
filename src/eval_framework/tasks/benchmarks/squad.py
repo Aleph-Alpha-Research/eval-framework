@@ -26,7 +26,6 @@ class SQUAD2(BaseTask[str]):
     METRICS = [AccuracyCompletion, F1]
     SUBJECTS = [NO_SUBJECT]
     UNANSWERABLE_STR = "unanswerable"
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer", "Context", "unanswerable"]
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -310,7 +309,6 @@ class SQuAD_OLMES(SQUAD):
     NAME = "SQuAD_OLMES"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Title", "Background", "Question", "Answer"]
     METRICS = [F1SquadNormalized]
 
     def __init__(self, num_fewshot: int = 0) -> None:

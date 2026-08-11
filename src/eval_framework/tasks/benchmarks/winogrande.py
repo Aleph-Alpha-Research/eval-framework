@@ -27,7 +27,6 @@ class WINOGRANDE(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = ["winogrande_xl"]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["1", "2"]
     LANGUAGE = Language.ENG
 
     def _extract_question(self, item: dict) -> str:

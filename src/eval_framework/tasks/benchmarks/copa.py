@@ -26,7 +26,6 @@ class COPAEvalHarness(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
     SUBJECTS = ["copa"]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["because", "therefore"]
     LANGUAGE = Language.ENG
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

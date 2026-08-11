@@ -666,7 +666,6 @@ class GSM8KReasoning(MATHReasoning):
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion, LanguageRawConsistencyChecker]
     SUBJECTS = ["main"]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"]
     LANGUAGE = Language.ENG
 
     # Reasoning prompt template that encourages step-by-step thinking with boxed answers

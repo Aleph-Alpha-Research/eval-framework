@@ -32,9 +32,6 @@ if __name__ == "__main__":
         "hf_upload_dir": "",
         "description": "",
         "batch_size": 1,
-        "perturbation_type": None,
-        "perturbation_probability": None,
-        "perturbation_seed": None,
         "save_logs": True,
     }
     run_with_kwargs(kwargs)

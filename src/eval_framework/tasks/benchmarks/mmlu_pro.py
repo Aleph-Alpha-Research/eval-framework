@@ -44,7 +44,6 @@ class MMLU_PRO(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
     SUBJECTS = MMLU_PRO_SUBJECTS
-    PERTURBATION_UNMODIFIABLE_WORDS = get_n_letters(10)
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -137,9 +136,6 @@ class MMLU_PRO_COT(MMLU_PRO):
     NAME = "MMLU_PRO_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Therefore", "the", "answer", "is", "ANSWER_LETTER"] + get_n_letters(
-        4
-    )
     ANS_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
 
     def __init__(self, num_fewshot: int = 0) -> None:

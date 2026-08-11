@@ -87,7 +87,6 @@ class MMLU(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
     SUBJECTS = MMLU_SUBJECTS
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Answer"] + get_n_letters(4)
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -141,7 +140,6 @@ class FullTextMMLU(MMLU):
 
     NAME = "Full Text MMLU"
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "answers"] + get_n_letters(4)
 
     def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
         subject_name = self._get_subject_name(item)
@@ -194,9 +192,6 @@ class MMLU_COT(MMLU):
     NAME = "MMLU_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Therefore", "the", "answer", "is", "ANSWER_LETTER"] + get_n_letters(
-        4
-    )
 
     ANS_RE = re.compile(r"Therefore, the answer is: ([ABCD])")
 

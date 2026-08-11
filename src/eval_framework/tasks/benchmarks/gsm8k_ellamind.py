@@ -32,7 +32,6 @@ class GSM8K_Ellamind_DE_Platinum(GSM8KEvalHarness):
     FEWSHOT_SPLIT = "test"
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Frage", "Antwort"]
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
@@ -75,7 +74,6 @@ class GSM8K_Ellamind_DE_BPB_Platinum(BaseTask):
     FEWSHOT_SPLIT = "test"
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Frage", "Antwort"]
     TASK_STYLER = BPBStyle(question_prefix="Frage: ", cue_text="Antwort:")
 
     def _get_raw_question(self, item: dict[str, Any]) -> str:

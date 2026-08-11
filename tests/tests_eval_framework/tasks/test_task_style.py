@@ -276,7 +276,6 @@ class _ConcreteMCTask(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
     TASK_STYLER = MCStyle()
 
@@ -300,7 +299,6 @@ class _ConcreteClozeTask(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
     TASK_STYLER = ClozeStyle()
 
@@ -324,7 +322,6 @@ class _ConcreteMCCompletionTask(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
     TASK_STYLER = MCCompletionStyle()
 
@@ -447,7 +444,6 @@ class TestBaseTaskStylerVariants:
             SAMPLE_SPLIT = "test"
             FEWSHOT_SPLIT = "train"
             SUBJECTS = [NO_SUBJECT]
-            PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
             LANGUAGE = Language.ENG
 
             def _get_raw_question(self, item: dict) -> str:
@@ -562,7 +558,6 @@ class _ConcreteBPBTask(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"]
     LANGUAGE = Language.ENG
     TASK_STYLER = BPBStyle()
 

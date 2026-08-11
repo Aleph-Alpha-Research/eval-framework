@@ -31,7 +31,6 @@ class GPQA(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
     METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
     SUBJECTS = ["gpqa_extended"]  # ["gpqa_diamond", "gpqa_extended", "gpqa_main", "gpqa_experts"]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question"] + get_n_letters(4)
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -178,9 +177,6 @@ class GPQA_COT(GPQA):
     NAME = "GPQA_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Therefore", "the", "answer", "is", "ANSWER_LETTER"] + get_n_letters(
-        4
-    )
     ANS_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
 
     def __init__(self, num_fewshot: int = 0) -> None:

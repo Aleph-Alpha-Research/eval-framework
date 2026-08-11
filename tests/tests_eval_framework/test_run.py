@@ -22,9 +22,7 @@ def _load_model_mock(llm_name: str, models_path, *, info: str = ""):
 
 @patch("argparse.ArgumentParser.parse_args")
 @patch("eval_framework.context.local._load_model", side_effect=_load_model_mock)
-@patch("eval_framework.tasks.registry.create_perturbation_class")
 def test_run(
-    mock_create_perturbation_class: Mock,
     _mock_load_model: Mock,
     mock_parse_args: Mock,
     tmp_path: Path,
@@ -55,9 +53,6 @@ def test_run(
         batch_size=2,
         task_subjects=None,
         description="",
-        perturbation_type="editor",
-        perturbation_probability=0.5,
-        perturbation_seed=123,
         extra_task_modules=None,
         save_logs=True,
         resource_cleanup=True,
@@ -66,8 +61,6 @@ def test_run(
         repeats=1,
         task_suite=None,
     )
-
-    mock_create_perturbation_class.side_effect = lambda x, _: x  # don't spin up docker here just for the test
 
     run()
 
@@ -78,9 +71,7 @@ def test_run(
 
 @patch("argparse.ArgumentParser.parse_args")
 @patch("eval_framework.context.local._load_model", side_effect=_load_model_mock)
-@patch("eval_framework.tasks.registry.create_perturbation_class")
 def test_run_path(
-    mock_create_perturbation_class: Mock,
     _mock_load_model: Mock,
     mock_parse_args: Mock,
     tmp_path: Path,
@@ -112,9 +103,6 @@ def test_run_path(
         batch_size=2,
         task_subjects=None,
         description="",
-        perturbation_type="editor",
-        perturbation_probability=0.5,
-        perturbation_seed=123,
         extra_task_modules=None,
         save_logs=True,
         delete_output_dir_after_upload=False,
@@ -122,8 +110,6 @@ def test_run_path(
         repeats=1,
         task_suite=None,
     )
-
-    mock_create_perturbation_class.side_effect = lambda x, _: x  # don't spin up docker here just for the test
 
     run()
 
@@ -160,9 +146,6 @@ def test_run_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
         batch_size=2,
         task_subjects=None,
         description="",
-        perturbation_type="",
-        perturbation_probability=None,
-        perturbation_seed=None,
         extra_task_modules=None,
         save_logs=True,
         delete_output_dir_after_upload=False,
@@ -207,9 +190,6 @@ def test_run_path_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
         batch_size=2,
         task_subjects=None,
         description="",
-        perturbation_type="",
-        perturbation_probability=None,
-        perturbation_seed=None,
         extra_task_modules=None,
         save_logs=True,
         delete_output_dir_after_upload=False,

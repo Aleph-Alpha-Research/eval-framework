@@ -6,7 +6,6 @@ from collections.abc import Generator, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, ResponseType
-from eval_framework.tasks.perturbation import PerturbationConfig, create_perturbation_class
 from template_formatting.formatter import BaseFormatter
 
 if TYPE_CHECKING:
@@ -70,17 +69,6 @@ class EvalFactory(ABC):
     ) -> BaseTask: ...
 
     @abstractmethod
-    def create_perturbation(
-        self,
-        perturbation_config: PerturbationConfig,
-        num_fewshot: int,
-        custom_subjects: list[str] | None,
-        custom_hf_revision: str | None,
-        user_prompt_suffix: str | None = None,
-        seed: int | None = None,
-    ) -> BaseTask: ...
-
-    @abstractmethod
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         """Render the eval's documentation as markdown."""
         ...
@@ -124,24 +112,6 @@ class _Lazy(EvalFactory):
         seed: int | None = None,
     ) -> BaseTask:
         return self.task_class().with_overwrite(
-            num_fewshot=num_fewshot,
-            custom_subjects=custom_subjects,
-            custom_hf_revision=custom_hf_revision,
-            user_prompt_suffix=user_prompt_suffix,
-            seed=seed,
-        )
-
-    def create_perturbation(
-        self,
-        perturbation_config: PerturbationConfig,
-        num_fewshot: int,
-        custom_subjects: list[str] | None,
-        custom_hf_revision: str | None,
-        user_prompt_suffix: str | None = None,
-        seed: int | None = None,
-    ) -> BaseTask:
-        perturbation_task_class = create_perturbation_class(self.task_class(), perturbation_config)
-        return perturbation_task_class.with_overwrite(
             num_fewshot=num_fewshot,
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,
@@ -195,24 +165,6 @@ class _Eager(EvalFactory):
         seed: int | None = None,
     ) -> BaseTask:
         return self._task.with_overwrite(
-            num_fewshot=num_fewshot,
-            custom_subjects=custom_subjects,
-            custom_hf_revision=custom_hf_revision,
-            user_prompt_suffix=user_prompt_suffix,
-            seed=seed,
-        )
-
-    def create_perturbation(
-        self,
-        perturbation_config: PerturbationConfig,
-        num_fewshot: int,
-        custom_subjects: list[str] | None,
-        custom_hf_revision: str | None,
-        user_prompt_suffix: str | None = None,
-        seed: int | None = None,
-    ) -> BaseTask:
-        perturbation_task_class = create_perturbation_class(self._task, perturbation_config)
-        return perturbation_task_class.with_overwrite(
             num_fewshot=num_fewshot,
             custom_subjects=custom_subjects,
             custom_hf_revision=custom_hf_revision,

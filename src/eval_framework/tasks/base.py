@@ -129,10 +129,6 @@ class BaseTask[SubjectType](Task):
     # inherited implicitly (a subclass in another package would otherwise resolve the wrong file).
     REVISION_LOCKFILE: Path | None
 
-    # Words in _get_instruction_text() not to be perturbed. List of words is case insensitive. No special characters
-    # or whitespace should be included.
-    PERTURBATION_UNMODIFIABLE_WORDS: list[str] | None
-
     # The language (or languages) tested by the benchmark. Accepts a single string, a dictionary specifying
     # language by subtopic, or `None` (for tasks not specific to a single language).
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None

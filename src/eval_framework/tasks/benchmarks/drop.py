@@ -84,7 +84,6 @@ class DropCompletion(BaseTask[str]):
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [DropF1ExactMatch]
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Passage"]
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -178,7 +177,6 @@ class DropMC(BaseTask[str]):
         BitsPerByteLoglikelihood,
     ]
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Passage"]
     LANGUAGE = Language.ENG
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -250,7 +248,6 @@ class DropCloze(BaseTask[str]):
         BitsPerByteLoglikelihood,
     ]
     SUBJECTS = [NO_SUBJECT]
-    PERTURBATION_UNMODIFIABLE_WORDS = ["Question", "Passage"]
     LANGUAGE = Language.ENG
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:

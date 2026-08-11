@@ -48,7 +48,6 @@ class LocalContext(EvalContext):
             num_samples=self.num_samples,
             max_tokens=self.max_tokens,
             num_fewshot=self.num_fewshot,
-            perturbation_config=self.perturbation_config,
             task_name=self.task_name,
             task_subjects=self.task_subjects,
             hf_revision=self.hf_revision,

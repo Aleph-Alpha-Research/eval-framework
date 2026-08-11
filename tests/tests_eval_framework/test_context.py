@@ -12,7 +12,6 @@ from eval_framework.context.eval import import_models
 from eval_framework.context.local import LocalContext
 from eval_framework.llm.aleph_alpha import Llama31_8B_Instruct_API
 from eval_framework.llm.base import BaseLLM
-from eval_framework.tasks.perturbation import PerturbationType
 
 
 @pytest.fixture
@@ -52,10 +51,6 @@ def mock_get_cluster_info_maximal() -> Generator[mock.Mock, None, None]:
                 "task_name": "ARC",
                 "judge_model_name": Llama31_8B_Instruct_API.__name__,
                 "judge_model_args": {},
-                "perturbation_config": {
-                    "type": "editor",
-                    "seed": 123,
-                },
             },
         }
         mock_get_cluster_info.return_value = mock_info
@@ -83,7 +78,6 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         judge_models_path=models_path,
         batch_size=1,
         description="d",
-        perturbation_type="uppercase",
     ) as ctx:
         assert ctx is not None
         assert ctx.config is not None
@@ -103,9 +97,6 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         assert ctx.config.judge_model_args is not None
         assert ctx.config.batch_size == 1
         assert ctx.config.description == "d"
-        assert ctx.config.perturbation_config is not None
-        assert ctx.config.perturbation_config.type == PerturbationType.UPPERCASE
-        assert ctx.config.perturbation_config.probability == 0.1  # default
         assert ctx.config.repeats == 1
     mock_get_cluster_info_minimal.assert_called()
 
@@ -130,7 +121,6 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         judge_models_path=models_path,
         batch_size=1,  # overriden by hparams
         description="d",  # overriden by hparams
-        perturbation_type="uppercase",  # overriden by hparams
         repeats=100,
     ) as ctx:
         assert ctx is not None
@@ -151,10 +141,6 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         assert ctx.config.judge_model_args is not None
         assert ctx.config.batch_size == 16
         assert ctx.config.description == "det_description"
-        assert ctx.config.perturbation_config is not None
-        assert ctx.config.perturbation_config.type == PerturbationType.EDITOR
-        assert ctx.config.perturbation_config.probability == 0.1  # default
-        assert ctx.config.perturbation_config.seed == 123
         assert ctx.config.repeats == 100
     mock_get_cluster_info_maximal.assert_called()
 
