@@ -29,7 +29,7 @@ and first-party/internal packages are excluded.
 | `python-iso639` | `>=2026.7.23` |
 | `pyyaml` | `>=6.0.3,<7` |
 | `scipy` | `>=1.18.0,<2` |
-| `spacy` | `>=3.8.14,<4` |
+| `spacy` | `>=3.8.15,<4` |
 | `sympy` | `>=1.14.0,<2` |
 | `wandb` | `>=0.28.1,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
@@ -43,7 +43,7 @@ and first-party/internal packages are excluded.
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
 | `blis` | `1.3.3` |
-| `botocore` | `1.43.67` |
+| `botocore` | `1.43.68` |
 | `catalogue` | `2.0.10` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.4.9` |
@@ -74,10 +74,10 @@ and first-party/internal packages are excluded.
 | `murmurhash` | `1.0.15` |
 | `packaging` | `26.3` |
 | `pandas` | `3.0.5` |
-| `platformdirs` | `4.11.1` |
+| `platformdirs` | `4.11.2` |
 | `preshed` | `3.0.13` |
 | `protobuf` | `7.35.1` |
-| `pyarrow` | `25.0.0` |
+| `pyarrow` | `25.0.1` |
 | `pydantic-core` | `2.46.4` |
 | `pygments` | `2.20.0` |
 | `python-dateutil` | `2.9.0.post0` |
@@ -87,7 +87,7 @@ and first-party/internal packages are excluded.
 | `rich` | `15.0.0` |
 | `rpds-py` | `2026.6.3` |
 | `s3transfer` | `0.19.2` |
-| `sentry-sdk` | `2.66.1` |
+| `sentry-sdk` | `2.67.1` |
 | `setuptools` | `84.0.0` |
 | `shellingham` | `1.5.4` |
 | `six` | `1.17.0` |
@@ -99,7 +99,7 @@ and first-party/internal packages are excluded.
 | `tqdm` | `4.70.0` |
 | `typer` | `0.27.1` |
 | `typing-extensions` | `4.16.0` |
-| `typing-inspection` | `0.4.2` |
+| `typing-inspection` | `0.4.3` |
 | `tzdata` | `2026.3` |
 | `urllib3` | `2.7.0` |
 | `wasabi` | `1.1.3` |

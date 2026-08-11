@@ -26,15 +26,15 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.67 - https://github.com/boto/boto3
-- **botocore** 1.43.67 - https://github.com/boto/botocore
+- **boto3** 1.43.68 - https://github.com/boto/boto3
+- **botocore** 1.43.68 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.2 - https://www.nltk.org/
-- **pyarrow** 25.0.0 - https://arrow.apache.org/
+- **pyarrow** 25.0.1 - https://arrow.apache.org/
 - **python-iso639** 2026.7.23 - https://github.com/jacksonllee/iso639
 - **requests** 2.34.2 - https://github.com/psf/requests
 - **s3transfer** 0.19.2 - https://github.com/boto/s3transfer
@@ -119,7 +119,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **markdown-it-py** 4.2.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
 - **murmurhash** 1.0.15 - https://github.com/explosion/murmurhash
-- **platformdirs** 4.11.1 - https://github.com/tox-dev/platformdirs
+- **platformdirs** 4.11.2 - https://github.com/tox-dev/platformdirs
 - **preshed** 3.0.13 - https://github.com/explosion/preshed
 - **pydantic** 2.13.4 - https://github.com/pydantic/pydantic
 - **pydantic_core** 2.46.4 - https://github.com/pydantic
@@ -127,7 +127,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
 - **rich** 15.0.0 - https://github.com/Textualize/rich
 - **rpds-py** 2026.6.3 - https://github.com/crate-py/rpds
-- **sentry-sdk** 2.66.1 - https://github.com/getsentry/sentry-python
+- **sentry-sdk** 2.67.1 - https://github.com/getsentry/sentry-python
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **smart_open** 8.0.1 - https://github.com/piskvorky/smart_open
 - **spacy** 3.8.15 - https://spacy.io
@@ -136,7 +136,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **srsly** 2.5.3 - https://github.com/explosion/srsly
 - **thinc** 8.3.13 - https://github.com/explosion/thinc
 - **typer** 0.27.1 - https://github.com/fastapi/typer
-- **typing-inspection** 0.4.2 - https://github.com/pydantic/typing-inspection
+- **typing-inspection** 0.4.3 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.7.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
 - **wandb** 0.28.1 - https://github.com/wandb/wandb
 - **wasabi** 1.1.3 - https://github.com/explosion/wasabi
@@ -314,7 +314,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### boto3 1.43.67 (Apache-2.0)
+### boto3 1.43.68 (Apache-2.0)
 
 ```text
 Apache License
@@ -495,7 +495,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.67 (Apache-2.0)
+### botocore 1.43.68 (Apache-2.0)
 
 ```text
 Apache License
@@ -12964,7 +12964,7 @@ https://opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
   terms specified in this license.
 ```
 
-### platformdirs 4.11.1 (MIT)
+### platformdirs 4.11.2 (MIT)
 
 ```text
 MIT License
@@ -13107,7 +13107,7 @@ the pattern ``psycopg/adapter*.{h,c}`` and ``psycopg/microprotocol*.{h,c}``:
  3. This notice may not be removed or altered from any source distribution.
 ```
 
-### pyarrow 25.0.0 (Apache-2.0)
+### pyarrow 25.0.1 (Apache-2.0)
 
 ```text
 Apache License
@@ -17886,7 +17886,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### sentry-sdk 2.66.1 (MIT)
+### sentry-sdk 2.67.1 (MIT)
 
 ```text
 MIT License
@@ -18347,7 +18347,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### typing-inspection 0.4.2 (MIT)
+### typing-inspection 0.4.3 (MIT)
 
 ```text
 MIT License
