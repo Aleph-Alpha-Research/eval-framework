@@ -1,9 +1,5 @@
-import textwrap
 from pathlib import Path
 
-import pytest
-
-from eval_framework.tasks.benchmarks.copa import COPA
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_loader import load_extra_tasks, load_modules_from_directory
 
@@ -86,12 +82,3 @@ def test_unique_module_names(tmp_path: Path) -> None:
     modules = load_modules_from_directory(tmp_path)
     names = {module.__name__ for module in modules}
     assert names == {"user_tasks.task1", "user_tasks.nested.task2"}
-
-
-
-
-
-
-
-
-
