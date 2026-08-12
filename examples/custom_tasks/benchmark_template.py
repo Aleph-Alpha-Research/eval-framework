@@ -5,10 +5,10 @@ This template provides a starting point for creating new benchmarks.
 Copy this file and fill in the TODO sections with your specific implementation.
 
 Usage:
-1. Copy this file to your project
+1. Copy this file into your plugin directory (loaded via --extra-tasks-dir)
 2. Replace "YourBenchmark" with your actual benchmark name
 3. Fill in all TODO sections
-4. Add your task to eval_framework/tasks/task_names.py:register_all_tasks
+4. Register your task in the `register_tasks` entrypoint at the bottom of this file
 5. Add tests in tests/tasks/
 
 Example: Geography Question Answering benchmark that tests knowledge of world capitals.
@@ -18,6 +18,7 @@ from typing import Any
 
 from eval_framework.metrics.completion import AccuracyCompletion  # Import your metrics
 from eval_framework.tasks.base import BaseTask, ResponseType, Sample
+from eval_framework.tasks.registry import Registry
 
 
 class YourBenchmarkTask(BaseTask[str]):  # Replace with your class name
@@ -111,3 +112,8 @@ class GeographyQATask(BaseTask[str]):
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         """Start the model's response with 'A:'."""
         return "A:"
+
+
+def register_tasks(registry: Registry) -> None:
+    """Entrypoint invoked by the plugin loader to register this module's tasks."""
+    registry.register(GeographyQATask)

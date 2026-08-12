@@ -42,11 +42,11 @@ def parse_args() -> argparse.Namespace:
         help="The path to the Python module file containing model classes.",
     )
     parser.add_argument(
-        "--extra-task-modules",
-        nargs="*",
-        default=[],
+        "--extra-tasks-dir",
+        type=Path,
+        default=None,
         required=False,
-        help="List of files and folders containing additional task definitions.",
+        help="Directory containing additional task plugin modules to load.",
     )
     parser.add_argument(
         "--llm-name",
@@ -282,12 +282,6 @@ def parse_args() -> argparse.Namespace:
 
     args.judge_model_args = judge_model_args
 
-    # if args.extra_task_modules:
-    #     # Convert the comma-separated string into a list
-    #     args.extra_task_modules = [file_or_dir.strip() for file_or_dir in args.extra_task_modules.split(",")]
-    # else:
-    #     args.extra_task_modules = None
-
     if args.task_suite and args.task_name:
         parser.error("--task-suite and --task-name are mutually exclusive.")
 
@@ -305,8 +299,8 @@ def _run_single_task(kwargs: dict) -> None:
     now = datetime.datetime.now()
     logger.info(f"starting time: {now}")
 
-    if kwargs.get("extra_task_modules"):
-        load_extra_tasks(kwargs["extra_task_modules"])
+    if kwargs.get("extra_tasks_dir"):
+        load_extra_tasks(kwargs["extra_tasks_dir"])
 
     context_name = kwargs.pop("context")
 

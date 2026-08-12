@@ -1,81 +1,89 @@
 import importlib.util
-import inspect
 import logging
 import os
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 from types import ModuleType
-from typing import Any
 
-from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.registry import registry as global_registry
 
 logger = logging.getLogger(__name__)
 
+# Prefix used to namespace dynamically loaded user plugin modules in ``sys.modules``.
+USER_PLUGIN_NAMESPACE = "user_tasks"
 
-def find_all_python_files(*module_paths: str | os.PathLike) -> set[Path]:
-    """Recursively walk through all paths and return all Python files."""
-    all_files: set[Path] = set()
-    for path in module_paths:
-        path = Path(path).resolve()
-
-        if not path.exists():
-            raise FileNotFoundError(f"[User Task Loader] Path does not exist: {path}")
-        if path.is_dir():
-            all_files.update(path.glob("**/*.py"))
-        elif path.is_file():
-            if path.suffix != ".py":
-                raise ValueError(f"The provided path {path} is not a Python file.")
-            all_files.add(path)
-        else:
-            raise ValueError(f"Path is not a .py file or directory: {path}")
-    return all_files
+# Name of the entrypoint function each plugin module may define to register tasks.
+REGISTER_TASKS_ENTRYPOINT = "register_tasks"
 
 
-def import_file(f: str | os.PathLike, /) -> Any:
-    """Import a file as a Python module."""
-    file_path = Path(f)
-    try:
-        spec = importlib.util.spec_from_file_location("user_task_module", file_path)
-        if spec is None or spec.loader is None:
-            raise RuntimeError(f"Could not create a module spec for {file_path}")
-        user_module: ModuleType = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(user_module)
-    except Exception as e:
-        raise ImportError(f"Failed to import {file_path}: {e}") from e
-    return user_module
+def _module_name_for(file_path: Path, root: Path) -> str:
+    """Derive a unique, importable module name from a plugin file's path.
 
-
-def load_extra_tasks(module_paths: Sequence[str | os.PathLike], registry: Registry | None = None) -> None:
-    """Dynamically load and register user-defined tasks from a list of files or directories.
-
-    Each .py file found is imported, and any BaseTask subclass is registered
+    The name is namespaced under ``USER_PLUGIN_NAMESPACE`` and mirrors the file's
+    location relative to the plugin root, e.g. ``<root>/subdir/foo.py`` becomes
+    ``user_tasks.subdir.foo``.
     """
-    assert not (isinstance(module_paths, str)), "module_paths must be a sequence of strings / os.PathLike objects"
+    relative = file_path.relative_to(root).with_suffix("")
+    return ".".join((USER_PLUGIN_NAMESPACE, *relative.parts))
+
+
+def load_modules_from_directory(directory: str | os.PathLike) -> list[ModuleType]:
+    """Recursively import every ``.py`` file under ``directory`` as a module.
+
+    Each file is imported under a unique module name derived from its path
+    relative to ``directory`` and inserted into ``sys.modules``.
+    """
+    root = Path(directory).resolve()
+    if not root.exists():
+        raise FileNotFoundError(f"[User Task Loader] Path does not exist: {root}")
+    if not root.is_dir():
+        raise NotADirectoryError(f"[User Task Loader] Path is not a directory: {root}")
+
+    modules: list[ModuleType] = []
+    for file_path in sorted(root.glob("**/*.py")):
+        module_name = _module_name_for(file_path, root)
+        try:
+            spec = importlib.util.spec_from_file_location(module_name, file_path)
+            if spec is None or spec.loader is None:
+                raise RuntimeError(f"Could not create a module spec for {file_path}")
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name] = module
+            spec.loader.exec_module(module)
+        except Exception as e:
+            sys.modules.pop(module_name, None)
+            raise ImportError(f"Failed to import {file_path}: {e}") from e
+        modules.append(module)
+    return modules
+
+
+def register_tasks_from_module(module: ModuleType, registry: Registry | None = None) -> None:
+    """Invoke ``register_tasks(registry)`` on ``module`` if it defines it.
+
+    Modules without a ``register_tasks`` entrypoint are ignored.
+    """
     registry = registry if registry is not None else global_registry()
-    for file_path in find_all_python_files(*module_paths):
-        user_module = import_file(file_path)
+    register_fn = getattr(module, REGISTER_TASKS_ENTRYPOINT, None)
+    if register_fn is None:
+        logger.info(f"[User Task Loader] Skipping {module.__name__} - no {REGISTER_TASKS_ENTRYPOINT}() present.")
+        return
+    register_fn(registry)
+    logger.info(f"[User Task Loader] Registered tasks from {module.__name__}")
 
-        for name, obj in inspect.getmembers(user_module):
-            if inspect.isclass(obj) and issubclass(obj, BaseTask) and obj is not BaseTask:
-                # check unique name of BaseTask subclasses (when they have a NAME attribute)
-                if not hasattr(obj, "NAME"):
-                    logger.info(f"[User Task Loader] Skipping {obj.__module__} - no NAME attribute present.")
-                else:
-                    if obj.NAME in registry:
-                        # two classes with the same NAME attribute
-                        logger.info(obj.__module__)
 
-                        # if it comes from eval_framework's built-in tasks then will just skip (no need to register
-                        # again; this can happen if a class is imported so that a new task can be derived from it)
-                        # but if it is one of the user defined task then raise a duplicated name error
-                        if "eval_framework.tasks.benchmarks" not in obj.__module__:
-                            # skip if import comes from eval_framework's built-in tasks
-                            raise ValueError(f"Duplicate user task name found (case-insensitive): {obj.NAME}")
+def register_tasks_from_modules(modules: Sequence[ModuleType], registry: Registry | None = None) -> None:
+    """Register tasks from each module in ``modules`` (see ``register_tasks_from_module``)."""
+    for module in modules:
+        register_tasks_from_module(module, registry=registry)
 
-                    else:
-                        # if there is no duplicate name conflict then register the new task
-                        class_obj = getattr(user_module, name)
-                        registry.register(class_obj)
-                        logger.info(f"[User Task Loader] Registered task: {class_obj.NAME}")
+
+def load_extra_tasks(directory: str | os.PathLike, registry: Registry | None = None) -> None:
+    """Load and register user-defined tasks from a directory of plugin modules.
+
+    Every ``.py`` file under ``directory`` (searched recursively) is imported as a
+    module, and any module exposing a ``register_tasks(registry)`` function has it
+    invoked to register its tasks.
+    """
+    modules = load_modules_from_directory(directory)
+    register_tasks_from_modules(modules, registry=registry)

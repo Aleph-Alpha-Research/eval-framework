@@ -46,7 +46,7 @@ class Hyperparameters(BaseModel):
     description: str | None = None
     task_args: TaskArgs
     llm_args: dict[str, Any] | None = {}
-    extra_task_modules: list[str] | None = None
+    extra_tasks_dir: str | None = None
     delete_output_dir_after_upload: bool | None = None
 
 
@@ -65,19 +65,18 @@ class DeterminedContext(EvalContext):
             raise RuntimeError("Failed to retrieve cluster info.")
 
         # Load extra tasks if specified first
-        extra_task_modules = info.trial.hparams.get("extra_task_modules", None)
-        if extra_task_modules:
-            name = "extra_task_modules"
+        extra_tasks_dir = info.trial.hparams.get("extra_tasks_dir", None)
+        if extra_tasks_dir:
+            name = "extra_tasks_dir"
             val_cli = getattr(self, name, None)
-            val_hparams = extra_task_modules
-            if val_hparams:
-                if val_cli and val_hparams and val_cli != val_hparams:
-                    logger.info(
-                        f"CLI argument {name} ({val_cli}) is being overridden by hyperparameters:"
-                        f"({val_hparams}). If it fails due to duplicate task names, remove the CLI argument and"
-                        "consolidate as a determined hyperparameter instead."
-                    )
-                load_extra_tasks(val_hparams)
+            val_hparams = extra_tasks_dir
+            if val_cli and val_hparams and val_cli != val_hparams:
+                logger.info(
+                    f"CLI argument {name} ({val_cli}) is being overridden by hyperparameters:"
+                    f"({val_hparams}). If it fails due to duplicate task names, remove the CLI argument and"
+                    "consolidate as a determined hyperparameter instead."
+                )
+            load_extra_tasks(val_hparams)
 
         self.hparams = Hyperparameters(**info.trial.hparams)
 
