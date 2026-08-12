@@ -5,10 +5,11 @@ import pytest
 
 from eval_framework.tasks.benchmarks.copa import COPA
 from eval_framework.tasks.registry import Registry
-from eval_framework.tasks.task_loader import find_all_python_files, load_extra_tasks
+from eval_framework.tasks.task_loader import load_extra_tasks, load_modules_from_directory
 
 TASK1 = """\
 from eval_framework.tasks.base import BaseTask, Language
+from eval_framework.tasks.registry import Registry
 
 class MyCustomTask(BaseTask):
     NAME = "MyCustomTask"
@@ -19,10 +20,14 @@ class MyCustomTask(BaseTask):
     METRICS = []
     SUBJECTS = []
     LANGUAGE = Language.ENG
+
+def register_tasks(registry: Registry) -> None:
+    registry.register(MyCustomTask)
 """
 
 TASK2 = """\
 from eval_framework.tasks.base import BaseTask, Language
+from eval_framework.tasks.registry import Registry
 
 class MySecondCustomTask(BaseTask):
     NAME = "MySecondCustomTask"
@@ -33,113 +38,60 @@ class MySecondCustomTask(BaseTask):
     METRICS = []
     SUBJECTS = []
     LANGUAGE = Language.ENG
+
+def register_tasks(registry: Registry) -> None:
+    registry.register(MySecondCustomTask)
 """
 
 
 def test_user_task_registration(tmp_path: Path) -> None:
     registry = Registry()
-    task_file = tmp_path / "my_custom_task.py"
-    with open(task_file, "w") as f:
-        f.write(TASK1)
-    load_extra_tasks([task_file], registry=registry)
+    (tmp_path / "my_custom_task.py").write_text(TASK1)
+
+    load_extra_tasks(tmp_path, registry=registry)
     assert "MyCustomTask" in registry
     assert registry["MyCustomTask"].display_name() == "MyCustomTask"
     assert set(registry.task_names()) == {"MyCustomTask"}
 
-    task_file = tmp_path / "my_second_custom_task.py"
-    with open(task_file, "w") as f:
-        f.write(TASK2)
-    load_extra_tasks([task_file], registry=registry)
-    assert "MySecondCustomTask" in registry
-    assert "MySecondCustomTask".upper() in registry
-    assert registry["MySecondCustomTask".upper()].display_name() == "MySecondCustomTask"
-    assert set(registry.task_names()) == {"MyCustomTask", "MySecondCustomTask"}
 
-    assert registry["MyCustomTask"] is not registry["MySecondCustomTask"]
-
-
-def test_directory(tmp_path: Path) -> None:
+def test_directory_recursive(tmp_path: Path) -> None:
     registry = Registry()
     subdir = tmp_path / "my_custom_tasks"
     subdir.mkdir()
 
-    with open(tmp_path / "task1.py", "w") as f:
-        f.write(TASK1)
-    with open(subdir / "task2.py", "w") as f:
-        f.write(TASK2)
+    (tmp_path / "task1.py").write_text(TASK1)
+    (subdir / "task2.py").write_text(TASK2)
 
-    load_extra_tasks([tmp_path], registry=registry)
+    load_extra_tasks(tmp_path, registry=registry)
     assert set(registry.task_names()) == {"MyCustomTask", "MySecondCustomTask"}
     assert registry["MyCustomTask"] is not registry["MySecondCustomTask"]
 
 
-def test_derived_user_task_registration(tmp_path: Path) -> None:
-    # With the built-in COPA already registered, loading a task derived from it must skip
-    # re-registering COPA and register only the derived task.
+def test_modules_without_register_tasks_are_ignored(tmp_path: Path) -> None:
     registry = Registry()
-    registry.register(COPA)
-    task_file = tmp_path / "my_derived_task.py"
-    with open(task_file, "w") as f:
-        f.write(
-            textwrap.dedent("""
-            from eval_framework.tasks.benchmarks.copa import COPA
-            class MyCOPA(COPA):
-                NAME = "MyCOPA"
-        """)
-        )
-    load_extra_tasks([task_file], registry=registry)
-    assert "MyCOPA" in registry
-    assert registry["MyCOPA"].id() == "MyCOPA"
+    (tmp_path / "task1.py").write_text(TASK1)
+    # A helper module with no register_tasks entrypoint should simply be skipped.
+    (tmp_path / "helper.py").write_text("VALUE = 42\n")
+
+    load_extra_tasks(tmp_path, registry=registry)
+    assert set(registry.task_names()) == {"MyCustomTask"}
 
 
-def test_user_task_registration_with_repeated_names(tmp_path: Path) -> None:
-    """Test that loading user tasks with duplicate names raises an error."""
-    registry = Registry()
-    task_file = tmp_path / "my_custom_task.py"
-    with open(task_file, "w") as f:
-        f.write(
-            textwrap.dedent("""
-            from eval_framework.tasks.base import BaseTask, Language
-            class MyCustomTask(BaseTask):
-                NAME = "MyCustomTask"
-                DATASET_PATH = "dummy"
-                SAMPLE_SPLIT = "test"
-                FEWSHOT_SPLIT = "test"
-                RESPONSE_TYPE = None
-                METRICS = []
-                SUBJECTS = []
-                LANGUAGE = Language.ENG
+def test_unique_module_names(tmp_path: Path) -> None:
+    subdir = tmp_path / "nested"
+    subdir.mkdir()
+    (tmp_path / "task1.py").write_text(TASK1)
+    (subdir / "task2.py").write_text(TASK2)
 
-            class MyCustomTask2(BaseTask):
-                NAME = "MyCustomTask" # repeated name
-                DATASET_PATH = "dummy"
-                SAMPLE_SPLIT = "test"
-                FEWSHOT_SPLIT = "test"
-                RESPONSE_TYPE = None
-                METRICS = []
-                SUBJECTS = []
-                LANGUAGE = Language.ENG
-        """)
-        )
-
-    with pytest.raises(ValueError, match="Duplicate user task"):
-        load_extra_tasks([task_file], registry=registry)
+    modules = load_modules_from_directory(tmp_path)
+    names = {module.__name__ for module in modules}
+    assert names == {"user_tasks.task1", "user_tasks.nested.task2"}
 
 
-def test_find_all_python_files(tmp_path: Path) -> None:
-    subdir = tmp_path / "dir1" / "dir2"
-    subdir.mkdir(parents=True)
 
-    file1 = tmp_path / "file.py"
-    file2 = subdir / "file.py"
 
-    file1.touch()
-    file2.touch()
 
-    assert find_all_python_files(file1) == {file1}
-    assert find_all_python_files(subdir) == {file2}
-    assert find_all_python_files(tmp_path) == {file1, file2}
-    # Overlapping paths (duplicates)
-    assert find_all_python_files(tmp_path, subdir) == {file1, file2}
-    # File / directory mixture
-    assert find_all_python_files(file1, subdir) == {file1, file2}
+
+
+
+

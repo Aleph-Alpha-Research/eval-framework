@@ -6,6 +6,7 @@ from typing import Any
 from datasets import load_dataset
 
 from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
+from eval_framework.tasks.registry import Registry
 
 logger = logging.getLogger(__name__)
 
@@ -48,3 +49,8 @@ class HELLASWAG_LOCAL(HELLASWAG):
                 "validation": ".data/hellaswag_val.jsonl",
             },
         )
+
+
+def register_tasks(registry: Registry) -> None:
+    """Entrypoint invoked by the plugin loader to register this module's tasks."""
+    registry.register(HELLASWAG_LOCAL)

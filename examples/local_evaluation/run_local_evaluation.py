@@ -13,7 +13,7 @@ if __name__ == "__main__":
     llm = Llama31_8B_Instruct_API()
 
     # Load custom tasks from the specified directory or file:
-    load_extra_tasks([SCRIPT_DIR / "custom_tasks"])
+    load_extra_tasks(SCRIPT_DIR / "custom_tasks")
 
     # Running evaluation on COPA task using 2 few-shot examples and 5 samples
     config = EvalConfig(
