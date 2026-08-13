@@ -230,6 +230,24 @@ def test_stripping_of_whitespace(llama3_formatter: BaseFormatter, hf_formatter: 
     assert hf_formatted_conversation == expected_output
 
 
+def test_never_strip_preserves_trailing_whitespace_of_final_turn() -> None:
+    class NeverStripConcatFormatter(ConcatFormatter):
+        never_strip = True
+
+    formatter = NeverStripConcatFormatter()
+
+    # A trailing newline in a cue such as "```python\n" decides whether the model
+    # continues on a new line, so it must survive formatting.
+    final_user_turn = [Message(role=Role.USER, content="def f(x):\n    ")]
+    assert formatter.format(final_user_turn, output_mode="string") == "def f(x):\n    "
+
+    final_assistant_cue = [
+        Message(role=Role.USER, content="Solve this"),
+        Message(role=Role.ASSISTANT, content="```python\n"),
+    ]
+    assert formatter.format(final_assistant_cue, output_mode="string") == "Solve this```python\n"
+
+
 @pytest.mark.parametrize(
     "model_name, expected_formatter",
     [
