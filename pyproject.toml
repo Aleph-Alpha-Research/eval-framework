@@ -57,10 +57,10 @@ api = ["aleph-alpha-client>=11.5.1"]
 openai = [
   "openai>=2.53.0,<3",
   "tiktoken>=0.13.0,<1",
-  "transformers>=4.45.2,<5",
+  "transformers>=4.45.2,<6",
 ]
 transformers = [
-  "transformers>=4.45.2,<5",
+  "transformers>=4.45.2,<6",
   "torch>=2.13.0,<3",
   "accelerate>=1.14.0,<2",
 ]
@@ -69,7 +69,7 @@ accelerate = ["accelerate"]
 
 # from template-formatting
 optional = [
-  "transformers>=4.45.2,<5",
+  "transformers>=4.45.2,<6",
   "jinja2>=3.1.6,<4"
 ]
 all = [
