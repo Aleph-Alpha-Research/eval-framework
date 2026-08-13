@@ -14,6 +14,24 @@
 
 ### Bug Fixes
 
+## [0.10.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.9.3...v0.10.0) (2026-08-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* perturbations removed
+
+### Features
+
+* perturbations removed ([842e1a0](https://github.com/Aleph-Alpha-Research/eval-framework/commit/842e1a072099fa8b5c4e307cc8b35012f0246d16))
+* register tasks from directory ([9cf932c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/9cf932c168cc89177cf3ad455169e2191716315d))
+
+
+### Bug Fixes
+
+* **deps:** update dependency numpy to &gt;=2.5.2 ([6e0d22d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/6e0d22da4cd2acf5d3055d03fe7c593e717377cc))
+* ruff linting issues in test_user_task_registration.py ([8ea01b4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/8ea01b4b3f3e58e33874b17b4fdaae5dfe05db1f))
+
 ## [0.9.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.9.2...v0.9.3) (2026-08-11)
 
 
