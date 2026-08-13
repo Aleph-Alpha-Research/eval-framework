@@ -95,6 +95,20 @@ def test_base_verify_messages_raises_exception() -> None:
         BaseFormatter._verify_messages(messages)
 
 
+def test_verify_message_fields_list_mode_requires_scaling_fields() -> None:
+    messages = [Message(role=Role.USER, content="dummy", type="text")]
+
+    with pytest.raises(ValueError, match="missing 'type' or 'has_loss'"):
+        BaseFormatter._verify_message_fields(messages, "list")
+
+
+def test_verify_message_fields_string_mode_rejects_scaling_fields() -> None:
+    messages = [Message(role=Role.USER, content="dummy", has_loss=False, type="text")]
+
+    with pytest.raises(ValueError, match="must not set 'type' or 'has_loss'"):
+        BaseFormatter._verify_message_fields(messages, "string")
+
+
 def test_reasoning_verify_messages() -> None:
     defaults = {"content": "dummy", "has_loss": False, "type": "text"}
 
