@@ -5,7 +5,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
-from eval_framework.tasks.base import RANDOM_SEED, BaseTask, ResponseType, Task
+from eval_framework.tasks.base import RANDOM_SEED, BaseTask
+from eval_framework.tasks.task import ResponseType, Task
 from template_formatting.formatter import BaseFormatter
 
 if TYPE_CHECKING:

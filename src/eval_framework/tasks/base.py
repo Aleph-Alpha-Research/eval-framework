@@ -2,7 +2,6 @@ import logging
 import os
 import random
 import traceback
-from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from enum import Enum
 from pathlib import Path
@@ -10,11 +9,11 @@ from typing import TYPE_CHECKING, Any, Self, TypeVar
 
 import iso639
 from datasets import DatasetDict, DownloadConfig, load_dataset
-from pydantic import BaseModel, ConfigDict
 
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
 from eval_framework.tasks.dataset_revisions import pinned_revision
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
+from eval_framework.tasks.task import ResponseType, Sample, Task
 from eval_framework.tasks.utils import classproperty, raise_errors
 from template_formatting.formatter import BaseFormatter, Message, Role
 
@@ -24,11 +23,6 @@ if TYPE_CHECKING:
 
 RANDOM_SEED = 42
 NO_SUBJECT = "no_subject"
-
-
-class ResponseType(Enum):
-    COMPLETION = "completion"
-    LOGLIKELIHOODS = "loglikelihoods"
 
 
 class TaskStyle(Enum):
@@ -71,49 +65,9 @@ for language in iso639.ALL_LANGUAGES:
 Language: type[Enum] = Language.add_members(languages)  # type: ignore[no-redef]
 
 
-class Sample(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    id: int
-    subject: str
-    messages: list[Message]
-    ground_truth: str | list[str] | None
-    possible_completions: list[str] | None
-    context: BaseMetricContext | list[BaseMetricContext] | None = None
-
-
 SubjectType = TypeVar("SubjectType")
 
 logger = logging.getLogger(__name__)
-
-
-class Task(ABC):
-    """The contract a caller relies on to run an evaluation"""
-
-    @abstractmethod
-    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]: ...
-
-    @abstractmethod
-    def generate_completions(
-        self,
-        llm: "BaseLLM",
-        samples: list[Sample],
-        stop_sequences: list[str] | None = None,
-        max_tokens: int | None = None,
-        fail_on_error: bool = True,
-    ) -> list[Completion]:
-        """Run ``llm`` over ``samples`` and return their completions."""
-
-    @abstractmethod
-    def get_metadata(self) -> dict[str, str | list[str]]:
-        """Descriptive metadata about the eval for result reporting."""
-
-    @abstractmethod
-    def get_response_type(self) -> ResponseType: ...
-
-    @abstractmethod
-    def display_name(self) -> str:
-        """Human-readable display name. Is allowed to have special characters and whitespaces."""
-        ...
 
 
 class BaseTask[SubjectType](Task):
