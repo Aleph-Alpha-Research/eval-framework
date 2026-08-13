@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
-from eval_framework.tasks.base import RANDOM_SEED, BaseTask, ResponseType
+from eval_framework.tasks.base import RANDOM_SEED, BaseTask, ResponseType, Task
 from template_formatting.formatter import BaseFormatter
 
 if TYPE_CHECKING:
@@ -66,7 +66,7 @@ class EvalFactory(ABC):
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
         seed: int | None = None,
-    ) -> BaseTask: ...
+    ) -> Task: ...
 
     @abstractmethod
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
