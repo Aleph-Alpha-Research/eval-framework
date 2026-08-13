@@ -103,14 +103,12 @@ class BaseFormatter:
         for message in messages:
             if output_mode == "string":
                 # eval-framework style
-                if not hasattr(message, "role"):
-                    raise ValueError("Message is missing 'role' property.")
-                if (getattr(message, "type", None) is not None) or (getattr(message, "has_loss", None) is not None):
-                    raise ValueError()
+                if message.type is not None or message.has_loss is not None:
+                    raise ValueError("Message must not set 'type' or 'has_loss' property in 'string' output mode.")
 
             elif output_mode == "list":
                 # scaling style
-                if not hasattr(message, "type") or not hasattr(message, "has_loss"):
+                if message.type is None or message.has_loss is None:
                     raise ValueError("Message is missing 'type' or 'has_loss' property.")
 
     @staticmethod
