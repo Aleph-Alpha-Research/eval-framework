@@ -1063,7 +1063,7 @@ requires-dist = [
     { name = "lxml", specifier = ">=6.1.1,<7" },
     { name = "mysql-connector-python", specifier = ">=26.7.0,<27" },
     { name = "nltk", specifier = ">=3.10.2,<4" },
-    { name = "numpy", specifier = ">=2.5.1" },
+    { name = "numpy", specifier = ">=2.5.2" },
     { name = "openai", marker = "extra == 'openai'", specifier = ">=2.53.0,<3" },
     { name = "psycopg2-binary", specifier = ">=2.9.12,<3" },
     { name = "pycountry", specifier = ">=26.2.16,<27" },
