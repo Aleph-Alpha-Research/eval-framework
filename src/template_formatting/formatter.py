@@ -196,7 +196,7 @@ class BaseFormatter:
             if self.strip_content:
                 text = text.strip()
             elif output_mode == "string":
-                if is_last or (self.template.end_user_id != "" and not self.never_strip):
+                if not self.never_strip and (is_last or self.template.end_user_id != ""):
                     text = text.strip()
             if output_mode == "string" or (output_mode == "list" and not is_last):
                 # start assistant message after user message
