@@ -467,6 +467,7 @@ class BaseTask[SubjectType](Task):
                     completion=completion,
                     raw_completion=raw_completion.completion,
                     raw_completion_num_tokens=raw_completion.completion_num_tokens,
+                    raw_completion_reasoning_num_tokens=raw_completion.reasoning_num_tokens,
                     context=sample.context,
                     error=raw_completion.raw_completion_error or error,
                 )
