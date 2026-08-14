@@ -13,7 +13,7 @@ from eval_framework.tasks.benchmarks.drop import DropCloze, DropCompletion, Drop
 from eval_framework.tasks.benchmarks.global_mmlu import GlobalMMLU
 from eval_framework.tasks.benchmarks.goldenswag import GOLDENSWAG, GOLDENSWAG_IDK
 from eval_framework.tasks.benchmarks.gpqa import GPQA_OLMES
-from eval_framework.tasks.benchmarks.humaneval import HumanEvalBPB
+from eval_framework.tasks.benchmarks.humaneval import HumanEvalBPB, HumanEvalBPB_V2
 from eval_framework.tasks.benchmarks.math_reasoning import (
     MATH500Minerva,
     MATHMinerva,
@@ -146,6 +146,7 @@ def test_global_mmlu_smoke() -> None:
 @pytest.mark.cpu_slow
 def test_humaneval_bpb_smoke() -> None:
     _smoke_test_task(HumanEvalBPB)
+    _smoke_test_task(HumanEvalBPB_V2)
 
 
 @pytest.mark.cpu_slow

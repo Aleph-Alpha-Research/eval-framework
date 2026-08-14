@@ -96,6 +96,8 @@
     "HLE_ELLAMIND_MC_NATIVE_DE.Llama3Formatter": "0f0f58b6f1e3052d35f54bf75e743756",
     "HumanEvalBPB.ConcatFormatter": "a87291b6ceeb714b3a6f36ff1e572944",
     "HumanEvalBPB.Llama3Formatter": "a8356d0d5ffd85c3265a6c16aa603823",
+    "HumanEvalBPB_V2.ConcatFormatter": "3aa4daff8585044f9c599b5512ad6fdd",
+    "HumanEvalBPB_V2.Llama3Formatter": "437945472b8733a0f82868abcde00198",
     "HumanEvalDE_BPB_OLMES.ConcatFormatter": "30b563aab18dd00907aeda142e3f1d49",
     "HumanEvalDE_BPB_OLMES.Llama3Formatter": "cd63756355ff0504069a9cb3e7fb0f67",
     "HumanEvalDE_OLMES.ConcatFormatter": "eaf961cfb01132ecfb6ffabc521d2f03",

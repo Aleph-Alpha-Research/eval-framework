@@ -104,6 +104,25 @@ class HumanEvalBPB(HumanEval):
         return [gt] if gt else None
 
 
+class HumanEvalBPB_V2(HumanEvalBPB):
+    """
+    HumanEvalBPB variant that wraps the prompt and canonical solution in markdown code fences
+    instead of prefixing the solution with a leading space, so the loglikelihood boundary
+    starts on a new line.
+    """
+
+    NAME = "Human Eval BPB V2"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
+        return item["canonical_solution"]
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return "```python\n" + item["prompt"].rstrip() + "\n"
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return item["canonical_solution"].rstrip() + "\n```"
+
+
 class HumanEval_OLMES(HumanEval):
     """HumanEval OLMES variant replicating codex_humaneval:3shot::olmo3:n32:v2 from oe_eval.
 
