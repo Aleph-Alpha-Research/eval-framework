@@ -114,6 +114,7 @@ def register_mmlu_tasks(registry: Registry) -> None:
 def register_humaneval_tasks(registry: Registry) -> None:
     """Register humaneval benchmark tasks."""
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEvalBPB", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEvalBPB_V2", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEval_OLMES", registry=registry)
 
 
