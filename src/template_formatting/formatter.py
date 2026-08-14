@@ -271,6 +271,10 @@ class ConcatFormatter(BaseFormatter):
     # new lines are handled on task level, so we don't need to strip content here
 
 
+class NoStripConcatFormatter(ConcatFormatter):
+    never_strip = True
+
+
 class Llama3Formatter(BaseFormatter):
     template = ChatTemplate(
         begin_of_text="<|begin_of_text|>",
