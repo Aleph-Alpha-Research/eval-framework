@@ -2,12 +2,11 @@ import contextlib
 import importlib
 import re
 import warnings
-from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
 
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask
-from eval_framework.tasks.task import ResponseType, Task
+from eval_framework.tasks.task import EvalFactory, ResponseType
 from template_formatting.formatter import BaseFormatter
 
 if TYPE_CHECKING:
@@ -25,57 +24,6 @@ __all__ = [
     "validate_task_name",
     "registered_task_names",
 ]
-
-
-class EvalFactory(ABC):
-    """Produces a registered benchmark's eval.
-
-    The registry stores one factory per eval. This allows the factory to be
-    constructed without constructing all evals. Going via this ABC allows
-    the factory instances to contain state specifically relevant to the
-    eval, as well as supporting different strategies for instantiating it.
-    E.g. eager vs lazy loading of the required dependencies.
-    """
-
-    @abstractmethod
-    def id(self) -> str:
-        "Canonical key used to register this benchmark"
-
-    @property
-    @abstractmethod
-    def source_module(self) -> str:
-        """Module the task class is defined in, resolvable without importing it."""
-
-    @abstractmethod
-    def response_type(self) -> ResponseType:
-        """The eval's response type"""
-
-    @abstractmethod
-    def metrics(self) -> list[type["BaseMetric"]]:
-        """The eval's metrics"""
-
-    @abstractmethod
-    def subjects(self) -> list[Any]:
-        """The eval's subjects"""
-
-    @abstractmethod
-    def display_name(self) -> str:
-        """Human-readable display name. Is allowed to have special characters and whitespaces."""
-
-    @abstractmethod
-    def create(
-        self,
-        num_fewshot: int,
-        custom_subjects: list[str] | None,
-        custom_hf_revision: str | None,
-        user_prompt_suffix: str | None = None,
-        seed: int | None = None,
-    ) -> Task: ...
-
-    @abstractmethod
-    def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        """Render the eval's documentation as markdown."""
-        ...
 
 
 class Lazy(EvalFactory):
