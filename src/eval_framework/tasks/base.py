@@ -520,10 +520,6 @@ class Lazy(EvalFactory):
         self._module = module
         self._loaded: type[BaseTask] | None = None
 
-    @property
-    def source_module(self) -> str:
-        return self._module
-
     def id(self) -> str:
         return self._class_name
 
@@ -578,10 +574,6 @@ class Eager(EvalFactory):
 
     def __init__(self, task: type[BaseTask]) -> None:
         self._task = task
-
-    @property
-    def source_module(self) -> str:
-        return self._task.__module__
 
     def id(self) -> str:
         return self._task.__name__

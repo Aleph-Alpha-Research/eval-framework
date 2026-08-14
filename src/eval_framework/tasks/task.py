@@ -72,11 +72,6 @@ class EvalFactory(ABC):
     def id(self) -> str:
         "Canonical key used to register this benchmark"
 
-    @property
-    @abstractmethod
-    def source_module(self) -> str:
-        """Module the task class is defined in, resolvable without importing it."""
-
     @abstractmethod
     def response_type(self) -> ResponseType:
         """The eval's response type"""
