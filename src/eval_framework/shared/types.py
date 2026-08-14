@@ -91,6 +91,12 @@ class RawCompletion(BaseCompletion):
         int | None,
         "number of tokens the model generated for the completion, or None if the backend did not report it",
     ]
+    reasoning_num_tokens: Annotated[
+        int | None,
+        "portion of completion_num_tokens that the model spent on reasoning (thinking), "
+        "or None if the backend did not report it. Non-reasoning models and backends that "
+        "do not surface a reasoning-token count leave this None.",
+    ] = None
     raw_completion_error: Error | None = None
 
 
@@ -104,6 +110,11 @@ class Completion(BaseCompletion):
         int | None,
         "number of tokens the model generated for the raw completion, or None if the backend did not report it",
     ]
+    raw_completion_reasoning_num_tokens: Annotated[
+        int | None,
+        "portion of raw_completion_num_tokens that the model spent on reasoning, or None if the "
+        "backend did not report it",
+    ] = None
     context: list[BaseMetricContext] | BaseMetricContext | None = None
     error: Error | None = None
 

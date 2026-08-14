@@ -223,6 +223,8 @@ class OpenAIModel(BaseLLM):
                 prompt = "\n".join([f"{m.get('role', '')}: {m.get('content', '')}" for m in chat_messages])
                 prompt_tokens = getattr(chat_response.usage, "prompt_tokens", None)
                 completion_tokens = getattr(chat_response.usage, "completion_tokens", None)
+                completion_details = getattr(chat_response.usage, "completion_tokens_details", None)
+                reasoning_tokens = getattr(completion_details, "reasoning_tokens", None)
                 completion = chat_response.choices[0].message.content or ""
                 return RawCompletion(
                     prompt=prompt,
@@ -242,6 +244,7 @@ class OpenAIModel(BaseLLM):
                         if completion_tokens is not None
                         else (self._count_tokens(completion) if self._encoder is not None else None)
                     ),
+                    reasoning_num_tokens=reasoning_tokens,
                 )
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
