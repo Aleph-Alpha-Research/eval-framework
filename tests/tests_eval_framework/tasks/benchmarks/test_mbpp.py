@@ -3,7 +3,14 @@ import pytest
 from eval_framework.tasks.benchmarks.mbpp import MBPPBPB
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_names import register_mbpp_tasks
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
+from template_formatting.formatter import (
+    BaseFormatter,
+    ConcatFormatter,
+    Llama3Formatter,
+    Message,
+    NoStripConcatFormatter,
+    Role,
+)
 from tests.tests_eval_framework.tasks.benchmarks.utils import (
     ExpectedPrompt,
     assert_offline_oneshot_prompt,
@@ -19,7 +26,7 @@ register_mbpp_tasks(registry=_mbpp_registry)
 
 
 @pytest.mark.formatter_hash
-@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter, NoStripConcatFormatter])
 @pytest.mark.parametrize("task_name", _mbpp_registry.task_names())
 def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
     run_formatter_hash_test(

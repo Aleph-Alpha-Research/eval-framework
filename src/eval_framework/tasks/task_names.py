@@ -116,6 +116,7 @@ def register_humaneval_tasks(registry: Registry) -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEvalBPB", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEvalBPB_V2", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEval_OLMES", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.humaneval.HumanEval_NL", registry=registry)
 
 
 def register_mbpp_tasks(registry: Registry) -> None:
@@ -301,6 +302,7 @@ def register_humaneval_ellamind_tasks(registry: Registry) -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_OLMES", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_BPB_OLMES", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_BPB_OLMES_V2", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_NL", registry=registry)
 
 
 def register_mbpp_ellamind_tasks(registry: Registry) -> None:

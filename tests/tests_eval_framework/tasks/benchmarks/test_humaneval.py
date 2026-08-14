@@ -6,7 +6,14 @@ from eval_framework.tasks.benchmarks.humaneval import HumanEval, HumanEval_OLMES
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_names import register_humaneval_tasks
 from eval_framework.tasks.utils import run_python_code
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
+from template_formatting.formatter import (
+    BaseFormatter,
+    ConcatFormatter,
+    Llama3Formatter,
+    Message,
+    NoStripConcatFormatter,
+    Role,
+)
 from tests.tests_eval_framework.tasks.benchmarks.utils import (
     ExpectedPrompt,
     assert_offline_oneshot_prompt,
@@ -73,11 +80,11 @@ class TestHumanEvalOLMES:
         item = human_eval_olmes_task.dataset[human_eval_olmes_task.SAMPLE_SPLIT][0]
         instruction = human_eval_olmes_task._get_instruction_text(item)
         assert instruction.startswith("```python\n")
-        assert instruction == "```python\n" + item["prompt"]
+        assert instruction == "```python\n" + item["prompt"].rstrip("\n")
 
         fewshot_target = human_eval_olmes_task._get_fewshot_target_text(item)
         assert fewshot_target.endswith("```")
-        assert fewshot_target == item["canonical_solution"] + "```"
+        assert fewshot_target == "\n" + item["canonical_solution"] + "```"
 
 
 class TestHumanEvalInstructCode:
@@ -104,7 +111,7 @@ register_humaneval_tasks(registry=_humaneval_registry)
 
 
 @pytest.mark.formatter_hash
-@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter, NoStripConcatFormatter])
 @pytest.mark.parametrize("task_name", _humaneval_registry.task_names())
 def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
     run_formatter_hash_test(
@@ -209,4 +216,3 @@ def test_humaneval_completion_bpb_same():
 
     humaneval_compl = ConcatFormatter().format(task2_sample.messages)
     assert humaneval == humaneval_compl
-    assert task1_sample.messages == task2_sample.messages
