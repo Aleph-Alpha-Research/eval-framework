@@ -4,7 +4,7 @@ from collections.abc import Callable
 import pytest
 
 from eval_framework.tasks.benchmarks.math_reasoning import MATH, MATHLvl5
-from eval_framework.tasks.registry import Registry, with_registry
+from eval_framework.tasks.registry import Registry, register_lazy_task, register_task, with_registry
 
 
 def temporary_registry[**P, T](fun: Callable[P, T]) -> Callable[P, T]:
@@ -22,7 +22,7 @@ def temporary_registry[**P, T](fun: Callable[P, T]) -> Callable[P, T]:
 def test_case_insensitive_lookup() -> None:
     registry = Registry()
 
-    registry.register(MATH)
+    register_task(MATH, registry)
 
     assert "MATH" in registry
     assert set(registry.task_names()) == {"MATH"}
@@ -30,7 +30,7 @@ def test_case_insensitive_lookup() -> None:
     assert registry["Math"].id() == MATH.__name__
     assert registry["math"].id() == MATH.__name__
 
-    registry.register(MATHLvl5)
+    register_task(MATHLvl5, registry)
     assert set(registry.task_names()) == {"MATH", "MATHLvl5"}
     assert registry["math lvl 5"].id() == MATHLvl5.__name__
     assert registry["MATH LVL 5"].id() == MATHLvl5.__name__
@@ -46,26 +46,38 @@ def test_register_non_task() -> None:
     registry = Registry()
 
     with pytest.raises(ValueError):
-        registry.register(int)  # type: ignore[arg-type]
+        register_task(int, registry=registry)  # type: ignore[arg-type]
 
     class MyTask:
         pass
 
     with pytest.raises(ValueError):
-        registry.register(MyTask)  # type: ignore[arg-type]
+        register_task(MyTask, registry=registry)  # type: ignore[arg-type]
 
 
 def test_lazy_registration() -> None:
     registry = Registry()
-    registry.register_lazy(f"{MATH.__module__}.{MATH.__name__}")
+    register_lazy_task(f"{MATH.__module__}.{MATH.__name__}", registry=registry)
     assert registry["Math"].display_name() == MATH.NAME
 
 
 def test_subjects() -> None:
     registry = Registry()
-    registry.register(MATH)
+    register_task(MATH, registry)
     assert registry["MATH"].subjects() == MATH.SUBJECTS
 
     registry = Registry()
-    registry.register_lazy(f"{MATH.__module__}.{MATH.__name__}")
+    register_lazy_task(f"{MATH.__module__}.{MATH.__name__}", registry=registry)
     assert registry["Math"].subjects() == MATH.SUBJECTS
+
+
+def test_deprecated_register_methods_warn() -> None:
+    registry = Registry()
+    with pytest.warns(DeprecationWarning):
+        registry.register(MATH)
+    assert registry["MATH"].id() == MATH.__name__
+
+    registry = Registry()
+    with pytest.warns(DeprecationWarning):
+        registry.register_lazy(f"{MATHLvl5.__module__}.{MATHLvl5.__name__}")
+    assert registry["MATHLvl5"].subjects() == MATHLvl5.SUBJECTS

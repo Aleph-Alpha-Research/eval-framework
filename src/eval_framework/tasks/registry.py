@@ -1,6 +1,7 @@
 import contextlib
 import importlib
 import re
+import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterator, Sequence
 from typing import TYPE_CHECKING, Any
@@ -16,6 +17,8 @@ __all__ = [
     "register_task",
     "register_lazy_task",
     "EvalFactory",
+    "Eager",
+    "Lazy",
     "Registry",
     "with_registry",
     "is_registered",
@@ -75,7 +78,7 @@ class EvalFactory(ABC):
         ...
 
 
-class _Lazy(EvalFactory):
+class Lazy(EvalFactory):
     """
     Create eval from qualified class path; Delays importing modules until
     eval is constructed.
@@ -144,7 +147,7 @@ class _Lazy(EvalFactory):
         return task.markdown_doc(formatters)
 
 
-class _Eager(EvalFactory):
+class Eager(EvalFactory):
     """Wraps an already-imported task class."""
 
     def __init__(self, task: type[BaseTask]) -> None:
@@ -246,22 +249,30 @@ class Registry:
         self._registry[task_key] = factory
 
     def register(self, task: type[BaseTask]) -> str:
-        """The class name is used as the task name."""
-        if not issubclass(task, BaseTask):
-            raise ValueError(f"Can only register subclasses of BaseTask, got {task}")
-        factory = _Eager(task)
-        self.add(factory)
-        return factory.id()
+        """Register a task class. The class name is used as the task name.
+
+        .. deprecated::
+            Use :func:`register_task` (``register_task(task, registry)``) instead.
+        """
+        warnings.warn(
+            "Registry.register is deprecated; use register_task(task, registry) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return register_task(task, registry=self)
 
     def register_lazy(self, class_path: str, /) -> None:
-        """Register a task by its dotted class path, without importing its module."""
-        if "." not in class_path:
-            raise ValueError(
-                f"Invalid class path `{class_path}`. This needs to be a global path like "
-                "`eval_framework.tasks.benchmarks.mmlu.MMLU`): "
-            )
-        base_module, class_name = class_path.rsplit(".", maxsplit=1)
-        self.add(_Lazy(class_name=class_name, module=base_module))
+        """Register a task by its dotted class path, without importing its module.
+
+        .. deprecated::
+            Use :func:`register_lazy_task` (``register_lazy_task(class_path, registry)``) instead.
+        """
+        warnings.warn(
+            "Registry.register_lazy is deprecated; use register_lazy_task(class_path, registry) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        register_lazy_task(class_path, registry=self)
 
 
 _REGISTRY = Registry()
@@ -300,12 +311,26 @@ def validate_task_name(name: str) -> str:
     return name
 
 
-def register_task(task: type[BaseTask]) -> str:
-    """The class name is used as the task name."""
-    return registry().register(task)
+def register_task(task: type[BaseTask], registry: Registry | None = None) -> str:
+    """Register ``task`` into ``registry`` (the global registry by default).
+
+    The class name is used as the task name.
+    """
+    if not issubclass(task, BaseTask):
+        raise ValueError(f"Can only register subclasses of BaseTask, got {task}")
+    r = registry if registry is not None else _REGISTRY
+    factory = Eager(task)
+    r.add(factory)
+    return factory.id()
 
 
 def register_lazy_task(class_path: str, /, registry: Registry | None = None) -> None:
     """Register a task by its dotted class path, without importing its module."""
+    if "." not in class_path:
+        raise ValueError(
+            f"Invalid class path `{class_path}`. This needs to be a global path like "
+            "`eval_framework.tasks.benchmarks.mmlu.MMLU`): "
+        )
     r = registry if registry is not None else _REGISTRY
-    r.register_lazy(class_path)
+    base_module, class_name = class_path.rsplit(".", maxsplit=1)
+    r.add(Lazy(class_name=class_name, module=base_module))

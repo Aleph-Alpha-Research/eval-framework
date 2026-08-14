@@ -18,7 +18,7 @@ from typing import Any
 
 from eval_framework.metrics.completion import AccuracyCompletion  # Import your metrics
 from eval_framework.tasks.base import BaseTask, ResponseType, Sample
-from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.registry import Registry, register_task
 
 
 class YourBenchmarkTask(BaseTask[str]):  # Replace with your class name
@@ -116,4 +116,4 @@ class GeographyQATask(BaseTask[str]):
 
 def register_tasks(registry: Registry) -> None:
     """Entrypoint invoked by the plugin loader to register this module's tasks."""
-    registry.register(GeographyQATask)
+    register_task(GeographyQATask, registry)
