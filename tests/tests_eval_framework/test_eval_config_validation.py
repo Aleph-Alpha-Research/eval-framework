@@ -314,3 +314,5 @@ class TestEvalConfigJudgeModelArgsValidation:
             "max_tokens": 100,
             "model_name": "gpt-4",
         }
+        assert config.judge_model_args["api_key"] == "sk-1234567890"
+        assert config.judge_model_args["base_url"] == "https://api.openai.com"
