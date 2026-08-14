@@ -21,6 +21,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.multipl_e_assertion import MultiPLECodeAssertion, MultiPLEMetricContext
 from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
+from eval_framework.metrics.efficiency.reasoning_tokens import NumReasoningTokens
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
@@ -49,7 +50,7 @@ class _BaseMPLE(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"  # no dedicated fewshot split; 0-shot is expected
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [MultiPLECodeAssertion, NumCompletionTokens]
+    METRICS = [MultiPLECodeAssertion, NumCompletionTokens, NumReasoningTokens]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 

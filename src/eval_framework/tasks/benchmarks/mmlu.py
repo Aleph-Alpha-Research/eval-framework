@@ -3,6 +3,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
+from eval_framework.metrics.efficiency.reasoning_tokens import NumReasoningTokens
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
@@ -192,7 +193,7 @@ class MMLU_COT(MMLU):
 
     NAME = "MMLU_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [AccuracyCompletion, NumCompletionTokens]
+    METRICS = [AccuracyCompletion, NumCompletionTokens, NumReasoningTokens]
 
     ANS_RE = re.compile(r"Therefore, the answer is: ([ABCD])")
 

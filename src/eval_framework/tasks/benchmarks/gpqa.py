@@ -6,6 +6,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
+from eval_framework.metrics.efficiency.reasoning_tokens import NumReasoningTokens
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
@@ -177,7 +178,7 @@ class GPQA_COT(GPQA):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "GPQA_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [AccuracyCompletion, NumCompletionTokens]
+    METRICS = [AccuracyCompletion, NumCompletionTokens, NumReasoningTokens]
     ANS_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
 
     def __init__(self, num_fewshot: int = 0) -> None:
