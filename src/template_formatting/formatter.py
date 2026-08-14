@@ -270,6 +270,14 @@ class ConcatFormatter(BaseFormatter):
     )
     # new lines are handled on task level, so we don't need to strip content here
 
+    def __init__(self, preserve_trailing_whitespace: bool = False) -> None:
+        # Tasks like HumanEval carry a load-bearing trailing "\n" after the
+        # closing docstring quotes; stripping it lands the prompt on a
+        # tokenizer boundary where the model emits EOS instead of continuing.
+        if preserve_trailing_whitespace:
+            self.never_strip = True
+        super().__init__()
+
 
 class Llama3Formatter(BaseFormatter):
     template = ChatTemplate(

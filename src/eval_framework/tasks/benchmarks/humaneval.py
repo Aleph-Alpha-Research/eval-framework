@@ -147,6 +147,32 @@ class HumanEval_OLMES(HumanEval):
         return item["canonical_solution"] + "```"
 
 
+class HumanEval_V2(HumanEval):
+    """HumanEval variant that preserves the trailing newline after the closing docstring.
+
+    Motivation: on the canonical HumanEval prompt, the closing triple-quote is followed
+    by a newline in the reference dataset. When the harness right-strips the prompt,
+    the model is asked to continue directly after `\"\"\"`. For tokenizers that weld
+    `\"\"\"` and the following newline into a single token (e.g. Phoenix-2's `p2_t8`),
+    the requested continuation is off-manifold and the model emits EOS instead, so
+    completions come back empty. Restoring the trailing newline puts the prompt back
+    on a token boundary the model has seen during training.
+
+    Callers must pair this task with a formatter that does not strip the last turn.
+    For `ConcatFormatter`, pass `preserve_trailing_whitespace=True`.
+    """
+
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+
+    NAME = "Human Eval V2"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        prompt = item["prompt"].lstrip()
+        if not prompt.endswith("\n"):
+            prompt = prompt + "\n"
+        return f"```python\n{prompt}"
+
+
 class HumanEvalInstruct(HumanEval):
     # See https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/humaneval/humaneval_instruct.yaml
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE

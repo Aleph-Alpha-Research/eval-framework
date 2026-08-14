@@ -248,6 +248,21 @@ def test_never_strip_preserves_trailing_whitespace_of_final_turn() -> None:
     assert formatter.format(final_assistant_cue, output_mode="string") == "Solve this```python\n"
 
 
+def test_concat_formatter_preserve_trailing_whitespace_kwarg() -> None:
+    # Given: a ConcatFormatter opting into the trailing-whitespace preservation.
+    formatter = ConcatFormatter(preserve_trailing_whitespace=True)
+
+    # When: the final user turn ends in a load-bearing "\n" (e.g. HumanEval V2 prompt).
+    final_user_turn = [Message(role=Role.USER, content='def f():\n    """docstring"""\n')]
+
+    # Then: the newline survives formatting.
+    assert formatter.format(final_user_turn, output_mode="string") == 'def f():\n    """docstring"""\n'
+
+    # And: the default remains strip-on.
+    default_formatter = ConcatFormatter()
+    assert default_formatter.format(final_user_turn, output_mode="string") == 'def f():\n    """docstring"""'
+
+
 @pytest.mark.parametrize(
     "model_name, expected_formatter",
     [

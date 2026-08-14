@@ -175,7 +175,7 @@ class BaseLLM(ABC):
                 case "ConcatFormatter":
                     from template_formatting.formatter import ConcatFormatter
 
-                    return ConcatFormatter()
+                    return ConcatFormatter(**kwargs)
                 case "HFFormatter":
                     from template_formatting.formatter import HFFormatter
 
