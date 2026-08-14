@@ -49,12 +49,12 @@ def test_length_control_for_target(
         subject="en",
         ground_truth=json.dumps({"count": count_requirement, "unit": unit, "type": "target"}),
         prompt="",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=None,
         # including two newlines at the beginning that should be ignored
         completion="\n\n " + UNIT_STRINGS[unit]["sep"].join([UNIT_STRINGS[unit]["text"]] * count),
         raw_completion="\n\n " + UNIT_STRINGS[unit]["sep"].join([UNIT_STRINGS[unit]["text"]] * count),
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     metric = LengthControl()
@@ -104,11 +104,11 @@ def test_length_control_for_min(
         subject="en",
         ground_truth=json.dumps({"count": min_count_requirement, "unit": unit, "type": "minimum"}),
         prompt="",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=None,
         completion=UNIT_STRINGS[unit]["sep"].join([UNIT_STRINGS[unit]["text"]] * count),
         raw_completion=UNIT_STRINGS[unit]["sep"].join([UNIT_STRINGS[unit]["text"]] * count),
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     metric = LengthControl()
@@ -158,11 +158,11 @@ def test_length_control_for_max(
         subject="en",
         ground_truth=json.dumps({"count": max_count_requirement, "unit": unit, "type": "maximum"}),
         prompt="",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=None,
         completion=UNIT_STRINGS[unit]["sep"].join([UNIT_STRINGS[unit]["text"]] * count),
         raw_completion=UNIT_STRINGS[unit]["sep"].join([UNIT_STRINGS[unit]["text"]] * count),
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     metric = LengthControl()

@@ -50,11 +50,11 @@ def test_f1_metric_class(ground_truth: str | list[str] | None, completion: str, 
         subject="test",
         ground_truth=ground_truth,
         prompt="test prompt",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=None,
         completion=completion,
         raw_completion=completion,
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     results = metric.calculate(completion_obj)

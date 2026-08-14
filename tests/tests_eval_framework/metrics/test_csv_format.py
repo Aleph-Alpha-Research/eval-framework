@@ -147,11 +147,11 @@ def test_csv_format_for_target(sample_csv: str, asserts: list[bool]) -> None:
         subject="en",
         ground_truth='{"columns": ["Name", "Country", "Population"], "separator": "comma"}',
         prompt="",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=None,
         completion=sample_csv,
         raw_completion="",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     metric = CSVFormat()

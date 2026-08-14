@@ -34,8 +34,8 @@ class FakeLLMJudge(BaseLLM):
             RawCompletion(
                 prompt="prompt",
                 completion="Rating: [[5]]",
-                prompt_sequence_positions=None,
-                completion_sequence_positions=None,
+                prompt_num_tokens=None,
+                completion_num_tokens=None,
             )
         ] * len(messages)
 
@@ -102,11 +102,11 @@ def example_completion(request) -> Completion:  # type: ignore
         subject="math",
         ground_truth="42",
         prompt="What is 6 multiplied by 7?",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[],
         completion="The answer is 42.",
         raw_completion="The answer is 42.",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
 
@@ -216,13 +216,13 @@ class TestPairJudgePromptsRandomization:
             subject="en_test",
             ground_truth="42",
             prompt="What is the question?",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=[
                 Message(role="user", content="What is the question?"),
             ],
             completion="Candidate answer here",
             raw_completion="Candidate answer here",
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
         )
 
     def test_randomize_order_with_seed_deterministic(self, single_turn_completion: Completion) -> None:

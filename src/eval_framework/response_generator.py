@@ -110,9 +110,9 @@ class ResponseGenerator:
             raw_loglikelihoods = [
                 RawLoglikelihood(
                     prompt="",
-                    prompt_sequence_positions=0,
+                    prompt_num_tokens=0,
                     loglikelihoods={},
-                    loglikelihoods_sequence_positions={},
+                    loglikelihoods_num_tokens={},
                     raw_loglikelihood_error=Error(
                         error_class=e.__class__.__name__,
                         message=str(e),
@@ -132,10 +132,10 @@ class ResponseGenerator:
                     subject=sample.subject,
                     ground_truth=sample.ground_truth,
                     prompt=raw_loglikelihood.prompt,
-                    prompt_sequence_positions=raw_loglikelihood.prompt_sequence_positions,
+                    prompt_num_tokens=raw_loglikelihood.prompt_num_tokens,
                     concat_compression=raw_loglikelihood.concat_compression,
                     loglikelihoods=raw_loglikelihood.loglikelihoods,
-                    loglikelihoods_sequence_positions=raw_loglikelihood.loglikelihoods_sequence_positions,
+                    loglikelihoods_num_tokens=raw_loglikelihood.loglikelihoods_num_tokens,
                     error=raw_loglikelihood.raw_loglikelihood_error,
                 )
             )

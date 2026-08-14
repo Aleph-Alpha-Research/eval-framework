@@ -50,8 +50,8 @@ def test_generate_completions_message_handling() -> None:
         RawCompletion(
             prompt="prompt",
             completion="generated text",
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
+            prompt_num_tokens=None,
+            completion_num_tokens=None,
         )
     ]
     llm.post_process_completion.side_effect = lambda completion, sample: completion
@@ -256,10 +256,10 @@ def test_response_generator_llm_token_overloading(
                 ground_truth="none",
                 messages=mock_message,
                 prompt="prompt",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 completion="completion",
                 raw_completion="raw_completion",
-                raw_completion_sequence_positions=1,
+                raw_completion_num_tokens=1,
             )
         ]
     )
@@ -490,8 +490,8 @@ def test_response_generator_applies_model_then_task_post_processing(tmp_path: Pa
             RawCompletion(
                 prompt="prompt",
                 completion="raw_answer",
-                prompt_sequence_positions=None,
-                completion_sequence_positions=None,
+                prompt_num_tokens=None,
+                completion_num_tokens=None,
             )
         ]
     )

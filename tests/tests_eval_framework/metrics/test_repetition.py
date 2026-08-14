@@ -30,11 +30,11 @@ def test_word_repetition(
         subject="en",
         ground_truth=None,
         prompt="",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=None,
         completion=completion_str,
         raw_completion=completion_str,
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
     metric = WordRepetition(window_size=window_size, min_repetitions=min_repetitions)
 

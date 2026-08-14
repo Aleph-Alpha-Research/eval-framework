@@ -113,9 +113,9 @@ def test_openai_loglikelihoods(model_cls: type[BaseLLM]) -> None:
 
     assert len(results) == 2
     assert set(results[0].loglikelihoods.keys()) == {" red", " blue", " black", " white"}
-    assert set(results[0].loglikelihoods_sequence_positions.keys()) == {" red", " blue", " black", " white"}
+    assert set(results[0].loglikelihoods_num_tokens.keys()) == {" red", " blue", " black", " white"}
     assert set(results[1].loglikelihoods.keys()) == {" foo", " bar"}
-    assert set(results[1].loglikelihoods_sequence_positions.keys()) == {" foo", " bar"}
+    assert set(results[1].loglikelihoods_num_tokens.keys()) == {" foo", " bar"}
 
 
 def _make_chat_response(mocker: MockerFixture, content: str = "test") -> object:

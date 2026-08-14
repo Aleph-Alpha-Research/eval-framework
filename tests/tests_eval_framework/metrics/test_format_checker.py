@@ -13,7 +13,7 @@ from eval_framework.shared.types import Completion
                 subject="test",
                 ground_truth=None,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
                 completion='{"name": "John Doe",\n'
                 '"age": 35,\n'
@@ -25,7 +25,7 @@ from eval_framework.shared.types import Completion
                 '"email": "john.doe@example.com",\n'
                 '"hobbies": ["reading", "hiking", "photography"],\n'
                 '"address": {"street": "123 Main St", "city": "Anytown"}}',
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
             ),
             1.0,
             id="valid_json",
@@ -36,7 +36,7 @@ from eval_framework.shared.types import Completion
                 subject="test",
                 ground_truth=None,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
                 completion='```json\n{"name": "John Doe",\n'
                 '"age": 35,\n'
@@ -48,7 +48,7 @@ from eval_framework.shared.types import Completion
                 '"email": "john.doe@example.com",\n'
                 '"hobbies": ["reading", "hiking", "photography"],\n'
                 '"address": {"street": "123 Main St", "city": "Anytown"}}\n```',
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
             ),
             1.0,
             id="valid_json_embedded",
@@ -59,7 +59,7 @@ from eval_framework.shared.types import Completion
                 subject="test",
                 ground_truth=None,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
                 completion='{name: "John Doe",\n'
                 '"age": 35,\n'
@@ -71,7 +71,7 @@ from eval_framework.shared.types import Completion
                 '"email": "john.doe@example.com",\n'
                 '"hobbies": ["reading", "hiking", "photography"],\n'
                 '"address": {"street": "123 Main St", "city": "Anytown"}}',
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
             ),
             0.0,
             id="invalid_json",
@@ -82,7 +82,7 @@ from eval_framework.shared.types import Completion
                 subject="test",
                 ground_truth=None,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
                 completion="This is a json-file:\n"
                 '```json\n{"name": "John Doe",\n'
@@ -96,7 +96,7 @@ from eval_framework.shared.types import Completion
                 '"email": "john.doe@example.com",\n'
                 '"hobbies": ["reading", "hiking", "photography"],\n'
                 '"address": {"street": "123 Main St", "city": "Anytown"}}\n```',
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
             ),
             0.0,
             id="invalid_json_embedded",
@@ -121,11 +121,11 @@ def test_check_json_format(response: Completion, expected_value: float) -> None:
                 subject="test",
                 ground_truth=None,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
                 completion="This is a postscript P.P.S. ",
                 raw_completion="This is a postscript P.P.S. ",
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
             ),
             1.0,
             id="valid_postscript_pps",
@@ -136,11 +136,11 @@ def test_check_json_format(response: Completion, expected_value: float) -> None:
                 subject="test",
                 ground_truth=None,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
                 completion="This is a postscript P.S. X",
                 raw_completion="This is a postscript P.S. X",
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
             ),
             1.0,
             id="valid_postscript_ps",
@@ -151,11 +151,11 @@ def test_check_json_format(response: Completion, expected_value: float) -> None:
                 subject="test",
                 ground_truth=None,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
                 completion="This is a postscript P. S. X",
                 raw_completion="This is a postscript P. S. X",
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
             ),
             0.0,
             id="invalid_postscript_ps",
@@ -166,11 +166,11 @@ def test_check_json_format(response: Completion, expected_value: float) -> None:
                 subject="test",
                 ground_truth=None,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
                 completion="This is a postscript P.P. S. X",
                 raw_completion="This is a postscript P.P. S. X",
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
             ),
             0.0,
             id="invalid_postscript_pps",

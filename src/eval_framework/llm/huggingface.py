@@ -196,9 +196,9 @@ class BaseHFLLM(BaseLLM):
                 raw_completions.append(
                     RawCompletion(
                         prompt=prompt,
-                        prompt_sequence_positions=prompt_token_count,
+                        prompt_num_tokens=prompt_token_count,
                         completion="",
-                        completion_sequence_positions=0,
+                        completion_num_tokens=0,
                         raw_completion_error=Error(
                             error_class=PromptTooLongException.__name__,
                             message="Prompt exceeded context size.",
@@ -225,12 +225,12 @@ class BaseHFLLM(BaseLLM):
             raw_completions.append(
                 RawCompletion(
                     prompt=prompt,
-                    prompt_sequence_positions=prompt_token_count,
+                    prompt_num_tokens=prompt_token_count,
                     concat_compression=ConcatCompression.calculate(
                         single_messages, count_tokens=self.count_tokens, completion=completion
                     ),
                     completion=completion,
-                    completion_sequence_positions=completion_token_count,
+                    completion_num_tokens=completion_token_count,
                 )
             )
         return raw_completions
@@ -251,7 +251,7 @@ class BaseHFLLM(BaseLLM):
             # format
             prompt = self._formatter.format(sample.messages, output_mode="string")
             choices_log_probs: dict[str, float] = {}
-            choices_log_probs_sequence_positions: dict[str, float] = {}
+            choices_log_probs_num_tokens: dict[str, float] = {}
             error: Error | None = None
 
             for choice in sample.possible_completions or []:
@@ -266,7 +266,7 @@ class BaseHFLLM(BaseLLM):
                     if raise_errors():
                         raise PromptTooLongException("Prompt exceeded context size.")
                     choices_log_probs = {}
-                    choices_log_probs_sequence_positions = {}
+                    choices_log_probs_num_tokens = {}
                     error = Error(
                         error_class=PromptTooLongException.__name__,
                         message="Prompt and choice exceeded context size.",
@@ -278,17 +278,17 @@ class BaseHFLLM(BaseLLM):
                     sum_log_probs = self._model_log_probs(prompt_and_choice, num_choice_tokens)
 
                 choices_log_probs.update({choice: sum_log_probs})
-                choices_log_probs_sequence_positions.update({choice: num_choice_tokens})
+                choices_log_probs_num_tokens.update({choice: num_choice_tokens})
 
             results.append(
                 RawLoglikelihood(
                     prompt=prompt,
-                    prompt_sequence_positions=len(self.tokenizer.encode(prompt, add_special_tokens=False)),
+                    prompt_num_tokens=len(self.tokenizer.encode(prompt, add_special_tokens=False)),
                     concat_compression=ConcatCompression.calculate(
                         sample.messages, count_tokens=self.count_tokens, choices=sample.possible_completions
                     ),
                     loglikelihoods=choices_log_probs,
-                    loglikelihoods_sequence_positions=choices_log_probs_sequence_positions,
+                    loglikelihoods_num_tokens=choices_log_probs_num_tokens,
                     raw_loglikelihood_error=error,
                 )
             )
