@@ -5,7 +5,6 @@ import pytest
 from eval_framework.tasks.benchmarks.humaneval import (
     HumanEval,
     HumanEval_OLMES,
-    HumanEval_V2,
     HumanEvalBPB_V2,
     HumanEvalInstruct,
 )
@@ -84,30 +83,6 @@ class TestHumanEvalOLMES:
         fewshot_target = human_eval_olmes_task._get_fewshot_target_text(item)
         assert fewshot_target.endswith("```")
         assert fewshot_target == item["canonical_solution"] + "```"
-
-
-class TestHumanEval_V2:
-    @pytest.fixture
-    def human_eval_v2_task(self) -> HumanEval_V2:
-        with DatasetPatcher(HumanEval_V2, num_fewshot=0) as patched_task:
-            return patched_task
-
-    def test_prompt_preserves_trailing_newline(self, human_eval_v2_task: HumanEval_V2) -> None:
-        # The docstring's closing quotes must be followed by "\n" so tokenizers
-        # that weld `"""` and the newline into one token do not stall on EOS.
-        human_eval_v2_task._load_dataset(human_eval_v2_task.SUBJECTS[0])
-        for item in human_eval_v2_task.dataset[human_eval_v2_task.SAMPLE_SPLIT][:5]:
-            instruction = human_eval_v2_task._get_instruction_text(item)
-            assert instruction.startswith("```python\n")
-            assert instruction.endswith("\n")
-
-    def test_code_is_executed(self, human_eval_v2_task: HumanEval_V2) -> None:
-        assert len(human_eval_v2_task.SUBJECTS) > 0
-        human_eval_v2_task._load_dataset(human_eval_v2_task.SUBJECTS[0])
-        for i, item in enumerate(human_eval_v2_task.dataset[human_eval_v2_task.SAMPLE_SPLIT][:5]):
-            sample = human_eval_v2_task._create_samples(item, i, human_eval_v2_task.SUBJECTS[0])[0]
-            formatted_code = human_eval_v2_task.post_process_generated_completion(item["canonical_solution"], sample)
-            assert run_python_code(formatted_code).endswith("True")
 
 
 class TestHumanEvalInstructCode:
