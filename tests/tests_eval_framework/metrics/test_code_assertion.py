@@ -28,7 +28,7 @@ except:
     score = False
 print(score)
 """,
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""def floor_Min(A,B,N):
     x = max(B - 1,N)
     return (A*x) // B
@@ -42,7 +42,7 @@ except:
 print(score)
 """,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             1.0,
@@ -65,7 +65,7 @@ except:
     score = False
 print(score)
 """,
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""def floor_Min(A,B,N):
     x = max(B - 1,N)
     return (A*x) // B
@@ -79,7 +79,7 @@ except:
 print(score)
 """,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             0.0,
@@ -100,7 +100,7 @@ except:
     score = False
 print(score)
 """,
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""
 try:
     assert floor_Min(10,20,30) == 16
@@ -112,7 +112,7 @@ except:
 print(score)
 """,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             0.0,
@@ -135,7 +135,7 @@ except:
     score = False
 print(score)
 """,
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""def floor_Min(A,B,N):
     x = max(B - 1,N)
     x = x +
@@ -149,7 +149,7 @@ except:
 print(score)
 """,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             0.0,
@@ -164,13 +164,13 @@ print(score)
     x = max(B - 1,N)
     x = x +
 """,
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""def floor_Min(A,B,N):
     x = max(B - 1,N)
     x = x +
 """,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             0.0,
@@ -193,7 +193,7 @@ except:
     score = False
 print(score)
 """,
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""def floor_Min(A,B,N):
     x = max(B - 1,N)
     return (A*x) // B £ 1
@@ -207,7 +207,7 @@ except:
 print(score)
 """,
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             0.0,
@@ -220,10 +220,10 @@ print(score)
                 subject="test",
                 ground_truth="",
                 raw_completion="",
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="",
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
                 error=Error(error_class="TestError", message="Something went wrong", traceback="traceback details"),
             ),
@@ -237,10 +237,10 @@ print(score)
                 subject="test",
                 ground_truth="",
                 raw_completion="""print("done")""",
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""print("done")""",
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             0.0,
@@ -253,10 +253,10 @@ print(score)
                 subject="test",
                 ground_truth="",
                 raw_completion="""print("one")\nprint("two")\nprint(True)""",
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""print("one")\nprint("two")\nprint(True)""",
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             1.0,
@@ -269,10 +269,10 @@ print(score)
                 subject="test",
                 ground_truth="",
                 raw_completion="""print("check")\nprint(False)""",
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""print("check")\nprint(False)""",
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             0.0,
@@ -285,10 +285,10 @@ print(score)
                 subject="test",
                 ground_truth="",
                 raw_completion="""def foo(): return 1+1""",
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""def foo(): return 1+1""",
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             0.0,
@@ -301,10 +301,10 @@ print(score)
                 subject="test",
                 ground_truth="",
                 raw_completion="""def foo()""",
-                raw_completion_sequence_positions=None,
+                raw_completion_num_tokens=None,
                 completion="""def foo()""",
                 prompt="test",
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 messages=None,
             ),
             0.0,
@@ -333,10 +333,10 @@ def _completion() -> Completion:
         subject="test",
         ground_truth="",
         raw_completion="print(True)",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
         completion="print(True)",
         prompt="test",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=None,
     )
 

@@ -13,14 +13,14 @@ def test_llm_judge_instruction() -> None:
         subject="test",
         ground_truth=None,
         prompt="test",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[
             Message(role=Role.SYSTEM, content="You are a helpful AI agent."),
             Message(role=Role.USER, content="Can you say what's the capital of Germany?"),
         ],
         completion="Yes, Frankfurt is in Germany. You're so bad at geography.",
         raw_completion="Yes, Frankfurt is in Germany. You're so bad at geography.",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     llm = Mock(spec=BaseLLM)
@@ -39,8 +39,8 @@ def test_llm_judge_instruction() -> None:
                     "is_harmful": True,
                 }
             ),
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
+            prompt_num_tokens=None,
+            completion_num_tokens=None,
         )
     ]
 
@@ -71,8 +71,8 @@ def test_llm_judge_instruction() -> None:
         RawCompletion(
             prompt="prompt",
             completion=json.dumps({"contains": "bad key"}),
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
+            prompt_num_tokens=None,
+            completion_num_tokens=None,
         )
     ]
 

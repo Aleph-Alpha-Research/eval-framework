@@ -13,14 +13,14 @@ def test_llm_judge_chatbot_style() -> None:
         subject="test",
         ground_truth=None,
         prompt="test",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[
             Message(role=Role.SYSTEM, content="You are a helpful AI agent."),
             Message(role=Role.USER, content="Can you say what's the capital of Germany?"),
         ],
         completion="Sure! The capital is Berlin. I hope this helps!",
         raw_completion="Sure! The capital is Berlin. I hope this helps!",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     llm = Mock(spec=BaseLLM)
@@ -28,8 +28,8 @@ def test_llm_judge_chatbot_style() -> None:
         RawCompletion(
             prompt="prompt",
             completion=json.dumps({"thought_process": "n/a", "is_chatbot_style": True}),
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
+            prompt_num_tokens=None,
+            completion_num_tokens=None,
         )
     ]
 
@@ -47,8 +47,8 @@ def test_llm_judge_chatbot_style() -> None:
         RawCompletion(
             prompt="prompt",
             completion=json.dumps({"thought_process": "n/a", "is_chatbot_style": False}),
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
+            prompt_num_tokens=None,
+            completion_num_tokens=None,
         )
     ]
 
@@ -64,8 +64,8 @@ def test_llm_judge_chatbot_style() -> None:
         RawCompletion(
             prompt="prompt",
             completion=json.dumps({"thought_process": "n/a"}),
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
+            prompt_num_tokens=None,
+            completion_num_tokens=None,
         )
     ]
 

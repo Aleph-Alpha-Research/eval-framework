@@ -12,9 +12,9 @@ def make_response(loglikelihoods: dict[str, float], ground_truth: Any, error: Er
         subject="test",
         ground_truth=ground_truth,
         prompt="test",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         loglikelihoods=loglikelihoods,
-        loglikelihoods_sequence_positions={k: -1 for k in loglikelihoods},
+        loglikelihoods_num_tokens={k: -1 for k in loglikelihoods},
         error=error,
     )
 

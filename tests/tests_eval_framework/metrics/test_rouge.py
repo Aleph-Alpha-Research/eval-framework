@@ -16,11 +16,11 @@ class TestROUGEMetrics:
             subject="test",
             ground_truth="The capital of France is Paris.",
             prompt="What is the capital of France?",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=None,
             completion="The capital of France is Paris.",
             raw_completion="The capital of France is Paris.",
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
             context=None,
         )
 
@@ -31,11 +31,11 @@ class TestROUGEMetrics:
             subject="test",
             ground_truth="The Eiffel Tower is located in Paris, France and was completed in 1889.",
             prompt="Describe the Eiffel Tower.",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=None,
             completion="The Eiffel Tower stands in Paris and was built in 1889.",
             raw_completion="The Eiffel Tower stands in Paris and was built in 1889.",
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
             context=None,
         )
 
@@ -75,11 +75,11 @@ class TestROUGEMetrics:
                 "Python is widely used in programming.",
             ],
             prompt="What is Python?",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=None,
             completion="Python is a programming language.",
             raw_completion="Python is a programming language.",
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
             context=None,
         )
 
@@ -98,11 +98,11 @@ class TestROUGEMetrics:
             subject="test",
             ground_truth="Albert Einstein published his theory of special relativity in 1905.",
             prompt="When did Einstein publish special relativity?",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=None,
             completion="Einstein published special relativity theory in 1905.",
             raw_completion="Einstein published special relativity theory in 1905.",
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
             context=None,
         )
 
@@ -121,11 +121,11 @@ class TestROUGEMetrics:
             subject="test",
             ground_truth=None,
             prompt="test",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=None,
             completion="test",
             raw_completion="test",
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
             context=None,
         )
 
@@ -140,11 +140,11 @@ class TestROUGEMetrics:
             subject="test",
             ground_truth="test",
             prompt="test",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=None,
             completion="",
             raw_completion="",
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
             context=None,
         )
         assert ROUGE_1().calculate(completion_empty)[0].value == 0.0
@@ -157,11 +157,11 @@ class TestROUGEMetrics:
             subject="test",
             ground_truth="Albert Einstein published his theory of special relativity in 1905.",
             prompt="When did Einstein publish special relativity?",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=None,
             completion="Einstein published special relativity theory in 1905.",
             raw_completion="Einstein published special relativity theory in 1905.",
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
             context=None,
         )
 

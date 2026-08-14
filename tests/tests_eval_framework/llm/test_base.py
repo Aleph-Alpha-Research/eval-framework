@@ -18,14 +18,14 @@ def test_completion_languages() -> None:
         subject="test",
         ground_truth=None,
         prompt="test",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[
             Message(role=Role.SYSTEM, content="You are a crazy assistant."),
             Message(role=Role.USER, content="Wie viele Leben hat eine Katze?"),
         ],
         completion="This is an example answer!",
         raw_completion="This is an example answer!",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     # THEN the languages can be detected
@@ -47,7 +47,7 @@ def test_completion_instructions() -> None:
         subject="test",
         ground_truth=None,
         prompt="test",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[
             Message(role=Role.SYSTEM, content="You are a crazy assistant."),
             Message(role=Role.USER, content="How many lives does a cat have?"),
@@ -56,7 +56,7 @@ def test_completion_instructions() -> None:
         ],
         completion="Oh dear I'll <|hack|> <you>!",
         raw_completion="Oh dear I'll <|hack|> <you>!",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     # THEN messages are formated into instructions

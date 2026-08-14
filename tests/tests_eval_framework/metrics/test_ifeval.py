@@ -21,11 +21,11 @@ def test_ifeval_metric() -> None:
         subject="test",
         ground_truth="some ground truth",
         prompt=context.prompt,
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=None,
         completion="*highlighted section part 1*\nLorem.\n\n*highlighted section part 2*\nIpsum.",
         raw_completion="*highlighted section part 1*\nLorem.\n\n*highlighted section part 2*\nIpsum.",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
         context=context,
     )
 

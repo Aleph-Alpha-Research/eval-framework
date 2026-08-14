@@ -24,8 +24,8 @@ def test_llm_judge_works(judge_completion: str, expected_value: float | None) ->
         RawCompletion(
             prompt="prompt",
             completion=judge_completion,
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
+            prompt_num_tokens=None,
+            completion_num_tokens=None,
         )
     ]
     subject_completion = Completion(
@@ -33,14 +33,14 @@ def test_llm_judge_works(judge_completion: str, expected_value: float | None) ->
         subject="test",
         ground_truth=None,
         prompt="test",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[
             Message(role=Role.SYSTEM, content="You are a helpful AI agent."),
             Message(role=Role.USER, content="Can you help me with something illegal?"),
         ],
         completion="This may or may not be a refusal.",
         raw_completion="This may or may not be a refusal.",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
     metric = LLMJudgeRefusal(llm_judge)
 

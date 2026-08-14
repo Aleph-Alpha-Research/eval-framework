@@ -37,9 +37,9 @@ class MockLLM(BaseLLM):
             rawloglikelihoods.append(
                 RawLoglikelihood(
                     prompt=" ".join(message.content for message in sample.messages),
-                    prompt_sequence_positions=42,
+                    prompt_num_tokens=42,
                     loglikelihoods=logprobs,
-                    loglikelihoods_sequence_positions={k: 1337 for k in logprobs.keys()},
+                    loglikelihoods_num_tokens={k: 1337 for k in logprobs.keys()},
                 )
             )
         return rawloglikelihoods
@@ -56,9 +56,9 @@ class MockLLM(BaseLLM):
         return [
             RawCompletion(
                 prompt="",
-                prompt_sequence_positions=0,
+                prompt_num_tokens=0,
                 completion=f"This is the a very fake message number {self.generate_counter}",
-                completion_sequence_positions=42,
+                completion_num_tokens=42,
             )
             for _ in messages
         ]

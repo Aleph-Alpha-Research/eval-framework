@@ -186,7 +186,7 @@ class OpenAIModel(BaseLLM):
                 completion_tokens = getattr(usage, "completion_tokens", None) if usage is not None else None
                 return RawCompletion(
                     prompt=prompt,
-                    prompt_sequence_positions=(
+                    prompt_num_tokens=(
                         prompt_tokens
                         if prompt_tokens is not None
                         else (self._count_tokens(prompt) if self._encoder is not None else None)
@@ -201,7 +201,7 @@ class OpenAIModel(BaseLLM):
                         else None
                     ),
                     completion=completion,
-                    completion_sequence_positions=(
+                    completion_num_tokens=(
                         completion_tokens
                         if completion_tokens is not None
                         else (self._count_tokens(completion) if self._encoder is not None else None)
@@ -226,7 +226,7 @@ class OpenAIModel(BaseLLM):
                 completion = chat_response.choices[0].message.content or ""
                 return RawCompletion(
                     prompt=prompt,
-                    prompt_sequence_positions=prompt_tokens,
+                    prompt_num_tokens=prompt_tokens,
                     concat_compression=(
                         ConcatCompression.calculate(
                             single_messages,
@@ -237,7 +237,7 @@ class OpenAIModel(BaseLLM):
                         else None
                     ),
                     completion=completion,
-                    completion_sequence_positions=(
+                    completion_num_tokens=(
                         completion_tokens
                         if completion_tokens is not None
                         else (self._count_tokens(completion) if self._encoder is not None else None)
@@ -276,8 +276,8 @@ class OpenAIModel(BaseLLM):
         for sample in samples:
             prompt = self._formatter.format(sample.messages, output_mode="string") if sample.messages else ""
             choices_log_probs: dict[str, float] = {}
-            choices_sequence_positions: dict[str, int] = {}
-            prompt_sequence_positions: int | None = self._count_tokens(prompt)
+            choices_num_tokens: dict[str, int] = {}
+            prompt_num_tokens: int | None = self._count_tokens(prompt)
             error: Error | None = None
 
             for choice in sample.possible_completions or []:
@@ -317,20 +317,20 @@ class OpenAIModel(BaseLLM):
 
                     # Sum logprobs for the completion portion
                     choices_log_probs[choice] = sum(all_logprobs[len(prompt_tokens) :])
-                    choices_sequence_positions[choice] = len(completion_tokens)
+                    choices_num_tokens[choice] = len(completion_tokens)
 
                 except Exception as e:
                     error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
-                    prompt_sequence_positions = None
+                    prompt_num_tokens = None
                     choices_log_probs = {}
-                    choices_sequence_positions = {}
+                    choices_num_tokens = {}
 
             results.append(
                 RawLoglikelihood(
                     prompt=prompt,
-                    prompt_sequence_positions=prompt_sequence_positions,
+                    prompt_num_tokens=prompt_num_tokens,
                     loglikelihoods=choices_log_probs,
-                    loglikelihoods_sequence_positions=choices_sequence_positions,
+                    loglikelihoods_num_tokens=choices_num_tokens,
                     raw_loglikelihood_error=error,
                 )
             )
