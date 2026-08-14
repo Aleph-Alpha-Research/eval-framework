@@ -1,10 +1,12 @@
 import contextlib
+import importlib
 import re
 import warnings
 from collections.abc import Generator, Iterator
 from typing import Any
 
-from eval_framework.tasks.base import BaseTask, Eager, Lazy
+from eval_framework.tasks.base import BaseTask, Eager
+from eval_framework.tasks.lazy import Lazy
 from eval_framework.tasks.task import EvalFactory
 
 __all__ = [
@@ -153,5 +155,10 @@ def register_lazy_task(class_path: str, /, registry: Registry | None = None) -> 
             "`eval_framework.tasks.benchmarks.mmlu.MMLU`): "
         )
     r = registry if registry is not None else _REGISTRY
-    base_module, class_name = class_path.rsplit(".", maxsplit=1)
-    r.add(Lazy(class_name=class_name, module=base_module))
+    module_path, class_name = class_path.rsplit(".", maxsplit=1)
+
+    def load() -> EvalFactory:
+        module = importlib.import_module(module_path)
+        return Eager(getattr(module, class_name))
+
+    r.add(Lazy(id=class_name, load=load))
