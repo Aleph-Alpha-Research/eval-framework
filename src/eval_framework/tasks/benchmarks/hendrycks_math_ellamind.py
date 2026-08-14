@@ -10,6 +10,7 @@ from eval_framework.metrics.completion.math_minerva_completion import (
     MathMinervaCompletionRelaxedDE,
 )
 from eval_framework.metrics.completion.minerva_math_utils import extract_answers
+from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
 from eval_framework.tasks.base import Language, Sample
 from eval_framework.tasks.benchmarks.math_reasoning import MATHMinerva
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
@@ -43,7 +44,7 @@ class MATHMinervaDE_OLMES(MATHMinerva):
     FEWSHOT_SPLIT = "test"  # EllaMind only ships a test split
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
-    METRICS = [MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE]
+    METRICS = [MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE, NumCompletionTokens]
 
     def __init__(self, num_fewshot: int = 4) -> None:
         super().__init__(num_fewshot)

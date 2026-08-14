@@ -6,6 +6,7 @@ from typing import Any
 from eval_framework.metrics.completion.code_assertion import (
     CodeCompletionAssertion,
 )
+from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
@@ -38,7 +39,7 @@ class MBPP(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [CodeCompletionAssertion]
+    METRICS = [CodeCompletionAssertion, NumCompletionTokens]
     SUBJECTS = ["full"]  # , "sanitized"]  # these are HF dataset SUBSETS!
     LANGUAGE = Language.ENG
 

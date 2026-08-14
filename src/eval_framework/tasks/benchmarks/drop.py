@@ -4,6 +4,7 @@ from eval_framework.metrics.completion.drop_completion import (
     DropF1ExactMatch,
     DropMetricContext,
 )
+from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
@@ -82,7 +83,7 @@ class DropCompletion(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [DropF1ExactMatch]
+    METRICS = [DropF1ExactMatch, NumCompletionTokens]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 

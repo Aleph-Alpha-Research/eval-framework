@@ -8,6 +8,7 @@ from eval_framework.metrics.completion.code_execution_pass_at_one import (
     CodeExecutionPassAtOneContext,
     CodeExecutionPassAtOneWithCodebench,
 )
+from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
 from eval_framework.tasks.base import (
     RANDOM_SEED,
     BaseTask,
@@ -46,7 +47,7 @@ class BigCodeBench(BaseTask[str]):
     SAMPLE_SPLIT = "v0.1.4"
     FEWSHOT_SPLIT = "v0.1.4"  # (there is no dedicated split, few-shot is not expected for this dataset)
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [CodeExecutionPassAtOne]
+    METRICS = [CodeExecutionPassAtOne, NumCompletionTokens]
     SUBJECTS = ["original", "calibrated"]
     LANGUAGE = Language.ENG
 
@@ -129,7 +130,7 @@ class BigCodeBench_OLMES(BigCodeBench):
     NAME = "BigCodeBench_OLMES"
     SAMPLE_SPLIT = "v0.1.2"
     FEWSHOT_SPLIT = "v0.1.2"
-    METRICS = [CodeExecutionPassAtOneWithCodebench]
+    METRICS = [CodeExecutionPassAtOneWithCodebench, NumCompletionTokens]
 
     def __init__(self, num_fewshot: int = 3) -> None:
         # Default 3-shot; config can override. Enforce 3 for this variant.

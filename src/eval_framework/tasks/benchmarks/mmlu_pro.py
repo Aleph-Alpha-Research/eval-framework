@@ -3,6 +3,7 @@ import re
 from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
@@ -135,7 +136,7 @@ class MMLU_PRO_COT(MMLU_PRO):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "MMLU_PRO_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [AccuracyCompletion]
+    METRICS = [AccuracyCompletion, NumCompletionTokens]
     ANS_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
 
     def __init__(self, num_fewshot: int = 0) -> None:
