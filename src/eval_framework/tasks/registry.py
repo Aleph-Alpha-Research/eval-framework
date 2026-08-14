@@ -1,16 +1,11 @@
 import contextlib
-import importlib
 import re
 import warnings
-from collections.abc import Generator, Iterator, Sequence
-from typing import TYPE_CHECKING, Any
+from collections.abc import Generator, Iterator
+from typing import Any
 
-from eval_framework.tasks.base import RANDOM_SEED, BaseTask
-from eval_framework.tasks.task import EvalFactory, ResponseType
-from template_formatting.formatter import BaseFormatter
-
-if TYPE_CHECKING:
-    from eval_framework.metrics.base import BaseMetric
+from eval_framework.tasks.base import BaseTask, Eager, Lazy
+from eval_framework.tasks.task import EvalFactory
 
 __all__ = [
     "register_task",
@@ -24,128 +19,6 @@ __all__ = [
     "validate_task_name",
     "registered_task_names",
 ]
-
-
-class Lazy(EvalFactory):
-    """
-    Create eval from qualified class path; Delays importing modules until
-    eval is constructed.
-    """
-
-    def __init__(self, class_name: str, module: str) -> None:
-        """
-        Args:
-            class_name: The name of the task class to import.
-            module: The module to import the task class from.
-        """
-        self._class_name = class_name
-        self._module = module
-        self._loaded: type[BaseTask] | None = None
-
-    @property
-    def source_module(self) -> str:
-        return self._module
-
-    def id(self) -> str:
-        return self._class_name
-
-    def task_class(self) -> type[BaseTask]:
-        if self._loaded is None:
-            module = importlib.import_module(self._module)
-            self._loaded = getattr(module, self._class_name)
-        return self._loaded
-
-    def create(
-        self,
-        num_fewshot: int,
-        custom_subjects: list[str] | None,
-        custom_hf_revision: str | None,
-        user_prompt_suffix: str | None = None,
-        seed: int | None = None,
-    ) -> BaseTask:
-        return self.task_class().with_overwrite(
-            num_fewshot=num_fewshot,
-            custom_subjects=custom_subjects,
-            custom_hf_revision=custom_hf_revision,
-            user_prompt_suffix=user_prompt_suffix,
-            seed=seed,
-        )
-
-    def response_type(self) -> ResponseType:
-        """The eval's response type"""
-        return self.task_class().get_response_type()
-
-    def metrics(self) -> list[type["BaseMetric"]]:
-        """The eval's metrics"""
-        return self.task_class().get_metrics()
-
-    def subjects(self) -> list[Any]:
-        """The eval's subjects"""
-        return self.task_class().SUBJECTS
-
-    def display_name(self) -> str:
-        """The eval's human-readable display name (the task's ``NAME``)."""
-        return self.task_class().NAME
-
-    def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        try:
-            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED)
-        except (TypeError, ValueError, AssertionError):
-            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED)
-        return task.markdown_doc(formatters)
-
-
-class Eager(EvalFactory):
-    """Wraps an already-imported task class."""
-
-    def __init__(self, task: type[BaseTask]) -> None:
-        self._task = task
-
-    @property
-    def source_module(self) -> str:
-        return self._task.__module__
-
-    def id(self) -> str:
-        return self._task.__name__
-
-    def create(
-        self,
-        num_fewshot: int,
-        custom_subjects: list[str] | None,
-        custom_hf_revision: str | None,
-        user_prompt_suffix: str | None = None,
-        seed: int | None = None,
-    ) -> BaseTask:
-        return self._task.with_overwrite(
-            num_fewshot=num_fewshot,
-            custom_subjects=custom_subjects,
-            custom_hf_revision=custom_hf_revision,
-            user_prompt_suffix=user_prompt_suffix,
-            seed=seed,
-        )
-
-    def response_type(self) -> ResponseType:
-        """The eval's response type"""
-        return self._task.get_response_type()
-
-    def metrics(self) -> list[type["BaseMetric"]]:
-        """The eval's metrics"""
-        return self._task.get_metrics()
-
-    def subjects(self) -> list[Any]:
-        """The eval's subjects"""
-        return self._task.SUBJECTS
-
-    def display_name(self) -> str:
-        """The eval's human-readable display name (the task's ``NAME``)."""
-        return self._task.NAME
-
-    def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        try:
-            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED)
-        except (TypeError, ValueError, AssertionError):
-            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED)
-        return task.markdown_doc(formatters)
 
 
 class Registry:
