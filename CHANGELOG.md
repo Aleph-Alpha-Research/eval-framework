@@ -14,6 +14,15 @@
 
 ### Bug Fixes
 
+## [0.10.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.0...v0.10.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.66,&lt;2 ([5a1eca0](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5a1eca07fe46215c14c0b3b5e9d374001edc800c))
+* **deps:** update dependency boto3 to &gt;=1.43.68,&lt;2 ([030d528](https://github.com/Aleph-Alpha-Research/eval-framework/commit/030d528c1b8316422a2f4951c8c7b839f4042f50))
+* never_strip is adhered to in user messages ([89f6c18](https://github.com/Aleph-Alpha-Research/eval-framework/commit/89f6c189f9654d9285c0b3183999764614a1750f))
+
 ## [0.10.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.9.3...v0.10.0) (2026-08-13)
 
 
