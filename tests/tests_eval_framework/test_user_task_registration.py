@@ -5,7 +5,7 @@ from eval_framework.tasks.task_loader import load_extra_tasks, load_modules_from
 
 TASK1 = """\
 from eval_framework.tasks.base import BaseTask, Language
-from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.registry import Registry, register_task
 
 class MyCustomTask(BaseTask):
     NAME = "MyCustomTask"
@@ -18,12 +18,12 @@ class MyCustomTask(BaseTask):
     LANGUAGE = Language.ENG
 
 def register_tasks(registry: Registry) -> None:
-    registry.register(MyCustomTask)
+    register_task(MyCustomTask, registry)
 """
 
 TASK2 = """\
 from eval_framework.tasks.base import BaseTask, Language
-from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.registry import Registry, register_task
 
 class MySecondCustomTask(BaseTask):
     NAME = "MySecondCustomTask"
@@ -36,7 +36,7 @@ class MySecondCustomTask(BaseTask):
     LANGUAGE = Language.ENG
 
 def register_tasks(registry: Registry) -> None:
-    registry.register(MySecondCustomTask)
+    register_task(MySecondCustomTask, registry)
 """
 
 
