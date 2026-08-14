@@ -114,15 +114,20 @@ def add(a: int, b: int) -> int:
     completions=_OLMES_ZEROSHOT.completions,
 )
 
-# --- HumanEvalDE_BPB_OLMES ---
+# --- HumanEvalDE_BPB_OLMES_V2 ---
+# The BPB_V2 variant mirrors the OLMES completion prompt exactly (including the ```python fences),
+# so that the loglikelihood-scored prompt and the generation prompt are identical.
 _BPB_ZEROSHOT = ExpectedPrompt(
     messages=[
         Message(
             role=Role.USER,
-            content=f'def add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
+            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
         ),
     ],
     concat=f"""\
+```python
+
+
 def add(a: int, b: int) -> int:
 {_INDENT}\"\"\"Addiert zwei Zahlen.\"\"\"""",
     ground_truth=f"{_INDENT}return a + b",
@@ -133,18 +138,24 @@ _BPB_FEWSHOT = ExpectedPrompt(
     messages=[
         Message(
             role=Role.USER,
-            content=f'def square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""\n',
+            content=f'```python\n\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""\n',
         ),
-        Message(role=Role.ASSISTANT, content=f"{_INDENT}return x * x"),
+        Message(role=Role.ASSISTANT, content=f"{_INDENT}return x * x\n```"),
         Message(
             role=Role.USER,
-            content=f'def add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
+            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
         ),
     ],
     concat=f"""\
+```python
+
 def square(x: int) -> int:
 {_INDENT}\"\"\"Gibt das Quadrat zurück.\"\"\"
 {_INDENT}return x * x
+```
+
+```python
+
 
 def add(a: int, b: int) -> int:
 {_INDENT}\"\"\"Addiert zwei Zahlen.\"\"\"""",
@@ -172,15 +183,35 @@ def test_humanevalde_olmes_offline_prompt_formatting() -> None:
 
 def test_humanevalde_olmes_bpb_offline_prompt_formatting() -> None:
     assert_offline_zeroshot_prompt(
-        humaneval_ellamind.HumanEvalDE_BPB_OLMES,
+        humaneval_ellamind.HumanEvalDE_BPB_OLMES_V2,
         eval_row=_EVAL_ROW,
         subjects=[_SUBJECT],
         expected=_BPB_ZEROSHOT,
     )
     assert_offline_oneshot_prompt(
-        humaneval_ellamind.HumanEvalDE_BPB_OLMES,
+        humaneval_ellamind.HumanEvalDE_BPB_OLMES_V2,
         eval_row=_EVAL_ROW,
         fewshot_row=_FEWSHOT_ROW,
         subjects=[_SUBJECT],
         expected=_BPB_FEWSHOT,
     )
+
+
+@pytest.mark.slow
+def test_humaneval_completion_bpb_same():
+    task = humaneval_ellamind.HumanEvalDE_BPB_OLMES_V2.with_overwrite(
+        num_fewshot=3, custom_subjects=None, custom_hf_revision=None
+    )
+    for task1_sample in task.iterate_samples(1):
+        break
+
+    humaneval = ConcatFormatter().format(task1_sample.messages)
+    task_compl = humaneval_ellamind.HumanEvalDE_OLMES.with_overwrite(
+        num_fewshot=3, custom_subjects=None, custom_hf_revision=None
+    )
+    for task2_sample in task_compl.iterate_samples(1):
+        break
+
+    humaneval_compl = ConcatFormatter().format(task2_sample.messages)
+    assert humaneval == humaneval_compl
+    assert task1_sample.messages == task2_sample.messages

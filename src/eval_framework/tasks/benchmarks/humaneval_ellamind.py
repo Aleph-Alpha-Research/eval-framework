@@ -63,3 +63,18 @@ class HumanEvalDE_BPB_OLMES(BaseTask[str]):
 
     def _get_correct_index(self, item: dict[str, Any]) -> int:
         return 0
+
+
+class HumanEvalDE_BPB_OLMES_V2(HumanEvalDE_BPB_OLMES):
+    """HumanEvalDE_BPB_OLMES variant that wraps the prompt and canonical solution in markdown code
+    fences, mirroring the HumanEvalDE_OLMES completion prompt exactly.
+    """
+
+    NAME = "HumanEvalDE_BPB_OLMES V2"
+
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        # Ensure that the code completion starts on a new line.
+        return "```python\n" + item["prompt"].rstrip() + "\n"
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        return item["canonical_solution"].rstrip() + "\n```"
