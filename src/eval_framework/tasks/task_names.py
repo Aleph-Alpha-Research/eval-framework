@@ -300,6 +300,7 @@ def register_humaneval_ellamind_tasks(registry: Registry) -> None:
     """Register humaneval_ellamind benchmark tasks."""
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_OLMES", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_BPB_OLMES", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_BPB_OLMES_V2", registry=registry)
 
 
 def register_mbpp_ellamind_tasks(registry: Registry) -> None:
