@@ -106,6 +106,8 @@
     "HumanEvalDE_OLMES.Llama3Formatter": "59c29b0d090e7dc9fa4ad0af98b6e4c9",
     "HumanEval_OLMES.ConcatFormatter": "8ce5a1465a77bfb558496d01f6684b04",
     "HumanEval_OLMES.Llama3Formatter": "6db1c1aeda39bc7485d183e1a3d28364",
+    "HumanEval_V2.ConcatFormatter": "2137d37b58c19b5e1c789f6cecea5f49",
+    "HumanEval_V2.Llama3Formatter": "80758d9903b75ab60dfcd03c2500198c",
     "IFEval.ConcatFormatter": "b517d9d281cd8d5db2ea72b47bd44314",
     "IFEval.Llama3Formatter": "7739c2862af662f2b146f4eae61ac208",
     "IFEvalDe.ConcatFormatter": "798e567efa346a45b42deff904a40b22",
