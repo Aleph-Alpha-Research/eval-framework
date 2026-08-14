@@ -97,11 +97,11 @@ def test_file_result_processor_save_and_load_results(tmp_path: Path) -> None:
             subject="math",
             ground_truth="4",
             prompt="What is 2+2?",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=[Message(role=Role.USER, content="Sample prompt 1")],
             completion="4",
             raw_completion="4",
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
         )
     )
     responses.append(
@@ -109,10 +109,10 @@ def test_file_result_processor_save_and_load_results(tmp_path: Path) -> None:
             id=2,
             subject="math",
             prompt="What is 2+2?",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             ground_truth="4",
             loglikelihoods={"1": -2.0, "2": -1.5, "3": -1.2, "4": -0.5},
-            loglikelihoods_sequence_positions={"1": -1, "2": -1, "3": -1, "4": -1},
+            loglikelihoods_num_tokens={"1": -1, "2": -1, "3": -1, "4": -1},
         )
     )
     metadata = {"llm_name": "TestLLM", "task_name": "TestTask", "num_fewshot": 0, "num_samples": 10}
@@ -160,11 +160,11 @@ def test_file_result_processor_load_duplicate_output(tmp_path: Path) -> None:
         subject="math",
         ground_truth="4",
         prompt="What is 2+2?",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[Message(role=Role.USER, content="Sample prompt 1")],
         completion="4",
         raw_completion="4",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
     processor = ResultsFileProcessor(tmp_path)
     processor.save_responses([completion, completion])
@@ -235,11 +235,11 @@ def test_file_result_processor_custom_context(tmp_path: Path) -> None:
         subject="custom_context_test",
         ground_truth="test",
         prompt="Test with custom context",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[Message(role=Role.USER, content="Sample prompt")],
         completion="test response",
         raw_completion="test response",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
         context=custom_context,  # Use our custom context
     )
 
@@ -290,11 +290,11 @@ def test_file_result_processor_list_of_custom_contexts(tmp_path: Path) -> None:
         subject="multiple_contexts_test",
         ground_truth="test",
         prompt="Test with multiple custom contexts",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[Message(role=Role.USER, content="Sample prompt")],
         completion="test response",
         raw_completion="test response",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
         context=context_list,  # Use our list of contexts
     )
 
@@ -348,11 +348,11 @@ def test_file_result_processor_batch_custom_contexts(tmp_path: Path) -> None:
         subject="batch_test_1",
         ground_truth="answer1",
         prompt="Test prompt 1",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[Message(role=Role.USER, content="Prompt 1")],
         completion="answer1",
         raw_completion="answer1",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
         context=MetricsContext(),
     )
 
@@ -361,11 +361,11 @@ def test_file_result_processor_batch_custom_contexts(tmp_path: Path) -> None:
         subject="batch_test_2",
         ground_truth="answer2",
         prompt="Test prompt 2",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[Message(role=Role.USER, content="Prompt 2")],
         completion="answer2",
         raw_completion="answer2",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
         context=DebugContext(),
     )
 

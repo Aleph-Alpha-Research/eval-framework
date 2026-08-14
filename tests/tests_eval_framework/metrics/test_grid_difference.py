@@ -159,10 +159,10 @@ class TestGridDifference:
         ]
         mock_completion = Completion(
             prompt=prompt,
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=messages,
             raw_completion=completion,
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
             id=0,
             subject="",
             ground_truth=ground_truth,

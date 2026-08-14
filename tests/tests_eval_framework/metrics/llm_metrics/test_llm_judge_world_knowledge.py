@@ -13,14 +13,14 @@ def test_llm_judge_world_knowledge() -> None:
         subject="test",
         ground_truth=None,
         prompt="test",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=[
             Message(role=Role.SYSTEM, content="You are a helpful AI agent which can summarize texts"),
             Message(role=Role.USER, content="Berlin is a lovable city. I really enjoy the food there."),
         ],
         completion="Berlin is the capital city of Germany, it's lovable.",
         raw_completion="Berlin is the capital city of Germany, it's lovable.",
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     llm = Mock(spec=BaseLLM)
@@ -33,8 +33,8 @@ def test_llm_judge_world_knowledge() -> None:
                     "contains_world_knowledge": True,
                 }
             ),
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
+            prompt_num_tokens=None,
+            completion_num_tokens=None,
         )
     ]
 
@@ -55,8 +55,8 @@ def test_llm_judge_world_knowledge() -> None:
                     "contains_world_knowledge": False,
                 }
             ),
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
+            prompt_num_tokens=None,
+            completion_num_tokens=None,
         )
     ]
 
@@ -70,8 +70,8 @@ def test_llm_judge_world_knowledge() -> None:
         RawCompletion(
             prompt="prompt",
             completion=json.dumps({"contains": "bad key"}),
-            prompt_sequence_positions=None,
-            completion_sequence_positions=None,
+            prompt_num_tokens=None,
+            completion_num_tokens=None,
         )
     ]
 

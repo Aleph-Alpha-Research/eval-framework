@@ -165,33 +165,33 @@ class AlephAlphaAPIModel(BaseLLM):
         if isinstance(response, Error):
             return RawCompletion(
                 prompt=prompt,
-                prompt_sequence_positions=None,
+                prompt_num_tokens=None,
                 completion="",
-                completion_sequence_positions=0,
+                completion_num_tokens=0,
                 raw_completion_error=response,
             )
 
         assert len(response.completions) == 1
         completion = response.completions[0].completion or ""
-        prompt_sequence_positions: int | None = None
-        completion_sequence_positions: int | None = None
+        prompt_num_tokens: int | None = None
+        completion_num_tokens: int | None = None
 
         # Support workaround in api-worker-transformer's scaling generator to return the correct number of tokens.
         # These are part of the completion string; those in CompletionResponse are invalid in this case.
         m = re.match(r"\uf8c9(\d+),(\d+)\uf8c9(.*)", completion, re.DOTALL)
         if m is not None:
             num_input_tokens, num_completion_tokens, completion = m.groups()
-            prompt_sequence_positions = int(num_input_tokens)
-            completion_sequence_positions = int(num_completion_tokens)
+            prompt_num_tokens = int(num_input_tokens)
+            completion_num_tokens = int(num_completion_tokens)
         else:
-            prompt_sequence_positions = response.num_tokens_prompt_total if response else None
-            completion_sequence_positions = response.num_tokens_generated if response else None
+            prompt_num_tokens = response.num_tokens_prompt_total if response else None
+            completion_num_tokens = response.num_tokens_generated if response else None
 
         return RawCompletion(
             prompt=prompt,
-            prompt_sequence_positions=prompt_sequence_positions,
+            prompt_num_tokens=prompt_num_tokens,
             completion=completion,
-            completion_sequence_positions=completion_sequence_positions,
+            completion_num_tokens=completion_num_tokens,
         )
 
     def generate_from_messages(
@@ -254,8 +254,8 @@ class AlephAlphaAPIModel(BaseLLM):
         results: list[RawLoglikelihood] = []
         for sample_idx, (sample, prompt) in enumerate(zip(samples, prompts, strict=True)):
             choices_log_probs: dict[str, float] = {}
-            choices_sequence_positions: dict[str, int] = {}
-            prompt_sequence_positions: int | None = 0
+            choices_num_tokens: dict[str, int] = {}
+            prompt_num_tokens: int | None = 0
             number_of_initial_choices_tokens: int | None = None
             error: Error | None = None
 
@@ -267,9 +267,9 @@ class AlephAlphaAPIModel(BaseLLM):
 
                 if isinstance(response, Error):
                     error = response
-                    prompt_sequence_positions = None
+                    prompt_num_tokens = None
                     choices_log_probs = {}
-                    choices_sequence_positions = {}
+                    choices_num_tokens = {}
                 else:
                     try:
                         logprob, choice_token_count = self._extract_choice_logprob_from_completion(
@@ -278,7 +278,7 @@ class AlephAlphaAPIModel(BaseLLM):
                             response=response,
                         )
                         choices_log_probs[choice] = logprob
-                        choices_sequence_positions[choice] = choice_token_count
+                        choices_num_tokens[choice] = choice_token_count
                         if number_of_initial_choices_tokens is None:
                             number_of_initial_choices_tokens = choice_token_count
 
@@ -294,16 +294,16 @@ class AlephAlphaAPIModel(BaseLLM):
                             message=str(exc),
                             traceback=traceback.format_exc(),
                         )
-                        prompt_sequence_positions = None
+                        prompt_num_tokens = None
                         choices_log_probs = {}
-                        choices_sequence_positions = {}
+                        choices_num_tokens = {}
 
             results.append(
                 RawLoglikelihood(
                     prompt=prompt,
-                    prompt_sequence_positions=prompt_sequence_positions,
+                    prompt_num_tokens=prompt_num_tokens,
                     loglikelihoods=choices_log_probs,
-                    loglikelihoods_sequence_positions=choices_sequence_positions,
+                    loglikelihoods_num_tokens=choices_num_tokens,
                     raw_loglikelihood_error=error,
                 )
             )

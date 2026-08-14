@@ -424,9 +424,9 @@ class BaseTask[SubjectType](Task):
             raw_completions = [
                 RawCompletion(
                     prompt="",
-                    prompt_sequence_positions=0,
+                    prompt_num_tokens=0,
                     completion="",
-                    completion_sequence_positions=0,
+                    completion_num_tokens=0,
                     raw_completion_error=Error(
                         error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc()
                     ),
@@ -461,12 +461,12 @@ class BaseTask[SubjectType](Task):
                     subject=sample.subject,
                     ground_truth=sample.ground_truth,
                     prompt=raw_completion.prompt,
-                    prompt_sequence_positions=raw_completion.prompt_sequence_positions,
+                    prompt_num_tokens=raw_completion.prompt_num_tokens,
                     concat_compression=raw_completion.concat_compression,
                     messages=messages,
                     completion=completion,
                     raw_completion=raw_completion.completion,
-                    raw_completion_sequence_positions=raw_completion.completion_sequence_positions,
+                    raw_completion_num_tokens=raw_completion.completion_num_tokens,
                     context=sample.context,
                     error=raw_completion.raw_completion_error or error,
                 )

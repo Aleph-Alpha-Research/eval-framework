@@ -93,11 +93,11 @@ def test_do_evaluate_single_output(
         subject="en",
         ground_truth=json.dumps(ground_truth),
         prompt="",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=None,
         completion=answer,
         raw_completion=answer,
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
     metric = JsonFormat()

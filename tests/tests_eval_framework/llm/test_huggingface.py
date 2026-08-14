@@ -52,9 +52,9 @@ def test_hf_llm() -> None:
 
     assert len(results) == 2
     assert set(results[0].loglikelihoods.keys()) == {"red", "blue", "black", "white"}
-    assert set(results[0].loglikelihoods_sequence_positions.keys()) == {"red", "blue", "black", "white"}
+    assert set(results[0].loglikelihoods_num_tokens.keys()) == {"red", "blue", "black", "white"}
     assert set(results[1].loglikelihoods.keys()) == {"foo", "bar"}
-    assert set(results[1].loglikelihoods_sequence_positions.keys()) == {"foo", "bar"}
+    assert set(results[1].loglikelihoods_num_tokens.keys()) == {"foo", "bar"}
 
     # -- TEST COMPLETIONS --
     generation_results: list[RawCompletion] = model.generate_from_messages(
@@ -90,7 +90,7 @@ def test_error_on_overly_long_prompt() -> None:
     # ... the loglikelihoods should be empty and the error should be stored
     assert len(lresults) == 1
     assert not lresults[0].loglikelihoods
-    assert not lresults[0].loglikelihoods_sequence_positions
+    assert not lresults[0].loglikelihoods_num_tokens
     assert (
         lresults[0].raw_loglikelihood_error is not None
         and lresults[0].raw_loglikelihood_error.error_class == PromptTooLongException.__name__
@@ -251,7 +251,7 @@ def test_max_tokens_generation() -> None:
     )
 
     assert len(generation_results) == 1
-    generated_num_tokens = generation_results[0].completion_sequence_positions
+    generated_num_tokens = generation_results[0].completion_num_tokens
     assert generated_num_tokens == 10
 
     byte_level_model = SmolLM135M(bytes_per_token=1.0)
@@ -266,5 +266,5 @@ def test_max_tokens_generation() -> None:
     )
 
     assert len(byte_level_model_generation_results) == 1
-    byte_level_model_generated_num_tokens = byte_level_model_generation_results[0].completion_sequence_positions
+    byte_level_model_generated_num_tokens = byte_level_model_generation_results[0].completion_num_tokens
     assert byte_level_model_generated_num_tokens == 40

@@ -16,11 +16,11 @@ def make_completion(completion: str, ground_truth: str | list[str]) -> Completio
         subject="test",
         ground_truth=ground_truth,
         prompt="test prompt",
-        prompt_sequence_positions=None,
+        prompt_num_tokens=None,
         messages=None,
         completion=completion,
         raw_completion=completion,
-        raw_completion_sequence_positions=None,
+        raw_completion_num_tokens=None,
     )
 
 

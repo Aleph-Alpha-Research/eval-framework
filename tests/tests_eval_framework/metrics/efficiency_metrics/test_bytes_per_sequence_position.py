@@ -15,10 +15,10 @@ log_likelihood_params = [
             subject="x",
             ground_truth="big car",
             prompt="test",
-            prompt_sequence_positions=1,
+            prompt_num_tokens=1,
             concat_compression=ConcatCompression(num_tokens=6, num_bytes=17),
             loglikelihoods={"big car": -1.0, "small mouse house": -2.0},
-            loglikelihoods_sequence_positions={"big car": 2, "small mouse house": 3},
+            loglikelihoods_num_tokens={"big car": 2, "small mouse house": 3},
         ),
         6,
         17,
@@ -30,9 +30,9 @@ log_likelihood_params = [
             subject="x",
             ground_truth="big car",
             prompt="test",
-            prompt_sequence_positions=1,
+            prompt_num_tokens=1,
             loglikelihoods={"big car": -1.0, "small mouse house": -2.0},
-            loglikelihoods_sequence_positions={},
+            loglikelihoods_num_tokens={},
         ),
         None,
         None,
@@ -44,9 +44,9 @@ log_likelihood_params = [
             subject="x",
             ground_truth="big car",
             prompt="test",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             loglikelihoods={},
-            loglikelihoods_sequence_positions={"big car": 2, "small mouse house": 3},
+            loglikelihoods_num_tokens={"big car": 2, "small mouse house": 3},
         ),
         None,
         None,
@@ -58,9 +58,9 @@ log_likelihood_params = [
             subject="x",
             ground_truth="big car",
             prompt="test",
-            prompt_sequence_positions=1,
+            prompt_num_tokens=1,
             loglikelihoods={"big car": -1.0, "small mouse house": -2.0},
-            loglikelihoods_sequence_positions={"big car": 2, "small mouse house": 3},
+            loglikelihoods_num_tokens={"big car": 2, "small mouse house": 3},
             error=Error(error_class="", message="", traceback=""),
         ),
         None,
@@ -71,7 +71,7 @@ log_likelihood_params = [
 
 
 @pytest.mark.parametrize("response,expected_sp,expected_bytes", log_likelihood_params)
-def test_sequence_positions_loglikelihood(
+def test_num_tokens_loglikelihood(
     response: Loglikelihood, expected_sp: float | None, expected_bytes: float | None
 ) -> None:
     metric = SequencePositionsLoglikelihood()
@@ -95,12 +95,12 @@ completion_params = [
             subject="x",
             ground_truth="wow, a cute dog!",
             prompt="test",
-            prompt_sequence_positions=1,
+            prompt_num_tokens=1,
             messages=None,
             completion="25",
             concat_compression=ConcatCompression(num_tokens=5, num_bytes=17),
             raw_completion="the answer is 25",
-            raw_completion_sequence_positions=4,
+            raw_completion_num_tokens=4,
         ),
         5,
         17,
@@ -112,11 +112,11 @@ completion_params = [
             subject="x",
             ground_truth="wow, a cute dog!",
             prompt="test",
-            prompt_sequence_positions=1,
+            prompt_num_tokens=1,
             messages=None,
             completion="25",
             raw_completion="the answer is 25",
-            raw_completion_sequence_positions=None,
+            raw_completion_num_tokens=None,
         ),
         None,
         None,
@@ -128,11 +128,11 @@ completion_params = [
             subject="x",
             ground_truth="wow, a cute dog!",
             prompt="test",
-            prompt_sequence_positions=None,
+            prompt_num_tokens=None,
             messages=None,
             completion="25",
             raw_completion="the answer is 25",
-            raw_completion_sequence_positions=4,
+            raw_completion_num_tokens=4,
         ),
         None,
         None,
@@ -144,11 +144,11 @@ completion_params = [
             subject="x",
             ground_truth="wow, a cute dog!",
             prompt="test",
-            prompt_sequence_positions=1,
+            prompt_num_tokens=1,
             messages=None,
             completion="25",
             raw_completion="the answer is 25",
-            raw_completion_sequence_positions=4,
+            raw_completion_num_tokens=4,
             error=Error(error_class="", message="", traceback=""),
         ),
         None,
@@ -159,9 +159,7 @@ completion_params = [
 
 
 @pytest.mark.parametrize("response,expected_sp,expected_bytes", completion_params)
-def test_sequence_positions_completion(
-    response: Completion, expected_sp: float | None, expected_bytes: float | None
-) -> None:
+def test_num_tokens_completion(response: Completion, expected_sp: float | None, expected_bytes: float | None) -> None:
     metric = SequencePositionsCompletion()
     results = metric.calculate(response)
     assert len(results) == 1
