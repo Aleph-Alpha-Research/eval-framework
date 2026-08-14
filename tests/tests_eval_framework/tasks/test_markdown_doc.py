@@ -12,7 +12,6 @@ class ExampleFormatter:
 def test_markdown_doc_with_examples() -> None:
     doc = markdown_doc(
         name="MyTask",
-        module="eval_framework.tasks.benchmarks.mytask",
         dataset_path=None,
         sample_split="test",
         fewshot_split="train",
@@ -41,8 +40,6 @@ RESPONSE_TYPE = COMPLETION
 METRICS = [Accuracy, F1]
 SUBJECTS = ['no_subject']
 ````
-
-- Module: `eval_framework.tasks.benchmarks.mytask`
 
 - `test` has 3 samples
 
@@ -73,7 +70,6 @@ SUBJECTS = ['no_subject']
 def test_markdown_doc_with_dataset_link() -> None:
     doc = markdown_doc(
         name="MyTask",
-        module="eval_framework.tasks.benchmarks.mytask",
         dataset_path="datasets/mytask",
         sample_split="test",
         fewshot_split="train",
@@ -103,8 +99,6 @@ RESPONSE_TYPE = COMPLETION
 METRICS = [Accuracy, F1]
 SUBJECTS = ['no_subject']
 ````
-
-- Module: `eval_framework.tasks.benchmarks.mytask`
 
 - Link to dataset: [https://huggingface.co/datasets/datasets/mytask](https://huggingface.co/datasets/datasets/mytask)
 """
