@@ -8,7 +8,6 @@ from template_formatting.formatter import BaseFormatter, Message
 def markdown_doc(
     *,
     name: str,
-    module: str,
     dataset_path: str | None,
     sample_split: str | None,
     fewshot_split: str | None,
@@ -43,8 +42,6 @@ def markdown_doc(
     if language is not None:
         buf.write(f"LANGUAGE = {language!r}".strip() + "\n")
     buf.write("````\n\n")
-
-    buf.write(f"- Module: `{module}`\n\n")
 
     if http_path:
         buf.write(f"- Link to dataset: [{http_path}]({http_path})\n")

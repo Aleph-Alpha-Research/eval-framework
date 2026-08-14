@@ -247,7 +247,6 @@ class BaseTask[SubjectType](Task):
 
         return render_markdown_doc(
             name=self.NAME,
-            module=type(self).__module__,
             dataset_path=dataset_path,
             sample_split=getattr(self, "SAMPLE_SPLIT", None),
             fewshot_split=getattr(self, "FEWSHOT_SPLIT", None),
