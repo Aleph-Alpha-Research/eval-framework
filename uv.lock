@@ -1100,7 +1100,7 @@ requires-dist = [
     { name = "llm-sandbox", extras = ["docker"], specifier = "==0.3.44" },
     { name = "lxml", specifier = ">=6.1.1,<7" },
     { name = "mysql-connector-python", specifier = ">=26.7.0,<27" },
-    { name = "nltk", specifier = ">=3.10.2,<4" },
+    { name = "nltk", specifier = ">=3.10.3,<4" },
     { name = "numpy", specifier = ">=2.5.2" },
     { name = "openai", marker = "extra == 'openai'", specifier = ">=3.0.0,<4" },
     { name = "psycopg2-binary", specifier = ">=2.9.12,<3" },
