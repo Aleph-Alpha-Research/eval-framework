@@ -96,7 +96,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **annotated-types** 0.8.0 - https://github.com/annotated-types/annotated-types
 - **anyio** 4.14.2 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
-- **charset-normalizer** 3.5.0 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
+- **charset-normalizer** 3.5.1 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
 - **filelock** 3.32.3 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
@@ -599,7 +599,7 @@ one at http://mozilla.org/MPL/2.0/.
 @(#) $RCSfile: certdata.txt,v $ $Revision: 1.80 $ $Date: 2011/11/03 15:11:58 $
 ```
 
-### charset-normalizer 3.5.0 (MIT)
+### charset-normalizer 3.5.1 (MIT)
 
 ```text
 MIT License
