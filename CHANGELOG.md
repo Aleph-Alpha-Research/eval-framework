@@ -14,6 +14,27 @@
 
 ### Bug Fixes
 
+## [0.10.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.1...v0.10.2) (2026-08-16)
+
+
+### Features
+
+* coding tasks end with new lines ([a44de91](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a44de917840ae4f19434a589b43670c16687e6f3))
+* concat formatter that never strips ([70a1cdd](https://github.com/Aleph-Alpha-Research/eval-framework/commit/70a1cddecb8b07702d74dfc1bfa05005a74993a6))
+* humaneval bpb task with fences ([3d62a85](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3d62a854b8b0306cdf279a74de3e7b464e367c21))
+* humaneval de bpb task has code fences ([333e65f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/333e65f9b73388baf7a983c04dadfdab9f26e977))
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.69,&lt;2 ([75c41a7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/75c41a7f3d3fc32baf8b4cfd46890602566dc537))
+* **deps:** update dependency boto3 to &gt;=1.43.70,&lt;2 ([0b96e13](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0b96e1359c87be390e963b788f2706966a04926f))
+* **deps:** update dependency nltk to &gt;=3.10.3,&lt;4 ([b3a00e4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b3a00e47a87e15c6961e3b3176be92517e86df5f))
+* **deps:** update dependency openai to &gt;=2.54.0,&lt;3 ([1137609](https://github.com/Aleph-Alpha-Research/eval-framework/commit/113760951a1d990800b2443fae0d3483cf29d22c))
+* **deps:** update dependency openai to v3 ([71e1e75](https://github.com/Aleph-Alpha-Research/eval-framework/commit/71e1e75ad7e1a7bef68b89b435c44f305f807eb8))
+* **deps:** update dependency wandb to &gt;=0.28.2,&lt;1 ([3a84f83](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3a84f8360694985fba5f901648c878b52a1138d5))
+* stop judge_model_args serializer from mutating the config ([986ff3e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/986ff3e41f3de1e25f91bda6657200ff3bd27167))
+
 ## [0.10.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.0...v0.10.1) (2026-08-14)
 
 
