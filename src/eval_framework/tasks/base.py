@@ -3,7 +3,7 @@ import os
 import random
 import traceback
 import typing
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self, TypeVar
@@ -540,14 +540,49 @@ def resolve_overwrite_subjects[SubjectType](
 class Eager(EvalFactory):
     """Wraps an already-imported task class."""
 
-    def __init__(self, task: type[BaseTask], id: str) -> None:
+    def __init__(
+        self,
+        task: type[BaseTask],
+        *,
+        id: str,
+        display_name: str,
+        subjects: list[Any],
+        metrics: list[type["BaseMetric"]],
+        response_type: ResponseType,
+        generate_markdown_doc: Callable[[Sequence[BaseFormatter]], str],
+    ) -> None:
         self._task = task
         self._id = id
+        self._display_name = display_name
+        self._subjects = subjects
+        self._metrics = metrics
+        self._response_type = response_type
+        self._generate_markdown_doc = generate_markdown_doc
 
     @classmethod
     def from_base_task(cls, task: type[BaseTask]) -> Self:
-        """Build an ``Eager`` from a task class, deriving the id from its class name."""
-        return cls(task, id=task.__name__)
+        """Build an ``Eager`` from a task class, deriving its metadata from the class."""
+
+        def generate_markdown_doc(formatters: Sequence[BaseFormatter]) -> str:
+            try:
+                instance = task.with_overwrite(
+                    num_fewshot=1, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
+                )
+            except (TypeError, ValueError, AssertionError):
+                instance = task.with_overwrite(
+                    num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
+                )
+            return instance.markdown_doc(formatters)
+
+        return cls(
+            task,
+            id=task.__name__,
+            display_name=task.NAME,
+            subjects=task.SUBJECTS,
+            metrics=task.get_metrics(),
+            response_type=task.get_response_type(),
+            generate_markdown_doc=generate_markdown_doc,
+        )
 
     def id(self) -> str:
         return self._id
@@ -570,23 +605,19 @@ class Eager(EvalFactory):
 
     def response_type(self) -> ResponseType:
         """The eval's response type"""
-        return self._task.get_response_type()
+        return self._response_type
 
     def metrics(self) -> list[type["BaseMetric"]]:
         """The eval's metrics"""
-        return self._task.get_metrics()
+        return self._metrics
 
     def subjects(self) -> list[Any]:
         """The eval's subjects"""
-        return self._task.SUBJECTS
+        return self._subjects
 
     def display_name(self) -> str:
-        """The eval's human-readable display name (the task's ``NAME``)."""
-        return self._task.NAME
+        """The eval's human-readable display name."""
+        return self._display_name
 
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        try:
-            task = self.create(num_fewshot=1, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED)
-        except (TypeError, ValueError, AssertionError):
-            task = self.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED)
-        return task.markdown_doc(formatters)
+        return self._generate_markdown_doc(formatters)
