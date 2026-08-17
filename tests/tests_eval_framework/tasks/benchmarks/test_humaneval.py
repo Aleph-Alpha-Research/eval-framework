@@ -80,11 +80,11 @@ class TestHumanEvalOLMES:
         item = human_eval_olmes_task.dataset[human_eval_olmes_task.SAMPLE_SPLIT][0]
         instruction = human_eval_olmes_task._get_instruction_text(item)
         assert instruction.startswith("```python\n")
-        assert instruction == "```python\n" + item["prompt"].rstrip("\n")
+        assert instruction == "```python\n" + item["prompt"]
 
         fewshot_target = human_eval_olmes_task._get_fewshot_target_text(item)
         assert fewshot_target.endswith("```")
-        assert fewshot_target == "\n" + item["canonical_solution"] + "```"
+        assert fewshot_target == item["canonical_solution"] + "```"
 
 
 class TestHumanEvalInstructCode:
@@ -153,8 +153,8 @@ _BPB_ZEROSHOT = ExpectedPrompt(
 
 def add(a: int, b: int) -> int:
 {_INDENT}\"\"\"Adds two numbers.\"\"\"""",
-    ground_truth=f"{_INDENT}return a + b",
-    completions=[f"{_INDENT}return a + b"],
+    ground_truth=f"{_INDENT}return a + b\n```",
+    completions=[f"{_INDENT}return a + b\n```"],
 )
 
 _BPB_FEWSHOT = ExpectedPrompt(

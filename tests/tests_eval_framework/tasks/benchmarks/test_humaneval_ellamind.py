@@ -74,7 +74,7 @@ _OLMES_ZEROSHOT = ExpectedPrompt(
     messages=[
         Message(
             role=Role.USER,
-            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""',
+            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
         ),
     ],
     concat=f"""\
@@ -108,12 +108,12 @@ _OLMES_FEWSHOT = ExpectedPrompt(
     messages=[
         Message(
             role=Role.USER,
-            content=f'```python\n\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""',
+            content=f'```python\n\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""\n',
         ),
-        Message(role=Role.ASSISTANT, content=f"\n{_INDENT}return x * x```"),
+        Message(role=Role.ASSISTANT, content=f"{_INDENT}return x * x```"),
         Message(
             role=Role.USER,
-            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""',
+            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
         ),
     ],
     concat=f"""\
@@ -138,7 +138,7 @@ _OLMES_FEWSHOT_V2 = ExpectedPrompt(
             role=Role.USER,
             content=f'```python\n\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""\n',
         ),
-        Message(role=Role.ASSISTANT, content=f"{_INDENT}return x * x```"),
+        Message(role=Role.ASSISTANT, content=f"{_INDENT}return x * x\n```"),
         Message(
             role=Role.USER,
             content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
@@ -149,7 +149,8 @@ _OLMES_FEWSHOT_V2 = ExpectedPrompt(
 
 def square(x: int) -> int:
 {_INDENT}\"\"\"Gibt das Quadrat zurück.\"\"\"
-{_INDENT}return x * x```
+{_INDENT}return x * x
+```
 
 ```python
 
@@ -167,7 +168,7 @@ _BPB_ZEROSHOT = ExpectedPrompt(
     messages=[
         Message(
             role=Role.USER,
-            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""',
+            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
         ),
     ],
     concat=f"""\
@@ -176,20 +177,20 @@ _BPB_ZEROSHOT = ExpectedPrompt(
 
 def add(a: int, b: int) -> int:
 {_INDENT}\"\"\"Addiert zwei Zahlen.\"\"\"""",
-    ground_truth=f"{_INDENT}return a + b",
-    completions=[f"{_INDENT}return a + b"],
+    ground_truth=f"{_INDENT}return a + b\n```",
+    completions=[f"{_INDENT}return a + b\n```"],
 )
 
 _BPB_FEWSHOT = ExpectedPrompt(
     messages=[
         Message(
             role=Role.USER,
-            content=f'```python\n\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""',
+            content=f'```python\n\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""\n',
         ),
-        Message(role=Role.ASSISTANT, content=f"\n{_INDENT}return x * x\n```"),
+        Message(role=Role.ASSISTANT, content=f"{_INDENT}return x * x\n```"),
         Message(
             role=Role.USER,
-            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""',
+            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
         ),
     ],
     concat=f"""\
