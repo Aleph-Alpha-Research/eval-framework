@@ -17,8 +17,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     SequencePositionsCompletion,
     SequencePositionsLoglikelihood,
 )
-from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
-from eval_framework.metrics.efficiency.reasoning_tokens import NumReasoningTokens
+from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
 from eval_framework.tasks.dataset_revisions import pinned_revision
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
@@ -459,8 +458,7 @@ class BaseTask[SubjectType](Task):
                 metrics = [
                     BytesCompletion,
                     SequencePositionsCompletion,
-                    NumCompletionTokens,
-                    NumReasoningTokens,
+                    TokenCounts,
                 ]
             case ResponseType.LOGLIKELIHOODS:
                 metrics = [BytesLoglikelihood, SequencePositionsLoglikelihood]
