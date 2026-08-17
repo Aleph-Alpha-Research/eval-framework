@@ -482,10 +482,21 @@ class BaseTask[SubjectType](Task):
 
     @classmethod
     def get_metrics(cls) -> list[type["BaseMetric"]]:
-        """Return the metrics of the task (or the styler if it exists)."""
+        """Return the metrics of the task (or the styler if it exists).
+
+        Completion tasks always report the number of generated tokens, so
+        ``NumCompletionTokens`` is appended automatically when it isn't already
+        listed. This keeps per-task metric lists focused on scoring.
+        """
+        from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
+
         if hasattr(cls, "TASK_STYLER"):
-            return cls.TASK_STYLER.metrics
-        return cls.METRICS
+            metrics = list(cls.TASK_STYLER.metrics)
+        else:
+            metrics = list(cls.METRICS)
+        if cls.get_response_type() == ResponseType.COMPLETION and NumCompletionTokens not in metrics:
+            metrics.append(NumCompletionTokens)
+        return metrics
 
     @classproperty
     def RESPONSE_TYPE(cls) -> ResponseType:

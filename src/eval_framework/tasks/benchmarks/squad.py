@@ -10,7 +10,6 @@ from huggingface_hub.errors import RevisionNotFoundError
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1, F1SquadNormalized
-from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
@@ -24,7 +23,7 @@ class SQUAD2(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [AccuracyCompletion, F1, NumCompletionTokens]
+    METRICS = [AccuracyCompletion, F1]
     SUBJECTS = [NO_SUBJECT]
     UNANSWERABLE_STR = "unanswerable"
     LANGUAGE = Language.ENG
@@ -247,7 +246,7 @@ class SQuAD2_MA(SQUAD2):
     NAME = "SQuAD2_MA"
     UNANSWERABLE_STR = "unanswerable"
 
-    METRICS = [AccuracyCompletion, F1, F1SquadNormalized, NumCompletionTokens]
+    METRICS = [AccuracyCompletion, F1, F1SquadNormalized]
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)
@@ -310,7 +309,7 @@ class SQuAD_OLMES(SQUAD):
     NAME = "SQuAD_OLMES"
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
-    METRICS = [F1SquadNormalized, NumCompletionTokens]
+    METRICS = [F1SquadNormalized]
 
     def __init__(self, num_fewshot: int = 0) -> None:
         super().__init__(num_fewshot)

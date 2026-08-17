@@ -11,7 +11,6 @@ from eval_framework.metrics.completion.math_minerva_completion import (
 )
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
 from eval_framework.metrics.completion.minerva_math_utils import extract_answers, normalized_gold_from_solution
-from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import BPBStyle
@@ -40,7 +39,7 @@ class MATHReasoning(BaseTask[str]):
     """
 
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [MathReasoningCompletion, NumCompletionTokens]
+    METRICS = [MathReasoningCompletion]
     SUBJECTS = [NO_SUBJECT]
     ANSWER_PATTERN = r"(?i)Answer\s*:\s*(.*)"
     LANGUAGE = Language.ENG
@@ -337,7 +336,7 @@ class AIME2024(MATHReasoning):
     SAMPLE_SPLIT = "train"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [MathReasoningCompletion, LanguageRawConsistencyChecker, NumCompletionTokens]
+    METRICS = [MathReasoningCompletion, LanguageRawConsistencyChecker]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 
@@ -438,7 +437,7 @@ class MATH500(MATHReasoning):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [MathReasoningCompletion, LanguageRawConsistencyChecker, NumCompletionTokens]
+    METRICS = [MathReasoningCompletion, LanguageRawConsistencyChecker]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 
@@ -487,7 +486,7 @@ class MATH(MATHReasoning):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [MathReasoningCompletion, LanguageRawConsistencyChecker, NumCompletionTokens]
+    METRICS = [MathReasoningCompletion, LanguageRawConsistencyChecker]
     SUBJECTS = MATH_SUBJECTS
     LANGUAGE = Language.ENG
 
@@ -566,7 +565,7 @@ class MATHMinervaEvalHarness(MATHReasoning):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [MathMinervaCompletion, NumCompletionTokens]
+    METRICS = [MathMinervaCompletion]
     SUBJECTS = MATH_SUBJECTS
     LANGUAGE = Language.ENG
 
@@ -600,7 +599,7 @@ class MATHMinerva(MATHMinervaEvalHarness):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "MATHMinerva"
-    METRICS = [MathMinervaCompletionRelaxed, NumCompletionTokens]
+    METRICS = [MathMinervaCompletionRelaxed]
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         """Primary answer for storage; uses relaxed final-answer extraction."""
@@ -665,7 +664,7 @@ class GSM8KReasoning(MATHReasoning):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [AccuracyCompletion, LanguageRawConsistencyChecker, NumCompletionTokens]
+    METRICS = [AccuracyCompletion, LanguageRawConsistencyChecker]
     SUBJECTS = ["main"]
     LANGUAGE = Language.ENG
 
@@ -761,7 +760,7 @@ _OLMES_FEWSHOTS = [
 class MATHMinerva_OLMES(MATHMinerva):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "MATHMinerva_OLMES"
-    METRICS = [MathMinervaCompletion, MathMinervaCompletionRelaxed, NumCompletionTokens]
+    METRICS = [MathMinervaCompletion, MathMinervaCompletionRelaxed]
 
     def __init__(self, num_fewshot: int = 4) -> None:
         if num_fewshot != 4:

@@ -3,7 +3,6 @@ import re
 from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion, AccuracyCompletionOLMES
-from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import BPBStyle
@@ -101,7 +100,7 @@ class GSM8KEvalHarness(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [AccuracyCompletion, NumCompletionTokens]
+    METRICS = [AccuracyCompletion]
     SUBJECTS = ["main"]
     LANGUAGE = Language.ENG
 
@@ -158,7 +157,7 @@ class GSM8K(GSM8KEvalHarness):
 class GSM8K_OLMES(GSM8K):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "GSM8K_OLMES"
-    METRICS = [AccuracyCompletionOLMES, NumCompletionTokens]
+    METRICS = [AccuracyCompletionOLMES]
 
     def __init__(self, num_fewshot: int = 8) -> None:
         if num_fewshot != 8:

@@ -1,7 +1,6 @@
 from typing import Any
 
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
-from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
@@ -36,7 +35,7 @@ class HumanEval(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"  # (there is no dedicated split, few-shot is not expected for this dataset)
     RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = [CodeCompletionAssertion, NumCompletionTokens]
+    METRICS = [CodeCompletionAssertion]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 
