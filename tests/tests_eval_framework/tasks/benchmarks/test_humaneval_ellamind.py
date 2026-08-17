@@ -87,6 +87,23 @@ def add(a: int, b: int) -> int:
     completions=None,
 )
 
+_OLMES_ZEROSHOT_V2 = ExpectedPrompt(
+    messages=[
+        Message(
+            role=Role.USER,
+            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
+        ),
+    ],
+    concat=f"""\
+```python
+
+
+def add(a: int, b: int) -> int:
+{_INDENT}\"\"\"Addiert zwei Zahlen.\"\"\"""",
+    ground_truth="Success",
+    completions=None,
+)
+
 _OLMES_FEWSHOT = ExpectedPrompt(
     messages=[
         Message(
@@ -113,6 +130,34 @@ def add(a: int, b: int) -> int:
 {_INDENT}\"\"\"Addiert zwei Zahlen.\"\"\"""",
     ground_truth=_OLMES_ZEROSHOT.ground_truth,
     completions=_OLMES_ZEROSHOT.completions,
+)
+
+_OLMES_FEWSHOT_V2 = ExpectedPrompt(
+    messages=[
+        Message(
+            role=Role.USER,
+            content=f'```python\n\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""\n',
+        ),
+        Message(role=Role.ASSISTANT, content=f"{_INDENT}return x * x```"),
+        Message(
+            role=Role.USER,
+            content=f'```python\n\n\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n',
+        ),
+    ],
+    concat=f"""\
+```python
+
+def square(x: int) -> int:
+{_INDENT}\"\"\"Gibt das Quadrat zurück.\"\"\"
+{_INDENT}return x * x```
+
+```python
+
+
+def add(a: int, b: int) -> int:
+{_INDENT}\"\"\"Addiert zwei Zahlen.\"\"\"""",
+    ground_truth=_OLMES_ZEROSHOT_V2.ground_truth,
+    completions=_OLMES_ZEROSHOT_V2.completions,
 )
 
 # --- HumanEvalDE_BPB_OLMES_V2 ---
@@ -179,6 +224,22 @@ def test_humanevalde_olmes_offline_prompt_formatting() -> None:
         fewshot_row=_FEWSHOT_ROW,
         subjects=[_SUBJECT],
         expected=_OLMES_FEWSHOT,
+    )
+
+
+def test_HumanEvalDE_OLMES_V2_olmes_offline_prompt_formatting() -> None:
+    assert_offline_zeroshot_prompt(
+        humaneval_ellamind.HumanEvalDE_OLMES_V2,
+        eval_row=_EVAL_ROW,
+        subjects=[_SUBJECT],
+        expected=_OLMES_ZEROSHOT_V2,
+    )
+    assert_offline_oneshot_prompt(
+        humaneval_ellamind.HumanEvalDE_OLMES_V2,
+        eval_row=_EVAL_ROW,
+        fewshot_row=_FEWSHOT_ROW,
+        subjects=[_SUBJECT],
+        expected=_OLMES_FEWSHOT_V2,
     )
 
 
