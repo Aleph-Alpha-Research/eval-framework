@@ -538,30 +538,45 @@ def resolve_overwrite_subjects[SubjectType](
 
 
 class Eager(EvalFactory):
-    """Wraps an already-imported task class."""
+    """An ``EvalFactory`` assembled from precomputed metadata and eval/doc callables."""
 
     def __init__(
         self,
-        task: type[BaseTask],
         *,
         id: str,
         display_name: str,
         subjects: list[Any],
         metrics: list[type["BaseMetric"]],
         response_type: ResponseType,
+        make_eval: Callable[..., Task],
         generate_markdown_doc: Callable[[Sequence[BaseFormatter]], str],
     ) -> None:
-        self._task = task
         self._id = id
         self._display_name = display_name
         self._subjects = subjects
         self._metrics = metrics
         self._response_type = response_type
+        self._make_eval = make_eval
         self._generate_markdown_doc = generate_markdown_doc
 
     @classmethod
     def from_base_task(cls, task: type[BaseTask]) -> Self:
         """Build an ``Eager`` from a task class, deriving its metadata from the class."""
+
+        def make_eval(
+            num_fewshot: int,
+            custom_subjects: list[str] | None,
+            custom_hf_revision: str | None,
+            user_prompt_suffix: str | None = None,
+            seed: int | None = None,
+        ) -> Task:
+            return task.with_overwrite(
+                num_fewshot=num_fewshot,
+                custom_subjects=custom_subjects,
+                custom_hf_revision=custom_hf_revision,
+                user_prompt_suffix=user_prompt_suffix,
+                seed=seed,
+            )
 
         def generate_markdown_doc(formatters: Sequence[BaseFormatter]) -> str:
             try:
@@ -575,12 +590,12 @@ class Eager(EvalFactory):
             return instance.markdown_doc(formatters)
 
         return cls(
-            task,
             id=task.__name__,
             display_name=task.NAME,
             subjects=task.SUBJECTS,
             metrics=task.get_metrics(),
             response_type=task.get_response_type(),
+            make_eval=make_eval,
             generate_markdown_doc=generate_markdown_doc,
         )
 
@@ -594,14 +609,8 @@ class Eager(EvalFactory):
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
         seed: int | None = None,
-    ) -> BaseTask:
-        return self._task.with_overwrite(
-            num_fewshot=num_fewshot,
-            custom_subjects=custom_subjects,
-            custom_hf_revision=custom_hf_revision,
-            user_prompt_suffix=user_prompt_suffix,
-            seed=seed,
-        )
+    ) -> Task:
+        return self._make_eval(num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix, seed)
 
     def response_type(self) -> ResponseType:
         """The eval's response type"""
