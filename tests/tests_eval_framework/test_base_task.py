@@ -4,6 +4,10 @@ from unittest.mock import patch
 
 import pytest
 
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.efficiency.bytes_per_sequence_position import BytesCompletion, SequencePositionsCompletion
+from eval_framework.metrics.efficiency.completion_tokens import NumCompletionTokens
+from eval_framework.metrics.efficiency.reasoning_tokens import NumReasoningTokens
 from eval_framework.run import parse_args
 from eval_framework.tasks import dataset_revisions as dr
 from eval_framework.tasks.base import BaseTask, ResponseType
@@ -243,3 +247,22 @@ def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
 
     # Then the override beats the pin
     assert task.hf_revision == "custom-sha"
+
+
+def test_completion_metrics_returns_all_completion_metrics() -> None:
+    class MyCompletionTask(BaseTask):
+        REVISION_LOCKFILE = None
+        NAME = "MyCompletionTask"
+        RESPONSE_TYPE = ResponseType.COMPLETION
+        METRICS = [AccuracyCompletion]
+
+    task = MyCompletionTask()
+
+    metrics = task.get_metrics()
+    assert set(metrics) == {
+        AccuracyCompletion,
+        BytesCompletion,
+        SequencePositionsCompletion,
+        NumCompletionTokens,
+        NumReasoningTokens,
+    }
