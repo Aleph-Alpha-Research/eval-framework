@@ -6,6 +6,7 @@ Covers: ``format_mc_prompt``, ``shuffle_correct_with_distractors``, ``answer_key
 
 import pytest
 
+from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, TaskStyle
 from eval_framework.tasks.task_style import (
     BPBStyle,
@@ -368,7 +369,6 @@ class TestBaseTaskMCStyle:
             AccuracyLoglikelihood,
             AccuracyNormLoglikelihood,
         )
-        from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 
         assert AccuracyLoglikelihood in self.task.TASK_STYLER.metrics
         assert AccuracyNormLoglikelihood in self.task.TASK_STYLER.metrics
@@ -536,7 +536,6 @@ class TestBPBStyle:
 
     def test_metrics_bpb_only(self) -> None:
         from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
-        from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 
         assert self.styler.metrics == [BitsPerByteLoglikelihood]
         assert AccuracyLoglikelihood not in self.styler.metrics
@@ -593,7 +592,7 @@ class TestBaseTaskBPBStyle:
 
     def test_metadata_metrics_bpb_only(self) -> None:
         meta = self.task.get_metadata()
-        assert meta["metrics"] == ["BitsPerByte"]
+        assert meta["metrics"] == ["BitsPerByte", "Bytes", "SequencePositions"]
 
 
 def test_instance_properties_are_styler_backed() -> None:
@@ -601,4 +600,4 @@ def test_instance_properties_are_styler_backed() -> None:
 
     # Check compatibility access points for metadata.
     assert task.RESPONSE_TYPE == ResponseType.LOGLIKELIHOODS
-    assert task.METRICS == task.TASK_STYLER.metrics
+    assert all(metric in task.METRICS for metric in task.TASK_STYLER.metrics)

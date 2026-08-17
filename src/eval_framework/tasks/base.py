@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import traceback
+import typing
 from collections.abc import Iterable, Sequence
 from enum import Enum
 from pathlib import Path
@@ -10,6 +11,12 @@ from typing import TYPE_CHECKING, Any, Self, TypeVar
 import iso639
 from datasets import DatasetDict, DownloadConfig, load_dataset
 
+from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
+    BytesCompletion,
+    BytesLoglikelihood,
+    SequencePositionsCompletion,
+    SequencePositionsLoglikelihood,
+)
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
 from eval_framework.tasks.dataset_revisions import pinned_revision
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
@@ -437,8 +444,19 @@ class BaseTask[SubjectType](Task):
     def get_metrics(cls) -> list[type["BaseMetric"]]:
         """Return the metrics of the task (or the styler if it exists)."""
         if hasattr(cls, "TASK_STYLER"):
-            return cls.TASK_STYLER.metrics
-        return cls.METRICS
+            task_metrics = cls.TASK_STYLER.metrics
+        else:
+            task_metrics = cls.METRICS
+
+        match cls.get_response_type():
+            case ResponseType.COMPLETION:
+                metrics = task_metrics + [BytesCompletion, SequencePositionsCompletion]
+            case ResponseType.LOGLIKELIHOODS:
+                metrics = task_metrics + [BytesLoglikelihood, SequencePositionsLoglikelihood]
+            case _:
+                typing.assert_never(cls.get_response_type())
+
+        return metrics
 
     @classproperty
     def RESPONSE_TYPE(cls) -> ResponseType:
