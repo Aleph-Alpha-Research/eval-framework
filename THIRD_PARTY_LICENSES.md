@@ -71,7 +71,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **multiprocess** 0.70.19 - https://github.com/uqfoundation/multiprocess
 - **pandas** 3.0.5 - https://pandas.pydata.org
 - **protobuf** 7.35.1 - https://developers.google.com/protocol-buffers/
-- **python-dotenv** 1.2.2 - https://github.com/theskumar/python-dotenv
+- **python-dotenv** 1.2.3 - https://github.com/theskumar/python-dotenv
 - **scipy** 1.18.0 - https://scipy.org/
 - **sympy** 1.14.0 - https://sympy.org
 
@@ -15797,7 +15797,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The above BSD License Applies to all code, even that also covered by Apache 2.0.
 ```
 
-### python-dotenv 1.2.2 (BSD-3-Clause)
+### python-dotenv 1.2.3 (BSD-3-Clause)
 
 ```text
 Copyright (c) 2014, Saurabh Kumar (python-dotenv), 2013, Ted Tieken (django-dotenv-rw), 2013, Jacob Kaplan-Moss (django-dotenv)
