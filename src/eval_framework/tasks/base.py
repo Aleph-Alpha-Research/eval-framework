@@ -540,11 +540,17 @@ def resolve_overwrite_subjects[SubjectType](
 class Eager(EvalFactory):
     """Wraps an already-imported task class."""
 
-    def __init__(self, task: type[BaseTask]) -> None:
+    def __init__(self, task: type[BaseTask], id: str) -> None:
         self._task = task
+        self._id = id
+
+    @classmethod
+    def from_base_task(cls, task: type[BaseTask]) -> Self:
+        """Build an ``Eager`` from a task class, deriving the id from its class name."""
+        return cls(task, id=task.__name__)
 
     def id(self) -> str:
-        return self._task.__name__
+        return self._id
 
     def create(
         self,

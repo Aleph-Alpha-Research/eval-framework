@@ -142,7 +142,7 @@ def register_task(task: type[BaseTask], registry: Registry | None = None) -> str
     if not issubclass(task, BaseTask):
         raise ValueError(f"Can only register subclasses of BaseTask, got {task}")
     r = registry if registry is not None else _REGISTRY
-    factory = Eager(task)
+    factory = Eager.from_base_task(task)
     r.add(factory)
     return factory.id()
 
@@ -159,6 +159,6 @@ def register_lazy_task(class_path: str, /, registry: Registry | None = None) -> 
 
     def load() -> EvalFactory:
         module = importlib.import_module(module_path)
-        return Eager(getattr(module, class_name))
+        return Eager.from_base_task(getattr(module, class_name))
 
     r.add(Lazy(id=class_name, load=load))
