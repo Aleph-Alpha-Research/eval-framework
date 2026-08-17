@@ -7,16 +7,9 @@ import wandb
 from tqdm import tqdm
 
 from eval_framework.metrics.base import BaseMetric
-from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
-    BytesCompletion,
-    BytesLoglikelihood,
-    SequencePositionsCompletion,
-    SequencePositionsLoglikelihood,
-)
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.result_processors.base import Result, ResultProcessor
 from eval_framework.shared.types import Completion, Loglikelihood
-from eval_framework.tasks.base import ResponseType
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import registry
 from eval_framework.utils.constants import RED, RESET
@@ -37,16 +30,7 @@ class EvaluationGenerator:
         self.save_intermediate_results = config.save_intermediate_results
 
         eval_ = registry()[config.task_name]
-        response_type = eval_.response_type()
-        task_metrics = eval_.metrics()
-
-        if response_type == ResponseType.COMPLETION:
-            self.metrics = task_metrics + [BytesCompletion, SequencePositionsCompletion]
-        elif response_type == ResponseType.LOGLIKELIHOODS:
-            self.metrics = task_metrics + [BytesLoglikelihood, SequencePositionsLoglikelihood]
-        else:
-            raise NotImplementedError
-
+        self.metrics = eval_.metrics()
         self.task_name = eval_.display_name()
 
     def _run_metric_calculators(self, responses: list[Completion | Loglikelihood]) -> list[Result]:
