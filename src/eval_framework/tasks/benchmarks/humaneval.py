@@ -141,10 +141,10 @@ class HumanEval_OLMES(HumanEval):
         self.max_tokens = 1024
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return "```python\n" + item["prompt"].rstrip()
+        return "```python\n" + item["prompt"]
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        return "\n" + item["canonical_solution"] + "```"
+        return item["canonical_solution"] + "```"
 
 
 class HumanEvalInstruct(HumanEval):
@@ -168,8 +168,8 @@ class HumanEvalInstruct(HumanEval):
         return self.CUE_PREFIX + item["prompt"].lstrip()
 
 
-class HumanEval_NL(HumanEval_OLMES):
-    NAME = "Human Eval Newline OLMES"
+class HumanEval_OLMES_V2(HumanEval_OLMES):
+    NAME = "Human Eval Olmes v2"
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return "```python\n" + item["prompt"].rstrip() + "\n"
