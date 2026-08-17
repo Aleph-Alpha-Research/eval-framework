@@ -592,7 +592,7 @@ class TestBaseTaskBPBStyle:
 
     def test_metadata_metrics_bpb_only(self) -> None:
         meta = self.task.get_metadata()
-        assert meta["metrics"] == ["BitsPerByte", "Bytes", "SequencePositions"]
+        assert meta["metrics"] == ["BitsPerByte"]
 
 
 def test_instance_properties_are_styler_backed() -> None:

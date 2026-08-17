@@ -349,7 +349,7 @@ class BaseTask[SubjectType](Task):
             "sample_split": self.SAMPLE_SPLIT,
             "fewshot_split": self.FEWSHOT_SPLIT,
             "response_type": self.get_response_type().value,
-            "metrics": [m.NAME for m in self.get_metrics()],
+            "metrics": [m.NAME for m in self._get_task_specific_metrics()],
             "subjects": [str(s) for s in self.SUBJECTS],
         }
         if hasattr(self, "TASK_STYLER"):
@@ -444,27 +444,38 @@ class BaseTask[SubjectType](Task):
         return cls.RESPONSE_TYPE
 
     @classmethod
-    def get_metrics(cls) -> list[type["BaseMetric"]]:
-        """Return the metrics of the task (or the styler if it exists)."""
+    def _get_task_specific_metrics(cls) -> list[type["BaseMetric"]]:
         if hasattr(cls, "TASK_STYLER"):
             task_metrics = cls.TASK_STYLER.metrics
         else:
             task_metrics = cls.METRICS
+        return task_metrics
 
+    @classmethod
+    def _get_response_type_specific_metrics(cls) -> list[type["BaseMetric"]]:
+        metrics: list[type[BaseMetric]]
         match cls.get_response_type():
             case ResponseType.COMPLETION:
-                metrics = task_metrics + [
+                metrics = [
                     BytesCompletion,
                     SequencePositionsCompletion,
                     NumCompletionTokens,
                     NumReasoningTokens,
                 ]
             case ResponseType.LOGLIKELIHOODS:
-                metrics = task_metrics + [BytesLoglikelihood, SequencePositionsLoglikelihood]
+                metrics = [BytesLoglikelihood, SequencePositionsLoglikelihood]
             case _:
                 typing.assert_never(cls.get_response_type())
 
         return metrics
+
+    @classmethod
+    def get_metrics(cls) -> list[type["BaseMetric"]]:
+        """Return the metrics of the task (or the styler if it exists)."""
+        task_metrics = cls._get_task_specific_metrics()
+        response_type_metrics = cls._get_response_type_specific_metrics()
+
+        return task_metrics + response_type_metrics
 
     @classproperty
     def RESPONSE_TYPE(cls) -> ResponseType:
