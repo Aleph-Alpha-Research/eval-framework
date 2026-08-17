@@ -72,6 +72,9 @@ class HumanEvalDE_BPB_OLMES_V2(HumanEvalDE_BPB_OLMES):
 
     NAME = "HumanEvalDE_BPB_OLMES V2"
 
+    def _get_choices(self, item: dict[str, Any]) -> list[str]:
+        return [item["canonical_solution"].rstrip() + "\n```"]
+
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         # Ensure that the code completion starts on a new line.
         return "```python\n" + item["prompt"].rstrip() + "\n"
