@@ -21,7 +21,7 @@ from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
 from eval_framework.tasks.dataset_revisions import pinned_revision
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
-from eval_framework.tasks.task import EvalFactory, ResponseType, Sample, Task
+from eval_framework.tasks.task import Benchmark, ResponseType, Sample, Task
 from eval_framework.tasks.utils import classproperty, raise_errors
 from template_formatting.formatter import BaseFormatter, Message, Role
 
@@ -537,8 +537,8 @@ def resolve_overwrite_subjects[SubjectType](
     return chosen_subjects
 
 
-class Eager(EvalFactory):
-    """An ``EvalFactory`` assembled from precomputed metadata and eval/doc callables."""
+class Eager(Benchmark):
+    """A ``Benchmark`` assembled from precomputed metadata and eval/doc callables."""
 
     def __init__(
         self,

@@ -7,11 +7,12 @@ from typing import Any
 
 from eval_framework.tasks.base import BaseTask, Eager
 from eval_framework.tasks.lazy import Lazy
-from eval_framework.tasks.task import EvalFactory
+from eval_framework.tasks.task import Benchmark
 
 __all__ = [
     "register_task",
     "register_lazy_task",
+    "Benchmark",
     "EvalFactory",
     "Eager",
     "Lazy",
@@ -22,12 +23,16 @@ __all__ = [
     "registered_task_names",
 ]
 
+# Transitional alias for the former name. Remove once downstream consumers (e.g. the
+# companion) have migrated their imports to ``Benchmark``.
+EvalFactory = Benchmark
+
 
 class Registry:
-    """A registry for Tasks"""
+    """A registry for Benchmarks"""
 
     def __init__(self) -> None:
-        self._registry: dict[str, EvalFactory] = dict()
+        self._registry: dict[str, Benchmark] = dict()
 
     def __iter__(self) -> Iterator[str]:
         """Iterate over all task names in the registry."""
@@ -38,8 +43,8 @@ class Registry:
         """The names of all registered tasks."""
         return list(self)
 
-    def items(self) -> Iterator[tuple[str, EvalFactory]]:
-        """Iterate over `(task name, EvalFactory)` pairs in the registry."""
+    def items(self) -> Iterator[tuple[str, Benchmark]]:
+        """Iterate over `(task name, Benchmark)` pairs in the registry."""
         for factory in self._registry.values():
             yield factory.id(), factory
 
@@ -56,14 +61,14 @@ class Registry:
         task_key = self._task_key(name)
         return task_key in self._registry
 
-    def __getitem__(self, name: str, /) -> EvalFactory:
+    def __getitem__(self, name: str, /) -> Benchmark:
         task_key = self._task_key(name)
         try:
             return self._registry[task_key]
         except KeyError:
             raise KeyError(f"Task not found: {name=} with task_key {task_key=}")
 
-    def add(self, factory: EvalFactory) -> None:
+    def add(self, factory: Benchmark) -> None:
         """Register a factory under the key derived from its ``id()``."""
         task_key = self._task_key(factory.id())
         if task_key in self._registry:
@@ -157,7 +162,7 @@ def register_lazy_task(class_path: str, /, registry: Registry | None = None) -> 
     r = registry if registry is not None else _REGISTRY
     module_path, class_name = class_path.rsplit(".", maxsplit=1)
 
-    def load() -> EvalFactory:
+    def load() -> Benchmark:
         module = importlib.import_module(module_path)
         return Eager.from_base_task(getattr(module, class_name))
 
