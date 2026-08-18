@@ -14,6 +14,16 @@
 
 ### Bug Fixes
 
+## [0.10.5](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.4...v0.10.5) (2026-08-18)
+
+
+### Features
+
+* add token completion metric to all completion tasks ([d4ec1e6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d4ec1e66aa0931fcc824302b4e992150652034c9))
+* **metrics:** add NumCompletionTokens metric ([e9dd943](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e9dd943488aa0b9d3068cf42162dbd5eddf7faf6))
+* **metrics:** add NumReasoningTokens metric ([c63a7cc](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c63a7cc79ff69e9955d822112c77b1fa601f9a52))
+* reasoning tokens are reported for completion tasks ([d9a14d4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d9a14d46f2ee3764d8d6bf80a5329f7ca67791e3))
+
 ## [0.10.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.3...v0.10.4) (2026-08-18)
 
 
