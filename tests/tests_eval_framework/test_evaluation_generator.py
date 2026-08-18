@@ -203,58 +203,63 @@ def test_aggregate_results(tmp_path: Path) -> None:
 
     aggregated_results = evaluator._aggregate_results(results)
 
-    assert aggregated_results == {
-        "Average metric1": 2.0,  # mean of all key-subject pairs (3.0, 4.0, 1.0, 0.0)
-        "Average metric1 (including Errors)": 1.8125,  # errors treated as 0: (2.25, 1.0, 4.0, 0.0)
-        "Average metric1 - key1": 3.5,  # mean of means of subjects (3.0 and 4.0)
-        "Average metric1 (including Errors) - key1": 3.125,  # errors as 0: (2.25, 4.0)
-        "Average metric1 - key2": 0.5,
-        "Average metric1 (including Errors) - key2": 0.5,  # errors as 0: (1.0, 0.0)
-        "Average metric1 - subject1": 2.0,  # mean of means of keys (3.0 and 1.0)
-        "Average metric1 (including Errors) - subject1": 1.625,  # errors as 0: (2.25, 1.0)
-        "Average metric1 - subject2": 2.0,
-        "Average metric1 (including Errors) - subject2": 2.0,  # errors as 0: (4.0, 0.0)
-        "Average metric2": 3.0,  # NaNs are skipped in the mean calculation
-        "Average metric2 - subject1": 3.0,
-        "Average metric2 - subject2": None,  # NaN appears
-        # key in metric2 is not output because it's just a single submetric
-        "Average metric3": 19.0,  # key=None case works
-        "Average metric3 - subject1": 20.0,
-        "Average metric3 - subject2": 18.0,
-        "ErrorFreeRatio metric1": 0.8,
-        "ErrorFreeRatio metric1 - key1": 0.8,
-        "ErrorFreeRatio metric1 - key2": 0.8,
-        "ErrorFreeRatio metric1 - subject1": 0.8571428571428571,
-        "ErrorFreeRatio metric1 - subject2": 0.6666666666666666,
-        "ErrorFreeRatio metric2": 1.0,
-        "ErrorFreeRatio metric2 - subject1": 1.0,
-        "ErrorFreeRatio metric2 - subject2": 1.0,
-        "ErrorFreeRatio metric3": 1.0,
-        "ErrorFreeRatio metric3 - subject1": 1.0,
-        "ErrorFreeRatio metric3 - subject2": 1.0,
-        "StdErr metric1 - key1": 0.8660254037844386,
-        "NumSamples metric1 - key1": 4,
-        "StdErr metric1 - key2": 0.3535533905932738,
-        "NumSamples metric1 - key2": 4,
-        "StdErr metric1 - subject1": 0.4978909578906802,
-        "NumSamples metric1 - subject1": 6,
-        "StdErr metric1 - subject2": None,  # NaN appear, cannot compute the std of only one value (division by N-1)
-        "NumSamples metric1 - subject2": 2,
-        "StdErr metric1": None,
-        "NumSamples metric1": 16,
-        "StdErr metric2 - subject1": 0,
-        "NumSamples metric2 - subject1": 2,
-        "StdErr metric2 - subject2": None,
-        "NumSamples metric2 - subject2": 1,
-        "StdErr metric2": None,
-        "NumSamples metric2": 3,
-        "StdErr metric3 - subject1": None,
-        "NumSamples metric3 - subject1": 1,
-        "StdErr metric3 - subject2": None,
-        "NumSamples metric3 - subject2": 1,
-        "StdErr metric3": None,
-        "NumSamples metric3": 2,
-    }
+    assert aggregated_results == pytest.approx(
+        {
+            "Average metric1": 2.0,  # mean of all key-subject pairs (3.0, 4.0, 1.0, 0.0)
+            "Average metric1 (including Errors)": 1.8125,  # errors treated as 0: (2.25, 1.0, 4.0, 0.0)
+            "Average metric1 - key1": 3.5,  # mean of means of subjects (3.0 and 4.0)
+            "Average metric1 (including Errors) - key1": 3.125,  # errors as 0: (2.25, 4.0)
+            "Average metric1 - key2": 0.5,
+            "Average metric1 (including Errors) - key2": 0.5,  # errors as 0: (1.0, 0.0)
+            "Average metric1 - subject1": 2.0,  # mean of means of keys (3.0 and 1.0)
+            "Average metric1 (including Errors) - subject1": 1.625,  # errors as 0: (2.25, 1.0)
+            "Average metric1 - subject2": 2.0,
+            "Average metric1 (including Errors) - subject2": 2.0,  # errors as 0: (4.0, 0.0)
+            "Average metric2": 3.0,  # NaNs are skipped in the mean calculation
+            "Average metric2 - subject1": 3.0,
+            "Average metric2 - subject2": float("nan"),  # NaN appears
+            # key in metric2 is not output because it's just a single submetric
+            "Average metric3": 19.0,  # key=None case works
+            "Average metric3 - subject1": 20.0,
+            "Average metric3 - subject2": 18.0,
+            "ErrorFreeRatio metric1": 0.8,
+            "ErrorFreeRatio metric1 - key1": 0.8,
+            "ErrorFreeRatio metric1 - key2": 0.8,
+            "ErrorFreeRatio metric1 - subject1": 0.8571428571428571,
+            "ErrorFreeRatio metric1 - subject2": 0.6666666666666666,
+            "ErrorFreeRatio metric2": 1.0,
+            "ErrorFreeRatio metric2 - subject1": 1.0,
+            "ErrorFreeRatio metric2 - subject2": 1.0,
+            "ErrorFreeRatio metric3": 1.0,
+            "ErrorFreeRatio metric3 - subject1": 1.0,
+            "ErrorFreeRatio metric3 - subject2": 1.0,
+            "StdErr metric1 - key1": 0.8660254037844386,
+            "NumSamples metric1 - key1": 4,
+            "StdErr metric1 - key2": 0.3535533905932738,
+            "NumSamples metric1 - key2": 4,
+            "StdErr metric1 - subject1": 0.4978909578906802,
+            "NumSamples metric1 - subject1": 6,
+            "StdErr metric1 - subject2": float(
+                "nan"
+            ),  # NaN appear, cannot compute the std of only one value (division by N-1)
+            "NumSamples metric1 - subject2": 2,
+            "StdErr metric1": float("nan"),
+            "NumSamples metric1": 16,
+            "StdErr metric2 - subject1": 0,
+            "NumSamples metric2 - subject1": 2,
+            "StdErr metric2 - subject2": float("nan"),
+            "NumSamples metric2 - subject2": 1,
+            "StdErr metric2": float("nan"),
+            "NumSamples metric2": 3,
+            "StdErr metric3 - subject1": float("nan"),
+            "NumSamples metric3 - subject1": 1,
+            "StdErr metric3 - subject2": float("nan"),
+            "NumSamples metric3 - subject2": 1,
+            "StdErr metric3": float("nan"),
+            "NumSamples metric3": 2,
+        },
+        nan_ok=True,
+    )
 
 
 def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
