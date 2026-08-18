@@ -1,28 +1,28 @@
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
-from eval_framework.tasks.task import EvalFactory, ResponseType, Task
+from eval_framework.tasks.task import Benchmark, ResponseType, Task
 from template_formatting.formatter import BaseFormatter
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
 
 
-class Lazy(EvalFactory):
-    """An ``EvalFactory`` that defers producing the real factory until first use.
+class Lazy(Benchmark):
+    """A ``Benchmark`` that defers producing the real benchmark until first use.
 
-    Holds an ``id`` and a ``load`` thunk returning the wrapped ``EvalFactory``; every
-    other call is delegated to that factory, which is built (and memoized) on first
+    Holds an ``id`` and a ``load`` thunk returning the wrapped ``Benchmark``; every
+    other call is delegated to that benchmark, which is built (and memoized) on first
     access. This keeps ``Lazy`` independent of any concrete task type — the thunk owns
-    whatever loading (e.g. importing a module) the wrapped factory requires.
+    whatever loading (e.g. importing a module) the wrapped benchmark requires.
     """
 
-    def __init__(self, id: str, load: Callable[[], EvalFactory]) -> None:
+    def __init__(self, id: str, load: Callable[[], Benchmark]) -> None:
         self._id = id
         self._load = load
-        self._factory: EvalFactory | None = None
+        self._factory: Benchmark | None = None
 
-    def _loaded_factory(self) -> EvalFactory:
+    def _loaded_factory(self) -> Benchmark:
         if self._factory is None:
             self._factory = self._load()
         return self._factory

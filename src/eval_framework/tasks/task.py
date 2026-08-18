@@ -58,31 +58,27 @@ class Task(ABC):
         ...
 
 
-class EvalFactory(ABC):
-    """Produces a registered benchmark's eval.
+class Benchmark(ABC):
+    """A benchmark is used to provide means of measuring model performance in a domain.
 
-    The registry stores one factory per eval. This allows the factory to be
-    constructed without constructing all evals. Going via this ABC allows
-    the factory instances to contain state specifically relevant to the
-    eval, as well as supporting different strategies for instantiating it.
-    E.g. eager vs lazy loading of the required dependencies.
+    A benchmark is used to instantiate concrete evaluations.
     """
 
     @abstractmethod
     def id(self) -> str:
-        "Canonical key used to register this benchmark"
+        "Uniquely identifies the benchmark"
 
     @abstractmethod
     def response_type(self) -> ResponseType:
-        """The eval's response type"""
+        """The benchmark's response type"""
 
     @abstractmethod
     def metrics(self) -> list[type["BaseMetric"]]:
-        """The eval's metrics"""
+        """The benchmark's metrics"""
 
     @abstractmethod
     def subjects(self) -> list[Any]:
-        """The eval's subjects"""
+        """Subjects of the benchmark"""
 
     @abstractmethod
     def display_name(self) -> str:
@@ -100,5 +96,5 @@ class EvalFactory(ABC):
 
     @abstractmethod
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        """Render the eval's documentation as markdown."""
+        """Render the benchmarks's documentation as markdown."""
         ...
