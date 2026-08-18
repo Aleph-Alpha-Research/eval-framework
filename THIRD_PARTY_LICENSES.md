@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.72 - https://github.com/boto/boto3
-- **botocore** 1.43.72 - https://github.com/boto/botocore
+- **boto3** 1.43.73 - https://github.com/boto/boto3
+- **botocore** 1.43.73 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -53,7 +53,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## BSD-2-Clause
 
-- **xxhash** 4.0.0 - https://github.com/ifduyue/python-xxhash
+- **xxhash** 4.0.1 - https://github.com/ifduyue/python-xxhash
 
 ## BSD-3-Clause
 
@@ -212,7 +212,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.72 (Apache-2.0)
+### boto3 1.43.73 (Apache-2.0)
 
 ```text
 Apache License
@@ -393,7 +393,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.72 (Apache-2.0)
+### botocore 1.43.73 (Apache-2.0)
 
 ```text
 Apache License
@@ -18272,7 +18272,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### xxhash 4.0.0 (BSD-2-Clause)
+### xxhash 4.0.1 (BSD-2-Clause)
 
 ```text
 Copyright (c) 2014-2026, Yue Du
