@@ -168,7 +168,7 @@ class EvaluationGenerator:
 
                         group_key_subject_mean = group_error_free.groupby(["key", "subject"]).mean()
                         value = float(group_key_subject_mean[["value"]].mean()["value"])
-                        aggregated_results[f"Average {metric} - {name[0]}"] = value if not math.isnan(value) else None
+                        aggregated_results[f"Average {metric} - {name[0]}"] = value
 
                         if group_error_free_ratio < 1.0:
                             # Treat error samples (with value=None) as 0 for the "including errors" average
@@ -182,9 +182,7 @@ class EvaluationGenerator:
                                 "value"
                             ].mean()
                             value_with_errors = float(group_key_subject_mean_with_errors.mean())
-                            aggregated_results[f"Average {metric} (including Errors) - {name[0]}"] = (
-                                value_with_errors if not math.isnan(value_with_errors) else None
-                            )
+                            aggregated_results[f"Average {metric} (including Errors) - {name[0]}"] = value_with_errors
 
                         if not ("SequencePositions" in metric or "Bytes" in metric):
                             # calculate standard error for selected  metrics
@@ -193,7 +191,7 @@ class EvaluationGenerator:
                             num_samples = len(group_error_free)
 
                             if math.isnan(std) or num_samples == 0:
-                                aggregated_results[f"StdErr {metric} - {name[0]}"] = None
+                                aggregated_results[f"StdErr {metric} - {name[0]}"] = float("nan")
                             else:
                                 aggregated_results[f"StdErr {metric} - {name[0]}"] = std / np.sqrt(num_samples)
                             aggregated_results[f"NumSamples {metric} - {name[0]}"] = num_samples
@@ -210,7 +208,7 @@ class EvaluationGenerator:
                     # where variance_i is the variance of each group and i is the number of groups
                     # (the combined mean is also not weighted by the number of samples)
                     if math.isnan(std) or std_err_mean_total_num_samples == 0:
-                        aggregated_results[f"StdErr {metric}"] = None
+                        aggregated_results[f"StdErr {metric}"] = float("nan")
                     else:
                         aggregated_results[f"StdErr {metric}"] = np.sqrt(
                             std_err_mean_sum_of_squares / std_err_mean_num_subjects
@@ -222,7 +220,7 @@ class EvaluationGenerator:
                     std = float(key_subject_std[["value"]].mean()["value"])
                     num_samples = len(data_subset_error_free)
                     if math.isnan(std) or num_samples == 0:
-                        aggregated_results[f"StdErr {metric}"] = None
+                        aggregated_results[f"StdErr {metric}"] = float("nan")
                     else:
                         aggregated_results[f"StdErr {metric}"] = std / np.sqrt(num_samples)
                     aggregated_results[f"NumSamples {metric}"] = num_samples
