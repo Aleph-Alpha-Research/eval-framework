@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.73` |
+| `botocore` | `1.43.74` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.1` |
 | `click` | `8.4.2` |
@@ -54,7 +54,7 @@ and first-party/internal packages are excluded.
 | `httpcore` | `1.0.9` |
 | `httpx` | `0.28.1` |
 | `huggingface-hub` | `0.36.2` |
-| `idna` | `3.18` |
+| `idna` | `3.19` |
 | `jmespath` | `1.1.0` |
 | `joblib` | `1.5.3` |
 | `jsonschema-specifications` | `2025.9.1` |
