@@ -181,7 +181,6 @@ def register_mmlu_pro_tasks(registry: Registry) -> None:
 def register_global_mmlu_tasks(registry: Registry) -> None:
     """Register global_mmlu benchmark tasks."""
     register_lazy_task("eval_framework.tasks.benchmarks.global_mmlu.GlobalMMLU", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.global_mmlu.GlobalMMLU_German", registry=registry)
 
 
 def register_sciq_tasks(registry: Registry) -> None:
