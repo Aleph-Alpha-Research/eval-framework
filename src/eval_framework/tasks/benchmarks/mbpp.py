@@ -145,11 +145,6 @@ class MBPPBPB(MBPP):
         return [gt] if gt else None
 
 
-class MBPP_SANITIZED(MBPP):
-    NAME = "MBPP_SANITZED"
-    SUBJECTS = ["sanitized"]
-
-
 class MBPP_PROMPT_WITHOUT_TESTS(MBPP):
     """
     MBPP provides both the problem statement and the test cases upfront. It says, "Here's the problem and here are the
@@ -209,11 +204,6 @@ class MBPP_PROMPT_WITHOUT_TESTS(MBPP):
         function_header = self._get_function_header(sample.messages[-1].content)
         code = self._code_expander(extracted_code, mbpp_ground_truth)
         return function_header + code
-
-
-class MBPP_PROMPT_WITHOUT_TESTS_SANITIZED(MBPP_PROMPT_WITHOUT_TESTS):
-    NAME = "MBPP_PROMPT_WITHOUT_TESTS_SANITIZED"
-    SUBJECTS = ["sanitized"]
 
 
 _OLMES_FEWSHOT_EXAMPLES: list[dict[str, Any]] = [
