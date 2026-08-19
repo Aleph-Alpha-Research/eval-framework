@@ -14,6 +14,18 @@
 
 ### Bug Fixes
 
+## [0.10.6](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.5...v0.10.6) (2026-08-19)
+
+
+### Features
+
+* rename HumanEvalNL to V2 ([0f5007f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0f5007f8c2d1f41208549e5231f4918fbafc2681))
+
+
+### Bug Fixes
+
+* close few-shot fences on new line; close python block in ground truth ([0fea46a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0fea46a91fb990f83b06156de3dc9bf3935e0e8c))
+
 ## [0.10.5](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.4...v0.10.5) (2026-08-18)
 
 
