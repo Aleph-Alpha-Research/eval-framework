@@ -14,6 +14,18 @@
 
 ### Bug Fixes
 
+## [0.10.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.6...v0.10.7) (2026-08-20)
+
+
+### Features
+
+* make unavailable metrics always return nan rather than none ([dca088b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/dca088b1a97dc1f099f4f73418f95d595dff7e31))
+
+
+### Bug Fixes
+
+* **deps:** update dependency python-dotenv to &gt;=1.2.3,&lt;2 ([08d6b61](https://github.com/Aleph-Alpha-Research/eval-framework/commit/08d6b619ddd854e90ccc73d8dff19d035b76893b))
+
 ## [0.10.6](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.5...v0.10.6) (2026-08-19)
 
 
