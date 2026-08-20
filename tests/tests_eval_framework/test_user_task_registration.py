@@ -5,7 +5,7 @@ from eval_framework.tasks.task_loader import load_extra_tasks, load_modules_from
 
 TASK1 = """\
 from eval_framework.tasks.registry import Registry
-from eval_framework.tasks.task import Benchmark
+from eval_framework.contract import Benchmark
 
 
 class DummyBenchmark(Benchmark):
@@ -37,7 +37,7 @@ def register_tasks(registry: Registry) -> None:
 
 TASK2 = """\
 from eval_framework.tasks.registry import Registry
-from eval_framework.tasks.task import Benchmark
+from eval_framework.contract import Benchmark
 
 
 class DummyBenchmark(Benchmark):

@@ -1,7 +1,7 @@
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
-from eval_framework.tasks.task import Benchmark, Eval, ResponseType
+from eval_framework.contract import Benchmark, Eval, ResponseType
 from template_formatting.formatter import BaseFormatter
 
 if TYPE_CHECKING:
