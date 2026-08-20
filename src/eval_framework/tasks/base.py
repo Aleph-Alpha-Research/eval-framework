@@ -21,7 +21,7 @@ from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
 from eval_framework.tasks.dataset_revisions import pinned_revision
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
-from eval_framework.tasks.task import Benchmark, ResponseType, Sample, Task
+from eval_framework.tasks.task import Benchmark, Eval, ResponseType, Sample
 from eval_framework.tasks.utils import classproperty, raise_errors
 from template_formatting.formatter import BaseFormatter, Message, Role
 
@@ -78,7 +78,7 @@ SubjectType = TypeVar("SubjectType")
 logger = logging.getLogger(__name__)
 
 
-class BaseTask[SubjectType](Task):
+class BaseTask[SubjectType](Eval):
     NAME: str
     DATASET_PATH: str
     SAMPLE_SPLIT: str
@@ -548,7 +548,7 @@ class Eager(Benchmark):
         subjects: list[Any],
         metrics: list[type["BaseMetric"]],
         response_type: ResponseType,
-        make_eval: Callable[..., Task],
+        make_eval: Callable[..., Eval],
         generate_markdown_doc: Callable[[Sequence[BaseFormatter]], str],
     ) -> None:
         self._id = id
@@ -569,7 +569,7 @@ class Eager(Benchmark):
             custom_hf_revision: str | None,
             user_prompt_suffix: str | None = None,
             seed: int | None = None,
-        ) -> Task:
+        ) -> Eval:
             return task.with_overwrite(
                 num_fewshot=num_fewshot,
                 custom_subjects=custom_subjects,
@@ -609,7 +609,7 @@ class Eager(Benchmark):
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
         seed: int | None = None,
-    ) -> Task:
+    ) -> Eval:
         return self._make_eval(num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix, seed)
 
     def response_type(self) -> ResponseType:

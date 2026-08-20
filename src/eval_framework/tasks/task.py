@@ -28,7 +28,7 @@ class Sample(BaseModel):
     context: BaseMetricContext | list[BaseMetricContext] | None = None
 
 
-class Task(ABC):
+class Eval(ABC):
     """The contract a caller relies on to run an evaluation"""
 
     @abstractmethod
@@ -92,7 +92,7 @@ class Benchmark(ABC):
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
         seed: int | None = None,
-    ) -> Task: ...
+    ) -> Eval: ...
 
     @abstractmethod
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
