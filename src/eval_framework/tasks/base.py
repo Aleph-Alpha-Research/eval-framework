@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, Self, TypeVar
 import iso639
 from datasets import DatasetDict, DownloadConfig, load_dataset
 
+from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesCompletion,
     BytesLoglikelihood,
@@ -21,7 +22,6 @@ from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
 from eval_framework.tasks.dataset_revisions import pinned_revision
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
-from eval_framework.tasks.task import Benchmark, Eval, ResponseType, Sample
 from eval_framework.tasks.utils import classproperty, raise_errors
 from template_formatting.formatter import BaseFormatter, Message, Role
 

@@ -5,9 +5,9 @@ import warnings
 from collections.abc import Generator, Iterator
 from typing import Any
 
+from eval_framework.contract import Benchmark
 from eval_framework.tasks.base import BaseTask, Eager
 from eval_framework.tasks.lazy import Lazy
-from eval_framework.tasks.task import Benchmark
 
 __all__ = [
     "register_task",
