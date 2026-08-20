@@ -25,7 +25,7 @@ and first-party/internal packages are excluded.
 | `psycopg2-binary` | `>=2.9.12,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.13.4,<3` |
-| `python-dotenv` | `>=1.2.2,<2` |
+| `python-dotenv` | `>=1.2.3,<2` |
 | `python-iso639` | `>=2026.7.23` |
 | `pyyaml` | `>=6.0.3,<7` |
 | `scipy` | `>=1.18.0,<2` |
@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.74` |
+| `botocore` | `1.43.75` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.1` |
 | `click` | `8.4.2` |
