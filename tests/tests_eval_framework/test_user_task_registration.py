@@ -4,7 +4,7 @@ from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_loader import load_extra_tasks, load_modules_from_directory
 
 TASK1 = """\
-from eval_framework.tasks.base import BaseTask, Language
+from eval_framework.tasks.base import BaseTask, Language, ResponseType
 from eval_framework.tasks.registry import Registry, register_task
 
 class MyCustomTask(BaseTask):
@@ -12,7 +12,7 @@ class MyCustomTask(BaseTask):
     DATASET_PATH = "dummy"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
-    RESPONSE_TYPE = None
+    RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = []
     SUBJECTS = []
     LANGUAGE = Language.ENG
@@ -22,7 +22,7 @@ def register_tasks(registry: Registry) -> None:
 """
 
 TASK2 = """\
-from eval_framework.tasks.base import BaseTask, Language
+from eval_framework.tasks.base import BaseTask, Language, ResponseType
 from eval_framework.tasks.registry import Registry, register_task
 
 class MySecondCustomTask(BaseTask):
@@ -30,7 +30,7 @@ class MySecondCustomTask(BaseTask):
     DATASET_PATH = "dummy"
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
-    RESPONSE_TYPE = None
+    RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = []
     SUBJECTS = []
     LANGUAGE = Language.ENG
