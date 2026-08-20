@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.74 - https://github.com/boto/boto3
-- **botocore** 1.43.74 - https://github.com/boto/botocore
+- **boto3** 1.43.75 - https://github.com/boto/boto3
+- **botocore** 1.43.75 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -66,7 +66,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **idna** 3.19 - https://github.com/kjd/idna
 - **joblib** 1.5.3 - https://joblib.readthedocs.io
 - **jsonlines** 4.0.0 - https://github.com/wbolster/jsonlines
-- **lxml** 6.1.1 - https://lxml.de/
+- **lxml** 6.1.2 - https://lxml.de/
 - **mpmath** 1.3.0 - http://mpmath.org/
 - **multiprocess** 0.70.19 - https://github.com/uqfoundation/multiprocess
 - **pandas** 3.0.5 - https://pandas.pydata.org
@@ -212,7 +212,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.74 (Apache-2.0)
+### boto3 1.43.75 (Apache-2.0)
 
 ```text
 Apache License
@@ -393,7 +393,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.74 (Apache-2.0)
+### botocore 1.43.75 (Apache-2.0)
 
 ```text
 Apache License
@@ -2139,7 +2139,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### lxml 6.1.1 (BSD-3-Clause)
+### lxml 6.1.2 (BSD-3-Clause)
 
 ```text
 BSD 3-Clause License
