@@ -4,39 +4,67 @@ from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_loader import load_extra_tasks, load_modules_from_directory
 
 TASK1 = """\
-from eval_framework.tasks.base import BaseTask, Language, ResponseType
-from eval_framework.tasks.registry import Registry, register_task
+from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.task import Benchmark
 
-class MyCustomTask(BaseTask):
-    NAME = "MyCustomTask"
-    DATASET_PATH = "dummy"
-    SAMPLE_SPLIT = "test"
-    FEWSHOT_SPLIT = "test"
-    RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = []
-    SUBJECTS = []
-    LANGUAGE = Language.ENG
+
+class DummyBenchmark(Benchmark):
+    def id(self):
+        return "MyCustomTask"
+
+    def display_name(self):
+        return "MyCustomTask"
+
+    def response_type(self):
+        raise NotImplementedError
+
+    def metrics(self):
+        raise NotImplementedError
+
+    def subjects(self):
+        raise NotImplementedError
+
+    def create(self, num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix=None, seed=None):
+        raise NotImplementedError
+
+    def markdown_doc(self, formatters):
+        raise NotImplementedError
+
 
 def register_tasks(registry: Registry) -> None:
-    register_task(MyCustomTask, registry)
+    registry.add(DummyBenchmark())
 """
 
 TASK2 = """\
-from eval_framework.tasks.base import BaseTask, Language, ResponseType
-from eval_framework.tasks.registry import Registry, register_task
+from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.task import Benchmark
 
-class MySecondCustomTask(BaseTask):
-    NAME = "MySecondCustomTask"
-    DATASET_PATH = "dummy"
-    SAMPLE_SPLIT = "test"
-    FEWSHOT_SPLIT = "test"
-    RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS = []
-    SUBJECTS = []
-    LANGUAGE = Language.ENG
+
+class DummyBenchmark(Benchmark):
+    def id(self):
+        return "MySecondCustomTask"
+
+    def display_name(self):
+        return "MySecondCustomTask"
+
+    def response_type(self):
+        raise NotImplementedError
+
+    def metrics(self):
+        raise NotImplementedError
+
+    def subjects(self):
+        raise NotImplementedError
+
+    def create(self, num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix=None, seed=None):
+        raise NotImplementedError
+
+    def markdown_doc(self, formatters):
+        raise NotImplementedError
+
 
 def register_tasks(registry: Registry) -> None:
-    register_task(MySecondCustomTask, registry)
+    registry.add(DummyBenchmark())
 """
 
 
