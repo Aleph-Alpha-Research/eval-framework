@@ -1,7 +1,7 @@
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
-from eval_framework.tasks.task import Benchmark, ResponseType, Task
+from eval_framework.tasks.task import Benchmark, Eval, ResponseType
 from template_formatting.formatter import BaseFormatter
 
 if TYPE_CHECKING:
@@ -37,7 +37,7 @@ class Lazy(Benchmark):
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
         seed: int | None = None,
-    ) -> Task:
+    ) -> Eval:
         return self._loaded_factory().create(num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix, seed)
 
     def response_type(self) -> ResponseType:
