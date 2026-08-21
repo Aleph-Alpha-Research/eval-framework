@@ -1103,7 +1103,7 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.18.0,<2" },
     { name = "sympy", specifier = ">=1.14.0,<2" },
     { name = "tensorboard", marker = "extra == 'determined'", specifier = "==2.21.0" },
-    { name = "tiktoken", marker = "extra == 'openai'", specifier = ">=0.13.0,<1" },
+    { name = "tiktoken", marker = "extra == 'openai'", specifier = ">=0.14.0,<1" },
     { name = "torch", marker = "extra == 'transformers'", specifier = ">=2.13.0,<3" },
     { name = "transformers", marker = "extra == 'openai'", specifier = ">=4.45.2,<5" },
     { name = "transformers", marker = "extra == 'optional'", specifier = ">=4.45.2,<5" },
