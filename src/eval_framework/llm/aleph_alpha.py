@@ -18,9 +18,9 @@ from aleph_alpha_client.prompt import Text
 from dotenv import load_dotenv
 
 from eval_framework.llm.base import BaseLLM
+from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Error, PromptTooLongException, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from eval_framework.tasks.utils import raise_errors
 from template_formatting.formatter import BaseFormatter, Llama3Formatter, Message
 
 load_dotenv()

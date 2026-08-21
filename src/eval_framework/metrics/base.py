@@ -5,8 +5,8 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 
 from eval_framework.metrics.aggregators.aggregators import Aggregator
+from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Error
-from eval_framework.tasks.utils import raise_errors
 
 
 class MetricResult(BaseModel):

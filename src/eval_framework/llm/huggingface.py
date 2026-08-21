@@ -20,6 +20,7 @@ from transformers.models.gpt2 import GPT2Tokenizer
 from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from eval_framework.llm.base import BaseLLM
+from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import (
     ConcatCompression,
     Error,
@@ -28,7 +29,6 @@ from eval_framework.shared.types import (
     RawLoglikelihood,
 )
 from eval_framework.tasks.base import Sample
-from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message
 
