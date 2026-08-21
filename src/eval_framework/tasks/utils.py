@@ -1,7 +1,6 @@
 import atexit
 import base64
 import logging
-import os
 import re
 import string
 import threading
@@ -17,7 +16,6 @@ from llm_sandbox.pool.base import ContainerPoolManager
 
 logger = logging.getLogger(__name__)
 
-RANDOM_SEED = 42  # hacky way to get around circular import
 redis_warning_printed = False
 
 
@@ -90,16 +88,6 @@ def close_pools() -> None:
 
 
 atexit.register(close_pools)
-
-
-def raise_errors() -> bool:
-    debug = os.environ.get("DEBUG", "FALSE").lower()
-    if debug in {"1", "true"}:
-        return True
-    elif debug in {"0", "false"}:
-        return False
-    else:
-        raise ValueError(f"Invalid value for DEBUG environment variable: {debug}. Use one of 1, 0, true, false.")
 
 
 def get_n_letters(n: int) -> list[str]:

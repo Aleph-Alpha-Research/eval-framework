@@ -20,6 +20,7 @@ from tqdm import tqdm
 from eval_framework import __version__ as eval_framework_version
 from eval_framework.llm.base import BaseLLM
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
+from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import (
     Completion,
     Error,
@@ -28,7 +29,6 @@ from eval_framework.shared.types import (
 )
 from eval_framework.tasks.base import RANDOM_SEED, Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.utils import raise_errors
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag
 
