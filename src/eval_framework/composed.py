@@ -66,7 +66,6 @@ class ChoiceReader(ABC):
 
 class ComposedEval[SubjectType](Eval):
     NAME: str
-    DATASET_PATH: str
     SAMPLE_SPLIT: str
     FEWSHOT_SPLIT: str
     SUBJECTS: list[SubjectType]
@@ -74,7 +73,7 @@ class ComposedEval[SubjectType](Eval):
     # Composed evals are styler-only (choice-based); there is no completion styling path.
     TASK_STYLER: "TaskStyler"
 
-    # The lock file this task resolves its pinned dataset revision from, keyed by ``DATASET_PATH``.
+    # The lock file this task resolves its pinned dataset revision from, keyed by ``dataset_path``.
     # Each task sets this explicitly: point it at a lock file (e.g. ``HF_REVISIONS_LOCKFILE`` or a
     # frozen one), or ``None`` to opt out of pinning. Deliberately not defaulted so it is never
     # inherited implicitly (a subclass in another package would otherwise resolve the wrong file).
@@ -84,9 +83,10 @@ class ComposedEval[SubjectType](Eval):
     # language by subtopic, or `None` (for tasks not specific to a single language).
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
 
-    def __init__(self, num_fewshot: int = 0, *, reader: ChoiceReader) -> None:
+    def __init__(self, num_fewshot: int = 0, *, reader: ChoiceReader, dataset_path: str) -> None:
         self.num_fewshot = num_fewshot
         self.reader = reader
+        self.dataset_path = dataset_path
         self.hf_revision: str | None = self._apply_hf_revision()
         self.rnd: random.Random | None = None
 
@@ -96,7 +96,7 @@ class ComposedEval[SubjectType](Eval):
         if custom_hf_revision:
             hf_revision = custom_hf_revision
         elif self.REVISION_LOCKFILE is not None:
-            hf_revision = pinned_revision(self.REVISION_LOCKFILE, self.DATASET_PATH)
+            hf_revision = pinned_revision(self.REVISION_LOCKFILE, self.dataset_path)
         else:
             hf_revision = None
         return hf_revision
@@ -107,12 +107,13 @@ class ComposedEval[SubjectType](Eval):
         num_fewshot: int,
         *,
         reader: ChoiceReader,
+        dataset_path: str,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
         seed: int | None = RANDOM_SEED,
     ) -> Self:
-        instance = cls(num_fewshot=num_fewshot, reader=reader)
+        instance = cls(num_fewshot=num_fewshot, reader=reader, dataset_path=dataset_path)
         # No completion path yet, so any suffix is rejected. This deliberately trips even for a
         # completion response type, flagging that suffix handling must be implemented once that lands.
         if user_prompt_suffix is not None:
@@ -161,7 +162,7 @@ class ComposedEval[SubjectType](Eval):
 
     def _load_dataset(self, subject: SubjectType) -> None:
         name = subject if subject != NO_SUBJECT else None
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=name)
+        hf_dataset = self._load_hf_dataset(path=self.dataset_path, name=name)
         self.dataset = self._shuffle_splits(hf_dataset=hf_dataset)
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
@@ -216,7 +217,7 @@ class ComposedEval[SubjectType](Eval):
 
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         """Render this task's documentation as markdown."""
-        dataset_path = getattr(self, "DATASET_PATH", None)
+        dataset_path = self.dataset_path
         example_messages = split_sizes = possible_completions = ground_truth = None
         if dataset_path is None:
             sample = next(iter(self.iterate_samples(1)))
@@ -299,7 +300,7 @@ class ComposedEval[SubjectType](Eval):
 
     def get_metadata(self) -> dict[str, str | list[str]]:
         meta: dict[str, str | list[str]] = {
-            "dataset_path": self.DATASET_PATH,
+            "dataset_path": self.dataset_path,
             "sample_split": self.SAMPLE_SPLIT,
             "fewshot_split": self.FEWSHOT_SPLIT,
             "response_type": self.get_response_type().value,
@@ -437,8 +438,9 @@ class ComposedBenchmark(Benchmark):
         metrics: list[type["BaseMetric"]],
         response_type: ResponseType,
         reader: ChoiceReader,
+        dataset_path: str,
         make_eval: Callable[..., Eval],
-        generate_markdown_doc: Callable[[Sequence[BaseFormatter], ChoiceReader], str],
+        generate_markdown_doc: Callable[[Sequence[BaseFormatter], ChoiceReader, str], str],
     ) -> None:
         self._id = id
         self._display_name = display_name
@@ -446,12 +448,16 @@ class ComposedBenchmark(Benchmark):
         self._metrics = metrics
         self._response_type = response_type
         self.reader = reader
+        self.dataset_path = dataset_path
         self._make_eval = make_eval
         self._generate_markdown_doc = generate_markdown_doc
 
     @classmethod
-    def from_base(cls, task: type[ComposedEval], reader: ChoiceReader) -> Self:
-        """Build an ``ComposedBenchmark`` from a task class and reader, deriving metadata from the class."""
+    def from_base(cls, task: type[ComposedEval], reader: ChoiceReader, dataset_path: str) -> Self:
+        """Build an ``ComposedBenchmark`` from a task class, reader and dataset path.
+
+        Metadata (name, subjects, metrics, response type) is derived from the class.
+        """
 
         def make_eval(
             num_fewshot: int,
@@ -461,19 +467,26 @@ class ComposedBenchmark(Benchmark):
             seed: int | None = None,
             *,
             reader: ChoiceReader,
+            dataset_path: str,
         ) -> Eval:
             return task.with_overwrite(
                 num_fewshot=num_fewshot,
                 reader=reader,
+                dataset_path=dataset_path,
                 custom_subjects=custom_subjects,
                 custom_hf_revision=custom_hf_revision,
                 user_prompt_suffix=user_prompt_suffix,
                 seed=seed,
             )
 
-        def generate_markdown_doc(formatters: Sequence[BaseFormatter], reader: ChoiceReader) -> str:
+        def generate_markdown_doc(formatters: Sequence[BaseFormatter], reader: ChoiceReader, dataset_path: str) -> str:
             instance = task.with_overwrite(
-                num_fewshot=1, reader=reader, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
+                num_fewshot=1,
+                reader=reader,
+                dataset_path=dataset_path,
+                custom_subjects=None,
+                custom_hf_revision=None,
+                seed=RANDOM_SEED,
             )
             return instance.markdown_doc(formatters)
 
@@ -484,6 +497,7 @@ class ComposedBenchmark(Benchmark):
             metrics=task.get_metrics(),
             response_type=task.get_response_type(),
             reader=reader,
+            dataset_path=dataset_path,
             make_eval=make_eval,
             generate_markdown_doc=generate_markdown_doc,
         )
@@ -500,7 +514,13 @@ class ComposedBenchmark(Benchmark):
         seed: int | None = None,
     ) -> Eval:
         return self._make_eval(
-            num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix, seed, reader=self.reader
+            num_fewshot,
+            custom_subjects,
+            custom_hf_revision,
+            user_prompt_suffix,
+            seed,
+            reader=self.reader,
+            dataset_path=self.dataset_path,
         )
 
     def response_type(self) -> ResponseType:
@@ -520,4 +540,4 @@ class ComposedBenchmark(Benchmark):
         return self._display_name
 
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        return self._generate_markdown_doc(formatters, self.reader)
+        return self._generate_markdown_doc(formatters, self.reader, self.dataset_path)

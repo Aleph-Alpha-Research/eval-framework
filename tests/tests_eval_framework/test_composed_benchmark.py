@@ -25,6 +25,7 @@ class _DummyReader(ChoiceReader):
 
 
 _DUMMY_READER = _DummyReader()
+_DUMMY_DATASET_PATH = "dummy/dataset"
 
 
 class _DummyStyler(TaskStyler):
@@ -159,11 +160,19 @@ def test_task_custom_subjects(
     if expected_value == "ValueError":
         with pytest.raises(ValueError):
             task = MyTask.with_overwrite(
-                num_fewshot=0, reader=_DUMMY_READER, custom_subjects=custom_subjects, custom_hf_revision=None
+                num_fewshot=0,
+                reader=_DUMMY_READER,
+                dataset_path=_DUMMY_DATASET_PATH,
+                custom_subjects=custom_subjects,
+                custom_hf_revision=None,
             )
     else:
         task = MyTask.with_overwrite(
-            num_fewshot=0, reader=_DUMMY_READER, custom_subjects=custom_subjects, custom_hf_revision=None
+            num_fewshot=0,
+            reader=_DUMMY_READER,
+            dataset_path=_DUMMY_DATASET_PATH,
+            custom_subjects=custom_subjects,
+            custom_hf_revision=None,
         )
         result = task.SUBJECTS
         assert result == expected_value
@@ -190,10 +199,12 @@ def test_base_task() -> None:
         def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
             return []
 
-    task1 = MyTask1(reader=_DUMMY_READER)
+    task1 = MyTask1(reader=_DUMMY_READER, dataset_path=_DUMMY_DATASET_PATH)
     assert task1.NAME == "MyTask1"
 
-    task2 = MyTask2.with_overwrite(0, reader=_DUMMY_READER, custom_subjects=None, custom_hf_revision=None)
+    task2 = MyTask2.with_overwrite(
+        0, reader=_DUMMY_READER, dataset_path=_DUMMY_DATASET_PATH, custom_subjects=None, custom_hf_revision=None
+    )
     assert task2.NAME == "MyTask2"
 
 
@@ -208,6 +219,7 @@ def test_user_prompt_suffix_rejected() -> None:
         MyTask.with_overwrite(
             0,
             reader=_DUMMY_READER,
+            dataset_path=_DUMMY_DATASET_PATH,
             custom_subjects=None,
             custom_hf_revision=None,
             user_prompt_suffix="/think_short",
@@ -226,7 +238,6 @@ def _pinned_task(lockfile: Path | None) -> type[ComposedEval]:
 
     class PinnedTask(ComposedEval):
         NAME = "PinnedTask"
-        DATASET_PATH = "my/dataset"
         REVISION_LOCKFILE = lockfile
 
         def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -244,7 +255,9 @@ def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
     dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
 
     # When constructing the task without a revision override
-    task = _pinned_task(lockfile).with_overwrite(0, reader=_DUMMY_READER, custom_subjects=None, custom_hf_revision=None)
+    task = _pinned_task(lockfile).with_overwrite(
+        0, reader=_DUMMY_READER, dataset_path="my/dataset", custom_subjects=None, custom_hf_revision=None
+    )
 
     # Then the pinned revision is applied
     assert task.hf_revision == "pinned-sha"
@@ -252,7 +265,9 @@ def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
 
 def test_task_without_lockfile_is_not_pinned() -> None:
     # Given a task that opted out of pinning, when constructing it
-    task = _pinned_task(None).with_overwrite(0, reader=_DUMMY_READER, custom_subjects=None, custom_hf_revision=None)
+    task = _pinned_task(None).with_overwrite(
+        0, reader=_DUMMY_READER, dataset_path="my/dataset", custom_subjects=None, custom_hf_revision=None
+    )
 
     # Then no revision is pinned
     assert task.hf_revision is None
@@ -265,7 +280,9 @@ def test_missing_pin_in_declared_lockfile_raises(tmp_path: Path) -> None:
 
     # Then constructing the task fails
     with pytest.raises(KeyError, match="not pinned"):
-        _pinned_task(lockfile).with_overwrite(0, reader=_DUMMY_READER, custom_subjects=None, custom_hf_revision=None)
+        _pinned_task(lockfile).with_overwrite(
+            0, reader=_DUMMY_READER, dataset_path="my/dataset", custom_subjects=None, custom_hf_revision=None
+        )
 
 
 def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
@@ -275,7 +292,7 @@ def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
 
     # When constructing the task with a revision override
     task = _pinned_task(lockfile).with_overwrite(
-        0, reader=_DUMMY_READER, custom_subjects=None, custom_hf_revision="custom-sha"
+        0, reader=_DUMMY_READER, dataset_path="my/dataset", custom_subjects=None, custom_hf_revision="custom-sha"
     )
 
     # Then the override beats the pin
@@ -290,5 +307,5 @@ def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
         TASK_STYLER = _StubTaskStyler()
 
     # Then its metrics are the styler's metrics plus the loglikelihood response-type metrics
-    task = MyTask(reader=_DUMMY_READER)
+    task = MyTask(reader=_DUMMY_READER, dataset_path=_DUMMY_DATASET_PATH)
     assert set(task.get_metrics()) == {_FakeMetric, BytesLoglikelihood, SequencePositionsLoglikelihood}
