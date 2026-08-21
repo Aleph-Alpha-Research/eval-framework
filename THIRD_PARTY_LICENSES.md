@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.75 - https://github.com/boto/boto3
-- **botocore** 1.43.75 - https://github.com/boto/botocore
+- **boto3** 1.43.76 - https://github.com/boto/boto3
+- **botocore** 1.43.76 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -70,7 +70,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **mpmath** 1.3.0 - http://mpmath.org/
 - **multiprocess** 0.70.19 - https://github.com/uqfoundation/multiprocess
 - **pandas** 3.0.5 - https://pandas.pydata.org
-- **protobuf** 7.35.1 - https://developers.google.com/protocol-buffers/
+- **protobuf** 7.36.0 - https://developers.google.com/protocol-buffers/
 - **python-dotenv** 1.2.3 - https://github.com/theskumar/python-dotenv
 - **scipy** 1.18.0 - https://scipy.org/
 - **sympy** 1.14.0 - https://sympy.org
@@ -212,7 +212,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.75 (Apache-2.0)
+### boto3 1.43.76 (Apache-2.0)
 
 ```text
 Apache License
@@ -393,7 +393,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.75 (Apache-2.0)
+### botocore 1.43.76 (Apache-2.0)
 
 ```text
 Apache License
@@ -12821,7 +12821,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### protobuf 7.35.1 (BSD-3-Clause)
+### protobuf 7.36.0 (BSD-3-Clause)
 
 ```text
 Copyright 2008 Google Inc.  All rights reserved.
