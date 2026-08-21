@@ -9,12 +9,14 @@ subclass overrides.
 
 from typing import Any, Literal
 
-from eval_framework.tasks.base import BaseTask, Language
+from eval_framework.composed import ComposedBenchmark, ComposedEval
+from eval_framework.contract import Benchmark
+from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, shuffle_correct_with_distractors
 
 
-class _PIQA_ELLAMIND_DE_Base(BaseTask[str]):
+class _PIQA_ELLAMIND_DE_Base(ComposedEval[str]):
     """Non-registered base for German PIQA (EllaMind) variants.
 
     Dataset: https://huggingface.co/datasets/ellamind/piqa-multilingual
@@ -93,3 +95,13 @@ class PIQA_ELLAMIND_BPB_DE(_PIQA_ELLAMIND_DE_Base):
 
     NAME = "PIQA_ELLAMIND_BPB_DE"
     TASK_STYLER = BPBStyle(question_prefix="Ziel: ", cue_text="Antwort:")
+
+
+def piqa_ellamind_benchmarks() -> list[Benchmark]:
+    return [
+        ComposedBenchmark.from_base_task(PIQA_ELLAMIND_CLOZE_EASY_DE),
+        ComposedBenchmark.from_base_task(PIQA_ELLAMIND_CLOZE_HARD_DE),
+        ComposedBenchmark.from_base_task(PIQA_ELLAMIND_MC_EASY_DE),
+        ComposedBenchmark.from_base_task(PIQA_ELLAMIND_MC_HARD_DE),
+        ComposedBenchmark.from_base_task(PIQA_ELLAMIND_BPB_DE)
+    ]
