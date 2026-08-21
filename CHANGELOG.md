@@ -14,6 +14,15 @@
 
 ### Bug Fixes
 
+## [0.10.8](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.7...v0.10.8) (2026-08-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.73,&lt;2 ([8248f49](https://github.com/Aleph-Alpha-Research/eval-framework/commit/8248f49ab3b92d20be41108706441b72eef2b01a))
+* **deps:** update dependency openai to &gt;=3.2.0,&lt;4 ([0e00687](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0e0068779bd98d65e807df76c5a650da505d4107))
+* **deps:** update dependency tiktoken to &gt;=0.14.0,&lt;1 ([605ba39](https://github.com/Aleph-Alpha-Research/eval-framework/commit/605ba39d22453f23a31574eed61fc93d27440175))
+
 ## [0.10.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.6...v0.10.7) (2026-08-20)
 
 
