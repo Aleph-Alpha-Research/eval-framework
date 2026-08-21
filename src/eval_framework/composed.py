@@ -498,14 +498,9 @@ class ComposedBenchmark(Benchmark):
             )
 
         def generate_markdown_doc(formatters: Sequence[BaseFormatter], reader: ChoiceReader) -> str:
-            try:
-                instance = task.with_overwrite(
-                    num_fewshot=1, reader=reader, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
-                )
-            except (TypeError, ValueError, AssertionError):
-                instance = task.with_overwrite(
-                    num_fewshot=0, reader=reader, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
-                )
+            instance = task.with_overwrite(
+                num_fewshot=1, reader=reader, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
+            )
             return instance.markdown_doc(formatters)
 
         return cls(
