@@ -3,7 +3,9 @@ import os
 import random
 import traceback
 import typing
+from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self
 
@@ -38,6 +40,31 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True)
+class ChoiceFields:
+    """The fields a choice-based styler needs out of a single dataset item.
+
+    ``choices`` and ``correct_index`` are produced together (a benchmark may shuffle the correct
+    answer in among distractors), so a reader yields them in one ``read`` rather than via separate
+    calls that would each have to re-derive the same shuffle.
+    """
+
+    raw_question: str
+    choices: list[str]
+    correct_index: int
+
+
+class ChoiceReader(ABC):
+    """Reads the fields a styler needs out of a raw dataset item.
+
+    Isolates dataset-schema knowledge here, so neither the eval nor the styler has to know the shape
+    of a benchmark's items.
+    """
+
+    @abstractmethod
+    def read(self, item: dict[str, Any]) -> ChoiceFields: ...
+
+
 class ComposedEval[SubjectType](Eval):
     NAME: str
     DATASET_PATH: str
@@ -45,8 +72,7 @@ class ComposedEval[SubjectType](Eval):
     FEWSHOT_SPLIT: str
     SUBJECTS: list[SubjectType]
 
-    # The styling strategy. Composed evals are always styler-based; the styler turns the fields the
-    # data-access hooks read (question/choices/correct index) into the prompt, ground truth and completions.
+    # Composed evals are styler-only (choice-based); there is no completion styling path.
     TASK_STYLER: "TaskStyler"
 
     # The lock file this task resolves its pinned dataset revision from, keyed by ``DATASET_PATH``.
@@ -63,8 +89,9 @@ class ComposedEval[SubjectType](Eval):
     # `TaskClass.*` or `task.*` (or `task.get_metrics()`). This avoids mypy conflicts from re-declaring class vars.
     # By default, these values come from TASK_STYLER if set, otherwise from legacy class attributes.
 
-    def __init__(self, num_fewshot: int = 0) -> None:
+    def __init__(self, num_fewshot: int = 0, *, reader: ChoiceReader) -> None:
         self.num_fewshot = num_fewshot
+        self.reader = reader
         self.user_prompt_suffix: str | None = None
         self.stop_sequences: list[str] | None = None
         self.max_tokens: int | None = None
@@ -87,12 +114,13 @@ class ComposedEval[SubjectType](Eval):
         cls,
         num_fewshot: int,
         *,
+        reader: ChoiceReader,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
         user_prompt_suffix: str | None = None,
         seed: int | None = RANDOM_SEED,
     ) -> Self:
-        instance = cls(num_fewshot=num_fewshot)
+        instance = cls(num_fewshot=num_fewshot, reader=reader)
         if user_prompt_suffix is not None and instance.get_response_type() != ResponseType.COMPLETION:
             raise ValueError("user_prompt_suffix is only supported for completion tasks.")
         instance.user_prompt_suffix = user_prompt_suffix
@@ -252,29 +280,24 @@ class ComposedEval[SubjectType](Eval):
     def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
         return None
 
-    def _get_raw_question(self, item: dict[str, Any]) -> str:
-        raise NotImplementedError("Subclasses using a TASK_STYLER must implement _get_raw_question")
-
-    def _get_choices(self, item: dict[str, Any]) -> list[str]:
-        raise NotImplementedError("Subclasses using a TASK_STYLER must implement _get_choices")
-
-    def _get_correct_index(self, item: dict[str, Any]) -> int:
-        raise NotImplementedError("Subclasses using a TASK_STYLER must implement _get_correct_index")
-
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return self.TASK_STYLER.get_instruction_text(self._get_raw_question(item), self._get_choices(item))
+        fields = self.reader.read(item)
+        return self.TASK_STYLER.get_instruction_text(fields.raw_question, fields.choices)
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        return self.TASK_STYLER.get_fewshot_target_text(self._get_choices(item), self._get_correct_index(item))
+        fields = self.reader.read(item)
+        return self.TASK_STYLER.get_fewshot_target_text(fields.choices, fields.correct_index)
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
-        return self.TASK_STYLER.get_ground_truth(self._get_choices(item), self._get_correct_index(item))
+        fields = self.reader.read(item)
+        return self.TASK_STYLER.get_ground_truth(fields.choices, fields.correct_index)
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return self.TASK_STYLER.get_cue_text()
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        return self.TASK_STYLER.get_possible_completions(self._get_choices(item), self._get_correct_index(item))
+        fields = self.reader.read(item)
+        return self.TASK_STYLER.get_possible_completions(fields.choices, fields.correct_index)
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         assert self.rnd is not None, "Task RNG is unseeded; build tasks via `with_overwrite`."
@@ -451,20 +474,22 @@ class ComposedBenchmark(Benchmark):
         subjects: list[Any],
         metrics: list[type["BaseMetric"]],
         response_type: ResponseType,
+        reader: ChoiceReader,
         make_eval: Callable[..., Eval],
-        generate_markdown_doc: Callable[[Sequence[BaseFormatter]], str],
+        generate_markdown_doc: Callable[[Sequence[BaseFormatter], ChoiceReader], str],
     ) -> None:
         self._id = id
         self._display_name = display_name
         self._subjects = subjects
         self._metrics = metrics
         self._response_type = response_type
+        self.reader = reader
         self._make_eval = make_eval
         self._generate_markdown_doc = generate_markdown_doc
 
     @classmethod
-    def from_base(cls, task: type[ComposedEval]) -> Self:
-        """Build an ``ComposedBenchmark`` from a task class, deriving its metadata from the class."""
+    def from_base(cls, task: type[ComposedEval], reader: ChoiceReader) -> Self:
+        """Build an ``ComposedBenchmark`` from a task class and reader, deriving metadata from the class."""
 
         def make_eval(
             num_fewshot: int,
@@ -472,23 +497,26 @@ class ComposedBenchmark(Benchmark):
             custom_hf_revision: str | None,
             user_prompt_suffix: str | None = None,
             seed: int | None = None,
+            *,
+            reader: ChoiceReader,
         ) -> Eval:
             return task.with_overwrite(
                 num_fewshot=num_fewshot,
+                reader=reader,
                 custom_subjects=custom_subjects,
                 custom_hf_revision=custom_hf_revision,
                 user_prompt_suffix=user_prompt_suffix,
                 seed=seed,
             )
 
-        def generate_markdown_doc(formatters: Sequence[BaseFormatter]) -> str:
+        def generate_markdown_doc(formatters: Sequence[BaseFormatter], reader: ChoiceReader) -> str:
             try:
                 instance = task.with_overwrite(
-                    num_fewshot=1, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
+                    num_fewshot=1, reader=reader, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
                 )
             except (TypeError, ValueError, AssertionError):
                 instance = task.with_overwrite(
-                    num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
+                    num_fewshot=0, reader=reader, custom_subjects=None, custom_hf_revision=None, seed=RANDOM_SEED
                 )
             return instance.markdown_doc(formatters)
 
@@ -498,6 +526,7 @@ class ComposedBenchmark(Benchmark):
             subjects=task.SUBJECTS,
             metrics=task.get_metrics(),
             response_type=task.get_response_type(),
+            reader=reader,
             make_eval=make_eval,
             generate_markdown_doc=generate_markdown_doc,
         )
@@ -513,7 +542,9 @@ class ComposedBenchmark(Benchmark):
         user_prompt_suffix: str | None = None,
         seed: int | None = None,
     ) -> Eval:
-        return self._make_eval(num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix, seed)
+        return self._make_eval(
+            num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix, seed, reader=self.reader
+        )
 
     def response_type(self) -> ResponseType:
         """The eval's response type"""
@@ -532,4 +563,4 @@ class ComposedBenchmark(Benchmark):
         return self._display_name
 
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        return self._generate_markdown_doc(formatters)
+        return self._generate_markdown_doc(formatters, self.reader)

@@ -4,14 +4,48 @@ from unittest.mock import patch
 
 import pytest
 
-from eval_framework.composed import ComposedEval
+from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedEval
 from eval_framework.contract import ResponseType
+from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import BytesCompletion, SequencePositionsCompletion
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.run import parse_args
 from eval_framework.tasks import dataset_revisions as dr
-from eval_framework.tasks.task_style import MCStyle
+from eval_framework.tasks.task_style import TaskStyle, TaskStyler
+
+
+class _DummyReader(ChoiceReader):
+    """A dummy reader: passed only to satisfy construction for doubles that never read (they override
+    the styling methods, or raise before styling)."""
+
+    def read(self, item: dict[str, Any]) -> ChoiceFields:
+        return ChoiceFields(raw_question="", choices=[], correct_index=0)
+
+
+_DUMMY_READER = _DummyReader()
+
+
+class _DummyStyler(TaskStyler):
+    """A dummy styler for tests that need a ComposedEval with a (loglikelihood) styler but never render
+    a prompt — e.g. asserting a user_prompt_suffix is rejected on a non-completion task."""
+
+    response_type = ResponseType.LOGLIKELIHOODS
+    metrics: list[type[BaseMetric]] = []
+    task_style = TaskStyle.MULTIPLE_CHOICE
+    question_prefix = ""
+
+    def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
+        return ""
+
+    def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
+        return ""
+
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str] | None:
+        return None
+
+    def get_cue_text(self) -> str:
+        return ""
 
 
 @pytest.mark.parametrize(
@@ -98,9 +132,13 @@ def test_task_custom_subjects(
 
     if expected_value == "ValueError":
         with pytest.raises(ValueError):
-            task = MyTask.with_overwrite(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)
+            task = MyTask.with_overwrite(
+                num_fewshot=0, reader=_DUMMY_READER, custom_subjects=custom_subjects, custom_hf_revision=None
+            )
     else:
-        task = MyTask.with_overwrite(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)
+        task = MyTask.with_overwrite(
+            num_fewshot=0, reader=_DUMMY_READER, custom_subjects=custom_subjects, custom_hf_revision=None
+        )
         result = task.SUBJECTS
         assert result == expected_value
 
@@ -126,10 +164,10 @@ def test_base_task() -> None:
         def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
             return []
 
-    task1 = MyTask1()
+    task1 = MyTask1(reader=_DUMMY_READER)
     assert task1.NAME == "MyTask1"
 
-    task2 = MyTask2.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+    task2 = MyTask2.with_overwrite(0, reader=_DUMMY_READER, custom_subjects=None, custom_hf_revision=None)
     assert task2.NAME == "MyTask2"
 
 
@@ -137,12 +175,13 @@ def test_user_prompt_suffix_rejected_for_loglikelihood_task() -> None:
     # Given a loglikelihood task (its styler declares the response type)
     class MyTask(ComposedEval):
         REVISION_LOCKFILE = None
-        TASK_STYLER = MCStyle()
+        TASK_STYLER = _DummyStyler()
 
     # When constructing it with a user prompt suffix, then it is rejected
     with pytest.raises(ValueError, match="only supported for completion tasks"):
         MyTask.with_overwrite(
             0,
+            reader=_DUMMY_READER,
             custom_subjects=None,
             custom_hf_revision=None,
             user_prompt_suffix="/think_short",
@@ -179,7 +218,7 @@ def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
     dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
 
     # When constructing the task without a revision override
-    task = _pinned_task(lockfile).with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+    task = _pinned_task(lockfile).with_overwrite(0, reader=_DUMMY_READER, custom_subjects=None, custom_hf_revision=None)
 
     # Then the pinned revision is applied
     assert task.hf_revision == "pinned-sha"
@@ -187,7 +226,7 @@ def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
 
 def test_task_without_lockfile_is_not_pinned() -> None:
     # Given a task that opted out of pinning, when constructing it
-    task = _pinned_task(None).with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+    task = _pinned_task(None).with_overwrite(0, reader=_DUMMY_READER, custom_subjects=None, custom_hf_revision=None)
 
     # Then no revision is pinned
     assert task.hf_revision is None
@@ -200,7 +239,7 @@ def test_missing_pin_in_declared_lockfile_raises(tmp_path: Path) -> None:
 
     # Then constructing the task fails
     with pytest.raises(KeyError, match="not pinned"):
-        _pinned_task(lockfile).with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
+        _pinned_task(lockfile).with_overwrite(0, reader=_DUMMY_READER, custom_subjects=None, custom_hf_revision=None)
 
 
 def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
@@ -209,7 +248,9 @@ def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
     dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
 
     # When constructing the task with a revision override
-    task = _pinned_task(lockfile).with_overwrite(0, custom_subjects=None, custom_hf_revision="custom-sha")
+    task = _pinned_task(lockfile).with_overwrite(
+        0, reader=_DUMMY_READER, custom_subjects=None, custom_hf_revision="custom-sha"
+    )
 
     # Then the override beats the pin
     assert task.hf_revision == "custom-sha"
@@ -222,7 +263,7 @@ def test_completion_metrics_returns_all_completion_metrics() -> None:
         RESPONSE_TYPE = ResponseType.COMPLETION
         METRICS = [AccuracyCompletion]
 
-    task = MyCompletionTask()
+    task = MyCompletionTask(reader=_DUMMY_READER)
 
     metrics = task.get_metrics()
     assert set(metrics) == {
