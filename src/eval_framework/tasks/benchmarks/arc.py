@@ -1,6 +1,7 @@
 from typing import Any
 
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -23,7 +24,12 @@ class ARC(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = ["ARC-Easy", "ARC-Challenge"]
     LANGUAGE = Language.ENG
 
@@ -85,6 +91,7 @@ class ARC_IDK(ARC):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
         TernaryScore,

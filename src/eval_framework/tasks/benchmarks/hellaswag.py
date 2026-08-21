@@ -2,6 +2,7 @@ import re
 from typing import Any
 
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -24,7 +25,12 @@ class HELLASWAG(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 
@@ -62,6 +68,7 @@ class HELLASWAG_IDK(HELLASWAG):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
         TernaryScore,

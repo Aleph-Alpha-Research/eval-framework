@@ -5,6 +5,7 @@ from eval_framework.metrics.completion.drop_completion import (
     DropMetricContext,
 )
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -174,6 +175,7 @@ class DropMC(BaseTask[str]):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         BitsPerByteLoglikelihood,
     ]
     SUBJECTS = [NO_SUBJECT]
@@ -245,6 +247,7 @@ class DropCloze(BaseTask[str]):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         BitsPerByteLoglikelihood,
     ]
     SUBJECTS = [NO_SUBJECT]

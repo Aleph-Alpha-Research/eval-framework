@@ -1,6 +1,7 @@
 from typing import Any
 
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -23,7 +24,12 @@ class PIQA(BaseTask[str]):
     SAMPLE_SPLIT = "validation"  # 1838 examples (same split as lm-eval)
     FEWSHOT_SPLIT = "test"  # 3084 examples
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 
@@ -82,6 +88,7 @@ class PIQA_IDK(PIQA):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
         TernaryScore,

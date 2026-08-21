@@ -1,6 +1,7 @@
 from typing import Any
 
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -29,6 +30,7 @@ class GOLDENSWAG_IDK(GOLDENSWAG):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
         TernaryScore,

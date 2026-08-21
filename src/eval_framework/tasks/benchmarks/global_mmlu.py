@@ -3,6 +3,7 @@ from itertools import product
 from typing import Any
 
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -477,7 +478,12 @@ class GlobalMMLU(BaseTask[tuple[str, str]]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "dev"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = list(product(GLOBAL_MMLU_LANGUAGES, MMLU_SUBJECTS))
     LANGUAGE: Language | dict[str, Language] | None = {
         str((lang_code.split("_")[0], subject)): LANGUAGE_NAME_MAP[lang_code]

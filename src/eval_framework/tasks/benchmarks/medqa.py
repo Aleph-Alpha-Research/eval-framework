@@ -5,6 +5,7 @@ MedQA (English): Open-domain medical question answering from medical exams.
 from typing import Any
 
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -24,7 +25,12 @@ class MedQACloze(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "dev"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 

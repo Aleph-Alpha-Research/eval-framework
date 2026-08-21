@@ -48,6 +48,10 @@ class BaseMetric[Response](ABC):
     def calculate(self, response: Response) -> list[MetricResult]:
         raise NotImplementedError
 
+    def prepare(self, responses: list[Response]) -> None:
+        """Prepare metric before calculating per-response results.
+        This is needed for metrics that depend on variables derived from all of the responses."""
+
     def _record_or_raise(self, exc: Exception) -> list[MetricResult]:
         """Infra failure (e.g. a Docker image-pull rate limit): abort when fail_on_error is set,
         otherwise record a per-sample error so the run continues."""

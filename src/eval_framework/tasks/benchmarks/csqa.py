@@ -1,6 +1,7 @@
 from typing import Any
 
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -20,7 +21,12 @@ class CommonsenseQACloze(BaseTask[str]):
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "validation"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
 
@@ -57,7 +63,12 @@ class CommonsenseQAFullTextCloze(CommonsenseQACloze):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "CommonsenseQAFullTextCloze"
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
+    METRICS = [
+        AccuracyLoglikelihood,
+        AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
+        BitsPerByteLoglikelihood,
+    ]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
         correct_label = item["answerKey"]

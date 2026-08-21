@@ -40,7 +40,11 @@ def test_automatic_tasks(tmp_path: Path, test_llms: BaseLLM) -> None:
     output_dir = tmp_path / "eval"
 
     task_name = HELLASWAG.NAME
-    expected_results = {"Accuracy Loglikelihood": 0.4, "Accuracy Normalized Loglikelihood": 0.6}
+    expected_results = {
+        "Accuracy Loglikelihood": 0.4,
+        "Accuracy Normalized Loglikelihood": 0.6,
+        "Accuracy Bayesian Loglikelihood": 0.5,
+    }
     num_fewshot = 2
     num_samples = 10
 

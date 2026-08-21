@@ -366,12 +366,14 @@ class TestBaseTaskMCStyle:
 
     def test_metrics_from_styler(self) -> None:
         from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+            AccuracyBayesianLoglikelihood,
             AccuracyLoglikelihood,
             AccuracyNormLoglikelihood,
         )
 
         assert AccuracyLoglikelihood in self.task.TASK_STYLER.metrics
         assert AccuracyNormLoglikelihood in self.task.TASK_STYLER.metrics
+        assert AccuracyBayesianLoglikelihood in self.task.TASK_STYLER.metrics
         assert BitsPerByteLoglikelihood in self.task.TASK_STYLER.metrics
 
 
@@ -403,6 +405,11 @@ class TestBaseTaskClozeStyle:
     def test_metadata_includes_task_style(self) -> None:
         meta = self.task.get_metadata()
         assert meta["task_style"] == TaskStyle.CLOZE.value
+
+    def test_metrics_include_bayesian_accuracy(self) -> None:
+        from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyBayesianLoglikelihood
+
+        assert AccuracyBayesianLoglikelihood in self.task.TASK_STYLER.metrics
 
 
 class TestBaseTaskMCCompletionStyle:

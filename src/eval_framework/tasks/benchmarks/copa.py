@@ -1,6 +1,7 @@
 from typing import Any
 
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -24,7 +25,7 @@ class COPAEvalHarness(BaseTask[str]):
     SAMPLE_SPLIT = "validation"  # 100 examples (same split as lm-eval)
     FEWSHOT_SPLIT = "test"  # 500 examples
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, AccuracyBayesianLoglikelihood]
     SUBJECTS = ["copa"]
     LANGUAGE = Language.ENG
 
@@ -94,6 +95,7 @@ class COPA_IDKEvalHarness(COPAEvalHarness):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
         TernaryScore,

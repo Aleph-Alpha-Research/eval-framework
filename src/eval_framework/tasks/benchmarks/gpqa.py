@@ -6,6 +6,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -29,7 +30,7 @@ class GPQA(BaseTask[str]):
     SAMPLE_SPLIT = "train"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, AccuracyBayesianLoglikelihood]
     SUBJECTS = ["gpqa_extended"]  # ["gpqa_diamond", "gpqa_extended", "gpqa_main", "gpqa_experts"]
     LANGUAGE = Language.ENG
 
@@ -156,6 +157,7 @@ class GPQA_IDK(GPQA):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
         TernaryScore,

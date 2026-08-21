@@ -1,5 +1,6 @@
 import logging
 import math
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -49,18 +50,20 @@ class EvaluationGenerator:
         """
         llm_judge = None
         for metric_class in self.metrics:
-            metric: BaseMetric
+            raw_metric: BaseMetric[Any]
             if issubclass(metric_class, BaseLLMJudgeMetric):
                 if llm_judge is None:
                     llm_judge = self.config.llm_judge()
-                metric = metric_class(
+                raw_metric = metric_class(
                     llm_judge=llm_judge,
                     randomize_order=self.config.randomize_judge_order,
                 )
             else:
-                metric = metric_class()
+                raw_metric = metric_class()
+            metric = cast(BaseMetric[Completion | Loglikelihood], raw_metric)
             metric.fail_on_error = self.config.fail_on_error
 
+            metric.prepare(responses)
             logger.info(f"Starting calculation of {metric.NAME}")
             for response in tqdm(responses, desc=f"Calculating {metric.NAME}", disable=get_disable_bar_flag()):
                 if f"{response.subject}_{response.id}_{metric.__class__.__name__}" in subject_result_id_existing:
