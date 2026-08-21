@@ -99,9 +99,9 @@ class PIQA_ELLAMIND_BPB_DE(_PIQA_ELLAMIND_DE_Base):
 
 def piqa_ellamind_benchmarks() -> list[Benchmark]:
     return [
-        ComposedBenchmark.from_base_task(PIQA_ELLAMIND_CLOZE_EASY_DE),
-        ComposedBenchmark.from_base_task(PIQA_ELLAMIND_CLOZE_HARD_DE),
-        ComposedBenchmark.from_base_task(PIQA_ELLAMIND_MC_EASY_DE),
-        ComposedBenchmark.from_base_task(PIQA_ELLAMIND_MC_HARD_DE),
-        ComposedBenchmark.from_base_task(PIQA_ELLAMIND_BPB_DE)
+        ComposedBenchmark.from_base(PIQA_ELLAMIND_CLOZE_EASY_DE),
+        ComposedBenchmark.from_base(PIQA_ELLAMIND_CLOZE_HARD_DE),
+        ComposedBenchmark.from_base(PIQA_ELLAMIND_MC_EASY_DE),
+        ComposedBenchmark.from_base(PIQA_ELLAMIND_MC_HARD_DE),
+        ComposedBenchmark.from_base(PIQA_ELLAMIND_BPB_DE),
     ]

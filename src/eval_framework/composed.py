@@ -33,6 +33,7 @@ from template_formatting.formatter import BaseFormatter, Message, Role
 if TYPE_CHECKING:
     from eval_framework.llm.base import BaseLLM
     from eval_framework.metrics.base import BaseMetric
+    from eval_framework.tasks.task_style import TaskStyler
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,10 @@ class ComposedEval[SubjectType](Eval):
     SAMPLE_SPLIT: str
     FEWSHOT_SPLIT: str
     SUBJECTS: list[SubjectType]
+
+    # The styling strategy. Composed evals are always styler-based; the styler turns the fields the
+    # data-access hooks read (question/choices/correct index) into the prompt, ground truth and completions.
+    TASK_STYLER: "TaskStyler"
 
     # The lock file this task resolves its pinned dataset revision from, keyed by ``DATASET_PATH``.
     # Each task sets this explicitly: point it at a lock file (e.g. ``HF_REVISIONS_LOCKFILE`` or a
@@ -257,32 +262,19 @@ class ComposedEval[SubjectType](Eval):
         raise NotImplementedError("Subclasses using a TASK_STYLER must implement _get_correct_index")
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        if hasattr(self, "TASK_STYLER"):
-            return self.TASK_STYLER.get_instruction_text(self._get_raw_question(item), self._get_choices(item))
-        raise NotImplementedError
+        return self.TASK_STYLER.get_instruction_text(self._get_raw_question(item), self._get_choices(item))
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        if hasattr(self, "TASK_STYLER"):
-            return self.TASK_STYLER.get_fewshot_target_text(self._get_choices(item), self._get_correct_index(item))
-        target = self._get_ground_truth(item)
-        assert target is not None
-        assert isinstance(target, str)
-        return target
+        return self.TASK_STYLER.get_fewshot_target_text(self._get_choices(item), self._get_correct_index(item))
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
-        if hasattr(self, "TASK_STYLER"):
-            return self.TASK_STYLER.get_ground_truth(self._get_choices(item), self._get_correct_index(item))
-        raise NotImplementedError
+        return self.TASK_STYLER.get_ground_truth(self._get_choices(item), self._get_correct_index(item))
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
-        if hasattr(self, "TASK_STYLER"):
-            return self.TASK_STYLER.get_cue_text()
-        return ""
+        return self.TASK_STYLER.get_cue_text()
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        if hasattr(self, "TASK_STYLER"):
-            return self.TASK_STYLER.get_possible_completions(self._get_choices(item), self._get_correct_index(item))
-        return None
+        return self.TASK_STYLER.get_possible_completions(self._get_choices(item), self._get_correct_index(item))
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         assert self.rnd is not None, "Task RNG is unseeded; build tasks via `with_overwrite`."
@@ -471,7 +463,7 @@ class ComposedBenchmark(Benchmark):
         self._generate_markdown_doc = generate_markdown_doc
 
     @classmethod
-    def from_base_task(cls, task: type[ComposedEval]) -> Self:
+    def from_base(cls, task: type[ComposedEval]) -> Self:
         """Build an ``ComposedBenchmark`` from a task class, deriving its metadata from the class."""
 
         def make_eval(
