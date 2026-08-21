@@ -4,6 +4,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -42,7 +43,7 @@ class MMLU_PRO(BaseTask[str]):
     SAMPLE_SPLIT = "test"
     FEWSHOT_SPLIT = "test"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood]
+    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, AccuracyBayesianLoglikelihood]
     SUBJECTS = MMLU_PRO_SUBJECTS
     LANGUAGE = Language.ENG
 
@@ -114,6 +115,7 @@ class MMLU_PRO_IDK(MMLU_PRO):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         ConfidenceWeightedAccuracy,
         DistributionalCorrectnessScore,
         TernaryScore,

@@ -1,5 +1,8 @@
+import numpy as np
+
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import Loglikelihood
+from eval_framework.utils.helpers import count_bytes
 
 
 class AccuracyLoglikelihood(BaseMetric[Loglikelihood]):
@@ -45,6 +48,65 @@ class AccuracyNormLoglikelihood(BaseMetric[Loglikelihood]):
             MetricResult(
                 metric_name=self.NAME,
                 value=float(model_output_len_normalized in ground_truth_list),
+                higher_is_better=True,
+                error=response.error,
+            )
+        ]
+
+
+class AccuracyBayesianLoglikelihood(BaseMetric[Loglikelihood]):
+    """Accuracy after adjusting the loglikelihoods for the byte-length bias of the completion.
+    See https://arxiv.org/html/2607.12767v1 for more details.
+    """
+
+    NAME = "Accuracy Bayesian Loglikelihood"
+
+    def __init__(self) -> None:
+        self.length_decay = 0.0
+
+    def prepare(self, responses: list[Loglikelihood]) -> None:
+        """Estimating the length decay factor.
+        See Equation (24) in https://arxiv.org/html/2607.12767v1
+        """
+        numerator = 0.0
+        denominator = 0.0
+
+        for response in responses:
+            if response.error is not None:
+                continue
+
+            num_candidates = len(response.loglikelihoods)
+            if num_candidates <= 1:
+                continue
+
+            lengths = np.array([count_bytes(completion) for completion in response.loglikelihoods], dtype=float)
+            loglikelihoods = np.array(list(response.loglikelihoods.values()), dtype=float)
+            length_differences = lengths - np.mean(lengths)
+            loglikelihood_differences = loglikelihoods - np.mean(loglikelihoods)
+
+            local_denominator = num_candidates * np.sum(length_differences**2)
+            if local_denominator == 0:
+                continue
+
+            numerator += float(num_candidates * np.sum(length_differences * loglikelihood_differences))
+            denominator += float(local_denominator)
+
+        self.length_decay = 0.0 if denominator == 0 else numerator / denominator
+
+    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+        if response.error is not None:
+            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
+
+        corrected_loglikelihoods = {
+            completion: loglikelihood - self.length_decay * count_bytes(completion)
+            for completion, loglikelihood in response.loglikelihoods.items()
+        }
+        completion_text = max(corrected_loglikelihoods, key=corrected_loglikelihoods.get)  # type: ignore[arg-type]
+
+        return [
+            MetricResult(
+                metric_name=self.NAME,
+                value=float(completion_text in response.ground_truth_list),
                 higher_is_better=True,
                 error=response.error,
             )

@@ -14,6 +14,7 @@ from urllib.request import urlretrieve
 from datasets import Dataset, DatasetDict, DownloadConfig, load_dataset
 
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -161,6 +162,7 @@ class SocialIQACloze(BaseTask[str]):
     METRICS = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         BitsPerByteLoglikelihood,
     ]
     SUBJECTS = [NO_SUBJECT]

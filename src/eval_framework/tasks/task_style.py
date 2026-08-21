@@ -64,6 +64,7 @@ from typing import TYPE_CHECKING, Any, Self
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
+    AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
@@ -177,6 +178,7 @@ class MCStyle(TaskStyler):
     metrics: list[type["BaseMetric"]] = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         BitsPerByteLoglikelihood,
     ]
     task_style = TaskStyle.MULTIPLE_CHOICE
@@ -303,6 +305,7 @@ class ClozeStyle(TaskStyler):
     metrics: list[type["BaseMetric"]] = [
         AccuracyLoglikelihood,
         AccuracyNormLoglikelihood,
+        AccuracyBayesianLoglikelihood,
         BitsPerByteLoglikelihood,
     ]
     task_style = TaskStyle.CLOZE
