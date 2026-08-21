@@ -28,7 +28,7 @@ _DUMMY_READER = _DummyReader()
 
 class _DummyStyler(TaskStyler):
     """A dummy styler for tests that need a ComposedEval with a (loglikelihood) styler but never render
-    a prompt — e.g. asserting a user_prompt_suffix is rejected on a non-completion task."""
+    a prompt — e.g. asserting a user_prompt_suffix is rejected."""
 
     response_type = ResponseType.LOGLIKELIHOODS
     metrics: list[type[BaseMetric]] = []
@@ -171,8 +171,8 @@ def test_base_task() -> None:
     assert task2.NAME == "MyTask2"
 
 
-def test_user_prompt_suffix_rejected_for_loglikelihood_task() -> None:
-    # Given a loglikelihood task (its styler declares the response type)
+def test_user_prompt_suffix_rejected() -> None:
+    # Given a composed eval (composed evals have no completion path, so a suffix is never valid)
     class MyTask(ComposedEval):
         REVISION_LOCKFILE = None
         TASK_STYLER = _DummyStyler()
