@@ -65,7 +65,8 @@ class AccuracyBayesianLoglikelihood(BaseMetric[Loglikelihood]):
         self.length_decay = 0.0
 
     def prepare(self, responses: list[Loglikelihood]) -> None:
-        """Estimating the length decay factor.
+        """
+        Estimating the length decay factor.
         See Equation (24) in https://arxiv.org/html/2607.12767v1
         """
         numerator = 0.0
