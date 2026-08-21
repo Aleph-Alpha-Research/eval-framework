@@ -7,9 +7,10 @@ import pytest
 from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedEval
 from eval_framework.contract import ResponseType
 from eval_framework.metrics.base import BaseMetric
-from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
-from eval_framework.metrics.efficiency.bytes_per_sequence_position import BytesCompletion, SequencePositionsCompletion
-from eval_framework.metrics.efficiency.token_counters import TokenCounts
+from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
+    BytesLoglikelihood,
+    SequencePositionsLoglikelihood,
+)
 from eval_framework.run import parse_args
 from eval_framework.tasks import dataset_revisions as dr
 from eval_framework.tasks.task_style import TaskStyle, TaskStyler
@@ -32,6 +33,31 @@ class _DummyStyler(TaskStyler):
 
     response_type = ResponseType.LOGLIKELIHOODS
     metrics: list[type[BaseMetric]] = []
+    task_style = TaskStyle.MULTIPLE_CHOICE
+    question_prefix = ""
+
+    def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
+        return ""
+
+    def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
+        return ""
+
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str] | None:
+        return None
+
+    def get_cue_text(self) -> str:
+        return ""
+
+
+class _FakeMetric(BaseMetric[Any]):
+    NAME = "FakeMetric"
+
+
+class _StubTaskStyler(TaskStyler):
+    """A stub styler whose declared metrics the metrics test reads back."""
+
+    response_type = ResponseType.LOGLIKELIHOODS
+    metrics: list[type[BaseMetric]] = [_FakeMetric]
     task_style = TaskStyle.MULTIPLE_CHOICE
     question_prefix = ""
 
@@ -256,19 +282,13 @@ def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
     assert task.hf_revision == "custom-sha"
 
 
-def test_completion_metrics_returns_all_completion_metrics() -> None:
-    class MyCompletionTask(ComposedEval):
+def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
+    # Given a composed eval whose styler declares its own metrics
+    class MyTask(ComposedEval):
         REVISION_LOCKFILE = None
-        NAME = "MyCompletionTask"
-        RESPONSE_TYPE = ResponseType.COMPLETION
-        METRICS = [AccuracyCompletion]
+        NAME = "MyTask"
+        TASK_STYLER = _StubTaskStyler()
 
-    task = MyCompletionTask(reader=_DUMMY_READER)
-
-    metrics = task.get_metrics()
-    assert set(metrics) == {
-        AccuracyCompletion,
-        BytesCompletion,
-        SequencePositionsCompletion,
-        TokenCounts,
-    }
+    # Then its metrics are the styler's metrics plus the loglikelihood response-type metrics
+    task = MyTask(reader=_DUMMY_READER)
+    assert set(task.get_metrics()) == {_FakeMetric, BytesLoglikelihood, SequencePositionsLoglikelihood}
