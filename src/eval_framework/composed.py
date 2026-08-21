@@ -29,7 +29,6 @@ from eval_framework.tasks.base import (
 )
 from eval_framework.tasks.dataset_revisions import pinned_revision
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
-from eval_framework.tasks.utils import classproperty
 from template_formatting.formatter import BaseFormatter, Message, Role
 
 if TYPE_CHECKING:
@@ -85,15 +84,9 @@ class ComposedEval[SubjectType](Eval):
     # language by subtopic, or `None` (for tasks not specific to a single language).
     LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
 
-    # RESPONSE_TYPE and METRICS use exposed as classproperties, so you can access them via either
-    # `TaskClass.*` or `task.*` (or `task.get_metrics()`). This avoids mypy conflicts from re-declaring class vars.
-    # By default, these values come from TASK_STYLER if set, otherwise from legacy class attributes.
-
     def __init__(self, num_fewshot: int = 0, *, reader: ChoiceReader) -> None:
         self.num_fewshot = num_fewshot
         self.reader = reader
-        self.stop_sequences: list[str] | None = None
-        self.max_tokens: int | None = None
         self.hf_revision: str | None = self._apply_hf_revision()
         self.rnd: random.Random | None = None
 
@@ -313,8 +306,7 @@ class ComposedEval[SubjectType](Eval):
             "metrics": [m.NAME for m in self._get_task_specific_metrics()],
             "subjects": [str(s) for s in self.SUBJECTS],
         }
-        if hasattr(self, "TASK_STYLER"):
-            meta.update(self.TASK_STYLER.get_extra_metadata())
+        meta.update(self.TASK_STYLER.get_extra_metadata())
         return meta
 
     def generate_completions(
@@ -399,18 +391,11 @@ class ComposedEval[SubjectType](Eval):
 
     @classmethod
     def get_response_type(cls) -> ResponseType:
-        """Return the response type of the task (or the styler if it exists)."""
-        if hasattr(cls, "TASK_STYLER"):
-            return cls.TASK_STYLER.response_type
-        return cls.RESPONSE_TYPE
+        return cls.TASK_STYLER.response_type
 
     @classmethod
     def _get_task_specific_metrics(cls) -> list[type["BaseMetric"]]:
-        if hasattr(cls, "TASK_STYLER"):
-            task_metrics = cls.TASK_STYLER.metrics
-        else:
-            task_metrics = cls.METRICS
-        return task_metrics
+        return cls.TASK_STYLER.metrics
 
     @classmethod
     def _get_response_type_specific_metrics(cls) -> list[type["BaseMetric"]]:
@@ -431,21 +416,10 @@ class ComposedEval[SubjectType](Eval):
 
     @classmethod
     def get_metrics(cls) -> list[type["BaseMetric"]]:
-        """Return the metrics of the task (or the styler if it exists)."""
         task_metrics = cls._get_task_specific_metrics()
         response_type_metrics = cls._get_response_type_specific_metrics()
 
         return task_metrics + response_type_metrics
-
-    @classproperty
-    def RESPONSE_TYPE(cls) -> ResponseType:
-        """For backwards compatibility."""
-        return cls.get_response_type()
-
-    @classproperty
-    def METRICS(cls) -> list[type["BaseMetric"]]:
-        """For backwards compatibility."""
-        return cls.get_metrics()
 
     def display_name(self) -> str:
         return self.NAME
