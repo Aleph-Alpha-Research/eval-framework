@@ -55,7 +55,7 @@ determined = [
 ]
 api = ["aleph-alpha-client>=11.5.1"]
 openai = [
-  "openai>=3.2.0,<4",
+  "openai>=3.3.0,<4",
   "tiktoken>=0.14.0,<1",
   "transformers>=4.45.2,<5",
 ]
