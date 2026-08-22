@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.76 - https://github.com/boto/boto3
-- **botocore** 1.43.76 - https://github.com/boto/botocore
+- **boto3** 1.43.78 - https://github.com/boto/boto3
+- **botocore** 1.43.78 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -72,7 +72,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **pandas** 3.0.5 - https://pandas.pydata.org
 - **protobuf** 7.36.0 - https://developers.google.com/protocol-buffers/
 - **python-dotenv** 1.2.3 - https://github.com/theskumar/python-dotenv
-- **scipy** 1.18.0 - https://scipy.org/
+- **scipy** 1.18.1 - https://scipy.org/
 - **sympy** 1.14.0 - https://sympy.org
 
 ## BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
@@ -212,7 +212,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.76 (Apache-2.0)
+### boto3 1.43.78 (Apache-2.0)
 
 ```text
 Apache License
@@ -393,7 +393,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.76 (Apache-2.0)
+### botocore 1.43.78 (Apache-2.0)
 
 ```text
 Apache License
@@ -16695,7 +16695,7 @@ Apache License
    limitations under the License.
 ```
 
-### scipy 1.18.0 (BSD-3-Clause)
+### scipy 1.18.1 (BSD-3-Clause)
 
 ```text
 Copyright (c) 2001-2002 Enthought, Inc. 2003, SciPy Developers.
