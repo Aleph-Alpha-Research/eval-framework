@@ -10,6 +10,7 @@ from typing import Any
 import pytest
 
 import eval_framework.tasks.benchmarks.piqa_ellamind as piqa_ellamind
+from eval_framework.contract import Benchmark
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_names import register_piqa_ellamind_tasks
 from template_formatting.formatter import (
@@ -22,14 +23,20 @@ from template_formatting.formatter import (
 )
 from tests.tests_eval_framework.tasks.benchmarks.utils import (
     ExpectedPrompt,
-    assert_offline_oneshot_prompt,
-    assert_offline_zeroshot_prompt,
+    assert_offline_oneshot_prompt_composed,
+    assert_offline_zeroshot_prompt_composed,
     run_formatter_hash_test,
 )
 
 # Registry for this test suite only holding piqa_ellamind tasks
 _piqa_ellamind_registry = Registry()
 register_piqa_ellamind_tasks(registry=_piqa_ellamind_registry)
+
+
+def _benchmark(task_cls: type) -> Benchmark:
+    """The registered composed benchmark for a PIQA class (carries its reader/dataset_path/splits)."""
+    return _piqa_ellamind_registry[task_cls.NAME]
+
 
 # ---------------------------------------------------------------------------
 # Formatter hash tests (Hugging Face)
@@ -232,14 +239,15 @@ _BPB_FEWSHOT = ExpectedPrompt(
 
 # --- TESTS ---
 def test_piqa_ellamind_mc_easy_de_offline_prompt_formatting() -> None:
-    assert_offline_zeroshot_prompt(
-        piqa_ellamind.PIQA_ELLAMIND_MC_EASY_DE,
+    benchmark = _benchmark(piqa_ellamind.PIQA_ELLAMIND_MC_EASY_DE)
+    assert_offline_zeroshot_prompt_composed(
+        benchmark,
         eval_row=_EVAL_ROW,
         subjects=[_SUBJECT],
         expected=_MC_EASY_ZEROSHOT,
     )
-    assert_offline_oneshot_prompt(
-        piqa_ellamind.PIQA_ELLAMIND_MC_EASY_DE,
+    assert_offline_oneshot_prompt_composed(
+        benchmark,
         eval_row=_EVAL_ROW,
         fewshot_row=_FEWSHOT_ROW,
         subjects=[_SUBJECT],
@@ -248,14 +256,15 @@ def test_piqa_ellamind_mc_easy_de_offline_prompt_formatting() -> None:
 
 
 def test_piqa_ellamind_mc_hard_de_offline_prompt_formatting() -> None:
-    assert_offline_zeroshot_prompt(
-        piqa_ellamind.PIQA_ELLAMIND_MC_HARD_DE,
+    benchmark = _benchmark(piqa_ellamind.PIQA_ELLAMIND_MC_HARD_DE)
+    assert_offline_zeroshot_prompt_composed(
+        benchmark,
         eval_row=_EVAL_ROW,
         subjects=[_SUBJECT],
         expected=_MC_HARD_ZEROSHOT,
     )
-    assert_offline_oneshot_prompt(
-        piqa_ellamind.PIQA_ELLAMIND_MC_HARD_DE,
+    assert_offline_oneshot_prompt_composed(
+        benchmark,
         eval_row=_EVAL_ROW,
         fewshot_row=_FEWSHOT_ROW,
         subjects=[_SUBJECT],
@@ -264,14 +273,15 @@ def test_piqa_ellamind_mc_hard_de_offline_prompt_formatting() -> None:
 
 
 def test_piqa_ellamind_cloze_easy_de_offline_prompt_formatting() -> None:
-    assert_offline_zeroshot_prompt(
-        piqa_ellamind.PIQA_ELLAMIND_CLOZE_EASY_DE,
+    benchmark = _benchmark(piqa_ellamind.PIQA_ELLAMIND_CLOZE_EASY_DE)
+    assert_offline_zeroshot_prompt_composed(
+        benchmark,
         eval_row=_EVAL_ROW,
         subjects=[_SUBJECT],
         expected=_CLOZE_EASY_ZEROSHOT,
     )
-    assert_offline_oneshot_prompt(
-        piqa_ellamind.PIQA_ELLAMIND_CLOZE_EASY_DE,
+    assert_offline_oneshot_prompt_composed(
+        benchmark,
         eval_row=_EVAL_ROW,
         fewshot_row=_FEWSHOT_ROW,
         subjects=[_SUBJECT],
@@ -280,14 +290,15 @@ def test_piqa_ellamind_cloze_easy_de_offline_prompt_formatting() -> None:
 
 
 def test_piqa_ellamind_cloze_hard_de_offline_prompt_formatting() -> None:
-    assert_offline_zeroshot_prompt(
-        piqa_ellamind.PIQA_ELLAMIND_CLOZE_HARD_DE,
+    benchmark = _benchmark(piqa_ellamind.PIQA_ELLAMIND_CLOZE_HARD_DE)
+    assert_offline_zeroshot_prompt_composed(
+        benchmark,
         eval_row=_EVAL_ROW,
         subjects=[_SUBJECT],
         expected=_CLOZE_HARD_ZEROSHOT,
     )
-    assert_offline_oneshot_prompt(
-        piqa_ellamind.PIQA_ELLAMIND_CLOZE_HARD_DE,
+    assert_offline_oneshot_prompt_composed(
+        benchmark,
         eval_row=_EVAL_ROW,
         fewshot_row=_FEWSHOT_ROW,
         subjects=[_SUBJECT],
@@ -296,14 +307,15 @@ def test_piqa_ellamind_cloze_hard_de_offline_prompt_formatting() -> None:
 
 
 def test_piqa_ellamind_bpb_de_offline_prompt_formatting() -> None:
-    assert_offline_zeroshot_prompt(
-        piqa_ellamind.PIQA_ELLAMIND_BPB_DE,
+    benchmark = _benchmark(piqa_ellamind.PIQA_ELLAMIND_BPB_DE)
+    assert_offline_zeroshot_prompt_composed(
+        benchmark,
         eval_row=_EVAL_ROW,
         subjects=[_SUBJECT],
         expected=_BPB_ZEROSHOT,
     )
-    assert_offline_oneshot_prompt(
-        piqa_ellamind.PIQA_ELLAMIND_BPB_DE,
+    assert_offline_oneshot_prompt_composed(
+        benchmark,
         eval_row=_EVAL_ROW,
         fewshot_row=_FEWSHOT_ROW,
         subjects=[_SUBJECT],
