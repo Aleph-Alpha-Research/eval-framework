@@ -78,8 +78,24 @@ class _StubTaskStyler(TaskStyler):
         return ""
 
 
+def _benchmark_with_subjects(subjects: list[Any]) -> ComposedBenchmark:
+    class MyTask(ComposedEval):
+        REVISION_LOCKFILE = None
+        NAME = "MyTask"
+        TASK_STYLER = _DummyStyler()
+
+    return ComposedBenchmark.from_base(
+        MyTask,
+        reader=_DUMMY_READER,
+        dataset_path=_DUMMY_DATASET_PATH,
+        sample_split=_DUMMY_SPLIT,
+        fewshot_split=_DUMMY_SPLIT,
+        subjects=subjects,
+    )
+
+
 @pytest.mark.parametrize(
-    "subjects,custom_subjects,expected_value",
+    "subjects,custom_subjects,expected",
     [
         (["subject1", "subject2"], [], ["subject1", "subject2"]),
         (["subject1", "subject2"], None, ["subject1", "subject2"]),
@@ -138,37 +154,30 @@ class _StubTaskStyler(TaskStyler):
             ["ctx1,*,*"],
             [("ctx1", 4096, "single"), ("ctx1", 8192, "multi")],
         ),
-        (["subject1", "subject2"], ["invalid_subject"], "ValueError"),
-        ([("EN_US", "topic1"), ("EN_US", "topic2")], ["EN_US,invalid_topic"], "ValueError"),
-        ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,9999,single"], "ValueError"),
-        # matching compares stringified subject fields, not a parsed native value, so a non-numeric
-        # part at an int position is just another "not a legal value" case, not a separate parse error.
-        ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,abc,single"], "ValueError"),
     ],
 )
 def test_task_custom_subjects(
-    subjects: list[str] | list[tuple], custom_subjects: list[str] | None, expected_value: list[str] | list[tuple] | str
+    subjects: list[str] | list[tuple], custom_subjects: list[str] | None, expected: list[str] | list[tuple]
 ) -> None:
-    class MyTask(ComposedEval):
-        REVISION_LOCKFILE = None
-        NAME = "MyTask"
-        TASK_STYLER = _DummyStyler()
+    # Filtering by custom subjects happens in create().
+    task = _benchmark_with_subjects(subjects).create(0, custom_subjects, None)
+    assert task.subjects == expected
 
-    benchmark = ComposedBenchmark.from_base(
-        MyTask,
-        reader=_DUMMY_READER,
-        dataset_path=_DUMMY_DATASET_PATH,
-        sample_split=_DUMMY_SPLIT,
-        fewshot_split=_DUMMY_SPLIT,
-        subjects=subjects,
-    )
-    # Filtering by custom subjects happens in create(), so exercise it there.
-    if expected_value == "ValueError":
-        with pytest.raises(ValueError):
-            benchmark.create(0, custom_subjects, None)
-    else:
-        task = benchmark.create(0, custom_subjects, None)
-        assert task.subjects == expected_value
+
+@pytest.mark.parametrize(
+    "subjects,custom_subjects",
+    [
+        (["subject1", "subject2"], ["invalid_subject"]),
+        ([("EN_US", "topic1"), ("EN_US", "topic2")], ["EN_US,invalid_topic"]),
+        ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,9999,single"]),
+        # matching compares stringified subject fields, not a parsed native value, so a non-numeric
+        # part at an int position is just another "not a legal value" case, not a separate parse error.
+        ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,abc,single"]),
+    ],
+)
+def test_task_custom_subjects_rejects_unknown(subjects: list[str] | list[tuple], custom_subjects: list[str]) -> None:
+    with pytest.raises(ValueError):
+        _benchmark_with_subjects(subjects).create(0, custom_subjects, None)
 
 
 def test_base_task() -> None:
