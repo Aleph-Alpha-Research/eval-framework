@@ -89,14 +89,34 @@ class ComposedEval[SubjectType](Eval):
         dataset_path: str,
         sample_split: str,
         fewshot_split: str,
+        custom_subjects: list[str] | None = None,
+        custom_hf_revision: str | None = None,
+        user_prompt_suffix: str | None = None,
+        seed: int | None = RANDOM_SEED,
     ) -> None:
+        # No completion path yet, so any suffix is rejected. This deliberately trips even for a
+        # completion response type, flagging that suffix handling must be implemented once that lands.
+        if user_prompt_suffix is not None:
+            raise ValueError("user_prompt_suffix is only supported for completion tasks.")
+
         self.num_fewshot = num_fewshot
         self.reader = reader
         self.dataset_path = dataset_path
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
-        self.hf_revision: str | None = self._apply_hf_revision()
-        self.rnd: random.Random | None = None
+        self.rnd = random.Random(seed)
+
+        # Custom subjects, when provided, take precedence over the class-level SUBJECTS.
+        if custom_subjects:
+            filtered_subjects = resolve_overwrite_subjects(
+                custom_subjects=custom_subjects,
+                accepted_subjects=self.SUBJECTS,
+                task_name=self.display_name(),
+            )
+            logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {self.display_name()}")
+            self.SUBJECTS = filtered_subjects
+
+        self.hf_revision: str | None = self._apply_hf_revision(custom_hf_revision)
 
     def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> str | None:
         # Precedence: CLI/config override > REVISION_LOCKFILE pin.
@@ -109,46 +129,6 @@ class ComposedEval[SubjectType](Eval):
             hf_revision = None
         return hf_revision
 
-    @classmethod
-    def with_overwrite(
-        cls,
-        num_fewshot: int,
-        *,
-        reader: ChoiceReader,
-        dataset_path: str,
-        sample_split: str,
-        fewshot_split: str,
-        custom_subjects: list[str] | None,
-        custom_hf_revision: str | None,
-        user_prompt_suffix: str | None = None,
-        seed: int | None = RANDOM_SEED,
-    ) -> Self:
-        instance = cls(
-            num_fewshot=num_fewshot,
-            reader=reader,
-            dataset_path=dataset_path,
-            sample_split=sample_split,
-            fewshot_split=fewshot_split,
-        )
-        # No completion path yet, so any suffix is rejected. This deliberately trips even for a
-        # completion response type, flagging that suffix handling must be implemented once that lands.
-        if user_prompt_suffix is not None:
-            raise ValueError("user_prompt_suffix is only supported for completion tasks.")
-        instance.rnd = random.Random(seed)
-        # If custom subjects were provided during initialization, they take precedence over the class-level SUBJECTS.
-        if custom_subjects:
-            filtered_subjects = resolve_overwrite_subjects(
-                custom_subjects=custom_subjects,
-                accepted_subjects=instance.SUBJECTS,
-                task_name=instance.display_name(),
-            )
-            logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {instance.display_name()}")
-            instance.SUBJECTS = filtered_subjects
-
-        instance.hf_revision = instance._apply_hf_revision(custom_hf_revision)
-
-        return instance
-
     def _load_hf_dataset(self, **kwargs: Any) -> Any:
         cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
         download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
@@ -160,7 +140,6 @@ class ComposedEval[SubjectType](Eval):
         )
 
     def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, Any]:
-        assert self.rnd is not None, "Task RNG is unseeded; build tasks via `with_overwrite`."
         dataset = {}
 
         for split, data in hf_dataset.items():
@@ -298,7 +277,6 @@ class ComposedEval[SubjectType](Eval):
         return self.TASK_STYLER.get_possible_completions(fields.choices, fields.correct_index)
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
-        assert self.rnd is not None, "Task RNG is unseeded; build tasks via `with_overwrite`."
         if self.fewshot_split == self.sample_split:
             # If the fewshot and sample splits are the same, we risk including the current eval item
             # as a fewshot example (leaking the answer). To prevent this, sample one extra example,
@@ -498,7 +476,7 @@ class ComposedBenchmark(Benchmark):
             sample_split: str,
             fewshot_split: str,
         ) -> Eval:
-            return task.with_overwrite(
+            return task(
                 num_fewshot=num_fewshot,
                 reader=reader,
                 dataset_path=dataset_path,
@@ -517,7 +495,7 @@ class ComposedBenchmark(Benchmark):
             sample_split: str,
             fewshot_split: str,
         ) -> str:
-            instance = task.with_overwrite(
+            instance = task(
                 num_fewshot=1,
                 reader=reader,
                 dataset_path=dataset_path,
