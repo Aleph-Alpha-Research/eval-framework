@@ -4,7 +4,7 @@ import random
 import traceback
 import typing
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self
@@ -410,7 +410,7 @@ class ComposedEval[SubjectType](Eval):
 
 
 class ComposedBenchmark(Benchmark):
-    """A ``Benchmark`` assembled from precomputed metadata and eval/doc callables."""
+    """A ``Benchmark`` that constructs one ``ComposedEval`` type from precomputed metadata + inputs."""
 
     def __init__(
         self,
@@ -424,8 +424,7 @@ class ComposedBenchmark(Benchmark):
         dataset_path: str,
         sample_split: str,
         fewshot_split: str,
-        make_eval: Callable[..., Eval],
-        generate_markdown_doc: Callable[..., str],
+        task: type[ComposedEval],
     ) -> None:
         self._id = id
         self._display_name = display_name
@@ -436,8 +435,7 @@ class ComposedBenchmark(Benchmark):
         self.dataset_path = dataset_path
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
-        self._make_eval = make_eval
-        self._generate_markdown_doc = generate_markdown_doc
+        self._task = task
 
     @classmethod
     def from_base(
@@ -453,51 +451,6 @@ class ComposedBenchmark(Benchmark):
 
         Metadata (name, metrics, response type) is derived from the class.
         """
-
-        def make_eval(
-            num_fewshot: int,
-            subjects: list[Any],
-            custom_hf_revision: str | None,
-            user_prompt_suffix: str | None = None,
-            seed: int | None = None,
-            *,
-            reader: ChoiceReader,
-            dataset_path: str,
-            sample_split: str,
-            fewshot_split: str,
-        ) -> Eval:
-            return task(
-                num_fewshot=num_fewshot,
-                reader=reader,
-                dataset_path=dataset_path,
-                sample_split=sample_split,
-                fewshot_split=fewshot_split,
-                subjects=subjects,
-                custom_hf_revision=custom_hf_revision,
-                user_prompt_suffix=user_prompt_suffix,
-                seed=seed,
-            )
-
-        def generate_markdown_doc(
-            formatters: Sequence[BaseFormatter],
-            reader: ChoiceReader,
-            dataset_path: str,
-            sample_split: str,
-            fewshot_split: str,
-            subjects: list[Any],
-        ) -> str:
-            instance = task(
-                num_fewshot=1,
-                reader=reader,
-                dataset_path=dataset_path,
-                sample_split=sample_split,
-                fewshot_split=fewshot_split,
-                subjects=subjects,
-                custom_hf_revision=None,
-                seed=RANDOM_SEED,
-            )
-            return instance.markdown_doc(formatters)
-
         return cls(
             id=task.__name__,
             display_name=task.NAME,
@@ -508,8 +461,7 @@ class ComposedBenchmark(Benchmark):
             dataset_path=dataset_path,
             sample_split=sample_split,
             fewshot_split=fewshot_split,
-            make_eval=make_eval,
-            generate_markdown_doc=generate_markdown_doc,
+            task=task,
         )
 
     def id(self) -> str:
@@ -529,16 +481,16 @@ class ComposedBenchmark(Benchmark):
                 custom_subjects=custom_subjects, accepted_subjects=self._subjects, task_name=self._display_name
             )
             logger.info(f"Restricting subjects to `{subjects}` for the task {self._display_name}")
-        return self._make_eval(
-            num_fewshot,
-            subjects,
-            custom_hf_revision,
-            user_prompt_suffix,
-            seed,
+        return self._task(
+            num_fewshot=num_fewshot,
             reader=self.reader,
             dataset_path=self.dataset_path,
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
+            subjects=subjects,
+            custom_hf_revision=custom_hf_revision,
+            user_prompt_suffix=user_prompt_suffix,
+            seed=seed,
         )
 
     def response_type(self) -> ResponseType:
@@ -558,6 +510,14 @@ class ComposedBenchmark(Benchmark):
         return self._display_name
 
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        return self._generate_markdown_doc(
-            formatters, self.reader, self.dataset_path, self.sample_split, self.fewshot_split, self._subjects
+        instance = self._task(
+            num_fewshot=1,
+            reader=self.reader,
+            dataset_path=self.dataset_path,
+            sample_split=self.sample_split,
+            fewshot_split=self.fewshot_split,
+            subjects=self._subjects,
+            custom_hf_revision=None,
+            seed=RANDOM_SEED,
         )
+        return instance.markdown_doc(formatters)
