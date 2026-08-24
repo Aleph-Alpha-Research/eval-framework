@@ -8,7 +8,8 @@ from unittest.mock import patch
 import pytest
 from datasets import Dataset, DatasetDict
 
-from eval_framework.tasks.base import BaseTask, Sample
+from eval_framework.contract import Benchmark, Eval
+from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Sample
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.registry import registry as global_registry
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Message
@@ -102,7 +103,7 @@ class ExpectedPrompt:
     completions: list[str] | None
 
 
-def _iterate_samples_over_mock_dataset(task: BaseTask, fictional_dataset: DatasetDict) -> Sample:
+def _iterate_samples_over_mock_dataset(task: Eval, fictional_dataset: DatasetDict) -> Sample:
     """Same entry points as production: ``iterate_samples`` over a patched HF load."""
     with patch.object(task, "_load_hf_dataset", return_value=fictional_dataset):
         return next(iter(task.iterate_samples(1)))
@@ -152,4 +153,38 @@ def assert_offline_oneshot_prompt(
             # Use fewshot row first such that after shuffling (with seed 42) the eval row is the first item
             {task.SAMPLE_SPLIT: Dataset.from_list([fewshot_row, eval_row])},
         )
+    _assert_sample_matches(_iterate_samples_over_mock_dataset(task, mock_dataset), expected)
+
+
+def assert_offline_zeroshot_prompt_composed(
+    benchmark: Benchmark,
+    eval_row: dict,
+    *,
+    subjects: list[str],
+    expected: ExpectedPrompt,
+) -> None:
+    task = benchmark.create(0, subjects, None, seed=RANDOM_SEED)
+    mock_dataset = DatasetDict({task.sample_split: Dataset.from_list([eval_row])})
+    _assert_sample_matches(_iterate_samples_over_mock_dataset(task, mock_dataset), expected)
+
+
+def assert_offline_oneshot_prompt_composed(
+    benchmark: Benchmark,
+    eval_row: dict,
+    fewshot_row: dict,
+    *,
+    subjects: list[str],
+    expected: ExpectedPrompt,
+) -> None:
+    task = benchmark.create(1, subjects, None, seed=RANDOM_SEED)
+    if task.fewshot_split != task.sample_split:
+        mock_dataset = DatasetDict(
+            {
+                task.sample_split: Dataset.from_list([eval_row]),
+                task.fewshot_split: Dataset.from_list([fewshot_row]),
+            }
+        )
+    else:
+        # Use fewshot row first such that after shuffling (with seed 42) the eval row is the first item
+        mock_dataset = DatasetDict({task.sample_split: Dataset.from_list([fewshot_row, eval_row])})
     _assert_sample_matches(_iterate_samples_over_mock_dataset(task, mock_dataset), expected)
