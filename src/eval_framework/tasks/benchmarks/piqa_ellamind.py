@@ -45,13 +45,23 @@ class _PIQA_ELLAMIND_DE_Base(ComposedEval[str]):
     LANGUAGE = Language.DEU
 
 
+_QUESTION_PREFIX = "Ziel: "
+_CUE_TEXT = "Antwort:"
+
+# One styler per format (all sharing the German prefix/cue). The easy/hard distractor axis belongs to
+# the reader, so it is orthogonal to the styler choice.
+PIQA_ELLAMIND_CLOZE_STYLER = ClozeStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT)
+PIQA_ELLAMIND_MC_STYLER = MCStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT)
+PIQA_ELLAMIND_BPB_STYLER = BPBStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT)
+
+
 class PIQA_ELLAMIND_CLOZE_EASY_DE(_PIQA_ELLAMIND_DE_Base):
     """German PIQA - Cloze format with easy distractor."""
 
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "PIQA_ELLAMIND_CLOZE_EASY_DE"
-    TASK_STYLER = ClozeStyle(question_prefix="Ziel: ", cue_text="Antwort:")
+    TASK_STYLER = PIQA_ELLAMIND_CLOZE_STYLER
 
 
 class PIQA_ELLAMIND_CLOZE_HARD_DE(_PIQA_ELLAMIND_DE_Base):
@@ -60,7 +70,7 @@ class PIQA_ELLAMIND_CLOZE_HARD_DE(_PIQA_ELLAMIND_DE_Base):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "PIQA_ELLAMIND_CLOZE_HARD_DE"
-    TASK_STYLER = ClozeStyle(question_prefix="Ziel: ", cue_text="Antwort:")
+    TASK_STYLER = PIQA_ELLAMIND_CLOZE_STYLER
 
 
 class PIQA_ELLAMIND_MC_EASY_DE(_PIQA_ELLAMIND_DE_Base):
@@ -69,7 +79,7 @@ class PIQA_ELLAMIND_MC_EASY_DE(_PIQA_ELLAMIND_DE_Base):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "PIQA_ELLAMIND_MC_EASY_DE"
-    TASK_STYLER = MCStyle(question_prefix="Ziel: ", cue_text="Antwort:")
+    TASK_STYLER = PIQA_ELLAMIND_MC_STYLER
 
 
 class PIQA_ELLAMIND_MC_HARD_DE(_PIQA_ELLAMIND_DE_Base):
@@ -78,7 +88,7 @@ class PIQA_ELLAMIND_MC_HARD_DE(_PIQA_ELLAMIND_DE_Base):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "PIQA_ELLAMIND_MC_HARD_DE"
-    TASK_STYLER = MCStyle(question_prefix="Ziel: ", cue_text="Antwort:")
+    TASK_STYLER = PIQA_ELLAMIND_MC_STYLER
 
 
 class PIQA_ELLAMIND_BPB_DE(_PIQA_ELLAMIND_DE_Base):
@@ -87,7 +97,7 @@ class PIQA_ELLAMIND_BPB_DE(_PIQA_ELLAMIND_DE_Base):
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "PIQA_ELLAMIND_BPB_DE"
-    TASK_STYLER = BPBStyle(question_prefix="Ziel: ", cue_text="Antwort:")
+    TASK_STYLER = PIQA_ELLAMIND_BPB_STYLER
 
 
 def _piqa_ellamind_benchmark(
