@@ -41,7 +41,6 @@ class _PIQA_ELLAMIND_DE_Base(ComposedEval[str]):
     Dataset: https://huggingface.co/datasets/ellamind/piqa-multilingual
     """
 
-    SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
 
 
@@ -110,6 +109,7 @@ def _piqa_ellamind_benchmark(
         dataset_path="ellamind/piqa-multilingual",
         sample_split="validation",
         fewshot_split="validation",
+        subjects=["deu"],
     )
 
 

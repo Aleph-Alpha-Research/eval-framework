@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedEval
+from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark, ComposedEval
 from eval_framework.contract import ResponseType
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
@@ -28,6 +28,7 @@ class _DummyReader(ChoiceReader):
 _DUMMY_READER = _DummyReader()
 _DUMMY_DATASET_PATH = "dummy/dataset"
 _DUMMY_SPLIT = "test"
+_DUMMY_SUBJECTS = ["subject"]
 
 
 class _DummyStyler(TaskStyler):
@@ -150,38 +151,24 @@ def test_task_custom_subjects(
 ) -> None:
     class MyTask(ComposedEval):
         REVISION_LOCKFILE = None
-        SUBJECTS = subjects
         NAME = "MyTask"
+        TASK_STYLER = _DummyStyler()
 
-        def _get_instruction_text(self, item: dict[str, Any]) -> str:
-            return ""
-
-        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
-            return []
-
+    benchmark = ComposedBenchmark.from_base(
+        MyTask,
+        reader=_DUMMY_READER,
+        dataset_path=_DUMMY_DATASET_PATH,
+        sample_split=_DUMMY_SPLIT,
+        fewshot_split=_DUMMY_SPLIT,
+        subjects=subjects,
+    )
+    # Filtering by custom subjects happens in create(), so exercise it there.
     if expected_value == "ValueError":
         with pytest.raises(ValueError):
-            task = MyTask(
-                num_fewshot=0,
-                reader=_DUMMY_READER,
-                dataset_path=_DUMMY_DATASET_PATH,
-                sample_split=_DUMMY_SPLIT,
-                fewshot_split=_DUMMY_SPLIT,
-                custom_subjects=custom_subjects,
-                custom_hf_revision=None,
-            )
+            benchmark.create(0, custom_subjects, None)
     else:
-        task = MyTask(
-            num_fewshot=0,
-            reader=_DUMMY_READER,
-            dataset_path=_DUMMY_DATASET_PATH,
-            sample_split=_DUMMY_SPLIT,
-            fewshot_split=_DUMMY_SPLIT,
-            custom_subjects=custom_subjects,
-            custom_hf_revision=None,
-        )
-        result = task.SUBJECTS
-        assert result == expected_value
+        task = benchmark.create(0, custom_subjects, None)
+        assert task.subjects == expected_value
 
 
 def test_base_task() -> None:
@@ -206,7 +193,11 @@ def test_base_task() -> None:
             return []
 
     task1 = MyTask1(
-        reader=_DUMMY_READER, dataset_path=_DUMMY_DATASET_PATH, sample_split=_DUMMY_SPLIT, fewshot_split=_DUMMY_SPLIT
+        reader=_DUMMY_READER,
+        dataset_path=_DUMMY_DATASET_PATH,
+        sample_split=_DUMMY_SPLIT,
+        fewshot_split=_DUMMY_SPLIT,
+        subjects=_DUMMY_SUBJECTS,
     )
     assert task1.NAME == "MyTask1"
 
@@ -216,7 +207,7 @@ def test_base_task() -> None:
         dataset_path=_DUMMY_DATASET_PATH,
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
-        custom_subjects=None,
+        subjects=_DUMMY_SUBJECTS,
         custom_hf_revision=None,
     )
     assert task2.NAME == "MyTask2"
@@ -236,7 +227,7 @@ def test_user_prompt_suffix_rejected() -> None:
             dataset_path=_DUMMY_DATASET_PATH,
             sample_split=_DUMMY_SPLIT,
             fewshot_split=_DUMMY_SPLIT,
-            custom_subjects=None,
+            subjects=_DUMMY_SUBJECTS,
             custom_hf_revision=None,
             user_prompt_suffix="/think_short",
         )
@@ -277,7 +268,7 @@ def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
         dataset_path="my/dataset",
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
-        custom_subjects=None,
+        subjects=_DUMMY_SUBJECTS,
         custom_hf_revision=None,
     )
 
@@ -293,7 +284,7 @@ def test_task_without_lockfile_is_not_pinned() -> None:
         dataset_path="my/dataset",
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
-        custom_subjects=None,
+        subjects=_DUMMY_SUBJECTS,
         custom_hf_revision=None,
     )
 
@@ -314,7 +305,7 @@ def test_missing_pin_in_declared_lockfile_raises(tmp_path: Path) -> None:
             dataset_path="my/dataset",
             sample_split=_DUMMY_SPLIT,
             fewshot_split=_DUMMY_SPLIT,
-            custom_subjects=None,
+            subjects=_DUMMY_SUBJECTS,
             custom_hf_revision=None,
         )
 
@@ -331,7 +322,7 @@ def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
         dataset_path="my/dataset",
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
-        custom_subjects=None,
+        subjects=_DUMMY_SUBJECTS,
         custom_hf_revision="custom-sha",
     )
 
@@ -348,7 +339,11 @@ def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
 
     # Then its metrics are the styler's metrics plus the loglikelihood response-type metrics
     task = MyTask(
-        reader=_DUMMY_READER, dataset_path=_DUMMY_DATASET_PATH, sample_split=_DUMMY_SPLIT, fewshot_split=_DUMMY_SPLIT
+        reader=_DUMMY_READER,
+        dataset_path=_DUMMY_DATASET_PATH,
+        sample_split=_DUMMY_SPLIT,
+        fewshot_split=_DUMMY_SPLIT,
+        subjects=_DUMMY_SUBJECTS,
     )
     assert set(task.get_metrics()) == {_FakeMetric, BytesLoglikelihood, SequencePositionsLoglikelihood}
 
@@ -372,7 +367,11 @@ def test_get_messages_assembles_instruction_and_cue() -> None:
         TASK_STYLER = _Styler()
 
     task = MyTask(
-        reader=_Reader(), dataset_path=_DUMMY_DATASET_PATH, sample_split=_DUMMY_SPLIT, fewshot_split=_DUMMY_SPLIT
+        reader=_Reader(),
+        dataset_path=_DUMMY_DATASET_PATH,
+        sample_split=_DUMMY_SPLIT,
+        fewshot_split=_DUMMY_SPLIT,
+        subjects=_DUMMY_SUBJECTS,
     )
 
     # Then the instruction becomes the evaluated USER turn and the cue an ASSISTANT turn

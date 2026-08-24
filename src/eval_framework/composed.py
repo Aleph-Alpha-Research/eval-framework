@@ -66,7 +66,6 @@ class ChoiceReader(ABC):
 
 class ComposedEval[SubjectType](Eval):
     NAME: str
-    SUBJECTS: list[SubjectType]
 
     # Composed evals are styler-only (choice-based); there is no completion styling path.
     TASK_STYLER: "TaskStyler"
@@ -89,7 +88,7 @@ class ComposedEval[SubjectType](Eval):
         dataset_path: str,
         sample_split: str,
         fewshot_split: str,
-        custom_subjects: list[str] | None = None,
+        subjects: list[SubjectType],
         custom_hf_revision: str | None = None,
         user_prompt_suffix: str | None = None,
         seed: int | None = RANDOM_SEED,
@@ -104,18 +103,8 @@ class ComposedEval[SubjectType](Eval):
         self.dataset_path = dataset_path
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
+        self.subjects = subjects
         self.rnd = random.Random(seed)
-
-        # Custom subjects, when provided, take precedence over the class-level SUBJECTS.
-        if custom_subjects:
-            filtered_subjects = resolve_overwrite_subjects(
-                custom_subjects=custom_subjects,
-                accepted_subjects=self.SUBJECTS,
-                task_name=self.display_name(),
-            )
-            logger.info(f"Setting SUBJECTS to `{filtered_subjects}` for the task {self.display_name()}")
-            self.SUBJECTS = filtered_subjects
-
         self.hf_revision: str | None = self._apply_hf_revision(custom_hf_revision)
 
     def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> str | None:
@@ -194,7 +183,7 @@ class ComposedEval[SubjectType](Eval):
         return [Message(role=Role.USER, content=self._get_instruction_text(item))]
 
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
-        for subject in self.SUBJECTS:
+        for subject in self.subjects:
             self._load_dataset(subject)
             assert len(self.dataset[self.sample_split]) > 0
             done = False
@@ -228,7 +217,7 @@ class ComposedEval[SubjectType](Eval):
             fewshot_split=self.fewshot_split,
             response_type=self.get_response_type().name,
             metrics=[m.__name__ for m in self.get_metrics()],
-            subjects=getattr(self, "SUBJECTS", None),
+            subjects=self.subjects,
             language=getattr(self, "LANGUAGE", None),
             num_fewshot=self.num_fewshot,
             formatters=formatters,
@@ -299,7 +288,7 @@ class ComposedEval[SubjectType](Eval):
             "fewshot_split": self.fewshot_split,
             "response_type": self.get_response_type().value,
             "metrics": [m.NAME for m in self._get_task_specific_metrics()],
-            "subjects": [str(s) for s in self.SUBJECTS],
+            "subjects": [str(s) for s in self.subjects],
         }
         meta.update(self.TASK_STYLER.get_extra_metadata())
         return meta
@@ -458,15 +447,16 @@ class ComposedBenchmark(Benchmark):
         dataset_path: str,
         sample_split: str,
         fewshot_split: str,
+        subjects: list[Any],
     ) -> Self:
         """Build an ``ComposedBenchmark`` from a task class and its construction inputs.
 
-        Metadata (name, subjects, metrics, response type) is derived from the class.
+        Metadata (name, metrics, response type) is derived from the class.
         """
 
         def make_eval(
             num_fewshot: int,
-            custom_subjects: list[str] | None,
+            subjects: list[Any],
             custom_hf_revision: str | None,
             user_prompt_suffix: str | None = None,
             seed: int | None = None,
@@ -482,7 +472,7 @@ class ComposedBenchmark(Benchmark):
                 dataset_path=dataset_path,
                 sample_split=sample_split,
                 fewshot_split=fewshot_split,
-                custom_subjects=custom_subjects,
+                subjects=subjects,
                 custom_hf_revision=custom_hf_revision,
                 user_prompt_suffix=user_prompt_suffix,
                 seed=seed,
@@ -494,6 +484,7 @@ class ComposedBenchmark(Benchmark):
             dataset_path: str,
             sample_split: str,
             fewshot_split: str,
+            subjects: list[Any],
         ) -> str:
             instance = task(
                 num_fewshot=1,
@@ -501,7 +492,7 @@ class ComposedBenchmark(Benchmark):
                 dataset_path=dataset_path,
                 sample_split=sample_split,
                 fewshot_split=fewshot_split,
-                custom_subjects=None,
+                subjects=subjects,
                 custom_hf_revision=None,
                 seed=RANDOM_SEED,
             )
@@ -510,7 +501,7 @@ class ComposedBenchmark(Benchmark):
         return cls(
             id=task.__name__,
             display_name=task.NAME,
-            subjects=task.SUBJECTS,
+            subjects=subjects,
             metrics=task.get_metrics(),
             response_type=task.get_response_type(),
             reader=reader,
@@ -532,9 +523,15 @@ class ComposedBenchmark(Benchmark):
         user_prompt_suffix: str | None = None,
         seed: int | None = None,
     ) -> Eval:
+        subjects = self._subjects
+        if custom_subjects:
+            subjects = resolve_overwrite_subjects(
+                custom_subjects=custom_subjects, accepted_subjects=self._subjects, task_name=self._display_name
+            )
+            logger.info(f"Restricting subjects to `{subjects}` for the task {self._display_name}")
         return self._make_eval(
             num_fewshot,
-            custom_subjects,
+            subjects,
             custom_hf_revision,
             user_prompt_suffix,
             seed,
@@ -562,5 +559,5 @@ class ComposedBenchmark(Benchmark):
 
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         return self._generate_markdown_doc(
-            formatters, self.reader, self.dataset_path, self.sample_split, self.fewshot_split
+            formatters, self.reader, self.dataset_path, self.sample_split, self.fewshot_split, self._subjects
         )
