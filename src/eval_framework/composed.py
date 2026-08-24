@@ -38,6 +38,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# The language(s) a benchmark tests: a single language, a per-subtopic mapping, or None (not language-specific).
+LanguageSpec = Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
+
 
 @dataclass(frozen=True)
 class ChoiceFields:
@@ -76,10 +79,6 @@ class ComposedEval[SubjectType](Eval):
     # inherited implicitly (a subclass in another package would otherwise resolve the wrong file).
     REVISION_LOCKFILE: Path | None
 
-    # The language (or languages) tested by the benchmark. Accepts a single string, a dictionary specifying
-    # language by subtopic, or `None` (for tasks not specific to a single language).
-    LANGUAGE: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
-
     def __init__(
         self,
         num_fewshot: int = 0,
@@ -89,6 +88,7 @@ class ComposedEval[SubjectType](Eval):
         sample_split: str,
         fewshot_split: str,
         subjects: list[SubjectType],
+        language: LanguageSpec = None,
         custom_hf_revision: str | None = None,
         user_prompt_suffix: str | None = None,
         seed: int | None = RANDOM_SEED,
@@ -104,6 +104,7 @@ class ComposedEval[SubjectType](Eval):
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
         self.subjects = subjects
+        self.language = language
         self.rnd = random.Random(seed)
         self.hf_revision: str | None = self._apply_hf_revision(custom_hf_revision)
 
@@ -218,7 +219,7 @@ class ComposedEval[SubjectType](Eval):
             response_type=self.get_response_type().name,
             metrics=[m.__name__ for m in self.get_metrics()],
             subjects=self.subjects,
-            language=getattr(self, "LANGUAGE", None),
+            language=self.language,
             num_fewshot=self.num_fewshot,
             formatters=formatters,
             example_messages=example_messages,
@@ -424,6 +425,7 @@ class ComposedBenchmark(Benchmark):
         dataset_path: str,
         sample_split: str,
         fewshot_split: str,
+        language: LanguageSpec = None,
         task: type[ComposedEval],
     ) -> None:
         self._id = id
@@ -435,6 +437,7 @@ class ComposedBenchmark(Benchmark):
         self.dataset_path = dataset_path
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
+        self.language = language
         self._task = task
 
     @classmethod
@@ -446,6 +449,7 @@ class ComposedBenchmark(Benchmark):
         sample_split: str,
         fewshot_split: str,
         subjects: list[Any],
+        language: LanguageSpec = None,
     ) -> Self:
         """Build an ``ComposedBenchmark`` from a task class and its construction inputs.
 
@@ -461,6 +465,7 @@ class ComposedBenchmark(Benchmark):
             dataset_path=dataset_path,
             sample_split=sample_split,
             fewshot_split=fewshot_split,
+            language=language,
             task=task,
         )
 
@@ -488,6 +493,7 @@ class ComposedBenchmark(Benchmark):
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
             subjects=subjects,
+            language=self.language,
             custom_hf_revision=custom_hf_revision,
             user_prompt_suffix=user_prompt_suffix,
             seed=seed,
@@ -517,6 +523,7 @@ class ComposedBenchmark(Benchmark):
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
             subjects=self._subjects,
+            language=self.language,
             custom_hf_revision=None,
             seed=RANDOM_SEED,
         )
