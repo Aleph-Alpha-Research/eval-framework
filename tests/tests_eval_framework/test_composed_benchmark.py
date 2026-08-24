@@ -160,7 +160,7 @@ def test_task_custom_subjects(
 
     if expected_value == "ValueError":
         with pytest.raises(ValueError):
-            task = MyTask.with_overwrite(
+            task = MyTask(
                 num_fewshot=0,
                 reader=_DUMMY_READER,
                 dataset_path=_DUMMY_DATASET_PATH,
@@ -170,7 +170,7 @@ def test_task_custom_subjects(
                 custom_hf_revision=None,
             )
     else:
-        task = MyTask.with_overwrite(
+        task = MyTask(
             num_fewshot=0,
             reader=_DUMMY_READER,
             dataset_path=_DUMMY_DATASET_PATH,
@@ -209,7 +209,7 @@ def test_base_task() -> None:
     )
     assert task1.NAME == "MyTask1"
 
-    task2 = MyTask2.with_overwrite(
+    task2 = MyTask2(
         0,
         reader=_DUMMY_READER,
         dataset_path=_DUMMY_DATASET_PATH,
@@ -229,7 +229,7 @@ def test_user_prompt_suffix_rejected() -> None:
 
     # When constructing it with a user prompt suffix, then it is rejected
     with pytest.raises(ValueError, match="only supported for completion tasks"):
-        MyTask.with_overwrite(
+        MyTask(
             0,
             reader=_DUMMY_READER,
             dataset_path=_DUMMY_DATASET_PATH,
@@ -270,7 +270,7 @@ def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
     dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
 
     # When constructing the task without a revision override
-    task = _pinned_task(lockfile).with_overwrite(
+    task = _pinned_task(lockfile)(
         0,
         reader=_DUMMY_READER,
         dataset_path="my/dataset",
@@ -286,7 +286,7 @@ def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
 
 def test_task_without_lockfile_is_not_pinned() -> None:
     # Given a task that opted out of pinning, when constructing it
-    task = _pinned_task(None).with_overwrite(
+    task = _pinned_task(None)(
         0,
         reader=_DUMMY_READER,
         dataset_path="my/dataset",
@@ -307,7 +307,7 @@ def test_missing_pin_in_declared_lockfile_raises(tmp_path: Path) -> None:
 
     # Then constructing the task fails
     with pytest.raises(KeyError, match="not pinned"):
-        _pinned_task(lockfile).with_overwrite(
+        _pinned_task(lockfile)(
             0,
             reader=_DUMMY_READER,
             dataset_path="my/dataset",
@@ -324,7 +324,7 @@ def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
     dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
 
     # When constructing the task with a revision override
-    task = _pinned_task(lockfile).with_overwrite(
+    task = _pinned_task(lockfile)(
         0,
         reader=_DUMMY_READER,
         dataset_path="my/dataset",
