@@ -41,8 +41,6 @@ class _PIQA_ELLAMIND_DE_Base(ComposedEval[str]):
     Dataset: https://huggingface.co/datasets/ellamind/piqa-multilingual
     """
 
-    SAMPLE_SPLIT = "validation"
-    FEWSHOT_SPLIT = "validation"
     SUBJECTS = ["deu"]
     LANGUAGE = Language.DEU
 
@@ -95,9 +93,14 @@ class PIQA_ELLAMIND_BPB_DE(_PIQA_ELLAMIND_DE_Base):
 def _piqa_ellamind_benchmark(
     task: type[_PIQA_ELLAMIND_DE_Base], distractor_level: Literal["easy", "hard"]
 ) -> Benchmark:
-    """Dataset: https://huggingface.co/datasets/ellamind/piqa-multilingual
-    """
-    return ComposedBenchmark.from_base(task, PiqaReader(distractor_level), dataset_path="ellamind/piqa-multilingual")
+    """Dataset: https://huggingface.co/datasets/ellamind/piqa-multilingual"""
+    return ComposedBenchmark.from_base(
+        task,
+        PiqaReader(distractor_level),
+        dataset_path="ellamind/piqa-multilingual",
+        sample_split="validation",
+        fewshot_split="validation",
+    )
 
 
 def piqa_ellamind_benchmarks() -> list[Benchmark]:
