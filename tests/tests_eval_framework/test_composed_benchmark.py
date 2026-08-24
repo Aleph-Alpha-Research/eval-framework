@@ -14,6 +14,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
 from eval_framework.run import parse_args
 from eval_framework.tasks import dataset_revisions as dr
 from eval_framework.tasks.task_style import TaskStyle, TaskStyler
+from template_formatting.formatter import Message, Role
 
 
 class _DummyReader(ChoiceReader):
@@ -350,3 +351,32 @@ def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
         reader=_DUMMY_READER, dataset_path=_DUMMY_DATASET_PATH, sample_split=_DUMMY_SPLIT, fewshot_split=_DUMMY_SPLIT
     )
     assert set(task.get_metrics()) == {_FakeMetric, BytesLoglikelihood, SequencePositionsLoglikelihood}
+
+
+def test_get_messages_assembles_instruction_and_cue() -> None:
+    # Given a reader that reads the question from item["question"], and a styler that echoes it + a cue
+    class _Reader(ChoiceReader):
+        def read(self, item: dict[str, Any]) -> ChoiceFields:
+            return ChoiceFields(raw_question=item["question"], choices=[], correct_index=0)
+
+    class _Styler(_DummyStyler):
+        def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
+            return f"instruction: {raw_question}"
+
+        def get_cue_text(self) -> str:
+            return "the cue"
+
+    class MyTask(ComposedEval):
+        REVISION_LOCKFILE = None
+        NAME = "MyTask"
+        TASK_STYLER = _Styler()
+
+    task = MyTask(
+        reader=_Reader(), dataset_path=_DUMMY_DATASET_PATH, sample_split=_DUMMY_SPLIT, fewshot_split=_DUMMY_SPLIT
+    )
+
+    # Then the instruction becomes the evaluated USER turn and the cue an ASSISTANT turn
+    assert task._get_messages({"question": "the goal"}) == [
+        Message(role=Role.USER, content="instruction: the goal"),
+        Message(role=Role.ASSISTANT, content="the cue"),
+    ]
