@@ -35,15 +35,6 @@ class PiqaReader(ChoiceReader):
         return ChoiceFields(raw_question=item["goal"], choices=choices, correct_index=correct_index)
 
 
-class _PIQA_ELLAMIND_DE_Base(ComposedEval[str]):
-    """Non-registered base for German PIQA (EllaMind) variants.
-
-    Dataset: https://huggingface.co/datasets/ellamind/piqa-multilingual
-    """
-
-    LANGUAGE = Language.DEU
-
-
 _QUESTION_PREFIX = "Ziel: "
 _CUE_TEXT = "Antwort:"
 
@@ -54,7 +45,7 @@ PIQA_ELLAMIND_MC_STYLER = MCStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CU
 PIQA_ELLAMIND_BPB_STYLER = BPBStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT)
 
 
-class PIQA_ELLAMIND_CLOZE_EASY_DE(_PIQA_ELLAMIND_DE_Base):
+class PIQA_ELLAMIND_CLOZE_EASY_DE(ComposedEval[str]):
     """German PIQA - Cloze format with easy distractor."""
 
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
@@ -63,7 +54,7 @@ class PIQA_ELLAMIND_CLOZE_EASY_DE(_PIQA_ELLAMIND_DE_Base):
     TASK_STYLER = PIQA_ELLAMIND_CLOZE_STYLER
 
 
-class PIQA_ELLAMIND_CLOZE_HARD_DE(_PIQA_ELLAMIND_DE_Base):
+class PIQA_ELLAMIND_CLOZE_HARD_DE(ComposedEval[str]):
     """German PIQA - Cloze format with hard distractor."""
 
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
@@ -72,7 +63,7 @@ class PIQA_ELLAMIND_CLOZE_HARD_DE(_PIQA_ELLAMIND_DE_Base):
     TASK_STYLER = PIQA_ELLAMIND_CLOZE_STYLER
 
 
-class PIQA_ELLAMIND_MC_EASY_DE(_PIQA_ELLAMIND_DE_Base):
+class PIQA_ELLAMIND_MC_EASY_DE(ComposedEval[str]):
     """German PIQA - MC format with easy distractor."""
 
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
@@ -81,7 +72,7 @@ class PIQA_ELLAMIND_MC_EASY_DE(_PIQA_ELLAMIND_DE_Base):
     TASK_STYLER = PIQA_ELLAMIND_MC_STYLER
 
 
-class PIQA_ELLAMIND_MC_HARD_DE(_PIQA_ELLAMIND_DE_Base):
+class PIQA_ELLAMIND_MC_HARD_DE(ComposedEval[str]):
     """German PIQA - MC format with hard distractor."""
 
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
@@ -90,7 +81,7 @@ class PIQA_ELLAMIND_MC_HARD_DE(_PIQA_ELLAMIND_DE_Base):
     TASK_STYLER = PIQA_ELLAMIND_MC_STYLER
 
 
-class PIQA_ELLAMIND_BPB_DE(_PIQA_ELLAMIND_DE_Base):
+class PIQA_ELLAMIND_BPB_DE(ComposedEval[str]):
     """German PIQA - BPB format (distractor set is irrelevant for BPB)."""
 
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
@@ -99,9 +90,7 @@ class PIQA_ELLAMIND_BPB_DE(_PIQA_ELLAMIND_DE_Base):
     TASK_STYLER = PIQA_ELLAMIND_BPB_STYLER
 
 
-def _piqa_ellamind_benchmark(
-    task: type[_PIQA_ELLAMIND_DE_Base], distractor_level: Literal["easy", "hard"]
-) -> Benchmark:
+def _piqa_ellamind_benchmark(task: type[ComposedEval[str]], distractor_level: Literal["easy", "hard"]) -> Benchmark:
     """Dataset: https://huggingface.co/datasets/ellamind/piqa-multilingual"""
     return ComposedBenchmark.from_base(
         task,
@@ -110,6 +99,7 @@ def _piqa_ellamind_benchmark(
         sample_split="validation",
         fewshot_split="validation",
         subjects=["deu"],
+        language=Language.DEU,
     )
 
 
