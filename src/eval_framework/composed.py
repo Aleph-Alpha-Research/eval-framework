@@ -66,9 +66,6 @@ class ChoiceReader(ABC):
 
 
 class ComposedEval[SubjectType](Eval):
-    # Composed evals are styler-only (choice-based); there is no completion styling path.
-    TASK_STYLER: "TaskStyler"
-
     def __init__(
         self,
         num_fewshot: int = 0,
@@ -77,6 +74,7 @@ class ComposedEval[SubjectType](Eval):
         display_name: str,
         reader: ChoiceReader,
         loader: DatasetLoader,
+        styler: "TaskStyler",
         sample_split: str,
         fewshot_split: str,
         subjects: list[SubjectType],
@@ -88,6 +86,7 @@ class ComposedEval[SubjectType](Eval):
         self.num_fewshot = num_fewshot
         self.reader = reader
         self.loader = loader
+        self.styler = styler
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
         self.subjects = subjects
@@ -187,22 +186,22 @@ class ComposedEval[SubjectType](Eval):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         fields = self.reader.read(item)
-        return self.TASK_STYLER.get_instruction_text(fields.raw_question, fields.choices)
+        return self.styler.get_instruction_text(fields.raw_question, fields.choices)
 
     def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
         fields = self.reader.read(item)
-        return self.TASK_STYLER.get_fewshot_target_text(fields.choices, fields.correct_index)
+        return self.styler.get_fewshot_target_text(fields.choices, fields.correct_index)
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
         fields = self.reader.read(item)
-        return self.TASK_STYLER.get_ground_truth(fields.choices, fields.correct_index)
+        return self.styler.get_ground_truth(fields.choices, fields.correct_index)
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
-        return self.TASK_STYLER.get_cue_text()
+        return self.styler.get_cue_text()
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         fields = self.reader.read(item)
-        return self.TASK_STYLER.get_possible_completions(fields.choices, fields.correct_index)
+        return self.styler.get_possible_completions(fields.choices, fields.correct_index)
 
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         if self.fewshot_split == self.sample_split:
@@ -225,11 +224,11 @@ class ComposedEval[SubjectType](Eval):
             "sample_split": self.sample_split,
             "fewshot_split": self.fewshot_split,
             "response_type": self.get_response_type().value,
-            "metrics": [m.NAME for m in self._get_task_specific_metrics()],
+            "metrics": [m.NAME for m in self.styler.metrics],
             "subjects": [str(s) for s in self.subjects],
         }
         meta.update(self.loader.metadata())
-        meta.update(self.TASK_STYLER.get_extra_metadata())
+        meta.update(self.styler.get_extra_metadata())
         return meta
 
     def generate_completions(
@@ -312,37 +311,8 @@ class ComposedEval[SubjectType](Eval):
             )
         return completion_list
 
-    @classmethod
-    def get_response_type(cls) -> ResponseType:
-        return cls.TASK_STYLER.response_type
-
-    @classmethod
-    def _get_task_specific_metrics(cls) -> list[type["BaseMetric"]]:
-        return cls.TASK_STYLER.metrics
-
-    @classmethod
-    def _get_response_type_specific_metrics(cls) -> list[type["BaseMetric"]]:
-        metrics: list[type[BaseMetric]]
-        match cls.get_response_type():
-            case ResponseType.COMPLETION:
-                metrics = [
-                    BytesCompletion,
-                    SequencePositionsCompletion,
-                    TokenCounts,
-                ]
-            case ResponseType.LOGLIKELIHOODS:
-                metrics = [BytesLoglikelihood, SequencePositionsLoglikelihood]
-            case _:
-                typing.assert_never(cls.get_response_type())
-
-        return metrics
-
-    @classmethod
-    def get_metrics(cls) -> list[type["BaseMetric"]]:
-        task_metrics = cls._get_task_specific_metrics()
-        response_type_metrics = cls._get_response_type_specific_metrics()
-
-        return task_metrics + response_type_metrics
+    def get_response_type(self) -> ResponseType:
+        return self.styler.response_type
 
     def id(self) -> str:
         return self._id
@@ -351,8 +321,21 @@ class ComposedEval[SubjectType](Eval):
         return self._display_name
 
 
+def _metrics_for(styler: "TaskStyler") -> list[type["BaseMetric"]]:
+    """The metrics a styler implies: its own plus those its response type requires."""
+    response_type_metrics: list[type[BaseMetric]]
+    match styler.response_type:
+        case ResponseType.COMPLETION:
+            response_type_metrics = [BytesCompletion, SequencePositionsCompletion, TokenCounts]
+        case ResponseType.LOGLIKELIHOODS:
+            response_type_metrics = [BytesLoglikelihood, SequencePositionsLoglikelihood]
+        case _:
+            typing.assert_never(styler.response_type)
+    return styler.metrics + response_type_metrics
+
+
 class ComposedBenchmark(Benchmark):
-    """A ``Benchmark`` that constructs one ``ComposedEval`` type from precomputed metadata + inputs."""
+    """A ``Benchmark`` that builds a ``ComposedEval`` from an injected styler and dataset inputs."""
 
     def __init__(
         self,
@@ -360,33 +343,29 @@ class ComposedBenchmark(Benchmark):
         id: str,
         display_name: str,
         subjects: list[Any],
-        metrics: list[type["BaseMetric"]],
-        response_type: ResponseType,
+        styler: "TaskStyler",
         reader: ChoiceReader,
         sample_split: str,
         fewshot_split: str,
         dataset_policy: DatasetPolicy,
         language: LanguageSpec,
-        task: type[ComposedEval],
     ) -> None:
         self._id = id
         self._display_name = display_name
         self._subjects = subjects
-        self._metrics = metrics
-        self._response_type = response_type
+        self._styler = styler
         self.reader = reader
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
         self.language = language
         self.dataset_policy = dataset_policy
-        self._task = task
 
     @classmethod
-    def from_base(
+    def compose(
         cls,
-        task: type[ComposedEval],
         *,
         id: str,
+        styler: "TaskStyler",
         reader: ChoiceReader,
         sample_split: str,
         fewshot_split: str,
@@ -395,22 +374,17 @@ class ComposedBenchmark(Benchmark):
         language: LanguageSpec,
         display_name: str | None = None,
     ) -> Self:
-        """Build an ``ComposedBenchmark`` from a task class and its construction inputs.
-
-        Metrics and response type are derived from the class; ``display_name`` defaults to ``id``.
-        """
+        """Build a ``ComposedBenchmark`` from its inputs; ``display_name`` defaults to ``id``."""
         return cls(
             id=id,
             display_name=display_name if display_name is not None else id,
             subjects=subjects,
-            metrics=task.get_metrics(),
-            response_type=task.get_response_type(),
+            styler=styler,
             reader=reader,
             sample_split=sample_split,
             fewshot_split=fewshot_split,
             language=language,
             dataset_policy=dataset_policy,
-            task=task,
         )
 
     def id(self) -> str:
@@ -433,11 +407,12 @@ class ComposedBenchmark(Benchmark):
                 custom_subjects=custom_subjects, accepted_subjects=self._subjects, task_name=self._display_name
             )
             logger.info(f"Restricting subjects to `{subjects}` for the task {self._display_name}")
-        return self._task(
+        return ComposedEval(
             num_fewshot=num_fewshot,
             id=self._id,
             display_name=self._display_name,
             reader=self.reader,
+            styler=self._styler,
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
             subjects=subjects,
@@ -448,11 +423,11 @@ class ComposedBenchmark(Benchmark):
 
     def response_type(self) -> ResponseType:
         """The eval's response type"""
-        return self._response_type
+        return self._styler.response_type
 
     def metrics(self) -> list[type["BaseMetric"]]:
         """The eval's metrics"""
-        return self._metrics
+        return _metrics_for(self._styler)
 
     def subjects(self) -> list[Any]:
         """The eval's subjects"""
@@ -464,11 +439,12 @@ class ComposedBenchmark(Benchmark):
 
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         num_fewshot = 1
-        instance = self._task(
+        instance = ComposedEval(
             num_fewshot=num_fewshot,
             id=self._id,
             display_name=self._display_name,
             reader=self.reader,
+            styler=self._styler,
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
             subjects=self._subjects,
@@ -482,8 +458,8 @@ class ComposedBenchmark(Benchmark):
             dataset_doc=self.dataset_policy.documentation(),
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
-            response_type=self._response_type.name,
-            metrics=[m.__name__ for m in self._metrics],
+            response_type=self.response_type().name,
+            metrics=[m.__name__ for m in self.metrics()],
             subjects=self._subjects,
             language=self.language,
             num_fewshot=num_fewshot,
