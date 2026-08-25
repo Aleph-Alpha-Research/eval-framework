@@ -8,7 +8,6 @@ from template_formatting.formatter import BaseFormatter, Message
 def markdown_doc(
     *,
     name: str,
-    dataset_path: str | None,
     dataset_doc: str,
     sample_split: str | None,
     fewshot_split: str | None,
@@ -27,10 +26,10 @@ def markdown_doc(
     buf = StringIO()
     buf.write(f"# {name}\n\n")
 
+    buf.write(f"## Dataset\n\n{dataset_doc}\n\n")
+
     buf.write("````\n")  # fence with 4 thicks because some prompts have code blocks with 3 thicks
     buf.write(f"NAME = {name}".strip() + "\n")
-    if dataset_path is not None:
-        buf.write(f"DATASET_PATH = {dataset_path}".strip() + "\n")
     if sample_split is not None:
         buf.write(f"SAMPLE_SPLIT = {sample_split}".strip() + "\n")
     if fewshot_split is not None:
@@ -42,8 +41,6 @@ def markdown_doc(
     if language is not None:
         buf.write(f"LANGUAGE = {language!r}".strip() + "\n")
     buf.write("````\n\n")
-
-    buf.write(f"## Dataset\n\n{dataset_doc}\n\n")
 
     if example_messages is not None:
         for split, size in (split_sizes or {}).items():
