@@ -480,6 +480,7 @@ class ComposedBenchmark(Benchmark):
         return render_markdown_doc(
             name=self._display_name,
             dataset_path=self.dataset_path,
+            dataset_doc=self.dataset_policy.documentation(),
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
             response_type=self._response_type.name,

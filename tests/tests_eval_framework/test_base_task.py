@@ -9,7 +9,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import BytesC
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.run import parse_args
 from eval_framework.tasks import dataset_revisions as dr
-from eval_framework.tasks.base import BaseTask, ResponseType
+from eval_framework.tasks.base import BaseTask, ResponseType, hf_dataset_link
 from template_formatting.formatter import Message, Role
 
 
@@ -264,3 +264,9 @@ def test_completion_metrics_returns_all_completion_metrics() -> None:
         SequencePositionsCompletion,
         TokenCounts,
     }
+
+
+def test_hf_dataset_link_formats_markdown_link() -> None:
+    assert hf_dataset_link("org/data") == (
+        "- Link to dataset: [https://huggingface.co/datasets/org/data](https://huggingface.co/datasets/org/data)"
+    )

@@ -13,6 +13,7 @@ def test_markdown_doc_with_examples() -> None:
     doc = markdown_doc(
         name="MyTask",
         dataset_path=None,
+        dataset_doc="No information about dataset",
         sample_split="test",
         fewshot_split="train",
         response_type="COMPLETION",
@@ -41,6 +42,10 @@ METRICS = [Accuracy, F1]
 SUBJECTS = ['no_subject']
 ````
 
+## Dataset
+
+No information about dataset
+
 - `test` has 3 samples
 
 - `train` has 5 samples
@@ -67,10 +72,12 @@ SUBJECTS = ['no_subject']
     )
 
 
-def test_markdown_doc_with_dataset_link_only() -> None:
+def test_markdown_doc_inserts_dataset_section_verbatim() -> None:
+    # render is agnostic to what the dataset section says; it just places the supplied doc under a heading.
     doc = markdown_doc(
         name="MyTask",
         dataset_path="datasets/mytask",
+        dataset_doc="- line one\n- line two",
         sample_split="test",
         fewshot_split="train",
         response_type="COMPLETION",
@@ -100,66 +107,10 @@ METRICS = [Accuracy, F1]
 SUBJECTS = ['no_subject']
 ````
 
-- Link to dataset: [https://huggingface.co/datasets/datasets/mytask](https://huggingface.co/datasets/datasets/mytask)
-"""
-    )
+## Dataset
 
+- line one
+- line two
 
-def test_markdown_doc_with_dataset_link_and_example() -> None:
-    doc = markdown_doc(
-        name="MyTask",
-        dataset_path="datasets/mytask",
-        sample_split="test",
-        fewshot_split="train",
-        response_type="COMPLETION",
-        metrics=["Accuracy", "F1"],
-        subjects=["no_subject"],
-        language=None,
-        num_fewshot=1,
-        formatters=[ExampleFormatter()],
-        example_messages=[Message(role=Role.USER, content="Q")],
-        split_sizes={"test": 3, "train": 5},
-        possible_completions=["A", "B"],
-        ground_truth="A",
-    )
-
-    assert (
-        doc
-        == """\
-# MyTask
-
-````
-NAME = MyTask
-DATASET_PATH = datasets/mytask
-SAMPLE_SPLIT = test
-FEWSHOT_SPLIT = train
-RESPONSE_TYPE = COMPLETION
-METRICS = [Accuracy, F1]
-SUBJECTS = ['no_subject']
-````
-
-- Link to dataset: [https://huggingface.co/datasets/datasets/mytask](https://huggingface.co/datasets/datasets/mytask)
-- `test` has 3 samples
-
-- `train` has 5 samples
-
-## Example prompt with ExampleFormatter (1-shot)
-
-````
-"USER: Q"
-````
-
-## Possible completions:
-
-````
-- "A"
-- "B"
-````
-
-## Ground truth:
-
-````
-- "A"
-````
 """
     )
