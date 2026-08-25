@@ -8,11 +8,11 @@ concern, carried by the ``PiqaReader`` handed to each benchmark rather than by t
 
 from typing import Any, Literal
 
-from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark, ComposedEval
+from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, shuffle_correct_with_distractors
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
 
 
 class PiqaReader(ChoiceReader):
@@ -45,44 +45,12 @@ PIQA_ELLAMIND_MC_STYLER = MCStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CU
 PIQA_ELLAMIND_BPB_STYLER = BPBStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT)
 
 
-class PIQA_ELLAMIND_CLOZE_EASY_DE(ComposedEval[str]):
-    """German PIQA - Cloze format with easy distractor."""
-
-    TASK_STYLER = PIQA_ELLAMIND_CLOZE_STYLER
-
-
-class PIQA_ELLAMIND_CLOZE_HARD_DE(ComposedEval[str]):
-    """German PIQA - Cloze format with hard distractor."""
-
-    TASK_STYLER = PIQA_ELLAMIND_CLOZE_STYLER
-
-
-class PIQA_ELLAMIND_MC_EASY_DE(ComposedEval[str]):
-    """German PIQA - MC format with easy distractor."""
-
-    TASK_STYLER = PIQA_ELLAMIND_MC_STYLER
-
-
-class PIQA_ELLAMIND_MC_HARD_DE(ComposedEval[str]):
-    """German PIQA - MC format with hard distractor."""
-
-    TASK_STYLER = PIQA_ELLAMIND_MC_STYLER
-
-
-class PIQA_ELLAMIND_BPB_DE(ComposedEval[str]):
-    """German PIQA - BPB format (distractor set is irrelevant for BPB)."""
-
-    TASK_STYLER = PIQA_ELLAMIND_BPB_STYLER
-
-
-def _piqa_ellamind_benchmark(
-    task: type[ComposedEval[str]], name: str, distractor_level: Literal["easy", "hard"]
-) -> Benchmark:
+def _piqa_ellamind_benchmark(id: str, styler: TaskStyler, distractor_level: Literal["easy", "hard"]) -> Benchmark:
     """Dataset: https://huggingface.co/datasets/ellamind/piqa-multilingual"""
     dataset_path = "ellamind/piqa-multilingual"
-    return ComposedBenchmark.from_base(
-        task,
-        id=name,
+    return ComposedBenchmark.compose(
+        id=id,
+        styler=styler,
         reader=PiqaReader(distractor_level),
         sample_split="validation",
         fewshot_split="validation",
@@ -94,9 +62,9 @@ def _piqa_ellamind_benchmark(
 
 def piqa_ellamind_benchmarks() -> list[Benchmark]:
     return [
-        _piqa_ellamind_benchmark(PIQA_ELLAMIND_CLOZE_EASY_DE, "PIQA_ELLAMIND_CLOZE_EASY_DE", "easy"),
-        _piqa_ellamind_benchmark(PIQA_ELLAMIND_CLOZE_HARD_DE, "PIQA_ELLAMIND_CLOZE_HARD_DE", "hard"),
-        _piqa_ellamind_benchmark(PIQA_ELLAMIND_MC_EASY_DE, "PIQA_ELLAMIND_MC_EASY_DE", "easy"),
-        _piqa_ellamind_benchmark(PIQA_ELLAMIND_MC_HARD_DE, "PIQA_ELLAMIND_MC_HARD_DE", "hard"),
-        _piqa_ellamind_benchmark(PIQA_ELLAMIND_BPB_DE, "PIQA_ELLAMIND_BPB_DE", "easy"),
+        _piqa_ellamind_benchmark("PIQA_ELLAMIND_CLOZE_EASY_DE", PIQA_ELLAMIND_CLOZE_STYLER, "easy"),
+        _piqa_ellamind_benchmark("PIQA_ELLAMIND_CLOZE_HARD_DE", PIQA_ELLAMIND_CLOZE_STYLER, "hard"),
+        _piqa_ellamind_benchmark("PIQA_ELLAMIND_MC_EASY_DE", PIQA_ELLAMIND_MC_STYLER, "easy"),
+        _piqa_ellamind_benchmark("PIQA_ELLAMIND_MC_HARD_DE", PIQA_ELLAMIND_MC_STYLER, "hard"),
+        _piqa_ellamind_benchmark("PIQA_ELLAMIND_BPB_DE", PIQA_ELLAMIND_BPB_STYLER, "easy"),
     ]

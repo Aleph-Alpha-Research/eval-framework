@@ -48,7 +48,6 @@ class _DummyDatasetPolicy(DatasetPolicy):
 
 _DUMMY_READER = _DummyReader()
 _DUMMY_LOADER = _DummyDatasetLoader()
-_DUMMY_POLICY = _DummyDatasetPolicy()
 _DUMMY_RNG = random.Random(0)
 _DUMMY_SPLIT = "test"
 _DUMMY_SUBJECTS = ["subject"]
@@ -101,36 +100,40 @@ class _StubTaskStyler(TaskStyler):
         return ""
 
 
-def _benchmark_with_subjects(
-    subjects: list[Any],
-    dataset_policy: DatasetPolicy,
+def _make_benchmark(
+    *,
     id: str = "dummy-benchmark",
     display_name: str | None = None,
+    styler: TaskStyler | None = None,
+    reader: ChoiceReader = _DUMMY_READER,
+    sample_split: str = _DUMMY_SPLIT,
+    fewshot_split: str = _DUMMY_SPLIT,
+    subjects: list[Any] = _DUMMY_SUBJECTS,
+    dataset_policy: DatasetPolicy | None = None,
+    language: LanguageSpec = None,
 ) -> ComposedBenchmark:
-    class MyTask(ComposedEval):
-        TASK_STYLER = _DummyStyler()
-
-    return ComposedBenchmark.from_base(
-        MyTask,
+    """Build a ``ComposedBenchmark`` for tests, defaulting to dummies for every argument the test does not provide."""
+    return ComposedBenchmark.compose(
         id=id,
         display_name=display_name,
-        reader=_DUMMY_READER,
-        sample_split=_DUMMY_SPLIT,
-        fewshot_split=_DUMMY_SPLIT,
+        styler=styler or _DummyStyler(),
+        reader=reader,
+        sample_split=sample_split,
+        fewshot_split=fewshot_split,
         subjects=subjects,
-        dataset_policy=dataset_policy,
-        language=None,
+        dataset_policy=dataset_policy or _DummyDatasetPolicy(),
+        language=language,
     )
 
 
 def _make_eval(
-    task_cls: type[ComposedEval],
     *,
     id: str = "dummy-eval",
     display_name: str = "dummy-eval",
     num_fewshot: int = 0,
     reader: ChoiceReader = _DUMMY_READER,
     loader: DatasetLoader = _DUMMY_LOADER,
+    styler: TaskStyler | None = None,
     sample_split: str = _DUMMY_SPLIT,
     fewshot_split: str = _DUMMY_SPLIT,
     subjects: list[Any] = _DUMMY_SUBJECTS,
@@ -138,12 +141,13 @@ def _make_eval(
     rnd: random.Random = _DUMMY_RNG,
 ) -> ComposedEval:
     """Build a ``ComposedEval`` for tests, defaulting to dummies for every argument the test does not provide."""
-    return task_cls(
+    return ComposedEval(
         num_fewshot,
         id=id,
         display_name=display_name,
         reader=reader,
         loader=loader,
+        styler=styler or _DummyStyler(),
         sample_split=sample_split,
         fewshot_split=fewshot_split,
         subjects=subjects,
@@ -220,7 +224,7 @@ def test_task_custom_subjects(
     expected: list[str] | list[tuple],
 ) -> None:
     # Filtering by custom subjects happens in create().
-    task = _benchmark_with_subjects(subjects, _DUMMY_POLICY).create(0, custom_subjects, None)
+    task = _make_benchmark(subjects=subjects).create(0, custom_subjects, None)
     assert task.subjects == expected
 
 
@@ -237,7 +241,7 @@ def test_task_custom_subjects(
 )
 def test_task_custom_subjects_rejects_unknown(subjects: list[str] | list[tuple], custom_subjects: list[str]) -> None:
     with pytest.raises(ValueError):
-        _benchmark_with_subjects(subjects, _DUMMY_POLICY).create(0, custom_subjects, None)
+        _make_benchmark(subjects=subjects).create(0, custom_subjects, None)
 
 
 def test_create_resolves_loader_through_policy_with_revision_override() -> None:
@@ -256,7 +260,7 @@ def test_create_resolves_loader_through_policy_with_revision_override() -> None:
     policy = _SpyPolicy()
 
     # When creating an eval with a revision override
-    _benchmark_with_subjects(_DUMMY_SUBJECTS, policy).create(0, None, "custom-sha")
+    _make_benchmark(dataset_policy=policy).create(0, None, "custom-sha")
 
     # Then create forwards the override to the policy
     assert policy.calls == ["custom-sha"]
@@ -279,7 +283,7 @@ def test_markdown_doc_renders_policy_dataset_section_and_example() -> None:
             return "FIXTURE DATASET DOC"
 
     # When rendering the benchmark's documentation
-    doc = _benchmark_with_subjects(_DUMMY_SUBJECTS, _FixturePolicy()).markdown_doc([ConcatFormatter()])
+    doc = _make_benchmark(dataset_policy=_FixturePolicy()).markdown_doc([ConcatFormatter()])
 
     # Then the policy's dataset section and an example prompt both appear
     assert "## Dataset\n\nFIXTURE DATASET DOC" in doc
@@ -287,12 +291,12 @@ def test_markdown_doc_renders_policy_dataset_section_and_example() -> None:
 
 
 def test_display_name_defaults_to_id() -> None:
-    benchmark = _benchmark_with_subjects(_DUMMY_SUBJECTS, _DUMMY_POLICY, id="the-id")
+    benchmark = _make_benchmark(id="the-id")
     assert benchmark.display_name() == "the-id"
 
 
 def test_id_and_display_name_reach_the_eval() -> None:
-    benchmark = _benchmark_with_subjects(_DUMMY_SUBJECTS, _DUMMY_POLICY, id="the-id", display_name="Nice Name")
+    benchmark = _make_benchmark(id="the-id", display_name="Nice Name")
     assert (benchmark.id(), benchmark.display_name()) == ("the-id", "Nice Name")
 
     task = benchmark.create(0, None, None)
@@ -302,9 +306,7 @@ def test_id_and_display_name_reach_the_eval() -> None:
 def test_user_prompt_suffix_rejected() -> None:
     # Composed evals have no completion path, so create rejects a user prompt suffix
     with pytest.raises(ValueError, match="only supported for completion tasks"):
-        _benchmark_with_subjects(_DUMMY_SUBJECTS, _DUMMY_POLICY).create(
-            0, None, None, user_prompt_suffix="/think_short"
-        )
+        _make_benchmark().create(0, None, None, user_prompt_suffix="/think_short")
 
 
 def test_cli_user_prompt_suffix_parsing() -> None:
@@ -314,14 +316,10 @@ def test_cli_user_prompt_suffix_parsing() -> None:
     assert args.user_prompt_suffix == "/think_short"
 
 
-def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
-    # Given a composed eval whose styler declares its own metrics
-    class MyTask(ComposedEval):
-        TASK_STYLER = _StubTaskStyler()
-
-    # Then its metrics are the styler's metrics plus the loglikelihood response-type metrics
-    task = _make_eval(MyTask)
-    assert set(task.get_metrics()) == {_FakeMetric, BytesLoglikelihood, SequencePositionsLoglikelihood}
+def test_metrics_combine_styler_and_response_type_metrics() -> None:
+    # A benchmark's metrics are its styler's own metrics plus the ones its response type requires.
+    benchmark = _make_benchmark(styler=_StubTaskStyler())
+    assert set(benchmark.metrics()) == {_FakeMetric, BytesLoglikelihood, SequencePositionsLoglikelihood}
 
 
 def test_get_metadata_reports_dataset_path_from_loader() -> None:
@@ -333,10 +331,7 @@ def test_get_metadata_reports_dataset_path_from_loader() -> None:
         def metadata(self) -> dict[str, str]:
             return {"dataset_path": "some/dataset"}
 
-    class MyTask(ComposedEval):
-        TASK_STYLER = _DummyStyler()
-
-    task = _make_eval(MyTask, loader=_LoaderStub())
+    task = _make_eval(loader=_LoaderStub())
 
     # Then get_metadata reports that dataset path
     assert task.get_metadata()["dataset_path"] == "some/dataset"
@@ -355,10 +350,7 @@ def test_get_messages_assembles_instruction_and_cue() -> None:
         def get_cue_text(self) -> str:
             return "the cue"
 
-    class MyTask(ComposedEval):
-        TASK_STYLER = _Styler()
-
-    task = _make_eval(MyTask, reader=_Reader())
+    task = _make_eval(reader=_Reader(), styler=_Styler())
 
     # Then the instruction becomes the evaluated USER turn and the cue an ASSISTANT turn
     assert task._get_messages({"question": "the goal"}) == [
