@@ -5,7 +5,6 @@ import typing
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self
 
 from datasets import DatasetDict
@@ -26,8 +25,7 @@ from eval_framework.tasks.base import (
     Language,
     resolve_overwrite_subjects,
 )
-from eval_framework.tasks.dataset_loading import DatasetLoader, HfDatasetLoader
-from eval_framework.tasks.dataset_revisions import pinned_revision
+from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
 from template_formatting.formatter import BaseFormatter, Message, Role
 
@@ -399,7 +397,7 @@ class ComposedBenchmark(Benchmark):
         dataset_path: str,
         sample_split: str,
         fewshot_split: str,
-        revision_lockfile: Path,
+        dataset_policy: DatasetPolicy,
         language: LanguageSpec = None,
         task: type[ComposedEval],
     ) -> None:
@@ -413,7 +411,7 @@ class ComposedBenchmark(Benchmark):
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
         self.language = language
-        self.revision_lockfile = revision_lockfile
+        self.dataset_policy = dataset_policy
         self._task = task
 
     @classmethod
@@ -425,7 +423,7 @@ class ComposedBenchmark(Benchmark):
         sample_split: str,
         fewshot_split: str,
         subjects: list[Any],
-        revision_lockfile: Path,
+        dataset_policy: DatasetPolicy,
         language: LanguageSpec = None,
     ) -> Self:
         """Build an ``ComposedBenchmark`` from a task class and its construction inputs.
@@ -443,7 +441,7 @@ class ComposedBenchmark(Benchmark):
             sample_split=sample_split,
             fewshot_split=fewshot_split,
             language=language,
-            revision_lockfile=revision_lockfile,
+            dataset_policy=dataset_policy,
             task=task,
         )
 
@@ -472,10 +470,7 @@ class ComposedBenchmark(Benchmark):
             fewshot_split=self.fewshot_split,
             subjects=subjects,
             language=self.language,
-            loader=HfDatasetLoader(
-                self.dataset_path,
-                custom_hf_revision or pinned_revision(self.revision_lockfile, self.dataset_path),
-            ),
+            loader=self.dataset_policy.loader(custom_hf_revision),
             user_prompt_suffix=user_prompt_suffix,
             seed=seed,
         )
@@ -505,7 +500,7 @@ class ComposedBenchmark(Benchmark):
             fewshot_split=self.fewshot_split,
             subjects=self._subjects,
             language=self.language,
-            loader=HfDatasetLoader(self.dataset_path, pinned_revision(self.revision_lockfile, self.dataset_path)),
+            loader=self.dataset_policy.loader(None),
             seed=RANDOM_SEED,
         )
         return instance.markdown_doc(formatters)

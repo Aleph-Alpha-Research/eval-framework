@@ -34,3 +34,10 @@ class HfDatasetLoader(DatasetLoader):
             download_config=download_config,
         )
         return cast(DatasetDict, dataset)
+
+
+class DatasetPolicy(ABC):
+    """Produces the loader for a benchmark's dataset, given a run's optional revision override."""
+
+    @abstractmethod
+    def loader(self, custom_hf_revision: str | None) -> DatasetLoader: ...

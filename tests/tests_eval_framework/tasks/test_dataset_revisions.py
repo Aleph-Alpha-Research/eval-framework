@@ -76,3 +76,49 @@ def test_hf_dataset_revisions_file_is_sorted_by_dataset_path(tmp_path: Path) -> 
     dr.HfDatasetRevisions({"org/b": "sha-b", "org/a": "sha-a"}).to_file(lockfile)
 
     assert lockfile.read_text(encoding="utf-8").index('"org/a"') < lockfile.read_text(encoding="utf-8").index('"org/b"')
+
+
+def test_pinned_policy_loads_recorded_revision(tmp_path: Path) -> None:
+    # Given a lock file that pins the dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
+
+    # When building a loader without an override
+    loader = dr.Pinned(lockfile, "my/dataset").loader(None)
+
+    # Then the loader carries that dataset's pinned revision
+    assert loader.revision == "pinned-sha"
+
+
+def test_pinned_policy_override_beats_pin(tmp_path: Path) -> None:
+    # Given a lock file that pins the dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
+
+    # When building a loader with an explicit override
+    loader = dr.Pinned(lockfile, "my/dataset").loader("custom-sha")
+
+    # Then the override wins
+    assert loader.revision == "custom-sha"
+
+
+def test_pinned_policy_missing_pin_raises(tmp_path: Path) -> None:
+    # Given a lock file with no entry for the dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({}).to_file(lockfile)
+
+    # Then building a loader fails
+    with pytest.raises(KeyError, match="not pinned"):
+        dr.Pinned(lockfile, "my/dataset").loader(None)
+
+
+def test_pinned_by_framework_binds_the_bundled_lockfile() -> None:
+    # Given a dataset the framework already pins
+    pins = dr.HfDatasetRevisions.from_file(dr.HF_REVISIONS_LOCKFILE).to_dict()
+    dataset_path, sha = next(iter(pins.items()))
+
+    # When building its loader with no override
+    loader = dr.pinned_by_framework(dataset_path).loader(None)
+
+    # Then the loader carries the framework-pinned revision
+    assert loader.revision == sha

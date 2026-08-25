@@ -11,7 +11,7 @@ from typing import Any, Literal
 from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark, ComposedEval
 from eval_framework.contract import Benchmark
 from eval_framework.tasks.base import Language
-from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
+from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, shuffle_correct_with_distractors
 
 
@@ -82,14 +82,15 @@ class PIQA_ELLAMIND_BPB_DE(ComposedEval[str]):
 
 def _piqa_ellamind_benchmark(task: type[ComposedEval[str]], distractor_level: Literal["easy", "hard"]) -> Benchmark:
     """Dataset: https://huggingface.co/datasets/ellamind/piqa-multilingual"""
+    dataset_path = "ellamind/piqa-multilingual"
     return ComposedBenchmark.from_base(
         task,
         PiqaReader(distractor_level),
-        dataset_path="ellamind/piqa-multilingual",
+        dataset_path=dataset_path,
         sample_split="validation",
         fewshot_split="validation",
         subjects=["deu"],
-        revision_lockfile=HF_REVISIONS_LOCKFILE,
+        dataset_policy=pinned_by_framework(dataset_path),
         language=Language.DEU,
     )
 
