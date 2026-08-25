@@ -48,16 +48,12 @@ PIQA_ELLAMIND_BPB_STYLER = BPBStyle(question_prefix=_QUESTION_PREFIX, cue_text=_
 class PIQA_ELLAMIND_CLOZE_EASY_DE(ComposedEval[str]):
     """German PIQA - Cloze format with easy distractor."""
 
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-
     NAME = "PIQA_ELLAMIND_CLOZE_EASY_DE"
     TASK_STYLER = PIQA_ELLAMIND_CLOZE_STYLER
 
 
 class PIQA_ELLAMIND_CLOZE_HARD_DE(ComposedEval[str]):
     """German PIQA - Cloze format with hard distractor."""
-
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "PIQA_ELLAMIND_CLOZE_HARD_DE"
     TASK_STYLER = PIQA_ELLAMIND_CLOZE_STYLER
@@ -66,8 +62,6 @@ class PIQA_ELLAMIND_CLOZE_HARD_DE(ComposedEval[str]):
 class PIQA_ELLAMIND_MC_EASY_DE(ComposedEval[str]):
     """German PIQA - MC format with easy distractor."""
 
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-
     NAME = "PIQA_ELLAMIND_MC_EASY_DE"
     TASK_STYLER = PIQA_ELLAMIND_MC_STYLER
 
@@ -75,16 +69,12 @@ class PIQA_ELLAMIND_MC_EASY_DE(ComposedEval[str]):
 class PIQA_ELLAMIND_MC_HARD_DE(ComposedEval[str]):
     """German PIQA - MC format with hard distractor."""
 
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-
     NAME = "PIQA_ELLAMIND_MC_HARD_DE"
     TASK_STYLER = PIQA_ELLAMIND_MC_STYLER
 
 
 class PIQA_ELLAMIND_BPB_DE(ComposedEval[str]):
     """German PIQA - BPB format (distractor set is irrelevant for BPB)."""
-
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
 
     NAME = "PIQA_ELLAMIND_BPB_DE"
     TASK_STYLER = PIQA_ELLAMIND_BPB_STYLER
@@ -99,6 +89,7 @@ def _piqa_ellamind_benchmark(task: type[ComposedEval[str]], distractor_level: Li
         sample_split="validation",
         fewshot_split="validation",
         subjects=["deu"],
+        revision_lockfile=HF_REVISIONS_LOCKFILE,
         language=Language.DEU,
     )
 

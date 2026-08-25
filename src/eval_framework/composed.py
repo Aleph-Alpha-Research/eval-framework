@@ -73,12 +73,6 @@ class ComposedEval[SubjectType](Eval):
     # Composed evals are styler-only (choice-based); there is no completion styling path.
     TASK_STYLER: "TaskStyler"
 
-    # The lock file this task resolves its pinned dataset revision from, keyed by ``dataset_path``.
-    # Each task sets this explicitly: point it at a lock file (e.g. ``HF_REVISIONS_LOCKFILE`` or a
-    # frozen one), or ``None`` to opt out of pinning. Deliberately not defaulted so it is never
-    # inherited implicitly (a subclass in another package would otherwise resolve the wrong file).
-    REVISION_LOCKFILE: Path | None
-
     def __init__(
         self,
         num_fewshot: int = 0,
@@ -88,6 +82,7 @@ class ComposedEval[SubjectType](Eval):
         sample_split: str,
         fewshot_split: str,
         subjects: list[SubjectType],
+        revision_lockfile: Path | None,
         language: LanguageSpec = None,
         custom_hf_revision: str | None = None,
         user_prompt_suffix: str | None = None,
@@ -105,16 +100,17 @@ class ComposedEval[SubjectType](Eval):
         self.fewshot_split = fewshot_split
         self.subjects = subjects
         self.language = language
+        self.revision_lockfile = revision_lockfile
         self.rnd = random.Random(seed)
         self.hf_revision: str | None = self._apply_hf_revision(custom_hf_revision)
 
     def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> str | None:
-        # Precedence: CLI/config override > REVISION_LOCKFILE pin.
-        # Tasks without a Hugging Face dataset set REVISION_LOCKFILE to None and are not pinned.
+        # Precedence: CLI/config override > revision_lockfile pin.
+        # Tasks without a Hugging Face dataset get revision_lockfile=None and are not pinned.
         if custom_hf_revision:
             hf_revision = custom_hf_revision
-        elif self.REVISION_LOCKFILE is not None:
-            hf_revision = pinned_revision(self.REVISION_LOCKFILE, self.dataset_path)
+        elif self.revision_lockfile is not None:
+            hf_revision = pinned_revision(self.revision_lockfile, self.dataset_path)
         else:
             hf_revision = None
         return hf_revision
@@ -425,6 +421,7 @@ class ComposedBenchmark(Benchmark):
         dataset_path: str,
         sample_split: str,
         fewshot_split: str,
+        revision_lockfile: Path | None,
         language: LanguageSpec = None,
         task: type[ComposedEval],
     ) -> None:
@@ -438,6 +435,7 @@ class ComposedBenchmark(Benchmark):
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
         self.language = language
+        self.revision_lockfile = revision_lockfile
         self._task = task
 
     @classmethod
@@ -449,6 +447,7 @@ class ComposedBenchmark(Benchmark):
         sample_split: str,
         fewshot_split: str,
         subjects: list[Any],
+        revision_lockfile: Path | None,
         language: LanguageSpec = None,
     ) -> Self:
         """Build an ``ComposedBenchmark`` from a task class and its construction inputs.
@@ -466,6 +465,7 @@ class ComposedBenchmark(Benchmark):
             sample_split=sample_split,
             fewshot_split=fewshot_split,
             language=language,
+            revision_lockfile=revision_lockfile,
             task=task,
         )
 
@@ -494,6 +494,7 @@ class ComposedBenchmark(Benchmark):
             fewshot_split=self.fewshot_split,
             subjects=subjects,
             language=self.language,
+            revision_lockfile=self.revision_lockfile,
             custom_hf_revision=custom_hf_revision,
             user_prompt_suffix=user_prompt_suffix,
             seed=seed,
@@ -524,6 +525,7 @@ class ComposedBenchmark(Benchmark):
             fewshot_split=self.fewshot_split,
             subjects=self._subjects,
             language=self.language,
+            revision_lockfile=self.revision_lockfile,
             custom_hf_revision=None,
             seed=RANDOM_SEED,
         )
