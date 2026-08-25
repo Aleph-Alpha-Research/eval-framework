@@ -66,8 +66,6 @@ class ChoiceReader(ABC):
 
 
 class ComposedEval[SubjectType](Eval):
-    NAME: str
-
     # Composed evals are styler-only (choice-based); there is no completion styling path.
     TASK_STYLER: "TaskStyler"
 
@@ -75,6 +73,8 @@ class ComposedEval[SubjectType](Eval):
         self,
         num_fewshot: int = 0,
         *,
+        id: str,
+        display_name: str,
         reader: ChoiceReader,
         loader: DatasetLoader,
         sample_split: str,
@@ -83,6 +83,8 @@ class ComposedEval[SubjectType](Eval):
         language: LanguageSpec,
         rnd: random.Random,
     ) -> None:
+        self._id = id
+        self._display_name = display_name
         self.num_fewshot = num_fewshot
         self.reader = reader
         self.loader = loader
@@ -342,8 +344,11 @@ class ComposedEval[SubjectType](Eval):
 
         return task_metrics + response_type_metrics
 
+    def id(self) -> str:
+        return self._id
+
     def display_name(self) -> str:
-        return self.NAME
+        return self._display_name
 
 
 class ComposedBenchmark(Benchmark):
@@ -380,20 +385,23 @@ class ComposedBenchmark(Benchmark):
     def from_base(
         cls,
         task: type[ComposedEval],
+        *,
+        id: str,
         reader: ChoiceReader,
         sample_split: str,
         fewshot_split: str,
         subjects: list[Any],
         dataset_policy: DatasetPolicy,
         language: LanguageSpec,
+        display_name: str | None = None,
     ) -> Self:
         """Build an ``ComposedBenchmark`` from a task class and its construction inputs.
 
-        Metadata (name, metrics, response type) is derived from the class.
+        Metrics and response type are derived from the class; ``display_name`` defaults to ``id``.
         """
         return cls(
-            id=task.__name__,
-            display_name=task.NAME,
+            id=id,
+            display_name=display_name if display_name is not None else id,
             subjects=subjects,
             metrics=task.get_metrics(),
             response_type=task.get_response_type(),
@@ -427,6 +435,8 @@ class ComposedBenchmark(Benchmark):
             logger.info(f"Restricting subjects to `{subjects}` for the task {self._display_name}")
         return self._task(
             num_fewshot=num_fewshot,
+            id=self._id,
+            display_name=self._display_name,
             reader=self.reader,
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
@@ -456,6 +466,8 @@ class ComposedBenchmark(Benchmark):
         num_fewshot = 1
         instance = self._task(
             num_fewshot=num_fewshot,
+            id=self._id,
+            display_name=self._display_name,
             reader=self.reader,
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,

@@ -101,13 +101,19 @@ class _StubTaskStyler(TaskStyler):
         return ""
 
 
-def _benchmark_with_subjects(subjects: list[Any], dataset_policy: DatasetPolicy) -> ComposedBenchmark:
+def _benchmark_with_subjects(
+    subjects: list[Any],
+    dataset_policy: DatasetPolicy,
+    id: str = "dummy-benchmark",
+    display_name: str | None = None,
+) -> ComposedBenchmark:
     class MyTask(ComposedEval):
-        NAME = "MyTask"
         TASK_STYLER = _DummyStyler()
 
     return ComposedBenchmark.from_base(
         MyTask,
+        id=id,
+        display_name=display_name,
         reader=_DUMMY_READER,
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
@@ -120,6 +126,8 @@ def _benchmark_with_subjects(subjects: list[Any], dataset_policy: DatasetPolicy)
 def _make_eval(
     task_cls: type[ComposedEval],
     *,
+    id: str = "dummy-eval",
+    display_name: str = "dummy-eval",
     num_fewshot: int = 0,
     reader: ChoiceReader = _DUMMY_READER,
     loader: DatasetLoader = _DUMMY_LOADER,
@@ -132,6 +140,8 @@ def _make_eval(
     """Build a ``ComposedEval`` for tests, defaulting to dummies for every argument the test does not provide."""
     return task_cls(
         num_fewshot,
+        id=id,
+        display_name=display_name,
         reader=reader,
         loader=loader,
         sample_split=sample_split,
@@ -276,27 +286,17 @@ def test_markdown_doc_renders_policy_dataset_section_and_example() -> None:
     assert "## Example prompt" in doc
 
 
-def test_base_task() -> None:
-    class MyTask1(ComposedEval):
-        NAME = "MyTask1"
+def test_display_name_defaults_to_id() -> None:
+    benchmark = _benchmark_with_subjects(_DUMMY_SUBJECTS, _DUMMY_POLICY, id="the-id")
+    assert benchmark.display_name() == "the-id"
 
-        def _get_instruction_text(self, item: dict[str, Any]) -> str:
-            return ""
 
-        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
-            return []
+def test_id_and_display_name_reach_the_eval() -> None:
+    benchmark = _benchmark_with_subjects(_DUMMY_SUBJECTS, _DUMMY_POLICY, id="the-id", display_name="Nice Name")
+    assert (benchmark.id(), benchmark.display_name()) == ("the-id", "Nice Name")
 
-    class MyTask2(ComposedEval):
-        NAME = "MyTask2"
-
-        def _get_instruction_text(self, item: dict[str, Any]) -> str:
-            return ""
-
-        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
-            return []
-
-    assert _make_eval(MyTask1).NAME == "MyTask1"
-    assert _make_eval(MyTask2).NAME == "MyTask2"
+    task = benchmark.create(0, None, None)
+    assert (task.id(), task.display_name()) == ("the-id", "Nice Name")
 
 
 def test_user_prompt_suffix_rejected() -> None:
@@ -317,7 +317,6 @@ def test_cli_user_prompt_suffix_parsing() -> None:
 def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
     # Given a composed eval whose styler declares its own metrics
     class MyTask(ComposedEval):
-        NAME = "MyTask"
         TASK_STYLER = _StubTaskStyler()
 
     # Then its metrics are the styler's metrics plus the loglikelihood response-type metrics
@@ -335,7 +334,6 @@ def test_get_metadata_reports_dataset_path_from_loader() -> None:
             return {"dataset_path": "some/dataset"}
 
     class MyTask(ComposedEval):
-        NAME = "MyTask"
         TASK_STYLER = _DummyStyler()
 
     task = _make_eval(MyTask, loader=_LoaderStub())
@@ -358,7 +356,6 @@ def test_get_messages_assembles_instruction_and_cue() -> None:
             return "the cue"
 
     class MyTask(ComposedEval):
-        NAME = "MyTask"
         TASK_STYLER = _Styler()
 
     task = _make_eval(MyTask, reader=_Reader())
