@@ -80,7 +80,6 @@ class _StubTaskStyler(TaskStyler):
 
 def _benchmark_with_subjects(subjects: list[Any]) -> ComposedBenchmark:
     class MyTask(ComposedEval):
-        REVISION_LOCKFILE = None
         NAME = "MyTask"
         TASK_STYLER = _DummyStyler()
 
@@ -91,6 +90,7 @@ def _benchmark_with_subjects(subjects: list[Any]) -> ComposedBenchmark:
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=subjects,
+        revision_lockfile=None,
     )
 
 
@@ -182,7 +182,6 @@ def test_task_custom_subjects_rejects_unknown(subjects: list[str] | list[tuple],
 
 def test_base_task() -> None:
     class MyTask1(ComposedEval):
-        REVISION_LOCKFILE = None
         NAME = "MyTask1"
 
         def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -192,7 +191,6 @@ def test_base_task() -> None:
             return []
 
     class MyTask2(ComposedEval):
-        REVISION_LOCKFILE = None
         NAME = "MyTask2"
 
         def _get_instruction_text(self, item: dict[str, Any]) -> str:
@@ -207,6 +205,7 @@ def test_base_task() -> None:
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,
+        revision_lockfile=None,
     )
     assert task1.NAME == "MyTask1"
 
@@ -217,6 +216,7 @@ def test_base_task() -> None:
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,
+        revision_lockfile=None,
         custom_hf_revision=None,
     )
     assert task2.NAME == "MyTask2"
@@ -225,7 +225,6 @@ def test_base_task() -> None:
 def test_user_prompt_suffix_rejected() -> None:
     # Given a composed eval (composed evals have no completion path, so a suffix is never valid)
     class MyTask(ComposedEval):
-        REVISION_LOCKFILE = None
         TASK_STYLER = _DummyStyler()
 
     # When constructing it with a user prompt suffix, then it is rejected
@@ -237,6 +236,7 @@ def test_user_prompt_suffix_rejected() -> None:
             sample_split=_DUMMY_SPLIT,
             fewshot_split=_DUMMY_SPLIT,
             subjects=_DUMMY_SUBJECTS,
+            revision_lockfile=None,
             custom_hf_revision=None,
             user_prompt_suffix="/think_short",
         )
@@ -249,20 +249,16 @@ def test_cli_user_prompt_suffix_parsing() -> None:
     assert args.user_prompt_suffix == "/think_short"
 
 
-def _pinned_task(lockfile: Path | None) -> type[ComposedEval]:
-    """Test double declaring its own revision lock file, like any real task would."""
+class _PinnedTask(ComposedEval):
+    """Test double for revision pinning; its lock file is supplied at construction, as a benchmark would."""
 
-    class PinnedTask(ComposedEval):
-        NAME = "PinnedTask"
-        REVISION_LOCKFILE = lockfile
+    NAME = "PinnedTask"
 
-        def _get_instruction_text(self, item: dict[str, Any]) -> str:
-            return ""
+    def _get_instruction_text(self, item: dict[str, Any]) -> str:
+        return ""
 
-        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
-            return []
-
-    return PinnedTask
+    def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+        return []
 
 
 def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
@@ -271,13 +267,14 @@ def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
     dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
 
     # When constructing the task without a revision override
-    task = _pinned_task(lockfile)(
+    task = _PinnedTask(
         0,
         reader=_DUMMY_READER,
         dataset_path="my/dataset",
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,
+        revision_lockfile=lockfile,
         custom_hf_revision=None,
     )
 
@@ -287,13 +284,14 @@ def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
 
 def test_task_without_lockfile_is_not_pinned() -> None:
     # Given a task that opted out of pinning, when constructing it
-    task = _pinned_task(None)(
+    task = _PinnedTask(
         0,
         reader=_DUMMY_READER,
         dataset_path="my/dataset",
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,
+        revision_lockfile=None,
         custom_hf_revision=None,
     )
 
@@ -308,13 +306,14 @@ def test_missing_pin_in_declared_lockfile_raises(tmp_path: Path) -> None:
 
     # Then constructing the task fails
     with pytest.raises(KeyError, match="not pinned"):
-        _pinned_task(lockfile)(
+        _PinnedTask(
             0,
             reader=_DUMMY_READER,
             dataset_path="my/dataset",
             sample_split=_DUMMY_SPLIT,
             fewshot_split=_DUMMY_SPLIT,
             subjects=_DUMMY_SUBJECTS,
+            revision_lockfile=lockfile,
             custom_hf_revision=None,
         )
 
@@ -325,13 +324,14 @@ def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
     dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
 
     # When constructing the task with a revision override
-    task = _pinned_task(lockfile)(
+    task = _PinnedTask(
         0,
         reader=_DUMMY_READER,
         dataset_path="my/dataset",
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,
+        revision_lockfile=lockfile,
         custom_hf_revision="custom-sha",
     )
 
@@ -342,7 +342,6 @@ def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
 def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
     # Given a composed eval whose styler declares its own metrics
     class MyTask(ComposedEval):
-        REVISION_LOCKFILE = None
         NAME = "MyTask"
         TASK_STYLER = _StubTaskStyler()
 
@@ -353,6 +352,7 @@ def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,
+        revision_lockfile=None,
     )
     assert set(task.get_metrics()) == {_FakeMetric, BytesLoglikelihood, SequencePositionsLoglikelihood}
 
@@ -371,7 +371,6 @@ def test_get_messages_assembles_instruction_and_cue() -> None:
             return "the cue"
 
     class MyTask(ComposedEval):
-        REVISION_LOCKFILE = None
         NAME = "MyTask"
         TASK_STYLER = _Styler()
 
@@ -381,6 +380,7 @@ def test_get_messages_assembles_instruction_and_cue() -> None:
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,
+        revision_lockfile=None,
     )
 
     # Then the instruction becomes the evaluated USER turn and the cue an ASSISTANT turn
