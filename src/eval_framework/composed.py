@@ -80,15 +80,9 @@ class ComposedEval[SubjectType](Eval):
         sample_split: str,
         fewshot_split: str,
         subjects: list[SubjectType],
-        language: LanguageSpec = None,
-        user_prompt_suffix: str | None = None,
-        seed: int | None = RANDOM_SEED,
+        language: LanguageSpec,
+        rnd: random.Random,
     ) -> None:
-        # No completion path yet, so any suffix is rejected. This deliberately trips even for a
-        # completion response type, flagging that suffix handling must be implemented once that lands.
-        if user_prompt_suffix is not None:
-            raise ValueError("user_prompt_suffix is only supported for completion tasks.")
-
         self.num_fewshot = num_fewshot
         self.reader = reader
         self.loader = loader
@@ -96,7 +90,7 @@ class ComposedEval[SubjectType](Eval):
         self.fewshot_split = fewshot_split
         self.subjects = subjects
         self.language = language
-        self.rnd = random.Random(seed)
+        self.rnd = rnd
 
     def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, Any]:
         dataset = {}
@@ -367,7 +361,7 @@ class ComposedBenchmark(Benchmark):
         sample_split: str,
         fewshot_split: str,
         dataset_policy: DatasetPolicy,
-        language: LanguageSpec = None,
+        language: LanguageSpec,
         task: type[ComposedEval],
     ) -> None:
         self._id = id
@@ -391,7 +385,7 @@ class ComposedBenchmark(Benchmark):
         fewshot_split: str,
         subjects: list[Any],
         dataset_policy: DatasetPolicy,
-        language: LanguageSpec = None,
+        language: LanguageSpec,
     ) -> Self:
         """Build an ``ComposedBenchmark`` from a task class and its construction inputs.
 
@@ -422,6 +416,9 @@ class ComposedBenchmark(Benchmark):
         user_prompt_suffix: str | None = None,
         seed: int | None = None,
     ) -> Eval:
+        # Composed evals have no completion path yet, so a completion-only user prompt suffix is rejected.
+        if user_prompt_suffix is not None:
+            raise ValueError("user_prompt_suffix is only supported for completion tasks.")
         subjects = self._subjects
         if custom_subjects:
             subjects = resolve_overwrite_subjects(
@@ -436,8 +433,7 @@ class ComposedBenchmark(Benchmark):
             subjects=subjects,
             language=self.language,
             loader=self.dataset_policy.loader(custom_hf_revision),
-            user_prompt_suffix=user_prompt_suffix,
-            seed=seed,
+            rnd=random.Random(seed),
         )
 
     def response_type(self) -> ResponseType:
@@ -466,7 +462,7 @@ class ComposedBenchmark(Benchmark):
             subjects=self._subjects,
             language=self.language,
             loader=self.dataset_policy.loader(None),
-            seed=RANDOM_SEED,
+            rnd=random.Random(RANDOM_SEED),
         )
         sample = next(iter(instance.iterate_samples(1)))
         return render_markdown_doc(
