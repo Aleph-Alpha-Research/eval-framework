@@ -1,8 +1,8 @@
 """Pinned Hugging Face dataset revisions.
 
-A lock file maps dataset paths to pinned commit SHAs. Tasks declare the lock file that
-governs them via their ``REVISION_LOCKFILE`` attribute and resolve their pin from it at
-construction time.
+A lock file maps dataset paths to pinned commit SHAs, so an eval runs against a reproducible
+dataset revision. ``BaseTask`` resolves its pin from the lock file named by ``REVISION_LOCKFILE``;
+composed benchmarks take a ``Pinned`` policy instead (usually via ``pinned_by_framework``).
 """
 
 import json
@@ -11,6 +11,8 @@ from functools import lru_cache
 from pathlib import Path
 
 from huggingface_hub import HfApi
+
+from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy, HfDatasetLoader
 
 logger = logging.getLogger(__name__)
 
@@ -82,3 +84,20 @@ def pinned_revision(lockfile: Path, dataset_path: str) -> str:
         return _revisions_from_file(lockfile).revision_for(dataset_path)
     except KeyError:
         raise KeyError(f"Dataset '{dataset_path}' is not pinned in {lockfile}") from None
+
+
+class Pinned(DatasetPolicy):
+    """Pins ``dataset_path`` to the revision recorded for it in ``lockfile``; a run's override still wins."""
+
+    def __init__(self, lockfile: Path, dataset_path: str) -> None:
+        self._lockfile = lockfile
+        self._dataset_path = dataset_path
+
+    def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
+        revision = custom_hf_revision or pinned_revision(self._lockfile, self._dataset_path)
+        return HfDatasetLoader(self._dataset_path, revision)
+
+
+def pinned_by_framework(dataset_path: str) -> Pinned:
+    """A ``Pinned`` policy binding ``dataset_path`` to the framework's bundled lock file."""
+    return Pinned(HF_REVISIONS_LOCKFILE, dataset_path)

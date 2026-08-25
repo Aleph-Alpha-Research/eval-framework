@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
@@ -13,8 +12,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     SequencePositionsLoglikelihood,
 )
 from eval_framework.run import parse_args
-from eval_framework.tasks import dataset_revisions as dr
-from eval_framework.tasks.dataset_loading import DatasetLoader
+from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.task_style import TaskStyle, TaskStyler
 from template_formatting.formatter import Message, Role
 
@@ -34,8 +32,16 @@ class _DummyDatasetLoader(DatasetLoader):
         return DatasetDict()
 
 
+class _DummyDatasetPolicy(DatasetPolicy):
+    """A no-op policy for benchmark doubles that never load a dataset."""
+
+    def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
+        return _DUMMY_LOADER
+
+
 _DUMMY_READER = _DummyReader()
 _DUMMY_LOADER = _DummyDatasetLoader()
+_DUMMY_POLICY = _DummyDatasetPolicy()
 _DUMMY_DATASET_PATH = "dummy/dataset"
 _DUMMY_SPLIT = "test"
 _DUMMY_SUBJECTS = ["subject"]
@@ -88,7 +94,7 @@ class _StubTaskStyler(TaskStyler):
         return ""
 
 
-def _benchmark_with_subjects(subjects: list[Any], revision_lockfile: Path) -> ComposedBenchmark:
+def _benchmark_with_subjects(subjects: list[Any], dataset_policy: DatasetPolicy) -> ComposedBenchmark:
     class MyTask(ComposedEval):
         NAME = "MyTask"
         TASK_STYLER = _DummyStyler()
@@ -100,16 +106,8 @@ def _benchmark_with_subjects(subjects: list[Any], revision_lockfile: Path) -> Co
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=subjects,
-        revision_lockfile=revision_lockfile,
+        dataset_policy=dataset_policy,
     )
-
-
-@pytest.fixture
-def dummy_lockfile(tmp_path: Path) -> Path:
-    """Pins the dummy dataset so a composed benchmark (always pinned) can be built."""
-    lockfile = tmp_path / "hf-dataset-revisions.json"
-    dr.HfDatasetRevisions({_DUMMY_DATASET_PATH: "dummy-sha"}).to_file(lockfile)
-    return lockfile
 
 
 @pytest.mark.parametrize(
@@ -175,13 +173,12 @@ def dummy_lockfile(tmp_path: Path) -> Path:
     ],
 )
 def test_task_custom_subjects(
-    dummy_lockfile: Path,
     subjects: list[str] | list[tuple],
     custom_subjects: list[str] | None,
     expected: list[str] | list[tuple],
 ) -> None:
     # Filtering by custom subjects happens in create().
-    task = _benchmark_with_subjects(subjects, dummy_lockfile).create(0, custom_subjects, None)
+    task = _benchmark_with_subjects(subjects, _DUMMY_POLICY).create(0, custom_subjects, None)
     assert task.subjects == expected
 
 
@@ -196,11 +193,28 @@ def test_task_custom_subjects(
         ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,abc,single"]),
     ],
 )
-def test_task_custom_subjects_rejects_unknown(
-    dummy_lockfile: Path, subjects: list[str] | list[tuple], custom_subjects: list[str]
-) -> None:
+def test_task_custom_subjects_rejects_unknown(subjects: list[str] | list[tuple], custom_subjects: list[str]) -> None:
     with pytest.raises(ValueError):
-        _benchmark_with_subjects(subjects, dummy_lockfile).create(0, custom_subjects, None)
+        _benchmark_with_subjects(subjects, _DUMMY_POLICY).create(0, custom_subjects, None)
+
+
+def test_create_resolves_loader_through_policy_with_revision_override() -> None:
+    # Given a policy that spies on how create invokes it
+    class _SpyPolicy(DatasetPolicy):
+        def __init__(self) -> None:
+            self.calls: list[str | None] = []
+
+        def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
+            self.calls.append(custom_hf_revision)
+            return _DUMMY_LOADER
+
+    policy = _SpyPolicy()
+
+    # When creating an eval with a revision override
+    _benchmark_with_subjects(_DUMMY_SUBJECTS, policy).create(0, None, "custom-sha")
+
+    # Then create forwards the override to the policy
+    assert policy.calls == ["custom-sha"]
 
 
 def test_base_task() -> None:
@@ -268,40 +282,6 @@ def test_cli_user_prompt_suffix_parsing() -> None:
         args = parse_args()
 
     assert args.user_prompt_suffix == "/think_short"
-
-
-def test_pinned_hf_revision_applied_when_unset(tmp_path: Path) -> None:
-    # Given a benchmark whose lock file pins its dataset
-    lockfile = tmp_path / "hf-dataset-revisions.json"
-    dr.HfDatasetRevisions({_DUMMY_DATASET_PATH: "pinned-sha"}).to_file(lockfile)
-
-    # When creating an eval without a revision override
-    task = _benchmark_with_subjects(_DUMMY_SUBJECTS, lockfile).create(0, None, None)
-
-    # Then the pinned revision is applied
-    assert task.loader.revision == "pinned-sha"
-
-
-def test_missing_pin_in_declared_lockfile_raises(tmp_path: Path) -> None:
-    # Given a benchmark whose lock file has no pin for its dataset
-    lockfile = tmp_path / "hf-dataset-revisions.json"
-    dr.HfDatasetRevisions({}).to_file(lockfile)
-
-    # Then creating an eval fails
-    with pytest.raises(KeyError, match="not pinned"):
-        _benchmark_with_subjects(_DUMMY_SUBJECTS, lockfile).create(0, None, None)
-
-
-def test_custom_hf_revision_overrides_pinned(tmp_path: Path) -> None:
-    # Given a benchmark whose lock file pins its dataset
-    lockfile = tmp_path / "hf-dataset-revisions.json"
-    dr.HfDatasetRevisions({_DUMMY_DATASET_PATH: "pinned-sha"}).to_file(lockfile)
-
-    # When creating an eval with a revision override
-    task = _benchmark_with_subjects(_DUMMY_SUBJECTS, lockfile).create(0, None, "custom-sha")
-
-    # Then the override beats the pin
-    assert task.loader.revision == "custom-sha"
 
 
 def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
