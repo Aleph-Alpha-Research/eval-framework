@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.78 - https://github.com/boto/boto3
-- **botocore** 1.43.78 - https://github.com/boto/botocore
+- **boto3** 1.43.79 - https://github.com/boto/boto3
+- **botocore** 1.43.79 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -102,13 +102,13 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
 - **jsonschema-specifications** 2025.9.1 - https://github.com/python-jsonschema/jsonschema-specifications
-- **platformdirs** 4.11.3 - https://github.com/tox-dev/platformdirs
+- **platformdirs** 4.11.4 - https://github.com/tox-dev/platformdirs
 - **pydantic** 2.13.4 - https://github.com/pydantic/pydantic
 - **pydantic_core** 2.46.4 - https://github.com/pydantic
 - **PyYAML** 6.0.3 - https://pyyaml.org/
 - **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
 - **rpds-py** 2026.6.3 - https://github.com/crate-py/rpds
-- **sentry-sdk** 2.68.0 - https://github.com/getsentry/sentry-python
+- **sentry-sdk** 2.68.1 - https://github.com/getsentry/sentry-python
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **typing-inspection** 0.4.4 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.7.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
@@ -212,7 +212,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.78 (Apache-2.0)
+### boto3 1.43.79 (Apache-2.0)
 
 ```text
 Apache License
@@ -393,7 +393,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.78 (Apache-2.0)
+### botocore 1.43.79 (Apache-2.0)
 
 ```text
 Apache License
@@ -12795,7 +12795,7 @@ https://opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
   terms specified in this license.
 ```
 
-### platformdirs 4.11.3 (MIT)
+### platformdirs 4.11.4 (MIT)
 
 ```text
 MIT License
@@ -17637,7 +17637,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### sentry-sdk 2.68.0 (MIT)
+### sentry-sdk 2.68.1 (MIT)
 
 ```text
 MIT License
