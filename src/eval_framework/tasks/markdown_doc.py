@@ -45,8 +45,8 @@ def markdown_doc(
 
     if http_path:
         buf.write(f"- Link to dataset: [{http_path}]({http_path})\n")
-    else:
-        assert example_messages is not None, "a task without a dataset link must supply an example sample"
+
+    if example_messages is not None:
         for split, size in (split_sizes or {}).items():
             buf.write(f"- `{split}` has {size} samples\n\n")
 

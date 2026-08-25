@@ -2,7 +2,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from datasets import DatasetDict
+from datasets import Dataset, DatasetDict
 
 from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark, ComposedEval
 from eval_framework.contract import ResponseType
@@ -14,7 +14,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
 from eval_framework.run import parse_args
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.task_style import TaskStyle, TaskStyler
-from template_formatting.formatter import Message, Role
+from template_formatting.formatter import ConcatFormatter, Message, Role
 
 
 class _DummyReader(ChoiceReader):
@@ -215,6 +215,24 @@ def test_create_resolves_loader_through_policy_with_revision_override() -> None:
 
     # Then create forwards the override to the policy
     assert policy.calls == ["custom-sha"]
+
+
+def test_markdown_doc_renders_link_and_example_for_composed_benchmark() -> None:
+    # Given a policy whose loader serves a fixture dataset (no network)
+    class _FixtureLoader(DatasetLoader):
+        def load(self, name: str | None) -> DatasetDict:
+            return DatasetDict({_DUMMY_SPLIT: Dataset.from_list([{"x": 1}, {"x": 2}])})
+
+    class _FixturePolicy(DatasetPolicy):
+        def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
+            return _FixtureLoader()
+
+    # When rendering the benchmark's documentation
+    doc = _benchmark_with_subjects(_DUMMY_SUBJECTS, _FixturePolicy()).markdown_doc([ConcatFormatter()])
+
+    # Then it shows both the dataset link and an example prompt
+    assert "Link to dataset" in doc
+    assert "## Example prompt" in doc
 
 
 def test_base_task() -> None:
