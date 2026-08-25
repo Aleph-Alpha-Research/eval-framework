@@ -31,6 +31,9 @@ class _DummyDatasetLoader(DatasetLoader):
     def load(self, name: str | None) -> DatasetDict:
         return DatasetDict()
 
+    def metadata(self) -> dict[str, str]:
+        return {}
+
 
 class _DummyDatasetPolicy(DatasetPolicy):
     """A no-op policy for benchmark doubles that never load a dataset."""
@@ -229,6 +232,9 @@ def test_markdown_doc_renders_policy_dataset_section_and_example() -> None:
         def load(self, name: str | None) -> DatasetDict:
             return DatasetDict({_DUMMY_SPLIT: Dataset.from_list([{"x": 1}, {"x": 2}])})
 
+        def metadata(self) -> dict[str, str]:
+            return {}
+
     class _FixturePolicy(DatasetPolicy):
         def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
             return _FixtureLoader()
@@ -266,7 +272,6 @@ def test_base_task() -> None:
     task1 = MyTask1(
         reader=_DUMMY_READER,
         loader=_DUMMY_LOADER,
-        dataset_path=_DUMMY_DATASET_PATH,
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,
@@ -277,7 +282,6 @@ def test_base_task() -> None:
         0,
         reader=_DUMMY_READER,
         loader=_DUMMY_LOADER,
-        dataset_path=_DUMMY_DATASET_PATH,
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,
@@ -296,7 +300,6 @@ def test_user_prompt_suffix_rejected() -> None:
             0,
             reader=_DUMMY_READER,
             loader=_DUMMY_LOADER,
-            dataset_path=_DUMMY_DATASET_PATH,
             sample_split=_DUMMY_SPLIT,
             fewshot_split=_DUMMY_SPLIT,
             subjects=_DUMMY_SUBJECTS,
@@ -321,12 +324,36 @@ def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
     task = MyTask(
         reader=_DUMMY_READER,
         loader=_DUMMY_LOADER,
-        dataset_path=_DUMMY_DATASET_PATH,
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,
     )
     assert set(task.get_metrics()) == {_FakeMetric, BytesLoglikelihood, SequencePositionsLoglikelihood}
+
+
+def test_get_metadata_reports_dataset_path_from_loader() -> None:
+    # Given an eval whose loader reports a dataset path
+    class _LoaderStub(DatasetLoader):
+        def load(self, name: str | None) -> DatasetDict:
+            return DatasetDict()
+
+        def metadata(self) -> dict[str, str]:
+            return {"dataset_path": "some/dataset"}
+
+    class MyTask(ComposedEval):
+        NAME = "MyTask"
+        TASK_STYLER = _DummyStyler()
+
+    task = MyTask(
+        reader=_DUMMY_READER,
+        loader=_LoaderStub(),
+        sample_split=_DUMMY_SPLIT,
+        fewshot_split=_DUMMY_SPLIT,
+        subjects=_DUMMY_SUBJECTS,
+    )
+
+    # Then get_metadata reports that dataset path
+    assert task.get_metadata()["dataset_path"] == "some/dataset"
 
 
 def test_get_messages_assembles_instruction_and_cue() -> None:
@@ -349,7 +376,6 @@ def test_get_messages_assembles_instruction_and_cue() -> None:
     task = MyTask(
         reader=_Reader(),
         loader=_DUMMY_LOADER,
-        dataset_path=_DUMMY_DATASET_PATH,
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=_DUMMY_SUBJECTS,

@@ -77,7 +77,6 @@ class ComposedEval[SubjectType](Eval):
         *,
         reader: ChoiceReader,
         loader: DatasetLoader,
-        dataset_path: str,
         sample_split: str,
         fewshot_split: str,
         subjects: list[SubjectType],
@@ -93,7 +92,6 @@ class ComposedEval[SubjectType](Eval):
         self.num_fewshot = num_fewshot
         self.reader = reader
         self.loader = loader
-        self.dataset_path = dataset_path
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
         self.subjects = subjects
@@ -228,13 +226,13 @@ class ComposedEval[SubjectType](Eval):
 
     def get_metadata(self) -> dict[str, str | list[str]]:
         meta: dict[str, str | list[str]] = {
-            "dataset_path": self.dataset_path,
             "sample_split": self.sample_split,
             "fewshot_split": self.fewshot_split,
             "response_type": self.get_response_type().value,
             "metrics": [m.NAME for m in self._get_task_specific_metrics()],
             "subjects": [str(s) for s in self.subjects],
         }
+        meta.update(self.loader.metadata())
         meta.update(self.TASK_STYLER.get_extra_metadata())
         return meta
 
@@ -437,7 +435,6 @@ class ComposedBenchmark(Benchmark):
         return self._task(
             num_fewshot=num_fewshot,
             reader=self.reader,
-            dataset_path=self.dataset_path,
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
             subjects=subjects,
@@ -468,7 +465,6 @@ class ComposedBenchmark(Benchmark):
         instance = self._task(
             num_fewshot=num_fewshot,
             reader=self.reader,
-            dataset_path=self.dataset_path,
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
             subjects=self._subjects,
