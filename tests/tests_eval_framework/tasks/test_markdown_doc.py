@@ -67,7 +67,45 @@ SUBJECTS = ['no_subject']
     )
 
 
-def test_markdown_doc_with_dataset_link() -> None:
+def test_markdown_doc_with_dataset_link_only() -> None:
+    doc = markdown_doc(
+        name="MyTask",
+        dataset_path="datasets/mytask",
+        sample_split="test",
+        fewshot_split="train",
+        response_type="COMPLETION",
+        metrics=["Accuracy", "F1"],
+        subjects=["no_subject"],
+        language=None,
+        num_fewshot=1,
+        formatters=[ExampleFormatter()],
+        example_messages=None,
+        split_sizes=None,
+        possible_completions=None,
+        ground_truth=None,
+    )
+
+    assert (
+        doc
+        == """\
+# MyTask
+
+````
+NAME = MyTask
+DATASET_PATH = datasets/mytask
+SAMPLE_SPLIT = test
+FEWSHOT_SPLIT = train
+RESPONSE_TYPE = COMPLETION
+METRICS = [Accuracy, F1]
+SUBJECTS = ['no_subject']
+````
+
+- Link to dataset: [https://huggingface.co/datasets/datasets/mytask](https://huggingface.co/datasets/datasets/mytask)
+"""
+    )
+
+
+def test_markdown_doc_with_dataset_link_and_example() -> None:
     doc = markdown_doc(
         name="MyTask",
         dataset_path="datasets/mytask",
@@ -101,5 +139,27 @@ SUBJECTS = ['no_subject']
 ````
 
 - Link to dataset: [https://huggingface.co/datasets/datasets/mytask](https://huggingface.co/datasets/datasets/mytask)
+- `test` has 3 samples
+
+- `train` has 5 samples
+
+## Example prompt with ExampleFormatter (1-shot)
+
+````
+"USER: Q"
+````
+
+## Possible completions:
+
+````
+- "A"
+- "B"
+````
+
+## Ground truth:
+
+````
+- "A"
+````
 """
     )

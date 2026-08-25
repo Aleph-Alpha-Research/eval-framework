@@ -172,34 +172,6 @@ class ComposedEval[SubjectType](Eval):
                         done = True
                         break
 
-    def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        """Render this task's documentation as markdown."""
-        dataset_path = self.dataset_path
-        example_messages = split_sizes = possible_completions = ground_truth = None
-        if dataset_path is None:
-            sample = next(iter(self.iterate_samples(1)))
-            example_messages = sample.messages
-            split_sizes = {split: len(self.dataset[split]) for split in self.dataset}
-            possible_completions = sample.possible_completions
-            ground_truth = sample.ground_truth
-
-        return render_markdown_doc(
-            name=self.NAME,
-            dataset_path=dataset_path,
-            sample_split=self.sample_split,
-            fewshot_split=self.fewshot_split,
-            response_type=self.get_response_type().name,
-            metrics=[m.__name__ for m in self.get_metrics()],
-            subjects=self.subjects,
-            language=self.language,
-            num_fewshot=self.num_fewshot,
-            formatters=formatters,
-            example_messages=example_messages,
-            split_sizes=split_sizes,
-            possible_completions=possible_completions,
-            ground_truth=ground_truth,
-        )
-
     def _create_samples(self, item: dict[str, Any], index: int, subject: str) -> list[Sample]:
         """Creates one or more samples from a single dataset item. Default implementation returns single sample."""
         return [
@@ -492,8 +464,9 @@ class ComposedBenchmark(Benchmark):
         return self._display_name
 
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
+        num_fewshot = 1
         instance = self._task(
-            num_fewshot=1,
+            num_fewshot=num_fewshot,
             reader=self.reader,
             dataset_path=self.dataset_path,
             sample_split=self.sample_split,
@@ -503,4 +476,20 @@ class ComposedBenchmark(Benchmark):
             loader=self.dataset_policy.loader(None),
             seed=RANDOM_SEED,
         )
-        return instance.markdown_doc(formatters)
+        sample = next(iter(instance.iterate_samples(1)))
+        return render_markdown_doc(
+            name=self._display_name,
+            dataset_path=self.dataset_path,
+            sample_split=self.sample_split,
+            fewshot_split=self.fewshot_split,
+            response_type=self._response_type.name,
+            metrics=[m.__name__ for m in self._metrics],
+            subjects=self._subjects,
+            language=self.language,
+            num_fewshot=num_fewshot,
+            formatters=formatters,
+            example_messages=sample.messages,
+            split_sizes={split: len(instance.dataset[split]) for split in instance.dataset},
+            possible_completions=sample.possible_completions,
+            ground_truth=sample.ground_truth,
+        )
