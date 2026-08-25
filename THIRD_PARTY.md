@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.76,<2` |
+| `boto3` | `>=1.43.78,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -28,7 +28,7 @@ and first-party/internal packages are excluded.
 | `python-dotenv` | `>=1.2.3,<2` |
 | `python-iso639` | `>=2026.7.23` |
 | `pyyaml` | `>=6.0.3,<7` |
-| `scipy` | `>=1.18.0,<2` |
+| `scipy` | `>=1.18.1,<2` |
 | `sympy` | `>=1.14.0,<2` |
 | `wandb` | `>=0.28.2,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.78` |
+| `botocore` | `1.43.79` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.1` |
 | `click` | `8.4.2` |
@@ -63,7 +63,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-api` | `1.44.0` |
 | `packaging` | `26.3` |
 | `pandas` | `3.0.5` |
-| `platformdirs` | `4.11.3` |
+| `platformdirs` | `4.11.4` |
 | `protobuf` | `7.36.0` |
 | `pyarrow` | `25.0.1` |
 | `pydantic-core` | `2.46.4` |
@@ -73,7 +73,7 @@ and first-party/internal packages are excluded.
 | `requests` | `2.34.2` |
 | `rpds-py` | `2026.6.3` |
 | `s3transfer` | `0.19.2` |
-| `sentry-sdk` | `2.68.0` |
+| `sentry-sdk` | `2.68.1` |
 | `six` | `1.17.0` |
 | `tqdm` | `4.70.0` |
 | `typing-extensions` | `4.16.0` |
