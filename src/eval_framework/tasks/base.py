@@ -261,7 +261,6 @@ class BaseTask[SubjectType](Eval):
 
         return render_markdown_doc(
             name=self.NAME,
-            dataset_path=dataset_path,
             dataset_doc=hf_dataset_link(dataset_path) if dataset_path else "No information about dataset",
             sample_split=getattr(self, "SAMPLE_SPLIT", None),
             fewshot_split=getattr(self, "FEWSHOT_SPLIT", None),

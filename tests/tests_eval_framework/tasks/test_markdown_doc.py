@@ -12,7 +12,6 @@ class ExampleFormatter:
 def test_markdown_doc_with_examples() -> None:
     doc = markdown_doc(
         name="MyTask",
-        dataset_path=None,
         dataset_doc="No information about dataset",
         sample_split="test",
         fewshot_split="train",
@@ -33,6 +32,10 @@ def test_markdown_doc_with_examples() -> None:
         == """\
 # MyTask
 
+## Dataset
+
+No information about dataset
+
 ````
 NAME = MyTask
 SAMPLE_SPLIT = test
@@ -41,10 +44,6 @@ RESPONSE_TYPE = COMPLETION
 METRICS = [Accuracy, F1]
 SUBJECTS = ['no_subject']
 ````
-
-## Dataset
-
-No information about dataset
 
 - `test` has 3 samples
 
@@ -73,10 +72,8 @@ No information about dataset
 
 
 def test_markdown_doc_inserts_dataset_section_verbatim() -> None:
-    # render is agnostic to what the dataset section says; it just places the supplied doc under a heading.
     doc = markdown_doc(
         name="MyTask",
-        dataset_path="datasets/mytask",
         dataset_doc="- line one\n- line two",
         sample_split="test",
         fewshot_split="train",
@@ -97,20 +94,19 @@ def test_markdown_doc_inserts_dataset_section_verbatim() -> None:
         == """\
 # MyTask
 
+## Dataset
+
+- line one
+- line two
+
 ````
 NAME = MyTask
-DATASET_PATH = datasets/mytask
 SAMPLE_SPLIT = test
 FEWSHOT_SPLIT = train
 RESPONSE_TYPE = COMPLETION
 METRICS = [Accuracy, F1]
 SUBJECTS = ['no_subject']
 ````
-
-## Dataset
-
-- line one
-- line two
 
 """
     )

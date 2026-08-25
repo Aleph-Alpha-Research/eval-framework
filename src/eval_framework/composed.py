@@ -364,7 +364,6 @@ class ComposedBenchmark(Benchmark):
         metrics: list[type["BaseMetric"]],
         response_type: ResponseType,
         reader: ChoiceReader,
-        dataset_path: str,
         sample_split: str,
         fewshot_split: str,
         dataset_policy: DatasetPolicy,
@@ -377,7 +376,6 @@ class ComposedBenchmark(Benchmark):
         self._metrics = metrics
         self._response_type = response_type
         self.reader = reader
-        self.dataset_path = dataset_path
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
         self.language = language
@@ -389,7 +387,6 @@ class ComposedBenchmark(Benchmark):
         cls,
         task: type[ComposedEval],
         reader: ChoiceReader,
-        dataset_path: str,
         sample_split: str,
         fewshot_split: str,
         subjects: list[Any],
@@ -407,7 +404,6 @@ class ComposedBenchmark(Benchmark):
             metrics=task.get_metrics(),
             response_type=task.get_response_type(),
             reader=reader,
-            dataset_path=dataset_path,
             sample_split=sample_split,
             fewshot_split=fewshot_split,
             language=language,
@@ -475,7 +471,6 @@ class ComposedBenchmark(Benchmark):
         sample = next(iter(instance.iterate_samples(1)))
         return render_markdown_doc(
             name=self._display_name,
-            dataset_path=self.dataset_path,
             dataset_doc=self.dataset_policy.documentation(),
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,

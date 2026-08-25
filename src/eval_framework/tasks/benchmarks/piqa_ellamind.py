@@ -86,7 +86,6 @@ def _piqa_ellamind_benchmark(task: type[ComposedEval[str]], distractor_level: Li
     return ComposedBenchmark.from_base(
         task,
         PiqaReader(distractor_level),
-        dataset_path=dataset_path,
         sample_split="validation",
         fewshot_split="validation",
         subjects=["deu"],

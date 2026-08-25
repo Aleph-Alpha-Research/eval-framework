@@ -48,7 +48,6 @@ class _DummyDatasetPolicy(DatasetPolicy):
 _DUMMY_READER = _DummyReader()
 _DUMMY_LOADER = _DummyDatasetLoader()
 _DUMMY_POLICY = _DummyDatasetPolicy()
-_DUMMY_DATASET_PATH = "dummy/dataset"
 _DUMMY_SPLIT = "test"
 _DUMMY_SUBJECTS = ["subject"]
 
@@ -108,7 +107,6 @@ def _benchmark_with_subjects(subjects: list[Any], dataset_policy: DatasetPolicy)
     return ComposedBenchmark.from_base(
         MyTask,
         reader=_DUMMY_READER,
-        dataset_path=_DUMMY_DATASET_PATH,
         sample_split=_DUMMY_SPLIT,
         fewshot_split=_DUMMY_SPLIT,
         subjects=subjects,
