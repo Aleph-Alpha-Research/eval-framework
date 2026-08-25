@@ -79,6 +79,12 @@ SubjectType = TypeVar("SubjectType")
 logger = logging.getLogger(__name__)
 
 
+def hf_dataset_link(dataset_path: str) -> str:
+    """Markdown bullet linking to a Hugging Face dataset."""
+    url = f"https://huggingface.co/datasets/{dataset_path}"
+    return f"- Link to dataset: [{url}]({url})"
+
+
 class BaseTask[SubjectType](Eval):
     NAME: str
     DATASET_PATH: str
@@ -256,6 +262,7 @@ class BaseTask[SubjectType](Eval):
         return render_markdown_doc(
             name=self.NAME,
             dataset_path=dataset_path,
+            dataset_doc=hf_dataset_link(dataset_path) if dataset_path else "No information about dataset",
             sample_split=getattr(self, "SAMPLE_SPLIT", None),
             fewshot_split=getattr(self, "FEWSHOT_SPLIT", None),
             response_type=self.get_response_type().name,

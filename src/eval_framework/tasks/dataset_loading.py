@@ -37,7 +37,12 @@ class HfDatasetLoader(DatasetLoader):
 
 
 class DatasetPolicy(ABC):
-    """Produces the loader for a benchmark's dataset, given a run's optional revision override."""
+    """Produces the loader for a benchmark's dataset, and documents where that dataset comes from."""
 
     @abstractmethod
     def loader(self, custom_hf_revision: str | None) -> DatasetLoader: ...
+
+    @abstractmethod
+    def documentation(self) -> str:
+        """Markdown for the task's ``## Dataset`` doc section, describing where the dataset comes from."""
+        ...

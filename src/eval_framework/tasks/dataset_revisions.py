@@ -97,6 +97,11 @@ class Pinned(DatasetPolicy):
         revision = custom_hf_revision or pinned_revision(self._lockfile, self._dataset_path)
         return HfDatasetLoader(self._dataset_path, revision)
 
+    def documentation(self) -> str:
+        url = f"https://huggingface.co/datasets/{self._dataset_path}"
+        revision = pinned_revision(self._lockfile, self._dataset_path)
+        return f"- Link to dataset: [{url}]({url})\n- Revision: {revision}"
+
 
 def pinned_by_framework(dataset_path: str) -> Pinned:
     """A ``Pinned`` policy binding ``dataset_path`` to the framework's bundled lock file."""

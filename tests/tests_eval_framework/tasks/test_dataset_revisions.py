@@ -122,3 +122,18 @@ def test_pinned_by_framework_binds_the_bundled_lockfile() -> None:
 
     # Then the loader carries the framework-pinned revision
     assert loader.revision == sha
+
+
+def test_pinned_documentation_links_dataset_and_records_revision(tmp_path: Path) -> None:
+    # Given a lock file that pins the dataset
+    lockfile = tmp_path / "hf-dataset-revisions.json"
+    dr.HfDatasetRevisions({"my/dataset": "pinned-sha"}).to_file(lockfile)
+
+    # When documenting the policy
+    doc = dr.Pinned(lockfile, "my/dataset").documentation()
+
+    # Then it links the dataset and records the pinned revision
+    assert doc == (
+        "- Link to dataset: [https://huggingface.co/datasets/my/dataset]"
+        "(https://huggingface.co/datasets/my/dataset)\n- Revision: pinned-sha"
+    )

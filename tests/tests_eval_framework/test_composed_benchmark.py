@@ -38,6 +38,9 @@ class _DummyDatasetPolicy(DatasetPolicy):
     def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
         return _DUMMY_LOADER
 
+    def documentation(self) -> str:
+        return ""
+
 
 _DUMMY_READER = _DummyReader()
 _DUMMY_LOADER = _DummyDatasetLoader()
@@ -208,6 +211,9 @@ def test_create_resolves_loader_through_policy_with_revision_override() -> None:
             self.calls.append(custom_hf_revision)
             return _DUMMY_LOADER
 
+        def documentation(self) -> str:
+            return ""
+
     policy = _SpyPolicy()
 
     # When creating an eval with a revision override
@@ -217,8 +223,8 @@ def test_create_resolves_loader_through_policy_with_revision_override() -> None:
     assert policy.calls == ["custom-sha"]
 
 
-def test_markdown_doc_renders_link_and_example_for_composed_benchmark() -> None:
-    # Given a policy whose loader serves a fixture dataset (no network)
+def test_markdown_doc_renders_policy_dataset_section_and_example() -> None:
+    # Given a policy whose loader serves a fixture dataset (no network) and documents itself
     class _FixtureLoader(DatasetLoader):
         def load(self, name: str | None) -> DatasetDict:
             return DatasetDict({_DUMMY_SPLIT: Dataset.from_list([{"x": 1}, {"x": 2}])})
@@ -227,11 +233,14 @@ def test_markdown_doc_renders_link_and_example_for_composed_benchmark() -> None:
         def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
             return _FixtureLoader()
 
+        def documentation(self) -> str:
+            return "FIXTURE DATASET DOC"
+
     # When rendering the benchmark's documentation
     doc = _benchmark_with_subjects(_DUMMY_SUBJECTS, _FixturePolicy()).markdown_doc([ConcatFormatter()])
 
-    # Then it shows both the dataset link and an example prompt
-    assert "Link to dataset" in doc
+    # Then the policy's dataset section and an example prompt both appear
+    assert "## Dataset\n\nFIXTURE DATASET DOC" in doc
     assert "## Example prompt" in doc
 
 
