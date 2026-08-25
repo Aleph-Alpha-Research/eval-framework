@@ -1,10 +1,11 @@
+import random
 from typing import Any
 from unittest.mock import patch
 
 import pytest
 from datasets import Dataset, DatasetDict
 
-from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark, ComposedEval
+from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark, ComposedEval, LanguageSpec
 from eval_framework.contract import ResponseType
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
@@ -48,6 +49,7 @@ class _DummyDatasetPolicy(DatasetPolicy):
 _DUMMY_READER = _DummyReader()
 _DUMMY_LOADER = _DummyDatasetLoader()
 _DUMMY_POLICY = _DummyDatasetPolicy()
+_DUMMY_RNG = random.Random(0)
 _DUMMY_SPLIT = "test"
 _DUMMY_SUBJECTS = ["subject"]
 
@@ -111,6 +113,32 @@ def _benchmark_with_subjects(subjects: list[Any], dataset_policy: DatasetPolicy)
         fewshot_split=_DUMMY_SPLIT,
         subjects=subjects,
         dataset_policy=dataset_policy,
+        language=None,
+    )
+
+
+def _make_eval(
+    task_cls: type[ComposedEval],
+    *,
+    num_fewshot: int = 0,
+    reader: ChoiceReader = _DUMMY_READER,
+    loader: DatasetLoader = _DUMMY_LOADER,
+    sample_split: str = _DUMMY_SPLIT,
+    fewshot_split: str = _DUMMY_SPLIT,
+    subjects: list[Any] = _DUMMY_SUBJECTS,
+    language: LanguageSpec = None,
+    rnd: random.Random = _DUMMY_RNG,
+) -> ComposedEval:
+    """Build a ``ComposedEval`` for tests, defaulting to dummies for every argument the test does not provide."""
+    return task_cls(
+        num_fewshot,
+        reader=reader,
+        loader=loader,
+        sample_split=sample_split,
+        fewshot_split=fewshot_split,
+        subjects=subjects,
+        language=language,
+        rnd=rnd,
     )
 
 
@@ -267,41 +295,15 @@ def test_base_task() -> None:
         def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
             return []
 
-    task1 = MyTask1(
-        reader=_DUMMY_READER,
-        loader=_DUMMY_LOADER,
-        sample_split=_DUMMY_SPLIT,
-        fewshot_split=_DUMMY_SPLIT,
-        subjects=_DUMMY_SUBJECTS,
-    )
-    assert task1.NAME == "MyTask1"
-
-    task2 = MyTask2(
-        0,
-        reader=_DUMMY_READER,
-        loader=_DUMMY_LOADER,
-        sample_split=_DUMMY_SPLIT,
-        fewshot_split=_DUMMY_SPLIT,
-        subjects=_DUMMY_SUBJECTS,
-    )
-    assert task2.NAME == "MyTask2"
+    assert _make_eval(MyTask1).NAME == "MyTask1"
+    assert _make_eval(MyTask2).NAME == "MyTask2"
 
 
 def test_user_prompt_suffix_rejected() -> None:
-    # Given a composed eval (composed evals have no completion path, so a suffix is never valid)
-    class MyTask(ComposedEval):
-        TASK_STYLER = _DummyStyler()
-
-    # When constructing it with a user prompt suffix, then it is rejected
+    # Composed evals have no completion path, so create rejects a user prompt suffix
     with pytest.raises(ValueError, match="only supported for completion tasks"):
-        MyTask(
-            0,
-            reader=_DUMMY_READER,
-            loader=_DUMMY_LOADER,
-            sample_split=_DUMMY_SPLIT,
-            fewshot_split=_DUMMY_SPLIT,
-            subjects=_DUMMY_SUBJECTS,
-            user_prompt_suffix="/think_short",
+        _benchmark_with_subjects(_DUMMY_SUBJECTS, _DUMMY_POLICY).create(
+            0, None, None, user_prompt_suffix="/think_short"
         )
 
 
@@ -319,13 +321,7 @@ def test_get_metrics_combines_styler_and_response_type_metrics() -> None:
         TASK_STYLER = _StubTaskStyler()
 
     # Then its metrics are the styler's metrics plus the loglikelihood response-type metrics
-    task = MyTask(
-        reader=_DUMMY_READER,
-        loader=_DUMMY_LOADER,
-        sample_split=_DUMMY_SPLIT,
-        fewshot_split=_DUMMY_SPLIT,
-        subjects=_DUMMY_SUBJECTS,
-    )
+    task = _make_eval(MyTask)
     assert set(task.get_metrics()) == {_FakeMetric, BytesLoglikelihood, SequencePositionsLoglikelihood}
 
 
@@ -342,13 +338,7 @@ def test_get_metadata_reports_dataset_path_from_loader() -> None:
         NAME = "MyTask"
         TASK_STYLER = _DummyStyler()
 
-    task = MyTask(
-        reader=_DUMMY_READER,
-        loader=_LoaderStub(),
-        sample_split=_DUMMY_SPLIT,
-        fewshot_split=_DUMMY_SPLIT,
-        subjects=_DUMMY_SUBJECTS,
-    )
+    task = _make_eval(MyTask, loader=_LoaderStub())
 
     # Then get_metadata reports that dataset path
     assert task.get_metadata()["dataset_path"] == "some/dataset"
@@ -371,13 +361,7 @@ def test_get_messages_assembles_instruction_and_cue() -> None:
         NAME = "MyTask"
         TASK_STYLER = _Styler()
 
-    task = MyTask(
-        reader=_Reader(),
-        loader=_DUMMY_LOADER,
-        sample_split=_DUMMY_SPLIT,
-        fewshot_split=_DUMMY_SPLIT,
-        subjects=_DUMMY_SUBJECTS,
-    )
+    task = _make_eval(MyTask, reader=_Reader())
 
     # Then the instruction becomes the evaluated USER turn and the cue an ASSISTANT turn
     assert task._get_messages({"question": "the goal"}) == [
