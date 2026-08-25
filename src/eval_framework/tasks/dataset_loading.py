@@ -15,6 +15,11 @@ class DatasetLoader(ABC):
     @abstractmethod
     def load(self, name: str | None) -> DatasetDict: ...
 
+    @abstractmethod
+    def metadata(self) -> dict[str, str]:
+        """Dataset-identifying metadata merged into the eval's ``get_metadata`` (e.g. the dataset path)."""
+        ...
+
 
 class HfDatasetLoader(DatasetLoader):
     """Loads one Hugging Face dataset, pinned to ``revision``."""
@@ -22,6 +27,9 @@ class HfDatasetLoader(DatasetLoader):
     def __init__(self, dataset_path: str, revision: str | None) -> None:
         self._dataset_path = dataset_path
         self.revision = revision
+
+    def metadata(self) -> dict[str, str]:
+        return {"dataset_path": self._dataset_path}
 
     def load(self, name: str | None) -> DatasetDict:
         cache_dir = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
