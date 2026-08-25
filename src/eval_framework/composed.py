@@ -1,5 +1,4 @@
 import logging
-import os
 import random
 import traceback
 import typing
@@ -9,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self
 
-from datasets import DatasetDict, DownloadConfig, load_dataset
+from datasets import DatasetDict
 
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
@@ -27,6 +26,7 @@ from eval_framework.tasks.base import (
     Language,
     resolve_overwrite_subjects,
 )
+from eval_framework.tasks.dataset_loading import DatasetLoader, HfDatasetLoader
 from eval_framework.tasks.dataset_revisions import pinned_revision
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
 from template_formatting.formatter import BaseFormatter, Message, Role
@@ -78,13 +78,12 @@ class ComposedEval[SubjectType](Eval):
         num_fewshot: int = 0,
         *,
         reader: ChoiceReader,
+        loader: DatasetLoader,
         dataset_path: str,
         sample_split: str,
         fewshot_split: str,
         subjects: list[SubjectType],
-        revision_lockfile: Path | None,
         language: LanguageSpec = None,
-        custom_hf_revision: str | None = None,
         user_prompt_suffix: str | None = None,
         seed: int | None = RANDOM_SEED,
     ) -> None:
@@ -95,35 +94,13 @@ class ComposedEval[SubjectType](Eval):
 
         self.num_fewshot = num_fewshot
         self.reader = reader
+        self.loader = loader
         self.dataset_path = dataset_path
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
         self.subjects = subjects
         self.language = language
-        self.revision_lockfile = revision_lockfile
         self.rnd = random.Random(seed)
-        self.hf_revision: str | None = self._apply_hf_revision(custom_hf_revision)
-
-    def _apply_hf_revision(self, custom_hf_revision: str | None = None) -> str | None:
-        # Precedence: CLI/config override > revision_lockfile pin.
-        # Tasks without a Hugging Face dataset get revision_lockfile=None and are not pinned.
-        if custom_hf_revision:
-            hf_revision = custom_hf_revision
-        elif self.revision_lockfile is not None:
-            hf_revision = pinned_revision(self.revision_lockfile, self.dataset_path)
-        else:
-            hf_revision = None
-        return hf_revision
-
-    def _load_hf_dataset(self, **kwargs: Any) -> Any:
-        cache_dir: str = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
-        download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
-        return load_dataset(
-            **kwargs,
-            revision=self.hf_revision,
-            cache_dir=cache_dir,
-            download_config=download_config,
-        )
 
     def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, Any]:
         dataset = {}
@@ -142,8 +119,9 @@ class ComposedEval[SubjectType](Eval):
         return dataset
 
     def _load_dataset(self, subject: SubjectType) -> None:
-        name = subject if subject != NO_SUBJECT else None
-        hf_dataset = self._load_hf_dataset(path=self.dataset_path, name=name)
+        # HF addresses configs by string name; NO_SUBJECT marks a dataset with no configs.
+        name = None if subject == NO_SUBJECT else str(subject)
+        hf_dataset = self.loader.load(name)
         self.dataset = self._shuffle_splits(hf_dataset=hf_dataset)
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
@@ -421,7 +399,7 @@ class ComposedBenchmark(Benchmark):
         dataset_path: str,
         sample_split: str,
         fewshot_split: str,
-        revision_lockfile: Path | None,
+        revision_lockfile: Path,
         language: LanguageSpec = None,
         task: type[ComposedEval],
     ) -> None:
@@ -447,7 +425,7 @@ class ComposedBenchmark(Benchmark):
         sample_split: str,
         fewshot_split: str,
         subjects: list[Any],
-        revision_lockfile: Path | None,
+        revision_lockfile: Path,
         language: LanguageSpec = None,
     ) -> Self:
         """Build an ``ComposedBenchmark`` from a task class and its construction inputs.
@@ -494,8 +472,10 @@ class ComposedBenchmark(Benchmark):
             fewshot_split=self.fewshot_split,
             subjects=subjects,
             language=self.language,
-            revision_lockfile=self.revision_lockfile,
-            custom_hf_revision=custom_hf_revision,
+            loader=HfDatasetLoader(
+                self.dataset_path,
+                custom_hf_revision or pinned_revision(self.revision_lockfile, self.dataset_path),
+            ),
             user_prompt_suffix=user_prompt_suffix,
             seed=seed,
         )
@@ -525,8 +505,7 @@ class ComposedBenchmark(Benchmark):
             fewshot_split=self.fewshot_split,
             subjects=self._subjects,
             language=self.language,
-            revision_lockfile=self.revision_lockfile,
-            custom_hf_revision=None,
+            loader=HfDatasetLoader(self.dataset_path, pinned_revision(self.revision_lockfile, self.dataset_path)),
             seed=RANDOM_SEED,
         )
         return instance.markdown_doc(formatters)
