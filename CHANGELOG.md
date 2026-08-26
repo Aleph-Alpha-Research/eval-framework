@@ -14,6 +14,20 @@
 
 ### Bug Fixes
 
+## [0.10.12](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.11...v0.10.12) (2026-08-26)
+
+
+### Features
+
+* dataset revision documented for benchmarks implemented using ([85c8ba7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/85c8ba787e280e14449fd82577c59b86351e4314))
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.77,&lt;2 ([16e6a5c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/16e6a5cdd2c1960820653a3079afd1ccc2dca26e))
+* **deps:** update dependency boto3 to &gt;=1.43.78,&lt;2 ([6ad844e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/6ad844e04bf81b06b4e565fbab4529c649eb9717))
+* **deps:** update dependency scipy to &gt;=1.18.1,&lt;2 ([0546a54](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0546a54cbb4f635b705a524cebce5ede4ccf977b))
+
 ## [0.10.11](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.10...v0.10.11) (2026-08-24)
 
 
