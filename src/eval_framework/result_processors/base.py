@@ -13,6 +13,14 @@ load_dotenv()
 
 
 class Result(BaseModel):
+    """One metric value for one sample.
+
+    Prompt and response are deliberately not part of a result: they are in
+    output.jsonl under the same id and subject, and repeating them in every
+    metric row multiplied results.jsonl by the number of metrics, which for
+    long-context tasks meant gigabytes.
+    """
+
     model_config = ConfigDict(extra="forbid")
     id: int
     subject: str
@@ -24,8 +32,6 @@ class Result(BaseModel):
     key: str | None
     value: float | None
     higher_is_better: bool
-    prompt: str
-    response: str
     llm_judge_prompt: str | None = None
     llm_judge_response: str | None = None
     code_execution_trace: str | None = None

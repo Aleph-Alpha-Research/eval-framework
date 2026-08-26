@@ -43,8 +43,6 @@ This file contains one JSON object per line, each representing a metric calculat
   "key": null,
   "value": 0.0,
   "higher_is_better": true,
-  "prompt": "Question: Which is the function of the gallbladder?\nAnswer:",
-  "response": " store bile",
   "llm_judge_prompt": null,
   "llm_judge_response": null,
   "code_execution_trace": null,
@@ -58,9 +56,9 @@ This file contains one JSON object per line, each representing a metric calculat
 - **`metric_name`**: The specific metric being measured
 - **`value`**: The metric score (0.0 = incorrect, 1.0 = correct for binary metrics)
 - **`higher_is_better`**: Whether higher values indicate better performance
-- **`prompt`**: The input given to the model
-- **`response`**: The model's output
 - **`error`**: Any errors encountered during evaluation
+
+The prompt and the model's response are not repeated here; look them up in `output.jsonl` by `id` and `subject`.
 
 ### 2. `output.jsonl` - Raw Model Responses
 

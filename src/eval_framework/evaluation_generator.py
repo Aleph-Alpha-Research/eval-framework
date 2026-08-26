@@ -74,7 +74,6 @@ class EvaluationGenerator:
                     else:
                         metric_name = metric_result.metric_name
                         key = None
-                    completion = response.completion if isinstance(response, Completion) else str(response.ground_truth)
 
                     result = Result(
                         id=response.id,
@@ -87,8 +86,6 @@ class EvaluationGenerator:
                         task_name=self.task_name,
                         value=metric_result.value,
                         higher_is_better=metric_result.higher_is_better,
-                        prompt=response.prompt,
-                        response=completion,
                         llm_judge_prompt=metric_result.llm_judge_prompt,
                         llm_judge_response=metric_result.llm_judge_response,
                         code_execution_trace=metric_result.code_execution_trace,
@@ -247,7 +244,8 @@ class EvaluationGenerator:
                     "key": r.key,
                     "value": r.value,
                     "error": r.error,
-                    "prompt": r.prompt,
+                    # Repeats of one problem carry consecutive ids (see `repeat_samples`).
+                    "problem": r.id // self.config.repeats,
                 }
                 for r in results
             ]
@@ -274,7 +272,7 @@ class EvaluationGenerator:
 
             for aggregator in current_metric.AGGREGATORS:
                 aggregated_results[f"{aggregator.name} {current_metric_class}.{metric_name}"] = (
-                    aggregator(metric_group, ["prompt"])  # Compute the aggregator, grouped by the prompt...
+                    aggregator(metric_group, ["subject", "problem"])  # Compute the aggregator per problem...
                     .groupby(["key", "subject"])  # ... then group by key, subject...
                     .agg({"value": "mean"})["value"]  # ...and average scores over each key, subject group...
                     .mean()  # ...and lastly average the scores across all groups giving equal weight to every
@@ -301,7 +299,9 @@ class EvaluationGenerator:
                     if not key
                     else f"{aggregator.name} {metric_name} - {key} - {subject}"
                 )
-                aggregated_results[save_string] = aggregator(ksm_group, ["prompt"])["value"].mean().mean().item()
+                aggregated_results[save_string] = (
+                    aggregator(ksm_group, ["subject", "problem"])["value"].mean().mean().item()
+                )
 
         return aggregated_results
 

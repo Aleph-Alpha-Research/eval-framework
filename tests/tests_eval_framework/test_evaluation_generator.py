@@ -195,8 +195,6 @@ def test_aggregate_results(tmp_path: Path) -> None:
                 metric_class_name=metric_name,
                 value=value,
                 higher_is_better=True,
-                prompt="prompt",
-                response="completion",
                 error=error,
             )
         )
@@ -275,28 +273,28 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
     evaluator.metrics = [MockPassAtKMetric]
 
     responses = [
-        ("subject1", "ExactMatch", "key1", "p1", 1.0, None),
-        ("subject1", "ExactMatch", "key1", "p1", 1.0, None),
-        ("subject1", "ExactMatch", "key1", "p1", 0.0, None),
-        ("subject1", "ExactMatch", "key1", "p2", 0.0, None),
-        ("subject1", "ExactMatch", "key2", "p3", 1.0, None),
-        ("subject2", "ExactMatch", "key1", "p4", 1.0, None),
-        ("subject2", "ExactMatch", "key2", "p5", 0.0, None),
+        ("subject1", "ExactMatch", "key1", 0, 1.0, None),
+        ("subject1", "ExactMatch", "key1", 0, 1.0, None),
+        ("subject1", "ExactMatch", "key1", 0, 0.0, None),
+        ("subject1", "ExactMatch", "key1", 1, 0.0, None),
+        ("subject1", "ExactMatch", "key2", 2, 1.0, None),
+        ("subject2", "ExactMatch", "key1", 3, 1.0, None),
+        ("subject2", "ExactMatch", "key2", 4, 0.0, None),
         (
             "subject2",
             "ExactMatch",
             "key1",
-            "p6",
+            5,
             None,
             Error(error_class="AssertionError", message="asserted False!", traceback="just check the test data"),
         ),
     ]
 
     results = []
-    for subject, metric_name, key, prompt, value, error in responses:
+    for subject, metric_name, key, sample_id, value, error in responses:
         results.append(
             Result(
-                id=0,
+                id=sample_id,
                 metric_name=metric_name,
                 num_fewshot=0,
                 key=key,
@@ -306,8 +304,6 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
                 metric_class_name="MockPassAtKMetric",
                 value=value,
                 higher_is_better=True,
-                prompt=prompt,
-                response="completion",
                 error=error,
             )
         )
@@ -353,28 +349,28 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
     evaluator.metrics = [MockIdentifierMeanMetric]
 
     responses = [
-        ("subject1", "ExactMatch", "key1", "p1", 1.0, None),
-        ("subject1", "ExactMatch", "key1", "p1", 1.0, None),
-        ("subject1", "ExactMatch", "key1", "p1", 0.0, None),
-        ("subject1", "ExactMatch", "key1", "p2", 0.0, None),
-        ("subject1", "ExactMatch", "key2", "p3", 1.0, None),
-        ("subject2", "ExactMatch", "key1", "p4", 1.0, None),
-        ("subject2", "ExactMatch", "key2", "p5", 0.0, None),
+        ("subject1", "ExactMatch", "key1", 0, 1.0, None),
+        ("subject1", "ExactMatch", "key1", 0, 1.0, None),
+        ("subject1", "ExactMatch", "key1", 0, 0.0, None),
+        ("subject1", "ExactMatch", "key1", 1, 0.0, None),
+        ("subject1", "ExactMatch", "key2", 2, 1.0, None),
+        ("subject2", "ExactMatch", "key1", 3, 1.0, None),
+        ("subject2", "ExactMatch", "key2", 4, 0.0, None),
         (
             "subject2",
             "ExactMatch",
             "key1",
-            "p5",
+            4,
             None,
             Error(error_class="AssertionError", message="asserted False!", traceback="just check the test data"),
         ),
     ]
 
     results = []
-    for subject, metric_name, key, prompt, value, error in responses:
+    for subject, metric_name, key, sample_id, value, error in responses:
         results.append(
             Result(
-                id=0,
+                id=sample_id,
                 metric_name=metric_name,
                 num_fewshot=0,
                 key=key,
@@ -384,8 +380,6 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
                 metric_class_name="MockIdentifierMeanMetric",
                 value=value,
                 higher_is_better=True,
-                prompt=prompt,
-                response="completion",
                 error=error,
             )
         )
