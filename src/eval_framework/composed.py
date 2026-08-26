@@ -19,12 +19,8 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Completion, Error, RawCompletion
-from eval_framework.tasks.base import (
-    NO_SUBJECT,
-    RANDOM_SEED,
-    Language,
-    resolve_overwrite_subjects,
-)
+from eval_framework.subjects import Subjects, SubjectsSelector
+from eval_framework.tasks.base import RANDOM_SEED, Language
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
 from template_formatting.formatter import BaseFormatter, Message, Role
@@ -66,7 +62,7 @@ class ChoiceReader(ABC):
 
 
 @final
-class ComposedEval[SubjectType](Eval):
+class ComposedEval(Eval):
     def __init__(
         self,
         num_fewshot: int = 0,
@@ -77,7 +73,7 @@ class ComposedEval[SubjectType](Eval):
         styler: "TaskStyler",
         sample_split: str,
         fewshot_split: str,
-        subjects: list[SubjectType],
+        subjects: Subjects,
         language: LanguageSpec,
         rnd: random.Random,
     ) -> None:
@@ -88,7 +84,7 @@ class ComposedEval[SubjectType](Eval):
         self.styler = styler
         self.sample_split = sample_split
         self.fewshot_split = fewshot_split
-        self.subjects = subjects
+        self._subjects = subjects
         self.language = language
         self.rnd = rnd
 
@@ -108,10 +104,8 @@ class ComposedEval[SubjectType](Eval):
 
         return dataset
 
-    def _load_dataset(self, subject: SubjectType) -> dict[str, Any]:
-        # HF addresses configs by string name; NO_SUBJECT marks a dataset with no configs.
-        name = None if subject == NO_SUBJECT else str(subject)
-        hf_dataset = self.loader.load(name)
+    def _load_dataset(self, load_key: str | None) -> dict[str, Any]:
+        hf_dataset = self.loader.load(load_key)
         return self._shuffle_splits(hf_dataset=hf_dataset)
 
     def _example_messages(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[Message]:
@@ -138,15 +132,15 @@ class ComposedEval[SubjectType](Eval):
 
     @override
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
-        for subject in self.subjects:
-            dataset = self._load_dataset(subject)
+        for subject in self._subjects:
+            dataset = self._load_dataset(subject.load_key)
             fewshot_pool = dataset[self.fewshot_split] if self.num_fewshot > 0 else []
             assert len(dataset[self.sample_split]) > 0
             for index, item in enumerate(dataset[self.sample_split]):
                 if index == num_samples:
                     break
-                item["subject"] = subject
-                yield self._create_sample(item, index, str(subject), fewshot_pool)
+                item["subject"] = subject.label
+                yield self._create_sample(item, index, subject.label, fewshot_pool)
 
     def _create_sample(self, item: dict[str, Any], index: int, subject: str, fewshot_pool: list[dict]) -> Sample:
         return Sample(
@@ -197,7 +191,7 @@ class ComposedEval[SubjectType](Eval):
             "fewshot_split": self.fewshot_split,
             "response_type": self.get_response_type().value,
             "metrics": [m.NAME for m in self.styler.metrics],
-            "subjects": [str(s) for s in self.subjects],
+            "subjects": [s.label for s in self._subjects],
         }
         meta.update(self.loader.metadata())
         meta.update(self.styler.get_extra_metadata())
@@ -314,7 +308,7 @@ class ComposedBenchmark(Benchmark):
         *,
         id: str,
         display_name: str,
-        subjects: list[Any],
+        subjects: SubjectsSelector,
         styler: "TaskStyler",
         reader: ChoiceReader,
         sample_split: str,
@@ -341,7 +335,7 @@ class ComposedBenchmark(Benchmark):
         reader: ChoiceReader,
         sample_split: str,
         fewshot_split: str,
-        subjects: list[Any],
+        subjects: SubjectsSelector,
         dataset_policy: DatasetPolicy,
         language: LanguageSpec,
         display_name: str | None = None,
@@ -375,12 +369,10 @@ class ComposedBenchmark(Benchmark):
         # Composed evals have no completion path yet, so a completion-only user prompt suffix is rejected.
         if user_prompt_suffix is not None:
             raise ValueError("user_prompt_suffix is only supported for completion tasks.")
-        subjects = self._subjects
+        subjects = self._subjects.select(custom_subjects or [])
         if custom_subjects:
-            subjects = resolve_overwrite_subjects(
-                custom_subjects=custom_subjects, accepted_subjects=self._subjects, task_name=self._display_name
-            )
-            logger.info(f"Restricting subjects to `{subjects}` for the task {self._display_name}")
+            labels = [subject.label for subject in subjects]
+            logger.info(f"Restricting subjects to `{labels}` for the task {self._display_name}")
         return ComposedEval(
             num_fewshot=num_fewshot,
             display_name=self._display_name,
@@ -407,7 +399,7 @@ class ComposedBenchmark(Benchmark):
     @override
     def subjects(self) -> list[Any]:
         """The benchmark's subjects"""
-        return self._subjects
+        return [subject.label for subject in self._subjects.select([])]
 
     @override
     def display_name(self) -> str:
@@ -417,6 +409,7 @@ class ComposedBenchmark(Benchmark):
     @override
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         num_fewshot = 1
+        subjects = self._subjects.select([])
         instance = ComposedEval(
             num_fewshot=num_fewshot,
             display_name=self._display_name,
@@ -424,13 +417,13 @@ class ComposedBenchmark(Benchmark):
             styler=self._styler,
             sample_split=self.sample_split,
             fewshot_split=self.fewshot_split,
-            subjects=self._subjects,
+            subjects=subjects,
             language=self.language,
             loader=self.dataset_policy.loader(None),
             rnd=random.Random(RANDOM_SEED),
         )
         sample = next(iter(instance.iterate_samples(1)))
-        dataset = instance._load_dataset(instance.subjects[0])
+        dataset = instance._load_dataset(subjects[0].load_key)
         return render_markdown_doc(
             name=self._display_name,
             dataset_doc=self.dataset_policy.documentation(),
@@ -438,7 +431,7 @@ class ComposedBenchmark(Benchmark):
             fewshot_split=self.fewshot_split,
             response_type=self.response_type().name,
             metrics=[m.__name__ for m in self.metrics()],
-            subjects=self._subjects,
+            subjects=[subject.label for subject in subjects],
             language=self.language,
             num_fewshot=num_fewshot,
             formatters=formatters,

@@ -4,7 +4,8 @@ from typing import Any, final, override
 
 from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.tasks.base import NO_SUBJECT, Language
+from eval_framework.subjects import NoSubject
+from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle, answer_key_to_index
 
@@ -38,7 +39,7 @@ def arc_de_benchmark() -> Benchmark:
         reader=ArcDeReader(),
         sample_split="test",
         fewshot_split="validation",
-        subjects=[NO_SUBJECT],
+        subjects=NoSubject(),
         dataset_policy=pinned_by_framework("LeoLM/ArcChallenge_de"),
         language=Language.DEU,
     )
