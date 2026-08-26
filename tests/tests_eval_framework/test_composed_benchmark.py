@@ -353,7 +353,7 @@ def test_get_messages_assembles_instruction_and_cue() -> None:
     task = _make_eval(reader=_Reader(), styler=_Styler())
 
     # Then the instruction becomes the evaluated USER turn and the cue an ASSISTANT turn
-    assert task._get_messages({"question": "the goal"}) == [
+    assert task._get_messages({"question": "the goal"}, []) == [
         Message(role=Role.USER, content="instruction: the goal"),
         Message(role=Role.ASSISTANT, content="the cue"),
     ]
