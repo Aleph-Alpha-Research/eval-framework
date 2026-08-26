@@ -118,7 +118,7 @@ class ComposedEval[SubjectType](Eval):
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         return completion_text
 
-    def _get_example_messages(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[Message]:
+    def _example_messages(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[Message]:
         fewshot_examples = self._sample_fewshot_examples(item, fewshot_pool) if self.num_fewshot > 0 else []
 
         example_messages = []
@@ -130,8 +130,8 @@ class ComposedEval[SubjectType](Eval):
             )
         return example_messages
 
-    def _get_messages(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[Message]:
-        example_messages = self._get_example_messages(item, fewshot_pool)
+    def _messages(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[Message]:
+        example_messages = self._example_messages(item, fewshot_pool)
         instruction_message = self._get_instruction_messages(item)
         cue_text = self._get_cue_text(item)
         cue_message = [Message(role=Role.ASSISTANT, content=cue_text)] if cue_text else []
@@ -174,7 +174,7 @@ class ComposedEval[SubjectType](Eval):
             Sample(
                 id=index,
                 subject=str(subject),
-                messages=self._get_messages(item, fewshot_pool),
+                messages=self._messages(item, fewshot_pool),
                 ground_truth=self._get_ground_truth(item),
                 possible_completions=self._get_possible_completions(item),
                 context=self._get_context(item),
