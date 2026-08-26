@@ -10,6 +10,7 @@ from typing import Any, Literal, final, override
 
 from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark
 from eval_framework.contract import Benchmark
+from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
@@ -56,7 +57,7 @@ def _piqa_ellamind_benchmark(id: str, styler: TaskStyler, distractor_level: Lite
         reader=PiqaReader(distractor_level),
         sample_split="validation",
         fewshot_split="validation",
-        subjects=["deu"],
+        subjects=ListOfSubjects(["deu"]),
         dataset_policy=pinned_by_framework(dataset_path),
         language=Language.DEU,
     )

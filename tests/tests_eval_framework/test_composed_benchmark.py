@@ -13,6 +13,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     SequencePositionsLoglikelihood,
 )
 from eval_framework.run import parse_args
+from eval_framework.subjects import ListOfSubjects, Subject, Subjects, SubjectsSelector
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.task_style import TaskStyle, TaskStyler
 from template_formatting.formatter import ConcatFormatter, Message, Role
@@ -55,7 +56,8 @@ _DUMMY_READER = _DummyReader()
 _DUMMY_LOADER = _DummyDatasetLoader()
 _DUMMY_RNG = random.Random(0)
 _DUMMY_SPLIT = "test"
-_DUMMY_SUBJECTS = ["subject"]
+_DUMMY_SELECTOR: SubjectsSelector = ListOfSubjects(["subject"])
+_DUMMY_EVAL_SUBJECTS: Subjects = (Subject(load_key="subject", label="subject"),)
 
 
 class _DummyStyler(TaskStyler):
@@ -121,7 +123,7 @@ def _make_benchmark(
     reader: ChoiceReader = _DUMMY_READER,
     sample_split: str = _DUMMY_SPLIT,
     fewshot_split: str = _DUMMY_SPLIT,
-    subjects: list[Any] = _DUMMY_SUBJECTS,
+    subjects: SubjectsSelector = _DUMMY_SELECTOR,
     dataset_policy: DatasetPolicy | None = None,
     language: LanguageSpec = None,
 ) -> ComposedBenchmark:
@@ -148,7 +150,7 @@ def _make_eval(
     styler: TaskStyler | None = None,
     sample_split: str = _DUMMY_SPLIT,
     fewshot_split: str = _DUMMY_SPLIT,
-    subjects: list[Any] = _DUMMY_SUBJECTS,
+    subjects: Subjects = _DUMMY_EVAL_SUBJECTS,
     language: LanguageSpec = None,
     rnd: random.Random = _DUMMY_RNG,
 ) -> ComposedEval:
@@ -167,92 +169,26 @@ def _make_eval(
     )
 
 
-@pytest.mark.parametrize(
-    "subjects,custom_subjects,expected",
-    [
-        (["subject1", "subject2"], [], ["subject1", "subject2"]),
-        (["subject1", "subject2"], None, ["subject1", "subject2"]),
-        (["subject1", "subject2", "subject3"], ["subject1", "subject3"], ["subject1", "subject3"]),
-        # result follows SUBJECTS' declared order, not the CLI argument order, and dedupes repeats --
-        # matches come from `accepted_subjects`, not from echoing `custom_subjects` back verbatim.
-        (["subject1", "subject2", "subject3"], ["subject3", "subject1"], ["subject1", "subject3"]),
-        (["subject1", "subject2"], ["subject1", "subject1"], ["subject1"]),
-        # "*" matches any scalar subject too, consistent with "*" already being a wildcard position
-        # within a tuple subject. Redundant with custom_subjects=None/[] for the top-level case, but
-        # the matching function treats scalar and tuple subjects the same way, so this falls out for free.
-        (["subject1", "subject2", "subject3"], ["*"], ["subject1", "subject2", "subject3"]),
-        ([("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")], ["EN_US,topic1"], [("EN_US", "topic1")]),
-        (
-            [("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")],
-            ["EN_US,*"],
-            [("EN_US", "topic1"), ("EN_US", "topic2")],
-        ),
-        (
-            [
-                ("EN_US", "topic1", "subtopic1"),
-                ("EN_US", "topic1", "subtopic2"),
-                ("EN_US", "topic2", "subtopic1"),
-                ("DE_DE", "topic1", "subtopic1"),
-            ],
-            ["EN_US,topic1,*"],
-            [("EN_US", "topic1", "subtopic1"), ("EN_US", "topic1", "subtopic2")],
-        ),
-        (
-            [
-                ("EN_US", "topic1", "subtopic1"),
-                ("EN_US", "topic1", "subtopic2"),
-                ("EN_US", "topic2", "subtopic1"),
-                ("DE_DE", "topic1", "subtopic1"),
-            ],
-            ["*,topic1,*"],
-            [
-                ("EN_US", "topic1", "subtopic1"),
-                ("EN_US", "topic1", "subtopic2"),
-                ("DE_DE", "topic1", "subtopic1"),
-            ],
-        ),
-        (
-            [("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")],
-            ["EN_US,topic1", "DE_DE,topic1"],
-            [("EN_US", "topic1"), ("DE_DE", "topic1")],
-        ),
-        # mixed-type tuple subjects, tuple[str, int, str]
-        (
-            [("ctx1", 4096, "single"), ("ctx1", 8192, "multi"), ("ctx2", 4096, "single")],
-            ["ctx1,4096,single"],
-            [("ctx1", 4096, "single")],
-        ),
-        (
-            [("ctx1", 4096, "single"), ("ctx1", 8192, "multi"), ("ctx2", 4096, "single")],
-            ["ctx1,*,*"],
-            [("ctx1", 4096, "single"), ("ctx1", 8192, "multi")],
-        ),
-    ],
-)
-def test_task_custom_subjects(
-    subjects: list[str] | list[tuple],
-    custom_subjects: list[str] | None,
-    expected: list[str] | list[tuple],
-) -> None:
-    # Filtering by custom subjects happens in create().
-    task = _make_benchmark(subjects=subjects).create(0, custom_subjects, None)
-    assert task.subjects == expected
+def test_create_forwards_custom_subjects_to_its_selector() -> None:
+    # Given a selector that records how create invokes it (selection itself is tested in test_subjects.py)
+    class _SpySelector(SubjectsSelector):
+        def __init__(self) -> None:
+            self.calls: list[list[str]] = []
 
+        @override
+        def select(self, tokens: list[str]) -> Subjects:
+            self.calls.append(tokens)
+            return (Subject(load_key=None, label="dummy"),)
 
-@pytest.mark.parametrize(
-    "subjects,custom_subjects",
-    [
-        (["subject1", "subject2"], ["invalid_subject"]),
-        ([("EN_US", "topic1"), ("EN_US", "topic2")], ["EN_US,invalid_topic"]),
-        ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,9999,single"]),
-        # matching compares stringified subject fields, not a parsed native value, so a non-numeric
-        # part at an int position is just another "not a legal value" case, not a separate parse error.
-        ([("ctx1", 4096, "single"), ("ctx1", 8192, "multi")], ["ctx1,abc,single"]),
-    ],
-)
-def test_task_custom_subjects_rejects_unknown(subjects: list[str] | list[tuple], custom_subjects: list[str]) -> None:
-    with pytest.raises(ValueError):
-        _make_benchmark(subjects=subjects).create(0, custom_subjects, None)
+    selector = _SpySelector()
+    benchmark = _make_benchmark(subjects=selector)
+
+    # When creating evals with a selection and without one
+    benchmark.create(0, ["b"], None)
+    benchmark.create(0, None, None)
+
+    # Then create forwards the tokens verbatim, mapping "no selection" to the empty (all) list
+    assert selector.calls == [["b"], []]
 
 
 def test_create_resolves_loader_through_policy_with_revision_override() -> None:
