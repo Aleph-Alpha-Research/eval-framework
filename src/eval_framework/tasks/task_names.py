@@ -2,6 +2,7 @@ from enum import Enum
 
 from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.benchmarks.arc_de import arc_de_benchmark
+from eval_framework.tasks.benchmarks.csqa_ellamind import csqa_ellamind_benchmarks
 from eval_framework.tasks.benchmarks.piqa_ellamind import piqa_ellamind_benchmarks
 from eval_framework.tasks.registry import Registry, register_lazy_task
 from eval_framework.tasks.registry import registry as global_registry
@@ -239,11 +240,8 @@ def register_arc_ellamind_tasks(registry: Registry) -> None:
 
 def register_csqa_ellamind_tasks(registry: Registry) -> None:
     """Register csqa_ellamind benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.csqa_ellamind.CSQA_ELLAMIND_MC_EASY_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.csqa_ellamind.CSQA_ELLAMIND_MC_HARD_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.csqa_ellamind.CSQA_ELLAMIND_CLOZE_EASY_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.csqa_ellamind.CSQA_ELLAMIND_CLOZE_HARD_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.csqa_ellamind.CSQA_ELLAMIND_BPB_DE", registry=registry)
+    for benchmark in csqa_ellamind_benchmarks():
+        registry.add(benchmark)
 
 
 def register_gpqa_ellamind_tasks(registry: Registry) -> None:
