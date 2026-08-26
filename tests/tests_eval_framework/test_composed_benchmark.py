@@ -337,8 +337,8 @@ def test_get_metadata_reports_dataset_path_from_loader() -> None:
     assert task.get_metadata()["dataset_path"] == "some/dataset"
 
 
-def test_get_messages_assembles_instruction_and_cue() -> None:
-    # Given a reader that reads the question from item["question"], and a styler that echoes it + a cue
+def test_message_sampling() -> None:
+    # Given a reader that reads item["question"], a styler that echoes it + a cue,
     class _Reader(ChoiceReader):
         def read(self, item: dict[str, Any]) -> ChoiceFields:
             return ChoiceFields(raw_question=item["question"], choices=[], correct_index=0)
@@ -350,10 +350,19 @@ def test_get_messages_assembles_instruction_and_cue() -> None:
         def get_cue_text(self) -> str:
             return "the cue"
 
-    task = _make_eval(reader=_Reader(), styler=_Styler())
+    # and a loader serving one row in the sample split
+    class _Loader(DatasetLoader):
+        def load(self, name: str | None) -> DatasetDict:
+            return DatasetDict({_DUMMY_SPLIT: Dataset.from_list([{"question": "the goal"}])})
 
-    # Then the instruction becomes the evaluated USER turn and the cue an ASSISTANT turn
-    assert task._get_messages({"question": "the goal"}, []) == [
+        def metadata(self) -> dict[str, str]:
+            return {}
+
+    task = _make_eval(reader=_Reader(), styler=_Styler(), loader=_Loader())
+
+    # When iterating samples, then the instruction is the evaluated USER turn and the cue the ASSISTANT turn
+    [sample] = list(task.iterate_samples())
+    assert sample.messages == [
         Message(role=Role.USER, content="instruction: the goal"),
         Message(role=Role.ASSISTANT, content="the cue"),
     ]
