@@ -1,5 +1,5 @@
 import random
-from typing import Any
+from typing import Any, override
 from unittest.mock import patch
 
 import pytest
@@ -22,6 +22,7 @@ class _DummyReader(ChoiceReader):
     """A dummy reader: passed only to satisfy construction for doubles that never read (they override
     the styling methods, or raise before styling)."""
 
+    @override
     def read(self, item: dict[str, Any]) -> ChoiceFields:
         return ChoiceFields(raw_question="", choices=[], correct_index=0)
 
@@ -29,9 +30,11 @@ class _DummyReader(ChoiceReader):
 class _DummyDatasetLoader(DatasetLoader):
     """A no-op loader for doubles that never load a dataset."""
 
+    @override
     def load(self, name: str | None) -> DatasetDict:
         return DatasetDict()
 
+    @override
     def metadata(self) -> dict[str, str]:
         return {}
 
@@ -39,9 +42,11 @@ class _DummyDatasetLoader(DatasetLoader):
 class _DummyDatasetPolicy(DatasetPolicy):
     """A no-op policy for benchmark doubles that never load a dataset."""
 
+    @override
     def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
         return _DUMMY_LOADER
 
+    @override
     def documentation(self) -> str:
         return ""
 
@@ -62,15 +67,19 @@ class _DummyStyler(TaskStyler):
     task_style = TaskStyle.MULTIPLE_CHOICE
     question_prefix = ""
 
+    @override
     def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
         return ""
 
+    @override
     def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
         return ""
 
+    @override
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str] | None:
         return None
 
+    @override
     def get_cue_text(self) -> str:
         return ""
 
@@ -87,15 +96,19 @@ class _StubTaskStyler(TaskStyler):
     task_style = TaskStyle.MULTIPLE_CHOICE
     question_prefix = ""
 
+    @override
     def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
         return ""
 
+    @override
     def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
         return ""
 
+    @override
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str] | None:
         return None
 
+    @override
     def get_cue_text(self) -> str:
         return ""
 
@@ -128,7 +141,6 @@ def _make_benchmark(
 
 def _make_eval(
     *,
-    id: str = "dummy-eval",
     display_name: str = "dummy-eval",
     num_fewshot: int = 0,
     reader: ChoiceReader = _DUMMY_READER,
@@ -143,7 +155,6 @@ def _make_eval(
     """Build a ``ComposedEval`` for tests, defaulting to dummies for every argument the test does not provide."""
     return ComposedEval(
         num_fewshot,
-        id=id,
         display_name=display_name,
         reader=reader,
         loader=loader,
@@ -250,10 +261,12 @@ def test_create_resolves_loader_through_policy_with_revision_override() -> None:
         def __init__(self) -> None:
             self.calls: list[str | None] = []
 
+        @override
         def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
             self.calls.append(custom_hf_revision)
             return _DUMMY_LOADER
 
+        @override
         def documentation(self) -> str:
             return ""
 
@@ -269,16 +282,20 @@ def test_create_resolves_loader_through_policy_with_revision_override() -> None:
 def test_markdown_doc_renders_policy_dataset_section_and_example() -> None:
     # Given a policy whose loader serves a fixture dataset (no network) and documents itself
     class _FixtureLoader(DatasetLoader):
+        @override
         def load(self, name: str | None) -> DatasetDict:
             return DatasetDict({_DUMMY_SPLIT: Dataset.from_list([{"x": 1}, {"x": 2}])})
 
+        @override
         def metadata(self) -> dict[str, str]:
             return {}
 
     class _FixturePolicy(DatasetPolicy):
+        @override
         def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
             return _FixtureLoader()
 
+        @override
         def documentation(self) -> str:
             return "FIXTURE DATASET DOC"
 
@@ -295,12 +312,13 @@ def test_display_name_defaults_to_id() -> None:
     assert benchmark.display_name() == "the-id"
 
 
-def test_id_and_display_name_reach_the_eval() -> None:
+def test_id_stays_on_benchmark_display_name_reaches_eval() -> None:
     benchmark = _make_benchmark(id="the-id", display_name="Nice Name")
     assert (benchmark.id(), benchmark.display_name()) == ("the-id", "Nice Name")
 
+    # id is a Benchmark concept; only display_name reaches the eval
     task = benchmark.create(0, None, None)
-    assert (task.id(), task.display_name()) == ("the-id", "Nice Name")
+    assert task.display_name() == "Nice Name"
 
 
 def test_user_prompt_suffix_rejected() -> None:
@@ -325,9 +343,11 @@ def test_metrics_combine_styler_and_response_type_metrics() -> None:
 def test_get_metadata_reports_dataset_path_from_loader() -> None:
     # Given an eval whose loader reports a dataset path
     class _LoaderStub(DatasetLoader):
+        @override
         def load(self, name: str | None) -> DatasetDict:
             return DatasetDict()
 
+        @override
         def metadata(self) -> dict[str, str]:
             return {"dataset_path": "some/dataset"}
 
@@ -340,21 +360,26 @@ def test_get_metadata_reports_dataset_path_from_loader() -> None:
 def test_message_sampling() -> None:
     # Given a reader that reads item["question"], a styler that echoes it + a cue,
     class _Reader(ChoiceReader):
+        @override
         def read(self, item: dict[str, Any]) -> ChoiceFields:
             return ChoiceFields(raw_question=item["question"], choices=[], correct_index=0)
 
     class _Styler(_DummyStyler):
+        @override
         def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
             return f"instruction: {raw_question}"
 
+        @override
         def get_cue_text(self) -> str:
             return "the cue"
 
     # and a loader serving one row in the sample split
     class _Loader(DatasetLoader):
+        @override
         def load(self, name: str | None) -> DatasetDict:
             return DatasetDict({_DUMMY_SPLIT: Dataset.from_list([{"question": "the goal"}])})
 
+        @override
         def metadata(self) -> dict[str, str]:
             return {}
 
