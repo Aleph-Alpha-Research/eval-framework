@@ -8,14 +8,14 @@ from scipy.special import comb
 class Aggregator(Protocol):
     """Base class for metric aggregators.
 
-    An aggregator collapses multiple evaluation rows for the same problem (i.e. prompt) into a
-    single score per problem. The input DataFrame has one row per (problem, attempt)
+    An aggregator collapses multiple evaluation rows for the same problem (the repeats of one
+    sample) into a single score per problem. The input DataFrame has one row per (problem, attempt)
     pair; the output has one row per problem with a new ``value``.
 
     Args:
         response_df: DataFrame where each row is one evaluation attempt. Must contain
             a ``value`` column (the per-attempt score) and all ``identifier_columns``.
-        identifier_columns: Columns that uniquely identify a problem (e.g. ``["prompt"]``).
+        identifier_columns: Columns that uniquely identify a problem (e.g. ``["subject", "problem"]``).
             Rows sharing the same identifier are different attempts at the same problem.
 
     Returns:

@@ -193,8 +193,6 @@ def test_file_result_processor_save_and_load_metrics(tmp_path: Path) -> None:
                 key=None,
                 value=0.5,
                 higher_is_better=True,
-                prompt="What is 2+2?",
-                response="4",
             )
         )
 
