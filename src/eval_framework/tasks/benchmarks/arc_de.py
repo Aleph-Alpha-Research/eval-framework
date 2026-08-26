@@ -1,6 +1,6 @@
 """ARC German (ARC-DE)."""
 
-from typing import Any
+from typing import Any, final, override
 
 from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark
 from eval_framework.contract import Benchmark
@@ -9,6 +9,7 @@ from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle, answer_key_to_index
 
 
+@final
 class ArcDeReader(ChoiceReader):
     """Reads an ARC-DE row into choice fields: the German question, its answer texts, and the correct index.
 
@@ -16,6 +17,7 @@ class ArcDeReader(ChoiceReader):
     which also frees the reader from caring how many answers a given row offers.
     """
 
+    @override
     def read(self, item: dict[str, Any]) -> ChoiceFields:
         return ChoiceFields(
             raw_question=item["question_de"],

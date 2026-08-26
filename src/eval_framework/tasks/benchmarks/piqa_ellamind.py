@@ -6,7 +6,7 @@ PIQA supplies separate easy and hard distractors. Which one a variant uses is a 
 concern, carried by the ``PiqaReader`` handed to each benchmark rather than by the task class.
 """
 
-from typing import Any, Literal
+from typing import Any, Literal, final, override
 
 from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark
 from eval_framework.contract import Benchmark
@@ -15,6 +15,7 @@ from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
 
 
+@final
 class PiqaReader(ChoiceReader):
     """Reads PIQA items into choice fields, shuffling the correct solution in among one distractor.
 
@@ -25,6 +26,7 @@ class PiqaReader(ChoiceReader):
     def __init__(self, distractor_level: Literal["easy", "hard"]) -> None:
         self._distractor_level = distractor_level
 
+    @override
     def read(self, item: dict[str, Any]) -> ChoiceFields:
         distractor = item["easy_distractor"] if self._distractor_level == "easy" else item["hard_distractor"]
         choices, correct_index = shuffle_correct_with_distractors(

@@ -4,7 +4,7 @@ mechanics (revisions, cache directories, download config)."""
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import cast
+from typing import cast, final, override
 
 from datasets import DatasetDict, DownloadConfig, load_dataset
 
@@ -21,6 +21,7 @@ class DatasetLoader(ABC):
         ...
 
 
+@final
 class HfDatasetLoader(DatasetLoader):
     """Loads one Hugging Face dataset, pinned to ``revision``."""
 
@@ -28,9 +29,11 @@ class HfDatasetLoader(DatasetLoader):
         self._dataset_path = dataset_path
         self.revision = revision
 
+    @override
     def metadata(self) -> dict[str, str]:
         return {"dataset_path": self._dataset_path}
 
+    @override
     def load(self, name: str | None) -> DatasetDict:
         cache_dir = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
         download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)

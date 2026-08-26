@@ -5,7 +5,7 @@ import typing
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, final, override
 
 from datasets import DatasetDict
 
@@ -65,12 +65,12 @@ class ChoiceReader(ABC):
     def read(self, item: dict[str, Any]) -> ChoiceFields: ...
 
 
+@final
 class ComposedEval[SubjectType](Eval):
     def __init__(
         self,
         num_fewshot: int = 0,
         *,
-        id: str,
         display_name: str,
         reader: ChoiceReader,
         loader: DatasetLoader,
@@ -81,7 +81,6 @@ class ComposedEval[SubjectType](Eval):
         language: LanguageSpec,
         rnd: random.Random,
     ) -> None:
-        self._id = id
         self._display_name = display_name
         self.num_fewshot = num_fewshot
         self.reader = reader
@@ -137,6 +136,7 @@ class ComposedEval[SubjectType](Eval):
     def _get_instruction_messages(self, item: dict[str, Any]) -> list[Message]:
         return [Message(role=Role.USER, content=self._get_instruction_text(item))]
 
+    @override
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
         for subject in self.subjects:
             dataset = self._load_dataset(subject)
@@ -190,6 +190,7 @@ class ComposedEval[SubjectType](Eval):
             # Separate splits: no risk of leaking the current item, sample directly.
             return self.rnd.sample(fewshot_pool, self.num_fewshot)
 
+    @override
     def get_metadata(self) -> dict[str, str | list[str]]:
         meta: dict[str, str | list[str]] = {
             "sample_split": self.sample_split,
@@ -202,6 +203,7 @@ class ComposedEval[SubjectType](Eval):
         meta.update(self.styler.get_extra_metadata())
         return meta
 
+    @override
     def generate_completions(
         self,
         llm: "BaseLLM",
@@ -281,12 +283,11 @@ class ComposedEval[SubjectType](Eval):
             )
         return completion_list
 
+    @override
     def get_response_type(self) -> ResponseType:
         return self.styler.response_type
 
-    def id(self) -> str:
-        return self._id
-
+    @override
     def display_name(self) -> str:
         return self._display_name
 
@@ -304,6 +305,7 @@ def _metrics_for(styler: "TaskStyler") -> list[type["BaseMetric"]]:
     return styler.metrics + response_type_metrics
 
 
+@final
 class ComposedBenchmark(Benchmark):
     """A ``Benchmark`` that builds a ``ComposedEval`` from an injected styler and dataset inputs."""
 
@@ -357,9 +359,11 @@ class ComposedBenchmark(Benchmark):
             dataset_policy=dataset_policy,
         )
 
+    @override
     def id(self) -> str:
         return self._id
 
+    @override
     def create(
         self,
         num_fewshot: int,
@@ -379,7 +383,6 @@ class ComposedBenchmark(Benchmark):
             logger.info(f"Restricting subjects to `{subjects}` for the task {self._display_name}")
         return ComposedEval(
             num_fewshot=num_fewshot,
-            id=self._id,
             display_name=self._display_name,
             reader=self.reader,
             styler=self._styler,
@@ -391,27 +394,31 @@ class ComposedBenchmark(Benchmark):
             rnd=random.Random(seed),
         )
 
+    @override
     def response_type(self) -> ResponseType:
-        """The eval's response type"""
+        """The benchmark's response type"""
         return self._styler.response_type
 
+    @override
     def metrics(self) -> list[type["BaseMetric"]]:
-        """The eval's metrics"""
+        """The benchmark's metrics"""
         return _metrics_for(self._styler)
 
+    @override
     def subjects(self) -> list[Any]:
-        """The eval's subjects"""
+        """The benchmark's subjects"""
         return self._subjects
 
+    @override
     def display_name(self) -> str:
-        """The eval's human-readable display name."""
+        """The benchmark's human-readable display name."""
         return self._display_name
 
+    @override
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         num_fewshot = 1
         instance = ComposedEval(
             num_fewshot=num_fewshot,
-            id=self._id,
             display_name=self._display_name,
             reader=self.reader,
             styler=self._styler,

@@ -9,6 +9,7 @@ import json
 import logging
 from functools import lru_cache
 from pathlib import Path
+from typing import final, override
 
 from huggingface_hub import HfApi
 
@@ -86,6 +87,7 @@ def pinned_revision(lockfile: Path, dataset_path: str) -> str:
         raise KeyError(f"Dataset '{dataset_path}' is not pinned in {lockfile}") from None
 
 
+@final
 class Pinned(DatasetPolicy):
     """Pins ``dataset_path`` to the revision recorded for it in ``lockfile``; a run's override still wins."""
 
@@ -93,10 +95,12 @@ class Pinned(DatasetPolicy):
         self._lockfile = lockfile
         self._dataset_path = dataset_path
 
+    @override
     def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
         revision = custom_hf_revision or pinned_revision(self._lockfile, self._dataset_path)
         return HfDatasetLoader(self._dataset_path, revision)
 
+    @override
     def documentation(self) -> str:
         url = f"https://huggingface.co/datasets/{self._dataset_path}"
         revision = pinned_revision(self._lockfile, self._dataset_path)
