@@ -109,17 +109,17 @@ class ComposedEval[SubjectType](Eval):
 
         return dataset
 
-    def _load_dataset(self, subject: SubjectType) -> None:
+    def _load_dataset(self, subject: SubjectType) -> dict[str, Any]:
         # HF addresses configs by string name; NO_SUBJECT marks a dataset with no configs.
         name = None if subject == NO_SUBJECT else str(subject)
         hf_dataset = self.loader.load(name)
-        self.dataset = self._shuffle_splits(hf_dataset=hf_dataset)
+        return self._shuffle_splits(hf_dataset=hf_dataset)
 
     def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
         return completion_text
 
-    def _get_example_messages(self, item: dict[str, Any]) -> list[Message]:
-        fewshot_examples = self._sample_fewshot_examples(item) if self.num_fewshot > 0 else []
+    def _get_example_messages(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[Message]:
+        fewshot_examples = self._sample_fewshot_examples(item, fewshot_pool) if self.num_fewshot > 0 else []
 
         example_messages = []
         for fewshot_example in fewshot_examples:
@@ -130,8 +130,8 @@ class ComposedEval[SubjectType](Eval):
             )
         return example_messages
 
-    def _get_messages(self, item: dict[str, Any]) -> list[Message]:
-        example_messages = self._get_example_messages(item)
+    def _get_messages(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[Message]:
+        example_messages = self._get_example_messages(item, fewshot_pool)
         instruction_message = self._get_instruction_messages(item)
         cue_text = self._get_cue_text(item)
         cue_message = [Message(role=Role.ASSISTANT, content=cue_text)] if cue_text else []
@@ -150,28 +150,31 @@ class ComposedEval[SubjectType](Eval):
 
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
         for subject in self.subjects:
-            self._load_dataset(subject)
-            assert len(self.dataset[self.sample_split]) > 0
+            dataset = self._load_dataset(subject)
+            fewshot_pool = dataset[self.fewshot_split] if self.num_fewshot > 0 else []
+            assert len(dataset[self.sample_split]) > 0
             done = False
             index = 0
-            for item in self.dataset[self.sample_split]:
+            for item in dataset[self.sample_split]:
                 if done:
                     break
                 item["subject"] = subject
-                for sample in self._create_samples(item, index, str(subject)):
+                for sample in self._create_samples(item, index, str(subject), fewshot_pool):
                     yield sample
                     index += 1
                     if index == num_samples:
                         done = True
                         break
 
-    def _create_samples(self, item: dict[str, Any], index: int, subject: str) -> list[Sample]:
+    def _create_samples(
+        self, item: dict[str, Any], index: int, subject: str, fewshot_pool: list[dict]
+    ) -> list[Sample]:
         """Creates one or more samples from a single dataset item. Default implementation returns single sample."""
         return [
             Sample(
                 id=index,
                 subject=str(subject),
-                messages=self._get_messages(item),
+                messages=self._get_messages(item, fewshot_pool),
                 ground_truth=self._get_ground_truth(item),
                 possible_completions=self._get_possible_completions(item),
                 context=self._get_context(item),
@@ -203,18 +206,18 @@ class ComposedEval[SubjectType](Eval):
         fields = self.reader.read(item)
         return self.styler.get_possible_completions(fields.choices, fields.correct_index)
 
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
+    def _sample_fewshot_examples(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[dict]:
         if self.fewshot_split == self.sample_split:
             # If the fewshot and sample splits are the same, we risk including the current eval item
             # as a fewshot example (leaking the answer). To prevent this, sample one extra example,
             # remove the current item if present, and truncate back to num_fewshot.
-            fewshot_examples = self.rnd.sample(self.dataset[self.fewshot_split], self.num_fewshot + 1)
+            fewshot_examples = self.rnd.sample(fewshot_pool, self.num_fewshot + 1)
             fewshot_examples = [example for example in fewshot_examples if example != item]
             fewshot_examples = fewshot_examples[: self.num_fewshot]
             return fewshot_examples
         else:
             # Separate splits: no risk of leaking the current item, sample directly.
-            return self.rnd.sample(self.dataset[self.fewshot_split], self.num_fewshot)
+            return self.rnd.sample(fewshot_pool, self.num_fewshot)
 
     def _get_context(self, item: dict[str, Any]) -> BaseMetricContext | list[BaseMetricContext] | None:
         return None
@@ -453,6 +456,7 @@ class ComposedBenchmark(Benchmark):
             rnd=random.Random(RANDOM_SEED),
         )
         sample = next(iter(instance.iterate_samples(1)))
+        dataset = instance._load_dataset(instance.subjects[0])
         return render_markdown_doc(
             name=self._display_name,
             dataset_doc=self.dataset_policy.documentation(),
@@ -465,7 +469,7 @@ class ComposedBenchmark(Benchmark):
             num_fewshot=num_fewshot,
             formatters=formatters,
             example_messages=sample.messages,
-            split_sizes={split: len(instance.dataset[split]) for split in instance.dataset},
+            split_sizes={split: len(dataset[split]) for split in dataset},
             possible_completions=sample.possible_completions,
             ground_truth=sample.ground_truth,
         )
