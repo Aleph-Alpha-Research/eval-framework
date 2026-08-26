@@ -2,94 +2,67 @@
 
 https://huggingface.co/datasets/ellamind/csqa-multilingual
 
-CSQA supplies separate easy and hard distractors. Each base class uses a
-``_DISTRACTOR_LEVEL`` class attribute (``"easy"`` or ``"hard"``) that the registered
-subclass overrides.
+CSQA supplies separate easy and hard distractors. Which one a variant uses is a data-access
+concern, carried by the ``CsqaReader`` handed to each benchmark rather than by the task class.
 """
 
-from typing import Any, Literal
+from typing import Any, Literal, final, override
 
-from eval_framework.tasks.base import BaseTask, Language
-from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
-from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, shuffle_correct_with_distractors
+from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark
+from eval_framework.contract import Benchmark
+from eval_framework.subjects import ListOfSubjects
+from eval_framework.tasks.base import Language
+from eval_framework.tasks.dataset_revisions import pinned_by_framework
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
 
 
-class _CSQA_ELLAMIND_DE_Base(BaseTask[str]):
-    """Non-registered base for German CSQA (EllaMind) variants.
+@final
+class CsqaReader(ChoiceReader):
+    """Reads CSQA items into choice fields, shuffling the correct answer in among its distractors.
 
-    Dataset: https://huggingface.co/datasets/ellamind/csqa-multilingual
-
-    Set ``_DISTRACTOR_LEVEL = "easy"`` or ``"hard"`` on the task class, defaults to "easy".
+    CSQA ships separate easy and hard distractor sets; ``distractor_level`` selects which to use. BPB
+    ignores the distractor set, so the level is immaterial there.
     """
 
-    DATASET_PATH = "ellamind/csqa-multilingual"
-    SAMPLE_SPLIT = "validation"
-    FEWSHOT_SPLIT = "validation"
-    SUBJECTS = ["deu"]
-    LANGUAGE = Language.DEU
-    _DISTRACTOR_LEVEL: Literal["easy", "hard"] = "easy"
+    def __init__(self, distractor_level: Literal["easy", "hard"]) -> None:
+        self._distractor_level = distractor_level
 
-    def _shuffled(self, item: dict[str, Any]) -> tuple[list[str], int]:
-        """Return (shuffled_choices, correct_index) for the selected distractor level."""
-        distractors = item["easy_distractors"] if self._DISTRACTOR_LEVEL == "easy" else item["hard_distractors"]
-        return shuffle_correct_with_distractors(
+    @override
+    def read(self, item: dict[str, Any]) -> ChoiceFields:
+        distractors = item["easy_distractors"] if self._distractor_level == "easy" else item["hard_distractors"]
+        choices, correct_index = shuffle_correct_with_distractors(
             correct=item["correct_answer"],
             distractors=distractors,
             seed_text=item["question"] + item["correct_answer"],
         )
-
-    def _get_raw_question(self, item: dict[str, Any]) -> str:
-        return item["question"]
-
-    def _get_choices(self, item: dict[str, Any]) -> list[str]:
-        return self._shuffled(item)[0]
-
-    def _get_correct_index(self, item: dict[str, Any]) -> int:
-        return self._shuffled(item)[1]
+        return ChoiceFields(raw_question=item["question"], choices=choices, correct_index=correct_index)
 
 
-class CSQA_ELLAMIND_MC_EASY_DE(_CSQA_ELLAMIND_DE_Base):
-    """German CSQA - MC format with easy distractors."""
-
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-
-    NAME = "CSQA_ELLAMIND_MC_EASY_DE"
-    TASK_STYLER = MCStyle().for_language(Language.DEU)
+# One styler per format, all sharing the German prefix/cue. The easy/hard distractor axis belongs to
+# the reader, so it is orthogonal to the styler choice.
+CSQA_ELLAMIND_CLOZE_STYLER = ClozeStyle.for_language(Language.DEU)
+CSQA_ELLAMIND_MC_STYLER = MCStyle.for_language(Language.DEU)
+CSQA_ELLAMIND_BPB_STYLER = BPBStyle.for_language(Language.DEU)
 
 
-class CSQA_ELLAMIND_MC_HARD_DE(_CSQA_ELLAMIND_DE_Base):
-    """German CSQA - MC format with hard distractors."""
-
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-
-    NAME = "CSQA_ELLAMIND_MC_HARD_DE"
-    _DISTRACTOR_LEVEL = "hard"
-    TASK_STYLER = MCStyle().for_language(Language.DEU)
-
-
-class CSQA_ELLAMIND_CLOZE_EASY_DE(_CSQA_ELLAMIND_DE_Base):
-    """German CSQA - Cloze format with easy distractors."""
-
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-
-    NAME = "CSQA_ELLAMIND_CLOZE_EASY_DE"
-    TASK_STYLER = ClozeStyle().for_language(Language.DEU)
+def _csqa_ellamind_benchmark(id: str, styler: TaskStyler, distractor_level: Literal["easy", "hard"]) -> Benchmark:
+    return ComposedBenchmark.compose(
+        id=id,
+        styler=styler,
+        reader=CsqaReader(distractor_level),
+        sample_split="validation",
+        fewshot_split="validation",
+        subjects=ListOfSubjects(["deu"]),
+        dataset_policy=pinned_by_framework("ellamind/csqa-multilingual"),
+        language=Language.DEU,
+    )
 
 
-class CSQA_ELLAMIND_CLOZE_HARD_DE(_CSQA_ELLAMIND_DE_Base):
-    """German CSQA - Cloze format with hard distractors."""
-
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-
-    NAME = "CSQA_ELLAMIND_CLOZE_HARD_DE"
-    _DISTRACTOR_LEVEL = "hard"
-    TASK_STYLER = ClozeStyle().for_language(Language.DEU)
-
-
-class CSQA_ELLAMIND_BPB_DE(CSQA_ELLAMIND_CLOZE_EASY_DE):
-    """German CSQA - BPB format (easy distractors; distractor set is irrelevant for BPB)."""
-
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-
-    NAME = "CSQA_ELLAMIND_BPB_DE"
-    TASK_STYLER = BPBStyle().for_language(Language.DEU)
+def csqa_ellamind_benchmarks() -> list[Benchmark]:
+    return [
+        _csqa_ellamind_benchmark("CSQA_ELLAMIND_MC_EASY_DE", CSQA_ELLAMIND_MC_STYLER, "easy"),
+        _csqa_ellamind_benchmark("CSQA_ELLAMIND_MC_HARD_DE", CSQA_ELLAMIND_MC_STYLER, "hard"),
+        _csqa_ellamind_benchmark("CSQA_ELLAMIND_CLOZE_EASY_DE", CSQA_ELLAMIND_CLOZE_STYLER, "easy"),
+        _csqa_ellamind_benchmark("CSQA_ELLAMIND_CLOZE_HARD_DE", CSQA_ELLAMIND_CLOZE_STYLER, "hard"),
+        _csqa_ellamind_benchmark("CSQA_ELLAMIND_BPB_DE", CSQA_ELLAMIND_BPB_STYLER, "easy"),
+    ]
