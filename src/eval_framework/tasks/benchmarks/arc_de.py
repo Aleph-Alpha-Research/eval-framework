@@ -2,7 +2,8 @@
 
 from typing import Any, final, override
 
-from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark
+from eval_framework.choices import ChoiceFields, ChoiceReader
+from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.subjects import NoSubject
 from eval_framework.tasks.base import Language

@@ -2,40 +2,30 @@
 
 https://huggingface.co/datasets/ellamind/piqa-multilingual
 
-PIQA supplies separate easy and hard distractors. Which one a variant uses is a data-access
-concern, carried by the ``PiqaReader`` handed to each benchmark rather than by the task class.
+PIQA supplies separate easy and hard distractors.
 """
 
-from typing import Any, Literal, final, override
+from typing import Literal
 
-from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark
+from eval_framework.choices import EllaMindReader
+from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler
 
 
-@final
-class PiqaReader(ChoiceReader):
-    """Reads PIQA items into choice fields, shuffling the correct solution in among one distractor.
-
-    PIQA ships separate easy and hard distractors; ``distractor_level`` selects which to use. BPB
-    ignores the distractor set, so the level is immaterial there.
-    """
-
-    def __init__(self, distractor_level: Literal["easy", "hard"]) -> None:
-        self._distractor_level = distractor_level
-
-    @override
-    def read(self, item: dict[str, Any]) -> ChoiceFields:
-        distractor = item["easy_distractor"] if self._distractor_level == "easy" else item["hard_distractor"]
-        choices, correct_index = shuffle_correct_with_distractors(
-            correct=item["correct_solution"],
-            distractors=[distractor],
-            seed_text=item["goal"] + item["correct_solution"],
-        )
-        return ChoiceFields(raw_question=item["goal"], choices=choices, correct_index=correct_index)
+def piqa_reader(distractor_level: Literal["easy", "hard"]) -> EllaMindReader:
+    """Reads PIQA items: a single easy/hard distractor per level, shuffled in with the correct solution."""
+    return EllaMindReader(
+        distractor_level,
+        question_field="goal",
+        correct_field="correct_solution",
+        easy_field="easy_distractor",
+        hard_field="hard_distractor",
+        singular=True,
+    )
 
 
 _QUESTION_PREFIX = "Ziel: "
@@ -54,7 +44,7 @@ def _piqa_ellamind_benchmark(id: str, styler: TaskStyler, distractor_level: Lite
     return ComposedBenchmark.compose(
         id=id,
         styler=styler,
-        reader=PiqaReader(distractor_level),
+        reader=piqa_reader(distractor_level),
         sample_split="validation",
         fewshot_split="validation",
         subjects=ListOfSubjects(["deu"]),

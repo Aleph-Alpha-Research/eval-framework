@@ -2,13 +2,12 @@ import logging
 import random
 import traceback
 import typing
-from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Self, final, override
 
 from datasets import DatasetDict
 
+from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesCompletion,
@@ -34,31 +33,6 @@ logger = logging.getLogger(__name__)
 
 # The language(s) a benchmark tests: a single language, a per-subtopic mapping, or None (not language-specific).
 LanguageSpec = Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
-
-
-@dataclass(frozen=True)
-class ChoiceFields:
-    """The fields a choice-based styler needs out of a single dataset item.
-
-    ``choices`` and ``correct_index`` are produced together (a benchmark may shuffle the correct
-    answer in among distractors), so a reader yields them in one ``read`` rather than via separate
-    calls that would each have to re-derive the same shuffle.
-    """
-
-    raw_question: str
-    choices: list[str]
-    correct_index: int
-
-
-class ChoiceReader(ABC):
-    """Reads the fields a styler needs out of a raw dataset item.
-
-    Isolates dataset-schema knowledge here, so neither the eval nor the styler has to know the shape
-    of a benchmark's items.
-    """
-
-    @abstractmethod
-    def read(self, item: dict[str, Any]) -> ChoiceFields: ...
 
 
 @final
