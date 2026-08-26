@@ -2,40 +2,30 @@
 
 https://huggingface.co/datasets/ellamind/csqa-multilingual
 
-CSQA supplies separate easy and hard distractors. Which one a variant uses is a data-access
-concern, carried by the ``CsqaReader`` handed to each benchmark rather than by the task class.
+CSQA supplies separate easy and hard distractors.
 """
 
-from typing import Any, Literal, final, override
+from typing import Literal
 
-from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark
+from eval_framework.choices import EllaMindReader
+from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler
 
 
-@final
-class CsqaReader(ChoiceReader):
-    """Reads CSQA items into choice fields, shuffling the correct answer in among its distractors.
-
-    CSQA ships separate easy and hard distractor sets; ``distractor_level`` selects which to use. BPB
-    ignores the distractor set, so the level is immaterial there.
-    """
-
-    def __init__(self, distractor_level: Literal["easy", "hard"]) -> None:
-        self._distractor_level = distractor_level
-
-    @override
-    def read(self, item: dict[str, Any]) -> ChoiceFields:
-        distractors = item["easy_distractors"] if self._distractor_level == "easy" else item["hard_distractors"]
-        choices, correct_index = shuffle_correct_with_distractors(
-            correct=item["correct_answer"],
-            distractors=distractors,
-            seed_text=item["question"] + item["correct_answer"],
-        )
-        return ChoiceFields(raw_question=item["question"], choices=choices, correct_index=correct_index)
+def csqa_reader(distractor_level: Literal["easy", "hard"]) -> EllaMindReader:
+    """Reads CSQA items: easy/hard distractor lists per level, shuffled in with the correct answer."""
+    return EllaMindReader(
+        distractor_level,
+        question_field="question",
+        correct_field="correct_answer",
+        easy_field="easy_distractors",
+        hard_field="hard_distractors",
+        singular=False,
+    )
 
 
 # One styler per format, all sharing the German prefix/cue. The easy/hard distractor axis belongs to
@@ -49,7 +39,7 @@ def _csqa_ellamind_benchmark(id: str, styler: TaskStyler, distractor_level: Lite
     return ComposedBenchmark.compose(
         id=id,
         styler=styler,
-        reader=CsqaReader(distractor_level),
+        reader=csqa_reader(distractor_level),
         sample_split="validation",
         fewshot_split="validation",
         subjects=ListOfSubjects(["deu"]),
