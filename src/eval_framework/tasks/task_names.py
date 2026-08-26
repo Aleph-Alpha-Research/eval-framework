@@ -1,6 +1,7 @@
 from enum import Enum
 
 from eval_framework.tasks.base import BaseTask
+from eval_framework.tasks.benchmarks.arc_de import arc_de_benchmark
 from eval_framework.tasks.benchmarks.piqa_ellamind import piqa_ellamind_benchmarks
 from eval_framework.tasks.registry import Registry, register_lazy_task
 from eval_framework.tasks.registry import registry as global_registry
@@ -135,7 +136,7 @@ def register_bigcodebench_tasks(registry: Registry) -> None:
 
 def register_arc_de_tasks(registry: Registry) -> None:
     """Register arc_de benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.arc_de.ARC_DE", registry=registry)
+    registry.add(arc_de_benchmark())
 
 
 def register_copa_tasks(registry: Registry) -> None:

@@ -1,49 +1,42 @@
+"""ARC German (ARC-DE)."""
+
 from typing import Any
 
-from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
-    AccuracyLoglikelihood,
-    AccuracyNormLoglikelihood,
-)
-from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
-from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
-from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
-from eval_framework.tasks.utils import get_n_letters
+from eval_framework.composed import ChoiceFields, ChoiceReader, ComposedBenchmark
+from eval_framework.contract import Benchmark
+from eval_framework.tasks.base import NO_SUBJECT, Language
+from eval_framework.tasks.dataset_revisions import pinned_by_framework
+from eval_framework.tasks.task_style import ClozeStyle, answer_key_to_index
 
 
-class ARC_DE(BaseTask[str]):
-    """ARC-DE dataset: https://huggingface.co/datasets/LeoLM/ArcChallenge_de"""
+class ArcDeReader(ChoiceReader):
+    """Reads an ARC-DE row into choice fields: the German question, its answer texts, and the correct index.
 
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
+    ``answerKey`` arrives as either a 1-based number or a letter; ``answer_key_to_index`` normalises both,
+    which also frees the reader from caring how many answers a given row offers.
+    """
 
-    NAME = "ARC German"
-    DATASET_PATH = "LeoLM/ArcChallenge_de"
-    SAMPLE_SPLIT = "test"
-    FEWSHOT_SPLIT = "validation"
-    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [AccuracyLoglikelihood, AccuracyNormLoglikelihood, BitsPerByteLoglikelihood]
-    SUBJECTS = [NO_SUBJECT]
-    LANGUAGE = Language.DEU
+    def read(self, item: dict[str, Any]) -> ChoiceFields:
+        return ChoiceFields(
+            raw_question=item["question_de"],
+            choices=item["choices_de"]["text"],
+            correct_index=answer_key_to_index(item["answerKey"]),
+        )
 
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
 
-        self.keys = get_n_letters(5)  # needs to be 5 because there is one sample with 5 answer possibilities
-        self.num_to_letter = {str(i): letter for i, letter in enumerate(self.keys, start=1)}
+def arc_de_benchmark() -> Benchmark:
+    """ARC-DE as cloze/ranked classification
 
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return f"Frage: {item['question_de']}\n"
-
-    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        ground_truth = self._get_ground_truth(item)
-        assert ground_truth is not None
-        return f"{self._get_cue_text(item)}{ground_truth}"
-
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
-        return "Antwort:"
-
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        answer_key = self.num_to_letter.get(item["answerKey"], item["answerKey"])
-        return f" {item['choices_de']['text'][self.keys.index(answer_key)]}"
-
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        return [f" {choice}" for choice in item["choices_de"]["text"]]
+    https://huggingface.co/datasets/LeoLM/ArcChallenge_de
+    """
+    return ComposedBenchmark.compose(
+        id="ARC_DE",
+        display_name="ARC German",
+        styler=ClozeStyle(question_prefix="Frage: ", cue_text="Antwort:"),
+        reader=ArcDeReader(),
+        sample_split="test",
+        fewshot_split="validation",
+        subjects=[NO_SUBJECT],
+        dataset_policy=pinned_by_framework("LeoLM/ArcChallenge_de"),
+        language=Language.DEU,
+    )
