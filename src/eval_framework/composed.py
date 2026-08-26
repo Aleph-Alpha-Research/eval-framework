@@ -18,7 +18,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
 )
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.shared.errors import raise_errors
-from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
+from eval_framework.shared.types import Completion, Error, RawCompletion
 from eval_framework.tasks.base import (
     NO_SUBJECT,
     RANDOM_SEED,
@@ -115,9 +115,6 @@ class ComposedEval[SubjectType](Eval):
         hf_dataset = self.loader.load(name)
         return self._shuffle_splits(hf_dataset=hf_dataset)
 
-    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
-        return completion_text
-
     def _example_messages(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[Message]:
         fewshot_examples = self._sample_fewshot_examples(item, fewshot_pool) if self.num_fewshot > 0 else []
 
@@ -135,15 +132,7 @@ class ComposedEval[SubjectType](Eval):
         instruction_message = self._get_instruction_messages(item)
         cue_text = self._get_cue_text(item)
         cue_message = [Message(role=Role.ASSISTANT, content=cue_text)] if cue_text else []
-        messages = example_messages + instruction_message + cue_message
-        if initial_prompt_text := self._get_initial_prompt_text(item):
-            first_message = messages[0]
-            assert first_message.role == Role.USER
-            first_message.content = f"{initial_prompt_text}\n\n{first_message.content}"
-
-        if system_prompt_text := self._get_system_prompt_text(item):
-            return [Message(role=Role.SYSTEM, content=system_prompt_text)] + messages
-        return messages
+        return example_messages + instruction_message + cue_message
 
     def _get_instruction_messages(self, item: dict[str, Any]) -> list[Message]:
         return [Message(role=Role.USER, content=self._get_instruction_text(item))]
@@ -153,39 +142,21 @@ class ComposedEval[SubjectType](Eval):
             dataset = self._load_dataset(subject)
             fewshot_pool = dataset[self.fewshot_split] if self.num_fewshot > 0 else []
             assert len(dataset[self.sample_split]) > 0
-            done = False
-            index = 0
-            for item in dataset[self.sample_split]:
-                if done:
+            for index, item in enumerate(dataset[self.sample_split]):
+                if index == num_samples:
                     break
                 item["subject"] = subject
-                for sample in self._create_samples(item, index, str(subject), fewshot_pool):
-                    yield sample
-                    index += 1
-                    if index == num_samples:
-                        done = True
-                        break
+                yield self._create_sample(item, index, str(subject), fewshot_pool)
 
-    def _create_samples(
-        self, item: dict[str, Any], index: int, subject: str, fewshot_pool: list[dict]
-    ) -> list[Sample]:
-        """Creates one or more samples from a single dataset item. Default implementation returns single sample."""
-        return [
-            Sample(
-                id=index,
-                subject=str(subject),
-                messages=self._messages(item, fewshot_pool),
-                ground_truth=self._get_ground_truth(item),
-                possible_completions=self._get_possible_completions(item),
-                context=self._get_context(item),
-            )
-        ]
-
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
-        return ""
-
-    def _get_system_prompt_text(self, item: dict[str, Any]) -> str | None:
-        return None
+    def _create_sample(self, item: dict[str, Any], index: int, subject: str, fewshot_pool: list[dict]) -> Sample:
+        return Sample(
+            id=index,
+            subject=str(subject),
+            messages=self._messages(item, fewshot_pool),
+            ground_truth=self._get_ground_truth(item),
+            possible_completions=self._get_possible_completions(item),
+            context=None,
+        )
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         fields = self.reader.read(item)
@@ -218,9 +189,6 @@ class ComposedEval[SubjectType](Eval):
         else:
             # Separate splits: no risk of leaking the current item, sample directly.
             return self.rnd.sample(fewshot_pool, self.num_fewshot)
-
-    def _get_context(self, item: dict[str, Any]) -> BaseMetricContext | list[BaseMetricContext] | None:
-        return None
 
     def get_metadata(self) -> dict[str, str | list[str]]:
         meta: dict[str, str | list[str]] = {
@@ -287,8 +255,7 @@ class ComposedEval[SubjectType](Eval):
 
             try:
                 error = None
-                model_post_processed_completion = llm.post_process_completion(raw_completion.completion, sample)
-                completion = self.post_process_generated_completion(model_post_processed_completion, sample)
+                completion = llm.post_process_completion(raw_completion.completion, sample)
             except Exception as e:
                 if raise_errors() or fail_on_error:
                     raise
