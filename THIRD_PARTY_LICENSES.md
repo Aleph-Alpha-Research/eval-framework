@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.80 - https://github.com/boto/boto3
-- **botocore** 1.43.80 - https://github.com/boto/botocore
+- **boto3** 1.43.81 - https://github.com/boto/boto3
+- **botocore** 1.43.81 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -58,7 +58,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## BSD-3-Clause
 
 - **antlr4-python3-runtime** 4.11.0 - http://www.antlr.org
-- **click** 8.4.2 - https://github.com/pallets/click/
+- **click** 8.5.0 - https://github.com/pallets/click/
 - **dill** 0.4.1 - https://github.com/uqfoundation/dill
 - **fsspec** 2026.6.0 - https://github.com/fsspec/filesystem_spec
 - **httpcore** 1.0.9 - https://www.encode.io/httpcore/
@@ -112,7 +112,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **typing-inspection** 0.4.4 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.7.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
-- **wandb** 0.28.2 - https://github.com/wandb/wandb
+- **wandb** 0.29.0 - https://github.com/wandb/wandb
 - **xmltodict** 1.0.4 - https://github.com/martinblech/xmltodict
 
 ## MPL-2.0
@@ -212,7 +212,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.80 (Apache-2.0)
+### boto3 1.43.81 (Apache-2.0)
 
 ```text
 Apache License
@@ -393,7 +393,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.80 (Apache-2.0)
+### botocore 1.43.81 (Apache-2.0)
 
 ```text
 Apache License
@@ -625,7 +625,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### click 8.4.2 (BSD-3-Clause)
+### click 8.5.0 (BSD-3-Clause)
 
 ```text
 Copyright 2014 Pallets
@@ -18234,7 +18234,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### wandb 0.28.2 (MIT)
+### wandb 0.29.0 (MIT)
 
 ```text
 MIT License
