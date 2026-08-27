@@ -28,19 +28,16 @@ class ArcDeReader(ChoiceReader):
         )
 
 
-def arc_de_benchmark() -> Benchmark:
-    """ARC-DE as cloze/ranked classification
-
-    https://huggingface.co/datasets/LeoLM/ArcChallenge_de
-    """
-    return ComposedBenchmark.compose(
-        id="ARC_DE",
-        display_name="ARC German",
-        styler=ClozeStyle(question_prefix="Frage: ", cue_text="Antwort:"),
-        reader=ArcDeReader(),
-        sample_split="test",
-        fewshot_split="validation",
-        subjects=NoSubject(),
-        dataset_policy=pinned_by_framework("LeoLM/ArcChallenge_de"),
-        language=Language.DEU,
-    )
+# ARC-DE as cloze/ranked classification.
+# https://huggingface.co/datasets/LeoLM/ArcChallenge_de
+ARC_DE_BENCHMARK: Benchmark = ComposedBenchmark.compose(
+    id="ARC_DE",
+    display_name="ARC German",
+    styler=ClozeStyle(question_prefix="Frage: ", cue_text="Antwort:"),
+    reader=ArcDeReader(),
+    sample_split="test",
+    fewshot_split="validation",
+    subjects=NoSubject(),
+    dataset_policy=pinned_by_framework("LeoLM/ArcChallenge_de"),
+    language=Language.DEU,
+)

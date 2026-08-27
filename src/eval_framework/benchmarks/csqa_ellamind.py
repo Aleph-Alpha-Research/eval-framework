@@ -54,11 +54,10 @@ def _csqa_ellamind_benchmark(id: str, styler: TaskStyler, distractor_level: Lite
     )
 
 
-def csqa_ellamind_benchmarks() -> list[Benchmark]:
-    return [
-        _csqa_ellamind_benchmark("CSQA_ELLAMIND_MC_EASY_DE", CSQA_ELLAMIND_MC_STYLER, "easy"),
-        _csqa_ellamind_benchmark("CSQA_ELLAMIND_MC_HARD_DE", CSQA_ELLAMIND_MC_STYLER, "hard"),
-        _csqa_ellamind_benchmark("CSQA_ELLAMIND_CLOZE_EASY_DE", CSQA_ELLAMIND_CLOZE_STYLER, "easy"),
-        _csqa_ellamind_benchmark("CSQA_ELLAMIND_CLOZE_HARD_DE", CSQA_ELLAMIND_CLOZE_STYLER, "hard"),
-        _csqa_ellamind_benchmark("CSQA_ELLAMIND_BPB_DE", CSQA_ELLAMIND_BPB_STYLER, "easy"),
-    ]
+CSQA_ELLAMIND_BENCHMARKS: list[Benchmark] = [
+    _csqa_ellamind_benchmark("CSQA_ELLAMIND_MC_EASY_DE", CSQA_ELLAMIND_MC_STYLER, "easy"),
+    _csqa_ellamind_benchmark("CSQA_ELLAMIND_MC_HARD_DE", CSQA_ELLAMIND_MC_STYLER, "hard"),
+    _csqa_ellamind_benchmark("CSQA_ELLAMIND_CLOZE_EASY_DE", CSQA_ELLAMIND_CLOZE_STYLER, "easy"),
+    _csqa_ellamind_benchmark("CSQA_ELLAMIND_CLOZE_HARD_DE", CSQA_ELLAMIND_CLOZE_STYLER, "hard"),
+    _csqa_ellamind_benchmark("CSQA_ELLAMIND_BPB_DE", CSQA_ELLAMIND_BPB_STYLER, "easy"),
+]
