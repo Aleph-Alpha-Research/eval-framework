@@ -15,9 +15,8 @@ from eval_framework.benchmarks.csqa_ellamind import (
     CSQA_ELLAMIND_BPB_STYLER,
     CSQA_ELLAMIND_CLOZE_STYLER,
     CSQA_ELLAMIND_MC_STYLER,
-    csqa_reader,
+    CsqaReader,
 )
-from eval_framework.choices import ChoiceReader
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_names import register_csqa_ellamind_tasks
 from eval_framework.tasks.task_style import TaskStyler
@@ -96,14 +95,14 @@ _BPB = _ExpectedPrompt(
 @pytest.mark.parametrize(
     "reader, styler, expected",
     [
-        pytest.param(csqa_reader("easy"), CSQA_ELLAMIND_MC_STYLER, _MC_EASY, id="mc_easy"),
-        pytest.param(csqa_reader("hard"), CSQA_ELLAMIND_MC_STYLER, _MC_HARD, id="mc_hard"),
-        pytest.param(csqa_reader("easy"), CSQA_ELLAMIND_CLOZE_STYLER, _CLOZE_EASY, id="cloze_easy"),
-        pytest.param(csqa_reader("hard"), CSQA_ELLAMIND_CLOZE_STYLER, _CLOZE_HARD, id="cloze_hard"),
-        pytest.param(csqa_reader("easy"), CSQA_ELLAMIND_BPB_STYLER, _BPB, id="bpb"),
+        pytest.param(CsqaReader("easy"), CSQA_ELLAMIND_MC_STYLER, _MC_EASY, id="mc_easy"),
+        pytest.param(CsqaReader("hard"), CSQA_ELLAMIND_MC_STYLER, _MC_HARD, id="mc_hard"),
+        pytest.param(CsqaReader("easy"), CSQA_ELLAMIND_CLOZE_STYLER, _CLOZE_EASY, id="cloze_easy"),
+        pytest.param(CsqaReader("hard"), CSQA_ELLAMIND_CLOZE_STYLER, _CLOZE_HARD, id="cloze_hard"),
+        pytest.param(CsqaReader("easy"), CSQA_ELLAMIND_BPB_STYLER, _BPB, id="bpb"),
     ],
 )
-def test_csqa_prompt_content(reader: ChoiceReader, styler: TaskStyler, expected: _ExpectedPrompt) -> None:
+def test_csqa_prompt_content(reader: CsqaReader, styler: TaskStyler, expected: _ExpectedPrompt) -> None:
     fields = reader.read(_EVAL_ROW)
     assert styler.get_instruction_text(fields.raw_question, fields.choices) == expected.instruction
     assert styler.get_cue_text() == expected.cue
