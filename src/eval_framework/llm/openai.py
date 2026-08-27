@@ -206,6 +206,7 @@ class OpenAIModel(BaseLLM):
                         if completion_tokens is not None
                         else (self._count_tokens(completion) if self._encoder is not None else None)
                     ),
+                    finish_reason=response.choices[0].finish_reason,
                 )
 
             else:
@@ -225,7 +226,13 @@ class OpenAIModel(BaseLLM):
                 completion_tokens = getattr(chat_response.usage, "completion_tokens", None)
                 completion_details = getattr(chat_response.usage, "completion_tokens_details", None)
                 reasoning_tokens = getattr(completion_details, "reasoning_tokens", None)
-                completion = chat_response.choices[0].message.content or ""
+                choice = chat_response.choices[0]
+                completion = choice.message.content or ""
+                # vLLM's reasoning parser returns the think block as `reasoning`; older
+                # versions named the field `reasoning_content`.
+                reasoning = getattr(choice.message, "reasoning", None) or getattr(
+                    choice.message, "reasoning_content", None
+                )
                 return RawCompletion(
                     prompt=prompt,
                     prompt_num_tokens=prompt_tokens,
@@ -245,6 +252,8 @@ class OpenAIModel(BaseLLM):
                         else (self._count_tokens(completion) if self._encoder is not None else None)
                     ),
                     reasoning_num_tokens=reasoning_tokens,
+                    reasoning=reasoning,
+                    finish_reason=choice.finish_reason,
                 )
 
         with concurrent.futures.ThreadPoolExecutor() as executor:

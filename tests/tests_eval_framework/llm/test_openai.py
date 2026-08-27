@@ -118,11 +118,37 @@ def test_openai_loglikelihoods(model_cls: type[BaseLLM]) -> None:
     assert set(results[1].loglikelihoods_num_tokens.keys()) == {" foo", " bar"}
 
 
-def _make_chat_response(mocker: MockerFixture, content: str = "test") -> object:
+def _make_chat_response(
+    mocker: MockerFixture,
+    content: str = "test",
+    reasoning: str | None = None,
+    finish_reason: str = "stop",
+) -> object:
     response = mocker.MagicMock()
     response.choices[0].message.content = content
+    response.choices[0].message.reasoning = reasoning
+    response.choices[0].message.reasoning_content = None
+    response.choices[0].finish_reason = finish_reason
     response.usage.prompt_tokens = 5
     return response
+
+
+def test_generate_from_messages_keeps_reasoning_and_finish_reason(mocker: MockerFixture) -> None:
+    # Given a chat response whose think block was split off by the server
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    mock_client.chat.completions.create.return_value = _make_chat_response(
+        mocker, content="42", reasoning="let me think", finish_reason="length"
+    )
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18")
+
+    # When
+    [result] = model.generate_from_messages([[Message(role=Role.USER, content="Hello")]])
+
+    # Then the completion stays answer-only and the rest is kept alongside it
+    assert result.completion == "42"
+    assert result.reasoning == "let me think"
+    assert result.finish_reason == "length"
 
 
 def test_openai_chat_api_top_p_generate_from_messages(mocker: MockerFixture) -> None:
