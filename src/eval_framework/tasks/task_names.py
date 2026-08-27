@@ -2,6 +2,7 @@ from enum import Enum
 
 from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK
 from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.gpqa_ellamind import GPQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.siqa_ellamind import SIQA_ELLAMIND_BENCHMARKS
 from eval_framework.tasks.base import BaseTask
@@ -247,14 +248,8 @@ def register_csqa_ellamind_tasks(registry: Registry) -> None:
 
 def register_gpqa_ellamind_tasks(registry: Registry) -> None:
     """Register gpqa_ellamind benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_MC_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_CLOZE_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_DIAMOND_MC_DE", registry=registry)
-    register_lazy_task(
-        "eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_DIAMOND_CLOZE_DE", registry=registry
-    )
-    register_lazy_task("eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_BPB_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.gpqa_ellamind.GPQA_ELLAMIND_DIAMOND_BPB_DE", registry=registry)
+    for benchmark in GPQA_ELLAMIND_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_gsm8k_ellamind_tasks(registry: Registry) -> None:
