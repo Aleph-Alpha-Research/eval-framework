@@ -14,6 +14,17 @@
 
 ### Bug Fixes
 
+## [0.11.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.12...v0.11.0) (2026-08-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* drop prompt and response from results.jsonl
+
+### Code Refactoring
+
+* drop prompt and response from results.jsonl ([da03728](https://github.com/Aleph-Alpha-Research/eval-framework/commit/da03728590a614b466ba5cb404e8c11b4599a750))
+
 ## [0.10.12](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.11...v0.10.12) (2026-08-26)
 
 
