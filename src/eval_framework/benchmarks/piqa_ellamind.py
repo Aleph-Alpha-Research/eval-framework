@@ -12,6 +12,7 @@ from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
+from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
 
@@ -37,14 +38,10 @@ class PiqaReader(ChoiceReader):
 _QUESTION_PREFIX = "Ziel: "
 _CUE_TEXT = "Antwort:"
 
-# One styler per format (all sharing the German prefix/cue). The easy/hard distractor axis belongs to
-# the reader, so it is orthogonal to the styler choice.
-PIQA_ELLAMIND_CLOZE_STYLER = ClozeStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT)
-PIQA_ELLAMIND_MC_STYLER = MCStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT)
-PIQA_ELLAMIND_BPB_STYLER = BPBStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT)
 
-
-def _piqa_ellamind_benchmark(id: str, styler: TaskStyler, distractor_level: Literal["easy", "hard"]) -> Benchmark:
+def _piqa_ellamind_benchmark(
+    id: str, styler: TaskStyler, distractor_level: Literal["easy", "hard"], dataset: DatasetPolicy | None
+) -> Benchmark:
     return ComposedBenchmark.compose(
         id=id,
         styler=styler,
@@ -52,15 +49,45 @@ def _piqa_ellamind_benchmark(id: str, styler: TaskStyler, distractor_level: Lite
         sample_split="validation",
         fewshot_split="validation",
         subjects=ListOfSubjects(["deu"]),
-        dataset_policy=pinned_by_framework("ellamind/piqa-multilingual"),
+        dataset_policy=dataset if dataset is not None else pinned_by_framework("ellamind/piqa-multilingual"),
         language=Language.DEU,
     )
 
 
+def piqa_ellamind_cloze_easy_de(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _piqa_ellamind_benchmark(
+        "PIQA_ELLAMIND_CLOZE_EASY_DE", ClozeStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT), "easy", dataset
+    )
+
+
+def piqa_ellamind_cloze_hard_de(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _piqa_ellamind_benchmark(
+        "PIQA_ELLAMIND_CLOZE_HARD_DE", ClozeStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT), "hard", dataset
+    )
+
+
+def piqa_ellamind_mc_easy_de(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _piqa_ellamind_benchmark(
+        "PIQA_ELLAMIND_MC_EASY_DE", MCStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT), "easy", dataset
+    )
+
+
+def piqa_ellamind_mc_hard_de(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _piqa_ellamind_benchmark(
+        "PIQA_ELLAMIND_MC_HARD_DE", MCStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT), "hard", dataset
+    )
+
+
+def piqa_ellamind_bpb_de(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _piqa_ellamind_benchmark(
+        "PIQA_ELLAMIND_BPB_DE", BPBStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT), "easy", dataset
+    )
+
+
 PIQA_ELLAMIND_BENCHMARKS: list[Benchmark] = [
-    _piqa_ellamind_benchmark("PIQA_ELLAMIND_CLOZE_EASY_DE", PIQA_ELLAMIND_CLOZE_STYLER, "easy"),
-    _piqa_ellamind_benchmark("PIQA_ELLAMIND_CLOZE_HARD_DE", PIQA_ELLAMIND_CLOZE_STYLER, "hard"),
-    _piqa_ellamind_benchmark("PIQA_ELLAMIND_MC_EASY_DE", PIQA_ELLAMIND_MC_STYLER, "easy"),
-    _piqa_ellamind_benchmark("PIQA_ELLAMIND_MC_HARD_DE", PIQA_ELLAMIND_MC_STYLER, "hard"),
-    _piqa_ellamind_benchmark("PIQA_ELLAMIND_BPB_DE", PIQA_ELLAMIND_BPB_STYLER, "easy"),
+    piqa_ellamind_cloze_easy_de(),
+    piqa_ellamind_cloze_hard_de(),
+    piqa_ellamind_mc_easy_de(),
+    piqa_ellamind_mc_hard_de(),
+    piqa_ellamind_bpb_de(),
 ]

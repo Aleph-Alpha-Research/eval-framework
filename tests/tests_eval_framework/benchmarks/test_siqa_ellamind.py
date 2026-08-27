@@ -1,26 +1,30 @@
-"""Tests for the German Social IQa (EllaMind) tasks.
+"""Specification of the German Social IQa (EllaMind) tasks.
 
-- formatter hash test for every SIQA variant
-- offline test that the reader (item -> ChoiceFields) and the chosen styler produce the expected
-  prompt content. Message assembly (roles / fewshot / cue placement) is generic and covered in
-  ``test_composed_benchmark``.
+Each spec test builds the real benchmark (via its ``siqa_ellamind_*_de`` constructor) over a fictional
+dataset and asserts the assembled messages, ground truth, and scored completions — so this file reads
+as SIQA's prompt spec, with ``composed.py`` an implementation detail. ``test_formatter_hash`` separately
+pins the real benchmarks against the real HuggingFace data. The shown question is the context followed
+by the question.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
 import pytest
 
 from eval_framework.benchmarks.siqa_ellamind import (
-    SIQA_ELLAMIND_BPB_STYLER,
-    SIQA_ELLAMIND_CLOZE_STYLER,
-    SIQA_ELLAMIND_MC_STYLER,
-    SiqaReader,
+    siqa_ellamind_bpb_de,
+    siqa_ellamind_cloze_easy_de,
+    siqa_ellamind_cloze_hard_de,
+    siqa_ellamind_mc_easy_de,
+    siqa_ellamind_mc_hard_de,
 )
+from eval_framework.contract import Benchmark
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_names import register_siqa_ellamind_tasks
-from eval_framework.tasks.task_style import TaskStyler
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
+from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
 from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
 
 # Registry for this test suite only holding siqa_ellamind tasks
@@ -36,76 +40,136 @@ def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> N
 
 
 # ---------------------------------------------------------------------------
-# Offline test: reader + chosen styler produce the expected prompt content (no Eval, no dataset)
+# Prompt spec: build the real benchmark over fictional rows, assert the assembled messages
 # ---------------------------------------------------------------------------
 
-# A fictional row in the SIQA format (NOT a real dataset example). The shown question is the context
-# followed by the question; choices are shuffled deterministically (seed: question + correct_answer).
+# Fictional rows in the SIQA format (NOT real dataset examples). Choices are shuffled deterministically
+# (seed: question + correct_answer).
 _EVAL_ROW: dict[str, Any] = {
-    "context": "Alex hat den ganzen Tag im Garten gearbeitet.",
-    "question": "Wie fühlt sich Alex danach?",
-    "correct_answer": "Erschöpft",
-    "easy_distractors": ["Gelangweilt", "Neugierig", "Hungrig"],
-    "hard_distractors": ["Zufrieden", "Entspannt", "Stolz"],
+    "context": "Max kommt nach Hause und findet sein Zimmer aufgeräumt.",
+    "question": "Was hat Max als nächstes getan?",
+    "correct_answer": "Er hat sich bedankt.",
+    "easy_distractors": ["Er ist wütend geworden.", "Er ist gegangen."],
+    "hard_distractors": ["Er hat gegessen.", "Er hat geschlafen."],
+}
+_FEWSHOT_ROW: dict[str, Any] = {
+    "context": "Lisa hat ihr Buch vergessen.",
+    "question": "Wie hat Lisa sich gefühlt?",
+    "correct_answer": "Ärgerlich.",
+    "easy_distractors": ["Glücklich.", "Müde."],
+    "hard_distractors": ["Neugierig.", "Aufgeregt."],
 }
 
-_QUESTION = "Frage: Alex hat den ganzen Tag im Garten gearbeitet. Wie fühlt sich Alex danach?"
+# The shown question is "Frage: " + context + " " + question.
+_EVAL_Q = "Frage: Max kommt nach Hause und findet sein Zimmer aufgeräumt. Was hat Max als nächstes getan?"
+_FEWSHOT_Q = "Frage: Lisa hat ihr Buch vergessen. Wie hat Lisa sich gefühlt?"
 
 
 @dataclass(frozen=True)
 class _ExpectedPrompt:
-    instruction: str
-    cue: str
+    messages: list[Message]
     ground_truth: str
-    completions: list[str]
+    possible_completions: list[str]
 
 
+# --- Zero-shot ---
 _MC_EASY = _ExpectedPrompt(
-    instruction=f"{_QUESTION}\nA. Hungrig\nB. Neugierig\nC. Gelangweilt\nD. Erschöpft\n",
-    cue="Antwort:",
-    ground_truth=" D",
-    completions=[" A", " B", " C", " D"],
+    messages=[
+        Message(
+            role=Role.USER,
+            content=f"{_EVAL_Q}\nA. Er ist wütend geworden.\nB. Er hat sich bedankt.\nC. Er ist gegangen.\n",
+        ),
+        Message(role=Role.ASSISTANT, content="Antwort:"),
+    ],
+    ground_truth=" B",
+    possible_completions=[" A", " B", " C"],
 )
 _MC_HARD = _ExpectedPrompt(
-    instruction=f"{_QUESTION}\nA. Stolz\nB. Entspannt\nC. Zufrieden\nD. Erschöpft\n",
-    cue="Antwort:",
-    ground_truth=" D",
-    completions=[" A", " B", " C", " D"],
+    messages=[
+        Message(
+            role=Role.USER, content=f"{_EVAL_Q}\nA. Er hat gegessen.\nB. Er hat sich bedankt.\nC. Er hat geschlafen.\n"
+        ),
+        Message(role=Role.ASSISTANT, content="Antwort:"),
+    ],
+    ground_truth=" B",
+    possible_completions=[" A", " B", " C"],
 )
-# Cloze/BPB show no options, so the prompt text is identical; only the scored completions differ.
+# Cloze/BPB show no options, so the assembled messages are identical; only the scored completions differ.
+_CLOZE_MESSAGES = [
+    Message(role=Role.USER, content=f"{_EVAL_Q}\n"),
+    Message(role=Role.ASSISTANT, content="Antwort:"),
+]
 _CLOZE_EASY = _ExpectedPrompt(
-    instruction=f"{_QUESTION}\n",
-    cue="Antwort:",
-    ground_truth=" Erschöpft",
-    completions=[" Hungrig", " Neugierig", " Gelangweilt", " Erschöpft"],
+    messages=_CLOZE_MESSAGES,
+    ground_truth=" Er hat sich bedankt.",
+    possible_completions=[" Er ist wütend geworden.", " Er hat sich bedankt.", " Er ist gegangen."],
 )
 _CLOZE_HARD = _ExpectedPrompt(
-    instruction=f"{_QUESTION}\n",
-    cue="Antwort:",
-    ground_truth=" Erschöpft",
-    completions=[" Stolz", " Entspannt", " Zufrieden", " Erschöpft"],
+    messages=_CLOZE_MESSAGES,
+    ground_truth=" Er hat sich bedankt.",
+    possible_completions=[" Er hat gegessen.", " Er hat sich bedankt.", " Er hat geschlafen."],
 )
 _BPB = _ExpectedPrompt(
-    instruction=f"{_QUESTION}\n",
-    cue="Antwort:",
-    ground_truth=" Erschöpft",
-    completions=[" Erschöpft"],  # BPB scores only the gold continuation
+    messages=_CLOZE_MESSAGES,
+    ground_truth=" Er hat sich bedankt.",
+    possible_completions=[" Er hat sich bedankt."],  # BPB scores only the gold continuation
 )
 
 
 @pytest.mark.parametrize(
-    "reader, styler, expected",
+    "make_benchmark, expected",
     [
-        pytest.param(SiqaReader("easy"), SIQA_ELLAMIND_MC_STYLER, _MC_EASY, id="mc_easy"),
-        pytest.param(SiqaReader("hard"), SIQA_ELLAMIND_MC_STYLER, _MC_HARD, id="mc_hard"),
-        pytest.param(SiqaReader("easy"), SIQA_ELLAMIND_CLOZE_STYLER, _CLOZE_EASY, id="cloze_easy"),
-        pytest.param(SiqaReader("hard"), SIQA_ELLAMIND_CLOZE_STYLER, _CLOZE_HARD, id="cloze_hard"),
-        pytest.param(SiqaReader("easy"), SIQA_ELLAMIND_BPB_STYLER, _BPB, id="bpb"),
+        pytest.param(siqa_ellamind_mc_easy_de, _MC_EASY, id="mc_easy"),
+        pytest.param(siqa_ellamind_mc_hard_de, _MC_HARD, id="mc_hard"),
+        pytest.param(siqa_ellamind_cloze_easy_de, _CLOZE_EASY, id="cloze_easy"),
+        pytest.param(siqa_ellamind_cloze_hard_de, _CLOZE_HARD, id="cloze_hard"),
+        pytest.param(siqa_ellamind_bpb_de, _BPB, id="bpb"),
     ],
 )
-def test_siqa_prompt_content(reader: SiqaReader, styler: TaskStyler, expected: _ExpectedPrompt) -> None:
-    fields = reader.read(_EVAL_ROW)
-    assert styler.get_instruction_text(fields.raw_question, fields.choices) == expected.instruction
-    assert styler.get_cue_text() == expected.cue
-    assert styler.get_ground_truth(fields.choices, fields.correct_index) == expected.ground_truth
-    assert styler.get_possible_completions(fields.choices, fields.correct_index) == expected.completions
+def test_siqa_zeroshot_prompt(make_benchmark: Callable[..., Benchmark], expected: _ExpectedPrompt) -> None:
+    benchmark = make_benchmark(dataset=DatasetStub({"validation": [_EVAL_ROW]}))
+    sample = first_sample(benchmark, num_fewshot=0)
+    assert sample.messages == expected.messages
+    assert sample.ground_truth == expected.ground_truth
+    assert sample.possible_completions == expected.possible_completions
+
+
+# --- One-shot: fewshot row rendered with its answer, then the eval row's own zero-shot prompt ---
+_MC_EASY_FEWSHOT_MESSAGES = [
+    Message(role=Role.USER, content=f"{_FEWSHOT_Q}\nA. Ärgerlich.\nB. Müde.\nC. Glücklich.\n"),
+    Message(role=Role.ASSISTANT, content="Antwort: A"),
+]
+_MC_HARD_FEWSHOT_MESSAGES = [
+    Message(role=Role.USER, content=f"{_FEWSHOT_Q}\nA. Ärgerlich.\nB. Aufgeregt.\nC. Neugierig.\n"),
+    Message(role=Role.ASSISTANT, content="Antwort: A"),
+]
+_CLOZE_FEWSHOT_MESSAGES = [
+    Message(role=Role.USER, content=f"{_FEWSHOT_Q}\n"),
+    Message(role=Role.ASSISTANT, content="Antwort: Ärgerlich."),
+]
+
+
+def _oneshot(fewshot_messages: list[Message], eval_expected: _ExpectedPrompt) -> _ExpectedPrompt:
+    return _ExpectedPrompt(
+        messages=[*fewshot_messages, *eval_expected.messages],
+        ground_truth=eval_expected.ground_truth,
+        possible_completions=eval_expected.possible_completions,
+    )
+
+
+@pytest.mark.parametrize(
+    "make_benchmark, expected",
+    [
+        pytest.param(siqa_ellamind_mc_easy_de, _oneshot(_MC_EASY_FEWSHOT_MESSAGES, _MC_EASY), id="mc_easy"),
+        pytest.param(siqa_ellamind_mc_hard_de, _oneshot(_MC_HARD_FEWSHOT_MESSAGES, _MC_HARD), id="mc_hard"),
+        pytest.param(siqa_ellamind_cloze_easy_de, _oneshot(_CLOZE_FEWSHOT_MESSAGES, _CLOZE_EASY), id="cloze_easy"),
+        pytest.param(siqa_ellamind_cloze_hard_de, _oneshot(_CLOZE_FEWSHOT_MESSAGES, _CLOZE_HARD), id="cloze_hard"),
+        pytest.param(siqa_ellamind_bpb_de, _oneshot(_CLOZE_FEWSHOT_MESSAGES, _BPB), id="bpb"),
+    ],
+)
+def test_siqa_oneshot_prompt(make_benchmark: Callable[..., Benchmark], expected: _ExpectedPrompt) -> None:
+    benchmark = make_benchmark(dataset=DatasetStub({"validation": [_FEWSHOT_ROW, _EVAL_ROW]}))
+    sample = first_sample(benchmark, num_fewshot=1)
+    assert sample.messages == expected.messages
+    assert sample.ground_truth == expected.ground_truth
+    assert sample.possible_completions == expected.possible_completions
