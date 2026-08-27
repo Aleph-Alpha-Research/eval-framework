@@ -97,6 +97,16 @@ class RawCompletion(BaseCompletion):
         "or None if the backend did not report it. Non-reasoning models and backends that "
         "do not surface a reasoning-token count leave this None.",
     ] = None
+    reasoning: Annotated[
+        str | None,
+        "reasoning (thinking) text the model generated before the completion, or None if the "
+        "backend did not return it separately",
+    ] = None
+    finish_reason: Annotated[
+        str | None,
+        "why generation ended as reported by the backend, e.g. `stop`, `length` or `repetition`; "
+        "None if the backend did not report it",
+    ] = None
     raw_completion_error: Error | None = None
 
 
@@ -114,6 +124,16 @@ class Completion(BaseCompletion):
         int | None,
         "portion of raw_completion_num_tokens that the model spent on reasoning, or None if the "
         "backend did not report it",
+    ] = None
+    raw_completion_reasoning: Annotated[
+        str | None,
+        "reasoning (thinking) text the model generated before the raw completion, or None if the "
+        "backend did not return it separately",
+    ] = None
+    raw_completion_finish_reason: Annotated[
+        str | None,
+        "why generation ended as reported by the backend, e.g. `stop`, `length` or `repetition`; "
+        "None if the backend did not report it",
     ] = None
     context: list[BaseMetricContext] | BaseMetricContext | None = None
     error: Error | None = None

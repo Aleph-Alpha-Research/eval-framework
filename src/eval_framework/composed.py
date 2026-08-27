@@ -245,6 +245,8 @@ class ComposedEval(Eval):
                     raw_completion=raw_completion.completion,
                     raw_completion_num_tokens=raw_completion.completion_num_tokens,
                     raw_completion_reasoning_num_tokens=raw_completion.reasoning_num_tokens,
+                    raw_completion_reasoning=raw_completion.reasoning,
+                    raw_completion_finish_reason=raw_completion.finish_reason,
                     context=sample.context,
                     error=raw_completion.raw_completion_error or error,
                 )
