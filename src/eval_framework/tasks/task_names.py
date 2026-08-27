@@ -1,9 +1,9 @@
 from enum import Enum
 
-from eval_framework.benchmarks.arc_de import arc_de_benchmark
-from eval_framework.benchmarks.csqa_ellamind import csqa_ellamind_benchmarks
-from eval_framework.benchmarks.piqa_ellamind import piqa_ellamind_benchmarks
-from eval_framework.benchmarks.siqa_ellamind import siqa_ellamind_benchmarks
+from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK
+from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.siqa_ellamind import SIQA_ELLAMIND_BENCHMARKS
 from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import Registry, register_lazy_task
 from eval_framework.tasks.registry import registry as global_registry
@@ -138,7 +138,7 @@ def register_bigcodebench_tasks(registry: Registry) -> None:
 
 def register_arc_de_tasks(registry: Registry) -> None:
     """Register arc_de benchmark tasks."""
-    registry.add(arc_de_benchmark())
+    registry.add(ARC_DE_BENCHMARK)
 
 
 def register_copa_tasks(registry: Registry) -> None:
@@ -241,7 +241,7 @@ def register_arc_ellamind_tasks(registry: Registry) -> None:
 
 def register_csqa_ellamind_tasks(registry: Registry) -> None:
     """Register csqa_ellamind benchmark tasks."""
-    for benchmark in csqa_ellamind_benchmarks():
+    for benchmark in CSQA_ELLAMIND_BENCHMARKS:
         registry.add(benchmark)
 
 
@@ -316,7 +316,7 @@ def register_mbpp_ellamind_tasks(registry: Registry) -> None:
 
 def register_piqa_ellamind_tasks(registry: Registry) -> None:
     """Register piqa_ellamind benchmark tasks."""
-    for benchmark in piqa_ellamind_benchmarks():
+    for benchmark in PIQA_ELLAMIND_BENCHMARKS:
         registry.add(benchmark)
 
 
@@ -339,7 +339,7 @@ def register_simpleqa_ellamind_tasks(registry: Registry) -> None:
 
 def register_siqa_ellamind_tasks(registry: Registry) -> None:
     """Register siqa_ellamind benchmark tasks."""
-    for benchmark in siqa_ellamind_benchmarks():
+    for benchmark in SIQA_ELLAMIND_BENCHMARKS:
         registry.add(benchmark)
 
 

@@ -57,11 +57,10 @@ def _siqa_ellamind_benchmark(id: str, styler: TaskStyler, distractor_level: Lite
     )
 
 
-def siqa_ellamind_benchmarks() -> list[Benchmark]:
-    return [
-        _siqa_ellamind_benchmark("SIQA_ELLAMIND_MC_EASY_DE", SIQA_ELLAMIND_MC_STYLER, "easy"),
-        _siqa_ellamind_benchmark("SIQA_ELLAMIND_MC_HARD_DE", SIQA_ELLAMIND_MC_STYLER, "hard"),
-        _siqa_ellamind_benchmark("SIQA_ELLAMIND_CLOZE_EASY_DE", SIQA_ELLAMIND_CLOZE_STYLER, "easy"),
-        _siqa_ellamind_benchmark("SIQA_ELLAMIND_CLOZE_HARD_DE", SIQA_ELLAMIND_CLOZE_STYLER, "hard"),
-        _siqa_ellamind_benchmark("SIQA_ELLAMIND_BPB_DE", SIQA_ELLAMIND_BPB_STYLER, "easy"),
-    ]
+SIQA_ELLAMIND_BENCHMARKS: list[Benchmark] = [
+    _siqa_ellamind_benchmark("SIQA_ELLAMIND_MC_EASY_DE", SIQA_ELLAMIND_MC_STYLER, "easy"),
+    _siqa_ellamind_benchmark("SIQA_ELLAMIND_MC_HARD_DE", SIQA_ELLAMIND_MC_STYLER, "hard"),
+    _siqa_ellamind_benchmark("SIQA_ELLAMIND_CLOZE_EASY_DE", SIQA_ELLAMIND_CLOZE_STYLER, "easy"),
+    _siqa_ellamind_benchmark("SIQA_ELLAMIND_CLOZE_HARD_DE", SIQA_ELLAMIND_CLOZE_STYLER, "hard"),
+    _siqa_ellamind_benchmark("SIQA_ELLAMIND_BPB_DE", SIQA_ELLAMIND_BPB_STYLER, "easy"),
+]
