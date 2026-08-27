@@ -1,9 +1,9 @@
 from enum import Enum
 
+from eval_framework.benchmarks.arc_de import arc_de_benchmark
+from eval_framework.benchmarks.csqa_ellamind import csqa_ellamind_benchmarks
+from eval_framework.benchmarks.piqa_ellamind import piqa_ellamind_benchmarks
 from eval_framework.tasks.base import BaseTask
-from eval_framework.tasks.benchmarks.arc_de import arc_de_benchmark
-from eval_framework.tasks.benchmarks.csqa_ellamind import csqa_ellamind_benchmarks
-from eval_framework.tasks.benchmarks.piqa_ellamind import piqa_ellamind_benchmarks
 from eval_framework.tasks.registry import Registry, register_lazy_task
 from eval_framework.tasks.registry import registry as global_registry
 

@@ -11,13 +11,13 @@ from typing import Any
 
 import pytest
 
-from eval_framework.choices import ChoiceReader
-from eval_framework.tasks.benchmarks.piqa_ellamind import (
+from eval_framework.benchmarks.piqa_ellamind import (
     PIQA_ELLAMIND_BPB_STYLER,
     PIQA_ELLAMIND_CLOZE_STYLER,
     PIQA_ELLAMIND_MC_STYLER,
     piqa_reader,
 )
+from eval_framework.choices import ChoiceReader
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_names import register_piqa_ellamind_tasks
 from eval_framework.tasks.task_style import TaskStyler

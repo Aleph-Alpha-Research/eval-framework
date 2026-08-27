@@ -1,6 +1,6 @@
 import pytest
 
-from eval_framework.tasks.benchmarks.arc_de import ArcDeReader
+from eval_framework.benchmarks.arc_de import ArcDeReader
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_names import register_arc_de_tasks
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
