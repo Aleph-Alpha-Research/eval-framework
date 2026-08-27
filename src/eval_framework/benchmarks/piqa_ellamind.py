@@ -5,27 +5,33 @@ https://huggingface.co/datasets/ellamind/piqa-multilingual
 PIQA supplies separate easy and hard distractors.
 """
 
-from typing import Literal
+from typing import Any, Literal, final, override
 
-from eval_framework.choices import EllaMindReader
+from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
 
 
-def piqa_reader(distractor_level: Literal["easy", "hard"]) -> EllaMindReader:
-    """Reads PIQA items: a single easy/hard distractor per level, shuffled in with the correct solution."""
-    return EllaMindReader(
-        distractor_level,
-        question_field="goal",
-        correct_field="correct_solution",
-        easy_field="easy_distractor",
-        hard_field="hard_distractor",
-        singular=True,
-    )
+@final
+class PiqaReader(ChoiceReader):
+    """Reads a PIQA item: a single easy/hard distractor per level, shuffled in with the correct solution."""
+
+    def __init__(self, distractor_level: Literal["easy", "hard"]) -> None:
+        self._distractor_level = distractor_level
+
+    @override
+    def read(self, item: dict[str, Any]) -> ChoiceFields:
+        distractor = item["easy_distractor"] if self._distractor_level == "easy" else item["hard_distractor"]
+        choices, correct_index = shuffle_correct_with_distractors(
+            correct=item["correct_solution"],
+            distractors=[distractor],
+            seed_text=item["goal"] + item["correct_solution"],
+        )
+        return ChoiceFields(raw_question=item["goal"], choices=choices, correct_index=correct_index)
 
 
 _QUESTION_PREFIX = "Ziel: "
@@ -39,16 +45,14 @@ PIQA_ELLAMIND_BPB_STYLER = BPBStyle(question_prefix=_QUESTION_PREFIX, cue_text=_
 
 
 def _piqa_ellamind_benchmark(id: str, styler: TaskStyler, distractor_level: Literal["easy", "hard"]) -> Benchmark:
-    """Dataset: https://huggingface.co/datasets/ellamind/piqa-multilingual"""
-    dataset_path = "ellamind/piqa-multilingual"
     return ComposedBenchmark.compose(
         id=id,
         styler=styler,
-        reader=piqa_reader(distractor_level),
+        reader=PiqaReader(distractor_level),
         sample_split="validation",
         fewshot_split="validation",
         subjects=ListOfSubjects(["deu"]),
-        dataset_policy=pinned_by_framework(dataset_path),
+        dataset_policy=pinned_by_framework("ellamind/piqa-multilingual"),
         language=Language.DEU,
     )
 
