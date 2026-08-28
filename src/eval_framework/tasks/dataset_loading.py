@@ -3,8 +3,9 @@ mechanics (revisions, cache directories, download config)."""
 
 import os
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from pathlib import Path
-from typing import cast, final, override
+from typing import Any, cast, final, override
 
 from datasets import DatasetDict, DownloadConfig, load_dataset
 
@@ -57,3 +58,42 @@ class DatasetPolicy(ABC):
     def documentation(self) -> str:
         """Markdown for the task's ``## Dataset`` doc section, describing where the dataset comes from."""
         ...
+
+
+@final
+class _SubsetLoader(DatasetLoader):
+    """Loads another loader's splits, keeping only the rows for which ``keep`` returns true."""
+
+    def __init__(self, inner: DatasetLoader, keep: Callable[[dict[str, Any]], bool]) -> None:
+        self._inner = inner
+        self._keep = keep
+
+    @override
+    def load(self, name: str | None) -> DatasetDict:
+        loaded = self._inner.load(name)
+        return DatasetDict({split: data.filter(self._keep) for split, data in loaded.items()})
+
+    @override
+    def metadata(self) -> dict[str, str]:
+        return self._inner.metadata()
+
+
+@final
+class Subset(DatasetPolicy):
+    """Restricts another policy's dataset to the rows for which ``keep`` returns true, in every split.
+
+    A benchmark whose items are a row-filtered subset of a larger dataset (e.g. GPQA's diamond subset,
+    HLE's natively-multiple-choice subset) wraps the base policy in a ``Subset``.
+    """
+
+    def __init__(self, inner: DatasetPolicy, keep: Callable[[dict[str, Any]], bool]) -> None:
+        self._inner = inner
+        self._keep = keep
+
+    @override
+    def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
+        return _SubsetLoader(self._inner.loader(custom_hf_revision), self._keep)
+
+    @override
+    def documentation(self) -> str:
+        return self._inner.documentation()

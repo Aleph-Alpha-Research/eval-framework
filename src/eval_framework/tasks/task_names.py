@@ -4,6 +4,7 @@ from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK
 from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.gpqa_ellamind import GPQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.hellaswag_ellamind import HELLASWAG_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.hle_ellamind import HLE_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.simpleqa_ellamind import SIMPLEQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.siqa_ellamind import SIQA_ELLAMIND_BENCHMARKS
@@ -281,11 +282,8 @@ def register_hendrycks_math_ellamind_tasks(registry: Registry) -> None:
 
 def register_hle_ellamind_tasks(registry: Registry) -> None:
     """Register hle_ellamind benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.hle_ellamind.HLE_ELLAMIND_MC_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.hle_ellamind.HLE_ELLAMIND_CLOZE_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.hle_ellamind.HLE_ELLAMIND_MC_NATIVE_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.hle_ellamind.HLE_ELLAMIND_CLOZE_NATIVE_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.hle_ellamind.HLE_ELLAMIND_BPB_DE", registry=registry)
+    for benchmark in HLE_ELLAMIND_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_humaneval_ellamind_tasks(registry: Registry) -> None:
