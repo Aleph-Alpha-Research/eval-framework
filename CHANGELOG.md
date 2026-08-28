@@ -14,6 +14,18 @@
 
 ### Bug Fixes
 
+## [0.11.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.0...v0.11.1) (2026-08-28)
+
+
+### Features
+
+* record reasoning text and finish_reason per sample ([51e92ce](https://github.com/Aleph-Alpha-Research/eval-framework/commit/51e92ce093ffc21edd0c15dc2d837854367b353c))
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.79,&lt;2 ([2f0fc79](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2f0fc79f6039cab82123d0556221621811c94317))
+
 ## [0.11.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.10.12...v0.11.0) (2026-08-27)
 
 
