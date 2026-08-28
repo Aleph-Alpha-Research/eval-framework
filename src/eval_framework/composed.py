@@ -18,7 +18,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Completion, Error, RawCompletion
-from eval_framework.subjects import Subjects, SubjectsSelector
+from eval_framework.subjects import NoSubject, Subjects, SubjectsSelector
 from eval_framework.tasks.base import RANDOM_SEED, Language
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
@@ -311,16 +311,17 @@ class ComposedBenchmark(Benchmark):
         reader: ChoiceReader,
         sample_split: str,
         fewshot_split: str,
-        subjects: SubjectsSelector,
+        subjects: SubjectsSelector | None = None,
         dataset_policy: DatasetPolicy,
         language: LanguageSpec,
         display_name: str | None = None,
     ) -> Self:
-        """Build a ``ComposedBenchmark`` from its inputs; ``display_name`` defaults to ``id``."""
+        """Build a ``ComposedBenchmark`` from its inputs; ``subjects`` defaults to ``NoSubject``
+        (a single unnamed slice) and ``display_name`` to ``id``."""
         return cls(
             id=id,
             display_name=display_name if display_name is not None else id,
-            subjects=subjects,
+            subjects=subjects if subjects is not None else NoSubject(),
             styler=styler,
             reader=reader,
             sample_split=sample_split,
