@@ -4,6 +4,7 @@ from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK
 from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.gpqa_ellamind import GPQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.simpleqa_ellamind import SIMPLEQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.siqa_ellamind import SIQA_ELLAMIND_BENCHMARKS
 from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import Registry, register_lazy_task
@@ -317,19 +318,8 @@ def register_piqa_ellamind_tasks(registry: Registry) -> None:
 
 def register_simpleqa_ellamind_tasks(registry: Registry) -> None:
     """Register simpleqa_ellamind benchmark tasks."""
-    register_lazy_task(
-        "eval_framework.tasks.benchmarks.simpleqa_ellamind.SIMPLEQA_ELLAMIND_MC_EASY_DE", registry=registry
-    )
-    register_lazy_task(
-        "eval_framework.tasks.benchmarks.simpleqa_ellamind.SIMPLEQA_ELLAMIND_MC_HARD_DE", registry=registry
-    )
-    register_lazy_task(
-        "eval_framework.tasks.benchmarks.simpleqa_ellamind.SIMPLEQA_ELLAMIND_CLOZE_EASY_DE", registry=registry
-    )
-    register_lazy_task(
-        "eval_framework.tasks.benchmarks.simpleqa_ellamind.SIMPLEQA_ELLAMIND_CLOZE_HARD_DE", registry=registry
-    )
-    register_lazy_task("eval_framework.tasks.benchmarks.simpleqa_ellamind.SIMPLEQA_ELLAMIND_BPB_DE", registry=registry)
+    for benchmark in SIMPLEQA_ELLAMIND_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_siqa_ellamind_tasks(registry: Registry) -> None:
