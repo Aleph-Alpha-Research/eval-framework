@@ -8,14 +8,12 @@ the diamond subset — the 198 hardest questions (``is_diamond``) from the origi
 
 from typing import Any, final, override
 
-from datasets import DatasetDict
-
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
-from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
+from eval_framework.tasks.dataset_loading import DatasetPolicy, Subset
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
 
@@ -34,39 +32,6 @@ class GpqaReader(ChoiceReader):
         return ChoiceFields(raw_question=item["question"], choices=choices, correct_index=correct_index)
 
 
-@final
-class _DiamondFilteredLoader(DatasetLoader):
-    """Restricts a loader's every split to the diamond subset (``is_diamond``)."""
-
-    def __init__(self, inner: DatasetLoader) -> None:
-        self._inner = inner
-
-    @override
-    def load(self, name: str | None) -> DatasetDict:
-        loaded = self._inner.load(name)
-        return DatasetDict({split: data.filter(lambda row: row["is_diamond"]) for split, data in loaded.items()})
-
-    @override
-    def metadata(self) -> dict[str, str]:
-        return self._inner.metadata()
-
-
-@final
-class _DiamondOnly(DatasetPolicy):
-    """Wraps a dataset policy to serve only the diamond subset — the 198 hardest GPQA questions."""
-
-    def __init__(self, inner: DatasetPolicy) -> None:
-        self._inner = inner
-
-    @override
-    def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
-        return _DiamondFilteredLoader(self._inner.loader(custom_hf_revision))
-
-    @override
-    def documentation(self) -> str:
-        return self._inner.documentation()
-
-
 def _gpqa_ellamind_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy | None) -> Benchmark:
     return ComposedBenchmark.compose(
         id=id,
@@ -82,7 +47,7 @@ def _gpqa_ellamind_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy
 
 def _gpqa_ellamind_diamond_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy | None) -> Benchmark:
     source = dataset if dataset is not None else pinned_by_framework("ellamind/gpqa-multilingual")
-    return _gpqa_ellamind_benchmark(id, styler, _DiamondOnly(source))
+    return _gpqa_ellamind_benchmark(id, styler, Subset(source, keep=lambda row: row["is_diamond"]))
 
 
 def gpqa_ellamind_mc_de(dataset: DatasetPolicy | None = None) -> Benchmark:
