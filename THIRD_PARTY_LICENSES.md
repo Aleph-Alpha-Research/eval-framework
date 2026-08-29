@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.82 - https://github.com/boto/boto3
-- **botocore** 1.43.82 - https://github.com/boto/botocore
+- **boto3** 1.43.83 - https://github.com/boto/boto3
+- **botocore** 1.43.83 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -103,8 +103,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
 - **jsonschema-specifications** 2025.9.1 - https://github.com/python-jsonschema/jsonschema-specifications
 - **platformdirs** 4.11.5 - https://github.com/tox-dev/platformdirs
-- **pydantic** 2.13.4 - https://github.com/pydantic/pydantic
-- **pydantic_core** 2.46.4 - https://github.com/pydantic
+- **pydantic** 2.13.5 - https://github.com/pydantic/pydantic
+- **pydantic_core** 2.46.5 - https://github.com/pydantic
 - **PyYAML** 6.0.3 - https://pyyaml.org/
 - **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
 - **rpds-py** 2026.6.3 - https://github.com/crate-py/rpds
@@ -212,7 +212,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.82 (Apache-2.0)
+### boto3 1.43.83 (Apache-2.0)
 
 ```text
 Apache License
@@ -393,7 +393,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.82 (Apache-2.0)
+### botocore 1.43.83 (Apache-2.0)
 
 ```text
 Apache License
@@ -15686,7 +15686,7 @@ DAMAGES.
                      END OF TERMS AND CONDITIONS
 ```
 
-### pydantic 2.13.4 (MIT)
+### pydantic 2.13.5 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -15712,7 +15712,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### pydantic_core 2.46.4 (MIT)
+### pydantic_core 2.46.5 (MIT)
 
 ```text
 The MIT License (MIT)

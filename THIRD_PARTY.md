@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.79,<2` |
+| `boto3` | `>=1.43.80,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.14.2` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.82` |
+| `botocore` | `1.43.83` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.1` |
 | `click` | `8.5.0` |
@@ -66,7 +66,7 @@ and first-party/internal packages are excluded.
 | `platformdirs` | `4.11.5` |
 | `protobuf` | `7.36.0` |
 | `pyarrow` | `25.0.1` |
-| `pydantic-core` | `2.46.4` |
+| `pydantic-core` | `2.46.5` |
 | `python-dateutil` | `2.9.0.post0` |
 | `referencing` | `0.37.0` |
 | `regex` | `2026.7.19` |
