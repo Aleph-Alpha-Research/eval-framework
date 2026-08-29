@@ -14,6 +14,18 @@
 
 ### Bug Fixes
 
+## [0.11.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.1...v0.11.2) (2026-08-29)
+
+
+### Features
+
+* **metrics:** add Bayesian accuracy ([7332bfa](https://github.com/Aleph-Alpha-Research/eval-framework/commit/7332bfa56d128c431c910f1eeb23a0eaf2e89857))
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.80,&lt;2 ([0bee8ff](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0bee8ff8d92ad44724f5ffde9cd98c7a07b2e022))
+
 ## [0.11.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.0...v0.11.1) (2026-08-28)
 
 
