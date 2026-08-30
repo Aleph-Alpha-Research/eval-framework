@@ -61,7 +61,9 @@ class Eval(ABC):
 class Benchmark(ABC):
     """A benchmark is used to provide means of measuring model performance in a domain.
 
-    A benchmark is used to instantiate concrete evaluations.
+    Benchmark act as factories for `Eval`. They bind all the a prior known information and enrich it
+    with the arguments provided at runtime to create concrete instances of `Eval` which are used to
+    provide measurements of the models performance.
     """
 
     @abstractmethod
