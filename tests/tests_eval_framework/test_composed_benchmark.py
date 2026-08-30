@@ -8,6 +8,7 @@ from datasets import Dataset, DatasetDict
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark, ComposedEval, LanguageSpec
 from eval_framework.contract import ResponseType
+from eval_framework.eval_kind import Choice
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesLoglikelihood,
@@ -80,7 +81,7 @@ class _DummyStyler(TaskStyler):
 
     @override
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str] | None:
-        return None
+        return []
 
     @override
     def get_cue_text(self) -> str:
@@ -132,8 +133,7 @@ def _make_benchmark(
     return ComposedBenchmark.compose(
         id=id,
         display_name=display_name,
-        styler=styler or _DummyStyler(),
-        reader=reader,
+        kind=Choice(reader=reader, styler=styler or _DummyStyler()),
         sample_split=sample_split,
         fewshot_split=fewshot_split,
         subjects=subjects,
@@ -159,9 +159,8 @@ def _make_eval(
     return ComposedEval(
         num_fewshot,
         display_name=display_name,
-        reader=reader,
+        kind=Choice(reader=reader, styler=styler or _DummyStyler()),
         loader=loader,
-        styler=styler or _DummyStyler(),
         sample_split=sample_split,
         fewshot_split=fewshot_split,
         subjects=subjects,

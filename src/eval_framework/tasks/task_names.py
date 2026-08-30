@@ -8,6 +8,7 @@ from eval_framework.benchmarks.hle_ellamind import HLE_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.simpleqa_ellamind import SIMPLEQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.siqa_ellamind import SIQA_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.winogrande_ellamind import WINOGRANDE_ELLAMIND_BENCHMARKS
 from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import Registry, register_lazy_task
 from eval_framework.tasks.registry import registry as global_registry
@@ -322,12 +323,5 @@ def register_siqa_ellamind_tasks(registry: Registry) -> None:
 
 def register_winogrande_ellamind_tasks(registry: Registry) -> None:
     """Register winogrande_ellamind benchmark tasks."""
-    register_lazy_task(
-        "eval_framework.tasks.benchmarks.winogrande_ellamind.WINOGRANDE_ELLAMIND_CLOZE_DE", registry=registry
-    )
-    register_lazy_task(
-        "eval_framework.tasks.benchmarks.winogrande_ellamind.WINOGRANDE_ELLAMIND_MC_DE", registry=registry
-    )
-    register_lazy_task(
-        "eval_framework.tasks.benchmarks.winogrande_ellamind.WINOGRANDE_ELLAMIND_PARTIAL_EVAL_DE", registry=registry
-    )
+    for benchmark in WINOGRANDE_ELLAMIND_BENCHMARKS:
+        registry.add(benchmark)

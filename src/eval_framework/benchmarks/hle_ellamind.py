@@ -11,6 +11,7 @@ from typing import Any, final, override
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
+from eval_framework.eval_kind import Choice
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy, Subset
@@ -32,20 +33,21 @@ class HleReader(ChoiceReader):
         return ChoiceFields(raw_question=item["question"], choices=choices, correct_index=correct_index)
 
 
-def _hle_ellamind_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy | None) -> Benchmark:
+def _hle_ellamind_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy | None = None) -> Benchmark:
+    kind = Choice(reader=HleReader(), styler=styler)
+    dataset_policy = dataset if dataset is not None else pinned_by_framework("ellamind/hle-multilingual")
     return ComposedBenchmark.compose(
         id=id,
-        styler=styler,
-        reader=HleReader(),
+        kind=kind,
         sample_split="test",
         fewshot_split="test",
         subjects=ListOfSubjects(["deu"]),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework("ellamind/hle-multilingual"),
+        dataset_policy=dataset_policy,
         language=Language.DEU,
     )
 
 
-def _hle_ellamind_native_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy | None) -> Benchmark:
+def _hle_ellamind_native_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy | None = None) -> Benchmark:
     source = dataset if dataset is not None else pinned_by_framework("ellamind/hle-multilingual")
     return _hle_ellamind_benchmark(id, styler, Subset(source, keep=lambda row: row["answer_type"] == "multipleChoice"))
 
