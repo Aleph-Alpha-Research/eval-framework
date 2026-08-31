@@ -107,6 +107,5 @@ RESPONSE_TYPE = COMPLETION
 METRICS = [Accuracy, F1]
 SUBJECTS = ['no_subject']
 ````
-
 """
     )
