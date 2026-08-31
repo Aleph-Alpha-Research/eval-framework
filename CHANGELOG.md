@@ -14,6 +14,17 @@
 
 ### Bug Fixes
 
+## [0.11.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.2...v0.11.3) (2026-08-31)
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.81,&lt;2 ([494bf73](https://github.com/Aleph-Alpha-Research/eval-framework/commit/494bf739a68d9ff6d63eb7788785fdf43b094f89))
+* **deps:** update dependency boto3 to &gt;=1.43.82,&lt;2 ([b676545](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b6765457edf6f6c306f79586e66cdc736c3962d3))
+* **deps:** update dependency openai to &gt;=3.4.0,&lt;4 ([32cc852](https://github.com/Aleph-Alpha-Research/eval-framework/commit/32cc8529f8b63868b8a8870dbc824251f90c1010))
+* **deps:** update dependency openai to &gt;=3.5.0,&lt;4 ([0c5d52d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0c5d52df559601d6e996809f488c61ef917395d2))
+* **deps:** update dependency wandb to &gt;=0.29.0,&lt;1 ([dca5263](https://github.com/Aleph-Alpha-Research/eval-framework/commit/dca52639aa9a45aeb60eb6495392ec2ebaf79d11))
+
 ## [0.11.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.1...v0.11.2) (2026-08-29)
 
 
