@@ -71,4 +71,4 @@ def markdown_doc(
             buf.write("None\n")
         buf.write("````\n")
 
-    return buf.getvalue()
+    return buf.getvalue().rstrip("\n") + "\n"
