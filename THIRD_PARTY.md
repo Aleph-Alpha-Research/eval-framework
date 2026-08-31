@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.81,<2` |
+| `boto3` | `>=1.43.82,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -30,7 +30,7 @@ and first-party/internal packages are excluded.
 | `pyyaml` | `>=6.0.3,<7` |
 | `scipy` | `>=1.18.1,<2` |
 | `sympy` | `>=1.14.0,<2` |
-| `wandb` | `>=0.28.2,<1` |
+| `wandb` | `>=0.29.0,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
 ## Transitive
@@ -69,7 +69,7 @@ and first-party/internal packages are excluded.
 | `pydantic-core` | `2.46.5` |
 | `python-dateutil` | `2.9.0.post0` |
 | `referencing` | `0.37.0` |
-| `regex` | `2026.7.19` |
+| `regex` | `2026.8.31` |
 | `requests` | `2.34.2` |
 | `rpds-py` | `2026.6.3` |
 | `s3transfer` | `0.19.2` |
