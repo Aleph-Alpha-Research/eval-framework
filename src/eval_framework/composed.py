@@ -2,7 +2,7 @@ import logging
 import random
 import traceback
 import typing
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from typing import TYPE_CHECKING, Any, Self, final, override
 
 from datasets import DatasetDict
@@ -33,6 +33,10 @@ logger = logging.getLogger(__name__)
 # The language(s) a benchmark tests: a single language, a per-subtopic mapping, or None (not language-specific).
 LanguageSpec = Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
 
+# An initial prompt ("preamble") for a benchmark: maps the subject label to the text prepended once
+# at the top of each assembled prompt (e.g. "The following are multiple choice questions about {subject}.").
+InitialPrompt = Callable[[str], str]
+
 
 @final
 class ComposedEval(Eval):
@@ -48,6 +52,7 @@ class ComposedEval(Eval):
         subjects: Subjects,
         language: LanguageSpec,
         rnd: random.Random,
+        initial_prompt: InitialPrompt | None = None,
     ) -> None:
         self._display_name = display_name
         self.num_fewshot = num_fewshot
@@ -58,6 +63,7 @@ class ComposedEval(Eval):
         self._subjects = subjects
         self.language = language
         self.rnd = rnd
+        self._initial_prompt = initial_prompt
 
     def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, Any]:
         dataset = {}
@@ -91,6 +97,12 @@ class ComposedEval(Eval):
                 prefix = self._fewshot_prefix(item, fewshot_pool)
                 for body in self._kind.samples(item):
                     messages = [*prefix, Message(role=Role.USER, content=body.prompt)]
+                    if self._initial_prompt is not None:
+                        # Prepended once, to the very first message (same placement as BaseTask's
+                        # ``_get_initial_prompt_text``): before the first fewshot example if present.
+                        first = messages[0]
+                        content = f"{self._initial_prompt(subject.label)}\n\n{first.content}"
+                        messages[0] = Message(role=first.role, content=content)
                     if body.cue:
                         messages.append(Message(role=Role.ASSISTANT, content=body.cue))
                     yield Sample(
@@ -260,6 +272,7 @@ class ComposedBenchmark(Benchmark):
         fewshot_split: str,
         dataset_policy: DatasetPolicy,
         language: LanguageSpec,
+        initial_prompt: InitialPrompt | None = None,
     ) -> None:
         self._id = id
         self._display_name = display_name
@@ -269,6 +282,7 @@ class ComposedBenchmark(Benchmark):
         self.fewshot_split = fewshot_split
         self.language = language
         self.dataset_policy = dataset_policy
+        self._initial_prompt = initial_prompt
 
     @classmethod
     def compose(
@@ -282,9 +296,13 @@ class ComposedBenchmark(Benchmark):
         dataset_policy: DatasetPolicy,
         language: LanguageSpec,
         display_name: str | None = None,
+        initial_prompt: InitialPrompt | None = None,
     ) -> Self:
         """Build a ``ComposedBenchmark`` from its inputs; ``subjects`` defaults to ``NoSubject``
-        (a single unnamed slice) and ``display_name`` to ``id``."""
+        (a single unnamed slice) and ``display_name`` to ``id``.
+
+        ``initial_prompt`` maps the subject label to a preamble prepended once to each prompt's
+        first message (separated by a blank line), before the first fewshot example if present."""
         return cls(
             id=id,
             display_name=display_name if display_name is not None else id,
@@ -294,6 +312,7 @@ class ComposedBenchmark(Benchmark):
             fewshot_split=fewshot_split,
             language=language,
             dataset_policy=dataset_policy,
+            initial_prompt=initial_prompt,
         )
 
     @override
@@ -326,6 +345,7 @@ class ComposedBenchmark(Benchmark):
             language=self.language,
             loader=self.dataset_policy.loader(custom_hf_revision),
             rnd=random.Random(seed),
+            initial_prompt=self._initial_prompt,
         )
 
     @override
@@ -362,6 +382,7 @@ class ComposedBenchmark(Benchmark):
             language=self.language,
             loader=self.dataset_policy.loader(None),
             rnd=random.Random(RANDOM_SEED),
+            initial_prompt=self._initial_prompt,
         )
         sample = next(iter(instance.iterate_samples(1)))
         dataset = instance._load_dataset(subjects[0].load_key)

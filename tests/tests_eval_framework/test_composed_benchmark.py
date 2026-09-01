@@ -6,7 +6,7 @@ import pytest
 from datasets import Dataset, DatasetDict
 
 from eval_framework.choices import ChoiceFields, ChoiceReader
-from eval_framework.composed import ComposedBenchmark, ComposedEval, LanguageSpec
+from eval_framework.composed import ComposedBenchmark, ComposedEval, InitialPrompt, LanguageSpec
 from eval_framework.contract import ResponseType
 from eval_framework.eval_kind import Choice
 from eval_framework.metrics.base import BaseMetric
@@ -19,6 +19,7 @@ from eval_framework.subjects import ListOfSubjects, Subject, Subjects, SubjectsS
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.task_style import TaskStyle, TaskStyler
 from template_formatting.formatter import ConcatFormatter, Message, Role
+from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
 
 
 class _DummyReader(ChoiceReader):
@@ -128,6 +129,7 @@ def _make_benchmark(
     subjects: SubjectsSelector = _DUMMY_SELECTOR,
     dataset_policy: DatasetPolicy | None = None,
     language: LanguageSpec = None,
+    initial_prompt: InitialPrompt | None = None,
 ) -> ComposedBenchmark:
     """Build a ``ComposedBenchmark`` for tests, defaulting to dummies for every argument the test does not provide."""
     return ComposedBenchmark.compose(
@@ -139,6 +141,7 @@ def _make_benchmark(
         subjects=subjects,
         dataset_policy=dataset_policy or _DummyDatasetPolicy(),
         language=language,
+        initial_prompt=initial_prompt,
     )
 
 
@@ -325,5 +328,41 @@ def test_message_sampling() -> None:
     [sample] = list(task.iterate_samples())
     assert sample.messages == [
         Message(role=Role.USER, content="instruction: the goal"),
+        Message(role=Role.ASSISTANT, content="the cue"),
+    ]
+
+
+def test_initial_prompt_is_prepended_once_before_the_first_fewshot_example() -> None:
+    # Given a reader/styler pair that echoes each item's question,
+    class _Reader(ChoiceReader):
+        @override
+        def read(self, item: dict[str, Any]) -> ChoiceFields:
+            return ChoiceFields(raw_question=item["question"], choices=[], correct_index=0)
+
+    class _Styler(_DummyStyler):
+        @override
+        def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
+            return f"instruction: {raw_question}"
+
+        @override
+        def get_cue_text(self) -> str:
+            return "the cue"
+
+    # and a benchmark over one eval row and one fewshot row, with a subject-dependent initial prompt
+    benchmark = _make_benchmark(
+        reader=_Reader(),
+        styler=_Styler(),
+        fewshot_split="train",
+        dataset_policy=DatasetStub({"test": [{"question": "eval q"}], "train": [{"question": "shot q"}]}),
+        initial_prompt=lambda subject: f"About {subject}.",
+    )
+
+    # When assembling a 1-shot sample, then the initial prompt appears exactly once,
+    # at the top of the first (fewshot) USER message
+    sample = first_sample(benchmark, num_fewshot=1)
+    assert sample.messages == [
+        Message(role=Role.USER, content="About subject.\n\ninstruction: shot q"),
+        Message(role=Role.ASSISTANT, content="the cue"),
+        Message(role=Role.USER, content="instruction: eval q"),
         Message(role=Role.ASSISTANT, content="the cue"),
     ]
