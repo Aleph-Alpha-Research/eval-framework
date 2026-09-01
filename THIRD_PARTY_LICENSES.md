@@ -8,7 +8,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 | License (SPDX) | Count |
 |---|---|
 | `MIT` | 21 |
-| `BSD-3-Clause` | 17 |
+| `BSD-3-Clause` | 18 |
 | `Apache-2.0` | 13 |
 | `PSF-2.0` | 2 |
 | `UNKNOWN` | 2 |
@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.83 - https://github.com/boto/boto3
-- **botocore** 1.43.83 - https://github.com/boto/botocore
+- **boto3** 1.43.85 - https://github.com/boto/boto3
+- **botocore** 1.43.85 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -59,18 +59,19 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 - **antlr4-python3-runtime** 4.11.0 - http://www.antlr.org
 - **click** 8.5.0 - https://github.com/pallets/click/
+- **cloudpickle** 3.1.2 - https://github.com/cloudpipe/cloudpickle
 - **dill** 0.4.1 - https://github.com/uqfoundation/dill
 - **fsspec** 2026.6.0 - https://github.com/fsspec/filesystem_spec
 - **httpcore** 1.0.9 - https://www.encode.io/httpcore/
 - **httpx** 0.28.1 - https://github.com/encode/httpx
 - **idna** 3.19 - https://github.com/kjd/idna
-- **joblib** 1.5.3 - https://joblib.readthedocs.io
+- **joblib** 1.6.0 - https://joblib.readthedocs.io
 - **jsonlines** 4.0.0 - https://github.com/wbolster/jsonlines
 - **lxml** 6.1.2 - https://lxml.de/
 - **mpmath** 1.3.0 - http://mpmath.org/
 - **multiprocess** 0.70.19 - https://github.com/uqfoundation/multiprocess
 - **pandas** 3.0.5 - https://pandas.pydata.org
-- **protobuf** 7.36.0 - https://developers.google.com/protocol-buffers/
+- **protobuf** 7.36.1 - https://developers.google.com/protocol-buffers/
 - **python-dotenv** 1.2.3 - https://github.com/theskumar/python-dotenv
 - **scipy** 1.18.1 - https://scipy.org/
 - **sympy** 1.14.0 - https://sympy.org
@@ -97,7 +98,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.14.2 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.1 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 3.32.4 - https://github.com/tox-dev/py-filelock
+- **filelock** 3.32.5 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -212,7 +213,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.83 (Apache-2.0)
+### boto3 1.43.85 (Apache-2.0)
 
 ```text
 Apache License
@@ -393,7 +394,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.83 (Apache-2.0)
+### botocore 1.43.85 (Apache-2.0)
 
 ```text
 Apache License
@@ -649,6 +650,43 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
 PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
+
+### cloudpickle 3.1.2 (BSD-3-Clause)
+
+```text
+This module was extracted from the `cloud` package, developed by
+PiCloud, Inc.
+
+Copyright (c) 2015, Cloudpickle contributors.
+Copyright (c) 2012, Regents of the University of California.
+Copyright (c) 2009 PiCloud, Inc. http://www.picloud.com.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the University of California, Berkeley nor the
+      names of its contributors may be used to endorse or promote
+      products derived from this software without specific prior written
+      permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
 HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
 SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
 TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
@@ -956,7 +994,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### filelock 3.32.4 (MIT)
+### filelock 3.32.5 (MIT)
 
 ```text
 MIT License
@@ -1772,7 +1810,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### joblib 1.5.3 (BSD-3-Clause)
+### joblib 1.6.0 (BSD-3-Clause)
 
 ```text
 BSD 3-Clause License
@@ -12821,7 +12859,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### protobuf 7.36.0 (BSD-3-Clause)
+### protobuf 7.36.1 (BSD-3-Clause)
 
 ```text
 Copyright 2008 Google Inc.  All rights reserved.
