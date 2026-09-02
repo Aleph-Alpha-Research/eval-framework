@@ -179,6 +179,8 @@ class GPQA_COT(GPQA):
     NAME = "GPQA_COT"
     RESPONSE_TYPE = ResponseType.COMPLETION
     METRICS = [AccuracyCompletion]
+    # "gpqa_diamond" can be selected via task_subjects=["gpqa_diamond"]
+    SUBJECTS = ["gpqa_extended", "gpqa_diamond"]
     ANS_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
 
     def __init__(self, num_fewshot: int = 0) -> None:
@@ -230,8 +232,3 @@ class GPQA_COT(GPQA):
         # index 1 selects the letter
         answer_key = choices[correct_answer_position][1]
         return answer_key
-
-
-class GPQA_DIAMOND_COT(GPQA_COT):
-    NAME = "GPQA_DIAMOND_COT"
-    SUBJECTS = ["gpqa_diamond"]

@@ -90,7 +90,7 @@ def register_piqa_tasks(registry: Registry) -> None:
 def register_gpqa_tasks(registry: Registry) -> None:
     """Register gpqa benchmark tasks."""
     register_lazy_task("eval_framework.tasks.benchmarks.gpqa.GPQA_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.gpqa.GPQA_DIAMOND_COT", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.gpqa.GPQA_COT", registry=registry)
 
 
 def register_gsm8k_tasks(registry: Registry) -> None:
@@ -190,7 +190,6 @@ def register_mmlu_pro_tasks(registry: Registry) -> None:
 def register_global_mmlu_tasks(registry: Registry) -> None:
     """Register global_mmlu benchmark tasks."""
     register_lazy_task("eval_framework.tasks.benchmarks.global_mmlu.GlobalMMLU", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.global_mmlu.GlobalMMLU_German", registry=registry)
 
 
 def register_sciq_tasks(registry: Registry) -> None:
