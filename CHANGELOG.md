@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.11.5](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.4...v0.11.5) (2026-09-03)
+
+
+### Features
+
+* optional initial prompt for composed benchmarks ([66b32d2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/66b32d2e3bcfde96db0a4c236668e5308eb72172))
+
 ## [0.11.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.3...v0.11.4) (2026-09-01)
 
 
