@@ -89,6 +89,7 @@ This file provides high-level performance summaries across all evaluation sample
 {
   "ErrorFreeRatio Accuracy Loglikelihood": 1.0,
   "Average Accuracy Loglikelihood": 0.215,
+  "Average Accuracy Loglikelihood (micro)": 0.22,
   "Average Accuracy Loglikelihood - ARC-Challenge": 0.14,
   "Average Accuracy Loglikelihood - ARC-Easy": 0.29,
   "ErrorFreeRatio Bytes": 1.0,
@@ -98,7 +99,8 @@ This file provides high-level performance summaries across all evaluation sample
 
 **Metric Types:**
 - **`ErrorFreeRatio`**: Percentage of samples that completed without errors (1.0 = 100%)
-- **`Average`**: Mean score across all samples
+- **`Average`**: Mean of the per-subject means (macro average), so every subject counts equally
+- **`Average (micro)`**: Mean over all samples, so larger subjects count more (micro average). Identical to `Average` for tasks without subjects.
 - **Subject-specific**: Metrics broken down by task subset (e.g., "ARC-Challenge" vs "ARC-Easy")
 
 ## Metadata

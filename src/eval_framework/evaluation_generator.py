@@ -136,9 +136,12 @@ class EvaluationGenerator:
             error_free_ratio = float(len(data_subset_error_free) / total_count)
             aggregated_results[f"ErrorFreeRatio {metric}"] = error_free_ratio
 
+            # Default average is weighted by key and subject (macro average).
             # aggregate by key and subject first to have equal weights for all key / subject combinations
             key_subject_mean = data_subset_error_free.groupby(["key", "subject"]).mean()
             aggregated_results[f"Average {metric}"] = float(key_subject_mean[["value"]].mean()["value"])
+            # Additionally, report the plain mean over all samples (micro average or per-sample average).
+            aggregated_results[f"Average {metric} (micro)"] = float(data_subset_error_free["value"].mean())
 
             if error_free_ratio < 1.0:
                 # Treat error samples (with value=None) as 0 for the "including errors" average
@@ -274,12 +277,15 @@ class EvaluationGenerator:
                 raise ValueError(f"Metric {metric_name} not found in metrics list")
 
             for aggregator in current_metric.AGGREGATORS:
+                # Compute the aggregator per problem (collapsing the repeats of each problem into one score).
+                per_problem = aggregator(metric_group, ["subject", "problem"])
+                # Macro average: mean per key/subject group, then mean over groups, giving equal weight to every group.
                 aggregated_results[f"{aggregator.name} {current_metric_class}.{metric_name}"] = (
-                    aggregator(metric_group, ["subject", "problem"])  # Compute the aggregator per problem...
-                    .groupby(["key", "subject"])  # ... then group by key, subject...
-                    .agg({"value": "mean"})["value"]  # ...and average scores over each key, subject group...
-                    .mean()  # ...and lastly average the scores across all groups giving equal weight to every
-                    .item()  # key, subject group.
+                    per_problem.groupby(["key", "subject"]).agg({"value": "mean"})["value"].mean().item()
+                )
+                # Micro average: plain mean over all problems.
+                aggregated_results[f"{aggregator.name} {current_metric_class}.{metric_name} (micro)"] = (
+                    per_problem["value"].mean().item()
                 )
 
         # Loop to additionally compute per-subject/per-key breakdown metric scores, e.g. for only subject="algebra"
