@@ -204,6 +204,7 @@ def test_aggregate_results(tmp_path: Path) -> None:
     assert aggregated_results == pytest.approx(
         {
             "Average metric1": 2.0,  # mean of all key-subject pairs (3.0, 4.0, 1.0, 0.0)
+            "Average metric1 (micro)": 15 / 7,  # plain mean of the 7 error-free values
             "Average metric1 (including Errors)": 1.8125,  # errors treated as 0: (2.25, 1.0, 4.0, 0.0)
             "Average metric1 - key1": 3.5,  # mean of means of subjects (3.0 and 4.0)
             "Average metric1 (including Errors) - key1": 3.125,  # errors as 0: (2.25, 4.0)
@@ -214,10 +215,12 @@ def test_aggregate_results(tmp_path: Path) -> None:
             "Average metric1 - subject2": 2.0,
             "Average metric1 (including Errors) - subject2": 2.0,  # errors as 0: (4.0, 0.0)
             "Average metric2": 3.0,  # NaNs are skipped in the mean calculation
+            "Average metric2 (micro)": 3.0,
             "Average metric2 - subject1": 3.0,
             "Average metric2 - subject2": float("nan"),  # NaN appears
             # key in metric2 is not output because it's just a single submetric
             "Average metric3": 19.0,  # key=None case works
+            "Average metric3 (micro)": 19.0,
             "Average metric3 - subject1": 20.0,
             "Average metric3 - subject2": 18.0,
             "ErrorFreeRatio metric1": 0.8,
@@ -324,11 +327,13 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
     # p5 s2 k2 0
     assert aggregated == {
         "Pass@1 MockPassAtKMetric.ExactMatch": pytest.approx(((2 / 3 + 0) / 2 + 1 + 1 + 0) / 4),
+        "Pass@1 MockPassAtKMetric.ExactMatch (micro)": pytest.approx((2 / 3 + 0 + 1 + 1 + 0) / 5),
         "Pass@1 ExactMatch - key1 - subject1": pytest.approx((2 / 3 + 0) / 2),
         "Pass@1 ExactMatch - key1 - subject2": 1,
         "Pass@1 ExactMatch - key2 - subject1": 1,
         "Pass@1 ExactMatch - key2 - subject2": 0.0,
         "Pass@2 MockPassAtKMetric.ExactMatch": pytest.approx((1 / 2 + 1 + 1 + 0) / 4),
+        "Pass@2 MockPassAtKMetric.ExactMatch (micro)": pytest.approx((1 + 0 + 1 + 1 + 0) / 5),
         "Pass@2 ExactMatch - key1 - subject1": pytest.approx((1 + 0) / 2),
         "Pass@2 ExactMatch - key1 - subject2": 1,
         "Pass@2 ExactMatch - key2 - subject1": 1,
@@ -396,6 +401,7 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
     # First loop: groupby (key, subject) means → (1/3, 1.0, 1.0, 0) → overall mean = 0.5833
     assert aggregated == {
         "IdentifierMean MockIdentifierMeanMetric.ExactMatch": pytest.approx(((2 / 3 + 0) / 2 + 1 + 1 + 0) / 4),
+        "IdentifierMean MockIdentifierMeanMetric.ExactMatch (micro)": pytest.approx((2 / 3 + 0 + 1 + 1 + 0) / 5),
         "IdentifierMean ExactMatch - key1 - subject1": pytest.approx((2 / 3 + 0) / 2),
         "IdentifierMean ExactMatch - key2 - subject1": 1,
         "IdentifierMean ExactMatch - key1 - subject2": 1,
