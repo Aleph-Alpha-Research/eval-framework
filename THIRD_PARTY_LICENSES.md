@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.86 - https://github.com/boto/boto3
-- **botocore** 1.43.86 - https://github.com/boto/botocore
+- **boto3** 1.43.87 - https://github.com/boto/boto3
+- **botocore** 1.43.87 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -67,7 +67,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **idna** 3.19 - https://github.com/kjd/idna
 - **joblib** 1.6.0 - https://joblib.readthedocs.io
 - **jsonlines** 4.0.0 - https://github.com/wbolster/jsonlines
-- **lxml** 6.1.2 - https://lxml.de/
+- **lxml** 6.1.3 - https://lxml.de/
 - **mpmath** 1.3.0 - http://mpmath.org/
 - **multiprocess** 0.70.19 - https://github.com/uqfoundation/multiprocess
 - **pandas** 3.0.5 - https://pandas.pydata.org
@@ -95,7 +95,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## MIT
 
 - **annotated-types** 0.8.0 - https://github.com/annotated-types/annotated-types
-- **anyio** 4.14.2 - https://anyio.readthedocs.io/en/stable/versionhistory.html
+- **anyio** 4.15.0 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.1 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
 - **filelock** 3.32.5 - https://github.com/tox-dev/py-filelock
@@ -162,7 +162,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### anyio 4.14.2 (MIT)
+### anyio 4.15.0 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -213,7 +213,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.86 (Apache-2.0)
+### boto3 1.43.87 (Apache-2.0)
 
 ```text
 Apache License
@@ -394,7 +394,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.86 (Apache-2.0)
+### botocore 1.43.87 (Apache-2.0)
 
 ```text
 Apache License
@@ -2177,7 +2177,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### lxml 6.1.2 (BSD-3-Clause)
+### lxml 6.1.3 (BSD-3-Clause)
 
 ```text
 BSD 3-Clause License
