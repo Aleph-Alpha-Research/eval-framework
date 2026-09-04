@@ -293,6 +293,17 @@ class TestEvalConfigJudgeModelArgsValidation:
         assert config.judge_model_args["use_cache"] == "True"
         assert isinstance(config.judge_model_args["use_cache"], str)
 
+    def test_judge_model_args_keep_none(self) -> None:
+        """A None value (e.g. an unset api_key) must pass through instead of crashing the number coercion."""
+        config = EvalConfig(
+            llm_class=OpenAIModel,
+            llm_judge_class=OpenAIModel,
+            judge_model_args={"model_name": "gpt-4", "api_key": None},
+            task_name="MMLU",
+        )
+
+        assert config.judge_model_args["api_key"] is None
+
     def test_judge_model_args_serialization(self) -> None:
         config_data = {
             "llm_class": OpenAIModel,

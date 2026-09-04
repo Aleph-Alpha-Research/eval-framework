@@ -106,7 +106,7 @@ class EvalConfig(BaseConfig):
                     v = float(v)
                 else:
                     v = int(v)
-            except ValueError:
+            except (ValueError, TypeError):  # not a number, or None
                 pass
             typed_value[k] = v
         return typed_value
