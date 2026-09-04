@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.87 - https://github.com/boto/boto3
-- **botocore** 1.43.87 - https://github.com/boto/botocore
+- **boto3** 1.43.88 - https://github.com/boto/boto3
+- **botocore** 1.43.88 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
@@ -213,7 +213,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.87 (Apache-2.0)
+### boto3 1.43.88 (Apache-2.0)
 
 ```text
 Apache License
@@ -394,7 +394,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.87 (Apache-2.0)
+### botocore 1.43.88 (Apache-2.0)
 
 ```text
 Apache License
