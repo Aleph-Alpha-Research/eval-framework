@@ -1,4 +1,6 @@
 import pytest
+from openai import omit
+from openai.types.chat.completion_create_params import ResponseFormat
 from pytest_mock import MockerFixture
 
 from eval_framework.llm.base import BaseLLM
@@ -166,6 +168,23 @@ def test_openai_chat_api_top_p_generate_from_messages(mocker: MockerFixture) -> 
     model.generate_from_messages(_MESSAGES, top_p=0.75)
     call_kwargs = mock_client.chat.completions.create.call_args.kwargs
     assert call_kwargs["top_p"] == 0.75
+
+
+def test_openai_chat_api_forwards_response_format(mocker: MockerFixture) -> None:
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    mock_client.chat.completions.create.return_value = _make_chat_response(mocker)
+    _MESSAGES = [[Message(role=Role.USER, content="Hello")]]
+
+    OpenAIModel(model_name="gpt-4o-mini-2024-07-18").generate_from_messages(_MESSAGES)
+    assert mock_client.chat.completions.create.call_args.kwargs["response_format"] is omit
+
+    response_format: ResponseFormat = {
+        "type": "json_schema",
+        "json_schema": {"name": "verdict", "schema": {"type": "object"}},
+    }
+    OpenAIModel(model_name="gpt-4o-mini-2024-07-18", response_format=response_format).generate_from_messages(_MESSAGES)
+    assert mock_client.chat.completions.create.call_args.kwargs["response_format"] == response_format
 
 
 def test_generate_from_messages_validates_temperature_and_top_p(mocker: MockerFixture) -> None:

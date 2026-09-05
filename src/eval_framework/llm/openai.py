@@ -7,13 +7,14 @@ from collections.abc import Callable, Sequence
 from functools import partial
 
 import tiktoken
-from openai import OpenAI
+from openai import OpenAI, omit
 from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
     ChatCompletionMessageParam,
     ChatCompletionSystemMessageParam,
     ChatCompletionUserMessageParam,
 )
+from openai.types.chat.completion_create_params import ResponseFormat
 from tokenizers import Tokenizer
 from transformers import AutoTokenizer
 
@@ -59,6 +60,7 @@ class OpenAIModel(BaseLLM):
         organization: str | None = None,
         base_url: str | None = None,
         bytes_per_token: float | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> None:
         """
         Initialize the OpenAIModel.
@@ -72,6 +74,8 @@ class OpenAIModel(BaseLLM):
             organization: Optional OpenAI organization ID.
             base_url: Optional API base URL for Azure or alternate endpoints.
             bytes_per_token: Optional custom bytes per token scalar for non-standard models.
+            response_format: Optional OpenAI ``response_format`` payload for structured output, e.g.
+                ``{"type": "json_schema", "json_schema": {...}}``. Only used by the chat completion API.
         """
         assert model_name is not None or self.LLM_NAME is not None, "A model name must be specified."
         self._model_name = model_name if model_name else self.LLM_NAME
@@ -84,6 +88,7 @@ class OpenAIModel(BaseLLM):
         if top_p is not None:
             assert 0.0 <= top_p <= 1.0, "top_p must be between 0.0 and 1.0"
         self._top_p = top_p
+        self._response_format = response_format
 
         self._client = OpenAI(
             api_key=api_key if api_key is not None else os.getenv("OPENAI_API_KEY", ""),
@@ -220,6 +225,7 @@ class OpenAIModel(BaseLLM):
                     top_p=effective_top_p,
                     max_tokens=scaled_max_tokens,
                     stop=stop_sequences,
+                    response_format=self._response_format if self._response_format is not None else omit,
                 )
                 prompt = "\n".join([f"{m.get('role', '')}: {m.get('content', '')}" for m in chat_messages])
                 prompt_tokens = getattr(chat_response.usage, "prompt_tokens", None)
