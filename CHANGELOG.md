@@ -14,6 +14,19 @@
 
 ### Bug Fixes
 
+## [0.11.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.6...v0.11.7) (2026-09-05)
+
+
+### Features
+
+* additionally compute micro averages ([a845c6f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a845c6f49de7c91e6e7c97612d37aa6c5064e35c))
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.86,&lt;2 ([2ccc7da](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2ccc7dad85fa0af562c05ea85faedc2b85dc8b90))
+* **deps:** update dependency openai to &gt;=3.7.0,&lt;4 ([5f92c66](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5f92c6604aab3f7de31049900ec7b02b28d54b69))
+
 ## [0.11.6](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.5...v0.11.6) (2026-09-04)
 
 
