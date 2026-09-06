@@ -95,7 +95,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## MIT
 
 - **annotated-types** 0.8.0 - https://github.com/annotated-types/annotated-types
-- **anyio** 4.15.0 - https://anyio.readthedocs.io/en/stable/versionhistory.html
+- **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.1 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
 - **filelock** 3.32.5 - https://github.com/tox-dev/py-filelock
@@ -162,7 +162,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### anyio 4.15.0 (MIT)
+### anyio 4.15.1 (MIT)
 
 ```text
 The MIT License (MIT)

@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.86,<2` |
+| `boto3` | `>=1.43.87,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -18,7 +18,7 @@ and first-party/internal packages are excluded.
 | `langdetect` | `>=1.0.9,<2` |
 | `lingua-language-detector` | `>=2.2.0,<3` |
 | `llm-sandbox` | `==0.3.44` |
-| `lxml` | `>=6.1.2,<7` |
+| `lxml` | `>=6.1.3,<7` |
 | `mysql-connector-python` | `>=26.7.0,<27` |
 | `nltk` | `>=3.10.3,<4` |
 | `numpy` | `>=2.5.2` |
@@ -38,7 +38,7 @@ and first-party/internal packages are excluded.
 | Package | Version |
 |---|---|
 | `annotated-types` | `0.8.0` |
-| `anyio` | `4.15.0` |
+| `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
 | `botocore` | `1.43.89` |
 | `certifi` | `2026.7.22` |
