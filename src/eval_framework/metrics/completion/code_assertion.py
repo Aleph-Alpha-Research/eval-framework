@@ -7,6 +7,9 @@ from eval_framework.tasks.utils import DockerReturnedEmptyOutput, run_python_cod
 
 class CodeCompletionAssertion(BaseMetric[Completion]):
     NAME = "Code Completion Accuracy"
+    IMAGE = "python:3.12-slim"
+    RUNTIME_CONFIGS: dict[str, str] | None = {"mem_limit": "512m"}
+    PACKAGES: list[str] | None = None
 
     def calculate(self, response: Completion) -> list[MetricResult]:
         if response.error is not None:
@@ -15,7 +18,9 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
         # this will always be a list, if return is "" this will be an empty list
         code = response.completion
         try:
-            output = run_python_code(code, image="python:3.12-slim", runtime_configs={"mem_limit": "512m"})
+            output = run_python_code(
+                code, image=self.IMAGE, runtime_configs=self.RUNTIME_CONFIGS, packages=self.PACKAGES
+            )
         except (SandboxTimeoutError, DockerReturnedEmptyOutput):
             # The submitted code timed out (e.g. an infinite loop) -- a failing sample, not an infra
             # problem.
@@ -51,3 +56,9 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
                 code_execution_trace=output,
             )
         ]
+
+
+class HumanEvalPlusCodeCompletionAssertion(CodeCompletionAssertion):
+    """CodeCompletionAssertion with numpy installed in the sandbox, needed by some HumanEvalPlus tests."""
+
+    PACKAGES = ["numpy"]
