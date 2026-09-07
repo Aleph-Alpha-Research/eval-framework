@@ -32,6 +32,7 @@
     "ellamind/simpleqa-verified-multilingual": "5975dec960b4d273708d58888ea23a020265f619",
     "ellamind/siqa-multilingual": "18408408ffb8375d7d190f248638b012c90c4031",
     "ellamind/winogrande-multilingual": "5c40020bc80f6b920e3fd7996296655ef436d3d9",
+    "evalplus/humanevalplus": "d32357cf319e50e9c8d8dab5ea876c72b0fd321b",
     "google-research-datasets/mbpp": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
     "google-research-datasets/nq_open": "5dd9790a83002ad084ddeb7c420dc716852c6f28",
     "google/IFEval": "966cd89545d6b6acfd7638bc708b98261ca58e84",
