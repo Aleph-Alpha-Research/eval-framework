@@ -78,7 +78,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
 
-- **numpy** 2.5.2 - https://numpy.org
+- **numpy** 2.5.3 - https://numpy.org
 
 ## GNU General Public License (GPL)
 
@@ -10614,7 +10614,7 @@ Apache License
    limitations under the License.
 ```
 
-### numpy 2.5.2 (BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0)
+### numpy 2.5.3 (BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0)
 
 ```text
 Copyright (c) 2005-2025, NumPy Developers.
