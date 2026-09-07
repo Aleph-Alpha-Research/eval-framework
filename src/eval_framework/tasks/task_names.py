@@ -171,19 +171,10 @@ def register_ifeval_tasks(registry: Registry) -> None:
 
 
 def register_multipl_e_tasks(registry: Registry) -> None:
-    """Register multipl_e benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalCpp", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalJava", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalJs", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalPhp", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalRs", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalSh", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPCpp", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPJava", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPJs", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPPhp", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPRs", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPSh", registry=registry)
+    """Register multipl_e benchmark tasks. Each task covers all 6 languages as SUBJECTS;
+    pass task_subjects=["cpp"] etc. to run a single language."""
+    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEval", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPP", registry=registry)
 
 
 def register_mmlu_pro_tasks(registry: Registry) -> None:
