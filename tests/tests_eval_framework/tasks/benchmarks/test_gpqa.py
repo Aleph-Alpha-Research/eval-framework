@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from eval_framework.tasks.benchmarks.gpqa import GPQA, GPQA_COT
+from eval_framework.tasks.benchmarks.gpqa import GPQA, GPQA_COT, GPQA_DIAMOND_COT_V2
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_names import register_gpqa_tasks
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
@@ -91,6 +91,20 @@ class TestGPQA_COT:
                 possible_completions = [f"({choice[1]})" for choice in choices]
                 assert f"({ground_truth})" in possible_completions
             assert len(ground_truths) == 1
+
+    @pytest.mark.parametrize(
+        "completion, expected",
+        [
+            ("Therefore, the answer is (B)", "B"),
+            ("Therefore, the answer is C", "C"),
+            ("the correct answer is (d).", "D"),
+            ("The answer is (A). Wait, actually the answer is (C).", "C"),
+            ("Therefore, the answer is (E)", "[invalid]"),
+            ("", "[invalid]"),
+        ],
+    )
+    def test_extract_answer(self, completion: str, expected: str) -> None:
+        assert GPQA_DIAMOND_COT_V2().post_process_generated_completion(completion) == expected
 
 
 # Registry for this test suite only holding gpqa tasks
