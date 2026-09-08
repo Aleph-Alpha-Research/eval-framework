@@ -14,6 +14,19 @@
 
 ### Bug Fixes
 
+## [0.11.10](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.9...v0.11.10) (2026-09-08)
+
+
+### Features
+
+* humaneval plus task copying humaneval ([5cd00b8](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5cd00b89c3acf87c1836dda499dbe26ba26d5cf3))
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.89,&lt;2 ([6630e1b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/6630e1b1ff03397c0727d83f775dca60a7899497))
+* keep None values in `judge_model_args` ([3802285](https://github.com/Aleph-Alpha-Research/eval-framework/commit/38022853beb2274dac8d0f52f9d0b643356c4834))
+
 ## [0.11.9](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.8...v0.11.9) (2026-09-07)
 
 
