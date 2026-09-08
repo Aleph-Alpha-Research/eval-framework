@@ -235,3 +235,18 @@ class GPQA_COT(GPQA):
 class GPQA_DIAMOND_COT(GPQA_COT):
     NAME = "GPQA_DIAMOND_COT"
     SUBJECTS = ["gpqa_diamond"]
+
+
+class GPQA_DIAMOND_COT_V2(GPQA_DIAMOND_COT):
+    """GPQA_DIAMOND_COT without the `Question:` stop sequence and with lenient last-match answer extraction."""
+
+    NAME = "GPQA_DIAMOND_COT_V2"
+    ANS_RE = re.compile(r"\banswer\s+is:?\s*\(?([A-D])\b\)?", re.IGNORECASE)
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.stop_sequences = []
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        matches = self.ANS_RE.findall(completion_text)
+        return matches[-1].upper() if matches else "[invalid]"

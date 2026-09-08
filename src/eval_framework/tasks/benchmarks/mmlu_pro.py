@@ -180,3 +180,18 @@ class MMLU_PRO_COT(MMLU_PRO):
             '"Therefore, the answer is (ANSWER_LETTER)" where (ANSWER_LETTER) is one of (A), (B), (C), (D), (E), etc.'
         )
         return instruction_text
+
+
+class MMLU_PRO_COT_V2(MMLU_PRO_COT):
+    """MMLU_PRO_COT without the `Question:` stop sequence and with lenient last-match answer extraction."""
+
+    NAME = "MMLU_PRO_COT_V2"
+    ANS_RE = re.compile(r"\banswer\s+is:?\s*\(?([A-J])\b\)?", re.IGNORECASE)
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.stop_sequences = []
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        matches = self.ANS_RE.findall(completion_text)
+        return matches[-1].upper() if matches else "[invalid]"
