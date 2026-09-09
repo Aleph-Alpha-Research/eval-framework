@@ -35,8 +35,8 @@ class IFEval(BaseTask[str]):
 
         new_kwargs = []
         for d in item["kwargs"]:
-            # fixing undesired float fields in the dataset
-            assert all([abs(v - float(v)) < 1e-5 for v in d.values() if isinstance(v, float)])
+            # some dataset variants type integer kwargs as float; int() below must not truncate anything
+            assert all(v.is_integer() for v in d.values() if isinstance(v, float)), f"Non-integer float in {d}"
             # None marks an absent kwarg; dropping it gives dense and sparse dataset shapes the same context
             new_kwargs.append({k: int(v) if isinstance(v, float) else v for k, v in d.items() if v is not None})
 

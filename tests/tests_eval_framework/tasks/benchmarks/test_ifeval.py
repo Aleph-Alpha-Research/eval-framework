@@ -35,3 +35,14 @@ def test_get_context_gives_same_kwargs_whether_absent_keys_are_omitted_or_none()
     for kwargs in (absent_keys_omitted, absent_keys_as_none):
         item = {"key": 142, "prompt": "", "instruction_id_list": [], "kwargs": kwargs}
         assert task._get_context(item).additional_kwargs == absent_keys_omitted
+
+
+def test_get_context_casts_integral_floats_to_int_and_rejects_others() -> None:
+    """Some dataset variants type integer kwargs as float; a non-integer value would be silently truncated."""
+    task = IFEval()
+    item = {"key": 0, "prompt": "", "instruction_id_list": [], "kwargs": [{"frequency": 2.0}]}
+    assert task._get_context(item).additional_kwargs == [{"frequency": 2}]
+
+    item["kwargs"] = [{"frequency": 2.5}]
+    with pytest.raises(AssertionError):
+        task._get_context(item)
