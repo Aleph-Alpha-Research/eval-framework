@@ -37,16 +37,8 @@ class IFEval(BaseTask[str]):
         for d in item["kwargs"]:
             # fixing undesired float fields in the dataset
             assert all([abs(v - float(v)) < 1e-5 for v in d.values() if isinstance(v, float)])
-            new_kwargs.append({k: v if not isinstance(v, float) else int(v) for k, v in d.items()})
-
-        # fixing changes to the HF dataset done on Apr 10 2025
-        if item["key"] == 142:
-            new_kwargs[2]["relation"] = None
-            new_kwargs[2]["frequency"] = None
-            new_kwargs[2]["keywords"] = new_kwargs[2]["keyword"]
-            del new_kwargs[2]["keyword"]
-        if item["key"] == 1512:
-            new_kwargs[0]["relation"] = None
+            # None marks an absent kwarg; dropping it gives dense and sparse dataset shapes the same context
+            new_kwargs.append({k: int(v) if isinstance(v, float) else v for k, v in d.items() if v is not None})
 
         item["kwargs"] = new_kwargs
 
