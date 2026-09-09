@@ -10,7 +10,7 @@ options (multiple choice); the IDK variant lets the model abstain with an "I do 
 from typing import Any, final, override
 
 from eval_framework.choices import ChoiceFields, ChoiceReader
-from eval_framework.composed import ComposedBenchmark, InitialPrompt
+from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice
 from eval_framework.tasks.base import Language
@@ -38,17 +38,12 @@ class PiqaReader(ChoiceReader):
         )
 
 
-def _idk_preamble(_subject: str) -> str:
-    return _IDK_PREAMBLE
-
-
 def _piqa_benchmark(
     id: str,
     styler: TaskStyler,
     *,
     sample_split: str,
     fewshot_split: str,
-    initial_prompt: InitialPrompt | None = None,
     dataset: DatasetPolicy | None = None,
 ) -> Benchmark:
     kind = Choice(reader=PiqaReader(), styler=styler)
@@ -60,7 +55,6 @@ def _piqa_benchmark(
         fewshot_split=fewshot_split,
         dataset_policy=dataset_policy,
         language=Language.ENG,
-        initial_prompt=initial_prompt,
     )
 
 
@@ -81,10 +75,9 @@ def piqa_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
 def piqa_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _piqa_benchmark(
         "PIQA_IDK",
-        IdkClozeStyle(abstention_option=" I do not know"),
+        IdkClozeStyle(abstention_option=" I do not know", initial_prompt=_IDK_PREAMBLE),
         sample_split="validation",
         fewshot_split="test",
-        initial_prompt=_idk_preamble,
         dataset=dataset,
     )
 

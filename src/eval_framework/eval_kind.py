@@ -47,6 +47,10 @@ class EvalKind(ABC):
         """Kind-specific metadata merged into the eval's ``get_metadata`` (e.g. the task style)."""
         return {}
 
+    def initial_prompt(self) -> str | None:
+        """A preamble prepended once at the top of the prompt (before any few-shot examples), or None."""
+        return None
+
 
 @final
 class Choice(EvalKind):
@@ -84,3 +88,7 @@ class Choice(EvalKind):
     @override
     def metadata(self) -> dict[str, str]:
         return self._styler.get_extra_metadata()
+
+    @override
+    def initial_prompt(self) -> str | None:
+        return self._styler.initial_prompt()
