@@ -32,7 +32,10 @@ class Eval(ABC):
     """The contract a caller relies on to run an evaluation"""
 
     @abstractmethod
-    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]: ...
+    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
+        """Yield the eval's samples across all subjects. ``num_samples`` caps how many are yielded PER
+        SUBJECT (``None`` = no cap), so a benchmark with S subjects yields up to ``S * num_samples``
+        samples. A sample's ``id`` is its index within its subject, restarting at 0 for each subject."""
 
     @abstractmethod
     def generate_completions(
