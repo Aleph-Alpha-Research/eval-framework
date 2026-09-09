@@ -87,12 +87,15 @@ class ComposedEval(Eval):
 
     @override
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
-        sample_id = 0
         for subject in self._subjects:
             dataset = self._load_dataset(subject.load_key)
             fewshot_pool = dataset[self.fewshot_split] if self.num_fewshot > 0 else []
             assert len(dataset[self.sample_split]) > 0
+            sample_id = 0  # ids and the num_samples cap are per subject, matching BaseTask
+            done = False
             for item in dataset[self.sample_split]:
+                if done:
+                    break
                 item["subject"] = subject.label
                 prefix = self._fewshot_prefix(item, fewshot_pool)
                 for body in self._kind.samples(item):
@@ -115,7 +118,8 @@ class ComposedEval(Eval):
                     )
                     sample_id += 1
                     if sample_id == num_samples:
-                        return
+                        done = True
+                        break
 
     def _fewshot_prefix(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[Message]:
         fewshot_examples = self._sample_fewshot_examples(item, fewshot_pool) if self.num_fewshot > 0 else []

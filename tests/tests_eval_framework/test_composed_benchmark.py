@@ -332,6 +332,28 @@ def test_message_sampling() -> None:
     ]
 
 
+def test_num_samples_caps_per_subject_not_in_total() -> None:
+    # Given an eval over two subjects, each served three items,
+    class _Loader(DatasetLoader):
+        @override
+        def load(self, name: str | None) -> DatasetDict:
+            return DatasetDict({_DUMMY_SPLIT: Dataset.from_list([{"q": 1}, {"q": 2}, {"q": 3}])})
+
+        @override
+        def metadata(self) -> dict[str, str]:
+            return {}
+
+    subjects = (Subject(load_key="a", label="a"), Subject(load_key="b", label="b"))
+    task = _make_eval(loader=_Loader(), subjects=subjects)
+
+    # When capping at two samples
+    samples = list(task.iterate_samples(num_samples=2))
+
+    # Then num_samples caps per subject (like BaseTask): two from each; ids restart at 0 per subject
+    assert [sample.subject for sample in samples] == ["a", "a", "b", "b"]
+    assert [sample.id for sample in samples] == [0, 1, 0, 1]
+
+
 def test_initial_prompt_is_prepended_once_before_the_first_fewshot_example() -> None:
     # Given a reader/styler pair that echoes each item's question,
     class _Reader(ChoiceReader):
