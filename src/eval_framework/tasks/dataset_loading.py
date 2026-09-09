@@ -5,7 +5,7 @@ import os
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, cast, final, override
+from typing import Any, final, override
 
 from datasets import DatasetDict, DownloadConfig, load_dataset
 
@@ -45,7 +45,7 @@ class HfDatasetLoader(DatasetLoader):
             cache_dir=cache_dir,
             download_config=download_config,
         )
-        return cast(DatasetDict, dataset)
+        return dataset
 
 
 class DatasetPolicy(ABC):

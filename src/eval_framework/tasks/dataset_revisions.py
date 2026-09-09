@@ -89,7 +89,12 @@ def pinned_revision(lockfile: Path, dataset_path: str) -> str:
 
 @final
 class Pinned(DatasetPolicy):
-    """Pins ``dataset_path`` to the revision recorded for it in ``lockfile``; a run's override still wins."""
+    """Pins ``dataset_path`` to the revision recorded for it in ``lockfile``
+
+    A CI job scans for newer available versions of these revisions, proposing PRs for updating them.
+    This ensures the revision is up to date, while still protecting against silently changing the
+    meaning of a benchmark.
+    """
 
     def __init__(self, lockfile: Path, dataset_path: str) -> None:
         self._lockfile = lockfile
@@ -110,3 +115,9 @@ class Pinned(DatasetPolicy):
 def pinned_by_framework(dataset_path: str) -> Pinned:
     """A ``Pinned`` policy binding ``dataset_path`` to the framework's bundled lock file."""
     return Pinned(HF_REVISIONS_LOCKFILE, dataset_path)
+
+
+def pinned_frozen(dataset_path: str) -> Pinned:
+    """A ``Pinned`` policy binding ``dataset_path`` to the frozen lock file (revisions held fixed to keep
+    results comparable across framework upgrades)."""
+    return Pinned(FROZEN_HF_REVISIONS_LOCKFILE, dataset_path)
