@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.11.11](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.10...v0.11.11) (2026-09-09)
+
+
+### Features
+
+* add MMLU-Pro + GPQA v2 with more lenient parsing and no stop sequences ([23f512a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/23f512acd75042928e6cc7cc9a021731d58b0150))
+* support structured output in OpenAIModel ([f59af77](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f59af771357e3dad5d3c0dbea4d0d6d2bcae7e31))
+
 ## [0.11.10](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.9...v0.11.10) (2026-09-08)
 
 
