@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Self, final, override
 from datasets import DatasetDict
 
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
-from eval_framework.eval_kind import EvalKind
+from eval_framework.eval_kind import EvalKind, SampleBody
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesCompletion,
     BytesLoglikelihood,
@@ -59,8 +59,8 @@ class ComposedEval(Eval):
         self.language = language
         self.rnd = rnd
 
-    def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, Any]:
-        dataset = {}
+    def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, list[dict[str, Any]]]:
+        dataset: dict[str, list[dict[str, Any]]] = {}
 
         for split, data in hf_dataset.items():
             if split not in [self.sample_split, self.fewshot_split]:
@@ -75,7 +75,7 @@ class ComposedEval(Eval):
 
         return dataset
 
-    def _load_dataset(self, load_key: str | None) -> dict[str, Any]:
+    def _load_dataset(self, load_key: str | None) -> dict[str, list[dict[str, Any]]]:
         hf_dataset = self.loader.load(load_key)
         return self._shuffle_splits(hf_dataset=hf_dataset)
 
@@ -87,26 +87,18 @@ class ComposedEval(Eval):
             assert len(dataset[self.sample_split]) > 0
             sample_id = 0  # ids and the num_samples cap are per subject, matching BaseTask
             done = False
-            initial_prompt = self._kind.initial_prompt()
             for item in dataset[self.sample_split]:
                 if done:
                     break
                 item["subject"] = subject.label
-                prefix = self._fewshot_prefix(item, fewshot_pool)
-                for body in self._kind.samples(item):
-                    messages = [*prefix, Message(role=Role.USER, content=body.prompt)]
-                    if initial_prompt is not None:
-                        # Prepended once, at the top of the first message (before the first fewshot example).
-                        first = messages[0]
-                        messages[0] = Message(role=first.role, content=f"{initial_prompt}\n\n{first.content}")
-                    if body.cue:
-                        messages.append(Message(role=Role.ASSISTANT, content=body.cue))
+                prefix = self._fewshot_messages(item, fewshot_pool)
+                for sample_body in self._kind.samples(item):
                     yield Sample(
                         id=sample_id,
                         subject=subject.label,
-                        messages=messages,
-                        ground_truth=body.ground_truth,
-                        possible_completions=body.possible_completions,
+                        messages=self._messages(prefix, sample_body),
+                        ground_truth=sample_body.ground_truth,
+                        possible_completions=sample_body.possible_completions,
                         context=None,
                     )
                     sample_id += 1
@@ -114,7 +106,17 @@ class ComposedEval(Eval):
                         done = True
                         break
 
-    def _fewshot_prefix(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[Message]:
+    def _messages(self, prefix: list[Message], body: SampleBody) -> list[Message]:
+        messages = [*prefix, Message(role=Role.USER, content=body.prompt)]
+        initial_prompt = self._kind.initial_prompt()
+        if initial_prompt is not None:
+            first = messages[0]
+            messages[0] = Message(role=first.role, content=f"{initial_prompt}\n\n{first.content}")
+        if body.cue:
+            messages.append(Message(role=Role.ASSISTANT, content=body.cue))
+        return messages
+
+    def _fewshot_messages(self, item: dict[str, Any], fewshot_pool: list[dict[str, Any]]) -> list[Message]:
         fewshot_examples = self._sample_fewshot_examples(item, fewshot_pool) if self.num_fewshot > 0 else []
         prefix: list[Message] = []
         for fewshot_example in fewshot_examples:
@@ -124,7 +126,9 @@ class ComposedEval(Eval):
             prefix.append(Message(role=Role.ASSISTANT, content=example.answer))
         return prefix
 
-    def _sample_fewshot_examples(self, item: dict[str, Any], fewshot_pool: list[dict]) -> list[dict]:
+    def _sample_fewshot_examples(
+        self, item: dict[str, Any], fewshot_pool: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         if self.fewshot_split == self.sample_split:
             # If the fewshot and sample splits are the same, we risk including the current eval item
             # as a fewshot example (leaking the answer). To prevent this, sample one extra example,
