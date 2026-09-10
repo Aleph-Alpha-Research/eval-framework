@@ -21,7 +21,7 @@ and first-party/internal packages are excluded.
 | `lxml` | `>=6.1.3,<7` |
 | `mysql-connector-python` | `>=26.7.0,<27` |
 | `nltk` | `>=3.10.3,<4` |
-| `numpy` | `>=2.5.2` |
+| `numpy` | `>=2.5.3` |
 | `psycopg2-binary` | `>=2.9.12,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.13.5,<3` |
@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.90` |
+| `botocore` | `1.43.91` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.1` |
 | `click` | `8.5.0` |
@@ -76,7 +76,7 @@ and first-party/internal packages are excluded.
 | `pydantic-core` | `2.46.5` |
 | `python-dateutil` | `2.9.0.post0` |
 | `referencing` | `0.37.0` |
-| `regex` | `2026.9.3` |
+| `regex` | `2026.9.10` |
 | `requests` | `2.34.2` |
 | `rpds-py` | `2026.6.3` |
 | `s3transfer` | `0.19.2` |

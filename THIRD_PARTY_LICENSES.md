@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.90 - https://github.com/boto/boto3
-- **botocore** 1.43.90 - https://github.com/boto/botocore
+- **boto3** 1.43.91 - https://github.com/boto/boto3
+- **botocore** 1.43.91 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **googleapis-common-protos** 1.75.3 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
@@ -47,7 +47,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0 AND CNRI-Python
 
-- **regex** 2026.9.3 - https://github.com/mrabarnett/mrab-regex
+- **regex** 2026.9.10 - https://github.com/mrabarnett/mrab-regex
 
 ## Apache-2.0 OR BSD-2-Clause
 
@@ -92,7 +92,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## GNU Library or Lesser General Public License (LGPL)
 
-- **psycopg2-binary** 2.9.12 - https://psycopg.org/
+- **psycopg2-binary** 2.9.13 - https://psycopg.org/
 
 ## LGPL-2.1-only
 
@@ -218,7 +218,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.90 (Apache-2.0)
+### boto3 1.43.91 (Apache-2.0)
 
 ```text
 Apache License
@@ -399,7 +399,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.90 (Apache-2.0)
+### botocore 1.43.91 (Apache-2.0)
 
 ```text
 Apache License
@@ -14137,7 +14137,7 @@ standalone and requires a support library to be linked with it.  This
 support library is itself covered by the above license.
 ```
 
-### psycopg2-binary 2.9.12 (GNU Library or Lesser General Public License (LGPL))
+### psycopg2-binary 2.9.13 (GNU Library or Lesser General Public License (LGPL))
 
 ```text
 psycopg2 and the LGPL
@@ -17352,7 +17352,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### regex 2026.9.3 (Apache-2.0 AND CNRI-Python)
+### regex 2026.9.10 (Apache-2.0 AND CNRI-Python)
 
 ```text
 This work was derived from the 're' module of CPython 2.6 and CPython 3.1,
