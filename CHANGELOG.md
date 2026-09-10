@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.11.12](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.11...v0.11.12) (2026-09-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency numpy to &gt;=2.5.3 ([28165fa](https://github.com/Aleph-Alpha-Research/eval-framework/commit/28165fa5baf4b768a0e64d2802156cb368b930aa))
+* **ifeval:** drop key-specific kwargs hotfixes and normalise None kwargs ([50e3cc2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/50e3cc2e317eeb100b7f5860ac6c3055cce9d60b))
+
 ## [0.11.11](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.10...v0.11.11) (2026-09-09)
 
 
