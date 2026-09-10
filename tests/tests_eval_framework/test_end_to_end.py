@@ -9,10 +9,10 @@ from unittest.mock import Mock, patch
 import pytest
 from datasets import disable_caching
 
+from eval_framework.benchmarks.hellaswag import hellaswag
 from eval_framework.llm.base import BaseLLM
 from eval_framework.main import main
 from eval_framework.result_processors.base import Result
-from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.task_names import TaskNameEnum
 from eval_framework.utils.constants import GREEN, RED, RESET
@@ -39,7 +39,7 @@ def _almost_equal(x: float, y: float) -> bool:
 def test_automatic_tasks(tmp_path: Path, test_llms: BaseLLM) -> None:
     output_dir = tmp_path / "eval"
 
-    task_name = HELLASWAG.NAME
+    task_name = hellaswag().display_name()
     expected_results = {
         "Accuracy Loglikelihood": 0.4,
         "Accuracy Normalized Loglikelihood": 0.6,
