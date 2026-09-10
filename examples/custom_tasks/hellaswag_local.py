@@ -4,8 +4,8 @@ import urllib.request
 from typing import Any
 
 from datasets import load_dataset
-
 from eval_framework.tasks.benchmarks.hellaswag import HELLASWAG
+
 from eval_framework.tasks.registry import Registry, register_task
 
 logger = logging.getLogger(__name__)
