@@ -1130,8 +1130,8 @@ dev = [
     { name = "pytest-xdist", specifier = ">=3.8.0,<4" },
     { name = "ruff", specifier = ">=0.16.6" },
     { name = "types-python-dateutil", specifier = ">=2.9.0.20260807,<3" },
-    { name = "types-pyyaml", specifier = ">=6.0.12.20260815,<7" },
-    { name = "types-requests", specifier = ">=2.33.0.20260712,<3" },
+    { name = "types-pyyaml", specifier = ">=6.0.12.20260906,<7" },
+    { name = "types-requests", specifier = ">=2.33.0.20260906,<3" },
 ]
 flash-attn = [
     { name = "flash-attn", specifier = ">=2.8.3.post1,<2.9" },
