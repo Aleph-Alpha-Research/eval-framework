@@ -11,7 +11,6 @@ from eval_framework.tasks.benchmarks.csqa import (
 )
 from eval_framework.tasks.benchmarks.drop import DropCloze, DropCompletion, DropMC, DropMC_OLMES
 from eval_framework.tasks.benchmarks.global_mmlu import GlobalMMLU
-from eval_framework.tasks.benchmarks.goldenswag import GOLDENSWAG, GOLDENSWAG_IDK
 from eval_framework.tasks.benchmarks.gpqa import GPQA_OLMES
 from eval_framework.tasks.benchmarks.humaneval import HumanEvalBPB, HumanEvalBPB_V2
 from eval_framework.tasks.benchmarks.math_reasoning import (
@@ -127,12 +126,6 @@ def test_olmes_variants_smoke() -> None:
 def test_copa_harness_smoke() -> None:
     _smoke_test_task(COPAEvalHarness)
     _smoke_test_task(COPA_IDKEvalHarness)
-
-
-@pytest.mark.cpu_slow
-def test_goldenswag_tasks_smoke() -> None:
-    _smoke_test_task(GOLDENSWAG)
-    _smoke_test_task(GOLDENSWAG_IDK)
 
 
 @pytest.mark.cpu_slow

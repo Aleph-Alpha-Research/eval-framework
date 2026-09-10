@@ -59,17 +59,15 @@ def _hellaswag_ellamind_benchmark(
     )
 
 
-# Sentence-completion: no question prefix, no cue, the continuation follows the context directly.
-def _cloze_completion_style() -> ClozeStyle:
-    return ClozeStyle(question_prefix="", trailing_newline=False, cue_text="")
-
-
+# Sentence-completion styling: no question prefix, no cue, the continuation follows the context directly.
 def hellaswag_ellamind_easy_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _hellaswag_ellamind_benchmark("HELLASWAG_ELLAMIND_EASY_DE", _cloze_completion_style(), "easy", dataset)
+    styler = ClozeStyle(question_prefix="", trailing_newline=False, cue_text="")
+    return _hellaswag_ellamind_benchmark("HELLASWAG_ELLAMIND_EASY_DE", styler, "easy", dataset)
 
 
 def hellaswag_ellamind_hard_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _hellaswag_ellamind_benchmark("HELLASWAG_ELLAMIND_HARD_DE", _cloze_completion_style(), "hard", dataset)
+    styler = ClozeStyle(question_prefix="", trailing_newline=False, cue_text="")
+    return _hellaswag_ellamind_benchmark("HELLASWAG_ELLAMIND_HARD_DE", styler, "hard", dataset)
 
 
 def hellaswag_ellamind_bpb_de(dataset: DatasetPolicy | None = None) -> Benchmark:
