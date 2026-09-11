@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.11.13](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.12...v0.11.13) (2026-09-11)
+
+
+### Bug Fixes
+
+* num_samples filters per subject if using composed benchmarks ([142db71](https://github.com/Aleph-Alpha-Research/eval-framework/commit/142db717342756ade740d5826d8409c3c1091cfb))
+
 ## [0.11.12](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.11...v0.11.12) (2026-09-10)
 
 
