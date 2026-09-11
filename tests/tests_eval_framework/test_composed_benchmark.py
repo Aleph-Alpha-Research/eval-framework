@@ -369,10 +369,10 @@ def test_initial_prompt_is_prepended_once_before_the_first_fewshot_example() -> 
             return "the cue"
 
         @override
-        def initial_prompt(self) -> str | None:
-            return "About the task."
+        def initial_prompt(self, subject_label: str) -> str | None:
+            return f"About {subject_label}."
 
-    # and a benchmark over one eval row and one fewshot row, with an initial prompt
+    # and a benchmark over one eval row and one fewshot row, with a subject-templated initial prompt
     benchmark = _make_benchmark(
         reader=_Reader(),
         styler=_Styler(),
@@ -380,11 +380,11 @@ def test_initial_prompt_is_prepended_once_before_the_first_fewshot_example() -> 
         dataset_policy=DatasetStub({"test": [{"question": "eval q"}], "train": [{"question": "shot q"}]}),
     )
 
-    # When assembling a 1-shot sample, then the initial prompt appears exactly once,
+    # When assembling a 1-shot sample, then the subject-templated initial prompt appears exactly once,
     # at the top of the first (fewshot) USER message
     sample = first_sample(benchmark, num_fewshot=1)
     assert sample.messages == [
-        Message(role=Role.USER, content="About the task.\n\ninstruction: shot q"),
+        Message(role=Role.USER, content="About subject.\n\ninstruction: shot q"),
         Message(role=Role.ASSISTANT, content="the cue"),
         Message(role=Role.USER, content="instruction: eval q"),
         Message(role=Role.ASSISTANT, content="the cue"),

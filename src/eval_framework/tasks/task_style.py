@@ -147,8 +147,10 @@ class TaskStyler(ABC):
         """Return styler-specific metadata to merge into the task's metadata."""
         return {"task_style": self.task_style.value}
 
-    def initial_prompt(self) -> str | None:
-        """A preamble prepended once at the top of the prompt, or None (the default: no preamble)."""
+    def initial_prompt(self, subject_label: str) -> str | None:
+        """A preamble prepended once at the top of the prompt for the given subject, or None (the
+        default: no preamble). Subject-templated preambles (e.g. MMLU's "... about {subject}.") read
+        ``subject_label``; fixed preambles ignore it."""
         return None
 
     @classmethod
@@ -418,7 +420,7 @@ class IdkClozeStyle(TaskStyler):
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
         return self._cloze.get_possible_completions(choices, correct_index) + [self._abstention_option]
 
-    def initial_prompt(self) -> str | None:
+    def initial_prompt(self, subject_label: str) -> str | None:
         return self._initial_prompt
 
 
