@@ -80,8 +80,8 @@ class ResponseGenerator:
         """
         llm_stop_sequences = getattr(self.llm, "stop_sequences", None)
         llm_max_tokens = getattr(self.llm, "max_tokens", None)
-        task_stop_sequences = getattr(self.task, "stop_sequences", None)
-        task_max_tokens = self.config.max_tokens or getattr(self.task, "max_tokens", None)
+        task_stop_sequences = self.task.get_stop_sequences()
+        task_max_tokens = self.config.max_tokens or self.task.get_max_tokens()
         # if both task and model define a max_token, the smaller value is used
         max_tokens = min(
             [x for x in [llm_max_tokens, task_max_tokens] if x is not None],
@@ -89,7 +89,7 @@ class ResponseGenerator:
         )
         logger.info(f"Set max_tokens to {max_tokens}")
         # if both task and model define stop sequences, those are merged into one list
-        stop_sequences_merged = (llm_stop_sequences or []) + (task_stop_sequences or [])
+        stop_sequences_merged = (llm_stop_sequences or []) + task_stop_sequences
         stop_sequences = sorted(list(set(stop_sequences_merged))) if stop_sequences_merged else None
         logger.info(f"Set stop_sequences to {stop_sequences}")
         return stop_sequences, max_tokens
