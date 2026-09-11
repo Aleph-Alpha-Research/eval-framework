@@ -18,6 +18,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     SequencePositionsCompletion,
     SequencePositionsLoglikelihood,
 )
+from eval_framework.metrics.efficiency.finish_reason import FinishReason
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, RawCompletion
@@ -468,6 +469,7 @@ class BaseTask[SubjectType](Eval):
                     BytesCompletion,
                     SequencePositionsCompletion,
                     TokenCounts,
+                    FinishReason,
                 ]
             case ResponseType.LOGLIKELIHOODS:
                 metrics = [BytesLoglikelihood, SequencePositionsLoglikelihood]
