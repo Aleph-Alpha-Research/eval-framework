@@ -6,6 +6,7 @@ import pytest
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import BytesCompletion, SequencePositionsCompletion
+from eval_framework.metrics.efficiency.finish_reason import FinishReason
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.run import parse_args
 from eval_framework.tasks import dataset_revisions as dr
@@ -263,6 +264,7 @@ def test_completion_metrics_returns_all_completion_metrics() -> None:
         BytesCompletion,
         SequencePositionsCompletion,
         TokenCounts,
+        FinishReason,
     }
 
 

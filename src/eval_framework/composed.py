@@ -15,6 +15,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     SequencePositionsCompletion,
     SequencePositionsLoglikelihood,
 )
+from eval_framework.metrics.efficiency.finish_reason import FinishReason
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Completion, Error, RawCompletion
@@ -250,7 +251,7 @@ def _metrics_for(kind: EvalKind) -> list[type["BaseMetric"]]:
     response_type_metrics: list[type[BaseMetric]]
     match kind.response_type:
         case ResponseType.COMPLETION:
-            response_type_metrics = [BytesCompletion, SequencePositionsCompletion, TokenCounts]
+            response_type_metrics = [BytesCompletion, SequencePositionsCompletion, TokenCounts, FinishReason]
         case ResponseType.LOGLIKELIHOODS:
             response_type_metrics = [BytesLoglikelihood, SequencePositionsLoglikelihood]
         case _:
