@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.91 - https://github.com/boto/boto3
-- **botocore** 1.43.91 - https://github.com/boto/botocore
+- **boto3** 1.43.92 - https://github.com/boto/boto3
+- **botocore** 1.43.92 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **googleapis-common-protos** 1.75.3 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
@@ -218,7 +218,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.91 (Apache-2.0)
+### boto3 1.43.92 (Apache-2.0)
 
 ```text
 Apache License
@@ -399,7 +399,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.91 (Apache-2.0)
+### botocore 1.43.92 (Apache-2.0)
 
 ```text
 Apache License

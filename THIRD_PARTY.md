@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.91` |
+| `botocore` | `1.43.92` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.1` |
 | `click` | `8.5.0` |
