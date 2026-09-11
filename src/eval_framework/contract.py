@@ -53,6 +53,14 @@ class Eval(ABC):
         """Descriptive metadata about the eval for result reporting."""
 
     @abstractmethod
+    def get_stop_sequences(self) -> list[str]:
+        """Stop sequences the eval requests for completion generation."""
+
+    @abstractmethod
+    def get_max_tokens(self) -> int | None:
+        """Token limit the eval requests for completion generation, or ``None`` for no limit."""
+
+    @abstractmethod
     def get_response_type(self) -> ResponseType: ...
 
     @abstractmethod

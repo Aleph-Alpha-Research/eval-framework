@@ -237,6 +237,14 @@ class ComposedEval(Eval):
         return completion_list
 
     @override
+    def get_stop_sequences(self) -> list[str]:
+        return []
+
+    @override
+    def get_max_tokens(self) -> int | None:
+        return None
+
+    @override
     def get_response_type(self) -> ResponseType:
         return self._kind.response_type
 
