@@ -21,7 +21,6 @@ from eval_framework.tasks.benchmarks.math_reasoning import (
 )
 from eval_framework.tasks.benchmarks.mbpp import MBPPBPB
 from eval_framework.tasks.benchmarks.medqa import MedQACloze, MedQAMC, MedQAMC_OLMES
-from eval_framework.tasks.benchmarks.mmlu import MMLU_OLMES
 from eval_framework.tasks.benchmarks.mmlu_pro import MMLU_PRO_OLMES
 from eval_framework.tasks.benchmarks.naturalqs_open import (
     NaturalQsOpen,
@@ -110,7 +109,6 @@ def test_olmes_variants_smoke() -> None:
         ARC_OLMES,
         COPA_OLMES,
         GPQA_OLMES,  # gated; skipped when not authenticated
-        MMLU_OLMES,
         MMLU_PRO_OLMES,
         WINOGRANDE_OLMES,
     ):

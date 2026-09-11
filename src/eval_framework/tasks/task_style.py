@@ -60,7 +60,8 @@ dataset attributes and data-access methods.  Variants only differ in ``TASK_STYL
 import hashlib
 import random
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Self
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Self, final
 
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
@@ -77,6 +78,10 @@ from eval_framework.tasks.utils import get_n_letters
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
+
+# A subject-templated preamble: maps a subject label to the preamble text (e.g. MMLU's
+# "... about {subject}."). Fixed preambles simply ignore the argument.
+InitialPrompt = Callable[[str], str]
 
 # Default (question_prefix, cue_text) per language; extend for new languages as needed.
 _DEFAULT_QUESTION_CUE_TEXT: dict[Language, tuple[str, str]] = {
@@ -153,6 +158,12 @@ class TaskStyler(ABC):
         ``subject_label``; fixed preambles ignore it."""
         return None
 
+    @final
+    def with_abstention_option(self, abstention_option: str) -> "IdkStyle":
+        """Wrap this styler so the model may also abstain with ``abstention_option`` (scored alongside
+        the real answers, with confidence-aware metrics). See ``IdkStyle``."""
+        return IdkStyle(inner=self, abstention_option=abstention_option)
+
     @classmethod
     def for_language(cls, language: Language, **kwargs: Any) -> Self:
         """Factory that fills ``question_prefix`` and ``cue_text`` from language defaults.
@@ -174,6 +185,8 @@ class MCStyle(TaskStyler):
         cue_text:               Assistant cue after the prompt (default ``"Answer:"``).
         space_prefixed_labels:  When ``True``, each option line starts with a space
                                 (``" A. choice"`` — OLMES-style). Default ``False``.
+        initial_prompt:         Optional subject-templated preamble prepended once at the top of the
+                                prompt (e.g. MMLU's "... about {subject}."). Default ``None`` (no preamble).
 
     Assembled prompt example (default settings, 3 choices)::
 
@@ -197,10 +210,15 @@ class MCStyle(TaskStyler):
         question_prefix: str = "Question: ",
         cue_text: str = "Answer:",
         space_prefixed_labels: bool = False,
+        initial_prompt: InitialPrompt | None = None,
     ) -> None:
         self.question_prefix = question_prefix
         self._cue_text = cue_text
         self.space_prefixed_labels = space_prefixed_labels
+        self._initial_prompt = initial_prompt
+
+    def initial_prompt(self, subject_label: str) -> str | None:
+        return self._initial_prompt(subject_label) if self._initial_prompt is not None else None
 
     def get_cue_text(self) -> str:
         return self._cue_text
@@ -294,6 +312,8 @@ class ClozeStyle(TaskStyler):
         trailing_newline:  When ``True`` (default), the instruction ends with ``"\\n"``.
                            Set to ``False`` for sentence-completion tasks where the
                            model should continue a fragment directly.
+        initial_prompt:    Optional subject-templated preamble prepended once at the top of the prompt.
+                           Default ``None`` (no preamble).
 
     Assembled prompt example (3 choices)::
 
@@ -325,11 +345,16 @@ class ClozeStyle(TaskStyler):
         cue_text: str = "Answer:",
         trailing_newline: bool = True,
         leading_space_continuations: bool = True,
+        initial_prompt: InitialPrompt | None = None,
     ) -> None:
         self.question_prefix = question_prefix
         self._cue_text = cue_text
         self.trailing_newline = trailing_newline
         self.leading_space_continuations = leading_space_continuations
+        self._initial_prompt = initial_prompt
+
+    def initial_prompt(self, subject_label: str) -> str | None:
+        return self._initial_prompt(subject_label) if self._initial_prompt is not None else None
 
     def get_cue_text(self) -> str:
         return self._cue_text
@@ -376,19 +401,19 @@ class BPBStyle(ClozeStyle):
         return [f" {choices[correct_index]}"] if self.leading_space_continuations else [choices[correct_index]]
 
 
-class IdkClozeStyle(TaskStyler):
-    """Cloze scoring for tasks that let the model abstain with an explicit "I do not know" answer.
+class IdkStyle(TaskStyler):
+    """Adds an explicit abstention option (e.g. "I do not know", "?") to a base styler's candidates.
 
-    Use this when a benchmark rewards calibrated abstention over confident guessing: it prefaces the
-    prompt with the abstention preamble, scores the real answers together with the abstention option,
-    and reports confidence-aware metrics.
+    Use this when a benchmark rewards calibrated abstention over confident guessing: it scores the real
+    answers together with the abstention option and reports confidence-aware metrics. Everything else —
+    the prompt formatting and the abstention preamble (via the inner styler's ``initial_prompt``) — is
+    the inner styler's; wrap any base styler, so both multiple-choice (abstain with an extra letter) and
+    cloze (abstain with an extra full answer) tasks are supported.
 
     Args:
+        inner:             The base styler doing the prompt formatting, preamble, and real-answer scoring.
         abstention_option: The abstention completion scored alongside the real choices, e.g.
-                           ``" I do not know"`` (leading space; some tasks add a trailing period).
-        initial_prompt:    The preamble telling the model it may abstain, prepended once at the top of
-                           the prompt (required — it pairs with the abstention option).
-        cloze:             The underlying cloze styling (default ``ClozeStyle()``).
+                           ``" I do not know"`` (cloze) or ``" ?"`` (multiple-choice).
     """
 
     response_type = ResponseType.LOGLIKELIHOODS
@@ -400,28 +425,28 @@ class IdkClozeStyle(TaskStyler):
         DistributionalCorrectnessScore,
         TernaryScore,
     ]
-    task_style = TaskStyle.CLOZE
 
-    def __init__(self, abstention_option: str, initial_prompt: str, cloze: ClozeStyle | None = None) -> None:
-        self._cloze = cloze or ClozeStyle()
+    def __init__(self, inner: TaskStyler, abstention_option: str) -> None:
+        self._inner = inner
         self._abstention_option = abstention_option
-        self._initial_prompt = initial_prompt
-        self.question_prefix = self._cloze.question_prefix
+        self.task_style = inner.task_style  # surfaced in metadata
 
     def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
-        return self._cloze.get_instruction_text(raw_question, choices)
+        return self._inner.get_instruction_text(raw_question, choices)
 
     def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
-        return self._cloze.get_ground_truth(choices, correct_index)
+        return self._inner.get_ground_truth(choices, correct_index)
 
     def get_cue_text(self) -> str:
-        return self._cloze.get_cue_text()
+        return self._inner.get_cue_text()
 
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
-        return self._cloze.get_possible_completions(choices, correct_index) + [self._abstention_option]
+        completions = self._inner.get_possible_completions(choices, correct_index)
+        assert completions is not None  # abstention wraps a styler that scores a candidate list
+        return completions + [self._abstention_option]
 
     def initial_prompt(self, subject_label: str) -> str | None:
-        return self._initial_prompt
+        return self._inner.initial_prompt(subject_label)
 
 
 # ---------------------------------------------------------------------------
