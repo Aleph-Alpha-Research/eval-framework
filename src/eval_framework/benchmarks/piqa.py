@@ -16,7 +16,7 @@ from eval_framework.eval_kind import Choice
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_frozen
-from eval_framework.tasks.task_style import ClozeStyle, IdkClozeStyle, MCStyle, TaskStyler
+from eval_framework.tasks.task_style import ClozeStyle, MCStyle, TaskStyler
 
 _IDK_PREAMBLE = (
     "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
@@ -75,7 +75,7 @@ def piqa_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
 def piqa_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _piqa_benchmark(
         "PIQA_IDK",
-        IdkClozeStyle(abstention_option=" I do not know", initial_prompt=_IDK_PREAMBLE),
+        ClozeStyle(initial_prompt=lambda _subject: _IDK_PREAMBLE).with_abstention_option(" I do not know"),
         sample_split="validation",
         fewshot_split="test",
         dataset=dataset,

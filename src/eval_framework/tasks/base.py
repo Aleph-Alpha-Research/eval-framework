@@ -444,6 +444,12 @@ class BaseTask[SubjectType](Eval):
             )
         return completion_list
 
+    def get_stop_sequences(self) -> list[str]:
+        return self.stop_sequences or []
+
+    def get_max_tokens(self) -> int | None:
+        return self.max_tokens
+
     @classmethod
     def get_response_type(cls) -> ResponseType:
         """Return the response type of the task (or the styler if it exists)."""

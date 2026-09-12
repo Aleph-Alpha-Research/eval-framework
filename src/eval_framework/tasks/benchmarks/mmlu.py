@@ -8,9 +8,6 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyNormLoglikelihood,
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
-from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
-from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
-from eval_framework.metrics.loglikelihood.ternary import TernaryScore
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
@@ -124,73 +121,6 @@ class MMLU(BaseTask[str]):
 
     def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
         return [f" {key}" for key in self.keys]
-
-
-class MMLU_OLMES(MMLU):
-    """
-    MMLU with OLMES-style prompt: space before each label in the prompt (" A.", " B.", ...).
-    """
-
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-
-    NAME = "MMLU_OLMES"
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        question = item["question"].strip()
-        choices = "".join([f" {key}. {choice}\n" for key, choice in zip(self.keys, item["choices"])])
-        return f"Question: {question}\n{choices}"
-
-
-class FullTextMMLU(MMLU):
-    """MMLU dataset but where the model is expected to replicate choice text, rather than just the key."""
-
-    NAME = "Full Text MMLU"
-    METRICS = [
-        AccuracyLoglikelihood,
-        AccuracyNormLoglikelihood,
-        AccuracyBayesianLoglikelihood,
-        BitsPerByteLoglikelihood,
-    ]
-
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
-        subject_name = self._get_subject_name(item)
-        return f"""The following are multiple choice questions (with possible answers) about {subject_name}.
-Answer with the full text of the correct answer."""
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        question = item["question"].strip()
-        choices = "".join([f"- {choice}\n" for choice in item["choices"]])
-        return f"Question: {question}\nPossible answers:\n{choices}"
-
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        return f" {item['choices'][item['answer']]}"
-
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        return [f" {choice}" for choice in item["choices"]]
-
-
-class MMLU_IDK(MMLU):
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-    NAME = "MMLU_IDK"
-    METRICS = [
-        AccuracyLoglikelihood,
-        AccuracyNormLoglikelihood,
-        AccuracyBayesianLoglikelihood,
-        ConfidenceWeightedAccuracy,
-        DistributionalCorrectnessScore,
-        TernaryScore,
-    ]
-
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
-        return (
-            f"The following are multiple choice questions (with answers) about {item['subject']}. "
-            "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
-            "It is acceptable to answer with '?' if you are unsure, and you will receive 0 points."
-        )
-
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        completions = super()._get_possible_completions(item)
-        return (completions or []) + [" ?"]
 
 
 class MMLU_COT(MMLU):

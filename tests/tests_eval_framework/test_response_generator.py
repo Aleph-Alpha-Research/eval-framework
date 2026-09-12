@@ -310,7 +310,7 @@ def test_filter_task_subjects(
             generator = ResponseGenerator(llm, config, result_processor)
     else:
         generator = ResponseGenerator(llm, config, result_processor)
-        assert sorted(generator.task.SUBJECTS) == sorted(expected_subjects)
+        assert sorted(generator.task.get_metadata()["subjects"]) == sorted(expected_subjects)
 
 
 @pytest.mark.parametrize(

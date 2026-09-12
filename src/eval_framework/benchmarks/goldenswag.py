@@ -11,7 +11,7 @@ from eval_framework.eval_kind import Choice
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import ClozeStyle, IdkClozeStyle, TaskStyler
+from eval_framework.tasks.task_style import ClozeStyle, TaskStyler
 
 _IDK_PREAMBLE = (
     "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
@@ -39,8 +39,10 @@ def goldenswag(dataset: DatasetPolicy | None = None) -> Benchmark:
 
 
 def goldenswag_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
-    cloze = ClozeStyle(question_prefix="", cue_text="", trailing_newline=False)
-    styler = IdkClozeStyle(abstention_option=" I do not know.", initial_prompt=_IDK_PREAMBLE, cloze=cloze)
+    cloze = ClozeStyle(
+        question_prefix="", cue_text="", trailing_newline=False, initial_prompt=lambda _subject: _IDK_PREAMBLE
+    )
+    styler = cloze.with_abstention_option(" I do not know.")
     return _goldenswag_benchmark("GoldenSwag_IDK", styler, dataset)
 
 

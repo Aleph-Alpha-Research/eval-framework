@@ -7,6 +7,7 @@ from eval_framework.benchmarks.gpqa_ellamind import GPQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.hellaswag import HELLASWAG_BENCHMARKS
 from eval_framework.benchmarks.hellaswag_ellamind import HELLASWAG_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.hle_ellamind import HLE_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
 from eval_framework.benchmarks.piqa import PIQA_BENCHMARKS
 from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.simpleqa_ellamind import SIMPLEQA_ELLAMIND_BENCHMARKS
@@ -117,10 +118,9 @@ def register_math_reasoning_tasks(registry: Registry) -> None:
 
 def register_mmlu_tasks(registry: Registry) -> None:
     """Register mmlu benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.mmlu.MMLU", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mmlu.MMLU_IDK", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mmlu.MMLU_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mmlu.FullTextMMLU", registry=registry)
+    for benchmark in MMLU_BENCHMARKS:  # composed: MMLU, MMLU_OLMES, FullTextMMLU, MMLU_IDK
+        registry.add(benchmark)
+    # MMLU_COT is a generative (completion) task, not yet supported by the composed design.
     register_lazy_task("eval_framework.tasks.benchmarks.mmlu.MMLU_COT", registry=registry)
 
 
