@@ -10,6 +10,8 @@ from typing import Any
 import pytest
 
 import eval_framework.tasks.benchmarks.humaneval_ellamind as humaneval_ellamind
+from eval_framework.tasks.base import Sample
+from eval_framework.tasks.benchmarks.humaneval import HumanEvalMetricContext
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_names import register_humaneval_ellamind_tasks
 from template_formatting.formatter import (
@@ -161,6 +163,54 @@ def add(a: int, b: int) -> int:
     completions=_OLMES_ZEROSHOT_V2.completions,
 )
 
+# --- HumanEvalDEInstruct ---
+_INSTRUCT_PREFIX = (
+    "Vervollständige die folgende Python-Funktion. Gib ausschließlich die vollständige Funktion "
+    "in einem Markdown-Codeblock zurück:"
+)
+_INSTRUCT_ZEROSHOT = ExpectedPrompt(
+    messages=[
+        Message(
+            role=Role.USER,
+            content=(
+                f'{_INSTRUCT_PREFIX}\n```python\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert '
+                'zwei Zahlen."""\n```\n'
+            ),
+        ),
+    ],
+    concat=(
+        f'{_INSTRUCT_PREFIX}\n```python\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Addiert zwei Zahlen."""\n```'
+    ),
+    ground_truth="Success",
+    completions=None,
+)
+_INSTRUCT_FEWSHOT = ExpectedPrompt(
+    messages=[
+        Message(
+            role=Role.USER,
+            content=(
+                f'{_INSTRUCT_PREFIX}\n```python\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat '
+                'zurück."""\n```\n'
+            ),
+        ),
+        Message(
+            role=Role.ASSISTANT,
+            content=(
+                f'```python\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""\n'
+                f"{_INDENT}return x * x\n```"
+            ),
+        ),
+        *_INSTRUCT_ZEROSHOT.messages,
+    ],
+    concat=(
+        f'{_INSTRUCT_PREFIX}\n```python\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""\n'
+        f'```\n```python\ndef square(x: int) -> int:\n{_INDENT}"""Gibt das Quadrat zurück."""\n'
+        f"{_INDENT}return x * x\n```\n\n{_INSTRUCT_ZEROSHOT.concat}"
+    ),
+    ground_truth="Success",
+    completions=None,
+)
+
 # --- HumanEvalDE_BPB_OLMES_V2 ---
 # The BPB_V2 variant mirrors the OLMES completion prompt exactly (including the ```python fences),
 # so that the loglikelihood-scored prompt and the generation prompt are identical.
@@ -242,6 +292,48 @@ def test_HumanEvalDE_OLMES_V2_olmes_offline_prompt_formatting() -> None:
         subjects=[_SUBJECT],
         expected=_OLMES_FEWSHOT_V2,
     )
+
+
+def test_humanevalde_instruct_offline_prompt_formatting() -> None:
+    assert_offline_zeroshot_prompt(
+        humaneval_ellamind.HumanEvalDEInstruct,
+        eval_row=_EVAL_ROW,
+        subjects=[_SUBJECT],
+        expected=_INSTRUCT_ZEROSHOT,
+    )
+    assert_offline_oneshot_prompt(
+        humaneval_ellamind.HumanEvalDEInstruct,
+        eval_row=_EVAL_ROW,
+        fewshot_row=_FEWSHOT_ROW,
+        subjects=[_SUBJECT],
+        expected=_INSTRUCT_FEWSHOT,
+    )
+
+
+def test_humanevalde_instruct_extracts_complete_function() -> None:
+    task = humaneval_ellamind.HumanEvalDEInstruct()
+    sample = Sample(
+        id=0,
+        subject=_SUBJECT,
+        messages=[],
+        ground_truth="Success",
+        possible_completions=None,
+        context=HumanEvalMetricContext(
+            test=_EVAL_ROW["test"],
+            entry_point=_EVAL_ROW["entry_point"],
+            prompt=_EVAL_ROW["prompt"],
+        ),
+    )
+
+    code = task.post_process_generated_completion(
+        f"Hier ist die Lösung:\n```python\ndef add(a: int, b: int) -> int:\n{_INDENT}return a + b\n```",
+        sample,
+    )
+
+    assert "Hier ist die Lösung" not in code
+    assert code.count("def add(a: int, b: int) -> int:") == 1
+    assert "check(add)" in code
+    assert task.stop_sequences == []
 
 
 def test_humanevalde_olmes_bpb_offline_prompt_formatting() -> None:

@@ -5,10 +5,11 @@ https://huggingface.co/datasets/ellamind/mbpp-multilingual
 
 from typing import Any
 
-from eval_framework.tasks.base import BaseTask, Language
+from eval_framework.tasks.base import BaseTask, Language, Sample
 from eval_framework.tasks.benchmarks.mbpp import MBPP_OLMES, MBPP_BPB_EvalPlus, MBPP_EvalPlus
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.task_style import BPBStyle
+from eval_framework.tasks.utils import extract_python_code_from_response
 
 
 class MBPPDE_OLMES(MBPP_OLMES):
@@ -170,3 +171,27 @@ class MBPPDE_BPB_EvalPlus(MBPP_BPB_EvalPlus):
     def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
         # Use the regular same-split sampling logic, instead of MBPP_BPB_EvalPlus's hard-coded English few-shots.
         return BaseTask._sample_fewshot_examples(self, item)
+
+
+class MBPPDEEvalPlusInstruct(MBPPDE_EvalPlus):
+    """German MBPP (EvalPlus prompt) for instruction-tuned chat models.
+
+    Zero-shot by default: no response preamble is forced, the code block is extracted from the free-form
+    response instead. Few-shot examples are supported but not required for chat models.
+    """
+
+    NAME = "MBPP DE EvalPlus Instruct"
+
+    def __init__(self, num_fewshot: int = 0) -> None:
+        super().__init__(num_fewshot)
+        self.stop_sequences = []
+
+    def _get_cue_text(self, item: dict[str, Any]) -> str:
+        return ""
+
+    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
+        code = item["code"].replace("\r\n", "\n").strip()
+        return f"```python\n{code}\n```"
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample) -> str:  # type: ignore[override]
+        return self._code_expander(extract_python_code_from_response(completion_text) + "\n", str(sample.ground_truth))
