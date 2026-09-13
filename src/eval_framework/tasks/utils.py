@@ -19,6 +19,26 @@ logger = logging.getLogger(__name__)
 redis_warning_printed = False
 
 
+def extract_python_code_from_response(llm_response: str) -> str:
+    """Extract the Python source from a chat-style LLM response that wraps its answer in markdown code fences.
+
+    The response is expected to contain a single Python solution (e.g. HumanEval, MBPP, BigCodeBench). The
+    first matching fenced block is returned, tried in this order: a ```python block nested inside a
+    ```markdown block, a plain ```python block, a ```markdown block, and finally any ``` block. If the
+    response contains no fences at all, it is assumed to be raw code and returned unchanged.
+    """
+    patterns = [
+        r"```markdown.*?```python\s*(.*?)\s*```",
+        r"```python\s*(.*?)\s*```",
+        r"```markdown\s*(.*?)\s*```",
+        r"```\s*(.*?)\s*```",
+    ]
+    for pattern in patterns:
+        if matches := re.findall(pattern, llm_response, re.DOTALL):
+            return matches[0].strip()
+    return llm_response
+
+
 class classproperty[T]:
     """Descriptor supporting property-like access on classes and instances."""
 

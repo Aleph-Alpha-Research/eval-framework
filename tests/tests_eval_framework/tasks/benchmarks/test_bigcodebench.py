@@ -1,10 +1,13 @@
 import pytest
 from datasets import DownloadConfig, load_dataset
 
-from eval_framework.tasks.benchmarks.bigcodebench import extract_executable_code
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_names import register_bigcodebench_tasks
-from eval_framework.tasks.utils import BIG_CODE_BENCH_PACKAGE_MAPPING, extract_imports
+from eval_framework.tasks.utils import (
+    BIG_CODE_BENCH_PACKAGE_MAPPING,
+    extract_imports,
+    extract_python_code_from_response,
+)
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
 from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
 
@@ -18,7 +21,7 @@ _bigcodebench_registry = Registry()
 register_bigcodebench_tasks(registry=_bigcodebench_registry)
 
 
-class TestExtractExecutableCode:
+class TestExtractPythonCodeFromResponse:
     def test_python_code_block(self) -> None:
         response = """Here's a solution:
 
@@ -28,7 +31,7 @@ def hello_world():
 ```
 Hope this helps!"""
         expected = 'def hello_world():\n    print("Hello, World!")'
-        assert extract_executable_code(response) == expected
+        assert extract_python_code_from_response(response) == expected
 
     def test_markdown_code_block(self) -> None:
         response = """Here's a solution:
@@ -39,7 +42,7 @@ def hello_world():
 ```
 Hope this helps!"""
         expected = 'def hello_world():\n    print("Hello, World!")'
-        assert extract_executable_code(response) == expected
+        assert extract_python_code_from_response(response) == expected
 
     def test_nested_markdown_python(self) -> None:
         response = """Here's a solution:
@@ -55,7 +58,7 @@ def hello_world():
 
 Hope this helps!"""
         expected = 'def hello_world():\n    print("Hello, World!")'
-        assert extract_executable_code(response) == expected
+        assert extract_python_code_from_response(response) == expected
 
     def test_generic_code_block(self) -> None:
         response = """Here's a solution:
@@ -69,7 +72,7 @@ def hello_world():
 
 Hope this helps!"""
         expected = 'def hello_world():\n    print("Hello, World!")'
-        assert extract_executable_code(response) == expected
+        assert extract_python_code_from_response(response) == expected
 
     def test_real_example_1(self) -> None:
         response = """Below is a Python script with a self-contained function that solves the problem and passes
@@ -151,7 +154,7 @@ K = 10
 
 result = task_func(l1, l2, K)
 print(result)"""
-        assert extract_executable_code(response) == expected
+        assert extract_python_code_from_response(response) == expected
 
     def test_real_example_2(self) -> None:
         response = """Below is a Python script with a self-contained function that solves the problem and passes
@@ -275,17 +278,17 @@ return ax, kurtosis(numbers)
 ax, kurtosis_value = task_func(intervals=10, seed=42)
 print(f'Kurtosis Value: {kurtosis_value}')
 plt.show()"""
-        assert extract_executable_code(response) == expected
+        assert extract_python_code_from_response(response) == expected
 
     def test_no_code_block(self) -> None:
         response = "Here's a solution without any code block."
         expected = response
-        assert extract_executable_code(response) == expected
+        assert extract_python_code_from_response(response) == expected
 
     def test_empty_code_block(self) -> None:
         response = "Here's an empty code block:\n```\n```"
         expected = ""
-        assert extract_executable_code(response) == expected
+        assert extract_python_code_from_response(response) == expected
 
     def test_code_block_with_whitespace(self) -> None:
         response = """Here's a solution:
@@ -297,7 +300,7 @@ def hello_world():
 
     ```"""
         expected = 'def hello_world():\n    print("Hello, World!")'
-        assert extract_executable_code(response) == expected
+        assert extract_python_code_from_response(response) == expected
 
 
 def test_all_imports_in_mapping() -> None:
