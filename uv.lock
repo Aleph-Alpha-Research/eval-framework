@@ -1091,7 +1091,7 @@ requires-dist = [
     { name = "nltk", specifier = ">=3.10.3,<4" },
     { name = "numpy", specifier = ">=2.5.3" },
     { name = "openai", marker = "extra == 'openai'", specifier = ">=3.11.0,<4" },
-    { name = "psycopg2-binary", specifier = ">=2.9.12,<3" },
+    { name = "psycopg2-binary", specifier = ">=2.9.13,<3" },
     { name = "pycountry", specifier = ">=26.2.16,<27" },
     { name = "pydantic", specifier = ">=2.13.5,<3" },
     { name = "python-dotenv", specifier = ">=1.2.3,<2" },
