@@ -14,6 +14,16 @@
 
 ### Bug Fixes
 
+## [0.11.15](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.14...v0.11.15) (2026-09-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency accelerate to &gt;=1.15.0,&lt;2 ([b02b601](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b02b60176965fd8fe911b71561370064392a8f0d))
+* **deps:** update dependency boto3 to &gt;=1.43.91,&lt;2 ([d89fac8](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d89fac8b54ea73564e5da9a18c67eee30ce68aa4))
+* **deps:** update dependency openai to &gt;=3.11.0,&lt;4 ([96e299a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/96e299a03100c96563faa8ac6ce69ea5dcb470d2))
+* **deps:** update dependency psycopg2-binary to &gt;=2.9.13,&lt;3 ([f3cf17d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f3cf17d5ea6b79274401e1ec7c54dbb4e2aea688))
+
 ## [0.11.14](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.13...v0.11.14) (2026-09-12)
 
 
