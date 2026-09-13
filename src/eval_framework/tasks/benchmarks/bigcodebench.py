@@ -1,6 +1,5 @@
 import logging
 import random
-import re
 from typing import Any
 
 from eval_framework.metrics.completion.code_execution_pass_at_one import (
@@ -21,6 +20,7 @@ from eval_framework.tasks.utils import (
     BIG_CODE_BENCH_PACKAGE_MAPPING,
     CallableSerializer,
     _parse_unittest_output,
+    extract_python_code_from_response,
     unittest_merge_snippets,
 )
 
@@ -104,7 +104,7 @@ class BigCodeBench(BaseTask[str]):
             assert isinstance(sample.context, CodeExecutionPassAtOneContext), "Expected CodeExecutionPassAtOneContext"
             processed_text = (sample.context.code_prompt if sample.context is not None else "") + completion_text
         else:
-            processed_text = extract_executable_code(completion_text)
+            processed_text = extract_python_code_from_response(completion_text)
 
         return processed_text
 
@@ -172,7 +172,7 @@ class BigCodeBench_OLMES(BigCodeBench):
             ) + completion_text.replace("```python", "").replace("```", "")
 
         else:
-            processed_text = extract_executable_code(completion_text)
+            processed_text = extract_python_code_from_response(completion_text)
 
         return processed_text
 
@@ -203,32 +203,3 @@ class BigCodeBenchHardInstruct(BigCodeBenchHard):
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
         return PROMPT_INSTRUCTION + item["instruct_prompt"]
-
-
-def extract_executable_code(llm_response: str) -> str:
-    # Look for nested markdown+python pattern
-    nested_pattern = r"```markdown.*?```python\s*(.*?)\s*```"
-    nested_matches = re.findall(nested_pattern, llm_response, re.DOTALL)
-    if nested_matches:
-        return nested_matches[0].strip()
-
-    # Look for python code blocks
-    python_pattern = r"```python\s*(.*?)\s*```"
-    python_matches = re.findall(python_pattern, llm_response, re.DOTALL)
-    if python_matches:
-        return python_matches[0].strip()
-
-    # Look for markdown-only code blocks
-    markdown_pattern = r"```markdown\s*(.*?)\s*```"
-    markdown_matches = re.findall(markdown_pattern, llm_response, re.DOTALL)
-    if markdown_matches:
-        return markdown_matches[0].strip()
-
-    # Look for generic code blocks as fallback
-    generic_pattern = r"```\s*(.*?)\s*```"
-    generic_matches = re.findall(generic_pattern, llm_response, re.DOTALL)
-    if generic_matches:
-        return generic_matches[0].strip()
-
-    # If no code blocks found, return original response
-    return llm_response
