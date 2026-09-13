@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.90,<2` |
+| `boto3` | `>=1.43.91,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -30,7 +30,7 @@ and first-party/internal packages are excluded.
 | `pyyaml` | `>=6.0.3,<7` |
 | `scipy` | `>=1.18.1,<2` |
 | `sympy` | `>=1.14.0,<2` |
-| `wandb` | `>=0.29.0,<1` |
+| `wandb` | `>=0.30.0,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
 ## Transitive
@@ -84,6 +84,6 @@ and first-party/internal packages are excluded.
 | `tqdm` | `4.70.1` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.4` |
-| `tzdata` | `2026.3` |
+| `tzdata` | `2026.4` |
 | `urllib3` | `2.7.0` |
 | `xxhash` | `4.0.1` |
