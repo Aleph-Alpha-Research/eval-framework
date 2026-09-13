@@ -273,6 +273,36 @@ Hier ist ein Python-Skript mit einer in sich geschlossenen Funktion, die das Pro
     completions=None,
 )
 
+# --- MBPPDEEvalPlusInstruct ---
+_EVALPLUS_INSTRUCT_EXPECTED = ExpectedPrompt(
+    messages=[
+        _EVALPLUS_EXPECTED.messages[0],
+        Message(
+            role=Role.ASSISTANT,
+            content="```python\ndef eins():\n    return 1\n```",
+        ),
+        _EVALPLUS_EXPECTED.messages[2],
+    ],
+    concat="""\
+Bitte erstelle ein in sich geschlossenes Python-Skript, das das folgende Problem in einem Markdown-Code-Block löst:
+```
+Gib die Zahl eins zurück.
+assert eins() == 1
+```
+```python
+def eins():
+    return 1
+```
+
+Bitte erstelle ein in sich geschlossenes Python-Skript, das das folgende Problem in einem Markdown-Code-Block löst:
+```
+Gib die Zahl zwei zurück.
+assert zwei() == 2
+```""",
+    ground_truth=_EVALPLUS_EXPECTED.ground_truth,
+    completions=None,
+)
+
 # --- MBPPDE_BPB_EvalPlus (loglikelihood; identical prompt, BPB scoring of the reference code) ---
 _BPB_EVALPLUS_EXPECTED = ExpectedPrompt(
     messages=_EVALPLUS_EXPECTED.messages,
@@ -303,6 +333,44 @@ def test_mbppde_evalplus_offline_prompt_formatting() -> None:
             sample = next(iter(task.iterate_samples(1)))
 
     _assert_sample_matches(sample, _EVALPLUS_EXPECTED)
+
+
+def test_mbppde_evalplus_instruct_offline_prompt_formatting() -> None:
+    def mock_fewshot_examples(self: Any, item: dict[str, Any]) -> list[dict]:
+        return list(_EP_FEWSHOT_EXAMPLES)
+
+    task = mbpp_ellamind.MBPPDEEvalPlusInstruct.with_overwrite(
+        num_fewshot=3, custom_subjects=[_SUBJECT], custom_hf_revision=None
+    )
+    mock_dataset = DatasetDict({task.SAMPLE_SPLIT: Dataset.from_list([_EP_EVAL_ROW])})
+
+    with patch.object(mbpp_ellamind.MBPPDEEvalPlusInstruct, "_sample_fewshot_examples", mock_fewshot_examples):
+        with patch.object(task, "_load_hf_dataset", return_value=mock_dataset):
+            sample = next(iter(task.iterate_samples(1)))
+
+    _assert_sample_matches(sample, _EVALPLUS_INSTRUCT_EXPECTED)
+    assert sample.messages[-1].role is Role.USER
+    assert task.stop_sequences == []
+
+
+def test_mbppde_evalplus_instruct_extracts_code_block() -> None:
+    task = mbpp_ellamind.MBPPDEEvalPlusInstruct()
+    sample = Sample(
+        id=0,
+        subject=_SUBJECT,
+        messages=[],
+        ground_truth="['assert zwei() == 2']",
+        possible_completions=None,
+    )
+
+    code = task.post_process_generated_completion(
+        "Hier ist die Lösung:\n```python\ndef zwei():\n    return 2\n```",
+        sample,
+    )
+
+    assert code.startswith("def zwei():\n    return 2\n")
+    assert "Hier ist die Lösung" not in code
+    assert "assert zwei() == 2" in code
 
 
 def test_mbppde_bpb_evalplus_offline_prompt_formatting() -> None:

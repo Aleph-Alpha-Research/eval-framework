@@ -310,6 +310,7 @@ def register_humaneval_ellamind_tasks(registry: Registry) -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_BPB_OLMES", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_BPB_OLMES_V2", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_OLMES_V2", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDEInstruct", registry=registry)
 
 
 def register_mbpp_ellamind_tasks(registry: Registry) -> None:
@@ -318,6 +319,7 @@ def register_mbpp_ellamind_tasks(registry: Registry) -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_BPB_OLMES", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_EvalPlus", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_BPB_EvalPlus", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDEEvalPlusInstruct", registry=registry)
 
 
 def register_piqa_ellamind_tasks(registry: Registry) -> None:
