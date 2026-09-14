@@ -50,12 +50,17 @@ class PartialEval(EvalKind):
     (consecutive ids) and picks the option under which the suffix is likelier. Few-shot examples render
     as ordinary cloze (the prefix, then the correct option + suffix)."""
 
-    response_type = ResponseType.LOGLIKELIHOODS
-    metrics: list[type["BaseMetric"]] = [PartialEvalAccuracy]
-
     def __init__(self) -> None:
         self._reader = WinograndeReader()
         self._fewshot_styler = ClozeStyle(question_prefix="", trailing_newline=False, cue_text="")
+
+    @override
+    def response_type(self) -> ResponseType:
+        return ResponseType.LOGLIKELIHOODS
+
+    @override
+    def metrics(self) -> list[type["BaseMetric"]]:
+        return [PartialEvalAccuracy]
 
     @override
     def fewshot(self, item: dict[str, Any]) -> FewshotExample:
