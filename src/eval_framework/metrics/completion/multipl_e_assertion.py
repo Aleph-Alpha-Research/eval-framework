@@ -21,6 +21,9 @@ _SANDBOX_LANG_MAP: dict[str, str] = {
     "js": SupportedLanguage.JAVASCRIPT,
 }
 
+# Memory cap applied to every sandbox container
+_RUNTIME_CONFIGS: dict[str, str] = {"mem_limit": "1g"}
+
 
 class _CustomLangConfig(NamedTuple):
     image: str
@@ -152,7 +155,7 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
     def _execute_via_sandbox_run(full_code: str, sandbox_lang: str, timeout: int) -> tuple[bool, str]:
         """Use llm-sandbox's native session.run() for cpp, java, js."""
         image = getattr(DefaultImage, sandbox_lang.upper())
-        pool = get_or_create_pool(image=image, lang=sandbox_lang)
+        pool = get_or_create_pool(image=image, lang=sandbox_lang, runtime_configs=_RUNTIME_CONFIGS)
         with SandboxSession(pool=pool, lang=sandbox_lang) as session:
             result: Any = session.run(full_code, timeout=timeout)
         return result.success(), result.stdout + result.stderr
@@ -185,7 +188,13 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
         code_file = f"{container_dir}/{code_filename}"
         output = ""
 
-        pool = get_or_create_pool(image=cfg.image, lang=SupportedLanguage.PYTHON, min_pool_size=1, max_pool_size=1)
+        pool = get_or_create_pool(
+            image=cfg.image,
+            lang=SupportedLanguage.PYTHON,
+            min_pool_size=1,
+            max_pool_size=1,
+            runtime_configs=_RUNTIME_CONFIGS,
+        )
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = os.path.join(tmp_dir, code_filename)
