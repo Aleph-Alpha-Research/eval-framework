@@ -72,7 +72,7 @@ def _idk_preamble(subject_label: str) -> str:
     )
 
 
-def _mmlu_benchmark(
+def _mmlu_generic(
     id: str, styler: TaskStyler, dataset: DatasetPolicy | None = None, display_name: str | None = None
 ) -> Benchmark:
     dataset_policy = dataset if dataset is not None else pinned_by_framework("cais/mmlu")
@@ -90,27 +90,27 @@ def _mmlu_benchmark(
 
 def mmlu(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(question_prefix="Question: ", cue_text="Answer:", initial_prompt=_mc_preamble)
-    return _mmlu_benchmark("MMLU", styler, dataset)
+    return _mmlu_generic("MMLU", styler, dataset)
 
 
 def mmlu_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(
         question_prefix="Question: ", cue_text="Answer:", space_prefixed_labels=True, initial_prompt=_mc_preamble
     )
-    return _mmlu_benchmark("MMLU_OLMES", styler, dataset)
+    return _mmlu_generic("MMLU_OLMES", styler, dataset)
 
 
 def mmlu_full_text(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = _FullTextMmluStyle(question_prefix="Question: ", cue_text="Answer:", initial_prompt=_full_text_preamble)
     # The registry/hash identity is the compact "FullTextMMLU"; the display name keeps the spelled-out form.
-    return _mmlu_benchmark("FullTextMMLU", styler, dataset, display_name="Full Text MMLU")
+    return _mmlu_generic("FullTextMMLU", styler, dataset, display_name="Full Text MMLU")
 
 
 def mmlu_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(
         question_prefix="Question: ", cue_text="Answer:", initial_prompt=_idk_preamble
     ).with_abstention_option(" ?")
-    return _mmlu_benchmark("MMLU_IDK", styler, dataset)
+    return _mmlu_generic("MMLU_IDK", styler, dataset)
 
 
 MMLU_BENCHMARKS: list[Benchmark] = [mmlu(), mmlu_olmes(), mmlu_full_text(), mmlu_idk()]
