@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.91,<2` |
+| `boto3` | `>=1.43.92,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -22,7 +22,7 @@ and first-party/internal packages are excluded.
 | `mysql-connector-python` | `>=26.7.0,<27` |
 | `nltk` | `>=3.10.3,<4` |
 | `numpy` | `>=2.5.3` |
-| `psycopg2-binary` | `>=2.9.12,<3` |
+| `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.13.5,<3` |
 | `python-dotenv` | `>=1.2.3,<2` |
