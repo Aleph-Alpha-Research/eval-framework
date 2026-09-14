@@ -32,8 +32,13 @@ class EvalKind(ABC):
     A kind deals only in text; ``ComposedEval`` owns the (fixed) mapping to USER / ASSISTANT turns.
     """
 
-    response_type: ResponseType
-    metrics: list[type["BaseMetric"]]
+    @abstractmethod
+    def response_type(self) -> ResponseType:
+        """Whether this kind is scored by loglikelihood over candidates or by free-form completion."""
+
+    @abstractmethod
+    def metrics(self) -> list[type["BaseMetric"]]:
+        """The metrics this kind is scored with."""
 
     @abstractmethod
     def fewshot(self, item: dict[str, Any]) -> FewshotExample:
@@ -61,8 +66,14 @@ class Choice(EvalKind):
     def __init__(self, reader: ChoiceReader, styler: "TaskStyler") -> None:
         self._reader = reader
         self._styler = styler
-        self.response_type = styler.response_type
-        self.metrics = styler.metrics
+
+    @override
+    def response_type(self) -> ResponseType:
+        return self._styler.response_type
+
+    @override
+    def metrics(self) -> list[type["BaseMetric"]]:
+        return self._styler.metrics
 
     @override
     def fewshot(self, item: dict[str, Any]) -> FewshotExample:

@@ -148,7 +148,7 @@ class ComposedEval(Eval):
             "sample_split": self.sample_split,
             "fewshot_split": self.fewshot_split,
             "response_type": self.get_response_type().value,
-            "metrics": [m.NAME for m in self._kind.metrics],
+            "metrics": [m.NAME for m in self._kind.metrics()],
             "subjects": [s.label for s in self._subjects],
         }
         meta.update(self.loader.metadata())
@@ -247,7 +247,7 @@ class ComposedEval(Eval):
 
     @override
     def get_response_type(self) -> ResponseType:
-        return self._kind.response_type
+        return self._kind.response_type()
 
     @override
     def display_name(self) -> str:
@@ -257,14 +257,15 @@ class ComposedEval(Eval):
 def _metrics_for(kind: EvalKind) -> list[type["BaseMetric"]]:
     """The metrics a kind implies: its own plus those its response type requires."""
     response_type_metrics: list[type[BaseMetric]]
-    match kind.response_type:
+    response_type = kind.response_type()
+    match response_type:
         case ResponseType.COMPLETION:
             response_type_metrics = [BytesCompletion, SequencePositionsCompletion, TokenCounts, FinishReason]
         case ResponseType.LOGLIKELIHOODS:
             response_type_metrics = [BytesLoglikelihood, SequencePositionsLoglikelihood]
         case _:
-            typing.assert_never(kind.response_type)
-    return kind.metrics + response_type_metrics
+            typing.assert_never(response_type)
+    return kind.metrics() + response_type_metrics
 
 
 @final
@@ -353,7 +354,7 @@ class ComposedBenchmark(Benchmark):
     @override
     def response_type(self) -> ResponseType:
         """The benchmark's response type"""
-        return self._kind.response_type
+        return self._kind.response_type()
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
