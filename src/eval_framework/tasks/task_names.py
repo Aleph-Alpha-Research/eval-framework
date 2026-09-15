@@ -1,6 +1,7 @@
 from enum import Enum
 
 from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK
+from eval_framework.benchmarks.csqa import CSQA_BENCHMARKS
 from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.goldenswag import GOLDENSWAG_BENCHMARKS
 from eval_framework.benchmarks.gpqa_ellamind import GPQA_ELLAMIND_BENCHMARKS
@@ -222,7 +223,8 @@ def register_winogrande_tasks(registry: Registry) -> None:
 
 def register_csqa_tasks(registry: Registry) -> None:
     """Register csqa benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.csqa.CommonsenseQAMC_OLMES", registry=registry)
+    for benchmark in CSQA_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_drop_tasks(registry: Registry) -> None:

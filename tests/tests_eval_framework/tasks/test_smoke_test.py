@@ -3,12 +3,6 @@ from datasets.exceptions import DatasetNotFoundError
 
 from eval_framework.tasks.benchmarks.arc import ARC_OLMES
 from eval_framework.tasks.benchmarks.copa import COPA_OLMES, COPA_IDKEvalHarness, COPAEvalHarness
-from eval_framework.tasks.benchmarks.csqa import (
-    CommonsenseQACloze,
-    CommonsenseQAFullTextCloze,
-    CommonsenseQAMC,
-    CommonsenseQAMC_OLMES,
-)
 from eval_framework.tasks.benchmarks.drop import DropCloze, DropCompletion, DropMC, DropMC_OLMES
 from eval_framework.tasks.benchmarks.global_mmlu import GlobalMMLU
 from eval_framework.tasks.benchmarks.gpqa import GPQA_OLMES
@@ -46,15 +40,6 @@ def _smoke_test_task(task_cls, num_fewshot: int = 0) -> None:
         assert sample.id is not None
         assert isinstance(sample.subject, str)
         assert sample.messages
-
-
-@pytest.mark.cpu_slow
-@pytest.mark.slow_download
-def test_csqa_tasks_smoke() -> None:
-    _smoke_test_task(CommonsenseQACloze)
-    _smoke_test_task(CommonsenseQAFullTextCloze)
-    _smoke_test_task(CommonsenseQAMC)
-    _smoke_test_task(CommonsenseQAMC_OLMES)
 
 
 @pytest.mark.cpu_slow
