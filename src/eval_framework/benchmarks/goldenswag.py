@@ -7,8 +7,6 @@ A curated subset of HellaSwag, read identically (sentence completion, scored as 
 from eval_framework.benchmarks.hellaswag import HellaswagReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import Choice
-from eval_framework.fewshot import SampledFewShot
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -22,13 +20,13 @@ _IDK_PREAMBLE = (
 
 
 def _goldenswag_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy | None = None) -> Benchmark:
-    kind = Choice(reader=HellaswagReader(), styler=styler)
     dataset_policy = dataset if dataset is not None else pinned_by_framework("PleIAs/GoldenSwag")
-    return ComposedBenchmark.compose(
+    return ComposedBenchmark.choice(
         id=id,
-        kind=kind,
+        reader=HellaswagReader(),
+        styler=styler,
         sample_split="validation",
-        fewshot=SampledFewShot("validation"),
+        fewshot_split="validation",
         dataset_policy=dataset_policy,
         language=Language.ENG,
     )

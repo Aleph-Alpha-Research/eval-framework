@@ -20,12 +20,6 @@ class SampleBody:
     ground_truth: str
 
 
-@dataclass(frozen=True)
-class FewshotExample:
-    prompt: str  # the user turn
-    answer: str  # the assistant turn (the shown correct answer)
-
-
 class EvalKind(ABC):
     """How a kind of task becomes scored model interactions. Describes what kind of test this is.
 
@@ -41,10 +35,6 @@ class EvalKind(ABC):
     @abstractmethod
     def metrics(self) -> list[type["BaseMetric"]]:
         """The metrics this kind is scored with."""
-
-    @abstractmethod
-    def fewshot(self, item: dict[str, Any]) -> FewshotExample:
-        """One solved few-shot example: the prompt shown and the answer shown."""
 
     @abstractmethod
     def samples(self, item: dict[str, Any]) -> list[SampleBody]:
@@ -96,14 +86,6 @@ class Choice(EvalKind):
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
         return self._styler.metrics
-
-    @override
-    def fewshot(self, item: dict[str, Any]) -> FewshotExample:
-        fields = self._reader.read(item)
-        return FewshotExample(
-            prompt=self._styler.get_instruction_text(fields.raw_question, fields.choices),
-            answer=self._styler.get_fewshot_target_text(fields.choices, fields.correct_index),
-        )
 
     @override
     def samples(self, item: dict[str, Any]) -> list[SampleBody]:

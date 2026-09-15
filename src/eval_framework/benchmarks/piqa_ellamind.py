@@ -10,8 +10,6 @@ from typing import Any, Literal, final, override
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import Choice
-from eval_framework.fewshot import SampledFewShot
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
@@ -44,13 +42,13 @@ _CUE_TEXT = "Antwort:"
 def _piqa_ellamind_benchmark(
     id: str, styler: TaskStyler, distractor_level: Literal["easy", "hard"], dataset: DatasetPolicy | None = None
 ) -> Benchmark:
-    kind = Choice(reader=PiqaReader(distractor_level), styler=styler)
     dataset_policy = dataset if dataset is not None else pinned_by_framework("ellamind/piqa-multilingual")
-    return ComposedBenchmark.compose(
+    return ComposedBenchmark.choice(
         id=id,
-        kind=kind,
+        reader=PiqaReader(distractor_level),
+        styler=styler,
         sample_split="validation",
-        fewshot=SampledFewShot("validation"),
+        fewshot_split="validation",
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=dataset_policy,
         language=Language.DEU,

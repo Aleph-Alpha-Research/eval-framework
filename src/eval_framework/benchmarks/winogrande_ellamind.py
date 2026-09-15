@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, final, override
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark, ResponseType
-from eval_framework.eval_kind import Choice, EvalKind, FewshotExample, SampleBody
+from eval_framework.eval_kind import EvalKind, SampleBody
 from eval_framework.fewshot import SampledFewShot
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import PartialEvalAccuracy
 from eval_framework.shared.types import BaseMetricContext
@@ -20,7 +20,7 @@ from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import ClozeStyle, MCStyle
+from eval_framework.tasks.task_style import ClozeStyle, MCStyle, TaskStyler
 from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
@@ -50,12 +50,10 @@ class WinograndeReader(ChoiceReader):
 class PartialEval(EvalKind):
     """Winogrande partial evaluation: one item becomes two samples, each scoring the shared sentence
     suffix under one option — ``p(suffix | prefix + option)``. ``PartialEvalAccuracy`` pairs the two
-    (consecutive ids) and picks the option under which the suffix is likelier. Few-shot examples render
-    as ordinary cloze (the prefix, then the correct option + suffix)."""
+    (consecutive ids) and picks the option under which the suffix is likelier."""
 
     def __init__(self) -> None:
         self._reader = WinograndeReader()
-        self._fewshot_styler = ClozeStyle(question_prefix="", trailing_newline=False, cue_text="")
 
     @override
     def response_type(self) -> ResponseType:
@@ -64,14 +62,6 @@ class PartialEval(EvalKind):
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
         return [PartialEvalAccuracy]
-
-    @override
-    def fewshot(self, item: dict[str, Any]) -> FewshotExample:
-        fields = self._reader.read(item)
-        return FewshotExample(
-            prompt=self._fewshot_styler.get_instruction_text(fields.raw_question, fields.choices),
-            answer=self._fewshot_styler.get_fewshot_target_text(fields.choices, fields.correct_index),
-        )
 
     @override
     def samples(self, item: dict[str, Any]) -> list[SampleBody]:
@@ -109,31 +99,44 @@ class PartialEval(EvalKind):
         return completion_text  # partial evaluation is scored by loglikelihood; no completion path
 
 
-def _winogrande_ellamind_benchmark(id: str, kind: EvalKind, dataset: DatasetPolicy | None = None) -> Benchmark:
-    dataset_policy = dataset if dataset is not None else pinned_by_framework("ellamind/winogrande-multilingual")
-    return ComposedBenchmark.compose(
+def _winogrande_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
+    return dataset if dataset is not None else pinned_by_framework("ellamind/winogrande-multilingual")
+
+
+def _winogrande_choice(id: str, styler: TaskStyler, dataset: DatasetPolicy | None = None) -> Benchmark:
+    return ComposedBenchmark.choice(
         id=id,
-        kind=kind,
+        reader=WinograndeReader(),
+        styler=styler,
         sample_split="validation",
-        fewshot=SampledFewShot("validation"),
+        fewshot_split="validation",
         subjects=ListOfSubjects(["deu"]),
-        dataset_policy=dataset_policy,
+        dataset_policy=_winogrande_dataset(dataset),
         language=Language.DEU,
     )
 
 
 def winogrande_ellamind_cloze_de(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = ClozeStyle(question_prefix="", trailing_newline=False, cue_text="")
-    return _winogrande_ellamind_benchmark("WINOGRANDE_ELLAMIND_CLOZE_DE", Choice(WinograndeReader(), styler), dataset)
+    return _winogrande_choice("WINOGRANDE_ELLAMIND_CLOZE_DE", styler, dataset)
 
 
 def winogrande_ellamind_mc_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    styler = MCStyle.for_language(Language.DEU)
-    return _winogrande_ellamind_benchmark("WINOGRANDE_ELLAMIND_MC_DE", Choice(WinograndeReader(), styler), dataset)
+    return _winogrande_choice("WINOGRANDE_ELLAMIND_MC_DE", MCStyle.for_language(Language.DEU), dataset)
 
 
 def winogrande_ellamind_partial_eval_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _winogrande_ellamind_benchmark("WINOGRANDE_ELLAMIND_PARTIAL_EVAL_DE", PartialEval(), dataset)
+    # Partial evaluation scores the suffix directly; its few-shot demonstrations render as ordinary cloze.
+    fewshot_styler = ClozeStyle(question_prefix="", trailing_newline=False, cue_text="")
+    return ComposedBenchmark.compose(
+        id="WINOGRANDE_ELLAMIND_PARTIAL_EVAL_DE",
+        kind=PartialEval(),
+        sample_split="validation",
+        fewshot=SampledFewShot(WinograndeReader(), fewshot_styler, "validation"),
+        subjects=ListOfSubjects(["deu"]),
+        dataset_policy=_winogrande_dataset(dataset),
+        language=Language.DEU,
+    )
 
 
 WINOGRANDE_ELLAMIND_BENCHMARKS: list[Benchmark] = [

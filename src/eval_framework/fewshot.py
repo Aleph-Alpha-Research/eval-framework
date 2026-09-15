@@ -1,18 +1,31 @@
-"""Few-shot policies: where a composed eval draws its demonstrations from — and whether it draws any.
+"""Few-shot policies: where a composed eval draws its demonstrations from, how they are rendered — and
+whether it draws any.
 
-A ``FewShot`` owns only the *source* of demonstrations (which split, sampled leak-safely) and whether
-few-shot is permitted at all. The eval renders each drawn item through its ``EvalKind``; the two concerns
-are injected side by side into ``ComposedEval``. ``NoFewShot`` lets a benchmark declare "0-shot only"
-structurally, so the constraint is enforced at creation instead of via a placeholder split.
+A ``FewShot`` owns the *source* of demonstrations (which split, sampled leak-safely) and their *rendering*
+into solved prompt/answer pairs; the eval only wraps those into USER / ASSISTANT turns. ``NoFewShot`` lets
+a benchmark declare "0-shot only" structurally, so the constraint is enforced at creation instead of via a
+placeholder split.
 """
 
 import random
 from abc import ABC, abstractmethod
-from typing import Any, final, override
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, final, override
+
+from eval_framework.choices import ChoiceReader
+
+if TYPE_CHECKING:
+    from eval_framework.tasks.task_style import TaskStyler
+
+
+@dataclass(frozen=True)
+class FewshotExample:
+    prompt: str  # the user turn
+    answer: str  # the assistant turn (the shown correct answer)
 
 
 class FewShot(ABC):
-    """The source of a composed eval's few-shot demonstrations, and whether it permits any."""
+    """The source of a composed eval's few-shot demonstrations, their rendering, and whether it permits any."""
 
     @abstractmethod
     def split(self) -> str | None:
@@ -25,7 +38,7 @@ class FewShot(ABC):
         so an unsupported request fails before any dataset is touched."""
 
     @abstractmethod
-    def select(
+    def examples(
         self,
         dataset: dict[str, list[dict[str, Any]]],
         *,
@@ -33,8 +46,9 @@ class FewShot(ABC):
         item: dict[str, Any],
         num_fewshot: int,
         rnd: random.Random,
-    ) -> list[dict[str, Any]]:
-        """The demonstration items to show before ``item`` — already sampled, and never ``item`` itself."""
+    ) -> list["FewshotExample"]:
+        """The rendered demonstrations to show before ``item`` — sampled leak-safely (never ``item``
+        itself) and formatted into solved prompt/answer pairs."""
 
     @abstractmethod
     def metadata(self) -> dict[str, str]:
@@ -43,10 +57,13 @@ class FewShot(ABC):
 
 @final
 class SampledFewShot(FewShot):
-    """Draws ``num_fewshot`` demonstrations at random from ``split``. When ``split`` is also the sample
-    split, the current eval item is excluded so its own answer never leaks into its prompt."""
+    """Draws ``num_fewshot`` demonstrations at random from ``split`` and renders each with ``reader`` +
+    ``styler`` — the shown prompt, then the correct answer. When ``split`` is also the sample split, the
+    current eval item is excluded so its own answer never leaks into its prompt."""
 
-    def __init__(self, split: str) -> None:
+    def __init__(self, reader: ChoiceReader, styler: "TaskStyler", split: str) -> None:
+        self._reader = reader
+        self._styler = styler
         self._split = split
 
     @override
@@ -58,7 +75,19 @@ class SampledFewShot(FewShot):
         return  # any shot count is supported
 
     @override
-    def select(
+    def examples(
+        self,
+        dataset: dict[str, list[dict[str, Any]]],
+        *,
+        sample_split: str,
+        item: dict[str, Any],
+        num_fewshot: int,
+        rnd: random.Random,
+    ) -> list[FewshotExample]:
+        sampled = self._sample(dataset, sample_split=sample_split, item=item, num_fewshot=num_fewshot, rnd=rnd)
+        return [self._render(demonstration) for demonstration in sampled]
+
+    def _sample(
         self,
         dataset: dict[str, list[dict[str, Any]]],
         *,
@@ -73,11 +102,18 @@ class SampledFewShot(FewShot):
         if self._split == sample_split:
             # Same split for demonstrations and evaluation: over-sample by one, drop the current item
             # if it was drawn (so its answer never leaks), then truncate back to num_fewshot.
-            examples = rnd.sample(fewshot_pool, num_fewshot + 1)
-            examples = [example for example in examples if example != item]
-            return examples[:num_fewshot]
+            drawn = rnd.sample(fewshot_pool, num_fewshot + 1)
+            drawn = [demonstration for demonstration in drawn if demonstration != item]
+            return drawn[:num_fewshot]
         # Separate splits: no risk of leaking the current item, sample directly.
         return rnd.sample(fewshot_pool, num_fewshot)
+
+    def _render(self, item: dict[str, Any]) -> FewshotExample:
+        fields = self._reader.read(item)
+        return FewshotExample(
+            prompt=self._styler.get_instruction_text(fields.raw_question, fields.choices),
+            answer=self._styler.get_fewshot_target_text(fields.choices, fields.correct_index),
+        )
 
     @override
     def metadata(self) -> dict[str, str]:
@@ -98,7 +134,7 @@ class NoFewShot(FewShot):
             raise ValueError(f"This benchmark is 0-shot only; num_fewshot must be 0, got {num_fewshot}.")
 
     @override
-    def select(
+    def examples(
         self,
         dataset: dict[str, list[dict[str, Any]]],
         *,
@@ -106,7 +142,7 @@ class NoFewShot(FewShot):
         item: dict[str, Any],
         num_fewshot: int,
         rnd: random.Random,
-    ) -> list[dict[str, Any]]:
+    ) -> list[FewshotExample]:
         return []
 
     @override
