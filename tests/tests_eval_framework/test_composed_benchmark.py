@@ -132,12 +132,13 @@ def _make_benchmark(
     language: LanguageSpec = None,
 ) -> ComposedBenchmark:
     """Build a ``ComposedBenchmark`` for tests, defaulting to dummies for every argument the test does not provide."""
+    resolved_styler = styler or _DummyStyler()
     return ComposedBenchmark.compose(
         id=id,
         display_name=display_name,
-        kind=Choice(reader=reader, styler=styler or _DummyStyler()),
+        kind=Choice(reader=reader, styler=resolved_styler),
         sample_split=sample_split,
-        fewshot=fewshot or SampledFewShot(_DUMMY_SPLIT),
+        fewshot=fewshot or SampledFewShot(reader, resolved_styler, _DUMMY_SPLIT),
         subjects=subjects,
         dataset_policy=dataset_policy or _DummyDatasetPolicy(),
         language=language,
@@ -158,13 +159,14 @@ def _make_eval(
     rnd: random.Random = _DUMMY_RNG,
 ) -> ComposedEval:
     """Build a ``ComposedEval`` for tests, defaulting to dummies for every argument the test does not provide."""
+    resolved_styler = styler or _DummyStyler()
     return ComposedEval(
         num_fewshot,
         display_name=display_name,
-        kind=Choice(reader=reader, styler=styler or _DummyStyler()),
+        kind=Choice(reader=reader, styler=resolved_styler),
         loader=loader,
         sample_split=sample_split,
-        fewshot=fewshot or SampledFewShot(_DUMMY_SPLIT),
+        fewshot=fewshot or SampledFewShot(reader, resolved_styler, _DUMMY_SPLIT),
         subjects=subjects,
         language=language,
         rnd=rnd,
@@ -374,10 +376,11 @@ def test_initial_prompt_is_prepended_once_before_the_first_fewshot_example() -> 
             return f"About {subject_label}."
 
     # and a benchmark over one eval row and one fewshot row, with a subject-templated initial prompt
+    reader, styler = _Reader(), _Styler()
     benchmark = _make_benchmark(
-        reader=_Reader(),
-        styler=_Styler(),
-        fewshot=SampledFewShot("train"),
+        reader=reader,
+        styler=styler,
+        fewshot=SampledFewShot(reader, styler, "train"),
         dataset_policy=DatasetStub({"test": [{"question": "eval q"}], "train": [{"question": "shot q"}]}),
     )
 
@@ -409,5 +412,47 @@ def test_no_fewshot_benchmark_allows_zero_shot_creation() -> None:
 
 def test_get_metadata_reports_fewshot_split_from_the_policy() -> None:
     # SampledFewShot surfaces its source split in metadata; NoFewShot contributes no split at all.
-    assert _make_eval(fewshot=SampledFewShot("dev")).get_metadata()["fewshot_split"] == "dev"
+    sampled = SampledFewShot(_DUMMY_READER, _DummyStyler(), "dev")
+    assert _make_eval(fewshot=sampled).get_metadata()["fewshot_split"] == "dev"
     assert "fewshot_split" not in _make_eval(fewshot=NoFewShot()).get_metadata()
+
+
+def test_choice_wires_the_kind_and_fewshot_from_one_reader_and_styler() -> None:
+    # ComposedBenchmark.choice takes the reader + styler once and drives both the scored Choice and the
+    # SampledFewShot, so a 1-shot sample styles the demonstration and the eval item identically.
+    class _Reader(ChoiceReader):
+        @override
+        def read(self, item: dict[str, Any]) -> ChoiceFields:
+            return ChoiceFields(raw_question=item["q"], choices=["x", "y"], correct_index=0)
+
+    class _Styler(_DummyStyler):
+        @override
+        def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
+            return f"Q: {raw_question}"
+
+        @override
+        def get_cue_text(self) -> str:
+            return "A:"
+
+        @override
+        def get_ground_truth(self, choices: list[str], correct_index: int) -> str:
+            return f" {choices[correct_index]}"
+
+    benchmark = ComposedBenchmark.choice(
+        id="c",
+        reader=_Reader(),
+        styler=_Styler(),
+        sample_split="test",
+        fewshot_split="train",
+        dataset_policy=DatasetStub({"test": [{"q": "eval"}], "train": [{"q": "shot"}]}),
+        language=None,
+    )
+
+    # The demonstration (USER prompt, ASSISTANT cue + answer) and the eval item share the styler's formatting.
+    sample = first_sample(benchmark, num_fewshot=1)
+    assert sample.messages == [
+        Message(role=Role.USER, content="Q: shot"),
+        Message(role=Role.ASSISTANT, content="A: x"),
+        Message(role=Role.USER, content="Q: eval"),
+        Message(role=Role.ASSISTANT, content="A:"),
+    ]

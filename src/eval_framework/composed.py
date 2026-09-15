@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING, Any, Self, final, override
 
 from datasets import DatasetDict
 
+from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
-from eval_framework.eval_kind import EvalKind, SampleBody
-from eval_framework.fewshot import FewShot
+from eval_framework.eval_kind import Choice, EvalKind, SampleBody
+from eval_framework.fewshot import FewShot, SampledFewShot
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesCompletion,
     BytesLoglikelihood,
@@ -29,6 +30,7 @@ from template_formatting.formatter import BaseFormatter, Message, Role
 if TYPE_CHECKING:
     from eval_framework.llm.base import BaseLLM
     from eval_framework.metrics.base import BaseMetric
+    from eval_framework.tasks.task_style import TaskStyler
 
 logger = logging.getLogger(__name__)
 
@@ -119,13 +121,10 @@ class ComposedEval(Eval):
         return messages
 
     def _fewshot_messages(self, item: dict[str, Any], dataset: dict[str, list[dict[str, Any]]]) -> list[Message]:
-        fewshot_examples = self._fewshot.select(
-            dataset, sample_split=self.sample_split, item=item, num_fewshot=self.num_fewshot, rnd=self.rnd
-        )
         prefix: list[Message] = []
-        for fewshot_example in fewshot_examples:
-            fewshot_example["subject"] = item["subject"]
-            example = self._kind.fewshot(fewshot_example)
+        for example in self._fewshot.examples(
+            dataset, sample_split=self.sample_split, item=item, num_fewshot=self.num_fewshot, rnd=self.rnd
+        ):
             prefix.append(Message(role=Role.USER, content=example.prompt))
             prefix.append(Message(role=Role.ASSISTANT, content=example.answer))
         return prefix
@@ -312,6 +311,33 @@ class ComposedBenchmark(Benchmark):
             fewshot=fewshot,
             language=language,
             dataset_policy=dataset_policy,
+        )
+
+    @classmethod
+    def choice(
+        cls,
+        *,
+        id: str,
+        reader: ChoiceReader,
+        styler: "TaskStyler",
+        sample_split: str,
+        fewshot_split: str,
+        subjects: SubjectsSelector | None = None,
+        dataset_policy: DatasetPolicy,
+        language: LanguageSpec,
+        display_name: str | None = None,
+    ) -> Self:
+        """Build a choice-based benchmark. The same ``reader`` + ``styler`` drive both the scored
+        ``Choice`` and its matching ``SampledFewShot`` demonstrations, so they are given once."""
+        return cls.compose(
+            id=id,
+            display_name=display_name,
+            kind=Choice(reader, styler),
+            sample_split=sample_split,
+            fewshot=SampledFewShot(reader, styler, fewshot_split),
+            subjects=subjects,
+            dataset_policy=dataset_policy,
+            language=language,
         )
 
     @override

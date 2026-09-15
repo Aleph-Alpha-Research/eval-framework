@@ -12,8 +12,6 @@ from typing import Any, final, override
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import Choice
-from eval_framework.fewshot import SampledFewShot
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -48,13 +46,13 @@ class HellaswagReader(ChoiceReader):
 def _hellaswag_benchmark(
     id: str, *, sample_split: str, fewshot_split: str, dataset: DatasetPolicy | None = None
 ) -> Benchmark:
-    kind = Choice(reader=HellaswagReader(), styler=ClozeStyle(question_prefix="", cue_text="", trailing_newline=False))
     dataset_policy = dataset if dataset is not None else pinned_by_framework("Rowan/hellaswag")
-    return ComposedBenchmark.compose(
+    return ComposedBenchmark.choice(
         id=id,
-        kind=kind,
+        reader=HellaswagReader(),
+        styler=ClozeStyle(question_prefix="", cue_text="", trailing_newline=False),
         sample_split=sample_split,
-        fewshot=SampledFewShot(fewshot_split),
+        fewshot_split=fewshot_split,
         dataset_policy=dataset_policy,
         language=Language.ENG,
     )
