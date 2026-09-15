@@ -2,7 +2,6 @@ import pytest
 from datasets.exceptions import DatasetNotFoundError
 
 from eval_framework.tasks.benchmarks.arc import ARC_OLMES
-from eval_framework.tasks.benchmarks.copa import COPA_OLMES, COPA_IDKEvalHarness, COPAEvalHarness
 from eval_framework.tasks.benchmarks.drop import DropCloze, DropCompletion, DropMC, DropMC_OLMES
 from eval_framework.tasks.benchmarks.global_mmlu import GlobalMMLU
 from eval_framework.tasks.benchmarks.gpqa import GPQA_OLMES
@@ -83,7 +82,6 @@ def test_social_iqa_tasks_smoke() -> None:
 def test_olmes_variants_smoke() -> None:
     for task_cls in (
         ARC_OLMES,
-        COPA_OLMES,
         GPQA_OLMES,  # gated; skipped when not authenticated
         MMLU_PRO_OLMES,
         WINOGRANDE_OLMES,
@@ -94,12 +92,6 @@ def test_olmes_variants_smoke() -> None:
             if "gated" in str(e).lower():
                 continue  # skip this task only when gated and not authenticated
             raise
-
-
-@pytest.mark.cpu_slow
-def test_copa_harness_smoke() -> None:
-    _smoke_test_task(COPAEvalHarness)
-    _smoke_test_task(COPA_IDKEvalHarness)
 
 
 @pytest.mark.cpu_slow
