@@ -13,6 +13,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark, ResponseType
 from eval_framework.eval_kind import Choice, EvalKind, FewshotExample, SampleBody
+from eval_framework.fewshot import SampledFewShot
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import PartialEvalAccuracy
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
@@ -114,7 +115,7 @@ def _winogrande_ellamind_benchmark(id: str, kind: EvalKind, dataset: DatasetPoli
         id=id,
         kind=kind,
         sample_split="validation",
-        fewshot_split="validation",
+        fewshot=SampledFewShot("validation"),
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=dataset_policy,
         language=Language.DEU,

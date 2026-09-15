@@ -9,6 +9,7 @@ from datasets import DatasetDict
 
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.eval_kind import EvalKind, SampleBody
+from eval_framework.fewshot import FewShot
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesCompletion,
     BytesLoglikelihood,
@@ -45,7 +46,7 @@ class ComposedEval(Eval):
         kind: EvalKind,
         loader: DatasetLoader,
         sample_split: str,
-        fewshot_split: str,
+        fewshot: FewShot,
         subjects: Subjects,
         language: LanguageSpec,
         rnd: random.Random,
@@ -55,7 +56,7 @@ class ComposedEval(Eval):
         self._kind = kind
         self.loader = loader
         self.sample_split = sample_split
-        self.fewshot_split = fewshot_split
+        self._fewshot = fewshot
         self._subjects = subjects
         self.language = language
         self.rnd = rnd
@@ -64,7 +65,7 @@ class ComposedEval(Eval):
         dataset: dict[str, list[dict[str, Any]]] = {}
 
         for split, data in hf_dataset.items():
-            if split not in [self.sample_split, self.fewshot_split]:
+            if split not in {self.sample_split, self._fewshot.split()}:
                 continue
 
             data_list = list(data)
@@ -84,7 +85,6 @@ class ComposedEval(Eval):
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
         for subject in self._subjects:
             dataset = self._load_dataset(subject.load_key)
-            fewshot_pool = dataset[self.fewshot_split] if self.num_fewshot > 0 else []
             assert len(dataset[self.sample_split]) > 0
             initial_prompt = self._kind.initial_prompt(subject.label)
             sample_id = 0  # ids and the num_samples cap are per subject, matching BaseTask
@@ -93,7 +93,7 @@ class ComposedEval(Eval):
                 if done:
                     break
                 item["subject"] = subject.label
-                prefix = self._fewshot_messages(item, fewshot_pool)
+                prefix = self._fewshot_messages(item, dataset)
                 for sample_body in self._kind.samples(item):
                     yield Sample(
                         id=sample_id,
@@ -118,8 +118,10 @@ class ComposedEval(Eval):
             messages.append(Message(role=Role.ASSISTANT, content=body.cue))
         return messages
 
-    def _fewshot_messages(self, item: dict[str, Any], fewshot_pool: list[dict[str, Any]]) -> list[Message]:
-        fewshot_examples = self._sample_fewshot_examples(item, fewshot_pool) if self.num_fewshot > 0 else []
+    def _fewshot_messages(self, item: dict[str, Any], dataset: dict[str, list[dict[str, Any]]]) -> list[Message]:
+        fewshot_examples = self._fewshot.select(
+            dataset, sample_split=self.sample_split, item=item, num_fewshot=self.num_fewshot, rnd=self.rnd
+        )
         prefix: list[Message] = []
         for fewshot_example in fewshot_examples:
             fewshot_example["subject"] = item["subject"]
@@ -128,30 +130,15 @@ class ComposedEval(Eval):
             prefix.append(Message(role=Role.ASSISTANT, content=example.answer))
         return prefix
 
-    def _sample_fewshot_examples(
-        self, item: dict[str, Any], fewshot_pool: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
-        if self.fewshot_split == self.sample_split:
-            # If the fewshot and sample splits are the same, we risk including the current eval item
-            # as a fewshot example (leaking the answer). To prevent this, sample one extra example,
-            # remove the current item if present, and truncate back to num_fewshot.
-            fewshot_examples = self.rnd.sample(fewshot_pool, self.num_fewshot + 1)
-            fewshot_examples = [example for example in fewshot_examples if example != item]
-            fewshot_examples = fewshot_examples[: self.num_fewshot]
-            return fewshot_examples
-        else:
-            # Separate splits: no risk of leaking the current item, sample directly.
-            return self.rnd.sample(fewshot_pool, self.num_fewshot)
-
     @override
     def get_metadata(self) -> dict[str, str | list[str]]:
         meta: dict[str, str | list[str]] = {
             "sample_split": self.sample_split,
-            "fewshot_split": self.fewshot_split,
             "response_type": self.get_response_type().value,
             "metrics": [m.NAME for m in self._kind.metrics()],
             "subjects": [s.label for s in self._subjects],
         }
+        meta.update(self._fewshot.metadata())
         meta.update(self.loader.metadata())
         meta.update(self._kind.metadata())
         return meta
@@ -288,7 +275,7 @@ class ComposedBenchmark(Benchmark):
         subjects: SubjectsSelector,
         kind: EvalKind,
         sample_split: str,
-        fewshot_split: str,
+        fewshot: FewShot,
         dataset_policy: DatasetPolicy,
         language: LanguageSpec,
     ) -> None:
@@ -297,7 +284,7 @@ class ComposedBenchmark(Benchmark):
         self._subjects = subjects
         self._kind = kind
         self.sample_split = sample_split
-        self.fewshot_split = fewshot_split
+        self._fewshot = fewshot
         self.language = language
         self.dataset_policy = dataset_policy
 
@@ -308,7 +295,7 @@ class ComposedBenchmark(Benchmark):
         id: str,
         kind: EvalKind,
         sample_split: str,
-        fewshot_split: str,
+        fewshot: FewShot,
         subjects: SubjectsSelector | None = None,
         dataset_policy: DatasetPolicy,
         language: LanguageSpec,
@@ -322,7 +309,7 @@ class ComposedBenchmark(Benchmark):
             subjects=subjects if subjects is not None else NoSubject(),
             kind=kind,
             sample_split=sample_split,
-            fewshot_split=fewshot_split,
+            fewshot=fewshot,
             language=language,
             dataset_policy=dataset_policy,
         )
@@ -343,6 +330,7 @@ class ComposedBenchmark(Benchmark):
         # Composed evals have no completion path yet, so a completion-only user prompt suffix is rejected.
         if user_prompt_suffix is not None:
             raise ValueError("user_prompt_suffix is only supported for completion tasks.")
+        self._fewshot.check(num_fewshot)  # reject an unsupported shot count before touching the dataset
         subjects = self._subjects.select(custom_subjects or [])
         if custom_subjects:
             labels = [subject.label for subject in subjects]
@@ -352,7 +340,7 @@ class ComposedBenchmark(Benchmark):
             display_name=self._display_name,
             kind=self._kind,
             sample_split=self.sample_split,
-            fewshot_split=self.fewshot_split,
+            fewshot=self._fewshot,
             subjects=subjects,
             language=self.language,
             loader=self.dataset_policy.loader(custom_hf_revision),
@@ -381,14 +369,16 @@ class ComposedBenchmark(Benchmark):
 
     @override
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        num_fewshot = 1
+        # Show one demonstration where the benchmark supports few-shot, none where it is 0-shot only.
+        fewshot_split = self._fewshot.split()
+        num_fewshot = 1 if fewshot_split is not None else 0
         subjects = self._subjects.select([])
         instance = ComposedEval(
             num_fewshot=num_fewshot,
             display_name=self._display_name,
             kind=self._kind,
             sample_split=self.sample_split,
-            fewshot_split=self.fewshot_split,
+            fewshot=self._fewshot,
             subjects=subjects,
             language=self.language,
             loader=self.dataset_policy.loader(None),
@@ -400,7 +390,7 @@ class ComposedBenchmark(Benchmark):
             name=self._display_name,
             dataset_doc=self.dataset_policy.documentation(),
             sample_split=self.sample_split,
-            fewshot_split=self.fewshot_split,
+            fewshot_split=fewshot_split,
             response_type=self.response_type().name,
             metrics=[m.__name__ for m in self.metrics()],
             subjects=[subject.label for subject in subjects],

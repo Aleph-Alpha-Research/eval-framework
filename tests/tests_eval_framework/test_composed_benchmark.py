@@ -9,6 +9,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark, ComposedEval, LanguageSpec
 from eval_framework.contract import ResponseType
 from eval_framework.eval_kind import Choice
+from eval_framework.fewshot import FewShot, NoFewShot, SampledFewShot
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesLoglikelihood,
@@ -125,7 +126,7 @@ def _make_benchmark(
     styler: TaskStyler | None = None,
     reader: ChoiceReader = _DUMMY_READER,
     sample_split: str = _DUMMY_SPLIT,
-    fewshot_split: str = _DUMMY_SPLIT,
+    fewshot: FewShot | None = None,
     subjects: SubjectsSelector = _DUMMY_SELECTOR,
     dataset_policy: DatasetPolicy | None = None,
     language: LanguageSpec = None,
@@ -136,7 +137,7 @@ def _make_benchmark(
         display_name=display_name,
         kind=Choice(reader=reader, styler=styler or _DummyStyler()),
         sample_split=sample_split,
-        fewshot_split=fewshot_split,
+        fewshot=fewshot or SampledFewShot(_DUMMY_SPLIT),
         subjects=subjects,
         dataset_policy=dataset_policy or _DummyDatasetPolicy(),
         language=language,
@@ -151,7 +152,7 @@ def _make_eval(
     loader: DatasetLoader = _DUMMY_LOADER,
     styler: TaskStyler | None = None,
     sample_split: str = _DUMMY_SPLIT,
-    fewshot_split: str = _DUMMY_SPLIT,
+    fewshot: FewShot | None = None,
     subjects: Subjects = _DUMMY_EVAL_SUBJECTS,
     language: LanguageSpec = None,
     rnd: random.Random = _DUMMY_RNG,
@@ -163,7 +164,7 @@ def _make_eval(
         kind=Choice(reader=reader, styler=styler or _DummyStyler()),
         loader=loader,
         sample_split=sample_split,
-        fewshot_split=fewshot_split,
+        fewshot=fewshot or SampledFewShot(_DUMMY_SPLIT),
         subjects=subjects,
         language=language,
         rnd=rnd,
@@ -376,7 +377,7 @@ def test_initial_prompt_is_prepended_once_before_the_first_fewshot_example() -> 
     benchmark = _make_benchmark(
         reader=_Reader(),
         styler=_Styler(),
-        fewshot_split="train",
+        fewshot=SampledFewShot("train"),
         dataset_policy=DatasetStub({"test": [{"question": "eval q"}], "train": [{"question": "shot q"}]}),
     )
 
@@ -389,3 +390,24 @@ def test_initial_prompt_is_prepended_once_before_the_first_fewshot_example() -> 
         Message(role=Role.USER, content="instruction: eval q"),
         Message(role=Role.ASSISTANT, content="the cue"),
     ]
+
+
+def test_no_fewshot_benchmark_rejects_a_fewshot_request_at_creation() -> None:
+    # Given a benchmark whose few-shot policy is NoFewShot (0-shot only),
+    benchmark = _make_benchmark(fewshot=NoFewShot())
+
+    # When creating it with a non-zero shot count, then it fails fast — before any dataset is touched.
+    with pytest.raises(ValueError, match="0-shot only"):
+        benchmark.create(1, None, None)
+
+
+def test_no_fewshot_benchmark_allows_zero_shot_creation() -> None:
+    # A NoFewShot benchmark still creates normally at 0-shot.
+    benchmark = _make_benchmark(fewshot=NoFewShot())
+    assert benchmark.create(0, None, None) is not None
+
+
+def test_get_metadata_reports_fewshot_split_from_the_policy() -> None:
+    # SampledFewShot surfaces its source split in metadata; NoFewShot contributes no split at all.
+    assert _make_eval(fewshot=SampledFewShot("dev")).get_metadata()["fewshot_split"] == "dev"
+    assert "fewshot_split" not in _make_eval(fewshot=NoFewShot()).get_metadata()

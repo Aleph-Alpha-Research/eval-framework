@@ -8,6 +8,7 @@ from eval_framework.benchmarks.hellaswag import HellaswagReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice
+from eval_framework.fewshot import SampledFewShot
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -27,7 +28,7 @@ def _goldenswag_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy | 
         id=id,
         kind=kind,
         sample_split="validation",
-        fewshot_split="validation",
+        fewshot=SampledFewShot("validation"),
         dataset_policy=dataset_policy,
         language=Language.ENG,
     )

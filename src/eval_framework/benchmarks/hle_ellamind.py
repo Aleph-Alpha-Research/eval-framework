@@ -12,6 +12,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice
+from eval_framework.fewshot import SampledFewShot
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy, Subset
@@ -40,7 +41,7 @@ def _hle_ellamind_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy 
         id=id,
         kind=kind,
         sample_split="test",
-        fewshot_split="test",
+        fewshot=SampledFewShot("test"),
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=dataset_policy,
         language=Language.DEU,

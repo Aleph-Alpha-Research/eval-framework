@@ -6,6 +6,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice
+from eval_framework.fewshot import SampledFewShot
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -41,7 +42,7 @@ def arc_de(dataset: DatasetPolicy | None = None) -> Benchmark:
         display_name="ARC German",
         kind=kind,
         sample_split="test",
-        fewshot_split="validation",
+        fewshot=SampledFewShot("validation"),
         dataset_policy=dataset_policy,
         language=Language.DEU,
     )
