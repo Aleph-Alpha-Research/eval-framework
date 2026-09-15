@@ -4,7 +4,8 @@ Each spec test builds the real benchmark over a fictional dataset and asserts th
 this file reads as MMLU's prompt spec, with ``composed.py`` an implementation detail. The subject label
 is an underscored config name; the preamble reads it as prose (except ``MMLU_IDK``, which keeps the raw
 key). ``test_formatter_hash`` separately pins the composed variants against the real HuggingFace data.
-``MMLU_COT`` is not here — it is still a BaseTask (generative), covered by the legacy ``test_mmlu``.
+``MMLU_COT`` is the free-form (completion) variant: it reasons then states the letter, is 0-shot only
+(``NoFewShot``), and is specified here alongside the loglikelihood variants.
 """
 
 from collections.abc import Callable

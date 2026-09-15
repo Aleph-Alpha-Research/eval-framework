@@ -17,6 +17,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark, ResponseType
 from eval_framework.eval_kind import Choice, EvalKind, FewshotExample, SampleBody
+from eval_framework.fewshot import FewShot, NoFewShot, SampledFewShot
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
@@ -208,7 +209,11 @@ class _MmluCotKind(EvalKind):
 
 
 def _mmlu_generic(
-    id: str, kind: EvalKind, dataset: DatasetPolicy | None = None, display_name: str | None = None
+    id: str,
+    kind: EvalKind,
+    fewshot: FewShot,
+    dataset: DatasetPolicy | None = None,
+    display_name: str | None = None,
 ) -> Benchmark:
     dataset_policy = dataset if dataset is not None else pinned_by_framework("cais/mmlu")
     return ComposedBenchmark.compose(
@@ -216,7 +221,7 @@ def _mmlu_generic(
         display_name=display_name,
         kind=kind,
         sample_split="test",
-        fewshot_split="dev",
+        fewshot=fewshot,
         subjects=ListOfSubjects(MMLU_SUBJECTS),
         dataset_policy=dataset_policy,
         language=Language.ENG,
@@ -229,31 +234,31 @@ def _choice(styler: TaskStyler) -> Choice:
 
 def mmlu(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(question_prefix="Question: ", cue_text="Answer:", initial_prompt=_mc_preamble)
-    return _mmlu_generic("MMLU", _choice(styler), dataset)
+    return _mmlu_generic("MMLU", _choice(styler), SampledFewShot("dev"), dataset)
 
 
 def mmlu_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(
         question_prefix="Question: ", cue_text="Answer:", space_prefixed_labels=True, initial_prompt=_mc_preamble
     )
-    return _mmlu_generic("MMLU_OLMES", _choice(styler), dataset)
+    return _mmlu_generic("MMLU_OLMES", _choice(styler), SampledFewShot("dev"), dataset)
 
 
 def mmlu_full_text(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = _FullTextMmluStyle(question_prefix="Question: ", cue_text="Answer:", initial_prompt=_full_text_preamble)
     # The registry/hash identity is the compact "FullTextMMLU"; the display name keeps the spelled-out form.
-    return _mmlu_generic("FullTextMMLU", _choice(styler), dataset, display_name="Full Text MMLU")
+    return _mmlu_generic("FullTextMMLU", _choice(styler), SampledFewShot("dev"), dataset, display_name="Full Text MMLU")
 
 
 def mmlu_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(
         question_prefix="Question: ", cue_text="Answer:", initial_prompt=_idk_preamble
     ).with_abstention_option(" ?")
-    return _mmlu_generic("MMLU_IDK", _choice(styler), dataset)
+    return _mmlu_generic("MMLU_IDK", _choice(styler), SampledFewShot("dev"), dataset)
 
 
 def mmlu_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_generic("MMLU_COT", _MmluCotKind(), dataset)
+    return _mmlu_generic("MMLU_COT", _MmluCotKind(), NoFewShot(), dataset)
 
 
 MMLU_BENCHMARKS: list[Benchmark] = [mmlu(), mmlu_olmes(), mmlu_full_text(), mmlu_idk(), mmlu_cot()]
