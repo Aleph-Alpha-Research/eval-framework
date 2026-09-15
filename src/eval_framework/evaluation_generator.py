@@ -1,5 +1,6 @@
 import logging
 import math
+from functools import partial
 from typing import Any, cast
 
 import numpy as np
@@ -34,6 +35,48 @@ class EvaluationGenerator:
         self.metrics = eval_.metrics()
         self.task_name = eval_.display_name()
 
+    def _results_for(
+        self,
+        metric: BaseMetric[Completion | Loglikelihood],
+        response: Completion | Loglikelihood,
+        llm_name: str,
+    ) -> list[Result]:
+        """Compute one response's results, without mutating anything the caller shares."""
+        results: list[Result] = []
+        for metric_result in metric.calculate(response):
+            if "/" in metric_result.metric_name:
+                metric_name, key = metric_result.metric_name.split("/")
+            else:
+                metric_name = metric_result.metric_name
+                key = None
+
+            results.append(
+                Result(
+                    id=response.id,
+                    metric_class_name=metric.__class__.__name__,
+                    metric_name=metric_name,
+                    num_fewshot=self.few_shot,
+                    key=key,
+                    subject=response.subject,
+                    llm_name=llm_name,
+                    task_name=self.task_name,
+                    value=metric_result.value,
+                    higher_is_better=metric_result.higher_is_better,
+                    llm_judge_prompt=metric_result.llm_judge_prompt,
+                    llm_judge_response=metric_result.llm_judge_response,
+                    code_execution_trace=metric_result.code_execution_trace,
+                    error=metric_result.error,
+                )
+            )
+        return results
+
+    def _collect(self, batch: list[Result], results: list[Result]) -> None:
+        """Accumulate one response's results and persist them."""
+        for result in batch:
+            results.append(result)
+            if self.save_intermediate_results:
+                self.result_processor.save_metrics_result(result)
+
     def _run_metric_calculators(self, responses: list[Completion | Loglikelihood]) -> list[Result]:
         results: list[Result] = self.result_processor.load_metrics_results()
         llm_name = self.result_processor.load_metadata()["llm_name"]
@@ -65,38 +108,16 @@ class EvaluationGenerator:
 
             metric.prepare(responses)
             logger.info(f"Starting calculation of {metric.NAME}")
-            for response in tqdm(responses, desc=f"Calculating {metric.NAME}", disable=get_disable_bar_flag()):
-                if f"{response.subject}_{response.id}_{metric.__class__.__name__}" in subject_result_id_existing:
-                    continue
 
-                subject = response.subject
-                metric_results = metric.calculate(response)
-                for metric_result in metric_results:
-                    if "/" in metric_result.metric_name:
-                        metric_name, key = metric_result.metric_name.split("/")
-                    else:
-                        metric_name = metric_result.metric_name
-                        key = None
+            pending = [
+                response
+                for response in responses
+                if f"{response.subject}_{response.id}_{metric.__class__.__name__}" not in subject_result_id_existing
+            ]
+            compute = partial(self._results_for, metric, llm_name=llm_name)
 
-                    result = Result(
-                        id=response.id,
-                        metric_class_name=metric.__class__.__name__,
-                        metric_name=metric_name,
-                        num_fewshot=self.few_shot,
-                        key=key,
-                        subject=subject,
-                        llm_name=llm_name,
-                        task_name=self.task_name,
-                        value=metric_result.value,
-                        higher_is_better=metric_result.higher_is_better,
-                        llm_judge_prompt=metric_result.llm_judge_prompt,
-                        llm_judge_response=metric_result.llm_judge_response,
-                        code_execution_trace=metric_result.code_execution_trace,
-                        error=metric_result.error,
-                    )
-                    results.append(result)
-                    if self.save_intermediate_results:
-                        self.result_processor.save_metrics_result(result)
+            for response in tqdm(pending, desc=f"Calculating {metric.NAME}", disable=get_disable_bar_flag()):
+                self._collect(compute(response), results)
 
             logger.info(f"Completed calculation of {metric.NAME}")
 
