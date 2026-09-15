@@ -184,6 +184,7 @@ def register_global_mmlu_tasks(registry: Registry) -> None:
 
 def register_sciq_tasks(registry: Registry) -> None:
     """Register sciq benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.sciq.SCIQ", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.sciq.SCIQ_OLMES", registry=registry)
 
 
@@ -192,10 +193,13 @@ def register_squad_tasks(registry: Registry) -> None:
     register_lazy_task("eval_framework.tasks.benchmarks.squad.SQuAD_OLMES", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.squad.SQuAD2_MA", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.squad.SQuAD2_MA_NO_SYSPROMPT", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.squad.SQUAD2BPB", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.squad.SQuAD2BPBMultiAlias", registry=registry)
 
 
 def register_winogrande_tasks(registry: Registry) -> None:
     """Register winogrande benchmark tasks."""
+    register_lazy_task("eval_framework.tasks.benchmarks.winogrande.WINOGRANDE", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.winogrande.WINOGRANDECloze", registry=registry)
 
 
@@ -214,6 +218,7 @@ def register_naturalqs_open_tasks(registry: Registry) -> None:
     """Register naturalqs_open benchmark tasks."""
     register_lazy_task("eval_framework.tasks.benchmarks.naturalqs_open.NaturalQsOpen", registry=registry)
     register_lazy_task("eval_framework.tasks.benchmarks.naturalqs_open.NaturalQsOpenMC_OLMES", registry=registry)
+    register_lazy_task("eval_framework.tasks.benchmarks.naturalqs_open.NaturalQsOpenBPB", registry=registry)
 
 
 def register_social_iqa_tasks(registry: Registry) -> None:

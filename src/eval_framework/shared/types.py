@@ -180,12 +180,26 @@ class Completion(BaseCompletion):
         return detected_language
 
 
+class PerTokenScores(BaseModel):
+    """Per-token surprisal and byte length for one scored completion.
+
+    ``bits[j]`` is -log2 p(token j); ``byte_lens[j]`` is its UTF-8 length. Used by
+    prefix and Prior BPB. Empty when the backend has no per-token logprobs.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    bits: list[float]
+    byte_lens: list[int]
+
+
 class BaseLoglikelihood(BaseModel):
     model_config = ConfigDict(extra="forbid")
     prompt: str
     prompt_sequence_positions: int | None
     loglikelihoods: dict[str, float]
     loglikelihoods_sequence_positions: dict[str, int]  # Is empty if the model does not provide sequence positions
+    # choice -> per-token scores; keys match loglikelihoods; {} if unavailable
+    loglikelihoods_per_token: dict[str, PerTokenScores] = {}
     concat_compression: Annotated[ConcatCompression | None, "Compression info for the concat formatter"] = None
 
 

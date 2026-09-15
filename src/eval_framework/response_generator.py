@@ -146,6 +146,7 @@ class ResponseGenerator:
                     concat_compression=raw_loglikelihood.concat_compression,
                     loglikelihoods=raw_loglikelihood.loglikelihoods,
                     loglikelihoods_sequence_positions=raw_loglikelihood.loglikelihoods_sequence_positions,
+                    loglikelihoods_per_token=raw_loglikelihood.loglikelihoods_per_token,
                     error=raw_loglikelihood.raw_loglikelihood_error,
                 )
             )

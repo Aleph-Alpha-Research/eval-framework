@@ -14,6 +14,8 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     SequencePositionsLoglikelihood,
 )
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
+from eval_framework.metrics.loglikelihood.bpb_common import aggregate_prior_bpb_metrics
+from eval_framework.metrics.loglikelihood.bpb_estimators import summarize_all
 from eval_framework.result_processors.base import Result, ResultProcessor
 from eval_framework.shared.types import Completion, Loglikelihood
 from eval_framework.tasks.base import ResponseType
@@ -23,6 +25,13 @@ from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag
 
 logger = logging.getLogger(__name__)
+
+
+def _aggregated_metric_label(metric: str) -> str:
+    """Label used in aggregated-result keys."""
+    if metric == "BitsPerByte":
+        return "BitsPerByte (mean-of-ratios)"
+    return metric
 
 
 class EvaluationGenerator:
@@ -140,6 +149,7 @@ class EvaluationGenerator:
         aggregated_results: dict[str, float | None] = {}
 
         for metric in metrics:
+            label = _aggregated_metric_label(metric)
             # filter for metric
             data_subset = data[data["metric_name"] == metric][["subject", "key", "value", "error"]]
 
@@ -150,11 +160,11 @@ class EvaluationGenerator:
             data_subset_error_free = data_subset.loc[mask, ["subject", "key", "value"]]
 
             error_free_ratio = float(len(data_subset_error_free) / total_count)
-            aggregated_results[f"ErrorFreeRatio {metric}"] = error_free_ratio
+            aggregated_results[f"ErrorFreeRatio {label}"] = error_free_ratio
 
             # aggregate by key and subject first to have equal weights for all key / subject combinations
             key_subject_mean = data_subset_error_free.groupby(["key", "subject"]).mean()
-            aggregated_results[f"Average {metric}"] = float(key_subject_mean[["value"]].mean()["value"])
+            aggregated_results[f"Average {label}"] = float(key_subject_mean[["value"]].mean()["value"])
 
             if error_free_ratio < 1.0:
                 # Treat error samples (with value=None) as 0 for the "including errors" average
@@ -165,7 +175,7 @@ class EvaluationGenerator:
                     error_mask, "value"
                 ].fillna(0.0)
                 key_subject_mean_with_errors = data_subset_with_errors.groupby(["key", "subject"])["value"].mean()
-                aggregated_results[f"Average {metric} (including Errors)"] = float(key_subject_mean_with_errors.mean())
+                aggregated_results[f"Average {label} (including Errors)"] = float(key_subject_mean_with_errors.mean())
 
             std_err_mean_sum_of_squares = 0.0
             std_err_mean_total_num_samples = 0.0
@@ -180,11 +190,11 @@ class EvaluationGenerator:
                         group_total_count = len(group)
                         group_error_free = group[group["error"].isnull()][["subject", "key", "value"]]
                         group_error_free_ratio = float(len(group_error_free) / group_total_count)
-                        aggregated_results[f"ErrorFreeRatio {metric} - {name[0]}"] = group_error_free_ratio
+                        aggregated_results[f"ErrorFreeRatio {label} - {name[0]}"] = group_error_free_ratio
 
                         group_key_subject_mean = group_error_free.groupby(["key", "subject"]).mean()
                         value = float(group_key_subject_mean[["value"]].mean()["value"])
-                        aggregated_results[f"Average {metric} - {name[0]}"] = value if not math.isnan(value) else None
+                        aggregated_results[f"Average {label} - {name[0]}"] = value if not math.isnan(value) else None
 
                         if group_error_free_ratio < 1.0:
                             # Treat error samples (with value=None) as 0 for the "including errors" average
@@ -198,7 +208,7 @@ class EvaluationGenerator:
                                 "value"
                             ].mean()
                             value_with_errors = float(group_key_subject_mean_with_errors.mean())
-                            aggregated_results[f"Average {metric} (including Errors) - {name[0]}"] = (
+                            aggregated_results[f"Average {label} (including Errors) - {name[0]}"] = (
                                 value_with_errors if not math.isnan(value_with_errors) else None
                             )
 
@@ -209,10 +219,10 @@ class EvaluationGenerator:
                             num_samples = len(group_error_free)
 
                             if math.isnan(std) or num_samples == 0:
-                                aggregated_results[f"StdErr {metric} - {name[0]}"] = None
+                                aggregated_results[f"StdErr {label} - {name[0]}"] = None
                             else:
-                                aggregated_results[f"StdErr {metric} - {name[0]}"] = std / np.sqrt(num_samples)
-                            aggregated_results[f"NumSamples {metric} - {name[0]}"] = num_samples
+                                aggregated_results[f"StdErr {label} - {name[0]}"] = std / np.sqrt(num_samples)
+                            aggregated_results[f"NumSamples {label} - {name[0]}"] = num_samples
 
                             std_err_mean_sum_of_squares += std**2 / num_samples
                             std_err_mean_total_num_samples += num_samples
@@ -226,22 +236,22 @@ class EvaluationGenerator:
                     # where variance_i is the variance of each group and i is the number of groups
                     # (the combined mean is also not weighted by the number of samples)
                     if math.isnan(std) or std_err_mean_total_num_samples == 0:
-                        aggregated_results[f"StdErr {metric}"] = None
+                        aggregated_results[f"StdErr {label}"] = None
                     else:
-                        aggregated_results[f"StdErr {metric}"] = np.sqrt(
+                        aggregated_results[f"StdErr {label}"] = np.sqrt(
                             std_err_mean_sum_of_squares / std_err_mean_num_subjects
                         )
-                    aggregated_results[f"NumSamples {metric}"] = std_err_mean_total_num_samples
+                    aggregated_results[f"NumSamples {label}"] = std_err_mean_total_num_samples
                 else:
                     # if there are no sub-groups to combine, calculate the SEM here directly
                     key_subject_std = data_subset_error_free.groupby(["key", "subject"]).std()
                     std = float(key_subject_std[["value"]].mean()["value"])
                     num_samples = len(data_subset_error_free)
                     if math.isnan(std) or num_samples == 0:
-                        aggregated_results[f"StdErr {metric}"] = None
+                        aggregated_results[f"StdErr {label}"] = None
                     else:
-                        aggregated_results[f"StdErr {metric}"] = std / np.sqrt(num_samples)
-                    aggregated_results[f"NumSamples {metric}"] = num_samples
+                        aggregated_results[f"StdErr {label}"] = std / np.sqrt(num_samples)
+                    aggregated_results[f"NumSamples {label}"] = num_samples
 
         if (
             "Average Bytes" in aggregated_results
@@ -323,6 +333,121 @@ class EvaluationGenerator:
 
         return aggregated_results
 
+    @staticmethod
+    def _flatten_corpus_summary(summary: dict, subject: str | None = None) -> dict[str, float | None]:
+        """Flatten ``summarize_all()`` output into aggregated-result keys."""
+        scope = "" if subject is None else f" - {subject}"
+        out: dict[str, float | None] = {}
+        scalar_map = {
+            "corpus_bpb": f"Corpus BPB{scope}",
+            "bits_per_answer": f"Corpus BitsPerAnswer{scope}",
+            "mean_bytes": f"Corpus mean_bytes{scope}",
+            "median_bytes": f"Corpus median_bytes{scope}",
+            "token_corpus_bpb": f"Corpus token BPB{scope}",
+            "space_stripped_corpus_bpb": f"Corpus BPB space_stripped{scope}",
+            "effective_length": f"Corpus effective_length BPB{scope}",
+        }
+        for _key, label in scalar_map.items():
+            if _key in summary and isinstance(summary[_key], (int, float)):
+                out[label] = float(summary[_key])
+
+        for ls_key in ("ls_bpb_task_q", "ls_bpb_common_q"):
+            if ls_key in summary and isinstance(summary[ls_key], (int, float)):
+                out[f"Corpus {ls_key}{scope}"] = float(summary[ls_key])
+
+        for fit_key in ("ols", "huber", "ols_tokens"):
+            fit = summary.get(fit_key)
+            if isinstance(fit, dict):
+                for sub_key, sub_val in fit.items():
+                    if isinstance(sub_val, (int, float)) and sub_val == sub_val:
+                        out[f"Corpus {fit_key}_{sub_key}{scope}"] = float(sub_val)
+
+        for method in ("bpb_at_nstar_ols", "bpb_at_nstar_huber"):
+            nested = summary.get(method)
+            if isinstance(nested, dict):
+                for nstar, val in nested.items():
+                    if isinstance(val, (int, float)) and val == val:
+                        out[f"Corpus {method} {nstar}{scope}"] = float(val)
+
+        return out
+
+    @staticmethod
+    def _aggregate_corpus_bpb_metrics(results: list[Result]) -> dict[str, float | None]:
+        """Corpus BPB and related estimators from ``BitsPerByte_*`` companion fields."""
+        sidecar_names = {"BitsPerByte_bits", "BitsPerByte_bytes", "BitsPerByte_tokens"}
+        rows: list[dict] = []
+        responses_by_item: dict[tuple[int, str, str], str] = {}
+        for result in results:
+            if result.error is not None or result.value is None:
+                continue
+            if result.metric_name not in sidecar_names:
+                continue
+            key = result.key or ""
+            item_key = (result.id, result.subject, key)
+            rows.append(
+                {
+                    "id": result.id,
+                    "subject": result.subject,
+                    "key": key,
+                    "metric_name": result.metric_name,
+                    "value": result.value,
+                }
+            )
+            if result.metric_name == "BitsPerByte_bits":
+                responses_by_item[item_key] = result.response
+
+        if not rows:
+            return {}
+
+        data = pd.DataFrame(rows)
+        pivot = data.pivot_table(
+            index=["id", "subject", "key"],
+            columns="metric_name",
+            values="value",
+            aggfunc="first",
+        )
+        required = ["BitsPerByte_bits", "BitsPerByte_bytes"]
+        if not all(col in pivot.columns for col in required):
+            return {}
+
+        pivot = pivot.dropna(subset=required)
+        if len(pivot) == 0:
+            return {}
+
+        aggregated: dict[str, float | None] = {}
+
+        def summarize_slice(frame: pd.DataFrame, subject: str | None = None) -> None:
+            bits = frame["BitsPerByte_bits"].to_numpy(dtype=float)
+            nbytes = frame["BitsPerByte_bytes"].to_numpy(dtype=float)
+            tokens = None
+            if "BitsPerByte_tokens" in frame.columns:
+                tok = frame["BitsPerByte_tokens"].to_numpy(dtype=float)
+                if np.all(np.isfinite(tok)):
+                    tokens = tok
+            leading_space = None
+            if responses_by_item:
+                ls_vals = []
+                for idx in frame.index:
+                    if subject is None:
+                        item_key = (idx[0], idx[1], idx[2])
+                    else:
+                        item_key = (idx[0], subject, idx[1])
+                    resp = responses_by_item.get(item_key, "")
+                    ls_vals.append(1.0 if resp.startswith(" ") else 0.0)
+                leading_space = np.asarray(ls_vals, dtype=float)
+            summary = summarize_all(bits, nbytes, tokens=tokens, leading_space=leading_space)
+            aggregated.update(EvaluationGenerator._flatten_corpus_summary(summary, subject=subject))
+
+        summarize_slice(pivot)
+
+        for subject in sorted(pivot.index.get_level_values("subject").unique()):
+            subject_frame = pivot.xs(subject, level="subject")
+            if len(subject_frame) == 0:
+                continue
+            summarize_slice(subject_frame, subject=subject)
+
+        return aggregated
+
     def run_eval(self) -> list[Result]:
         """Runs evaluation using saved completions."""
         logger.info("Running evaluation...")
@@ -331,10 +456,13 @@ class EvaluationGenerator:
             raise ValueError("No saved completions found. Run 'run_completions' first.")
 
         metrics_results = self._run_metric_calculators(responses)
+        loglikelihood_responses = [r for r in responses if isinstance(r, Loglikelihood)]
         del responses
         aggregated_results = self._aggregate_results(metrics_results)
         results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results)
         aggregated_results.update(results_with_aggregators)
+        aggregated_results.update(self._aggregate_corpus_bpb_metrics(metrics_results))
+        aggregated_results.update(aggregate_prior_bpb_metrics(loglikelihood_responses))
 
         wandb.log(aggregated_results)
         self.result_processor.save_aggregated_results(aggregated_results)

@@ -23,6 +23,7 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import (
     ConcatCompression,
     Error,
+    PerTokenScores,
     PromptTooLongException,
     RawCompletion,
     RawLoglikelihood,
@@ -86,18 +87,37 @@ class RepeatedTokenSequenceCriteria(StoppingCriteria):
 
 class BaseHFLLM(BaseLLM):
     LLM_NAME: str
+    # Hub revision (tag/commit). None uses the default branch.
+    REVISION: str | None = None
+    # Weight dtype, e.g. "bfloat16". None uses fp32. "auto" uses the checkpoint config.
+    DTYPE: str | None = None
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     SEQ_LENGTH: int | None = None
     BYTES_PER_TOKEN: float = 4.0  # rule of thumb according to https://platform.openai.com/tokenizer
 
+    def _torch_dtype(self) -> Any:
+        """Resolve DTYPE into a value accepted by ``from_pretrained(torch_dtype=...)``."""
+        if self.DTYPE is None:
+            return None
+        if self.DTYPE == "auto":
+            return "auto"
+        dtype = getattr(torch, self.DTYPE, None)
+        if not isinstance(dtype, torch.dtype):
+            raise ValueError(f"DTYPE={self.DTYPE!r} is not a valid torch dtype")
+        return dtype
+
     def _load_tokenizer(self) -> PreTrainedTokenizerBase:
         """Load the tokenizer. Override in subclasses to use a specific tokenizer class."""
-        return AutoTokenizer.from_pretrained(self.LLM_NAME)
+        return AutoTokenizer.from_pretrained(self.LLM_NAME, revision=self.REVISION)
 
     def __init__(self, formatter: BaseFormatter | None = None, bytes_per_token: float | None = None) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = self._load_tokenizer()
-        self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
+        _dtype = self._torch_dtype()
+        _model_kwargs: dict[str, Any] = {"device_map": "auto", "revision": self.REVISION}
+        if _dtype is not None:
+            _model_kwargs["torch_dtype"] = _dtype
+        self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, **_model_kwargs)
         logger.info(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
         self._set_formatter(formatter)
         # set bytes_per_token_scalar for non-standard models
@@ -252,21 +272,25 @@ class BaseHFLLM(BaseLLM):
             prompt = self._formatter.format(sample.messages, output_mode="string")
             choices_log_probs: dict[str, float] = {}
             choices_log_probs_sequence_positions: dict[str, float] = {}
+            choices_per_token: dict[str, PerTokenScores] = {}
             error: Error | None = None
 
+            prompt_token_count = len(self.tokenizer.encode(prompt, add_special_tokens=False))
+
             for choice in sample.possible_completions or []:
-                num_choice_tokens = len(self.tokenizer.encode(choice, add_special_tokens=False))
                 prompt_and_choice = f"{prompt}{choice}"
 
-                total_tokens_count = len(self.tokenizer.encode(prompt_and_choice, add_special_tokens=False))
-
+                joint_tokens_count = len(self.tokenizer.encode(prompt_and_choice, add_special_tokens=False))
+                # Score joint(prompt+choice) minus prompt tokens (_model_log_probs).
+                # Isolated choice encoding can merge at the seam (span_alignment.md).
                 min_max_tokens = min(filter(None, [self.SEQ_LENGTH, self.seq_length]))
 
-                if min_max_tokens < total_tokens_count:
+                if min_max_tokens < joint_tokens_count:
                     if raise_errors():
                         raise PromptTooLongException("Prompt exceeded context size.")
                     choices_log_probs = {}
                     choices_log_probs_sequence_positions = {}
+                    choices_per_token = {}
                     error = Error(
                         error_class=PromptTooLongException.__name__,
                         message="Prompt and choice exceeded context size.",
@@ -274,41 +298,53 @@ class BaseHFLLM(BaseLLM):
                     )
                     break
                 else:
-                    # Calculate log-likelihoods for each token in the completion
-                    sum_log_probs = self._model_log_probs(prompt_and_choice, num_choice_tokens)
+                    # Per-token bits and byte lengths; sum(bits) = total loglikelihood.
+                    per_token = self._model_log_probs(prompt, choice, prompt_token_count)
+                    sum_log_probs = -math.log(2) * float(sum(per_token.bits))
 
                 choices_log_probs.update({choice: sum_log_probs})
-                choices_log_probs_sequence_positions.update({choice: num_choice_tokens})
+                choices_log_probs_sequence_positions.update({choice: len(per_token.bits)})
+                choices_per_token.update({choice: per_token})
 
             results.append(
                 RawLoglikelihood(
                     prompt=prompt,
-                    prompt_sequence_positions=len(self.tokenizer.encode(prompt, add_special_tokens=False)),
+                    prompt_sequence_positions=prompt_token_count,
                     concat_compression=ConcatCompression.calculate(
                         sample.messages, count_tokens=self.count_tokens, choices=sample.possible_completions
                     ),
                     loglikelihoods=choices_log_probs,
                     loglikelihoods_sequence_positions=choices_log_probs_sequence_positions,
+                    loglikelihoods_per_token=choices_per_token,
                     raw_loglikelihood_error=error,
                 )
             )
         return results
 
-    def _model_log_probs(self, prompt: str, num_choice_tokens: int) -> float:
+    def _model_log_probs(self, prompt: str, choice: str, prompt_token_count: int | None = None) -> PerTokenScores:
+        """Per-token bits and UTF-8 byte lengths for the scored span (joint prompt+choice encoding)."""
         with torch.no_grad():
-            inputs = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False).to(self.device)
-            outputs = self.model(**inputs, labels=inputs["input_ids"])
-            logits = outputs.logits[:, :-1, :].squeeze(0)
-            target_ids = inputs["input_ids"][:, 1:].squeeze(0)
+            if prompt_token_count is None:
+                prompt_token_count = len(self.tokenizer.encode(prompt, add_special_tokens=False))
+            joint_text = f"{prompt}{choice}"
+            inputs = self.tokenizer(joint_text, return_tensors="pt", add_special_tokens=False).to(self.device)
+            joint_ids = inputs["input_ids"][0].tolist()
+            n_span = len(joint_ids) - prompt_token_count
+            if n_span <= 0:
+                # Empty choice or merge into last prompt token: use isolated choice length.
+                n_span = max(1, len(self.tokenizer.encode(choice, add_special_tokens=False)))
 
-            token_loglikelihoods = []
-            for i in range(0, len(target_ids)):
-                token_id = target_ids[i].item()
-                token = self.tokenizer.decode([token_id])
-                loglikelihood = torch.log_softmax(logits[i], dim=-1)[token_id].item()
-                token_loglikelihoods.append({token: loglikelihood})
+            outputs = self.model(**inputs)
+            logits = outputs.logits[0, :-1, :]
+            target_ids = inputs["input_ids"][0, 1:]
+            logp = torch.log_softmax(logits, dim=-1)
+            tok_lp = logp.gather(1, target_ids.unsqueeze(1)).squeeze(1)
 
-            return sum([list(log_prob.values())[0] for log_prob in token_loglikelihoods[-num_choice_tokens:]])
+            span_lp = tok_lp[-n_span:]
+            bits = (-span_lp / math.log(2)).tolist()
+            span_ids = joint_ids[-n_span:]
+            byte_lens = [len(self.tokenizer.decode([t]).encode("utf-8")) for t in span_ids]
+            return PerTokenScores(bits=[float(b) for b in bits], byte_lens=byte_lens)
 
     @property
     def seq_length(self) -> int | None:

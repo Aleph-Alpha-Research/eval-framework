@@ -213,6 +213,29 @@ class SQUAD2BPB(SQUAD2):
         return gt_list[0]
 
 
+class SQuAD2BPBMultiAlias(SQUAD2BPB):
+    """SQuAD2 BPB with every gold alias scored.
+
+    Default SQuAD2 BPB uses answers.text[0] only. Here each unique alias is a
+    completion and ground truth, so BPB_ALIAS_RULE (first / best / shortest) applies.
+    Compare first vs best runs to measure alias-ordering effect.
+    """
+
+    NAME = "SQuAD2 BPB MultiAlias"
+
+    def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+        text_ = item["answers"]["text"]
+        aliases = text_ if text_ else [self.UNANSWERABLE_STR]
+        # Deduplicate; preserve order (matters for ALIAS_RULE=first).
+        seen: set[str] = set()
+        unique: list[str] = []
+        for a in aliases:
+            if a not in seen:
+                seen.add(a)
+                unique.append(a)
+        return [f" {a}" for a in unique]
+
+
 class SQUAD(SQUAD2):
     """Squad dataset: https://huggingface.co/datasets/rajpurkar/squad"""
 

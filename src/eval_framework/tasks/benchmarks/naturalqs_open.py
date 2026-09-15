@@ -105,5 +105,6 @@ class NaturalQsOpenMC_OLMES(_NaturalQsOpenChoice_Base):
 class NaturalQsOpenBPB(_NaturalQsOpenChoice_Base):
     """BPB-only variant."""
 
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "NaturalQsOpenBPB"
     TASK_STYLER = BPBStyle()

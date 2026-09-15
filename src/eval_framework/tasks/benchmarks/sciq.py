@@ -37,6 +37,7 @@ class SCIQ(BaseTask[str]):
 
     NAME = "SciQ"
     DATASET_PATH = "allenai/sciq"
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     SAMPLE_SPLIT = "validation"  # 1000 examples (same split as lm-eval)
     FEWSHOT_SPLIT = "test"  # 1000 examples
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS

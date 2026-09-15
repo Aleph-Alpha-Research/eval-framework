@@ -22,6 +22,7 @@ class WINOGRANDE(BaseTask[str]):
 
     NAME = "Winogrande"
     DATASET_PATH = "allenai/winogrande"
+    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     SAMPLE_SPLIT = "validation"
     FEWSHOT_SPLIT = "train"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
