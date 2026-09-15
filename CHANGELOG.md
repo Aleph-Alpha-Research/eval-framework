@@ -14,6 +14,28 @@
 
 ### Bug Fixes
 
+## [0.12.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.16...v0.12.0) (2026-09-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* MMLU migrated to composed style except MMLU_COT
+
+### Features
+
+* initial_prompt may depend on subject ([ffa74b2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ffa74b2a912e284dc30b4ccae46d7c22ecfa433c))
+* report finish reasons as per-benchmark FinishReason metric ([3f03caa](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3f03caaf7545bfab05541d3bd2bacc246fe5d6c9))
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.93,&lt;2 ([3cafac5](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3cafac52ea309bf916efeb953f94924a7acdc8ee))
+
+
+### Code Refactoring
+
+* MMLU migrated to composed style except MMLU_COT ([44f29cf](https://github.com/Aleph-Alpha-Research/eval-framework/commit/44f29cffe39cfbcf22ac72854bb8341839ebd61c))
+
 ## [0.11.16](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.15...v0.11.16) (2026-09-14)
 
 
