@@ -6,6 +6,10 @@ from eval_framework.shared.types import Completion, Error
 
 
 class BaseLLMJudgeMetric(BaseMetric[Completion]):
+    # Judge calls are network-bound and hold no per-call state. Kept modest: this is the only
+    # backpressure against the judge API's rate limit.
+    MAX_WORKERS = 100
+
     def __init__(self, llm_judge: BaseLLM, randomize_order: bool = False) -> None:
         self._llm_judge = llm_judge
         self._randomize_order = randomize_order

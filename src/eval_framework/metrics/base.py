@@ -37,6 +37,9 @@ class BaseMetric[Response](ABC):
     AGGREGATORS: list[Aggregator] = []
     # Set by the evaluation generator before calculate(); controls how infra failures are handled.
     fail_on_error: bool = True
+    # Responses graded at once. Defaults to 1: e.g. the math metrics time out via signal.alarm(),
+    # which is main-thread-only and a single process-wide timer.
+    MAX_WORKERS: int = 1
 
     @classproperty
     def NAMES(cls) -> list[str]:
