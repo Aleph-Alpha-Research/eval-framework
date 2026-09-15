@@ -7,6 +7,7 @@ from eval_framework.benchmarks.gpqa_ellamind import GPQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.hellaswag import HELLASWAG_BENCHMARKS
 from eval_framework.benchmarks.hellaswag_ellamind import HELLASWAG_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.hle_ellamind import HLE_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.medqa import MEDQA_BENCHMARKS
 from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
 from eval_framework.benchmarks.piqa import PIQA_BENCHMARKS
 from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
@@ -243,7 +244,8 @@ def register_social_iqa_tasks(registry: Registry) -> None:
 
 def register_medqa_tasks(registry: Registry) -> None:
     """Register medqa benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.medqa.MedQAMC_OLMES", registry=registry)
+    for benchmark in MEDQA_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_arc_ellamind_tasks(registry: Registry) -> None:

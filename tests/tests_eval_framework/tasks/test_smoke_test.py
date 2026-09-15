@@ -20,7 +20,6 @@ from eval_framework.tasks.benchmarks.math_reasoning import (
     MATHMinervaEvalHarness,
 )
 from eval_framework.tasks.benchmarks.mbpp import MBPPBPB
-from eval_framework.tasks.benchmarks.medqa import MedQACloze, MedQAMC, MedQAMC_OLMES
 from eval_framework.tasks.benchmarks.mmlu_pro import MMLU_PRO_OLMES
 from eval_framework.tasks.benchmarks.naturalqs_open import (
     NaturalQsOpen,
@@ -93,13 +92,6 @@ def test_social_iqa_tasks_smoke() -> None:
         if "no longer supported" in str(e) or "loading script" in str(e).lower():
             pytest.skip("allenai/social_i_qa uses a dataset loading script not supported by this datasets version")
         raise
-
-
-@pytest.mark.cpu_slow
-def test_medqa_tasks_smoke() -> None:
-    _smoke_test_task(MedQACloze)
-    _smoke_test_task(MedQAMC)
-    _smoke_test_task(MedQAMC_OLMES)
 
 
 @pytest.mark.cpu_slow
