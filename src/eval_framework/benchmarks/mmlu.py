@@ -6,22 +6,91 @@ prompt is prefaced by a subject-templated preamble. The composed variants:
 * ``MMLU`` / ``MMLU_OLMES`` — score the letter labels; OLMES adds a space before each option label.
 * ``Full Text MMLU`` — shows the options as a bulleted list and scores the full answer text.
 * ``MMLU_IDK`` — lets the model abstain with ``"?"`` and reports confidence-aware metrics.
-
-``MMLU_COT`` stays BaseTask until the composed design supports generative (completion) tasks.
+* ``MMLU_COT`` — the model reasons freely and concludes with the answer, which is regex-extracted from
+  the generation (free-form completion, 0-shot).
 """
 
-from typing import Any, final, override
+import re
+from typing import TYPE_CHECKING, Any, final, override
 
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
-from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import Choice
+from eval_framework.contract import Benchmark, ResponseType
+from eval_framework.eval_kind import Choice, EvalKind, FewshotExample, SampleBody
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
-from eval_framework.tasks.benchmarks.mmlu import MMLU_SUBJECTS  # single source of truth for the 57 subjects
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle, MCStyle, TaskStyler
+from eval_framework.tasks.utils import get_n_letters
+from template_formatting.formatter import Message
+
+if TYPE_CHECKING:
+    from eval_framework.metrics.base import BaseMetric
+
+
+# The 57 MMLU subjects; each is an HF config of ``cais/mmlu`` (also reused by GlobalMMLU).
+MMLU_SUBJECTS = [
+    "abstract_algebra",
+    "anatomy",
+    "astronomy",
+    "business_ethics",
+    "clinical_knowledge",
+    "college_biology",
+    "college_chemistry",
+    "college_computer_science",
+    "college_mathematics",
+    "college_medicine",
+    "college_physics",
+    "computer_security",
+    "conceptual_physics",
+    "econometrics",
+    "electrical_engineering",
+    "elementary_mathematics",
+    "formal_logic",
+    "global_facts",
+    "high_school_biology",
+    "high_school_chemistry",
+    "high_school_computer_science",
+    "high_school_european_history",
+    "high_school_geography",
+    "high_school_government_and_politics",
+    "high_school_macroeconomics",
+    "high_school_mathematics",
+    "high_school_microeconomics",
+    "high_school_physics",
+    "high_school_psychology",
+    "high_school_statistics",
+    "high_school_us_history",
+    "high_school_world_history",
+    "human_aging",
+    "human_sexuality",
+    "international_law",
+    "jurisprudence",
+    "logical_fallacies",
+    "machine_learning",
+    "management",
+    "marketing",
+    "medical_genetics",
+    "miscellaneous",
+    "moral_disputes",
+    "moral_scenarios",
+    "nutrition",
+    "philosophy",
+    "prehistory",
+    "professional_accounting",
+    "professional_law",
+    "professional_medicine",
+    "professional_psychology",
+    "public_relations",
+    "security_studies",
+    "sociology",
+    "us_foreign_policy",
+    "virology",
+    "world_religions",
+]
 
 
 @final
@@ -72,14 +141,80 @@ def _idk_preamble(subject_label: str) -> str:
     )
 
 
+@final
+class _MmluCotKind(EvalKind):
+    """MMLU chain-of-thought: the model reasons freely and concludes with "Therefore, the answer is: X",
+    and the answer letter is extracted from the generation. Free-form (completion), 0-shot only."""
+
+    def __init__(self) -> None:
+        self._reader = MmluReader()
+        self._answer_re = re.compile(r"Therefore, the answer is: ([ABCD])")
+
+    @override
+    def response_type(self) -> ResponseType:
+        return ResponseType.COMPLETION
+
+    @override
+    def metrics(self) -> list[type["BaseMetric"]]:
+        return [AccuracyCompletion]
+
+    @override
+    def stop_sequences(self) -> list[str]:
+        return ["Question:"]
+
+    @override
+    def max_tokens(self) -> int | None:
+        return None
+
+    @override
+    def initial_prompt(self, subject_label: str) -> str | None:
+        return (
+            f"The following are multiple choice questions about {_humanized(subject_label)}. "
+            'Summarize your reasoning concisely, then conclude with "Therefore, the answer is: X", where X is '
+            "one of A, B, C, or D."
+        )
+
+    @override
+    def samples(self, item: dict[str, Any]) -> list[SampleBody]:
+        fields = self._reader.read(item)
+        keys = get_n_letters(len(fields.choices))
+        options = "\n".join(f"{key}. {choice}" for key, choice in zip(keys, fields.choices))
+        return [
+            SampleBody(
+                prompt=f"Question: {fields.raw_question}\n{options}",
+                cue="",  # no assistant cue — the model continues with its reasoning
+                possible_completions=[],  # free-form generation (normalized to None by ComposedEval)
+                ground_truth=keys[fields.correct_index],  # the bare answer letter
+            )
+        ]
+
+    @override
+    def extract_answer(
+        self,
+        completion_text: str,
+        *,
+        context: BaseMetricContext | list[BaseMetricContext] | None,
+        ground_truth: str | list[str] | None,
+        messages: list[Message],
+    ) -> str:
+        for stop in self.stop_sequences():
+            completion_text = completion_text.split(stop)[0]
+        match = self._answer_re.search(completion_text)
+        return match.group(1) if match else "[invalid]"
+
+    @override
+    def fewshot(self, item: dict[str, Any]) -> FewshotExample:
+        raise NotImplementedError("MMLU_COT is 0-shot only")
+
+
 def _mmlu_generic(
-    id: str, styler: TaskStyler, dataset: DatasetPolicy | None = None, display_name: str | None = None
+    id: str, kind: EvalKind, dataset: DatasetPolicy | None = None, display_name: str | None = None
 ) -> Benchmark:
     dataset_policy = dataset if dataset is not None else pinned_by_framework("cais/mmlu")
     return ComposedBenchmark.compose(
         id=id,
         display_name=display_name,
-        kind=Choice(reader=MmluReader(), styler=styler),
+        kind=kind,
         sample_split="test",
         fewshot_split="dev",
         subjects=ListOfSubjects(MMLU_SUBJECTS),
@@ -88,29 +223,37 @@ def _mmlu_generic(
     )
 
 
+def _choice(styler: TaskStyler) -> Choice:
+    return Choice(reader=MmluReader(), styler=styler)
+
+
 def mmlu(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(question_prefix="Question: ", cue_text="Answer:", initial_prompt=_mc_preamble)
-    return _mmlu_generic("MMLU", styler, dataset)
+    return _mmlu_generic("MMLU", _choice(styler), dataset)
 
 
 def mmlu_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(
         question_prefix="Question: ", cue_text="Answer:", space_prefixed_labels=True, initial_prompt=_mc_preamble
     )
-    return _mmlu_generic("MMLU_OLMES", styler, dataset)
+    return _mmlu_generic("MMLU_OLMES", _choice(styler), dataset)
 
 
 def mmlu_full_text(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = _FullTextMmluStyle(question_prefix="Question: ", cue_text="Answer:", initial_prompt=_full_text_preamble)
     # The registry/hash identity is the compact "FullTextMMLU"; the display name keeps the spelled-out form.
-    return _mmlu_generic("FullTextMMLU", styler, dataset, display_name="Full Text MMLU")
+    return _mmlu_generic("FullTextMMLU", _choice(styler), dataset, display_name="Full Text MMLU")
 
 
 def mmlu_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(
         question_prefix="Question: ", cue_text="Answer:", initial_prompt=_idk_preamble
     ).with_abstention_option(" ?")
-    return _mmlu_generic("MMLU_IDK", styler, dataset)
+    return _mmlu_generic("MMLU_IDK", _choice(styler), dataset)
 
 
-MMLU_BENCHMARKS: list[Benchmark] = [mmlu(), mmlu_olmes(), mmlu_full_text(), mmlu_idk()]
+def mmlu_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _mmlu_generic("MMLU_COT", _MmluCotKind(), dataset)
+
+
+MMLU_BENCHMARKS: list[Benchmark] = [mmlu(), mmlu_olmes(), mmlu_full_text(), mmlu_idk(), mmlu_cot()]

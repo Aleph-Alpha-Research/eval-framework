@@ -157,7 +157,7 @@ def register_lazy_task(class_path: str, /, registry: Registry | None = None) -> 
     if "." not in class_path:
         raise ValueError(
             f"Invalid class path `{class_path}`. This needs to be a global path like "
-            "`eval_framework.tasks.benchmarks.mmlu.MMLU`): "
+            "`eval_framework.tasks.benchmarks.my_module.my_class_deriving_from_task`): "
         )
     r = registry if registry is not None else _REGISTRY
     module_path, class_name = class_path.rsplit(".", maxsplit=1)

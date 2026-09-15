@@ -118,10 +118,8 @@ def register_math_reasoning_tasks(registry: Registry) -> None:
 
 def register_mmlu_tasks(registry: Registry) -> None:
     """Register mmlu benchmark tasks."""
-    for benchmark in MMLU_BENCHMARKS:  # composed: MMLU, MMLU_OLMES, FullTextMMLU, MMLU_IDK
+    for benchmark in MMLU_BENCHMARKS:  # composed: MMLU, MMLU_OLMES, FullTextMMLU, MMLU_IDK, MMLU_COT
         registry.add(benchmark)
-    # MMLU_COT is a generative (completion) task, not yet supported by the composed design.
-    register_lazy_task("eval_framework.tasks.benchmarks.mmlu.MMLU_COT", registry=registry)
 
 
 def register_humaneval_tasks(registry: Registry) -> None:
