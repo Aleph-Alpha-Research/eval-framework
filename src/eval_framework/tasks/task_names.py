@@ -1,6 +1,7 @@
 from enum import Enum
 
 from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK
+from eval_framework.benchmarks.copa import COPA_BENCHMARKS
 from eval_framework.benchmarks.csqa import CSQA_BENCHMARKS
 from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.goldenswag import GOLDENSWAG_BENCHMARKS
@@ -159,7 +160,8 @@ def register_arc_de_tasks(registry: Registry) -> None:
 
 def register_copa_tasks(registry: Registry) -> None:
     """Register copa benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.copa.COPA_OLMES", registry=registry)
+    for benchmark in COPA_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_goldenswag_tasks(registry: Registry) -> None:
