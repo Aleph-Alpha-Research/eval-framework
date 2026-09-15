@@ -12,6 +12,7 @@ from eval_framework.benchmarks.medqa import MEDQA_BENCHMARKS
 from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
 from eval_framework.benchmarks.piqa import PIQA_BENCHMARKS
 from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.sciq import SCIQ_BENCHMARKS
 from eval_framework.benchmarks.simpleqa_ellamind import SIMPLEQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.siqa_ellamind import SIQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.winogrande_ellamind import WINOGRANDE_ELLAMIND_BENCHMARKS
@@ -206,7 +207,8 @@ def register_global_mmlu_tasks(registry: Registry) -> None:
 
 def register_sciq_tasks(registry: Registry) -> None:
     """Register sciq benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.sciq.SCIQ_OLMES", registry=registry)
+    for benchmark in SCIQ_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_squad_tasks(registry: Registry) -> None:

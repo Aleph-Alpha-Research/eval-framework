@@ -21,7 +21,6 @@ from eval_framework.tasks.benchmarks.naturalqs_open import (
     NaturalQsOpenMC,
     NaturalQsOpenMC_OLMES,
 )
-from eval_framework.tasks.benchmarks.sciq import SCIQ_IDK, SCIQ_OLMES, SCIQEvalHarness_IDK
 from eval_framework.tasks.benchmarks.social_iqa import SocialIQACloze, SocialIQAMC, SocialIQAMC_OLMES
 from eval_framework.tasks.benchmarks.squad import SQUAD2BPB
 from eval_framework.tasks.benchmarks.winogrande import WINOGRANDE_OLMES
@@ -118,13 +117,6 @@ def test_humaneval_bpb_smoke() -> None:
 @pytest.mark.cpu_slow
 def test_mbpp_bpb_smoke() -> None:
     _smoke_test_task(MBPPBPB)
-
-
-@pytest.mark.cpu_slow
-def test_sciq_olmes_tasks_smoke() -> None:
-    _smoke_test_task(SCIQ_OLMES)
-    _smoke_test_task(SCIQ_IDK)
-    _smoke_test_task(SCIQEvalHarness_IDK)
 
 
 @pytest.mark.cpu_slow
