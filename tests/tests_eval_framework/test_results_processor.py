@@ -8,7 +8,6 @@ from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.result_processors.base import Result
 from eval_framework.result_processors.result_processor import ResultsFileProcessor, generate_output_dir
 from eval_framework.shared.types import BaseMetricContext, Completion, Loglikelihood
-from eval_framework.tasks.benchmarks.mmlu import MMLU
 from eval_framework.tasks.eval_config import EvalConfig
 from template_formatting.formatter import Message, Role
 
@@ -16,7 +15,7 @@ from template_formatting.formatter import Message, Role
 
 
 def test_user_prompt_suffix_only_affects_config_hash_when_set() -> None:
-    config = EvalConfig(task_name=MMLU.NAME, llm_class=Qwen3_0_6B)
+    config = EvalConfig(task_name="MMLU", llm_class=Qwen3_0_6B)
     config_with_suffix = config.model_copy(update={"user_prompt_suffix": "/think_long"})
 
     config_json = config.model_json_robust_subset_dump()
@@ -29,7 +28,7 @@ def test_user_prompt_suffix_only_affects_config_hash_when_set() -> None:
 
 def test_generate_output_dir_with_valid_values() -> None:
     llm_name = "llama-3.1"
-    task_name = MMLU.NAME
+    task_name = "MMLU"
     config = EvalConfig(
         output_dir=Path(__file__).parent / "eval_framework_results",
         num_fewshot=5,
@@ -59,7 +58,7 @@ def test_generate_output_dir_with_valid_values() -> None:
 
 def test_generate_output_dir_with_none_values() -> None:
     llm_name = "llama-3.1"
-    task_name = MMLU.NAME
+    task_name = "MMLU"
     config = EvalConfig(
         output_dir=Path("/eval_framework_results"),
         num_fewshot=0,

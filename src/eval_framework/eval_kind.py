@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Any, final, override
 
 from eval_framework.choices import ChoiceReader
 from eval_framework.contract import ResponseType
+from eval_framework.shared.types import BaseMetricContext
+from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -57,6 +59,26 @@ class EvalKind(ABC):
         examples), or None."""
         return None
 
+    @abstractmethod
+    def stop_sequences(self) -> list[str]:
+        """Stop sequences for completion generation (empty for kinds scored by loglikelihood)."""
+
+    @abstractmethod
+    def max_tokens(self) -> int | None:
+        """Token limit for completion generation, or None for no limit."""
+
+    @abstractmethod
+    def extract_answer(
+        self,
+        completion_text: str,
+        *,
+        context: BaseMetricContext | list[BaseMetricContext] | None,
+        ground_truth: str | list[str] | None,
+        messages: list[Message],
+    ) -> str:
+        """The answer to score, extracted from the raw generation. Free-form kinds pull it out (strip
+        reasoning, apply a regex); kinds whose generation is already the answer return it unchanged."""
+
 
 @final
 class Choice(EvalKind):
@@ -104,3 +126,22 @@ class Choice(EvalKind):
     @override
     def initial_prompt(self, subject_label: str) -> str | None:
         return self._styler.initial_prompt(subject_label)
+
+    @override
+    def stop_sequences(self) -> list[str]:
+        return []
+
+    @override
+    def max_tokens(self) -> int | None:
+        return None
+
+    @override
+    def extract_answer(
+        self,
+        completion_text: str,
+        *,
+        context: BaseMetricContext | list[BaseMetricContext] | None,
+        ground_truth: str | list[str] | None,
+        messages: list[Message],
+    ) -> str:
+        return completion_text  # a choice scores the completion directly; nothing to extract

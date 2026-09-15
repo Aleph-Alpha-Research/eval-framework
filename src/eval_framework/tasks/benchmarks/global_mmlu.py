@@ -2,6 +2,7 @@ import random
 from itertools import product
 from typing import Any
 
+from eval_framework.benchmarks.mmlu import MMLU_SUBJECTS
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
@@ -9,7 +10,6 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType
-from eval_framework.tasks.benchmarks.mmlu import MMLU_SUBJECTS
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
 

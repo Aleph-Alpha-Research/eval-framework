@@ -100,7 +100,8 @@ class ComposedEval(Eval):
                         subject=subject.label,
                         messages=self._messages(prefix, sample_body, initial_prompt),
                         ground_truth=sample_body.ground_truth,
-                        possible_completions=sample_body.possible_completions,
+                        # An empty candidate list means free-form generation (no candidates to score).
+                        possible_completions=sample_body.possible_completions or None,
                         context=None,
                     )
                     sample_id += 1
@@ -209,7 +210,14 @@ class ComposedEval(Eval):
 
             try:
                 error = None
+                # First the model-specific cleanup, then the kind's answer extraction (matching BaseTask).
                 completion = llm.post_process_completion(raw_completion.completion, sample)
+                completion = self._kind.extract_answer(
+                    completion,
+                    context=sample.context,
+                    ground_truth=sample.ground_truth,
+                    messages=sample.messages,
+                )
             except Exception as e:
                 if raise_errors() or fail_on_error:
                     raise
@@ -239,11 +247,11 @@ class ComposedEval(Eval):
 
     @override
     def get_stop_sequences(self) -> list[str]:
-        return []
+        return self._kind.stop_sequences()
 
     @override
     def get_max_tokens(self) -> int | None:
-        return None
+        return self._kind.max_tokens()
 
     @override
     def get_response_type(self) -> ResponseType:

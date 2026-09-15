@@ -12,7 +12,15 @@ from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS, mmlu, mmlu_full_text, mmlu_idk, mmlu_olmes
+from eval_framework.benchmarks.mmlu import (
+    MMLU_BENCHMARKS,
+    _MmluCotKind,
+    mmlu,
+    mmlu_cot,
+    mmlu_full_text,
+    mmlu_idk,
+    mmlu_olmes,
+)
 from eval_framework.contract import Benchmark
 from eval_framework.tasks.registry import Registry
 from template_formatting.formatter import (
@@ -120,6 +128,34 @@ def test_mmlu_idk_prompt() -> None:
     assert sample.possible_completions == [" A", " B", " C", " D", " ?"]
 
 
+def test_mmlu_cot_prompt() -> None:
+    # COT: free-form generation — a reasoning preamble, no assistant cue, no scored candidates.
+    benchmark = mmlu_cot(dataset=DatasetStub({"test": [_EVAL_ROW]}))
+    sample = first_sample(benchmark, num_fewshot=0)
+    assert sample.messages == [
+        Message(
+            role=Role.USER,
+            content="The following are multiple choice questions about abstract algebra. "
+            'Summarize your reasoning concisely, then conclude with "Therefore, the answer is: X", where X is '
+            "one of A, B, C, or D.\n\n"
+            "Question: What is 2 + 2?\nA. 3\nB. 4\nC. 5\nD. 6",  # no trailing newline, no "Answer:" cue
+        ),
+    ]
+    assert sample.ground_truth == "B"  # bare letter
+    assert sample.possible_completions is None  # free-form generation, no candidates
+
+
+def test_mmlu_cot_extracts_the_concluding_letter() -> None:
+    # extract_answer runs at scoring time (not captured by the formatter hash), so exercise it directly.
+    kind = _MmluCotKind()
+    fields: dict[str, Any] = {"context": None, "ground_truth": None, "messages": []}
+    assert kind.extract_answer("Reasoning ... Therefore, the answer is: C.", **fields) == "C"
+    # the "Question:" stop sequence is stripped before extraction
+    assert kind.extract_answer("Therefore, the answer is: A\nQuestion: the next one", **fields) == "A"
+    # no conclusion in the required form -> invalid
+    assert kind.extract_answer("I'm fairly sure it is 4.", **fields) == "[invalid]"
+
+
 @pytest.mark.parametrize(
     "make_benchmark, display_name",
     [
@@ -127,6 +163,7 @@ def test_mmlu_idk_prompt() -> None:
         pytest.param(mmlu_olmes, "MMLU_OLMES", id="mmlu_olmes"),
         pytest.param(mmlu_full_text, "Full Text MMLU", id="full_text"),
         pytest.param(mmlu_idk, "MMLU_IDK", id="mmlu_idk"),
+        pytest.param(mmlu_cot, "MMLU_COT", id="mmlu_cot"),
     ],
 )
 def test_mmlu_display_name(make_benchmark: Callable[..., Benchmark], display_name: str) -> None:
