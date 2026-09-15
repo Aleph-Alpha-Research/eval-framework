@@ -1,5 +1,7 @@
 import logging
 import math
+from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from typing import Any, cast
 
@@ -41,7 +43,7 @@ class EvaluationGenerator:
         response: Completion | Loglikelihood,
         llm_name: str,
     ) -> list[Result]:
-        """Compute one response's results, without mutating anything the caller shares."""
+        """Compute one response's results. Runs in a worker thread, so must not mutate shared state."""
         results: list[Result] = []
         for metric_result in metric.calculate(response):
             if "/" in metric_result.metric_name:
@@ -71,7 +73,7 @@ class EvaluationGenerator:
         return results
 
     def _collect(self, batch: list[Result], results: list[Result]) -> None:
-        """Accumulate one response's results and persist them."""
+        """Accumulate and persist one response's results. Main thread only, so no locking needed."""
         for result in batch:
             results.append(result)
             if self.save_intermediate_results:
@@ -115,9 +117,17 @@ class EvaluationGenerator:
                 if f"{response.subject}_{response.id}_{metric.__class__.__name__}" not in subject_result_id_existing
             ]
             compute = partial(self._results_for, metric, llm_name=llm_name)
+            desc = f"Calculating {metric.NAME}"
 
-            for response in tqdm(pending, desc=f"Calculating {metric.NAME}", disable=get_disable_bar_flag()):
-                self._collect(compute(response), results)
+            if metric.MAX_WORKERS > 1:
+                with ThreadPoolExecutor(max_workers=metric.MAX_WORKERS) as executor:
+                    # map yields in submission order, so results match a serial run.
+                    batches: Iterator[list[Result]] = executor.map(compute, pending)
+                    for batch in tqdm(batches, total=len(pending), desc=desc, disable=get_disable_bar_flag()):
+                        self._collect(batch, results)
+            else:
+                for response in tqdm(pending, desc=desc, disable=get_disable_bar_flag()):
+                    self._collect(compute(response), results)
 
             logger.info(f"Completed calculation of {metric.NAME}")
 

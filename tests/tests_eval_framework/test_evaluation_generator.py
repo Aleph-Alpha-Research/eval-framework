@@ -1,3 +1,5 @@
+import threading
+import time
 from collections.abc import Callable
 from pathlib import Path
 
@@ -7,6 +9,7 @@ import wandb
 from eval_framework.evaluation_generator import EvaluationGenerator
 from eval_framework.metrics.aggregators.aggregators import IdentifierMean, PassAtK
 from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.base import Result
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
@@ -37,6 +40,101 @@ class MockIdentifierMeanMetric(BaseMetric):
 
     def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
         return []
+
+
+PROBE_CONCURRENCY = 4
+
+
+class SerialProbeMetric(BaseMetric):
+    """Records the peak number of overlapping calculate() calls."""
+
+    NAME = "SerialProbe"
+    lock = threading.Lock()
+    in_flight = 0
+    max_in_flight = 0
+
+    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
+        with SerialProbeMetric.lock:
+            SerialProbeMetric.in_flight += 1
+            SerialProbeMetric.max_in_flight = max(SerialProbeMetric.max_in_flight, SerialProbeMetric.in_flight)
+        time.sleep(0.02)
+        with SerialProbeMetric.lock:
+            SerialProbeMetric.in_flight -= 1
+        return [MetricResult(metric_name=self.NAME, value=float(response.id), higher_is_better=True)]
+
+
+class JudgeProbeMetric(BaseLLMJudgeMetric):
+    """No __init__, so the generator constructs it exactly like a real judge metric."""
+
+    NAME = "JudgeProbe"
+    MAX_WORKERS = PROBE_CONCURRENCY
+    barrier = threading.Barrier(PROBE_CONCURRENCY, timeout=10)
+
+    def calculate(self, response: Completion) -> list[MetricResult]:
+        # Breaks on timeout rather than hanging if the calls are not truly concurrent.
+        JudgeProbeMetric.barrier.wait()
+        return [MetricResult(metric_name=self.NAME, value=float(response.id), higher_is_better=True)]
+
+
+def _make_completions(count: int) -> list[Completion]:
+    return [
+        Completion(
+            id=i,
+            subject="subject1",
+            prompt="prompt",
+            prompt_num_tokens=1,
+            completion="completion",
+            ground_truth="ground_truth",
+            messages=[],
+            raw_completion="completion",
+            raw_completion_num_tokens=1,
+        )
+        for i in range(count)
+    ]
+
+
+def _evaluator_with_metadata(
+    tmp_path: Path, should_preempt_callable: Callable, **config_kwargs: object
+) -> EvaluationGenerator:
+    """Run the response generator first so metadata.json exists, then return an evaluator."""
+    llm = MockLLM()
+    config = EvalConfig(
+        output_dir=tmp_path,
+        num_fewshot=0,
+        num_samples=2,
+        task_name=HumanEval_OLMES.NAME,
+        llm_class=llm.__class__,
+        **config_kwargs,  # type: ignore[arg-type]
+    )
+    file_processor = ResultsFileProcessor(tmp_path / "evaluator_test_output")
+    ResponseGenerator(llm, config, file_processor).generate(should_preempt_callable)
+    return EvaluationGenerator(config, file_processor)
+
+
+def test_run_metric_calculators_is_serial_by_default(tmp_path: Path, should_preempt_callable: Callable) -> None:
+    SerialProbeMetric.in_flight = 0
+    SerialProbeMetric.max_in_flight = 0
+
+    evaluator = _evaluator_with_metadata(tmp_path, should_preempt_callable)
+    evaluator.metrics = [SerialProbeMetric]
+    responses = _make_completions(8)
+
+    results = evaluator._run_metric_calculators(responses)  # type: ignore[arg-type]
+
+    assert SerialProbeMetric.max_in_flight == 1
+    assert [r.value for r in results] == [float(i) for i in range(8)]
+
+
+def test_run_metric_calculators_fans_out_judge_metrics(tmp_path: Path, should_preempt_callable: Callable) -> None:
+    JudgeProbeMetric.barrier.reset()
+
+    evaluator = _evaluator_with_metadata(tmp_path, should_preempt_callable, llm_judge_class=MockLLM)
+    evaluator.metrics = [JudgeProbeMetric]
+    responses = _make_completions(2 * PROBE_CONCURRENCY)
+
+    results = evaluator._run_metric_calculators(responses)  # type: ignore[arg-type]
+
+    assert [r.value for r in results] == [float(i) for i in range(2 * PROBE_CONCURRENCY)]
 
 
 def test_evaluator_run_completions(tmp_path: Path, should_preempt_callable: Callable) -> None:
