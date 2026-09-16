@@ -21,7 +21,6 @@ from eval_framework.tasks.benchmarks.naturalqs_open import (
 )
 from eval_framework.tasks.benchmarks.social_iqa import SocialIQACloze, SocialIQAMC, SocialIQAMC_OLMES
 from eval_framework.tasks.benchmarks.squad import SQUAD2BPB
-from eval_framework.tasks.benchmarks.winogrande import WINOGRANDE_OLMES
 
 
 def _smoke_test_task(task_cls, num_fewshot: int = 0) -> None:
@@ -82,7 +81,6 @@ def test_olmes_variants_smoke() -> None:
     for task_cls in (
         GPQA_OLMES,  # gated; skipped when not authenticated
         MMLU_PRO_OLMES,
-        WINOGRANDE_OLMES,
     ):
         try:
             _smoke_test_task(task_cls)
