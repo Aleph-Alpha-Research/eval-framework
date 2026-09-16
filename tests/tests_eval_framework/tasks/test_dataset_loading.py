@@ -41,6 +41,26 @@ def test_subject_column_keeps_only_the_rows_whose_column_names_the_requested_sub
     assert [row["q"] for row in policy.loader(None).load("ARC-Challenge")["test"]] == ["Q2"]
 
 
+def test_subset_documentation_names_the_restriction_on_top_of_the_inner_docs() -> None:
+    # Given a subset with a human-readable description, over an inner policy that has its own docs
+    policy = DatasetStub({"train": []}).subset(lambda row: True, description="the diamond subset")
+
+    # When the dataset section is rendered, then it keeps the inner docs and adds the restriction
+    doc = policy.documentation()
+    assert "fictional in-memory dataset" in doc
+    assert "- Restricted to the diamond subset." in doc
+
+
+def test_subject_column_documentation_names_the_config_and_column() -> None:
+    # Given a column-encoded subject policy
+    policy = DatasetStub({"test": []}).subject_encoded_in_column(config="deu", column="arc_config")
+
+    # When the dataset section is rendered, then it explains the shared config and the splitting column
+    doc = policy.documentation()
+    assert "fictional in-memory dataset" in doc
+    assert "`deu`" in doc and "`arc_config`" in doc
+
+
 def test_subject_column_always_loads_its_fixed_config_regardless_of_the_requested_subject() -> None:
     # Given an inner policy that records which config it is asked to load
     inner = _RecordingPolicy([{"arc_config": "ARC-Easy"}, {"arc_config": "ARC-Challenge"}])
