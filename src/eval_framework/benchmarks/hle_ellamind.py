@@ -13,7 +13,7 @@ from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
-from eval_framework.tasks.dataset_loading import DatasetPolicy, Subset
+from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
 
@@ -47,8 +47,13 @@ def _hle_ellamind_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy 
 
 
 def _hle_ellamind_native_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy | None = None) -> Benchmark:
-    source = dataset if dataset is not None else pinned_by_framework("ellamind/hle-multilingual")
-    return _hle_ellamind_benchmark(id, styler, Subset(source, keep=lambda row: row["answer_type"] == "multipleChoice"))
+    # The NATIVE variants keep only the items that are natively multiple-choice in the original benchmark.
+    source = (
+        dataset
+        if dataset is not None
+        else pinned_by_framework("ellamind/hle-multilingual").subset(lambda row: row["answer_type"] == "multipleChoice")
+    )
+    return _hle_ellamind_benchmark(id, styler, source)
 
 
 def hle_ellamind_mc_de(dataset: DatasetPolicy | None = None) -> Benchmark:

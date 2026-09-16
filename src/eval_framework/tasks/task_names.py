@@ -2,6 +2,7 @@ from enum import Enum
 
 from eval_framework.benchmarks.arc import ARC_BENCHMARKS
 from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK
+from eval_framework.benchmarks.arc_ellamind import ARC_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.copa import COPA_BENCHMARKS
 from eval_framework.benchmarks.csqa import CSQA_BENCHMARKS
 from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
@@ -258,9 +259,8 @@ def register_medqa_tasks(registry: Registry) -> None:
 
 def register_arc_ellamind_tasks(registry: Registry) -> None:
     """Register arc_ellamind benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.arc_ellamind.ARC_ELLAMIND_CLOZE_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.arc_ellamind.ARC_ELLAMIND_MC_DE", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.arc_ellamind.ARC_ELLAMIND_BPB_DE", registry=registry)
+    for benchmark in ARC_ELLAMIND_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_csqa_ellamind_tasks(registry: Registry) -> None:
