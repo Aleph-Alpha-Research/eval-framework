@@ -156,7 +156,7 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
         """Use llm-sandbox's native session.run() for cpp, java, js."""
         image = getattr(DefaultImage, sandbox_lang.upper())
         pool = get_or_create_pool(image=image, lang=sandbox_lang, runtime_configs=_RUNTIME_CONFIGS)
-        with SandboxSession(pool=pool, lang=sandbox_lang) as session:
+        with SandboxSession(pool=pool, lang=sandbox_lang, encoding_errors="replace") as session:
             result: Any = session.run(full_code, timeout=timeout)
         return result.success(), result.stdout + result.stderr
 
@@ -201,7 +201,7 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
             with open(tmp_path, "w") as f:
                 f.write(full_code)
 
-            with SandboxSession(pool=pool, lang=SupportedLanguage.PYTHON) as session:
+            with SandboxSession(pool=pool, lang=SupportedLanguage.PYTHON, encoding_errors="replace") as session:
                 session.execute_command(f"mkdir -p {container_dir}")
                 session.copy_to_runtime(tmp_path, code_file)
                 for filename, host_path in (extra_host_files or {}).items():
