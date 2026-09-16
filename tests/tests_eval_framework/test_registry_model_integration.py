@@ -5,7 +5,6 @@ import pytest
 import wandb
 
 from eval_framework import main as main_file
-from eval_framework.tasks.benchmarks.arc import ARC
 from eval_framework.tasks.eval_config import EvalConfig
 from tests.tests_eval_framework.conftest import MockLLM
 
@@ -14,7 +13,7 @@ def test_additional_artifact_use(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     """Test that additional wandb artifacts are registered as being used during evaluation."""
     mock_llm = MockLLM()
     eval_config = EvalConfig(
-        task_name=ARC.NAME,
+        task_name="ARC",
         num_fewshot=0,
         num_samples=10,
         output_dir=tmp_path,

@@ -1,7 +1,6 @@
 import pytest
 from datasets.exceptions import DatasetNotFoundError
 
-from eval_framework.tasks.benchmarks.arc import ARC_OLMES
 from eval_framework.tasks.benchmarks.drop import DropCloze, DropCompletion, DropMC, DropMC_OLMES
 from eval_framework.tasks.benchmarks.global_mmlu import GlobalMMLU
 from eval_framework.tasks.benchmarks.gpqa import GPQA_OLMES
@@ -81,7 +80,6 @@ def test_social_iqa_tasks_smoke() -> None:
 @pytest.mark.slow_download
 def test_olmes_variants_smoke() -> None:
     for task_cls in (
-        ARC_OLMES,
         GPQA_OLMES,  # gated; skipped when not authenticated
         MMLU_PRO_OLMES,
         WINOGRANDE_OLMES,
