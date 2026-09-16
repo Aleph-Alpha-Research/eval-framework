@@ -13,7 +13,6 @@
     "allenai/drop-gen2mc": "33191ccb7014f77bc6dc3f59792acd43f658eb06",
     "allenai/nq-gen2mc": "a7e553744f28cb673bf25b734513c41e3f413840",
     "allenai/sciq": "2c94ad3e1aafab77146f384e23536f97a4849815",
-    "allenai/social_i_qa": "8835ceb9141d7896d9d968634a9b21ae440e3ec5",
     "allenai/winogrande": "01e74176c63542e6b0bcb004dcdea22d94fb67b5",
     "aps/super_glue": "3de24cf8022e94f4ee4b9d55a6f539891524d646",
     "bigcode/bigcodebench": "b74c0d0bf70d2c0bc459be537895cca163007f1a",

@@ -18,6 +18,7 @@ from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.sciq import SCIQ_BENCHMARKS
 from eval_framework.benchmarks.simpleqa_ellamind import SIMPLEQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.siqa_ellamind import SIQA_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.social_iqa import SOCIAL_IQA_BENCHMARKS
 from eval_framework.benchmarks.winogrande import WINOGRANDE_BENCHMARKS
 from eval_framework.benchmarks.winogrande_ellamind import WINOGRANDE_ELLAMIND_BENCHMARKS
 from eval_framework.tasks.base import BaseTask
@@ -248,7 +249,8 @@ def register_naturalqs_open_tasks(registry: Registry) -> None:
 
 def register_social_iqa_tasks(registry: Registry) -> None:
     """Register social_iqa benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.social_iqa.SocialIQAMC_OLMES", registry=registry)
+    for benchmark in SOCIAL_IQA_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_medqa_tasks(registry: Registry) -> None:

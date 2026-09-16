@@ -19,7 +19,6 @@ from eval_framework.tasks.benchmarks.naturalqs_open import (
     NaturalQsOpenMC,
     NaturalQsOpenMC_OLMES,
 )
-from eval_framework.tasks.benchmarks.social_iqa import SocialIQACloze, SocialIQAMC, SocialIQAMC_OLMES
 from eval_framework.tasks.benchmarks.squad import SQUAD2BPB
 
 
@@ -61,18 +60,6 @@ def test_math_minerva_tasks_smoke() -> None:
     _smoke_test_task(MATHMinerva)
     _smoke_test_task(MATHMinervaBPB, num_fewshot=4)  # class default, kept explicit
     _smoke_test_task(MATH500Minerva)
-
-
-@pytest.mark.cpu_slow
-def test_social_iqa_tasks_smoke() -> None:
-    try:
-        _smoke_test_task(SocialIQACloze)
-        _smoke_test_task(SocialIQAMC)
-        _smoke_test_task(SocialIQAMC_OLMES)
-    except RuntimeError as e:
-        if "no longer supported" in str(e) or "loading script" in str(e).lower():
-            pytest.skip("allenai/social_i_qa uses a dataset loading script not supported by this datasets version")
-        raise
 
 
 @pytest.mark.cpu_slow
