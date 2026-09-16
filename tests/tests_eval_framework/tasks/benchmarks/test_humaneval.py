@@ -22,7 +22,7 @@ from tests.tests_eval_framework.tasks.benchmarks.utils import (
 )
 from tests.tests_eval_framework.utils import DatasetPatcher
 
-_NUM_FEWSHOT = {"HumanEval_OLMES": 3}
+_NUM_FEWSHOT = {"HumanEval_OLMES": 3, "HumanEvalInstruct": 0}
 
 
 class TestHumanEvalCode:
@@ -99,7 +99,10 @@ class TestHumanEvalInstructCode:
         i = 0
         for i, item in enumerate(human_eval_task_inst.dataset[human_eval_task_inst.SAMPLE_SPLIT][:10]):
             sample = human_eval_task_inst._create_samples(item, i, human_eval_task_inst.SUBJECTS[0])[0]
-            completion = item["canonical_solution"]
+            completion = (
+                "<think>Implement the requested function.</think>\n"
+                f"```python\n{item['prompt'].strip()}\n{item['canonical_solution'].rstrip()}\n```"
+            )
             formatted_code = human_eval_task_inst.post_process_generated_completion(completion, sample)
             assert run_python_code(formatted_code).endswith("True")
         assert i == 9
@@ -138,6 +141,23 @@ _FEWSHOT_ROW: dict[str, Any] = {
     "test": "def check(candidate):\n    assert candidate(3) == 9\n",
     "entry_point": "square",
 }
+
+# --- HumanEvalInstruct ---
+_INSTRUCT_PREFIX = "Complete the following Python function. Return only the complete function in a Markdown code block:"
+_INSTRUCT_ZEROSHOT = ExpectedPrompt(
+    messages=[
+        Message(
+            role=Role.USER,
+            content=(
+                f'{_INSTRUCT_PREFIX}\n```python\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Adds two '
+                'numbers."""\n```\n'
+            ),
+        ),
+    ],
+    concat=(f'{_INSTRUCT_PREFIX}\n```python\ndef add(a: int, b: int) -> int:\n{_INDENT}"""Adds two numbers."""\n```'),
+    ground_truth="Success",
+    completions=None,
+)
 
 # --- HumanEvalBPB_V2 ---
 _BPB_ZEROSHOT = ExpectedPrompt(
@@ -185,6 +205,15 @@ def add(a: int, b: int) -> int:
     ground_truth=_BPB_ZEROSHOT.ground_truth,
     completions=_BPB_ZEROSHOT.completions,
 )
+
+
+def test_humaneval_instruct_offline_prompt_formatting() -> None:
+    assert_offline_zeroshot_prompt(
+        HumanEvalInstruct,
+        eval_row=_EVAL_ROW,
+        subjects=[HumanEvalInstruct.SUBJECTS[0]],
+        expected=_INSTRUCT_ZEROSHOT,
+    )
 
 
 def test_humaneval_bpb_offline_prompt_formatting() -> None:

@@ -5,6 +5,7 @@ from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglik
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
+from eval_framework.tasks.utils import extract_python_code_from_response
 
 CODE_TO_EXECUTE = """
 {start_of_code}
@@ -148,24 +149,31 @@ class HumanEval_OLMES(HumanEval):
 
 
 class HumanEvalInstruct(HumanEval):
-    # See https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/humaneval/humaneval_instruct.yaml
     REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
     NAME = "Human Eval Instruct"
-    CUE_PREFIX = "Here is the completed function:\n```python\n"
 
     def __init__(self, num_fewshot: int = 0) -> None:
         assert num_fewshot == 0, "Fewshot is not supported for Human Eval Instruct"
         super().__init__(num_fewshot)
+        self.stop_sequences = []
 
     def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        instruction_text = (
-            "Write a solution to the following problem and make sure that "
-            f"it passes the tests:\n```python\n{item['prompt'].lstrip()}"
+        return (
+            "Complete the following Python function. Return only the complete function in a Markdown code block:"
+            f"\n```python\n{item['prompt'].strip()}\n```\n"
         )
-        return instruction_text
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
-        return self.CUE_PREFIX + item["prompt"].lstrip()
+        return ""
+
+    def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+        assert sample is not None and isinstance(sample.context, HumanEvalMetricContext)
+        return CODE_TO_EXECUTE.format(
+            start_of_code="",
+            completion_text=extract_python_code_from_response(completion_text),
+            test_code=sample.context.test,
+            entry_point=sample.context.entry_point,
+        )
 
 
 class HumanEval_OLMES_V2(HumanEval_OLMES):
