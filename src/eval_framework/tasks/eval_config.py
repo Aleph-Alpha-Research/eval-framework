@@ -3,12 +3,10 @@ import json
 from pathlib import Path
 from typing import Annotated, Any
 
-from pydantic import BeforeValidator, Field, field_serializer, field_validator, model_validator
+from pydantic import BeforeValidator, Field, field_serializer, field_validator
 
 from eval_framework.base_config import BaseConfig
 from eval_framework.llm.base import BaseLLM
-from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
-from eval_framework.tasks.registry import registry
 from eval_framework.utils.constants import ROOT_DIR
 
 # Keys that don't impact actual evaluation results and should be excluded from config dumps for hashing purposes.
@@ -110,14 +108,6 @@ class EvalConfig(BaseConfig):
                 pass
             typed_value[k] = v
         return typed_value
-
-    @model_validator(mode="after")
-    def validate_llm_judge_defined(self) -> "EvalConfig":
-        task_metrics = registry()[self.task_name].metrics()
-        for metric_class in task_metrics:
-            if issubclass(metric_class, BaseLLMJudgeMetric):
-                assert self.llm_judge_class is not None, "The LLM Judge must be defined for this evaluation task."
-        return self
 
     @field_serializer("llm_class")
     def serialize_llm_class(self, value: type[BaseLLM] | None) -> str | None:

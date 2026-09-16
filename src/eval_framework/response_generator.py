@@ -5,7 +5,7 @@ from collections.abc import Callable, Iterable
 from datetime import UTC, datetime
 from functools import partial
 
-from eval_framework.tasks.registry import registry
+from eval_framework.tasks.registry import Registry, registry
 
 try:
     from determined._info import get_cluster_info
@@ -18,7 +18,9 @@ from typing import Any
 from tqdm import tqdm
 
 from eval_framework import __version__ as eval_framework_version
+from eval_framework.contract import Benchmark
 from eval_framework.llm.base import BaseLLM
+from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import (
@@ -51,8 +53,26 @@ def map_language_to_value(
         raise ValueError(f"Invalid language: {language}")
 
 
+def _require_judge_when_task_uses_one(benchmark: Benchmark, config: EvalConfig) -> None:
+    """A task scored by an LLM-judge metric needs a judge model; fail early if the config lacks one."""
+    if config.llm_judge_class is not None:
+        return
+    if any(issubclass(metric, BaseLLMJudgeMetric) for metric in benchmark.metrics()):
+        raise ValueError(
+            f"Task '{config.task_name}' is scored with an LLM-judge metric, so the eval config must set "
+            "llm_judge_class."
+        )
+
+
 class ResponseGenerator:
-    def __init__(self, llm: BaseLLM, config: EvalConfig, result_processor: ResultsFileProcessor) -> None:
+    def __init__(
+        self,
+        llm: BaseLLM,
+        config: EvalConfig,
+        result_processor: ResultsFileProcessor,
+        *,
+        benchmark_registry: Registry | None = None,
+    ) -> None:
         self.task_name = config.task_name
         self.llm = llm
         self.config = config
@@ -60,7 +80,9 @@ class ResponseGenerator:
         self.num_samples = config.num_samples
         self.save_intermediate_results = config.save_intermediate_results
 
-        self.task = registry()[config.task_name].create(
+        benchmark = (benchmark_registry if benchmark_registry is not None else registry())[config.task_name]
+        _require_judge_when_task_uses_one(benchmark, config)
+        self.task = benchmark.create(
             config.num_fewshot,
             config.task_subjects,
             config.hf_revision,
