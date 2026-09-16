@@ -147,7 +147,7 @@ def run_python_code(
         dockerfile=dockerfile,
         runtime_configs=runtime_configs,
     )
-    with SandboxSession(pool=pool, lang="python") as session:
+    with SandboxSession(pool=pool, lang="python", encoding_errors="replace") as session:
         for host_file, docker_file in input_files or []:
             session.copy_to_runtime(host_file, docker_file)
 
