@@ -14,6 +14,25 @@
 
 ### Bug Fixes
 
+## [0.13.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.12.0...v0.13.0) (2026-09-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* MedQAMC_OLMES migrated to compose style; Removed unregisted
+* Fewshot extracted into own policy
+
+### Features
+
+* add German instruct code benchmarks ([3169a0e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3169a0e258fc88cf020e16b72439337c75b45869))
+* evaluate metrics concurrently up to their worker limit ([bdf096a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/bdf096a5223144ef8d5951b5e8712e9916913c73))
+
+
+### Code Refactoring
+
+* Fewshot extracted into own policy ([43f26da](https://github.com/Aleph-Alpha-Research/eval-framework/commit/43f26da62bb298a13d61fd5788e907391305799e))
+* MedQAMC_OLMES migrated to compose style; Removed unregisted ([0b47f2a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0b47f2abd45f3f818bb985e2020f749ad9fee6e9))
+
 ## [0.12.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.11.16...v0.12.0) (2026-09-15)
 
 
