@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.94 - https://github.com/boto/boto3
-- **botocore** 1.43.94 - https://github.com/boto/botocore
+- **boto3** 1.43.95 - https://github.com/boto/boto3
+- **botocore** 1.43.95 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **googleapis-common-protos** 1.75.3 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
@@ -117,7 +117,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **rpds-py** 2026.6.3 - https://github.com/crate-py/rpds
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **typing-inspection** 0.4.4 - https://github.com/pydantic/typing-inspection
-- **urllib3** 2.7.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
+- **urllib3** 2.8.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
 - **wandb** 0.30.0 - https://github.com/wandb/wandb
 - **xmltodict** 1.0.4 - https://github.com/martinblech/xmltodict
 
@@ -218,7 +218,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.94 (Apache-2.0)
+### boto3 1.43.95 (Apache-2.0)
 
 ```text
 Apache License
@@ -399,7 +399,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.94 (Apache-2.0)
+### botocore 1.43.95 (Apache-2.0)
 
 ```text
 Apache License
@@ -19461,7 +19461,7 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ```
 
-### urllib3 2.7.0 (MIT)
+### urllib3 2.8.0 (MIT)
 
 ```text
 MIT License
