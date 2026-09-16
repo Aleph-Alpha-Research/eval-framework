@@ -333,9 +333,8 @@ def test_hf_revisions(task_name: str, hf_revision: str) -> None:
         result_processor=result_processor,
     )
 
-    for _ in response_generator.task.iterate_samples(num_samples=config.num_samples):
-        pass
-    assert response_generator.task.dataset
+    samples = list(response_generator.task.iterate_samples(num_samples=config.num_samples))
+    assert samples
 
 
 def test_response_generator_metadata_handling(tmp_path: Path) -> None:
@@ -453,50 +452,36 @@ def test_with_wrong_loaded_metadata(tmp_path: Path) -> None:
                 generator.generate(lambda: False)
 
 
-def test_response_generator_applies_model_then_task_post_processing(tmp_path: Path) -> None:
+def test_generate_completions_applies_model_then_task_post_processing() -> None:
+    # generate_completions must apply the model's post-processing (llm.post_process_completion) BEFORE the
+    # task's own (post_process_generated_completion). The markers make the order visible:
+    # raw -> MODEL[raw] -> TASK[MODEL[raw]]. This is a property of BaseTask.generate_completions, so it runs
+    # on a BaseTask double built directly — no registry, no ResponseGenerator. (The composed equivalent, a
+    # kind's extract_answer, is covered in the composed tests.)
     class MarkerLLM(MockLLM):
         def post_process_completion(self, completion: str, sample: Sample) -> str:
             return f"MODEL[{completion}]"
 
+    class MarkerTask(StubTask):
+        def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
+            return f"TASK[{super().post_process_generated_completion(completion_text, sample)}]"
+
+    task = MarkerTask.with_overwrite(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
     llm = MarkerLLM()
-    config = EvalConfig(
-        task_name="ARC",
-        num_fewshot=0,
-        num_samples=1,
-        llm_class=llm.__class__,
-        save_intermediate_results=False,
+    llm.generate = Mock(  # type: ignore[method-assign]
+        return_value=[
+            RawCompletion(prompt="prompt", completion="raw_answer", prompt_num_tokens=None, completion_num_tokens=None)
+        ]
     )
-    result_processor = ResultsFileProcessor(tmp_path)
-    generator = ResponseGenerator(llm, config, result_processor)
-
-    original_task_post_process = generator.task.post_process_generated_completion
-
-    def task_post_process_with_marker(completion: str, sample: Sample | None = None) -> str:
-        result = original_task_post_process(completion, sample)
-        return f"TASK[{result}]"
-
-    generator.task.post_process_generated_completion = task_post_process_with_marker  # type: ignore[method-assign, assignment]
-
     sample = Sample(
         id=0,
-        subject="ARC-Easy",
+        subject="stub",
         ground_truth="A",
         messages=[Message(role=Role.USER, content="Test question")],
         possible_completions=None,
     )
 
-    llm.generate = Mock(  # type: ignore[method-assign]
-        return_value=[
-            RawCompletion(
-                prompt="prompt",
-                completion="raw_answer",
-                prompt_num_tokens=None,
-                completion_num_tokens=None,
-            )
-        ]
-    )
-
-    completions = generator.task.generate_completions(llm, [sample])
+    completions = task.generate_completions(llm, [sample])
 
     assert completions[0].raw_completion == "raw_answer"
     assert completions[0].completion == "TASK[MODEL[raw_answer]]"
