@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.94` |
+| `botocore` | `1.43.95` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.1` |
 | `click` | `8.5.0` |
@@ -85,5 +85,5 @@ and first-party/internal packages are excluded.
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.4` |
 | `tzdata` | `2026.4` |
-| `urllib3` | `2.7.0` |
+| `urllib3` | `2.8.0` |
 | `xxhash` | `4.0.1` |
