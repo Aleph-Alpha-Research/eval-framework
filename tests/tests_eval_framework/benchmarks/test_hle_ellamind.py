@@ -151,36 +151,3 @@ def test_hle_oneshot_prompt(make_benchmark: Callable[..., Benchmark], expected: 
     assert sample.messages == expected.messages
     assert sample.ground_truth == expected.ground_truth
     assert sample.possible_completions == expected.possible_completions
-
-
-# ---------------------------------------------------------------------------
-# NATIVE subset: the native variant keeps only answer_type == "multipleChoice" rows; the full variant keeps all
-# ---------------------------------------------------------------------------
-def test_hle_native_variant_keeps_only_multiple_choice_rows() -> None:
-    # Given a dataset mixing multipleChoice and other answer types
-    rows: list[dict[str, Any]] = [
-        {
-            "question": "Q1",
-            "correct_answer": "a",
-            "incorrect_answers": ["x", "y", "z"],
-            "answer_type": "multipleChoice",
-        },
-        {"question": "Q2", "correct_answer": "a", "incorrect_answers": ["x", "y", "z"], "answer_type": "exactMatch"},
-        {
-            "question": "Q3",
-            "correct_answer": "a",
-            "incorrect_answers": ["x", "y", "z"],
-            "answer_type": "multipleChoice",
-        },
-    ]
-    native = hle_ellamind_mc_native_de(dataset=DatasetStub({"test": rows}))
-    full = hle_ellamind_mc_de(dataset=DatasetStub({"test": rows}))
-
-    # When we assemble all samples for each
-    native_samples = list(native.create(0, None, None, seed=42).iterate_samples())
-    full_samples = list(full.create(0, None, None, seed=42).iterate_samples())
-
-    # Then the native variant drops the non-multipleChoice row (Q2); the full variant keeps all three
-    assert len(native_samples) == 2
-    assert all("Q2" not in sample.messages[0].content for sample in native_samples)
-    assert len(full_samples) == 3

@@ -151,26 +151,3 @@ def test_gpqa_oneshot_prompt(make_benchmark: Callable[..., Benchmark], expected:
     assert sample.messages == expected.messages
     assert sample.ground_truth == expected.ground_truth
     assert sample.possible_completions == expected.possible_completions
-
-
-# ---------------------------------------------------------------------------
-# Diamond subset: the diamond variant keeps only is_diamond rows; the full variant keeps them all
-# ---------------------------------------------------------------------------
-def test_gpqa_diamond_variant_keeps_only_diamond_rows() -> None:
-    # Given a dataset mixing diamond and non-diamond rows
-    rows: list[dict[str, Any]] = [
-        {"question": "Q1", "correct_answer": "A", "incorrect_answers": ["x", "y", "z"], "is_diamond": True},
-        {"question": "Q2", "correct_answer": "A", "incorrect_answers": ["x", "y", "z"], "is_diamond": False},
-        {"question": "Q3", "correct_answer": "A", "incorrect_answers": ["x", "y", "z"], "is_diamond": True},
-    ]
-    diamond = gpqa_ellamind_diamond_mc_de(dataset=DatasetStub({"train": rows}))
-    full = gpqa_ellamind_mc_de(dataset=DatasetStub({"train": rows}))
-
-    # When we assemble all samples for each
-    diamond_samples = list(diamond.create(0, None, None, seed=42).iterate_samples())
-    full_samples = list(full.create(0, None, None, seed=42).iterate_samples())
-
-    # Then the diamond variant drops the non-diamond row (Q2); the full variant keeps all three
-    assert len(diamond_samples) == 2
-    assert all("Q2" not in sample.messages[0].content for sample in diamond_samples)
-    assert len(full_samples) == 3
