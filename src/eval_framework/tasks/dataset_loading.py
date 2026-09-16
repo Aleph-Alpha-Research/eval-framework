@@ -59,9 +59,12 @@ class DatasetPolicy(ABC):
         """Markdown for the task's ``## Dataset`` doc section, describing where the dataset comes from."""
         ...
 
-    def subset(self, keep: Callable[[dict[str, Any]], bool]) -> "Subset":
-        """Restrict this policy's dataset to the rows for which ``keep`` returns true (see ``Subset``)."""
-        return Subset(self, keep)
+    def subset(self, keep: Callable[[dict[str, Any]], bool], description: str | None = None) -> "Subset":
+        """Restrict this policy's dataset to the rows for which ``keep`` returns true (see ``Subset``).
+
+        ``description`` names the resulting subset for the rendered dataset docs (e.g. "the diamond subset").
+        """
+        return Subset(self, keep, description)
 
     def subject_encoded_in_column(self, config: str, column: str) -> "SubjectColumn":
         """By default the loaded config names the subject; call this when the subject is instead encoded in
@@ -92,12 +95,16 @@ class Subset(DatasetPolicy):
     """Restricts another policy's dataset to the rows for which ``keep`` returns true, in every split.
 
     A benchmark whose items are a row-filtered subset of a larger dataset (e.g. GPQA's diamond subset,
-    HLE's natively-multiple-choice subset) wraps the base policy in a ``Subset``.
+    HLE's natively-multiple-choice subset) wraps the base policy in a ``Subset``. ``description`` names that
+    subset for the rendered dataset docs; without it the docs only note that some rows are dropped.
     """
 
-    def __init__(self, inner: DatasetPolicy, keep: Callable[[dict[str, Any]], bool]) -> None:
+    def __init__(
+        self, inner: DatasetPolicy, keep: Callable[[dict[str, Any]], bool], description: str | None = None
+    ) -> None:
         self._inner = inner
         self._keep = keep
+        self._description = description
 
     @override
     def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
@@ -105,7 +112,7 @@ class Subset(DatasetPolicy):
 
     @override
     def documentation(self) -> str:
-        return self._inner.documentation()
+        return f"{self._inner.documentation()}\n- Restricted to {self._description or 'a subset of its rows'}."
 
 
 @final
@@ -147,4 +154,7 @@ class SubjectColumn(DatasetPolicy):
 
     @override
     def documentation(self) -> str:
-        return self._inner.documentation()
+        return (
+            f"{self._inner.documentation()}\n"
+            f"- Subjects share the single `{self._config}` config and are split by the `{self._column}` column."
+        )

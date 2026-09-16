@@ -51,7 +51,9 @@ def _gpqa_ellamind_diamond_benchmark(id: str, styler: TaskStyler, dataset: Datas
     source = (
         dataset
         if dataset is not None
-        else pinned_by_framework("ellamind/gpqa-multilingual").subset(lambda row: row["is_diamond"])
+        else pinned_by_framework("ellamind/gpqa-multilingual").subset(
+            lambda row: row["is_diamond"], description="the diamond subset"
+        )
     )
     return _gpqa_ellamind_benchmark(id, styler, source)
 

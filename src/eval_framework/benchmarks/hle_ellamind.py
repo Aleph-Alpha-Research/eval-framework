@@ -51,7 +51,9 @@ def _hle_ellamind_native_benchmark(id: str, styler: TaskStyler, dataset: Dataset
     source = (
         dataset
         if dataset is not None
-        else pinned_by_framework("ellamind/hle-multilingual").subset(lambda row: row["answer_type"] == "multipleChoice")
+        else pinned_by_framework("ellamind/hle-multilingual").subset(
+            lambda row: row["answer_type"] == "multipleChoice", description="the natively multiple-choice items"
+        )
     )
     return _hle_ellamind_benchmark(id, styler, source)
 
