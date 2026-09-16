@@ -5,8 +5,6 @@ import typing
 from collections.abc import Iterable, Sequence
 from typing import TYPE_CHECKING, Any, Self, final, override
 
-from datasets import DatasetDict
-
 from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.eval_kind import Choice, EvalKind, SampleBody
@@ -63,25 +61,18 @@ class ComposedEval(Eval):
         self.language = language
         self.rnd = rnd
 
-    def _shuffle_splits(self, hf_dataset: DatasetDict) -> dict[str, list[dict[str, Any]]]:
-        dataset: dict[str, list[dict[str, Any]]] = {}
-
-        for split, data in hf_dataset.items():
-            if split not in {self.sample_split, self._fewshot.split()}:
-                continue
-
-            data_list = list(data)
-
-            if split == self.sample_split:
-                self.rnd.shuffle(data_list)
-
-            dataset[split] = data_list
-
-        return dataset
-
     def _load_dataset(self, load_key: str | None) -> dict[str, list[dict[str, Any]]]:
         hf_dataset = self.loader.load(load_key)
-        return self._shuffle_splits(hf_dataset=hf_dataset)
+
+        sample_rows = list(hf_dataset[self.sample_split])
+        self.rnd.shuffle(sample_rows)
+        dataset = {self.sample_split: sample_rows}
+
+        fewshot_split = self._fewshot.split()
+        if self.num_fewshot > 0 and fewshot_split is not None and fewshot_split != self.sample_split:
+            dataset[fewshot_split] = list(hf_dataset[fewshot_split])
+
+        return dataset
 
     @override
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
