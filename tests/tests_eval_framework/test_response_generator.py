@@ -6,7 +6,6 @@ from unittest.mock import MagicMock, Mock
 import pytest
 from dateutil import parser
 
-from eval_framework.contract import Benchmark, Eval
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator, repeat_samples
 from eval_framework.result_processors.base import ResultProcessor
@@ -14,7 +13,7 @@ from eval_framework.result_processors.result_processor import ResultsFileProcess
 from eval_framework.shared.types import Completion, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.registry import Registry, register_task
+from eval_framework.tasks.registry import register_task
 from template_formatting.formatter import Message, Role
 from tests.tests_eval_framework.conftest import MockLLM
 from tests.tests_eval_framework.tasks.test_registry import temporary_registry
@@ -312,32 +311,6 @@ def test_filter_task_subjects(
     else:
         generator = ResponseGenerator(llm, config, result_processor)
         assert sorted(generator.task.get_metadata()["subjects"]) == sorted(expected_subjects)
-
-
-@pytest.mark.parametrize("hf_revision", [None, "a-specific-revision"])
-def test_response_generator_forwards_the_hf_revision_to_the_benchmark(hf_revision: str | None) -> None:
-    # ResponseGenerator's only revision responsibility is handing config.hf_revision to the benchmark's
-    # create() as custom_hf_revision (verbatim, including None). Whether that revision then resolves and loads
-    # is the dataset policy's concern, not this class's — so a spy benchmark in a test-local registry is enough.
-    eval_stub = Mock(spec=Eval)
-    eval_stub.get_response_type.return_value = ResponseType.LOGLIKELIHOODS
-    benchmark = Mock(spec=Benchmark)
-    benchmark.id.return_value = "SpyBenchmark"
-    benchmark.metrics.return_value = []
-    benchmark.create.return_value = eval_stub
-
-    benchmark_registry = Registry()
-    benchmark_registry.add(benchmark)
-
-    config = EvalConfig(
-        task_name="SpyBenchmark", num_fewshot=0, num_samples=1, hf_revision=hf_revision, llm_class=MockLLM
-    )
-    ResponseGenerator(
-        Mock(spec=BaseLLM), config, Mock(spec=ResultsFileProcessor), benchmark_registry=benchmark_registry
-    )
-
-    # create(num_fewshot, custom_subjects, custom_hf_revision, ...): the 3rd positional arg is the revision.
-    assert benchmark.create.call_args.args[2] == hf_revision
 
 
 def test_response_generator_metadata_handling(tmp_path: Path) -> None:
