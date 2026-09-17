@@ -17,8 +17,10 @@ from eval_framework.benchmarks.gpqa_ellamind import (
     gpqa_ellamind_cloze_de,
     gpqa_ellamind_diamond_bpb_de,
     gpqa_ellamind_diamond_cloze_de,
+    gpqa_ellamind_diamond_cot_de,
     gpqa_ellamind_diamond_mc_de,
     gpqa_ellamind_mc_de,
+    tulu_answer_de,
 )
 from eval_framework.contract import Benchmark
 from eval_framework.tasks.registry import Registry
@@ -151,3 +153,52 @@ def test_gpqa_oneshot_prompt(make_benchmark: Callable[..., Benchmark], expected:
     assert sample.messages == expected.messages
     assert sample.ground_truth == expected.ground_truth
     assert sample.possible_completions == expected.possible_completions
+
+
+def test_gpqa_diamond_cot_prompt() -> None:
+    # COT: free-form generation, the reasoning instruction is stated twice, no assistant cue,
+    # no scored candidates.
+    benchmark = gpqa_ellamind_diamond_cot_de(dataset=DatasetStub({"train": [_EVAL_ROW]}))
+    sample = first_sample(benchmark, num_fewshot=0)
+    assert sample.messages == [
+        Message(
+            role=Role.USER,
+            content="Beantworte die folgende Multiple-Choice-Frage, indem du den Buchstaben der richtigen "
+            'Antwort in Klammern angibst. Begründe deine Antwort KURZ und beende deine Antwort unbedingt mit "Daher '
+            'ist die Antwort (ANTWORTBUCHSTABE)", wobei (ANTWORTBUCHSTABE) einer von (A), (B), (C), (D), (E) usw. '
+            "ist.\n\n"
+            "Frage: Was ist die SI-Einheit des elektrischen Widerstands?\n"
+            "(A) Ohm\n(B) Volt\n(C) Watt\n(D) Ampere\n\n"
+            'Beantworte die obige Frage und DENKE DARAN, deine Antwort mit genau dem Satz "Daher ist die Antwort '
+            '(ANTWORTBUCHSTABE)" abzuschließen, wobei (ANTWORTBUCHSTABE) einer von (A), (B), (C), (D), (E) usw. ist.',
+        ),
+    ]
+    assert sample.ground_truth == "A"  # bare letter
+    assert sample.possible_completions is None  # free-form generation, no candidates
+
+
+@pytest.mark.parametrize(
+    "completion, expected",
+    [
+        ("Kurze Begründung ... Daher ist die Antwort (C).", "C"),
+        # lenient: the parentheses and the German word order are optional, case-insensitive, upper-cased
+        ("Die Antwort ist B", "B"),
+        ("antwort: d", "D"),
+        # anchored on the answer phrase: a bare "Antwort <letter>" in the reasoning is not a conclusion
+        ("Daher ist die Antwort (C). Antwort D wäre falsch, weil ...", "C"),
+        ("Option A führt zur Antwort B. Daher ist die Antwort (A)", "A"),
+        # a model prompted in German may still conclude in English
+        ("Therefore, the answer is (C)", "C"),
+        # the last conclusion wins, so a restated reminder does not shadow the real answer
+        ("Die Antwort ist A ... nein, daher ist die Antwort (D)", "D"),
+        # only A-D are accepted, and the reminder's own placeholder is not an answer
+        ("Daher ist die Antwort (E)", "[invalid]"),
+        ('Beende mit "Daher ist die Antwort (ANTWORTBUCHSTABE)"', "[invalid]"),
+        ("Ich bin mir ziemlich sicher.", "[invalid]"),
+        ("", "[invalid]"),
+    ],
+)
+def test_gpqa_cot_extracts_the_concluding_letter(completion: str, expected: str) -> None:
+    # extract_answer runs at scoring time (not captured by the formatter hash), so exercise it directly.
+    answer = tulu_answer_de()
+    assert answer.extract_answer(completion, context=None, ground_truth=None, messages=[]) == expected
