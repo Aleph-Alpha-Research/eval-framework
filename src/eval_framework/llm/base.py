@@ -10,6 +10,12 @@ from template_formatting.formatter import BaseFormatter, Message
 
 
 class BaseLLM(ABC):
+    # Remote APIs gain throughput from having many requests in flight, so the response generator calls them
+    # from several threads and refills a slot the moment any request returns. Local models gain nothing from
+    # that (a single GPU serialises the work) and are not thread-safe, so they must keep this False and get
+    # whole batches on the calling thread instead.
+    SUPPORTS_CONCURRENT_REQUESTS: bool = False
+
     @property
     def name(self) -> str:
         """

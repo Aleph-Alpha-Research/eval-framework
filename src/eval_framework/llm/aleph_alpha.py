@@ -39,6 +39,8 @@ class AlephAlphaAPIModel(BaseLLM):
     LLM_NAME: str
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     BYTES_PER_TOKEN: float = 4.0  # rule of thumb according to https://platform.openai.com/tokenizer
+    # Each call runs its own `asyncio.run(...)` with a fresh AsyncClient, so calls are independent across threads.
+    SUPPORTS_CONCURRENT_REQUESTS = True
 
     def __init__(
         self,
