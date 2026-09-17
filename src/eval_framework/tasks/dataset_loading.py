@@ -66,9 +66,9 @@ class DatasetPolicy(ABC):
         """
         return Subset(self, keep, description)
 
-    def subject_encoded_in_column(self, config: str, column: str) -> "SubjectColumn":
+    def subject_encoded_in_column(self, config: str | None, column: str) -> "SubjectColumn":
         """By default the loaded config names the subject; call this when the subject is instead encoded in
-        a ``column`` of a single ``config`` (see ``SubjectColumn``)."""
+        a ``column`` of a single ``config`` (``None`` loads the default config) (see ``SubjectColumn``)."""
         return SubjectColumn(self, config, column)
 
 
@@ -117,10 +117,10 @@ class Subset(DatasetPolicy):
 
 @final
 class _SubjectColumnLoader(DatasetLoader):
-    """Loads a fixed ``config`` from the inner loader, keeping only the rows whose ``column`` equals the
-    requested subject (``name``)."""
+    """Loads a fixed ``config`` (``None`` = the default config) from the inner loader, keeping only the rows
+    whose ``column`` equals the requested subject (``name``)."""
 
-    def __init__(self, inner: DatasetLoader, config: str, column: str) -> None:
+    def __init__(self, inner: DatasetLoader, config: str | None, column: str) -> None:
         self._inner = inner
         self._config = config
         self._column = column
@@ -143,7 +143,7 @@ class SubjectColumn(DatasetPolicy):
     configuration.
     """
 
-    def __init__(self, inner: DatasetPolicy, config: str, column: str) -> None:
+    def __init__(self, inner: DatasetPolicy, config: str | None, column: str) -> None:
         self._inner = inner
         self._config = config
         self._column = column
@@ -154,7 +154,8 @@ class SubjectColumn(DatasetPolicy):
 
     @override
     def documentation(self) -> str:
+        shared_config = f"`{self._config}`" if self._config is not None else "default"
         return (
             f"{self._inner.documentation()}\n"
-            f"- Subjects share the single `{self._config}` config and are split by the `{self._column}` column."
+            f"- Subjects share the {shared_config} config and are split by the `{self._column}` column."
         )
