@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.13.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.0...v0.13.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* **metrics:** cap sandbox memory for multipl-e code assertion ([163678e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/163678e4a477a46ae607d41af4c64e14fc6f87a4))
+
 ## [0.13.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.12.0...v0.13.0) (2026-09-16)
 
 
