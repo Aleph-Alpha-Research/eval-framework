@@ -7,6 +7,7 @@ one. Cloze and MC score the two full "option + suffix" completions; partial eval
 shared suffix under each option-augmented prefix.
 """
 
+from eval_framework.answer import VerbatimAnswer
 from eval_framework.benchmarks.winogrande import PartialEval, WinograndeReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
@@ -50,6 +51,7 @@ def winogrande_ellamind_partial_eval_de(dataset: DatasetPolicy | None = None) ->
     return ComposedBenchmark.compose(
         id="WINOGRANDE_ELLAMIND_PARTIAL_EVAL_DE",
         kind=PartialEval(),
+        answer=VerbatimAnswer(),
         sample_split="validation",
         fewshot=SampledFewShot(WinograndeReader(), fewshot_styler, "validation"),
         subjects=ListOfSubjects(["deu"]),

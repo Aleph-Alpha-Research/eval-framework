@@ -11,10 +11,10 @@ from typing import Any
 
 import pytest
 
+from eval_framework.answer import ExtractedAnswer
 from eval_framework.benchmarks.mmlu_pro import (
     _COT_V2_ANSWER_RE,
     MMLU_PRO_BENCHMARKS,
-    _MmluProCotKind,
     mmlu_pro,
     mmlu_pro_cot,
     mmlu_pro_idk,
@@ -143,5 +143,5 @@ def test_mmlu_pro_cot_prompt() -> None:
 )
 def test_mmlu_pro_cot_v2_extracts_leniently(completion: str, expected: str) -> None:
     # extract_answer runs at scoring time (not captured by the formatter hash), so exercise it directly.
-    kind = _MmluProCotKind(_COT_V2_ANSWER_RE, [], last_match=True)
-    assert kind.extract_answer(completion, context=None, ground_truth=None, messages=[]) == expected
+    answer = ExtractedAnswer(_COT_V2_ANSWER_RE, [], last_match=True)
+    assert answer.extract_answer(completion, context=None, ground_truth=None, messages=[]) == expected

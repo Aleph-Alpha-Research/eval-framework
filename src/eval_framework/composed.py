@@ -1,22 +1,14 @@
 import logging
 import random
 import traceback
-import typing
 from collections.abc import Iterable, Sequence
 from typing import TYPE_CHECKING, Any, Self, final, override
 
+from eval_framework.answer import AnswerPolicy, VerbatimAnswer
 from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.eval_kind import Choice, EvalKind, SampleBody
 from eval_framework.fewshot import FewShot, SampledFewShot
-from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
-    BytesCompletion,
-    BytesLoglikelihood,
-    SequencePositionsCompletion,
-    SequencePositionsLoglikelihood,
-)
-from eval_framework.metrics.efficiency.finish_reason import FinishReason
-from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Completion, Error, RawCompletion
 from eval_framework.subjects import NoSubject, Subjects, SubjectsSelector
@@ -44,6 +36,7 @@ class ComposedEval(Eval):
         *,
         display_name: str,
         kind: EvalKind,
+        answer: AnswerPolicy,
         loader: DatasetLoader,
         sample_split: str,
         fewshot: FewShot,
@@ -54,6 +47,7 @@ class ComposedEval(Eval):
         self._display_name = display_name
         self.num_fewshot = num_fewshot
         self._kind = kind
+        self._answer = answer
         self.loader = loader
         self.sample_split = sample_split
         self._fewshot = fewshot
@@ -187,9 +181,9 @@ class ComposedEval(Eval):
 
             try:
                 error = None
-                # First the model-specific cleanup, then the kind's answer extraction (matching BaseTask).
+                # First the model-specific cleanup, then the answer policy's extraction (matching BaseTask).
                 completion = llm.post_process_completion(raw_completion.completion, sample)
-                completion = self._kind.extract_answer(
+                completion = self._answer.extract_answer(
                     completion,
                     context=sample.context,
                     ground_truth=sample.ground_truth,
@@ -224,33 +218,19 @@ class ComposedEval(Eval):
 
     @override
     def get_stop_sequences(self) -> list[str]:
-        return self._kind.stop_sequences()
+        return self._answer.stop_sequences()
 
     @override
     def get_max_tokens(self) -> int | None:
-        return self._kind.max_tokens()
+        return self._answer.max_tokens()
 
     @override
     def get_response_type(self) -> ResponseType:
-        return self._kind.response_type()
+        return self._answer.response_type()
 
     @override
     def display_name(self) -> str:
         return self._display_name
-
-
-def _metrics_for(kind: EvalKind) -> list[type["BaseMetric"]]:
-    """The metrics a kind implies: its own plus those its response type requires."""
-    response_type_metrics: list[type[BaseMetric]]
-    response_type = kind.response_type()
-    match response_type:
-        case ResponseType.COMPLETION:
-            response_type_metrics = [BytesCompletion, SequencePositionsCompletion, TokenCounts, FinishReason]
-        case ResponseType.LOGLIKELIHOODS:
-            response_type_metrics = [BytesLoglikelihood, SequencePositionsLoglikelihood]
-        case _:
-            typing.assert_never(response_type)
-    return kind.metrics() + response_type_metrics
 
 
 @final
@@ -264,6 +244,7 @@ class ComposedBenchmark(Benchmark):
         display_name: str,
         subjects: SubjectsSelector,
         kind: EvalKind,
+        answer: AnswerPolicy,
         sample_split: str,
         fewshot: FewShot,
         dataset_policy: DatasetPolicy,
@@ -273,6 +254,7 @@ class ComposedBenchmark(Benchmark):
         self._display_name = display_name
         self._subjects = subjects
         self._kind = kind
+        self._answer = answer
         self.sample_split = sample_split
         self._fewshot = fewshot
         self.language = language
@@ -284,6 +266,7 @@ class ComposedBenchmark(Benchmark):
         *,
         id: str,
         kind: EvalKind,
+        answer: AnswerPolicy,
         sample_split: str,
         fewshot: FewShot,
         subjects: SubjectsSelector | None = None,
@@ -298,6 +281,7 @@ class ComposedBenchmark(Benchmark):
             display_name=display_name if display_name is not None else id,
             subjects=subjects if subjects is not None else NoSubject(),
             kind=kind,
+            answer=answer,
             sample_split=sample_split,
             fewshot=fewshot,
             language=language,
@@ -319,11 +303,13 @@ class ComposedBenchmark(Benchmark):
         display_name: str | None = None,
     ) -> Self:
         """Build a choice-based benchmark. The same ``reader`` + ``styler`` drive both the scored
-        ``Choice`` and its matching ``SampledFewShot`` demonstrations, so they are given once."""
+        ``Choice`` and its matching ``SampledFewShot`` demonstrations, so they are given once. A choice is
+        always scored by loglikelihood over its candidates, so the answer is fixed to ``VerbatimAnswer``."""
         return cls.compose(
             id=id,
             display_name=display_name,
             kind=Choice(reader, styler),
+            answer=VerbatimAnswer(),
             sample_split=sample_split,
             fewshot=SampledFewShot(reader, styler, fewshot_split),
             subjects=subjects,
@@ -356,6 +342,7 @@ class ComposedBenchmark(Benchmark):
             num_fewshot=num_fewshot,
             display_name=self._display_name,
             kind=self._kind,
+            answer=self._answer,
             sample_split=self.sample_split,
             fewshot=self._fewshot,
             subjects=subjects,
@@ -367,12 +354,12 @@ class ComposedBenchmark(Benchmark):
     @override
     def response_type(self) -> ResponseType:
         """The benchmark's response type"""
-        return self._kind.response_type()
+        return self._answer.response_type()
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
-        """The benchmark's metrics"""
-        return _metrics_for(self._kind)
+        """The benchmark's scoring metrics (from the kind) plus the answer's bookkeeping metrics."""
+        return self._kind.metrics() + self._answer.metrics()
 
     @override
     def subjects(self) -> list[Any]:
@@ -394,6 +381,7 @@ class ComposedBenchmark(Benchmark):
             num_fewshot=num_fewshot,
             display_name=self._display_name,
             kind=self._kind,
+            answer=self._answer,
             sample_split=self.sample_split,
             fewshot=self._fewshot,
             subjects=subjects,
