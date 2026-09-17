@@ -2,6 +2,8 @@
 Minerva-style MATH completion metric: exact_match and exact_match_flex.
 """
 
+import logging
+
 from eval_framework.metrics.aggregators.aggregators import PassAtK
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.metrics.completion.minerva_math_utils import (
@@ -10,6 +12,8 @@ from eval_framework.metrics.completion.minerva_math_utils import (
     is_equiv_minerva,
 )
 from eval_framework.shared.types import Completion
+
+logger = logging.getLogger(__name__)
 
 
 class MathMinervaCompletion(BaseMetric[Completion]):
@@ -73,6 +77,8 @@ class MathMinervaCompletion(BaseMetric[Completion]):
             cot_style=self.cot_style,
             relaxed=self.relaxed,
         )
+        # Grading can be killed by the pod's memory limit; the last line seen names the sample.
+        logger.info("Grading %s_%s gold=%r candidates=%r", response.subject, response.id, gold, all_candidates)
 
         exact_match = 0.0
         if all_candidates:
