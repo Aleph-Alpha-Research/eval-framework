@@ -1,0 +1,237 @@
+"""MMLU-Pro: https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro
+
+Harder, ten-option multiple-choice questions across 14 categories. All questions live in one config and are
+split into subjects by the ``category`` column. Every prompt is prefaced by a subject-templated preamble.
+The composed variants:
+
+Note: MMLU-Pro questions carry a *variable* number of options (6–10), but every loglikelihood variant scores
+a fixed ten letters A–J regardless (see ``_MmluProMCStyle``) — A bug faithfully preserved from the original
+implementation, in order to not change the meaning of the score silently.
+"""
+
+import re
+from typing import TYPE_CHECKING, Any, final, override
+
+from eval_framework.choices import ChoiceFields, ChoiceReader
+from eval_framework.composed import ComposedBenchmark
+from eval_framework.contract import Benchmark, ResponseType
+from eval_framework.eval_kind import EvalKind, SampleBody
+from eval_framework.fewshot import NoFewShot
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.shared.types import BaseMetricContext
+from eval_framework.subjects import ListOfSubjects
+from eval_framework.tasks.base import Language
+from eval_framework.tasks.dataset_loading import DatasetPolicy
+from eval_framework.tasks.dataset_revisions import pinned_by_framework
+from eval_framework.tasks.task_style import MCStyle, TaskStyler
+from eval_framework.tasks.utils import get_n_letters
+from template_formatting.formatter import Message
+
+if TYPE_CHECKING:
+    from eval_framework.metrics.base import BaseMetric
+
+MMLU_PRO_SUBJECTS = [
+    "engineering",
+    "physics",
+    "psychology",
+    "chemistry",
+    "biology",
+    "law",
+    "philosophy",
+    "computer science",
+    "other",
+    "economics",
+    "business",
+    "history",
+    "math",
+    "health",
+]
+
+
+@final
+class MmluProReader(ChoiceReader):
+    """Reads an MMLU-Pro item: the question and its (6–10) options, with the correct one at ``answer_index``."""
+
+    @override
+    def read(self, item: dict[str, Any]) -> ChoiceFields:
+        return ChoiceFields(
+            raw_question=item["question"].strip(),
+            choices=item["options"],
+            correct_index=item["answer_index"],
+        )
+
+
+@final
+class _MmluProMCStyle(MCStyle):
+    """Multiple-choice styler that scores a fixed ten letters (A–J) regardless of how many options a question
+    actually lists. MMLU-Pro questions have a variable option count, but every loglikelihood variant scores
+    all ten letters — a quirk preserved from the original task (letters past the real options can never be the
+    answer, so they can only ever cost accuracy)."""
+
+    @override
+    def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:
+        return [f" {label}" for label in get_n_letters(10)]
+
+
+def _mmlu_pro_preamble(subject_label: str) -> str:
+    return f"The following are multiple choice questions (with answers) about {subject_label}."
+
+
+def _mmlu_pro_idk_preamble(subject_label: str) -> str:
+    return (
+        f"The following are multiple choice questions (with answers) about {subject_label}. "
+        "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
+        "It is acceptable to answer with '?' if you are unsure, and you will receive 0 points."
+    )
+
+
+_COT_ANSWER_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
+_COT_V2_ANSWER_RE = re.compile(r"\banswer\s+is:?\s*\(?([A-J])\b\)?", re.IGNORECASE)
+
+
+@final
+class _MmluProCotKind(EvalKind):
+    """MMLU-Pro chain-of-thought: the model reasons freely and concludes with "Therefore, the answer is (X)",
+    and the letter is regex-extracted. Free-form (completion), 0-shot only. COT and COT_V2 share this prompt
+    and differ only in extraction: V2 takes the last match, case-insensitively, with no stop sequence."""
+
+    def __init__(self, answer_re: re.Pattern[str], stop_sequences: list[str], *, last_match: bool) -> None:
+        self._reader = MmluProReader()
+        self._answer_re = answer_re
+        self._stop_sequences = stop_sequences
+        self._last_match = last_match
+
+    @override
+    def response_type(self) -> ResponseType:
+        return ResponseType.COMPLETION
+
+    @override
+    def metrics(self) -> list[type["BaseMetric"]]:
+        return [AccuracyCompletion]
+
+    @override
+    def stop_sequences(self) -> list[str]:
+        return self._stop_sequences
+
+    @override
+    def max_tokens(self) -> int | None:
+        return None
+
+    @override
+    def initial_prompt(self, subject_label: str) -> str | None:
+        return f"The following are multiple choice questions (with answers) about {subject_label}."
+
+    @override
+    def samples(self, item: dict[str, Any]) -> list[SampleBody]:
+        # Reasoning prompt from Figure 44 of the Tülu 3 paper: https://arxiv.org/pdf/2411.15124
+        fields = self._reader.read(item)
+        keys = get_n_letters(len(fields.choices))
+        options = "\n".join(f"({key}) {choice}" for key, choice in zip(keys, fields.choices))
+        prompt = (
+            "Answer the following multiple-choice question by giving the correct answer letter in parentheses. "
+            "Provide CONCISE reasoning for the answer, and make sure to finish the response with "
+            '"Therefore, the answer is (ANSWER_LETTER)" where (ANSWER_LETTER) is one of (A), (B), (C), (D), (E), etc.'
+            f"\n\nQuestion: {fields.raw_question}\n{options}"
+            "\n\nAnswer the above question and REMEMBER to finish your response with the exact phrase "
+            '"Therefore, the answer is (ANSWER_LETTER)" where (ANSWER_LETTER) is one of (A), (B), (C), (D), (E), etc.'
+        )
+        # The original completion task inherited the base's ten scored letters; they're unused for free-form
+        # scoring, but kept here so the sample (and its formatter hash) matches the original faithfully.
+        return [
+            SampleBody(
+                prompt=prompt,
+                cue="",
+                possible_completions=[f" {label}" for label in get_n_letters(10)],
+                ground_truth=keys[fields.correct_index],
+            )
+        ]
+
+    @override
+    def extract_answer(
+        self,
+        completion_text: str,
+        *,
+        context: BaseMetricContext | list[BaseMetricContext] | None,
+        ground_truth: str | list[str] | None,
+        messages: list[Message],
+    ) -> str:
+        for stop in self._stop_sequences:
+            completion_text = completion_text.split(stop)[0]
+        if self._last_match:
+            matches = self._answer_re.findall(completion_text)
+            return matches[-1].upper() if matches else "[invalid]"
+        match = self._answer_re.search(completion_text)
+        return match.group(1) if match else "[invalid]"
+
+
+def _mmlu_pro_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
+    # The subjects are the rows of the single (default) config, split by the ``category`` column.
+    return (
+        dataset
+        if dataset is not None
+        else pinned_by_framework("TIGER-Lab/MMLU-Pro").subject_encoded_in_column(config=None, column="category")
+    )
+
+
+def _mmlu_pro_choice(
+    id: str, styler: TaskStyler, dataset: DatasetPolicy | None = None, display_name: str | None = None
+) -> Benchmark:
+    return ComposedBenchmark.choice(
+        id=id,
+        display_name=display_name,
+        reader=MmluProReader(),
+        styler=styler,
+        sample_split="test",
+        fewshot_split="test",
+        subjects=ListOfSubjects(MMLU_PRO_SUBJECTS),
+        dataset_policy=_mmlu_pro_dataset(dataset),
+        language=Language.ENG,
+    )
+
+
+def mmlu_pro(dataset: DatasetPolicy | None = None) -> Benchmark:
+    styler = _MmluProMCStyle(question_prefix="", cue_text="Answer:", initial_prompt=_mmlu_pro_preamble)
+    return _mmlu_pro_choice("MMLU_PRO", styler, dataset, display_name="MMLU Pro")
+
+
+def mmlu_pro_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
+    styler = _MmluProMCStyle(
+        question_prefix="", cue_text="Answer:", space_prefixed_labels=True, initial_prompt=_mmlu_pro_preamble
+    )
+    return _mmlu_pro_choice("MMLU_PRO_OLMES", styler, dataset, display_name="MMLU Pro_OLMES")
+
+
+def mmlu_pro_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
+    styler = _MmluProMCStyle(
+        question_prefix="", cue_text="Answer:", initial_prompt=_mmlu_pro_idk_preamble
+    ).with_abstention_option(" ?")
+    return _mmlu_pro_choice("MMLU_PRO_IDK", styler, dataset, display_name="MMLU Pro_IDK")
+
+
+def _mmlu_pro_cot(id: str, kind: _MmluProCotKind, dataset: DatasetPolicy | None = None) -> Benchmark:
+    return ComposedBenchmark.compose(
+        id=id,
+        kind=kind,
+        sample_split="test",
+        fewshot=NoFewShot(),
+        subjects=ListOfSubjects(MMLU_PRO_SUBJECTS),
+        dataset_policy=_mmlu_pro_dataset(dataset),
+        language=Language.ENG,
+    )
+
+
+def mmlu_pro_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _mmlu_pro_cot("MMLU_PRO_COT", _MmluProCotKind(_COT_ANSWER_RE, ["Question:"], last_match=False), dataset)
+
+
+def mmlu_pro_cot_v2(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _mmlu_pro_cot("MMLU_PRO_COT_V2", _MmluProCotKind(_COT_V2_ANSWER_RE, [], last_match=True), dataset)
+
+
+MMLU_PRO_BENCHMARKS: list[Benchmark] = [
+    mmlu_pro(),
+    mmlu_pro_olmes(),
+    mmlu_pro_idk(),
+    mmlu_pro_cot(),
+    mmlu_pro_cot_v2(),
+]

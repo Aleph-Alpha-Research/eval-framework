@@ -13,6 +13,7 @@ from eval_framework.benchmarks.hellaswag_ellamind import HELLASWAG_ELLAMIND_BENC
 from eval_framework.benchmarks.hle_ellamind import HLE_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.medqa import MEDQA_BENCHMARKS
 from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
+from eval_framework.benchmarks.mmlu_pro import MMLU_PRO_BENCHMARKS
 from eval_framework.benchmarks.piqa import PIQA_BENCHMARKS
 from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.sciq import SCIQ_BENCHMARKS
@@ -197,11 +198,8 @@ def register_multipl_e_tasks(registry: Registry) -> None:
 
 def register_mmlu_pro_tasks(registry: Registry) -> None:
     """Register mmlu_pro benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO_IDK", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO_COT", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mmlu_pro.MMLU_PRO_COT_V2", registry=registry)
+    for benchmark in MMLU_PRO_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_global_mmlu_tasks(registry: Registry) -> None:
