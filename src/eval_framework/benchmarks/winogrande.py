@@ -8,19 +8,18 @@ and ``PartialEval`` live here and are reused by the multilingual EllaMind varian
 
 from typing import TYPE_CHECKING, Any, final, override
 
+from eval_framework.answer import VerbatimAnswer
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
-from eval_framework.contract import Benchmark, ResponseType
+from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import EvalKind, SampleBody
 from eval_framework.fewshot import SampledFewShot
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import PartialEvalAccuracy
-from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle
-from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -55,10 +54,6 @@ class PartialEval(EvalKind):
         self._reader = WinograndeReader()
 
     @override
-    def response_type(self) -> ResponseType:
-        return ResponseType.LOGLIKELIHOODS
-
-    @override
     def metrics(self) -> list[type["BaseMetric"]]:
         return [PartialEvalAccuracy]
 
@@ -78,25 +73,6 @@ class PartialEval(EvalKind):
             for opt_index, option in enumerate([item["option1"], item["option2"]])
         ]
 
-    @override
-    def stop_sequences(self) -> list[str]:
-        return []
-
-    @override
-    def max_tokens(self) -> int | None:
-        return None
-
-    @override
-    def extract_answer(
-        self,
-        completion_text: str,
-        *,
-        context: BaseMetricContext | list[BaseMetricContext] | None,
-        ground_truth: str | list[str] | None,
-        messages: list[Message],
-    ) -> str:
-        return completion_text  # partial evaluation is scored by loglikelihood; no completion path
-
 
 def winogrande_cloze(dataset: DatasetPolicy | None = None) -> Benchmark:
     # "Cloze" is the registered name, but the task is partial evaluation; its few-shot demonstrations
@@ -107,6 +83,7 @@ def winogrande_cloze(dataset: DatasetPolicy | None = None) -> Benchmark:
         id="WINOGRANDECloze",
         display_name="WinograndeCloze",
         kind=PartialEval(),
+        answer=VerbatimAnswer(),
         sample_split="train",
         fewshot=SampledFewShot(WinograndeReader(), fewshot_styler, "train"),
         subjects=ListOfSubjects(["winogrande_xl"]),

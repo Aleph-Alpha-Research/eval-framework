@@ -13,9 +13,10 @@ from typing import Any
 
 import pytest
 
+from eval_framework.answer import ExtractedAnswer
 from eval_framework.benchmarks.mmlu import (
+    _MMLU_COT_ANSWER_RE,
     MMLU_BENCHMARKS,
-    _MmluCotKind,
     mmlu,
     mmlu_cot,
     mmlu_full_text,
@@ -148,13 +149,13 @@ def test_mmlu_cot_prompt() -> None:
 
 def test_mmlu_cot_extracts_the_concluding_letter() -> None:
     # extract_answer runs at scoring time (not captured by the formatter hash), so exercise it directly.
-    kind = _MmluCotKind()
+    answer = ExtractedAnswer(_MMLU_COT_ANSWER_RE, ["Question:"])
     fields: dict[str, Any] = {"context": None, "ground_truth": None, "messages": []}
-    assert kind.extract_answer("Reasoning ... Therefore, the answer is: C.", **fields) == "C"
+    assert answer.extract_answer("Reasoning ... Therefore, the answer is: C.", **fields) == "C"
     # the "Question:" stop sequence is stripped before extraction
-    assert kind.extract_answer("Therefore, the answer is: A\nQuestion: the next one", **fields) == "A"
+    assert answer.extract_answer("Therefore, the answer is: A\nQuestion: the next one", **fields) == "A"
     # no conclusion in the required form -> invalid
-    assert kind.extract_answer("I'm fairly sure it is 4.", **fields) == "[invalid]"
+    assert answer.extract_answer("I'm fairly sure it is 4.", **fields) == "[invalid]"
 
 
 @pytest.mark.parametrize(

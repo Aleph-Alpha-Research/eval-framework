@@ -3,9 +3,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, final, override
 
 from eval_framework.choices import ChoiceReader
-from eval_framework.contract import ResponseType
-from eval_framework.shared.types import BaseMetricContext
-from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -21,16 +18,12 @@ class SampleBody:
 
 
 class EvalKind(ABC):
-    """How a kind of task becomes scored model interactions. Describes what kind of test this is.
+    """The prompt side of a task: what to put in front of the model and what its candidates/ground truth are.
 
-    E.g. Multiple choice vs Free Form answers.
-
-    A kind deals only in text; ``ComposedEval`` owns the (fixed) mapping to USER / ASSISTANT turns.
+    E.g. Multiple choice vs Free Form answers. A kind deals only in text; ``ComposedEval`` owns the (fixed)
+    mapping to USER / ASSISTANT turns, and the answer side (response type, generation bounds, extraction) is
+    an injected ``AnswerPolicy``.
     """
-
-    @abstractmethod
-    def response_type(self) -> ResponseType:
-        """Whether this kind is scored by loglikelihood over candidates or by free-form completion."""
 
     @abstractmethod
     def metrics(self) -> list[type["BaseMetric"]]:
@@ -49,26 +42,6 @@ class EvalKind(ABC):
         examples), or None."""
         return None
 
-    @abstractmethod
-    def stop_sequences(self) -> list[str]:
-        """Stop sequences for completion generation (empty for kinds scored by loglikelihood)."""
-
-    @abstractmethod
-    def max_tokens(self) -> int | None:
-        """Token limit for completion generation, or None for no limit."""
-
-    @abstractmethod
-    def extract_answer(
-        self,
-        completion_text: str,
-        *,
-        context: BaseMetricContext | list[BaseMetricContext] | None,
-        ground_truth: str | list[str] | None,
-        messages: list[Message],
-    ) -> str:
-        """The answer to score, extracted from the raw generation. Free-form kinds pull it out (strip
-        reasoning, apply a regex); kinds whose generation is already the answer return it unchanged."""
-
 
 @final
 class Choice(EvalKind):
@@ -78,10 +51,6 @@ class Choice(EvalKind):
     def __init__(self, reader: ChoiceReader, styler: "TaskStyler") -> None:
         self._reader = reader
         self._styler = styler
-
-    @override
-    def response_type(self) -> ResponseType:
-        return self._styler.response_type
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
@@ -108,22 +77,3 @@ class Choice(EvalKind):
     @override
     def initial_prompt(self, subject_label: str) -> str | None:
         return self._styler.initial_prompt(subject_label)
-
-    @override
-    def stop_sequences(self) -> list[str]:
-        return []
-
-    @override
-    def max_tokens(self) -> int | None:
-        return None
-
-    @override
-    def extract_answer(
-        self,
-        completion_text: str,
-        *,
-        context: BaseMetricContext | list[BaseMetricContext] | None,
-        ground_truth: str | list[str] | None,
-        messages: list[Message],
-    ) -> str:
-        return completion_text  # a choice scores the completion directly; nothing to extract

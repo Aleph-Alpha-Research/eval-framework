@@ -13,20 +13,19 @@ prompt is prefaced by a subject-templated preamble. The composed variants:
 import re
 from typing import TYPE_CHECKING, Any, final, override
 
+from eval_framework.answer import ExtractedAnswer
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
-from eval_framework.contract import Benchmark, ResponseType
+from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import EvalKind, SampleBody
 from eval_framework.fewshot import NoFewShot
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
-from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle, MCStyle, TaskStyler
 from eval_framework.tasks.utils import get_n_letters
-from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -149,23 +148,10 @@ class _MmluCotKind(EvalKind):
 
     def __init__(self) -> None:
         self._reader = MmluReader()
-        self._answer_re = re.compile(r"Therefore, the answer is: ([ABCD])")
-
-    @override
-    def response_type(self) -> ResponseType:
-        return ResponseType.COMPLETION
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
         return [AccuracyCompletion]
-
-    @override
-    def stop_sequences(self) -> list[str]:
-        return ["Question:"]
-
-    @override
-    def max_tokens(self) -> int | None:
-        return None
 
     @override
     def initial_prompt(self, subject_label: str) -> str | None:
@@ -189,19 +175,8 @@ class _MmluCotKind(EvalKind):
             )
         ]
 
-    @override
-    def extract_answer(
-        self,
-        completion_text: str,
-        *,
-        context: BaseMetricContext | list[BaseMetricContext] | None,
-        ground_truth: str | list[str] | None,
-        messages: list[Message],
-    ) -> str:
-        for stop in self.stop_sequences():
-            completion_text = completion_text.split(stop)[0]
-        match = self._answer_re.search(completion_text)
-        return match.group(1) if match else "[invalid]"
+
+_MMLU_COT_ANSWER_RE = re.compile(r"Therefore, the answer is: ([ABCD])")
 
 
 def _mmlu_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
@@ -255,6 +230,7 @@ def mmlu_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
     return ComposedBenchmark.compose(
         id="MMLU_COT",
         kind=_MmluCotKind(),
+        answer=ExtractedAnswer(_MMLU_COT_ANSWER_RE, ["Question:"]),
         sample_split="test",
         fewshot=NoFewShot(),
         subjects=ListOfSubjects(MMLU_SUBJECTS),

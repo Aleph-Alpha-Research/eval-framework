@@ -12,20 +12,19 @@ implementation, in order to not change the meaning of the score silently.
 import re
 from typing import TYPE_CHECKING, Any, final, override
 
+from eval_framework.answer import ExtractedAnswer
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
-from eval_framework.contract import Benchmark, ResponseType
+from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import EvalKind, SampleBody
 from eval_framework.fewshot import NoFewShot
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
-from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import MCStyle, TaskStyler
 from eval_framework.tasks.utils import get_n_letters
-from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -91,31 +90,16 @@ _COT_V2_ANSWER_RE = re.compile(r"\banswer\s+is:?\s*\(?([A-J])\b\)?", re.IGNORECA
 
 @final
 class _MmluProCotKind(EvalKind):
-    """MMLU-Pro chain-of-thought: the model reasons freely and concludes with "Therefore, the answer is (X)",
-    and the letter is regex-extracted. Free-form (completion), 0-shot only. COT and COT_V2 share this prompt
-    and differ only in extraction: V2 takes the last match, case-insensitively, with no stop sequence."""
+    """MMLU-Pro chain-of-thought prompt: the model is asked to reason and conclude with "Therefore, the
+    answer is (X)". Free-form (completion), 0-shot only. COT and COT_V2 share this prompt and differ only in
+    how the concluding letter is pulled out — the injected ``ExtractedAnswer`` (see the constructors)."""
 
-    def __init__(self, answer_re: re.Pattern[str], stop_sequences: list[str], *, last_match: bool) -> None:
+    def __init__(self) -> None:
         self._reader = MmluProReader()
-        self._answer_re = answer_re
-        self._stop_sequences = stop_sequences
-        self._last_match = last_match
-
-    @override
-    def response_type(self) -> ResponseType:
-        return ResponseType.COMPLETION
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
         return [AccuracyCompletion]
-
-    @override
-    def stop_sequences(self) -> list[str]:
-        return self._stop_sequences
-
-    @override
-    def max_tokens(self) -> int | None:
-        return None
 
     @override
     def initial_prompt(self, subject_label: str) -> str | None:
@@ -145,23 +129,6 @@ class _MmluProCotKind(EvalKind):
                 ground_truth=keys[fields.correct_index],
             )
         ]
-
-    @override
-    def extract_answer(
-        self,
-        completion_text: str,
-        *,
-        context: BaseMetricContext | list[BaseMetricContext] | None,
-        ground_truth: str | list[str] | None,
-        messages: list[Message],
-    ) -> str:
-        for stop in self._stop_sequences:
-            completion_text = completion_text.split(stop)[0]
-        if self._last_match:
-            matches = self._answer_re.findall(completion_text)
-            return matches[-1].upper() if matches else "[invalid]"
-        match = self._answer_re.search(completion_text)
-        return match.group(1) if match else "[invalid]"
 
 
 def _mmlu_pro_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
@@ -208,10 +175,11 @@ def mmlu_pro_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _mmlu_pro_choice("MMLU_PRO_IDK", styler, dataset, display_name="MMLU Pro_IDK")
 
 
-def _mmlu_pro_cot(id: str, kind: _MmluProCotKind, dataset: DatasetPolicy | None = None) -> Benchmark:
+def _mmlu_pro_cot(id: str, answer: ExtractedAnswer, dataset: DatasetPolicy | None = None) -> Benchmark:
     return ComposedBenchmark.compose(
         id=id,
-        kind=kind,
+        kind=_MmluProCotKind(),
+        answer=answer,
         sample_split="test",
         fewshot=NoFewShot(),
         subjects=ListOfSubjects(MMLU_PRO_SUBJECTS),
@@ -221,11 +189,11 @@ def _mmlu_pro_cot(id: str, kind: _MmluProCotKind, dataset: DatasetPolicy | None 
 
 
 def mmlu_pro_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_pro_cot("MMLU_PRO_COT", _MmluProCotKind(_COT_ANSWER_RE, ["Question:"], last_match=False), dataset)
+    return _mmlu_pro_cot("MMLU_PRO_COT", ExtractedAnswer(_COT_ANSWER_RE, ["Question:"]), dataset)
 
 
 def mmlu_pro_cot_v2(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_pro_cot("MMLU_PRO_COT_V2", _MmluProCotKind(_COT_V2_ANSWER_RE, [], last_match=True), dataset)
+    return _mmlu_pro_cot("MMLU_PRO_COT_V2", ExtractedAnswer(_COT_V2_ANSWER_RE, [], last_match=True), dataset)
 
 
 MMLU_PRO_BENCHMARKS: list[Benchmark] = [
