@@ -1,18 +1,40 @@
+"""Global-MMLU: https://huggingface.co/datasets/CohereLabs/Global-MMLU
+
+MMLU translated into many languages; we evaluate French, German, Spanish, Italian, Portuguese and Arabic.
+Each subject is a ``(language, subject)`` pair: the language names the dataset config, the (English) subject
+is a column filter. The whole prompt — preamble, the "Question"/"Answer" labels, and the subject name — is
+rendered in the subject's language, so the styler-less path (a local ``EvalKind`` + ``FewShot``) is used.
+"""
+
+import ast
 import random
 from itertools import product
-from typing import Any
+from typing import TYPE_CHECKING, Any, final, override
 
+from datasets import DatasetDict
+
+from eval_framework.answer import PickFromCandidates
 from eval_framework.benchmarks.mmlu import MMLU_SUBJECTS
+from eval_framework.composed import ComposedBenchmark, LanguageSpec
+from eval_framework.contract import Benchmark
+from eval_framework.eval_kind import EvalKind, SampleBody
+from eval_framework.fewshot import FewShot, FewshotExample
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
-from eval_framework.tasks.base import RANDOM_SEED, BaseTask, Language, ResponseType
-from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
+from eval_framework.subjects import ListOfSubjects
+from eval_framework.tasks.base import Language
+from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
+from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.utils import get_n_letters
 
+if TYPE_CHECKING:
+    from eval_framework.metrics.base import BaseMetric
+
+GLOBAL_MMLU_DATASET_PATH = "CohereLabs/Global-MMLU"
 GLOBAL_MMLU_LANGUAGES = ["fr", "de", "es", "it", "pt", "ar"]
 
 GLOBAL_MMLU_LANGUAGES_UNSUPPORTED = [
@@ -460,89 +482,173 @@ LANGUAGE_NAME_MAP = {
 }
 
 
-class GlobalMMLU(BaseTask[tuple[str, str]]):
-    """
-    MMLU dataset: https://huggingface.co/datasets/CohereLabs/Global-MMLU
+_OPTION_KEYS = {"A": "option_a", "B": "option_b", "C": "option_c", "D": "option_d"}
+_KEYS = get_n_letters(4)  # A, B, C, D
 
-    Currently, we only support prompting in French, German, Spanish, Italian,
-    Portugese, and Arabic.
-
-    TO-DO: Suggest we adjust prompting for languages individually, e.g., South-East Asian languages available here:
-    https://github.com/aisingapore/SEA-HELM/blob/main/seahelm_tasks/knowledge/global_mmlu/abstract_algebra/config.yaml
-    """
-
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-
-    NAME = "GlobalMMLU"
-    DATASET_PATH = "CohereLabs/Global-MMLU"
-    SAMPLE_SPLIT = "test"
-    FEWSHOT_SPLIT = "dev"
-    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [
-        AccuracyLoglikelihood,
-        AccuracyNormLoglikelihood,
-        AccuracyBayesianLoglikelihood,
-        BitsPerByteLoglikelihood,
-    ]
-    SUBJECTS = list(product(GLOBAL_MMLU_LANGUAGES, MMLU_SUBJECTS))
-    LANGUAGE: Language | dict[str, Language] | None = {
-        str((lang_code.split("_")[0], subject)): LANGUAGE_NAME_MAP[lang_code]
-        for lang_code, subjects in LANGUAGE_SUBJECTS_MAP.items()
-        for subject in subjects
-    }
-
-    def __init__(self, num_fewshot: int = 0) -> None:
-        super().__init__(num_fewshot)
-        self.keys = get_n_letters(4)
-
-    def _load_dataset(self, subject: tuple[str, str]) -> None:
-        lang, current_subject = subject
-        hf_dataset = self._load_hf_dataset(path=self.DATASET_PATH, name=lang)
-        self.dataset = {}
-
-        self.rnd = random.Random(RANDOM_SEED)
-
-        for split, data in hf_dataset.items():
-            data = data.filter(lambda x: x["subject"] == current_subject)
-            data_list = list(data)
-
-            if split == self.SAMPLE_SPLIT:
-                self.rnd.shuffle(data_list)
-
-            if split in [self.SAMPLE_SPLIT, self.FEWSHOT_SPLIT]:
-                self.dataset[split] = data_list
-
-    def _get_initial_prompt_text(self, item: dict[str, Any]) -> str:
-        language_key = item["subject"][0]
-        subject = LANGUAGE_SUBJECTS_MAP[language_key][item["subject"][1]]
-        return f"{LANGUAGE_INITIAL_PROMPT_TEXT_MAP[language_key]} {subject}."
-
-    OPTION_KEYS = {"A": "option_a", "B": "option_b", "C": "option_c", "D": "option_d"}
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        question = item["question"].strip()
-        choices = "".join([f"{key}. {item[self.OPTION_KEYS[key]]}\n" for key in self.keys])
-        language_key = item["subject"][0]
-        return f"{LANGUAGE_QUESTION_TEXT_MAP[language_key]}: {question}\n{choices}"
-
-    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        ground_truth = self._get_ground_truth(item)
-        assert ground_truth is not None
-        return f"{self._get_cue_text(item)}{ground_truth}"
-
-    def _get_cue_text(self, item: dict[str, Any]) -> str:
-        language_key = item["subject"][0]
-        return f"{LANGUAGE_ANSWER_TEXT_MAP[language_key]}:"
-
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None:
-        return f" {item['answer']}"
-
-    def _get_possible_completions(self, item: dict[str, Any]) -> list[str] | None:
-        return [f" {key}" for key in self.keys]
+# Per-subject language, keyed by the subject label — carried only in run metadata (not the prompt).
+GLOBAL_MMLU_LANGUAGE_SPEC: dict[str, Language] = {
+    str((lang, subject)): LANGUAGE_NAME_MAP[lang]
+    for lang, subjects in LANGUAGE_SUBJECTS_MAP.items()
+    for subject in subjects
+}
 
 
-class GlobalMMLU_German(GlobalMMLU):
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-    NAME = "GlobalMMLU_German"
-    SUBJECTS = [("de", subject) for subject in MMLU_SUBJECTS]
-    LANGUAGE = Language.DEU
+def _lang_and_subject(subject_label: str) -> tuple[str, str]:
+    """Parse a ``"('de', 'abstract_algebra')"`` subject label into its (language, english subject) parts."""
+    lang, subject = ast.literal_eval(subject_label)
+    return lang, subject
+
+
+def _mc_prompt(item: dict[str, Any], language_key: str) -> str:
+    question = item["question"].strip()
+    choices = "".join(f"{key}. {item[_OPTION_KEYS[key]]}\n" for key in _KEYS)
+    return f"{LANGUAGE_QUESTION_TEXT_MAP[language_key]}: {question}\n{choices}"
+
+
+class _GlobalMmluLoader(DatasetLoader):
+    """Loads one ``(language, subject)`` slice: the language names the config, the subject filters the rows."""
+
+    def __init__(self, inner: DatasetLoader) -> None:
+        self._inner = inner
+
+    @override
+    def load(self, name: str | None) -> DatasetDict:
+        assert name is not None, "GlobalMMLU subjects always carry a (language, subject) load key."
+        lang, subject = _lang_and_subject(name)
+        loaded = self._inner.load(lang)
+        return DatasetDict(
+            {split: data.filter(lambda row: row["subject"] == subject) for split, data in loaded.items()}
+        )
+
+    @override
+    def metadata(self) -> dict[str, str]:
+        return self._inner.metadata()
+
+
+@final
+class _GlobalMmluDataset(DatasetPolicy):
+    """Global-MMLU's data policy: each subject is a ``(language, subject)`` pair — config by language,
+    filtered by the ``subject`` column."""
+
+    def __init__(self, inner: DatasetPolicy) -> None:
+        self._inner = inner
+
+    @override
+    def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
+        return _GlobalMmluLoader(self._inner.loader(custom_hf_revision))
+
+    @override
+    def documentation(self) -> str:
+        url = f"https://huggingface.co/datasets/{GLOBAL_MMLU_DATASET_PATH}"
+        return (
+            f"- Link to dataset: [{url}]({url})\n"
+            "- Each subject is a `(language, subject)` pair: the language selects the config, and the subject "
+            "is kept from the `subject` column."
+        )
+
+
+@final
+class _GlobalMmluChoice(EvalKind):
+    """Localized multiple-choice loglikelihood: the preamble, the "Question"/"Answer" labels and the subject
+    name are rendered in the subject's language (encoded in the subject label); scored over the four letters."""
+
+    @override
+    def metrics(self) -> list[type["BaseMetric"]]:
+        return [
+            AccuracyLoglikelihood,
+            AccuracyNormLoglikelihood,
+            AccuracyBayesianLoglikelihood,
+            BitsPerByteLoglikelihood,
+        ]
+
+    @override
+    def initial_prompt(self, subject_label: str) -> str | None:
+        lang, subject = _lang_and_subject(subject_label)
+        return f"{LANGUAGE_INITIAL_PROMPT_TEXT_MAP[lang]} {LANGUAGE_SUBJECTS_MAP[lang][subject]}."
+
+    @override
+    def samples(self, item: dict[str, Any]) -> list[SampleBody]:
+        lang, _ = _lang_and_subject(item["subject"])
+        return [
+            SampleBody(
+                prompt=_mc_prompt(item, lang),
+                cue=f"{LANGUAGE_ANSWER_TEXT_MAP[lang]}:",
+                possible_completions=[f" {key}" for key in _KEYS],
+                ground_truth=f" {item['answer']}",
+            )
+        ]
+
+
+@final
+class _GlobalMmluFewShot(FewShot):
+    """Draws demonstrations from ``dev`` and renders them in the eval item's language (a subject's few-shot
+    demonstrations share its language)."""
+
+    def __init__(self, split: str) -> None:
+        self._split = split
+
+    @override
+    def split(self) -> str | None:
+        return self._split
+
+    @override
+    def check(self, num_fewshot: int) -> None:
+        return  # any shot count is supported
+
+    @override
+    def examples(
+        self,
+        dataset: dict[str, list[dict[str, Any]]],
+        *,
+        sample_split: str,
+        item: dict[str, Any],
+        num_fewshot: int,
+        rnd: random.Random,
+    ) -> list[FewshotExample]:
+        if num_fewshot <= 0:
+            return []
+        pool = dataset[self._split]
+        if self._split == sample_split:
+            drawn = rnd.sample(pool, num_fewshot + 1)
+            drawn = [demo for demo in drawn if demo != item][:num_fewshot]
+        else:
+            drawn = rnd.sample(pool, num_fewshot)
+        lang, _ = _lang_and_subject(item["subject"])
+        return [
+            FewshotExample(prompt=_mc_prompt(demo, lang), answer=f"{LANGUAGE_ANSWER_TEXT_MAP[lang]}: {demo['answer']}")
+            for demo in drawn
+        ]
+
+    @override
+    def metadata(self) -> dict[str, str]:
+        return {"fewshot_split": self._split}
+
+
+def _global_mmlu_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
+    return dataset if dataset is not None else _GlobalMmluDataset(pinned_by_framework(GLOBAL_MMLU_DATASET_PATH))
+
+
+def _global_mmlu(id: str, subjects: ListOfSubjects, language: LanguageSpec, dataset: DatasetPolicy | None) -> Benchmark:
+    return ComposedBenchmark.compose(
+        id=id,
+        kind=_GlobalMmluChoice(),
+        answer=PickFromCandidates(),
+        sample_split="test",
+        fewshot=_GlobalMmluFewShot("dev"),
+        subjects=subjects,
+        dataset_policy=_global_mmlu_dataset(dataset),
+        language=language,
+    )
+
+
+def global_mmlu(dataset: DatasetPolicy | None = None) -> Benchmark:
+    subjects = ListOfSubjects([str(pair) for pair in product(GLOBAL_MMLU_LANGUAGES, MMLU_SUBJECTS)])
+    return _global_mmlu("GlobalMMLU", subjects, GLOBAL_MMLU_LANGUAGE_SPEC, dataset)
+
+
+def global_mmlu_german(dataset: DatasetPolicy | None = None) -> Benchmark:
+    subjects = ListOfSubjects([str(("de", subject)) for subject in MMLU_SUBJECTS])
+    return _global_mmlu("GlobalMMLU_German", subjects, Language.DEU, dataset)
+
+
+GLOBAL_MMLU_BENCHMARKS: list[Benchmark] = [global_mmlu(), global_mmlu_german()]

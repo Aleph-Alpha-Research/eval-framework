@@ -6,6 +6,7 @@ from eval_framework.benchmarks.arc_ellamind import ARC_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.copa import COPA_BENCHMARKS
 from eval_framework.benchmarks.csqa import CSQA_BENCHMARKS
 from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.global_mmlu import GLOBAL_MMLU_BENCHMARKS
 from eval_framework.benchmarks.goldenswag import GOLDENSWAG_BENCHMARKS
 from eval_framework.benchmarks.gpqa import GPQA_BENCHMARKS
 from eval_framework.benchmarks.gpqa_ellamind import GPQA_ELLAMIND_BENCHMARKS
@@ -204,8 +205,8 @@ def register_mmlu_pro_tasks(registry: Registry) -> None:
 
 def register_global_mmlu_tasks(registry: Registry) -> None:
     """Register global_mmlu benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.global_mmlu.GlobalMMLU", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.global_mmlu.GlobalMMLU_German", registry=registry)
+    for benchmark in GLOBAL_MMLU_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_sciq_tasks(registry: Registry) -> None:
