@@ -4,7 +4,7 @@ import traceback
 from collections.abc import Iterable, Sequence
 from typing import TYPE_CHECKING, Any, Self, final, override
 
-from eval_framework.answer import AnswerPolicy, VerbatimAnswer
+from eval_framework.answer import AnswerPolicy, PickFromCandidates
 from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.eval_kind import Choice, EvalKind, SampleBody
@@ -304,12 +304,12 @@ class ComposedBenchmark(Benchmark):
     ) -> Self:
         """Build a choice-based benchmark. The same ``reader`` + ``styler`` drive both the scored
         ``Choice`` and its matching ``SampledFewShot`` demonstrations, so they are given once. A choice is
-        always scored by loglikelihood over its candidates, so the answer is fixed to ``VerbatimAnswer``."""
+        always scored by loglikelihood over its candidates, so the answer is fixed to ``PickFromCandidates``."""
         return cls.compose(
             id=id,
             display_name=display_name,
             kind=Choice(reader, styler),
-            answer=VerbatimAnswer(),
+            answer=PickFromCandidates(),
             sample_split=sample_split,
             fewshot=SampledFewShot(reader, styler, fewshot_split),
             subjects=subjects,

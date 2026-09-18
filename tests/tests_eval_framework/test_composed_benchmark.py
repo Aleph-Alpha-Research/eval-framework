@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 from datasets import Dataset, DatasetDict
 
-from eval_framework.answer import VerbatimAnswer
+from eval_framework.answer import PickFromCandidates
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark, ComposedEval, LanguageSpec
 from eval_framework.contract import ResponseType
@@ -138,7 +138,7 @@ def _make_benchmark(
         id=id,
         display_name=display_name,
         kind=Choice(reader=reader, styler=resolved_styler),
-        answer=VerbatimAnswer(),
+        answer=PickFromCandidates(),
         sample_split=sample_split,
         fewshot=fewshot or SampledFewShot(reader, resolved_styler, _DUMMY_SPLIT),
         subjects=subjects,
@@ -166,7 +166,7 @@ def _make_eval(
         num_fewshot,
         display_name=display_name,
         kind=Choice(reader=reader, styler=resolved_styler),
-        answer=VerbatimAnswer(),
+        answer=PickFromCandidates(),
         loader=loader,
         sample_split=sample_split,
         fewshot=fewshot or SampledFewShot(reader, resolved_styler, _DUMMY_SPLIT),
