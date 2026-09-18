@@ -136,8 +136,6 @@ class ExtractedAnswer(AnswerPolicy):
         ground_truth: str | list[str] | None,
         messages: list[Message],
     ) -> str:
-        for stop in self._stop_sequences:
-            completion_text = completion_text.split(stop)[0]
         if self._last_match:
             matches = self._answer_re.findall(completion_text)
             return matches[-1].upper() if matches else "[invalid]"

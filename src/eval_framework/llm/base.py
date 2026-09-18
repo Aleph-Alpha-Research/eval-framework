@@ -37,6 +37,9 @@ class BaseLLM(ABC):
         raise an error if something impedes the expected completion of a task.
 
         Important! The completion is expected to be detokenized and to NOT contain special tokens.
+        Backends must also cut the completion at the first occurrence of a stop sequence and return the text
+        before it; the stop sequence itself must not be part of the completion. Answer extraction relies on
+        this and does no stripping of its own.
 
         Returns: List[RawCompletion]
         """
@@ -61,6 +64,9 @@ class BaseLLM(ABC):
         raise an error if something impedes the expected completion of a task.
 
         Important! The completion is expected to be detokenized and to NOT contain special tokens.
+        Backends must also cut the completion at the first occurrence of a stop sequence and return the text
+        before it; the stop sequence itself must not be part of the completion. Answer extraction relies on
+        this and does no stripping of its own.
 
         Returns: List[RawCompletion]
         """
