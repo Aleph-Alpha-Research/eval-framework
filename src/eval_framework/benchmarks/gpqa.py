@@ -16,8 +16,8 @@ import random
 import re
 from typing import Any, final, override
 
-from eval_framework.answer import ExtractedAnswer
-from eval_framework.benchmarks.cot import Cot, tulu3_cot_prompt
+from eval_framework.answer import AnswerPolicy
+from eval_framework.benchmarks.cot import Cot, tulu3_cot_prompt, tulu_answer, tulu_answer_v2
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
@@ -35,9 +35,6 @@ _OVERLONG_QUESTION = (
     "Hello, you are embarking on a new project. You need to produce the HP1alpha protein in E. coli. "
     "Which of these plasmids will you choose?"
 )
-
-_COT_ANSWER_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
-_COT_V2_ANSWER_RE = re.compile(r"\banswer\s+is:?\s*\(?([A-D])\b\)?", re.IGNORECASE)
 
 
 def _gpqa_preamble(subject_label: str) -> str:
@@ -112,7 +109,7 @@ def gpqa_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     )
 
 
-def _gpqa_diamond_cot(id: str, answer: ExtractedAnswer, dataset: DatasetPolicy | None = None) -> Benchmark:
+def _gpqa_diamond_cot(id: str, answer: AnswerPolicy, dataset: DatasetPolicy | None = None) -> Benchmark:
     return ComposedBenchmark.compose(
         id=id,
         kind=Cot(GpqaReader(), build_prompt=tulu3_cot_prompt, candidates=_gpqa_cot_candidates),
@@ -126,11 +123,11 @@ def _gpqa_diamond_cot(id: str, answer: ExtractedAnswer, dataset: DatasetPolicy |
 
 
 def gpqa_diamond_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _gpqa_diamond_cot("GPQA_DIAMOND_COT", ExtractedAnswer(_COT_ANSWER_RE, ["Question:"]), dataset)
+    return _gpqa_diamond_cot("GPQA_DIAMOND_COT", tulu_answer(), dataset)
 
 
 def gpqa_diamond_cot_v2(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _gpqa_diamond_cot("GPQA_DIAMOND_COT_V2", ExtractedAnswer(_COT_V2_ANSWER_RE, [], last_match=True), dataset)
+    return _gpqa_diamond_cot("GPQA_DIAMOND_COT_V2", tulu_answer_v2(4), dataset)
 
 
 GPQA_BENCHMARKS: list[Benchmark] = [

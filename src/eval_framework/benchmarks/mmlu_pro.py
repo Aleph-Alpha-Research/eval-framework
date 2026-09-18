@@ -9,11 +9,10 @@ a fixed ten letters A–J regardless (see ``_MmluProMCStyle``) — A bug faithfu
 implementation, in order to not change the meaning of the score silently.
 """
 
-import re
 from typing import Any, final, override
 
-from eval_framework.answer import ExtractedAnswer
-from eval_framework.benchmarks.cot import Cot, tulu3_cot_prompt
+from eval_framework.answer import AnswerPolicy
+from eval_framework.benchmarks.cot import Cot, tulu3_cot_prompt, tulu_answer, tulu_answer_v2
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
@@ -80,10 +79,6 @@ def _mmlu_pro_idk_preamble(subject_label: str) -> str:
     )
 
 
-_COT_ANSWER_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
-_COT_V2_ANSWER_RE = re.compile(r"\banswer\s+is:?\s*\(?([A-J])\b\)?", re.IGNORECASE)
-
-
 def _mmlu_pro_cot_candidates(keys: list[str]) -> list[str]:
     # Faithful quirk: every loglikelihood variant scores a fixed ten letters A–J, so the COT sample carries
     # them too (inert for free-form scoring). See the module docstring.
@@ -134,7 +129,7 @@ def mmlu_pro_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _mmlu_pro_choice("MMLU_PRO_IDK", styler, dataset, display_name="MMLU Pro_IDK")
 
 
-def _mmlu_pro_cot(id: str, answer: ExtractedAnswer, dataset: DatasetPolicy | None = None) -> Benchmark:
+def _mmlu_pro_cot(id: str, answer: AnswerPolicy, dataset: DatasetPolicy | None = None) -> Benchmark:
     return ComposedBenchmark.compose(
         id=id,
         kind=Cot(
@@ -153,11 +148,11 @@ def _mmlu_pro_cot(id: str, answer: ExtractedAnswer, dataset: DatasetPolicy | Non
 
 
 def mmlu_pro_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_pro_cot("MMLU_PRO_COT", ExtractedAnswer(_COT_ANSWER_RE, ["Question:"]), dataset)
+    return _mmlu_pro_cot("MMLU_PRO_COT", tulu_answer(), dataset)
 
 
 def mmlu_pro_cot_v2(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_pro_cot("MMLU_PRO_COT_V2", ExtractedAnswer(_COT_V2_ANSWER_RE, [], last_match=True), dataset)
+    return _mmlu_pro_cot("MMLU_PRO_COT_V2", tulu_answer_v2(10), dataset)
 
 
 MMLU_PRO_BENCHMARKS: list[Benchmark] = [

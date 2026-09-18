@@ -6,9 +6,11 @@ and any inert scored candidates — is injected per benchmark; the CoT contract 
 sample, no assistant cue, the bare answer letter as ground truth, scored by accuracy.
 """
 
+import re
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, final, override
 
+from eval_framework.answer import ExtractedAnswer
 from eval_framework.choices import ChoiceReader
 from eval_framework.eval_kind import EvalKind, SampleBody
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
@@ -39,6 +41,21 @@ def tulu3_cot_prompt(raw_question: str, choices: list[str]) -> str:
         "\n\nAnswer the above question and REMEMBER to finish your response with the exact phrase "
         '"Therefore, the answer is (ANSWER_LETTER)" where (ANSWER_LETTER) is one of (A), (B), (C), (D), (E), etc.'
     )
+
+
+def tulu_answer() -> ExtractedAnswer:
+    """Extracts the parenthesised letter that ``tulu3_cot_prompt`` asks the model to conclude with —
+    ``"Therefore, the answer is (X)"``. Kept here beside the prompt because both encode the same ``(X)``
+    format. The accepted letters are the fixed A–J the prompt's ``"(A), (B), ..., (E), etc."`` implies."""
+    return ExtractedAnswer(re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)"), ["Question:"])
+
+
+def tulu_answer_v2(n_options: int) -> ExtractedAnswer:
+    """Lenient variant of ``tulu_answer``: no required ``"Therefore,"``, optional colon and parentheses,
+    case-insensitive, taking the last match. Only the accepted letter range is benchmark-specific, so it is
+    built from ``n_options``."""
+    letters = "".join(get_n_letters(n_options))
+    return ExtractedAnswer(re.compile(rf"\banswer\s+is:?\s*\(?([{letters}])\b\)?", re.IGNORECASE), [], last_match=True)
 
 
 @final

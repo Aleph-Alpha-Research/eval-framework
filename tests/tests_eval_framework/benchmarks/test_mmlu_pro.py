@@ -11,9 +11,8 @@ from typing import Any
 
 import pytest
 
-from eval_framework.answer import ExtractedAnswer
+from eval_framework.benchmarks.cot import tulu_answer_v2
 from eval_framework.benchmarks.mmlu_pro import (
-    _COT_V2_ANSWER_RE,
     MMLU_PRO_BENCHMARKS,
     mmlu_pro,
     mmlu_pro_cot,
@@ -143,5 +142,5 @@ def test_mmlu_pro_cot_prompt() -> None:
 )
 def test_mmlu_pro_cot_v2_extracts_leniently(completion: str, expected: str) -> None:
     # extract_answer runs at scoring time (not captured by the formatter hash), so exercise it directly.
-    answer = ExtractedAnswer(_COT_V2_ANSWER_RE, [], last_match=True)
+    answer = tulu_answer_v2(10)
     assert answer.extract_answer(completion, context=None, ground_truth=None, messages=[]) == expected

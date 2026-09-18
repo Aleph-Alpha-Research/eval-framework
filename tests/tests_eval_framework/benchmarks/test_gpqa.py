@@ -11,10 +11,8 @@ from typing import Any
 
 import pytest
 
-from eval_framework.answer import ExtractedAnswer
+from eval_framework.benchmarks.cot import tulu_answer, tulu_answer_v2
 from eval_framework.benchmarks.gpqa import (
-    _COT_ANSWER_RE,
-    _COT_V2_ANSWER_RE,
     GPQA_BENCHMARKS,
     GpqaReader,
     gpqa_diamond_cot,
@@ -136,7 +134,7 @@ def test_reader_strips_bracketed_markup() -> None:
     ],
 )
 def test_gpqa_cot_extracts_parenthesised_letter(completion: str, expected: str) -> None:
-    answer = ExtractedAnswer(_COT_ANSWER_RE, ["Question:"])
+    answer = tulu_answer()
     assert answer.extract_answer(completion, context=None, ground_truth=None, messages=[]) == expected
 
 
@@ -152,5 +150,5 @@ def test_gpqa_cot_extracts_parenthesised_letter(completion: str, expected: str) 
     ],
 )
 def test_gpqa_cot_v2_extracts_leniently(completion: str, expected: str) -> None:
-    answer = ExtractedAnswer(_COT_V2_ANSWER_RE, [], last_match=True)
+    answer = tulu_answer_v2(4)
     assert answer.extract_answer(completion, context=None, ground_truth=None, messages=[]) == expected
