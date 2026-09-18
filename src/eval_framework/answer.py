@@ -59,7 +59,7 @@ class AnswerPolicy(ABC):
 
 
 @final
-class VerbatimAnswer(AnswerPolicy):
+class PickFromCandidates(AnswerPolicy):
     """Loglikelihood scoring: the model is scored over fixed candidate completions and the answer is the
     best-scoring candidate, taken verbatim — nothing is generated, so nothing is bounded or extracted."""
 

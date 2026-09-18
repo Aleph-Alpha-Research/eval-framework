@@ -8,7 +8,7 @@ and ``PartialEval`` live here and are reused by the multilingual EllaMind varian
 
 from typing import TYPE_CHECKING, Any, final, override
 
-from eval_framework.answer import VerbatimAnswer
+from eval_framework.answer import PickFromCandidates
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
@@ -83,7 +83,7 @@ def winogrande_cloze(dataset: DatasetPolicy | None = None) -> Benchmark:
         id="WINOGRANDECloze",
         display_name="WinograndeCloze",
         kind=PartialEval(),
-        answer=VerbatimAnswer(),
+        answer=PickFromCandidates(),
         sample_split="train",
         fewshot=SampledFewShot(WinograndeReader(), fewshot_styler, "train"),
         subjects=ListOfSubjects(["winogrande_xl"]),
