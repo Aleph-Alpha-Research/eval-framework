@@ -1,7 +1,8 @@
 import logging
 import time
 import traceback
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from datetime import UTC, datetime
 from functools import partial
 
@@ -239,26 +240,9 @@ class ResponseGenerator:
         :param generative_output_function: function to generate responses
         :param metadata: metadata dictionary
         :param should_preempt_callable: function to check if preempt is called
-        :return: None
+        :return: list of responses, preempted
         """
-
-        def _process_batch(samples_batch: list[Sample]) -> None:
-            if not samples_batch:
-                return
-            if len(samples_batch) > 1:
-                logger.info("Processing batch...")
-
-            responses_batch = generative_output_function(samples_batch)
-            responses.extend(responses_batch)
-            if self.save_intermediate_results:
-                for response in responses_batch:
-                    self.result_processor.save_response(response)
-
-        # In order to enable parallelism we group samples in batches and send them in parallel to the `run_fn`.
-        # The BaseLLM class is then in charge of managing the parallelism (eg, using AsyncClient in API models).
-        # If samples_batch_size = 1, samples are run sequentially; in any case, we return here after finishing each
-        # individual batch to honor preemption requests and save cached results.
-        samples_batch_size = self.config.batch_size
+        batch_size = self.config.batch_size
         repeats = self.config.repeats
 
         # Calculate total samples for progress bar - use num_samples or iterate to count
@@ -268,45 +252,146 @@ class ResponseGenerator:
         else:
             total_num_samples = self.num_samples * repeats
 
-        samples_batch: list[Sample] = []
         with tqdm(
             total=total_num_samples,
             desc=f"Processing {self.response_type.value}",
             disable=get_disable_bar_flag(),
         ) as pbar:
-            samples = self.task.iterate_samples(self.num_samples)
-            for i, sample in enumerate(repeat_samples(samples, repeats)):
-                subject = f" - Subject: {sample.subject}"
-                sample_index = i + 1
+            pending_samples = self._iter_pending_samples(subject_response_id_mapping, total_num_samples, pbar)
 
-                if sample.id in subject_response_id_mapping.get(sample.subject, []):
-                    logger.info(
-                        f"Task: {self.response_type.value}{subject} - Sample: {sample_index} - skipping, already done."
-                    )
-                    pbar.update(1)
-                    continue
+            # Lock-step batches waste capacity whenever one request is slow: the remaining slots sit idle until it
+            # returns. A sliding window avoids that, but only for LLMs that tolerate concurrent calls.
+            if batch_size > 1 and self.llm.SUPPORTS_CONCURRENT_REQUESTS:
+                preempted = self._run_with_sliding_window(
+                    pending_samples, responses, generative_output_function, should_preempt_callable, batch_size, pbar
+                )
+            else:
+                preempted = self._run_in_batches(
+                    pending_samples, responses, generative_output_function, should_preempt_callable, batch_size, pbar
+                )
 
-                logger.info(f"Task: {self.response_type.value}{subject} - Sample: {sample_index}/{total_num_samples}")
-                pbar.set_postfix_str(f"Sample {sample_index}/{total_num_samples}")
-                pbar.update(1)
-
-                samples_batch.append(sample)
-
-                if len(samples_batch) >= samples_batch_size:
-                    _process_batch(samples_batch)
-                    samples_batch = []
-
-                if should_preempt_callable():
-                    logger.info("Preempt")
-                    if not self.save_intermediate_results:
-                        self.result_processor.save_responses(responses)
-                    return responses, True
-
-            _process_batch(samples_batch)
-
+        if preempted:
+            logger.info("Preempt")
         if not self.save_intermediate_results:
             self.result_processor.save_responses(responses)
-        return responses, False
+        return responses, preempted
+
+    def _iter_pending_samples(
+        self, subject_response_id_mapping: dict[str, set[int]], total_num_samples: int, pbar: tqdm
+    ) -> Iterator[Sample]:
+        """Yields the samples that still need a response, skipping (and logging) those already present on disk."""
+        samples = self.task.iterate_samples(self.num_samples)
+        for i, sample in enumerate(repeat_samples(samples, self.config.repeats)):
+            subject = f" - Subject: {sample.subject}"
+            sample_index = i + 1
+
+            if sample.id in subject_response_id_mapping.get(sample.subject, []):
+                logger.info(
+                    f"Task: {self.response_type.value}{subject} - Sample: {sample_index} - skipping, already done."
+                )
+                pbar.update(1)
+                continue
+
+            logger.info(f"Task: {self.response_type.value}{subject} - Sample: {sample_index}/{total_num_samples}")
+            pbar.set_postfix_str(f"Sample {sample_index}/{total_num_samples}")
+            yield sample
+
+    def _record_responses(
+        self,
+        responses_batch: list[Completion] | list[Loglikelihood],
+        responses: list[Completion | Loglikelihood],
+        pbar: tqdm,
+    ) -> None:
+        responses.extend(responses_batch)
+        if self.save_intermediate_results:
+            for response in responses_batch:
+                self.result_processor.save_response(response)
+        pbar.update(len(responses_batch))
+
+    def _run_in_batches(
+        self,
+        samples: Iterator[Sample],
+        responses: list[Completion | Loglikelihood],
+        generative_output_function: Callable[[list[Sample]], list[Completion] | list[Loglikelihood]],
+        should_preempt_callable: Callable[[], bool],
+        batch_size: int,
+        pbar: tqdm,
+    ) -> bool:
+        """Sends samples to the LLM in consecutive batches of `batch_size` on the calling thread.
+
+        Returns whether the run was preempted.
+        """
+
+        def _process_batch(samples_batch: list[Sample]) -> None:
+            if not samples_batch:
+                return
+            if len(samples_batch) > 1:
+                logger.info("Processing batch...")
+            self._record_responses(generative_output_function(samples_batch), responses, pbar)
+
+        samples_batch: list[Sample] = []
+        for sample in samples:
+            samples_batch.append(sample)
+
+            if len(samples_batch) >= batch_size:
+                _process_batch(samples_batch)
+                samples_batch = []
+
+            if should_preempt_callable():
+                return True
+
+        _process_batch(samples_batch)
+        return False
+
+    def _run_with_sliding_window(
+        self,
+        samples: Iterator[Sample],
+        responses: list[Completion | Loglikelihood],
+        generative_output_function: Callable[[list[Sample]], list[Completion] | list[Loglikelihood]],
+        should_preempt_callable: Callable[[], bool],
+        max_in_flight: int,
+        pbar: tqdm,
+    ) -> bool:
+        """Keeps up to `max_in_flight` single-sample requests running at once, submitting the next sample as soon
+        as any request completes. Responses are recorded in completion order.
+
+        Returns whether the run was preempted. On preemption, requests that are already running are allowed to
+        finish and their responses are kept; submitted-but-not-yet-started ones are dropped and redone on resume.
+        """
+        in_flight: set[Future[list[Completion] | list[Loglikelihood]]] = set()
+        preempted = False
+
+        def _collect(done: Iterable[Future[list[Completion] | list[Loglikelihood]]]) -> None:
+            for future in done:
+                self._record_responses(future.result(), responses, pbar)
+
+        executor = ThreadPoolExecutor(max_workers=max_in_flight)
+        try:
+            for sample in samples:
+                in_flight.add(executor.submit(generative_output_function, [sample]))
+                if len(in_flight) < max_in_flight:
+                    continue
+
+                done, in_flight = wait(in_flight, return_when=FIRST_COMPLETED)
+                _collect(done)
+                if should_preempt_callable():
+                    preempted = True
+                    break
+
+            while in_flight and not preempted:
+                done, in_flight = wait(in_flight, return_when=FIRST_COMPLETED)
+                _collect(done)
+                if should_preempt_callable():
+                    preempted = True
+        finally:
+            # `wait=True`: an error or preemption must not leave worker threads still hitting the API after we
+            # return. `cancel_futures=True`: samples no worker has picked up are cheaper to redo on resume than to
+            # finish now while the caller is waiting to shut down.
+            executor.shutdown(wait=True, cancel_futures=True)
+
+        if preempted:
+            _collect(future for future in in_flight if not future.cancelled())
+        return preempted
 
     def _get_metadata(self) -> dict[str, Any]:
         """Prepares metadata dictionary from the configuration."""

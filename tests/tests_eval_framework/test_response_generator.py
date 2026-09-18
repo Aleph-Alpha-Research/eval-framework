@@ -1,3 +1,4 @@
+import threading
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
@@ -502,7 +503,7 @@ class NoopResultProcessor(ResultProcessor):
 
 
 class StubTask(BaseTask[str]):
-    """Minimal task that yields a single sample, no HF dataset loader."""
+    """Minimal task that yields `num_samples` samples (default 1), no HF dataset loader."""
 
     REVISION_LOCKFILE = None
 
@@ -516,13 +517,14 @@ class StubTask(BaseTask[str]):
     METRICS: list = []
 
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
-        yield Sample(
-            id=0,
-            messages=[Message(role=Role.USER, content="Hello")],
-            ground_truth="A",
-            subject="stub",
-            possible_completions=None,
-        )
+        for i in range(num_samples or 1):
+            yield Sample(
+                id=i,
+                messages=[Message(role=Role.USER, content=f"sample-{i}")],
+                ground_truth="A",
+                subject="stub",
+                possible_completions=None,
+            )
 
 
 @temporary_registry
@@ -565,3 +567,150 @@ def test_fail_on_error_disabled_swallows_llm_failure() -> None:
     assert len(responses) == 1
     assert responses[0].error is not None
     assert responses[0].error.error_class == "RuntimeError"
+
+
+class RecordingConcurrentLLM(BaseLLM):
+    """API-style LLM: safe to call from several threads, records how it was called."""
+
+    SUPPORTS_CONCURRENT_REQUESTS = True
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self.call_sizes: list[int] = []
+        self.started: list[str] = []
+
+    def _on_start(self, content: str) -> None:
+        pass
+
+    def generate_from_messages(
+        self,
+        messages: list[Sequence[Message]],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+    ) -> list[RawCompletion]:
+        with self._lock:
+            self.call_sizes.append(len(messages))
+        completions = []
+        for single_messages in messages:
+            content = single_messages[0].content
+            with self._lock:
+                self.started.append(content)
+            self._on_start(content)
+            completions.append(
+                RawCompletion(prompt=content, completion="ok", prompt_num_tokens=None, completion_num_tokens=None)
+            )
+        return completions
+
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+        raise NotImplementedError
+
+
+class GatedConcurrentLLM(RecordingConcurrentLLM):
+    """The very first request only returns once a third request has started.
+
+    With a window of 2 this can only succeed if the generator refills the slot freed by the second
+    request while the first one is still running; lock-step batching would deadlock (and time out).
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._third_started = threading.Event()
+
+    def _on_start(self, content: str) -> None:
+        with self._lock:
+            if len(self.started) >= 3:
+                self._third_started.set()
+        if content == "sample-0":
+            assert self._third_started.wait(timeout=5), "window did not slide: third request never started"
+
+
+def _make_generator(llm: BaseLLM, num_samples: int, batch_size: int, **config_kwargs: Any) -> ResponseGenerator:
+    register_task(StubTask)
+    config = EvalConfig(
+        task_name="StubTask",
+        num_fewshot=0,
+        num_samples=num_samples,
+        llm_class=llm.__class__,
+        batch_size=batch_size,
+        save_intermediate_results=False,
+        **config_kwargs,
+    )
+    return ResponseGenerator(llm, config, NoopResultProcessor())  # type: ignore[arg-type]
+
+
+@temporary_registry
+def test_concurrent_llm_keeps_window_full_instead_of_waiting_for_whole_batch() -> None:
+    # Given an API-style LLM whose first request is slow, and a window of 2 requests
+    llm = GatedConcurrentLLM()
+    generator = _make_generator(llm, num_samples=3, batch_size=2)
+
+    # When running the generator
+    responses, preempted = generator.generate(should_preempt_callable=lambda: False)
+
+    # Then the third request was started while the first was still pending, and every sample succeeded
+    assert not preempted
+    assert len(responses) == 3
+    assert all(response.error is None for response in responses), [r.error for r in responses]
+    assert sorted(response.id for response in responses) == [0, 1, 2]
+    # ... each request carried a single sample rather than a whole batch
+    assert llm.call_sizes == [1, 1, 1]
+
+
+@temporary_registry
+def test_concurrent_llm_preemption_keeps_in_flight_results_and_drops_the_rest() -> None:
+    # Given a concurrent LLM, 6 samples, a window of 2, and a preemption request after the first completion
+    llm = RecordingConcurrentLLM()
+    generator = _make_generator(llm, num_samples=6, batch_size=2)
+
+    # When running the generator (preemption is polled after each completed request, at which point at least
+    # one request has been started)
+    responses, preempted = generator.generate(should_preempt_callable=lambda: len(llm.started) > 0)
+
+    # Then only requests from the first window are kept (the second one may have been cancelled before a worker
+    # picked it up); samples beyond the window were never submitted
+    assert preempted
+    assert 1 <= len(responses) <= 2
+    assert {response.id for response in responses} <= {0, 1}
+    assert set(llm.started) <= {"sample-0", "sample-1"}
+
+
+@temporary_registry
+def test_concurrent_llm_fail_on_error_propagates() -> None:
+    class ConcurrentSaboteurLLM(SaboteurLLM):
+        SUPPORTS_CONCURRENT_REQUESTS = True
+
+    generator = _make_generator(ConcurrentSaboteurLLM(), num_samples=3, batch_size=2, fail_on_error=True)
+
+    with pytest.raises(RuntimeError, match="inference connection failed"):
+        generator.generate(should_preempt_callable=lambda: False)
+
+
+@temporary_registry
+def test_concurrent_llm_fail_on_error_disabled_captures_errors_per_sample() -> None:
+    class ConcurrentSaboteurLLM(SaboteurLLM):
+        SUPPORTS_CONCURRENT_REQUESTS = True
+
+    generator = _make_generator(ConcurrentSaboteurLLM(), num_samples=3, batch_size=2)
+
+    responses, preempted = generator.generate(should_preempt_callable=lambda: False)
+
+    assert not preempted
+    assert len(responses) == 3
+    assert all(response.error is not None and response.error.error_class == "RuntimeError" for response in responses)
+
+
+@temporary_registry
+def test_non_concurrent_llm_still_receives_whole_batches() -> None:
+    # Given a local-style LLM (SUPPORTS_CONCURRENT_REQUESTS is False by default) and batch_size larger than the data
+    llm = MockLLM()
+    generator = _make_generator(llm, num_samples=3, batch_size=10)
+
+    # When running the generator
+    responses, preempted = generator.generate(should_preempt_callable=lambda: False)
+
+    # Then all samples went to the model in a single call on the calling thread
+    assert not preempted
+    assert len(responses) == 3
+    assert llm.generate_counter == 1

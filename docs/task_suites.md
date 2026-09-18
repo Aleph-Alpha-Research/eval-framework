@@ -99,7 +99,7 @@ The following fields can be set on any suite node:
 | `num_fewshot` | Number of few-shot examples |
 | `max_tokens` | Maximum tokens to generate |
 | `repeats` | Number of times to repeat each sample |
-| `batch_size` | Parallel batch size |
+| `batch_size` | Number of samples processed at once. For API models this many requests are kept in flight (a new one starts as soon as any finishes); for local models it is the number of samples handed to the model per call |
 | `task_subjects` | Subjects to evaluate; evaluates all subjects if empty |
 | `hf_revision` | HuggingFace dataset revision (branch, tag, or commit hash) |
 
