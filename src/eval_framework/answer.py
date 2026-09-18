@@ -107,7 +107,7 @@ class ExtractFromCompletion(AnswerPolicy):
         max_tokens: int | None = None,
     ) -> None:
         self._answer_re = answer_re
-        self._stop_sequences = list(stop_sequences) if stop_sequences is not None else []
+        self._stop_sequences = stop_sequences or []
         self._last_match = last_match
         self._max_tokens = max_tokens
 
@@ -121,7 +121,7 @@ class ExtractFromCompletion(AnswerPolicy):
 
     @override
     def stop_sequences(self) -> list[str]:
-        return list(self._stop_sequences)
+        return self._stop_sequences
 
     @override
     def max_tokens(self) -> int | None:
