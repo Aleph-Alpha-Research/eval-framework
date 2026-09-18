@@ -7,6 +7,7 @@ from eval_framework.benchmarks.copa import COPA_BENCHMARKS
 from eval_framework.benchmarks.csqa import CSQA_BENCHMARKS
 from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.goldenswag import GOLDENSWAG_BENCHMARKS
+from eval_framework.benchmarks.gpqa import GPQA_BENCHMARKS
 from eval_framework.benchmarks.gpqa_ellamind import GPQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.hellaswag import HELLASWAG_BENCHMARKS
 from eval_framework.benchmarks.hellaswag_ellamind import HELLASWAG_ELLAMIND_BENCHMARKS
@@ -101,9 +102,8 @@ def register_piqa_tasks(registry: Registry) -> None:
 
 def register_gpqa_tasks(registry: Registry) -> None:
     """Register gpqa benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.gpqa.GPQA_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.gpqa.GPQA_DIAMOND_COT", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.gpqa.GPQA_DIAMOND_COT_V2", registry=registry)
+    for benchmark in GPQA_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_gsm8k_tasks(registry: Registry) -> None:
