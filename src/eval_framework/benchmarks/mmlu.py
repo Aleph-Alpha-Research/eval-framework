@@ -13,7 +13,7 @@ prompt is prefaced by a subject-templated preamble. The composed variants:
 import re
 from typing import Any, final, override
 
-from eval_framework.answer import ExtractedAnswer
+from eval_framework.answer import ExtractFromCompletion
 from eval_framework.benchmarks.cot import Cot
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
@@ -204,7 +204,7 @@ def mmlu_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
     return ComposedBenchmark.compose(
         id="MMLU_COT",
         kind=Cot(MmluReader(), build_prompt=_mmlu_cot_prompt, preamble=_mmlu_cot_preamble),
-        answer=ExtractedAnswer(_MMLU_COT_ANSWER_RE, ["Question:"]),
+        answer=ExtractFromCompletion(_MMLU_COT_ANSWER_RE, ["Question:"]),
         sample_split="test",
         fewshot=NoFewShot(),
         subjects=ListOfSubjects(MMLU_SUBJECTS),

@@ -92,7 +92,7 @@ class PickFromCandidates(AnswerPolicy):
 
 
 @final
-class ExtractedAnswer(AnswerPolicy):
+class ExtractFromCompletion(AnswerPolicy):
     """Free-form completion: the model generates (bounded by ``stop_sequences`` / ``max_tokens``) and the
     scored answer is pulled out with ``answer_re``. ``last_match`` takes the final match, upper-cased (for
     lenient case-insensitive patterns); otherwise the first match is returned as-is. ``"[invalid]"`` when
