@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.93,<2` |
+| `boto3` | `>=1.43.94,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.96` |
+| `botocore` | `1.43.97` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.1` |
 | `click` | `8.5.0` |
@@ -48,7 +48,7 @@ and first-party/internal packages are excluded.
 | `colorama` | `0.4.6` |
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
-| `filelock` | `3.32.7` |
+| `filelock` | `4.0.0` |
 | `fsspec` | `2026.6.0` |
 | `googleapis-common-protos` | `1.75.3` |
 | `h11` | `0.16.0` |
@@ -56,7 +56,7 @@ and first-party/internal packages are excluded.
 | `httpcore` | `1.0.9` |
 | `httpx` | `0.28.1` |
 | `huggingface-hub` | `0.36.2` |
-| `idna` | `3.19` |
+| `idna` | `3.20` |
 | `jmespath` | `1.1.0` |
 | `joblib` | `1.6.0` |
 | `jsonschema-specifications` | `2025.9.1` |
@@ -69,9 +69,9 @@ and first-party/internal packages are excluded.
 | `opentelemetry-sdk` | `1.44.0` |
 | `opentelemetry-semantic-conventions` | `0.65b0` |
 | `packaging` | `26.3` |
-| `pandas` | `3.0.5` |
+| `pandas` | `3.0.6` |
 | `platformdirs` | `4.11.9` |
-| `protobuf` | `7.36.1` |
+| `protobuf` | `7.36.2` |
 | `pyarrow` | `25.0.1` |
 | `pydantic-core` | `2.46.5` |
 | `python-dateutil` | `2.9.0.post0` |

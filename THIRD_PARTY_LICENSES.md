@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.96 - https://github.com/boto/boto3
-- **botocore** 1.43.96 - https://github.com/boto/botocore
+- **boto3** 1.43.97 - https://github.com/boto/boto3
+- **botocore** 1.43.97 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **googleapis-common-protos** 1.75.3 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
@@ -70,14 +70,14 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **fsspec** 2026.6.0 - https://github.com/fsspec/filesystem_spec
 - **httpcore** 1.0.9 - https://www.encode.io/httpcore/
 - **httpx** 0.28.1 - https://github.com/encode/httpx
-- **idna** 3.19 - https://github.com/kjd/idna
+- **idna** 3.20 - https://github.com/kjd/idna
 - **joblib** 1.6.0 - https://joblib.readthedocs.io
 - **jsonlines** 4.0.0 - https://github.com/wbolster/jsonlines
 - **lxml** 6.1.3 - https://lxml.de/
 - **mpmath** 1.3.0 - http://mpmath.org/
 - **multiprocess** 0.70.19 - https://github.com/uqfoundation/multiprocess
-- **pandas** 3.0.5 - https://pandas.pydata.org
-- **protobuf** 7.36.1 - https://developers.google.com/protocol-buffers/
+- **pandas** 3.0.6 - https://pandas.pydata.org
+- **protobuf** 7.36.2 - https://developers.google.com/protocol-buffers/
 - **python-dotenv** 1.2.3 - https://github.com/theskumar/python-dotenv
 - **scipy** 1.18.1 - https://scipy.org/
 - **sympy** 1.14.0 - https://sympy.org
@@ -104,7 +104,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.1 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 3.32.7 - https://github.com/tox-dev/py-filelock
+- **filelock** 4.0.0 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -218,7 +218,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.96 (Apache-2.0)
+### boto3 1.43.97 (Apache-2.0)
 
 ```text
 Apache License
@@ -399,7 +399,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.96 (Apache-2.0)
+### botocore 1.43.97 (Apache-2.0)
 
 ```text
 Apache License
@@ -999,7 +999,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### filelock 3.32.7 (MIT)
+### filelock 4.0.0 (MIT)
 
 ```text
 MIT License
@@ -1959,7 +1959,7 @@ Apache License
    limitations under the License.
 ```
 
-### idna 3.19 (BSD-3-Clause)
+### idna 3.20 (BSD-3-Clause)
 
 ```text
 BSD 3-Clause License
@@ -13009,7 +13009,7 @@ found in LICENSE.APACHE or LICENSE.BSD. Contributions to this software is made
 under the terms of *both* these licenses.
 ```
 
-### pandas 3.0.5 (BSD-3-Clause)
+### pandas 3.0.6 (BSD-3-Clause)
 
 ```text
 BSD 3-Clause License
@@ -14100,7 +14100,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### protobuf 7.36.1 (BSD-3-Clause)
+### protobuf 7.36.2 (BSD-3-Clause)
 
 ```text
 Copyright 2008 Google Inc.  All rights reserved.
