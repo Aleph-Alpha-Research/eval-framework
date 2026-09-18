@@ -11,25 +11,20 @@ prompt is prefaced by a subject-templated preamble. The composed variants:
 """
 
 import re
-from typing import TYPE_CHECKING, Any, final, override
+from typing import Any, final, override
 
 from eval_framework.answer import ExtractedAnswer
+from eval_framework.benchmarks.cot import Cot
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import EvalKind, SampleBody
 from eval_framework.fewshot import NoFewShot
-from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle, MCStyle, TaskStyler
 from eval_framework.tasks.utils import get_n_letters
-
-if TYPE_CHECKING:
-    from eval_framework.metrics.base import BaseMetric
-
 
 # The 57 MMLU subjects; each is an HF config of ``cais/mmlu`` (also reused by GlobalMMLU).
 MMLU_SUBJECTS = [
@@ -141,39 +136,18 @@ def _idk_preamble(subject_label: str) -> str:
     )
 
 
-@final
-class _MmluCotKind(EvalKind):
-    """MMLU chain-of-thought: the model reasons freely and concludes with "Therefore, the answer is: X",
-    and the answer letter is extracted from the generation. Free-form (completion), 0-shot only."""
+def _mmlu_cot_preamble(subject_label: str) -> str:
+    return (
+        f"The following are multiple choice questions about {_humanized(subject_label)}. "
+        'Summarize your reasoning concisely, then conclude with "Therefore, the answer is: X", where X is '
+        "one of A, B, C, or D."
+    )
 
-    def __init__(self) -> None:
-        self._reader = MmluReader()
 
-    @override
-    def metrics(self) -> list[type["BaseMetric"]]:
-        return [AccuracyCompletion]
-
-    @override
-    def initial_prompt(self, subject_label: str) -> str | None:
-        return (
-            f"The following are multiple choice questions about {_humanized(subject_label)}. "
-            'Summarize your reasoning concisely, then conclude with "Therefore, the answer is: X", where X is '
-            "one of A, B, C, or D."
-        )
-
-    @override
-    def samples(self, item: dict[str, Any]) -> list[SampleBody]:
-        fields = self._reader.read(item)
-        keys = get_n_letters(len(fields.choices))
-        options = "\n".join(f"{key}. {choice}" for key, choice in zip(keys, fields.choices))
-        return [
-            SampleBody(
-                prompt=f"Question: {fields.raw_question}\n{options}",
-                cue="",  # no assistant cue — the model continues with its reasoning
-                possible_completions=[],  # free-form generation (normalized to None by ComposedEval)
-                ground_truth=keys[fields.correct_index],  # the bare answer letter
-            )
-        ]
+def _mmlu_cot_prompt(raw_question: str, choices: list[str]) -> str:
+    keys = get_n_letters(len(choices))
+    options = "\n".join(f"{key}. {choice}" for key, choice in zip(keys, choices))
+    return f"Question: {raw_question}\n{options}"
 
 
 _MMLU_COT_ANSWER_RE = re.compile(r"Therefore, the answer is: ([ABCD])")
@@ -226,10 +200,10 @@ def mmlu_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
 
 
 def mmlu_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
-    # Free-form (completion) and 0-shot only, so it takes the general compose path with its own kind.
+    # Free-form (completion) and 0-shot only, so it takes the general compose path with the shared Cot kind.
     return ComposedBenchmark.compose(
         id="MMLU_COT",
-        kind=_MmluCotKind(),
+        kind=Cot(MmluReader(), build_prompt=_mmlu_cot_prompt, preamble=_mmlu_cot_preamble),
         answer=ExtractedAnswer(_MMLU_COT_ANSWER_RE, ["Question:"]),
         sample_split="test",
         fewshot=NoFewShot(),

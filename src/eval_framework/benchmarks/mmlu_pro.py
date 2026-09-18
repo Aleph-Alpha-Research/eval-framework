@@ -10,24 +10,20 @@ implementation, in order to not change the meaning of the score silently.
 """
 
 import re
-from typing import TYPE_CHECKING, Any, final, override
+from typing import Any, final, override
 
 from eval_framework.answer import ExtractedAnswer
+from eval_framework.benchmarks.cot import Cot, tulu3_cot_prompt
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import EvalKind, SampleBody
 from eval_framework.fewshot import NoFewShot
-from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import MCStyle, TaskStyler
 from eval_framework.tasks.utils import get_n_letters
-
-if TYPE_CHECKING:
-    from eval_framework.metrics.base import BaseMetric
 
 MMLU_PRO_SUBJECTS = [
     "engineering",
@@ -88,47 +84,10 @@ _COT_ANSWER_RE = re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")
 _COT_V2_ANSWER_RE = re.compile(r"\banswer\s+is:?\s*\(?([A-J])\b\)?", re.IGNORECASE)
 
 
-@final
-class _MmluProCotKind(EvalKind):
-    """MMLU-Pro chain-of-thought prompt: the model is asked to reason and conclude with "Therefore, the
-    answer is (X)". Free-form (completion), 0-shot only. COT and COT_V2 share this prompt and differ only in
-    how the concluding letter is pulled out — the injected ``ExtractedAnswer`` (see the constructors)."""
-
-    def __init__(self) -> None:
-        self._reader = MmluProReader()
-
-    @override
-    def metrics(self) -> list[type["BaseMetric"]]:
-        return [AccuracyCompletion]
-
-    @override
-    def initial_prompt(self, subject_label: str) -> str | None:
-        return f"The following are multiple choice questions (with answers) about {subject_label}."
-
-    @override
-    def samples(self, item: dict[str, Any]) -> list[SampleBody]:
-        # Reasoning prompt from Figure 44 of the Tülu 3 paper: https://arxiv.org/pdf/2411.15124
-        fields = self._reader.read(item)
-        keys = get_n_letters(len(fields.choices))
-        options = "\n".join(f"({key}) {choice}" for key, choice in zip(keys, fields.choices))
-        prompt = (
-            "Answer the following multiple-choice question by giving the correct answer letter in parentheses. "
-            "Provide CONCISE reasoning for the answer, and make sure to finish the response with "
-            '"Therefore, the answer is (ANSWER_LETTER)" where (ANSWER_LETTER) is one of (A), (B), (C), (D), (E), etc.'
-            f"\n\nQuestion: {fields.raw_question}\n{options}"
-            "\n\nAnswer the above question and REMEMBER to finish your response with the exact phrase "
-            '"Therefore, the answer is (ANSWER_LETTER)" where (ANSWER_LETTER) is one of (A), (B), (C), (D), (E), etc.'
-        )
-        # The original completion task inherited the base's ten scored letters; they're unused for free-form
-        # scoring, but kept here so the sample (and its formatter hash) matches the original faithfully.
-        return [
-            SampleBody(
-                prompt=prompt,
-                cue="",
-                possible_completions=[f" {label}" for label in get_n_letters(10)],
-                ground_truth=keys[fields.correct_index],
-            )
-        ]
+def _mmlu_pro_cot_candidates(keys: list[str]) -> list[str]:
+    # Faithful quirk: every loglikelihood variant scores a fixed ten letters A–J, so the COT sample carries
+    # them too (inert for free-form scoring). See the module docstring.
+    return [f" {label}" for label in get_n_letters(10)]
 
 
 def _mmlu_pro_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
@@ -178,7 +137,12 @@ def mmlu_pro_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
 def _mmlu_pro_cot(id: str, answer: ExtractedAnswer, dataset: DatasetPolicy | None = None) -> Benchmark:
     return ComposedBenchmark.compose(
         id=id,
-        kind=_MmluProCotKind(),
+        kind=Cot(
+            MmluProReader(),
+            build_prompt=tulu3_cot_prompt,
+            preamble=_mmlu_pro_preamble,
+            candidates=_mmlu_pro_cot_candidates,
+        ),
         answer=answer,
         sample_split="test",
         fewshot=NoFewShot(),
