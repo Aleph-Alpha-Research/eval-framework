@@ -14,6 +14,16 @@
 
 ### Bug Fixes
 
+## [0.13.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.1...v0.13.2) (2026-09-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.94,&lt;2 ([a3215cc](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a3215ccf9fce241067f604cd2aee70e8d8b35e84))
+* **deps:** update dependency openai to &gt;=3.14.0,&lt;4 ([61bfbab](https://github.com/Aleph-Alpha-Research/eval-framework/commit/61bfbab75253c4dd640ad2952d9ecbbb662db7c9))
+* **metrics:** replace undecodable bytes in multipl-e sandbox output ([8092db6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/8092db665ff84392c5b296cfea1de9edb77bb58e))
+* replace undecodable bytes in python sandbox output ([b44d0b0](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b44d0b0c74bb3d0341febdf8cb50b5f90e1e34c6))
+
 ## [0.13.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.0...v0.13.1) (2026-09-17)
 
 
