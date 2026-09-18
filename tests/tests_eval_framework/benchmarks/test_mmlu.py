@@ -152,7 +152,7 @@ def test_mmlu_cot_extracts_the_concluding_letter() -> None:
     answer = ExtractedAnswer(_MMLU_COT_ANSWER_RE, ["Question:"])
     fields: dict[str, Any] = {"context": None, "ground_truth": None, "messages": []}
     assert answer.extract_answer("Reasoning ... Therefore, the answer is: C.", **fields) == "C"
-    # the "Question:" stop sequence is stripped before extraction
+    # the first conclusion wins; anything after it (e.g. a follow-up question) is ignored
     assert answer.extract_answer("Therefore, the answer is: A\nQuestion: the next one", **fields) == "A"
     # no conclusion in the required form -> invalid
     assert answer.extract_answer("I'm fairly sure it is 4.", **fields) == "[invalid]"
