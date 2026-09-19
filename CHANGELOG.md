@@ -14,6 +14,20 @@
 
 ### Bug Fixes
 
+## [0.13.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.2...v0.13.3) (2026-09-19)
+
+
+### Features
+
+* gpqa de cot ([47dc32a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/47dc32a1b612f9ce60fb694e443703de0bbe9f27))
+* SubjectColumn supports default column ([88da00d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/88da00d0f3a74dcbcfb7000be6f618616317b969))
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.95,&lt;2 ([ee93090](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ee930908432900bcfbad765a3b50ff7097dc386d))
+* **deps:** update dependency openai to &gt;=3.14.1,&lt;4 ([5d7e62f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5d7e62fc0473b07e2ac73c57c4a92fe3dfeef83b))
+
 ## [0.13.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.1...v0.13.2) (2026-09-18)
 
 
