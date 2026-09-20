@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.95,<2` |
+| `boto3` | `>=1.43.96,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -48,7 +48,7 @@ and first-party/internal packages are excluded.
 | `colorama` | `0.4.6` |
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
-| `filelock` | `4.0.0` |
+| `filelock` | `4.0.1` |
 | `fsspec` | `2026.6.0` |
 | `googleapis-common-protos` | `1.75.3` |
 | `h11` | `0.16.0` |
@@ -70,7 +70,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.65b0` |
 | `packaging` | `26.3` |
 | `pandas` | `3.0.6` |
-| `platformdirs` | `4.11.10` |
+| `platformdirs` | `4.11.11` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `25.0.1` |
 | `pydantic-core` | `2.46.5` |
