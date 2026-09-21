@@ -11,28 +11,20 @@ import logging
 import random
 import re
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, final, override
+from typing import Any, final, override
 
-from eval_framework.answer import AnswerPolicy, PickFromCandidates
+from eval_framework.answer import ExtractFromCompletion, PickFromCandidates
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
-from eval_framework.contract import Benchmark, ResponseType
-from eval_framework.eval_kind import Choice, EvalKind, SampleBody
+from eval_framework.contract import Benchmark
+from eval_framework.eval_kind import Choice, Generative
 from eval_framework.fewshot import FewShot, FewshotExample
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletionOLMES
-from eval_framework.metrics.efficiency.bytes_per_sequence_position import BytesCompletion, SequencePositionsCompletion
-from eval_framework.metrics.efficiency.finish_reason import FinishReason
-from eval_framework.metrics.efficiency.token_counters import TokenCounts
-from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle
-from template_formatting.formatter import Message
-
-if TYPE_CHECKING:
-    from eval_framework.metrics.base import BaseMetric
 
 logger = logging.getLogger(__name__)
 
@@ -158,59 +150,6 @@ def _normalize_answer_str(item: dict[str, Any]) -> str:
 
 
 @final
-class _Gsm8kAnswer(AnswerPolicy):
-    """Free-form completion reduced to its final number (OLMES ``_clean_short_answer``)."""
-
-    @override
-    def response_type(self) -> ResponseType:
-        return ResponseType.COMPLETION
-
-    @override
-    def metrics(self) -> list[type["BaseMetric"]]:
-        return [BytesCompletion, SequencePositionsCompletion, TokenCounts, FinishReason]
-
-    @override
-    def stop_sequences(self) -> list[str]:
-        return list(_STOP_SEQUENCES)
-
-    @override
-    def max_tokens(self) -> int | None:
-        return _MAX_TOKENS
-
-    @override
-    def extract_answer(
-        self,
-        completion_text: str,
-        *,
-        context: BaseMetricContext | list[BaseMetricContext] | None,
-        ground_truth: str | list[str] | None,
-        messages: list[Message],
-    ) -> str:
-        return _clean_short_answer(completion_text)
-
-
-@final
-class _Gsm8kGenerative(EvalKind):
-    """GSM8K free-form solving: the model continues ``"Question: ...\nAnswer:"`` and its final number is
-    scored against the gold answer's final number."""
-
-    @override
-    def metrics(self) -> list[type["BaseMetric"]]:
-        return [AccuracyCompletionOLMES]
-
-    @override
-    def samples(self, item: dict[str, Any]) -> list[SampleBody]:
-        return [
-            SampleBody(
-                prompt=f"Question: {item['question']}\nAnswer:",
-                cue="",  # no assistant cue — the model continues the answer
-                possible_completions=[],
-                ground_truth=_clean_short_answer(item["answer"]),
-            )
-        ]
-
-
-@final
 class _Gsm8kBpbReader(ChoiceReader):
     """The single 'choice' is the normalised gold solution; BPB scores the model's likelihood of it."""
 
@@ -269,8 +208,13 @@ def _gsm8k_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
 def gsm8k_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     return ComposedBenchmark.compose(
         id="GSM8K_OLMES",
-        kind=_Gsm8kGenerative(),
-        answer=_Gsm8kAnswer(),
+        kind=Generative(
+            build_prompt=lambda item: f"Question: {item['question']}\nAnswer:",
+            cue="",  # no assistant cue — the model continues the answer
+            ground_truth=lambda item: _clean_short_answer(item["answer"]),
+            metrics=[AccuracyCompletionOLMES],
+        ),
+        answer=ExtractFromCompletion(_clean_short_answer, _STOP_SEQUENCES, max_tokens=_MAX_TOKENS),
         sample_split="test",
         fewshot=_Gsm8kFewShot(_generative_demo),
         subjects=ListOfSubjects(["main"]),

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, final, override
 
@@ -77,3 +78,43 @@ class Choice(EvalKind):
     @override
     def initial_prompt(self, subject_label: str) -> str | None:
         return self._styler.initial_prompt(subject_label)
+
+
+# item -> a rendered prompt / cue / ground-truth string.
+ItemText = Callable[[dict[str, Any]], str]
+
+
+@final
+class Generative(EvalKind):
+    """Free-form question -> answer kind: one sample per item, no scored candidates (the answer is extracted
+    from the generation by the injected ``AnswerPolicy``). ``build_prompt`` frames the question, ``cue``
+    primes the answer turn (``""`` for none), ``ground_truth`` derives the gold answer, and ``metrics`` are
+    the scoring metrics."""
+
+    def __init__(
+        self,
+        *,
+        build_prompt: ItemText,
+        cue: str,
+        ground_truth: ItemText,
+        metrics: list[type["BaseMetric"]],
+    ) -> None:
+        self._build_prompt = build_prompt
+        self._cue = cue
+        self._ground_truth = ground_truth
+        self._metrics = metrics
+
+    @override
+    def metrics(self) -> list[type["BaseMetric"]]:
+        return self._metrics
+
+    @override
+    def samples(self, item: dict[str, Any]) -> list[SampleBody]:
+        return [
+            SampleBody(
+                prompt=self._build_prompt(item),
+                cue=self._cue,
+                possible_completions=[],
+                ground_truth=self._ground_truth(item),
+            )
+        ]

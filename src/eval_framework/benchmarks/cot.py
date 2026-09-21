@@ -10,7 +10,7 @@ import re
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, final, override
 
-from eval_framework.answer import ExtractFromCompletion
+from eval_framework.answer import ExtractFromCompletion, first_match, last_match
 from eval_framework.choices import ChoiceReader
 from eval_framework.eval_kind import EvalKind, SampleBody
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
@@ -47,7 +47,7 @@ def tulu_answer() -> ExtractFromCompletion:
     """Extracts the parenthesised letter that ``tulu3_cot_prompt`` asks the model to conclude with —
     ``"Therefore, the answer is (X)"``. Kept here beside the prompt because both encode the same ``(X)``
     format. The accepted letters are the fixed A–J the prompt's ``"(A), (B), ..., (E), etc."`` implies."""
-    return ExtractFromCompletion(re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)"), ["Question:"])
+    return ExtractFromCompletion(first_match(re.compile(r"Therefore, the answer is \(([ABCDEFGHIJ])\)")), ["Question:"])
 
 
 def tulu_answer_v2(n_options: int) -> ExtractFromCompletion:
@@ -55,9 +55,7 @@ def tulu_answer_v2(n_options: int) -> ExtractFromCompletion:
     case-insensitive, taking the last match. Only the accepted letter range is benchmark-specific, so it is
     built from ``n_options``."""
     letters = "".join(get_n_letters(n_options))
-    return ExtractFromCompletion(
-        re.compile(rf"\banswer\s+is:?\s*\(?([{letters}])\b\)?", re.IGNORECASE), last_match=True
-    )
+    return ExtractFromCompletion(last_match(re.compile(rf"\banswer\s+is:?\s*\(?([{letters}])\b\)?", re.IGNORECASE)))
 
 
 @final

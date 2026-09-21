@@ -11,7 +11,7 @@ leniently regex-extracted from the generation (free-form completion, 0-shot).
 import re
 from typing import Any, final, override
 
-from eval_framework.answer import ExtractFromCompletion
+from eval_framework.answer import ExtractFromCompletion, last_match
 from eval_framework.benchmarks.cot import Cot
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
@@ -95,8 +95,9 @@ def tulu_answer_de() -> ExtractFromCompletion:
     often still concludes in English. The match is anchored on the answer phrase, so a bare "Antwort D" in the
     reasoning does not count. GPQA always has four options, so only A–D are accepted."""
     return ExtractFromCompletion(
-        re.compile(r"\b(?:ist\s+die\s+Antwort|Antwort\s+ist|Antwort:|answer\s+is)\s*\(?([A-D])\b\)?", re.IGNORECASE),
-        last_match=True,
+        last_match(
+            re.compile(r"\b(?:ist\s+die\s+Antwort|Antwort\s+ist|Antwort:|answer\s+is)\s*\(?([A-D])\b\)?", re.IGNORECASE)
+        )
     )
 
 

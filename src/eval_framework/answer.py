@@ -8,6 +8,7 @@ into ``compose`` next to the eval kind, so the kind stays purely about the promp
 
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from typing import TYPE_CHECKING, final, override
 
 from eval_framework.contract import ResponseType
@@ -91,24 +92,46 @@ class PickFromCandidates(AnswerPolicy):
         return completion_text
 
 
+# A generation -> the scored answer distilled from it ("[invalid]" when none can be).
+Extractor = Callable[[str], str]
+
+
+def first_match(answer_re: re.Pattern[str]) -> Extractor:
+    """Extractor: group 1 of the first regex match, returned as-is, or ``"[invalid]"``."""
+
+    def extract(completion_text: str) -> str:
+        match = answer_re.search(completion_text)
+        return match.group(1) if match else "[invalid]"
+
+    return extract
+
+
+def last_match(answer_re: re.Pattern[str]) -> Extractor:
+    """Extractor: the last regex match, upper-cased (for lenient case-insensitive patterns), or
+    ``"[invalid]"``."""
+
+    def extract(completion_text: str) -> str:
+        matches = answer_re.findall(completion_text)
+        return matches[-1].upper() if matches else "[invalid]"
+
+    return extract
+
+
 @final
 class ExtractFromCompletion(AnswerPolicy):
     """Free-form completion: the model generates (bounded by ``stop_sequences`` / ``max_tokens``) and the
-    scored answer is pulled out with ``answer_re``. ``last_match`` takes the final match, upper-cased (for
-    lenient case-insensitive patterns); otherwise the first match is returned as-is. ``"[invalid]"`` when
-    nothing matches."""
+    scored answer is produced by ``extract`` applied to the generation. Regex extractors are available as
+    ``first_match`` / ``last_match``."""
 
     def __init__(
         self,
-        answer_re: re.Pattern[str],
+        extract: Extractor,
         stop_sequences: list[str] | None = None,
         *,
-        last_match: bool = False,
         max_tokens: int | None = None,
     ) -> None:
-        self._answer_re = answer_re
+        self._extract = extract
         self._stop_sequences = stop_sequences or []
-        self._last_match = last_match
         self._max_tokens = max_tokens
 
     @override
@@ -136,8 +159,4 @@ class ExtractFromCompletion(AnswerPolicy):
         ground_truth: str | list[str] | None,
         messages: list[Message],
     ) -> str:
-        if self._last_match:
-            matches = self._answer_re.findall(completion_text)
-            return matches[-1].upper() if matches else "[invalid]"
-        match = self._answer_re.search(completion_text)
-        return match.group(1) if match else "[invalid]"
+        return self._extract(completion_text)
