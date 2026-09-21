@@ -1,21 +1,16 @@
 import pytest
 
-from eval_framework.benchmarks.arc_de import ArcDeReader
-from eval_framework.tasks.registry import Registry
-from eval_framework.tasks.task_names import register_arc_de_tasks
+from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK, ArcDeReader
+from eval_framework.contract import Benchmark
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
-from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
-
-# Registry for this test suite only holding arc_de tasks
-_arc_de_registry = Registry()
-register_arc_de_tasks(registry=_arc_de_registry)
+from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
 
 
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-@pytest.mark.parametrize("task_name", _arc_de_registry.task_names())
-def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(task_name, formatter_cls, registry=_arc_de_registry)
+@pytest.mark.parametrize("benchmark", [ARC_DE_BENCHMARK], ids=lambda b: b.id())
+def test_formatter_hash(benchmark: Benchmark, formatter_cls: type[BaseFormatter]) -> None:
+    assert_benchmark_formatter_hash(benchmark, formatter_cls)
 
 
 @pytest.mark.parametrize("answer_key", ["2", "B"])

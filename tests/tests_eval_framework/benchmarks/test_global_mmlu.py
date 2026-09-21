@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 
 from eval_framework.benchmarks.global_mmlu import GLOBAL_MMLU_BENCHMARKS, global_mmlu
-from eval_framework.tasks.registry import Registry
+from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,
@@ -21,19 +21,14 @@ from template_formatting.formatter import (
     Role,
 )
 from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
-from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
-
-# Registry for this test suite only holding the composed global_mmlu tasks.
-_global_mmlu_registry = Registry()
-for _benchmark in GLOBAL_MMLU_BENCHMARKS:
-    _global_mmlu_registry.add(_benchmark)
+from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
 
 
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter, NoStripConcatFormatter])
-@pytest.mark.parametrize("task_name", _global_mmlu_registry.task_names())
-def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(task_name, formatter_cls, registry=_global_mmlu_registry)
+@pytest.mark.parametrize("benchmark", GLOBAL_MMLU_BENCHMARKS, ids=lambda b: b.id())
+def test_formatter_hash(benchmark: Benchmark, formatter_cls: type[BaseFormatter]) -> None:
+    assert_benchmark_formatter_hash(benchmark, formatter_cls)
 
 
 # ---------------------------------------------------------------------------

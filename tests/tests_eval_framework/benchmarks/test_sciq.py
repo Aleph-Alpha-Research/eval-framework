@@ -11,9 +11,8 @@ from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.sciq import sciq_mc_olmes
-from eval_framework.tasks.registry import Registry
-from eval_framework.tasks.task_names import register_sciq_tasks
+from eval_framework.benchmarks.sciq import SCIQ_BENCHMARKS, sciq_mc_olmes
+from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,
@@ -23,18 +22,14 @@ from template_formatting.formatter import (
     Role,
 )
 from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
-from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
-
-# Registry for this test suite only holding the composed sciq task.
-_sciq_registry = Registry()
-register_sciq_tasks(registry=_sciq_registry)
+from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
 
 
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter, NoStripConcatFormatter])
-@pytest.mark.parametrize("task_name", _sciq_registry.task_names())
-def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(task_name, formatter_cls, registry=_sciq_registry)
+@pytest.mark.parametrize("benchmark", SCIQ_BENCHMARKS, ids=lambda b: b.id())
+def test_formatter_hash(benchmark: Benchmark, formatter_cls: type[BaseFormatter]) -> None:
+    assert_benchmark_formatter_hash(benchmark, formatter_cls)
 
 
 # ---------------------------------------------------------------------------

@@ -15,7 +15,7 @@ from eval_framework.benchmarks.gsm8k_ellamind import (
     gsm8k_ellamind_de_bpb_platinum,
     gsm8k_ellamind_de_platinum,
 )
-from eval_framework.tasks.registry import Registry
+from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,
@@ -25,18 +25,14 @@ from template_formatting.formatter import (
     Role,
 )
 from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
-from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
-
-_gsm8k_ellamind_registry = Registry()
-for _benchmark in GSM8K_ELLAMIND_BENCHMARKS:
-    _gsm8k_ellamind_registry.add(_benchmark)
+from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
 
 
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter, NoStripConcatFormatter])
-@pytest.mark.parametrize("task_name", _gsm8k_ellamind_registry.task_names())
-def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(task_name, formatter_cls, registry=_gsm8k_ellamind_registry)
+@pytest.mark.parametrize("benchmark", GSM8K_ELLAMIND_BENCHMARKS, ids=lambda b: b.id())
+def test_formatter_hash(benchmark: Benchmark, formatter_cls: type[BaseFormatter]) -> None:
+    assert_benchmark_formatter_hash(benchmark, formatter_cls)
 
 
 # ---------------------------------------------------------------------------

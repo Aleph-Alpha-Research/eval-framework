@@ -1,11 +1,12 @@
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
 import pytest
 from dateutil import parser
 
+from eval_framework.contract import Benchmark, Eval
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator, repeat_samples
 from eval_framework.result_processors.base import ResultProcessor
@@ -13,7 +14,7 @@ from eval_framework.result_processors.result_processor import ResultsFileProcess
 from eval_framework.shared.types import Completion, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.registry import register_task
+from eval_framework.tasks.registry import Registry, register_task
 from template_formatting.formatter import Message, Role
 from tests.tests_eval_framework.conftest import MockLLM
 from tests.tests_eval_framework.tasks.test_registry import temporary_registry
@@ -191,6 +192,81 @@ precedence_test_setup = [
 ]
 
 
+class _PrecedenceStub(Eval, Benchmark):
+    """Task double for the precedence test: it contributes a fixed stop-sequence / max-token set, acts as its
+    own single-use benchmark, and records the stop/max it is asked to generate with — so the test can assert
+    the merged precedence through the public run, with no patching."""
+
+    def __init__(self, stop_sequences: list[str] | None, max_tokens: int | None) -> None:
+        self._stop_sequences = list(stop_sequences or [])  # BaseTask normalised None -> []
+        self._max_tokens = max_tokens
+        self.called_stop_sequences: list[str] | None = None
+        self.called_max_tokens: int | None = None
+
+    # Benchmark side — the double is its own factory.
+    def id(self) -> str:
+        return "PrecedenceStub"
+
+    def response_type(self) -> ResponseType:
+        return ResponseType.COMPLETION
+
+    def metrics(self) -> list:
+        return []
+
+    def subjects(self) -> list:
+        return ["stub"]
+
+    def create(self, num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix=None, seed=None) -> Eval:
+        return self
+
+    def markdown_doc(self, formatters) -> str:
+        return ""
+
+    # Eval side.
+    def get_response_type(self) -> ResponseType:
+        return ResponseType.COMPLETION
+
+    def get_stop_sequences(self) -> list[str]:
+        return self._stop_sequences
+
+    def get_max_tokens(self) -> int | None:
+        return self._max_tokens
+
+    def get_metadata(self) -> dict[str, str | list[str]]:
+        return {}
+
+    def display_name(self) -> str:
+        return "PrecedenceStub"
+
+    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
+        yield Sample(
+            id=0,
+            subject="stub",
+            ground_truth="A",
+            messages=[Message(role=Role.USER, content="Hi")],
+            possible_completions=None,
+        )
+
+    def generate_completions(
+        self, llm, samples, stop_sequences=None, max_tokens=None, fail_on_error=True
+    ) -> list[Completion]:
+        self.called_stop_sequences = stop_sequences
+        self.called_max_tokens = max_tokens
+        return [
+            Completion(
+                id=0,
+                subject="stub",
+                ground_truth="A",
+                messages=[Message(role=Role.ASSISTANT, content="c")],
+                prompt="p",
+                prompt_num_tokens=None,
+                completion="c",
+                raw_completion="c",
+                raw_completion_num_tokens=1,
+            )
+        ]
+
+
 @pytest.mark.parametrize(
     """
     llm_max_tokens,
@@ -211,7 +287,6 @@ def test_response_generator_llm_token_overloading(
     config_max_tokens: int | None,
     expected_max_tokens: int | None,
     expected_stop_sequences: list[str] | None,
-    tmp_path: Path,
 ) -> None:
     """
     Test the precedence of max tokens and stop sequences in the response generator
@@ -225,61 +300,27 @@ def test_response_generator_llm_token_overloading(
     :param expected_stop_sequences: expected stop sequences in the generator
     :return: None
     """
-    # setting up mock llm
     llm = MockLLM()
-    # defining max_tokens and stop_sequences from parameters
     setattr(llm, "max_tokens", llm_max_tokens)
     setattr(llm, "stop_sequences", llm_stop_sequences)
 
-    # defining task eval config
+    # A task double that contributes the task-side stop/max and records what it is actually asked to generate
+    # with, resolved through a test-local registry — so precedence is observed end-to-end, with no patching.
+    task = _PrecedenceStub(task_stop_sequences, task_max_tokens)
+    registry = Registry()
+    registry.add(task)
     config = EvalConfig(
-        task_name="AIME2024", num_fewshot=0, num_samples=1, llm_class=llm.__class__, max_tokens=config_max_tokens
+        task_name=task.id(), num_fewshot=0, num_samples=1, llm_class=llm.__class__, max_tokens=config_max_tokens
     )
+    generator = ResponseGenerator(llm, config, NoopResultProcessor(), benchmark_registry=registry)  # type: ignore[arg-type]
 
-    generator = ResponseGenerator(llm, config, ResultsFileProcessor(tmp_path))
-    generator.task.max_tokens = task_max_tokens
-    generator.task.stop_sequences = task_stop_sequences
+    assert generator.generate(lambda: False)
 
-    # no need to load from dataset
-    generator.result_processor.load_responses = MagicMock(return_value=[])  # type:ignore[method-assign]
-
-    # we don't want to write results to disk
-    generator.result_processor.save_responses = MagicMock(return_value=None)  # type:ignore[method-assign]
-    mock_message = [Message(role=Role.ASSISTANT, content="Hello")]
-
-    # don't need to actually run the completion
-    generator.task.generate_completions = MagicMock(  # type:ignore[method-assign]
-        return_value=[
-            Completion(
-                id=0,
-                subject="none",
-                ground_truth="none",
-                messages=mock_message,
-                prompt="prompt",
-                prompt_num_tokens=None,
-                completion="completion",
-                raw_completion="raw_completion",
-                raw_completion_num_tokens=1,
-            )
-        ]
-    )
-    generator.task.iterate_samples = MagicMock(  # type:ignore[method-assign]
-        return_value=[
-            Sample(id=0, subject="none", ground_truth="none", messages=mock_message, possible_completions=None)
-        ]
-    )
-    generated = generator.generate(lambda: False)
-    # make sure that run complete is called with the precedence values
-    call_kwargs = generator.task.generate_completions.call_args[1]
-    called_stop_sequences = call_kwargs["stop_sequences"]
-    called_max_tokens = call_kwargs["max_tokens"]
-
-    assert generated
-    assert expected_max_tokens == called_max_tokens
-
-    expected_stop_sequences = sorted(expected_stop_sequences) if expected_stop_sequences else None
-    called_stop_sequences = sorted(called_stop_sequences) if called_stop_sequences else None
-    assert expected_stop_sequences == called_stop_sequences
+    # The task is asked to generate with the precedence-merged max tokens and stop sequences.
+    assert expected_max_tokens == task.called_max_tokens
+    expected_stop = sorted(expected_stop_sequences) if expected_stop_sequences else None
+    called_stop = sorted(task.called_stop_sequences) if task.called_stop_sequences else None
+    assert expected_stop == called_stop
 
 
 @pytest.mark.parametrize(
