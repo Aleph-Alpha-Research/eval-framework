@@ -13,7 +13,7 @@ from typing import Any
 
 import pytest
 
-from eval_framework.answer import ExtractFromCompletion
+from eval_framework.answer import ExtractFromCompletion, first_match
 from eval_framework.benchmarks.mmlu import (
     _MMLU_COT_ANSWER_RE,
     MMLU_BENCHMARKS,
@@ -149,7 +149,7 @@ def test_mmlu_cot_prompt() -> None:
 
 def test_mmlu_cot_extracts_the_concluding_letter() -> None:
     # extract_answer runs at scoring time (not captured by the formatter hash), so exercise it directly.
-    answer = ExtractFromCompletion(_MMLU_COT_ANSWER_RE, ["Question:"])
+    answer = ExtractFromCompletion(first_match(_MMLU_COT_ANSWER_RE), ["Question:"])
     fields: dict[str, Any] = {"context": None, "ground_truth": None, "messages": []}
     assert answer.extract_answer("Reasoning ... Therefore, the answer is: C.", **fields) == "C"
     # the first conclusion wins; anything after it (e.g. a follow-up question) is ignored
