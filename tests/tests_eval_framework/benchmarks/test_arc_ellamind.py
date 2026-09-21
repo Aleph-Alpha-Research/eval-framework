@@ -11,12 +11,12 @@ from typing import Any
 import pytest
 
 from eval_framework.benchmarks.arc_ellamind import (
+    ARC_ELLAMIND_BENCHMARKS,
     arc_ellamind_bpb_de,
     arc_ellamind_cloze_de,
     arc_ellamind_mc_de,
 )
-from eval_framework.tasks.registry import Registry
-from eval_framework.tasks.task_names import register_arc_ellamind_tasks
+from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,
@@ -26,18 +26,14 @@ from template_formatting.formatter import (
     Role,
 )
 from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
-from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
-
-# Registry for this test suite only holding the composed arc_ellamind tasks.
-_arc_ellamind_registry = Registry()
-register_arc_ellamind_tasks(registry=_arc_ellamind_registry)
+from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
 
 
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter, NoStripConcatFormatter])
-@pytest.mark.parametrize("task_name", _arc_ellamind_registry.task_names())
-def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(task_name, formatter_cls, registry=_arc_ellamind_registry)
+@pytest.mark.parametrize("benchmark", ARC_ELLAMIND_BENCHMARKS, ids=lambda b: b.id())
+def test_formatter_hash(benchmark: Benchmark, formatter_cls: type[BaseFormatter]) -> None:
+    assert_benchmark_formatter_hash(benchmark, formatter_cls)
 
 
 # Fictional German ARC rows (NOT real dataset examples): each tagged with its arc_config subset; the

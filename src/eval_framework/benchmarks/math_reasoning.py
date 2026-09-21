@@ -1,0 +1,266 @@
+"""Math reasoning benchmarks."""
+
+import re
+from collections.abc import Callable
+
+from eval_framework.answer import ExtractFromCompletion, Extractor
+from eval_framework.composed import ComposedBenchmark
+from eval_framework.contract import Benchmark
+from eval_framework.eval_kind import Generative, ItemText
+from eval_framework.fewshot import NoFewShot
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
+from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
+from eval_framework.metrics.completion.minerva_math_utils import (
+    _fix_a_slash_b,
+    _fix_fracs,
+    _fix_sqrt,
+    _remove_right_units,
+    strip_string_hendrycks,
+)
+from eval_framework.subjects import ListOfSubjects, NoSubject
+from eval_framework.tasks.base import Language
+from eval_framework.tasks.dataset_loading import DatasetPolicy
+from eval_framework.tasks.dataset_revisions import pinned_by_framework
+
+MATH500_DATASET_PATH = "HuggingFaceH4/MATH-500"
+
+# From OpenAI's simple-evals math_eval.py (c) 2024 OpenAI, MIT. Continuation lines keep a 4-space indent, as
+# in the original; ``{{answer}}`` renders as the literal ``{answer}``.
+_QUERY_TEMPLATE = """
+Solve the following math problem step by step. The last line of your response should be of the form Answer: $ANSWER (without quotes) where $ANSWER is the answer to the problem.
+
+    {Question}
+
+    Remember to put your answer in $\\boxed{{answer}}$
+
+    where [answer] is just the final number or expression that solves the problem.
+""".strip()  # noqa: E501
+
+_ANSWER_PATTERN = r"(?i)Answer\s*:\s*(.*)"
+
+
+def _extract_boxed(string: str) -> str | None:
+    if "\\boxed" not in string and "\\fbox" not in string:
+        return None
+    idx = max(string.rfind("\\boxed"), string.rfind("\\fbox"))
+    right_brace_idx = None
+    num_left_braces_open = 0
+    i = idx
+    while i < len(string):
+        if string[i] == "{":
+            num_left_braces_open += 1
+        elif string[i] == "}":
+            num_left_braces_open -= 1
+            if num_left_braces_open == 0:
+                right_brace_idx = i
+                break
+        i += 1
+    if right_brace_idx is None:
+        return None
+    retval = string[idx : right_brace_idx + 1]
+    left = "\\boxed{"
+    if retval[: len(left)] == left and retval[-1] == "}":
+        return retval[len(left) : -1]
+    return None
+
+
+def _strip_string_with_bug(string: str) -> str:
+    """The original MATH answer normalisation, **faithfully preserved with its bug**: the ``\\left`` /
+    ``\\right`` / ``^\\circ`` / ``\\!`` entries are raw patterns (``r"\\\\left"`` = *two* backslashes), so
+    despite the comments they never match real single-backslash LaTeX and those commands are left in place.
+    ``MATH500_V2`` uses the corrected ``strip_string_hendrycks`` instead. Sub-helpers are shared with minerva
+    (verified identical)."""
+    for pattern, replacement in [
+        (r"\n", ""),  # linebreaks
+        (r"\\!", ""),  # remove inverse spaces
+        (r"\\\\", "\\"),  # replace \\ with \
+        (r"tfrac", "frac"),
+        (r"dfrac", "frac"),
+        (r"\\left", ""),  # remove \left  (bug: matches two backslashes, never a real \left)
+        (r"\\right", ""),  # remove \right (same bug)
+        (r"^{\\circ}", ""),
+        (r"^\\circ", ""),
+        (r"\\$", ""),  # remove $
+    ]:
+        string = string.replace(pattern, replacement)
+    string = _remove_right_units(string)
+    for pattern, replacement in [(r"\\%", ""), (r"\%", ""), (r" .", " 0."), (r"{.", "{0.")]:  # noqa: W605
+        string = string.replace(pattern, replacement)
+    if len(string) == 0:
+        return string
+    if string[0] == ".":
+        string = "0" + string
+    parts = [s.strip() for s in string.split("=")]
+    if len(parts) == 2 and len(parts[0]) <= 2:
+        string = parts[1]
+    elif len(parts) > 2:
+        if all(len(part) <= 2 and re.match(r"^[a-zA-Z]\w*$", part) for part in parts[:-1]):  # noqa: W605
+            string = parts[-1]
+    string = _fix_sqrt(string)
+    string = string.replace(" ", "")
+    string = _fix_fracs(string)
+    if string == "0.5":
+        string = "\\frac{1}{2}"
+    string = _fix_a_slash_b(string)
+    string = re.sub(r"\b0(?=\d)", "", string)  # remove leading zeros
+    return string
+
+
+def _boxed_extractor(strip: Callable[[str], str], *, answer_line_fallback: bool = False) -> Extractor:
+    def extract(completion_text: str) -> str:
+        answer = _extract_boxed(completion_text)
+        if answer is None and answer_line_fallback:
+            match = re.search(_ANSWER_PATTERN, completion_text)
+            answer = match.group(1) if match else None
+        return "[no_answer]" if answer is None else strip(answer)
+
+    return extract
+
+
+def _math500(id: str, strip: Callable[[str], str], dataset: DatasetPolicy | None) -> Benchmark:
+    return ComposedBenchmark.compose(
+        id=id,
+        kind=Generative(
+            build_prompt=lambda item: _QUERY_TEMPLATE.format(Question=item["problem"]),
+            cue="",  # no assistant cue — the model produces the full worked solution
+            ground_truth=lambda item: item["answer"],
+            metrics=[MathReasoningCompletion, LanguageRawConsistencyChecker],
+        ),
+        answer=ExtractFromCompletion(_boxed_extractor(strip, answer_line_fallback=True)),
+        sample_split="test",
+        fewshot=NoFewShot(),
+        subjects=NoSubject(),
+        dataset_policy=dataset if dataset is not None else pinned_by_framework(MATH500_DATASET_PATH),
+        language=Language.ENG,
+    )
+
+
+def math500_with_bug(dataset: DatasetPolicy | None = None) -> Benchmark:
+    # V1 — faithful to the original MATH500, including the latent normalisation bug in
+    # `_strip_string_with_bug`. `math500_v2` is the same task with the bug fixed.
+    return _math500("MATH500", _strip_string_with_bug, dataset)
+
+
+def math500_v2(dataset: DatasetPolicy | None = None) -> Benchmark:
+    # V2 — identical prompt and extraction, but the corrected shared normalisation, so LaTeX commands like
+    # \left / ^\circ are stripped as originally intended.
+    return _math500("MATH500_V2", strip_string_hendrycks, dataset)
+
+
+# From NVIDIA NeMo-Skills (llama3-instruct/math.yaml). Continuation lines keep a 4-space indent, as in the
+# original, and there is no trailing strip; ``{{answer}}`` renders as the literal ``{answer}``.
+_AIME_QUERY_TEMPLATE = """Solve the following math problem efficiently and clearly:
+
+    - For simple problems (2 steps or fewer):
+    Provide a concise solution with minimal explanation.
+
+    - For complex problems (3 steps or more):
+    Use this step-by-step format:
+
+    ## Step 1: [Concise description]
+    [Brief explanation and calculations]
+
+    ## Step 2: [Concise description]
+    [Brief explanation and calculations]
+
+    ...
+
+    Regardless of the approach, always conclude with:
+
+    Therefore, the final answer is: $\\boxed{{answer}}$. I hope it is correct.
+
+    Where [answer] is just the final number or expression that solves the problem.
+
+    Problem: {Question}"""  # noqa: E501
+
+
+def _aime(
+    id: str, dataset_path: str, sample_split: str, ground_truth: ItemText, dataset: DatasetPolicy | None
+) -> Benchmark:
+    # AIME answers are integers, so the `_strip_string_with_bug` bug is inert here — no bug-free V2 needed.
+    return ComposedBenchmark.compose(
+        id=id,
+        kind=Generative(
+            build_prompt=lambda item: _AIME_QUERY_TEMPLATE.format(Question=item["problem"]),
+            cue="",
+            ground_truth=ground_truth,
+            metrics=[MathReasoningCompletion, LanguageRawConsistencyChecker],
+        ),
+        answer=ExtractFromCompletion(_boxed_extractor(_strip_string_with_bug)),  # boxed only, no Answer: fallback
+        sample_split=sample_split,
+        fewshot=NoFewShot(),
+        subjects=NoSubject(),
+        dataset_policy=dataset if dataset is not None else pinned_by_framework(dataset_path),
+        language=Language.ENG,
+    )
+
+
+def aime2024(dataset: DatasetPolicy | None = None) -> Benchmark:
+    # AIME 2024 gold answers are zero-padded (range 0-999); strip the leading zeros.
+    return _aime("AIME2024", "HuggingFaceH4/aime_2024", "train", lambda item: item["answer"].lstrip("0"), dataset)
+
+
+def aime2025(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _aime("AIME2025", "math-ai/aime25", "test", lambda item: item["answer"], dataset)
+
+
+def aime2026(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _aime("AIME2026", "math-ai/aime26", "test", lambda item: item["answer"], dataset)
+
+
+GSM8K_REASONING_DATASET_PATH = "openai/gsm8k"
+
+# Zero-shot reasoning prompt (boxed final answer). Distinct from the OLMES gsm8k variants in benchmarks/gsm8k.py.
+_GSM8K_REASONING_QUERY_TEMPLATE = """\
+Solve the following math problem step by step. Think through the problem carefully and show your reasoning.
+
+Please provide your answer in the format: $\\boxed{{answer}}$ where answer is the final numerical result.
+
+Question: {question}
+
+Answer:"""
+
+_HASH_ANSWER_PATTERN = re.compile(r"#### (\-?[0-9\.\,]+)")
+
+
+def _extract_hash_answer(text: str) -> str:
+    """The GSM8K gold-answer form: the number after ``####`` with commas removed, or ``"[invalid]"``."""
+    match = _HASH_ANSWER_PATTERN.search(text)
+    return match.group(1).strip().replace(",", "") if match else "[invalid]"
+
+
+def _gsm8k_reasoning_extractor(completion_text: str) -> str:
+    """Boxed answer first (commas stripped); otherwise fall back to the ``####`` line."""
+    boxed = _extract_boxed(completion_text)
+    if boxed is not None:
+        return boxed.replace(",", "").strip()
+    return _extract_hash_answer(completion_text)
+
+
+def gsm8k_reasoning(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return ComposedBenchmark.compose(
+        id="GSM8KReasoning",
+        kind=Generative(
+            build_prompt=lambda item: _GSM8K_REASONING_QUERY_TEMPLATE.format(question=item["question"]),
+            cue="",  # the prompt already ends on "Answer:"; the model continues from there
+            ground_truth=lambda item: _extract_hash_answer(item["answer"]),
+            metrics=[AccuracyCompletion, LanguageRawConsistencyChecker],
+        ),
+        answer=ExtractFromCompletion(_gsm8k_reasoning_extractor),  # boxed, then #### fallback; no stop sequences
+        sample_split="test",
+        fewshot=NoFewShot(),
+        subjects=ListOfSubjects(["main"]),
+        dataset_policy=dataset if dataset is not None else pinned_by_framework(GSM8K_REASONING_DATASET_PATH),
+        language=Language.ENG,
+    )
+
+
+MATH_REASONING_BENCHMARKS: list[Benchmark] = [
+    math500_with_bug(),
+    math500_v2(),
+    aime2024(),
+    aime2025(),
+    aime2026(),
+    gsm8k_reasoning(),
+]

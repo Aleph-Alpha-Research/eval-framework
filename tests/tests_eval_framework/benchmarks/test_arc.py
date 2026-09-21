@@ -12,10 +12,8 @@ from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.arc import _IDK_PREAMBLE, arc, arc_idk, arc_olmes
+from eval_framework.benchmarks.arc import _IDK_PREAMBLE, ARC_BENCHMARKS, arc, arc_idk, arc_olmes
 from eval_framework.contract import Benchmark
-from eval_framework.tasks.registry import Registry
-from eval_framework.tasks.task_names import register_arc_tasks
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,
@@ -25,18 +23,14 @@ from template_formatting.formatter import (
     Role,
 )
 from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
-from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
-
-# Registry for this test suite only holding the composed arc tasks.
-_arc_registry = Registry()
-register_arc_tasks(registry=_arc_registry)
+from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
 
 
 @pytest.mark.formatter_hash
 @pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter, NoStripConcatFormatter])
-@pytest.mark.parametrize("task_name", _arc_registry.task_names())
-def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(task_name, formatter_cls, registry=_arc_registry)
+@pytest.mark.parametrize("benchmark", ARC_BENCHMARKS, ids=lambda b: b.id())
+def test_formatter_hash(benchmark: Benchmark, formatter_cls: type[BaseFormatter]) -> None:
+    assert_benchmark_formatter_hash(benchmark, formatter_cls)
 
 
 # ---------------------------------------------------------------------------

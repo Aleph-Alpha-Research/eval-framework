@@ -16,11 +16,15 @@ from tests.tests_eval_framework.tasks.benchmarks.utils import (
 from tests.tests_eval_framework.utils import DatasetPatcher
 
 _NUM_FEWSHOT = {
+    "MATH500": 0,
+    "MATH500_V2": 0,
+    "AIME2024": 0,
+    "AIME2025": 0,
+    "AIME2026": 0,
     "GSM8KReasoning": 0,
-    "MATHMinervaBPB": 0,
-    "MATHMinervaEvalHarness": 0,
-    "MATH500Minerva": 0,
+    "MATHMinervaBPB": 4,
     "MATHMinerva_OLMES": 4,
+    "MATHMinerva_OLMES_NONL": 4,
 }
 
 
@@ -122,7 +126,7 @@ register_math_reasoning_tasks(registry=_math_reasoning_registry)
 @pytest.mark.parametrize("task_name", _math_reasoning_registry.task_names())
 def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
     run_formatter_hash_test(
-        task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1), registry=_math_reasoning_registry
+        task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT[task_name], registry=_math_reasoning_registry
     )
 
 

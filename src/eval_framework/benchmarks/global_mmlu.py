@@ -1,9 +1,6 @@
 """Global-MMLU: https://huggingface.co/datasets/CohereLabs/Global-MMLU
 
 MMLU translated into many languages; we evaluate French, German, Spanish, Italian, Portuguese and Arabic.
-Each subject is a ``(language, subject)`` pair: the language names the dataset config, the (English) subject
-is a column filter. The whole prompt — preamble, the "Question"/"Answer" labels, and the subject name — is
-rendered in the subject's language, so the styler-less path (a local ``EvalKind`` + ``FewShot``) is used.
 """
 
 import ast
@@ -581,9 +578,6 @@ class _GlobalMmluChoice(EvalKind):
 
 @final
 class _GlobalMmluFewShot(FewShot):
-    """Draws demonstrations from ``dev`` and renders them in the eval item's language (a subject's few-shot
-    demonstrations share its language)."""
-
     def __init__(self, split: str) -> None:
         self._split = split
 
