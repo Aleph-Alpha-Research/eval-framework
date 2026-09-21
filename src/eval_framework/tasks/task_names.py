@@ -10,6 +10,7 @@ from eval_framework.benchmarks.global_mmlu import GLOBAL_MMLU_BENCHMARKS
 from eval_framework.benchmarks.goldenswag import GOLDENSWAG_BENCHMARKS
 from eval_framework.benchmarks.gpqa import GPQA_BENCHMARKS
 from eval_framework.benchmarks.gpqa_ellamind import GPQA_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.gsm8k import GSM8K_BENCHMARKS
 from eval_framework.benchmarks.hellaswag import HELLASWAG_BENCHMARKS
 from eval_framework.benchmarks.hellaswag_ellamind import HELLASWAG_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.hle_ellamind import HLE_ELLAMIND_BENCHMARKS
@@ -109,8 +110,8 @@ def register_gpqa_tasks(registry: Registry) -> None:
 
 def register_gsm8k_tasks(registry: Registry) -> None:
     """Register gsm8k benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.gsm8k.GSM8K_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.gsm8k.GSM8KBPB", registry=registry)
+    for benchmark in GSM8K_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_math_reasoning_tasks(registry: Registry) -> None:
