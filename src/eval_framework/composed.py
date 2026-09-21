@@ -333,7 +333,7 @@ class ComposedBenchmark(Benchmark):
         # Composed evals have no completion path yet, so a completion-only user prompt suffix is rejected.
         if user_prompt_suffix is not None:
             raise ValueError("user_prompt_suffix is only supported for completion tasks.")
-        self._fewshot.check(num_fewshot)  # reject an unsupported shot count before touching the dataset
+        num_fewshot = self._fewshot.check(num_fewshot)  # resolve/validate the shot count before loading data
         subjects = self._subjects.select(custom_subjects or [])
         if custom_subjects:
             labels = [subject.label for subject in subjects]
@@ -373,9 +373,10 @@ class ComposedBenchmark(Benchmark):
 
     @override
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        # Show one demonstration where the benchmark supports few-shot, none where it is 0-shot only.
+        # Show one demonstration where the benchmark supports few-shot, none where it is 0-shot only;
+        # a fixed-shot policy resolves this to its pinned count.
         fewshot_split = self._fewshot.split()
-        num_fewshot = 1 if fewshot_split is not None else 0
+        num_fewshot = self._fewshot.check(1 if fewshot_split is not None else 0)
         subjects = self._subjects.select([])
         instance = ComposedEval(
             num_fewshot=num_fewshot,

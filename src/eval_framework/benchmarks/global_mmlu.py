@@ -592,8 +592,8 @@ class _GlobalMmluFewShot(FewShot):
         return self._split
 
     @override
-    def check(self, num_fewshot: int) -> None:
-        return  # any shot count is supported
+    def check(self, num_fewshot: int) -> int:
+        return num_fewshot  # any shot count is supported
 
     @override
     def examples(
