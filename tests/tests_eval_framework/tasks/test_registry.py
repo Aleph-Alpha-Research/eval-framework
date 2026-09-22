@@ -1,10 +1,35 @@
 import functools
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 
 import pytest
 
-from eval_framework.tasks.benchmarks.math_reasoning import MATH, MATHLvl5
+from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.registry import Registry, register_lazy_task, register_task, with_registry
+
+
+class BenchmarkStub(BaseTask[str]):
+    """A minimal task used only to exercise registry registration and lookup — its topic is irrelevant.
+    ``NAME`` normalizes to the class name so eager and lazy registration key it identically."""
+
+    REVISION_LOCKFILE = None
+
+    NAME = "Benchmark Stub"
+    DATASET_PATH = "stub"
+    SAMPLE_SPLIT = "test"
+    FEWSHOT_SPLIT = "test"
+    SUBJECTS = ["stub"]
+    LANGUAGE = Language.ENG
+    RESPONSE_TYPE = ResponseType.COMPLETION
+    METRICS: list = []
+
+    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
+        return iter([])
+
+
+class MultiWordBenchmarkStub(BenchmarkStub):
+    """A longer name, to exercise whitespace/case/punctuation normalization in lookups."""
+
+    NAME = "Multi Word Benchmark Stub"
 
 
 def temporary_registry[**P, T](fun: Callable[P, T]) -> Callable[P, T]:
@@ -22,24 +47,23 @@ def temporary_registry[**P, T](fun: Callable[P, T]) -> Callable[P, T]:
 def test_case_insensitive_lookup() -> None:
     registry = Registry()
 
-    register_task(MATH, registry)
+    register_task(BenchmarkStub, registry)
 
-    assert "MATH" in registry
-    assert set(registry.task_names()) == {"MATH"}
-    assert registry["MATH"].id() == MATH.__name__
-    assert registry["Math"].id() == MATH.__name__
-    assert registry["math"].id() == MATH.__name__
+    assert "Benchmark Stub" in registry
+    assert set(registry.task_names()) == {"BenchmarkStub"}
+    assert registry["Benchmark Stub"].id() == BenchmarkStub.__name__
+    assert registry["benchmark stub"].id() == BenchmarkStub.__name__
+    assert registry["BenchmarkStub"].id() == BenchmarkStub.__name__
 
-    register_task(MATHLvl5, registry)
-    assert set(registry.task_names()) == {"MATH", "MATHLvl5"}
-    assert registry["math lvl 5"].id() == MATHLvl5.__name__
-    assert registry["MATH LVL 5"].id() == MATHLvl5.__name__
-    assert registry["Math Lvl 5"].id() == MATHLvl5.__name__
-    assert registry["Math Lvl     5"].id() == MATHLvl5.__name__
-    assert registry["Math-Lvl_5"].id() == MATHLvl5.__name__
+    register_task(MultiWordBenchmarkStub, registry)
+    assert set(registry.task_names()) == {"BenchmarkStub", "MultiWordBenchmarkStub"}
+    assert registry["multi word benchmark stub"].id() == MultiWordBenchmarkStub.__name__
+    assert registry["MULTI WORD BENCHMARK STUB"].id() == MultiWordBenchmarkStub.__name__
+    assert registry["Multi Word     Benchmark Stub"].id() == MultiWordBenchmarkStub.__name__
+    assert registry["Multi-Word_Benchmark-Stub"].id() == MultiWordBenchmarkStub.__name__
 
     with pytest.raises(ValueError):
-        registry["Math.Lvl.5"]
+        registry["Multi.Word.Benchmark.Stub"]
 
 
 def test_register_non_task() -> None:
@@ -57,27 +81,27 @@ def test_register_non_task() -> None:
 
 def test_lazy_registration() -> None:
     registry = Registry()
-    register_lazy_task(f"{MATH.__module__}.{MATH.__name__}", registry=registry)
-    assert registry["Math"].display_name() == MATH.NAME
+    register_lazy_task(f"{BenchmarkStub.__module__}.{BenchmarkStub.__name__}", registry=registry)
+    assert registry["Benchmark Stub"].display_name() == BenchmarkStub.NAME
 
 
 def test_subjects() -> None:
     registry = Registry()
-    register_task(MATH, registry)
-    assert registry["MATH"].subjects() == MATH.SUBJECTS
+    register_task(BenchmarkStub, registry)
+    assert registry["Benchmark Stub"].subjects() == BenchmarkStub.SUBJECTS
 
     registry = Registry()
-    register_lazy_task(f"{MATH.__module__}.{MATH.__name__}", registry=registry)
-    assert registry["Math"].subjects() == MATH.SUBJECTS
+    register_lazy_task(f"{BenchmarkStub.__module__}.{BenchmarkStub.__name__}", registry=registry)
+    assert registry["Benchmark Stub"].subjects() == BenchmarkStub.SUBJECTS
 
 
 def test_deprecated_register_methods_warn() -> None:
     registry = Registry()
     with pytest.warns(DeprecationWarning):
-        registry.register(MATH)
-    assert registry["MATH"].id() == MATH.__name__
+        registry.register(BenchmarkStub)
+    assert registry["Benchmark Stub"].id() == BenchmarkStub.__name__
 
     registry = Registry()
     with pytest.warns(DeprecationWarning):
-        registry.register_lazy(f"{MATHLvl5.__module__}.{MATHLvl5.__name__}")
-    assert registry["MATHLvl5"].subjects() == MATHLvl5.SUBJECTS
+        registry.register_lazy(f"{MultiWordBenchmarkStub.__module__}.{MultiWordBenchmarkStub.__name__}")
+    assert registry["Multi Word Benchmark Stub"].subjects() == MultiWordBenchmarkStub.SUBJECTS
