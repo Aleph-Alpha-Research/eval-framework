@@ -5,7 +5,6 @@ from eval_framework.tasks.benchmarks.humaneval import HumanEvalBPB, HumanEvalBPB
 from eval_framework.tasks.benchmarks.math_reasoning import (
     MATH500Minerva,
     MATHMinerva,
-    MATHMinervaBPB,
     MATHMinervaEvalHarness,
 )
 from eval_framework.tasks.benchmarks.mbpp import MBPPBPB
@@ -54,7 +53,6 @@ def test_naturalqs_open_tasks_smoke() -> None:
 def test_math_minerva_tasks_smoke() -> None:
     _smoke_test_task(MATHMinervaEvalHarness)
     _smoke_test_task(MATHMinerva)
-    _smoke_test_task(MATHMinervaBPB, num_fewshot=4)  # class default, kept explicit
     _smoke_test_task(MATH500Minerva)
 
 

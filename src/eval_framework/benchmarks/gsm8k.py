@@ -7,10 +7,7 @@ sampled from the dataset) and OLMES answer normalisation:
 - ``GSM8KBPB``: bits-per-byte of the single normalised gold solution (one forward pass).
 """
 
-import logging
-import random
 import re
-from collections.abc import Callable
 from typing import Any, final, override
 
 from eval_framework.answer import ExtractFromCompletion, PickFromCandidates
@@ -18,15 +15,13 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice, Generative
-from eval_framework.fewshot import FewShot, FewshotExample
+from eval_framework.fewshot import FewshotExample, PredefinedFewShot
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletionOLMES
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle
-
-logger = logging.getLogger(__name__)
 
 GSM8K_DATASET_PATH = "openai/gsm8k"
 _STOP_SEQUENCES = ["Question:"]
@@ -158,41 +153,6 @@ class _Gsm8kBpbReader(ChoiceReader):
         return ChoiceFields(raw_question=item["question"], choices=[_normalize_answer_str(item)], correct_index=0)
 
 
-@final
-class _Gsm8kFewShot(FewShot):
-    """The eight fixed exemplars rendered as solved Q/A pairs — no dataset sampling. The shot count is pinned
-    to eight (warning on a different request, matching the original OLMES behaviour)."""
-
-    def __init__(self, render: Callable[[dict[str, Any]], FewshotExample]) -> None:
-        self._render = render
-
-    @override
-    def split(self) -> str | None:
-        return None  # predefined exemplars, no dataset split
-
-    @override
-    def check(self, num_fewshot: int) -> int:
-        if num_fewshot != _NUM_FEWSHOT:
-            logger.warning(f"GSM8K uses a fixed num_fewshot of {_NUM_FEWSHOT}. Got {num_fewshot}.")
-        return _NUM_FEWSHOT
-
-    @override
-    def examples(
-        self,
-        dataset: dict[str, list[dict[str, Any]]],
-        *,
-        sample_split: str,
-        item: dict[str, Any],
-        num_fewshot: int,
-        rnd: random.Random,
-    ) -> list[FewshotExample]:
-        return [self._render(demo) for demo in FEWSHOT_ITEMS[:num_fewshot]]
-
-    @override
-    def metadata(self) -> dict[str, str]:
-        return {"fewshot_split": "predefined"}
-
-
 def _generative_demo(demo: dict[str, Any]) -> FewshotExample:
     return FewshotExample(prompt=f"Question: {demo['question']}\nAnswer:", answer=_normalize_answer_str(demo))
 
@@ -216,7 +176,7 @@ def gsm8k_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         ),
         answer=ExtractFromCompletion(_clean_short_answer, _STOP_SEQUENCES, max_tokens=_MAX_TOKENS),
         sample_split="test",
-        fewshot=_Gsm8kFewShot(_generative_demo),
+        fewshot=PredefinedFewShot(FEWSHOT_ITEMS, _generative_demo, count=_NUM_FEWSHOT, label="GSM8K"),
         subjects=ListOfSubjects(["main"]),
         dataset_policy=_gsm8k_dataset(dataset),
         language=Language.ENG,
@@ -230,7 +190,7 @@ def gsm8k_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
         kind=Choice(_Gsm8kBpbReader(), styler),
         answer=PickFromCandidates(),
         sample_split="test",
-        fewshot=_Gsm8kFewShot(_bpb_demo),
+        fewshot=PredefinedFewShot(FEWSHOT_ITEMS, _bpb_demo, count=_NUM_FEWSHOT, label="GSM8K"),
         subjects=ListOfSubjects(["main"]),
         dataset_policy=_gsm8k_dataset(dataset),
         language=Language.ENG,

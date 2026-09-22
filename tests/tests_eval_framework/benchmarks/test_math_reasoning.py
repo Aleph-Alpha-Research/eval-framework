@@ -4,6 +4,7 @@ import pytest
 
 from eval_framework.benchmarks.math_reasoning import (
     _GSM8K_REASONING_QUERY_TEMPLATE,
+    _OLMES_FEWSHOTS,
     _QUERY_TEMPLATE,
     MATH_REASONING_BENCHMARKS,
     _boxed_extractor,
@@ -11,6 +12,8 @@ from eval_framework.benchmarks.math_reasoning import (
     _strip_string_with_bug,
     gsm8k_reasoning,
     math500_with_bug,
+    mathminerva_bpb,
+    mathminerva_olmes,
 )
 from eval_framework.contract import Benchmark
 from eval_framework.metrics.completion.minerva_math_utils import strip_string_hendrycks
@@ -34,6 +37,9 @@ _NUM_FEWSHOT = {
     "AIME2025": 0,
     "AIME2026": 0,
     "GSM8KReasoning": 0,
+    "MATHMinerva_OLMES": 4,
+    "MATHMinerva_OLMES_NONL": 4,
+    "MATHMinervaBPB": 4,
 }
 
 
@@ -126,3 +132,28 @@ def test_gsm8k_reasoning_prompt() -> None:
 )
 def test_gsm8k_reasoning_extraction(completion: str, expected: str) -> None:
     assert _gsm8k_reasoning_extractor(completion) == expected
+
+
+# ---------------------------------------------------------------------------
+# Minerva-OLMES: "Problem:/Solution:" prompt, fixed 4-shot block; BPB scores the single gold solution
+# ---------------------------------------------------------------------------
+
+_MINERVA_ROW: dict[str, Any] = {"problem": "What is 2 + 2?", "solution": "Two plus two is $\\boxed{4}$."}
+
+
+def test_mathminerva_olmes_prompt() -> None:
+    benchmark = mathminerva_olmes(dataset=DatasetStub({"test": [_MINERVA_ROW]}))
+    sample = first_sample(benchmark, num_fewshot=4, custom_subjects=["algebra"])
+    # Four fixed OLMES demonstrations, then the eval question ending on "Solution:" (no assistant cue).
+    assert len(sample.messages) == 2 * len(_OLMES_FEWSHOTS) + 1
+    assert sample.messages[-1] == Message(role=Role.USER, content="Problem:\nWhat is 2 + 2?\n\nSolution:")
+    assert sample.ground_truth == "4"  # normalized gold from the boxed solution
+    assert sample.possible_completions is None  # free-form generation
+
+
+def test_mathminerva_bpb_scores_single_gold_solution() -> None:
+    benchmark = mathminerva_bpb(dataset=DatasetStub({"test": [_MINERVA_ROW]}))
+    sample = first_sample(benchmark, num_fewshot=4, custom_subjects=["algebra"])
+    # BPB scores the loglikelihood of the one gold solution (leading space), not a free-form generation.
+    assert sample.possible_completions == [" " + _MINERVA_ROW["solution"]]
+    assert sample.ground_truth == " " + _MINERVA_ROW["solution"]

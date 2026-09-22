@@ -1,4 +1,3 @@
-import logging
 import random
 import re
 from typing import Any
@@ -12,9 +11,8 @@ from eval_framework.metrics.completion.math_reasoning_completion import MathReas
 from eval_framework.metrics.completion.minerva_math_utils import extract_answers, normalized_gold_from_solution
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
-from eval_framework.tasks.task_style import BPBStyle
 
-# Hendrycks MATH subject splits (shared by MATH, MATHMinervaEvalHarness, MATHMinervaBPB)
+# Hendrycks MATH subject splits (shared by MATH and MATHMinervaEvalHarness)
 MATH_SUBJECTS = [
     "algebra",
     "counting_and_probability",
@@ -24,7 +22,6 @@ MATH_SUBJECTS = [
     "prealgebra",
     "precalculus",
 ]
-logger = logging.getLogger(__name__)
 
 
 class MATHReasoning(BaseTask[str]):
@@ -491,94 +488,3 @@ class MATHLvl5(MATH):
 
     def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
         return self._extract_answer(item["solution"])
-
-
-_OLMES_FEWSHOTS = [
-    # https://github.com/huggingface/lm-evaluation-harness/blob/add_leaderboard_tasks/lm_eval/tasks/leaderboard/math/utils.py
-    {
-        "problem": "Find the domain of the expression  $\\frac{\\sqrt{x-2}}{\\sqrt{5-x}}$.}",
-        "solution": "The expressions inside each square root must be non-negative. Therefore, $x-2 \\ge 0$, so "
-        "$x\\ge2$, and $5 - x \\ge 0$, so $x \\le 5$. Also, the denominator cannot be equal to zero, so $5-x>0$,"
-        " which gives $x<5$. Therefore, the domain of the expression is $\\boxed{[2,5)}$.\nFinal Answer: The "
-        "final answer is $[2,5)$. I hope it is correct.",
-        "few_shot": "1",
-    },
-    {
-        "problem": "If $\\det \\mathbf{A} = 2$ and $\\det \\mathbf{B} = 12,$ then find $\\det (\\mathbf{A} "
-        "\\mathbf{B}).$",
-        "solution": "We have that $\\det (\\mathbf{A} \\mathbf{B}) = (\\det \\mathbf{A})(\\det \\mathbf{B})"
-        " = (2)(12) = \\boxed{24}.$\nFinal Answer: The final answer is $24$. I hope it is correct.",
-        "few_shot": "1",
-    },
-    {
-        "problem": "Terrell usually lifts two 20-pound weights 12 times. If he uses two 15-pound weights instead, "
-        "how many times must Terrell lift them in order to lift the same total weight?",
-        "solution": "If Terrell lifts two 20-pound weights 12 times, he lifts a total of $2\\cdot 12\\cdot20=480$ "
-        "pounds of weight.  If he lifts two 15-pound weights instead for $n$ times, he will lift a total of "
-        "$2\\cdot15\\cdot n=30n$ pounds of weight.  Equating this to 480 pounds, we can solve for $n$:\n\\"
-        "begin{align*}\n30n&=480\\\n\\Rightarrow\\qquad n&=480/30=\\boxed{16}\n\\end{align*}\nFinal Answer:"
-        " The final answer is $16$. I hope it is correct.",
-        "few_shot": "1",
-    },
-    {
-        "problem": "If the system of equations\n\\begin{align*}\n6x-4y&=a,\\\n6y-9x &=b.\n\\end{align*}\nhas a "
-        "solution $(x, y)$ where $x$ and $y$ are both nonzero, find $\\frac{a}{b},$ assuming $b$ is nonzero.",
-        "solution": "If we multiply the first equation by $-\\frac{3}{2}$, we obtain $$6y-9x=-\\frac{3}{2}a.$$"
-        "Since we also know that $6y-9x=b$, we have $$-\\frac{3}{2}a=b\\Rightarrow\\frac{a}{b}=\\boxed{-\\frac"
-        "{2}{3}}.$$\nFinal Answer: The final answer is $-\\frac{2}{3}$. I hope it is correct.",
-        "few_shot": "1",
-    },
-]
-
-
-class MATHMinerva_OLMES(MATHMinerva):
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-    NAME = "MATHMinerva_OLMES"
-    METRICS = [MathMinervaCompletion, MathMinervaCompletionRelaxed]
-
-    def __init__(self, num_fewshot: int = 4) -> None:
-        if num_fewshot != 4:
-            logger.warning("MATHMinerva_OLMES supports a fixed num_fewshot of 4.")
-        super().__init__(num_fewshot=4)
-
-    def _sample_fewshot_examples(self, item: dict[str, Any]) -> list[dict]:
-        return _OLMES_FEWSHOTS[: self.num_fewshot]
-
-
-class MATHMinerva_OLMES_NONL(MATHMinerva_OLMES):
-    NAME = "MATHMinerva_OLMES_NONL"
-
-    def __init__(self, num_fewshot: int = 4) -> None:
-        if num_fewshot != 4:
-            logger.warning("MATHMinerva_OLMES_NONL supports a fixed num_fewshot of 4.")
-        super().__init__(num_fewshot=4)
-        self.stop_sequences = ["Problem:"]
-
-
-class MATHMinervaBPB(MATHMinerva_OLMES):
-    REVISION_LOCKFILE = HF_REVISIONS_LOCKFILE
-    NAME = "MATHMinervaBPB"
-    TASK_STYLER = BPBStyle(cue_text="Solution:", question_prefix="Problem:\n")
-
-    # MATHMinervaEvalHarness (an ancestor) overrides _get_instruction_text/_get_fewshot_target_text/
-    # _get_ground_truth directly instead of going through a TASK_STYLER, so we re-override them here to
-    # opt back into TASK_STYLER-driven formatting. _get_raw_question/_get_choices are the required data
-    # hooks the styler reads from; they have no styler-based default and must supply the raw text.
-
-    def _get_raw_question(self, item: dict[str, Any]) -> str:
-        return item["problem"]
-
-    def _get_choices(self, item: dict[str, Any]) -> list[str]:
-        return [item["solution"]]
-
-    def _get_correct_index(self, item: dict[str, Any]) -> int:
-        return 0
-
-    def _get_instruction_text(self, item: dict[str, Any]) -> str:
-        return self.TASK_STYLER.get_instruction_text(self._get_raw_question(item), self._get_choices(item))
-
-    def _get_fewshot_target_text(self, item: dict[str, Any]) -> str:
-        return self.TASK_STYLER.get_fewshot_target_text(self._get_choices(item), self._get_correct_index(item))
-
-    def _get_ground_truth(self, item: dict[str, Any]) -> str | None | list[str]:
-        return self.TASK_STYLER.get_ground_truth(self._get_choices(item), self._get_correct_index(item))
