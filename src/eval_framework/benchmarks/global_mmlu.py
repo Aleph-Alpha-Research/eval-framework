@@ -22,6 +22,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyNormLoglikelihood,
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
+from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariantsLoglikelihood
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
@@ -556,6 +557,7 @@ class _GlobalMmluChoice(EvalKind):
             AccuracyNormLoglikelihood,
             AccuracyBayesianLoglikelihood,
             BitsPerByteLoglikelihood,
+            BitsPerByteVariantsLoglikelihood,
         ]
 
     @override

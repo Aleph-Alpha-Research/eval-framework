@@ -19,7 +19,13 @@ from tokenizers import Tokenizer
 from transformers import AutoTokenizer
 
 from eval_framework.llm.base import BaseLLM
-from eval_framework.shared.types import ConcatCompression, Error, RawCompletion, RawLoglikelihood
+from eval_framework.shared.types import (
+    ConcatCompression,
+    Error,
+    PerTokenScores,
+    RawCompletion,
+    RawLoglikelihood,
+)
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message, Role
 
@@ -295,6 +301,7 @@ class OpenAIModel(BaseLLM):
             prompt = self._formatter.format(sample.messages, output_mode="string") if sample.messages else ""
             choices_log_probs: dict[str, float] = {}
             choices_num_tokens: dict[str, int] = {}
+            choices_per_token: dict[str, PerTokenScores] = {}
             prompt_num_tokens: int | None = self._count_tokens(prompt)
             error: Error | None = None
 
@@ -334,14 +341,26 @@ class OpenAIModel(BaseLLM):
                         )
 
                     # Sum logprobs for the completion portion
-                    choices_log_probs[choice] = sum(all_logprobs[len(prompt_tokens) :])
+                    completion_logprobs = all_logprobs[len(prompt_tokens) :]
+                    completion_token_strs = all_tokens[len(prompt_tokens) :]
+                    choices_log_probs[choice] = sum(completion_logprobs)
                     choices_num_tokens[choice] = len(completion_tokens)
+                    # Per-token scores consumed by the extended BPB metrics (prefix and prior BPB):
+                    # bits[j] = -log2 p(token j) and byte_lens[j] is that token's UTF-8 byte length
+                    # (from the API-returned token string here). Summing -log(2) * bits recovers the
+                    # total loglikelihood, so classical BitsPerByte is unaffected. Same layout as the
+                    # HF adapter.
+                    choices_per_token[choice] = PerTokenScores(
+                        bits=[float(-lp / math.log(2)) for lp in completion_logprobs],
+                        byte_lens=[len(str(t).encode("utf-8")) for t in completion_token_strs],
+                    )
 
                 except Exception as e:
                     error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
                     prompt_num_tokens = None
                     choices_log_probs = {}
                     choices_num_tokens = {}
+                    choices_per_token = {}
 
             results.append(
                 RawLoglikelihood(
@@ -349,6 +368,7 @@ class OpenAIModel(BaseLLM):
                     prompt_num_tokens=prompt_num_tokens,
                     loglikelihoods=choices_log_probs,
                     loglikelihoods_num_tokens=choices_num_tokens,
+                    loglikelihoods_per_token=choices_per_token,
                     raw_loglikelihood_error=error,
                 )
             )

@@ -11,6 +11,7 @@ from huggingface_hub.errors import RevisionNotFoundError
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1, F1SquadNormalized
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
+from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariantsLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, RANDOM_SEED, BaseTask, Language, ResponseType, Sample, SubjectType
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 
@@ -195,7 +196,7 @@ class SQUAD2BPB(SQUAD2):
 
     NAME = "SQuAD2 BPB"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [BitsPerByteLoglikelihood]
+    METRICS = [BitsPerByteLoglikelihood, BitsPerByteVariantsLoglikelihood]
 
     def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
         text_ = item["answers"]["text"]

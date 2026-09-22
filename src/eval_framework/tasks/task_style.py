@@ -70,6 +70,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyNormLoglikelihood,
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
+from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariantsLoglikelihood
 from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
@@ -202,6 +203,7 @@ class MCStyle(TaskStyler):
         AccuracyNormLoglikelihood,
         AccuracyBayesianLoglikelihood,
         BitsPerByteLoglikelihood,
+        BitsPerByteVariantsLoglikelihood,
     ]
     task_style = TaskStyle.MULTIPLE_CHOICE
 
@@ -336,6 +338,7 @@ class ClozeStyle(TaskStyler):
         AccuracyNormLoglikelihood,
         AccuracyBayesianLoglikelihood,
         BitsPerByteLoglikelihood,
+        BitsPerByteVariantsLoglikelihood,
     ]
     task_style = TaskStyle.CLOZE
 
@@ -389,7 +392,7 @@ class BPBStyle(ClozeStyle):
         Ground truth:        " Paris"
     """
 
-    metrics: list[type["BaseMetric"]] = [BitsPerByteLoglikelihood]
+    metrics: list[type["BaseMetric"]] = [BitsPerByteLoglikelihood, BitsPerByteVariantsLoglikelihood]
     task_style = TaskStyle.BPB
 
     def get_possible_completions(self, choices: list[str], correct_index: int | None = None) -> list[str]:

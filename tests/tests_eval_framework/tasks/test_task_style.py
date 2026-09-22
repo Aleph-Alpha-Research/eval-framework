@@ -543,8 +543,9 @@ class TestBPBStyle:
 
     def test_metrics_bpb_only(self) -> None:
         from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
+        from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariantsLoglikelihood
 
-        assert self.styler.metrics == [BitsPerByteLoglikelihood]
+        assert self.styler.metrics == [BitsPerByteLoglikelihood, BitsPerByteVariantsLoglikelihood]
         assert AccuracyLoglikelihood not in self.styler.metrics
 
     def test_for_language_german(self) -> None:
@@ -599,7 +600,7 @@ class TestBaseTaskBPBStyle:
 
     def test_metadata_metrics_bpb_only(self) -> None:
         meta = self.task.get_metadata()
-        assert meta["metrics"] == ["BitsPerByte"]
+        assert meta["metrics"] == ["BitsPerByte", "BitsPerByteVariants"]
 
 
 def test_instance_properties_are_styler_backed() -> None:
