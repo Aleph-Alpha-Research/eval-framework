@@ -14,6 +14,19 @@
 
 ### Bug Fixes
 
+## [0.13.6](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.5...v0.13.6) (2026-09-22)
+
+
+### Features
+
+* interface surface of math_reasoning allows for reuse outside of ([533e3cd](https://github.com/Aleph-Alpha-Research/eval-framework/commit/533e3cd2aa59fda375140ff93a67027c71286a53))
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.98,&lt;2 ([a9c6ba7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a9c6ba7df4eaeae3d5043b5a68d2338783abe869))
+* **deps:** update dependency openai to &gt;=3.16.2,&lt;4 ([c53b08a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c53b08a79acfa4170a8c049fcf6e4b7dc9f4b240))
+
 ## [0.13.5](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.4...v0.13.5) (2026-09-21)
 
 
