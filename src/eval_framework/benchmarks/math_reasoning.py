@@ -2,26 +2,35 @@
 
 import re
 from collections.abc import Callable
+from typing import Any, final, override
 
-from eval_framework.answer import ExtractFromCompletion, Extractor
+from eval_framework.answer import ExtractFromCompletion, Extractor, PickFromCandidates
+from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import Generative, ItemText
-from eval_framework.fewshot import NoFewShot
+from eval_framework.eval_kind import Choice, Generative, ItemText
+from eval_framework.fewshot import FewshotExample, NoFewShot, PredefinedFewShot
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
+from eval_framework.metrics.completion.math_minerva_completion import (
+    MathMinervaCompletion,
+    MathMinervaCompletionRelaxed,
+)
 from eval_framework.metrics.completion.math_reasoning_completion import MathReasoningCompletion
 from eval_framework.metrics.completion.minerva_math_utils import (
     _fix_a_slash_b,
     _fix_fracs,
     _fix_sqrt,
     _remove_right_units,
+    extract_answers,
+    normalized_gold_from_solution,
     strip_string_hendrycks,
 )
 from eval_framework.subjects import ListOfSubjects, NoSubject
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
+from eval_framework.tasks.task_style import BPBStyle
 
 MATH500_DATASET_PATH = "HuggingFaceH4/MATH-500"
 
@@ -256,6 +265,145 @@ def gsm8k_reasoning(dataset: DatasetPolicy | None = None) -> Benchmark:
     )
 
 
+# --- Minerva-style MATH (OLMES): "Problem:/Solution:" prompt, fixed 4-shot block, final-answer matching ---
+
+HENDRYCKS_MATH_DATASET_PATH = "EleutherAI/hendrycks_math"
+
+# Per-subject configs of the Hendrycks MATH dataset.
+_MATH_SUBJECTS = [
+    "algebra",
+    "counting_and_probability",
+    "geometry",
+    "intermediate_algebra",
+    "number_theory",
+    "prealgebra",
+    "precalculus",
+]
+
+_MINERVA_MAX_TOKENS = 1024
+
+# The canonical OLMES 4-shot block (hand-written, not sampled from the dataset).
+# https://github.com/huggingface/lm-evaluation-harness/blob/add_leaderboard_tasks/lm_eval/tasks/leaderboard/math/utils.py
+_OLMES_FEWSHOTS = [
+    {
+        "problem": "Find the domain of the expression  $\\frac{\\sqrt{x-2}}{\\sqrt{5-x}}$.}",
+        "solution": "The expressions inside each square root must be non-negative. Therefore, $x-2 \\ge 0$, so "
+        "$x\\ge2$, and $5 - x \\ge 0$, so $x \\le 5$. Also, the denominator cannot be equal to zero, so $5-x>0$,"
+        " which gives $x<5$. Therefore, the domain of the expression is $\\boxed{[2,5)}$.\nFinal Answer: The "
+        "final answer is $[2,5)$. I hope it is correct.",
+        "few_shot": "1",
+    },
+    {
+        "problem": "If $\\det \\mathbf{A} = 2$ and $\\det \\mathbf{B} = 12,$ then find $\\det (\\mathbf{A} "
+        "\\mathbf{B}).$",
+        "solution": "We have that $\\det (\\mathbf{A} \\mathbf{B}) = (\\det \\mathbf{A})(\\det \\mathbf{B})"
+        " = (2)(12) = \\boxed{24}.$\nFinal Answer: The final answer is $24$. I hope it is correct.",
+        "few_shot": "1",
+    },
+    {
+        "problem": "Terrell usually lifts two 20-pound weights 12 times. If he uses two 15-pound weights instead, "
+        "how many times must Terrell lift them in order to lift the same total weight?",
+        "solution": "If Terrell lifts two 20-pound weights 12 times, he lifts a total of $2\\cdot 12\\cdot20=480$ "
+        "pounds of weight.  If he lifts two 15-pound weights instead for $n$ times, he will lift a total of "
+        "$2\\cdot15\\cdot n=30n$ pounds of weight.  Equating this to 480 pounds, we can solve for $n$:\n\\"
+        "begin{align*}\n30n&=480\\\n\\Rightarrow\\qquad n&=480/30=\\boxed{16}\n\\end{align*}\nFinal Answer:"
+        " The final answer is $16$. I hope it is correct.",
+        "few_shot": "1",
+    },
+    {
+        "problem": "If the system of equations\n\\begin{align*}\n6x-4y&=a,\\\n6y-9x &=b.\n\\end{align*}\nhas a "
+        "solution $(x, y)$ where $x$ and $y$ are both nonzero, find $\\frac{a}{b},$ assuming $b$ is nonzero.",
+        "solution": "If we multiply the first equation by $-\\frac{3}{2}$, we obtain $$6y-9x=-\\frac{3}{2}a.$$"
+        "Since we also know that $6y-9x=b$, we have $$-\\frac{3}{2}a=b\\Rightarrow\\frac{a}{b}=\\boxed{-\\frac"
+        "{2}{3}}.$$\nFinal Answer: The final answer is $-\\frac{2}{3}$. I hope it is correct.",
+        "few_shot": "1",
+    },
+]
+
+
+def _minerva_prompt(item: dict[str, Any]) -> str:
+    return "Problem:\n" + item["problem"] + "\n\nSolution:"
+
+
+def _minerva_gold(item: dict[str, Any]) -> str:
+    # normalized_gold_from_solution returns None on a boxless/malformed solution; "" reads the same as None
+    # to the minerva metric (both hit its "no ground truth" branch), so we coalesce to keep the gold a str.
+    return normalized_gold_from_solution(item["solution"]) or ""
+
+
+def _minerva_extractor(completion_text: str) -> str:
+    candidates = extract_answers(completion_text, use_cot=True, cot_style="minerva", relaxed=True)
+    return candidates[0] if candidates else "[no_answer]"
+
+
+def _olmes_generative_demo(demo: dict[str, Any]) -> FewshotExample:
+    return FewshotExample(prompt=_minerva_prompt(demo), answer=" " + demo["solution"])
+
+
+def _mathminerva_olmes(id: str, stop_sequences: list[str], dataset: DatasetPolicy | None) -> Benchmark:
+    return ComposedBenchmark.compose(
+        id=id,
+        kind=Generative(
+            build_prompt=_minerva_prompt,
+            cue="",  # the prompt ends on "Solution:"; the model continues from there
+            ground_truth=_minerva_gold,
+            metrics=[MathMinervaCompletion, MathMinervaCompletionRelaxed],
+        ),
+        answer=ExtractFromCompletion(_minerva_extractor, stop_sequences, max_tokens=_MINERVA_MAX_TOKENS),
+        sample_split="test",
+        fewshot=PredefinedFewShot(_OLMES_FEWSHOTS, _olmes_generative_demo, count=4, label=id),
+        subjects=ListOfSubjects(_MATH_SUBJECTS),
+        dataset_policy=dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_DATASET_PATH),
+        language=Language.ENG,
+    )
+
+
+def mathminerva_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _mathminerva_olmes("MATHMinerva_OLMES", ["Problem:", "\n\n"], dataset)
+
+
+def mathminerva_olmes_nonl(dataset: DatasetPolicy | None = None) -> Benchmark:
+    # Same as MATHMinerva_OLMES but stops only on "Problem:" (drops the blank-line stop).
+    return _mathminerva_olmes("MATHMinerva_OLMES_NONL", ["Problem:"], dataset)
+
+
+_MINERVA_BPB_STYLER = BPBStyle(question_prefix="Problem:\n", cue_text="Solution:")
+
+
+@final
+class _MinervaBpbReader(ChoiceReader):
+    """The single scored 'choice' is the gold solution; BPB scores the model's likelihood of it."""
+
+    @override
+    def read(self, item: dict[str, Any]) -> ChoiceFields:
+        return ChoiceFields(raw_question=item["problem"], choices=[item["solution"]], correct_index=0)
+
+
+_MINERVA_BPB_READER = _MinervaBpbReader()
+
+
+def _minerva_bpb_demo(demo: dict[str, Any]) -> FewshotExample:
+    # Rendered through the same styler as the eval item, so the fixed 4-shot block matches the BPB format.
+    fields = _MINERVA_BPB_READER.read(demo)
+    return FewshotExample(
+        prompt=_MINERVA_BPB_STYLER.get_instruction_text(fields.raw_question, fields.choices),
+        answer=_MINERVA_BPB_STYLER.get_fewshot_target_text(fields.choices, fields.correct_index),
+    )
+
+
+def mathminerva_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return ComposedBenchmark.compose(
+        id="MATHMinervaBPB",
+        kind=Choice(_MINERVA_BPB_READER, _MINERVA_BPB_STYLER),
+        answer=PickFromCandidates(),
+        sample_split="test",
+        fewshot=PredefinedFewShot(_OLMES_FEWSHOTS, _minerva_bpb_demo, count=4, label="MATHMinervaBPB"),
+        subjects=ListOfSubjects(_MATH_SUBJECTS),
+        dataset_policy=dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_DATASET_PATH),
+        language=Language.ENG,
+    )
+
+
 MATH_REASONING_BENCHMARKS: list[Benchmark] = [
     math500_with_bug(),
     math500_v2(),
@@ -263,4 +411,7 @@ MATH_REASONING_BENCHMARKS: list[Benchmark] = [
     aime2025(),
     aime2026(),
     gsm8k_reasoning(),
+    mathminerva_olmes(),
+    mathminerva_olmes_nonl(),
+    mathminerva_bpb(),
 ]

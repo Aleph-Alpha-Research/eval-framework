@@ -117,12 +117,9 @@ def register_gsm8k_tasks(registry: Registry) -> None:
 
 
 def register_math_reasoning_tasks(registry: Registry) -> None:
-    """Register math_reasoning benchmark tasks (composed MATH500 variants; the rest still lazy BaseTask)."""
-    for benchmark in MATH_REASONING_BENCHMARKS:  # composed: MATH500(_V2), AIME2024/2025/2026, GSM8KReasoning
+    """Register math_reasoning benchmark tasks (all composed: MATH500(_V2), AIME, GSM8KReasoning, Minerva-OLMES)."""
+    for benchmark in MATH_REASONING_BENCHMARKS:
         registry.add(benchmark)
-    register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHMinervaBPB", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHMinerva_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.math_reasoning.MATHMinerva_OLMES_NONL", registry=registry)
 
 
 def register_mmlu_tasks(registry: Registry) -> None:
