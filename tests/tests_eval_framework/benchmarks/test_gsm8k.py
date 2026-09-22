@@ -13,8 +13,8 @@ import pytest
 from eval_framework.benchmarks.gsm8k import (
     FEWSHOT_ITEMS,
     GSM8K_BENCHMARKS,
-    _clean_short_answer,
     _normalize_answer_str,
+    clean_short_answer,
     gsm8k_bpb,
     gsm8k_olmes,
 )
@@ -91,7 +91,7 @@ def test_gsm8k_bpb_prompt() -> None:
     ],
 )
 def test_clean_short_answer(text: str, expected: str) -> None:
-    assert _clean_short_answer(text) == expected
+    assert clean_short_answer(text) == expected
 
 
 def test_normalize_answer_str_reformats_into_a_sentence() -> None:

@@ -107,7 +107,7 @@ FEWSHOT_ITEMS = [
 ]
 
 
-def _clean_short_answer(continuation: str) -> str:
+def clean_short_answer(continuation: str) -> str:
     """Reduce a solution to its final number, commas removed — the OLMES short-answer form."""
     output = re.sub(r"(\d),(\d)", r"\1\2", continuation)
     numbers = re.findall(r"[-+]?\d*\.\d+|\d+", output)
@@ -131,7 +131,7 @@ def _add_spaces_around_operators(text: str) -> str:
 def _normalize_answer_str(item: dict[str, Any]) -> str:
     """OLMES reformatting of a worked solution into a natural sentence (improves BPB scoring)."""
     answer = item["answer"]
-    short_answer = _clean_short_answer(answer.split("####")[-1].strip())
+    short_answer = clean_short_answer(answer.split("####")[-1].strip())
     answer = re.sub(r"<<.*?>>", "", answer)
     answer = re.sub(r"\s+", " ", answer).strip()
     answer = re.split(r"####", answer)[0]
@@ -171,10 +171,10 @@ def gsm8k_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         kind=Generative(
             build_prompt=lambda item: f"Question: {item['question']}\nAnswer:",
             cue="",  # no assistant cue — the model continues the answer
-            ground_truth=lambda item: _clean_short_answer(item["answer"]),
+            ground_truth=lambda item: clean_short_answer(item["answer"]),
             metrics=[AccuracyCompletionOLMES],
         ),
-        answer=ExtractFromCompletion(_clean_short_answer, _STOP_SEQUENCES, max_tokens=_MAX_TOKENS),
+        answer=ExtractFromCompletion(clean_short_answer, _STOP_SEQUENCES, max_tokens=_MAX_TOKENS),
         sample_split="test",
         fewshot=PredefinedFewShot(FEWSHOT_ITEMS, _generative_demo, count=_NUM_FEWSHOT, label="GSM8K"),
         subjects=ListOfSubjects(["main"]),
