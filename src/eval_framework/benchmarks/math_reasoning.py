@@ -26,7 +26,7 @@ from eval_framework.metrics.completion.minerva_math_utils import (
     normalized_gold_from_solution,
     strip_string_hendrycks,
 )
-from eval_framework.subjects import ListOfSubjects, NoSubject
+from eval_framework.subjects import ListOfSubjects, NoSubject, SubjectsSelector
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -184,14 +184,28 @@ _AIME_QUERY_TEMPLATE = """Solve the following math problem efficiently and clear
     Problem: {Question}"""  # noqa: E501
 
 
-def _aime(
-    id: str, dataset_path: str, sample_split: str, ground_truth: ItemText, dataset: DatasetPolicy | None
+def _aime_default_prompt(item: dict[str, Any]) -> str:
+    return _AIME_QUERY_TEMPLATE.format(Question=item["problem"])
+
+
+def aime(
+    id: str,
+    *,
+    dataset_policy: DatasetPolicy,
+    ground_truth: ItemText,
+    sample_split: str,
+    build_prompt: ItemText = _aime_default_prompt,
+    subjects: SubjectsSelector = NoSubject(),
+    language: Language = Language.ENG,
 ) -> Benchmark:
-    # AIME answers are integers, so the `_strip_string_with_bug` bug is inert here — no bug-free V2 needed.
+    """Build an AIME-style boxed-answer benchmark: 0-shot generative, boxed extraction with the preserved MATH
+    normalisation (its bug is inert on integer answers), scored by ``MathReasoningCompletion``. Callers vary the
+    prompt (``build_prompt``, defaulting to the English NeMo-Skills template), dataset, subjects and language —
+    e.g. localized AIME variants in the companion package reuse this."""
     return ComposedBenchmark.compose(
         id=id,
         kind=Generative(
-            build_prompt=lambda item: _AIME_QUERY_TEMPLATE.format(Question=item["problem"]),
+            build_prompt=build_prompt,
             cue="",
             ground_truth=ground_truth,
             metrics=[MathReasoningCompletion, LanguageRawConsistencyChecker],
@@ -199,23 +213,38 @@ def _aime(
         answer=ExtractFromCompletion(_boxed_extractor(_strip_string_with_bug)),  # boxed only, no Answer: fallback
         sample_split=sample_split,
         fewshot=NoFewShot(),
-        subjects=NoSubject(),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(dataset_path),
-        language=Language.ENG,
+        subjects=subjects,
+        dataset_policy=dataset_policy,
+        language=language,
     )
 
 
 def aime2024(dataset: DatasetPolicy | None = None) -> Benchmark:
     # AIME 2024 gold answers are zero-padded (range 0-999); strip the leading zeros.
-    return _aime("AIME2024", "HuggingFaceH4/aime_2024", "train", lambda item: item["answer"].lstrip("0"), dataset)
+    return aime(
+        "AIME2024",
+        dataset_policy=dataset if dataset is not None else pinned_by_framework("HuggingFaceH4/aime_2024"),
+        ground_truth=lambda item: item["answer"].lstrip("0"),
+        sample_split="train",
+    )
 
 
 def aime2025(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _aime("AIME2025", "math-ai/aime25", "test", lambda item: item["answer"], dataset)
+    return aime(
+        "AIME2025",
+        dataset_policy=dataset if dataset is not None else pinned_by_framework("math-ai/aime25"),
+        ground_truth=lambda item: item["answer"],
+        sample_split="test",
+    )
 
 
 def aime2026(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _aime("AIME2026", "math-ai/aime26", "test", lambda item: item["answer"], dataset)
+    return aime(
+        "AIME2026",
+        dataset_policy=dataset if dataset is not None else pinned_by_framework("math-ai/aime26"),
+        ground_truth=lambda item: item["answer"],
+        sample_split="test",
+    )
 
 
 GSM8K_REASONING_DATASET_PATH = "openai/gsm8k"
@@ -233,7 +262,7 @@ Answer:"""
 _HASH_ANSWER_PATTERN = re.compile(r"#### (\-?[0-9\.\,]+)")
 
 
-def _extract_hash_answer(text: str) -> str:
+def extract_hash_answer(text: str) -> str:
     """The GSM8K gold-answer form: the number after ``####`` with commas removed, or ``"[invalid]"``."""
     match = _HASH_ANSWER_PATTERN.search(text)
     return match.group(1).strip().replace(",", "") if match else "[invalid]"
@@ -244,7 +273,7 @@ def _gsm8k_reasoning_extractor(completion_text: str) -> str:
     boxed = _extract_boxed(completion_text)
     if boxed is not None:
         return boxed.replace(",", "").strip()
-    return _extract_hash_answer(completion_text)
+    return extract_hash_answer(completion_text)
 
 
 def gsm8k_reasoning(dataset: DatasetPolicy | None = None) -> Benchmark:
@@ -253,7 +282,7 @@ def gsm8k_reasoning(dataset: DatasetPolicy | None = None) -> Benchmark:
         kind=Generative(
             build_prompt=lambda item: _GSM8K_REASONING_QUERY_TEMPLATE.format(question=item["question"]),
             cue="",  # the prompt already ends on "Answer:"; the model continues from there
-            ground_truth=lambda item: _extract_hash_answer(item["answer"]),
+            ground_truth=lambda item: extract_hash_answer(item["answer"]),
             metrics=[AccuracyCompletion, LanguageRawConsistencyChecker],
         ),
         answer=ExtractFromCompletion(_gsm8k_reasoning_extractor),  # boxed, then #### fallback; no stop sequences
