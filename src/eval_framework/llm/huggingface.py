@@ -24,6 +24,7 @@ from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import (
     ConcatCompression,
     Error,
+    PerTokenScores,
     PromptTooLongException,
     RawCompletion,
     RawLoglikelihood,
@@ -252,6 +253,7 @@ class BaseHFLLM(BaseLLM):
             prompt = self._formatter.format(sample.messages, output_mode="string")
             choices_log_probs: dict[str, float] = {}
             choices_log_probs_num_tokens: dict[str, float] = {}
+            choices_per_token: dict[str, PerTokenScores] = {}
             error: Error | None = None
 
             for choice in sample.possible_completions or []:
@@ -267,6 +269,7 @@ class BaseHFLLM(BaseLLM):
                         raise PromptTooLongException("Prompt exceeded context size.")
                     choices_log_probs = {}
                     choices_log_probs_num_tokens = {}
+                    choices_per_token = {}
                     error = Error(
                         error_class=PromptTooLongException.__name__,
                         message="Prompt and choice exceeded context size.",
@@ -274,11 +277,16 @@ class BaseHFLLM(BaseLLM):
                     )
                     break
                 else:
-                    # Calculate log-likelihoods for each token in the completion
-                    sum_log_probs = self._model_log_probs(prompt_and_choice, num_choice_tokens)
+                    # Per-token scores consumed by the extended BPB metrics (prefix and prior BPB):
+                    # bits[j] = -log2 p(token j) and byte_lens[j] is that token's UTF-8 byte length.
+                    # -log(2) * sum(bits) recovers the total loglikelihood, so classical BitsPerByte
+                    # (which uses only that sum) is unchanged.
+                    per_token = self._model_log_probs(prompt_and_choice, num_choice_tokens)
+                    sum_log_probs = -math.log(2) * float(sum(per_token.bits))
 
                 choices_log_probs.update({choice: sum_log_probs})
                 choices_log_probs_num_tokens.update({choice: num_choice_tokens})
+                choices_per_token.update({choice: per_token})
 
             results.append(
                 RawLoglikelihood(
@@ -289,26 +297,31 @@ class BaseHFLLM(BaseLLM):
                     ),
                     loglikelihoods=choices_log_probs,
                     loglikelihoods_num_tokens=choices_log_probs_num_tokens,
+                    loglikelihoods_per_token=choices_per_token,
                     raw_loglikelihood_error=error,
                 )
             )
         return results
 
-    def _model_log_probs(self, prompt: str, num_choice_tokens: int) -> float:
+    def _model_log_probs(self, prompt_and_choice: str, num_choice_tokens: int) -> PerTokenScores:
+        """Per-token bits and UTF-8 byte lengths for the last ``num_choice_tokens`` scored tokens.
+
+        Scores the joint prompt+choice text and keeps the trailing choice span, matching how the
+        summed loglikelihood is computed, so classical ``BitsPerByte`` is unchanged.
+        """
         with torch.no_grad():
-            inputs = self.tokenizer(prompt, return_tensors="pt", add_special_tokens=False).to(self.device)
-            outputs = self.model(**inputs, labels=inputs["input_ids"])
-            logits = outputs.logits[:, :-1, :].squeeze(0)
-            target_ids = inputs["input_ids"][:, 1:].squeeze(0)
+            inputs = self.tokenizer(prompt_and_choice, return_tensors="pt", add_special_tokens=False).to(self.device)
+            outputs = self.model(**inputs)
+            logits = outputs.logits[0, :-1, :]
+            target_ids = inputs["input_ids"][0, 1:]
+            logp = torch.log_softmax(logits, dim=-1)
+            tok_lp = logp.gather(1, target_ids.unsqueeze(1)).squeeze(1)
 
-            token_loglikelihoods = []
-            for i in range(0, len(target_ids)):
-                token_id = target_ids[i].item()
-                token = self.tokenizer.decode([token_id])
-                loglikelihood = torch.log_softmax(logits[i], dim=-1)[token_id].item()
-                token_loglikelihoods.append({token: loglikelihood})
-
-            return sum([list(log_prob.values())[0] for log_prob in token_loglikelihoods[-num_choice_tokens:]])
+            span_lp = tok_lp[-num_choice_tokens:].tolist()
+            span_ids = target_ids[-num_choice_tokens:].tolist()
+            bits = [float(-lp / math.log(2)) for lp in span_lp]
+            byte_lens = [len(self.tokenizer.decode([token_id]).encode("utf-8")) for token_id in span_ids]
+            return PerTokenScores(bits=bits, byte_lens=byte_lens)
 
     @property
     def seq_length(self) -> int | None:

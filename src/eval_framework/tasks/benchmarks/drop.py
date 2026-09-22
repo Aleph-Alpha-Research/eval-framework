@@ -10,6 +10,7 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyNormLoglikelihood,
 )
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
+from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariantsLoglikelihood
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
 from eval_framework.tasks.utils import get_n_letters
@@ -177,6 +178,7 @@ class DropMC(BaseTask[str]):
         AccuracyNormLoglikelihood,
         AccuracyBayesianLoglikelihood,
         BitsPerByteLoglikelihood,
+        BitsPerByteVariantsLoglikelihood,
     ]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG
@@ -249,6 +251,7 @@ class DropCloze(BaseTask[str]):
         AccuracyNormLoglikelihood,
         AccuracyBayesianLoglikelihood,
         BitsPerByteLoglikelihood,
+        BitsPerByteVariantsLoglikelihood,
     ]
     SUBJECTS = [NO_SUBJECT]
     LANGUAGE = Language.ENG

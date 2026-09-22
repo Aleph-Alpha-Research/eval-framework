@@ -2,6 +2,7 @@ from typing import Any
 
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
+from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariantsLoglikelihood
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.base import NO_SUBJECT, BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.dataset_revisions import HF_REVISIONS_LOCKFILE
@@ -91,7 +92,7 @@ class HumanEvalBPB(HumanEval):
 
     NAME = "Human Eval BPB"
     RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-    METRICS = [BitsPerByteLoglikelihood]
+    METRICS = [BitsPerByteLoglikelihood, BitsPerByteVariantsLoglikelihood]
 
     def _get_cue_text(self, item: dict[str, Any]) -> str:
         return ""

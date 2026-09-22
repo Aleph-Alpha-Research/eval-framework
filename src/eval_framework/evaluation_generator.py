@@ -12,6 +12,8 @@ from tqdm import tqdm
 
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
+from eval_framework.metrics.loglikelihood.bpb_variants_common import aggregate_prior_bpb_metrics, select_ground_truth
+from eval_framework.metrics.loglikelihood.bpb_variants_estimators import summarize_all
 from eval_framework.result_processors.base import Result, ResultProcessor
 from eval_framework.shared.types import Completion, Loglikelihood
 from eval_framework.tasks.eval_config import EvalConfig
@@ -345,6 +347,123 @@ class EvaluationGenerator:
 
         return aggregated_results
 
+    @staticmethod
+    def _flatten_corpus_summary(summary: dict, subject: str | None = None) -> dict[str, float | None]:
+        """Flatten ``summarize_all()`` output into aggregated-result keys."""
+        scope = "" if subject is None else f" - {subject}"
+        out: dict[str, float | None] = {}
+        scalar_map = {
+            "corpus_bpb": f"Corpus BPB{scope}",
+            "bits_per_answer": f"Corpus BitsPerAnswer{scope}",
+            "mean_bytes": f"Corpus mean_bytes{scope}",
+            "median_bytes": f"Corpus median_bytes{scope}",
+            "token_corpus_bpb": f"Corpus token BPB{scope}",
+            "space_stripped_corpus_bpb": f"Corpus BPB space_stripped{scope}",
+            "effective_length": f"Corpus effective_length BPB{scope}",
+        }
+        for summary_key, label in scalar_map.items():
+            if summary_key in summary and isinstance(summary[summary_key], (int, float)):
+                out[label] = float(summary[summary_key])
+
+        for ls_key in ("ls_bpb_task_q", "ls_bpb_common_q"):
+            if ls_key in summary and isinstance(summary[ls_key], (int, float)):
+                out[f"Corpus {ls_key}{scope}"] = float(summary[ls_key])
+
+        for fit_key in ("ols", "huber", "ols_tokens"):
+            fit = summary.get(fit_key)
+            if isinstance(fit, dict):
+                for sub_key, sub_val in fit.items():
+                    if isinstance(sub_val, (int, float)) and sub_val == sub_val:
+                        out[f"Corpus {fit_key}_{sub_key}{scope}"] = float(sub_val)
+
+        for method in ("bpb_at_nstar_ols", "bpb_at_nstar_huber"):
+            nested = summary.get(method)
+            if isinstance(nested, dict):
+                for nstar, val in nested.items():
+                    if isinstance(val, (int, float)) and val == val:
+                        out[f"Corpus {method} {nstar}{scope}"] = float(val)
+
+        return out
+
+    @staticmethod
+    def _aggregate_corpus_bpb_metrics(
+        results: list[Result], leading_space_by_item: dict[tuple[int, str], float] | None = None
+    ) -> dict[str, float | None]:
+        """Corpus BPB and related estimators from the ``BitsPerByte_*`` companion fields.
+
+        ``leading_space_by_item`` maps (id, subject) to 1.0 when the ground truth begins with a
+        space (else 0.0), feeding the space-stripped corpus BPB. Result rows no longer carry the
+        response text, so leading-space comes in from the loglikelihood responses.
+        """
+        leading_space_by_item = leading_space_by_item or {}
+        sidecar_names = {"BitsPerByte_bits", "BitsPerByte_bytes", "BitsPerByte_tokens"}
+        rows: list[dict] = []
+        for result in results:
+            if result.error is not None or result.value is None:
+                continue
+            if result.metric_name not in sidecar_names:
+                continue
+            rows.append(
+                {
+                    "id": result.id,
+                    "subject": result.subject,
+                    "key": result.key or "",
+                    "metric_name": result.metric_name,
+                    "value": result.value,
+                }
+            )
+
+        if not rows:
+            return {}
+
+        data = pd.DataFrame(rows)
+        pivot = data.pivot_table(
+            index=["id", "subject", "key"],
+            columns="metric_name",
+            values="value",
+            aggfunc="first",
+        )
+        required = ["BitsPerByte_bits", "BitsPerByte_bytes"]
+        if not all(col in pivot.columns for col in required):
+            return {}
+
+        pivot = pivot.dropna(subset=required)
+        if len(pivot) == 0:
+            return {}
+
+        aggregated: dict[str, float | None] = {}
+
+        def summarize_slice(frame: pd.DataFrame, subject: str | None = None) -> None:
+            bits = frame["BitsPerByte_bits"].to_numpy(dtype=float)
+            nbytes = frame["BitsPerByte_bytes"].to_numpy(dtype=float)
+            tokens = None
+            if "BitsPerByte_tokens" in frame.columns:
+                tok = frame["BitsPerByte_tokens"].to_numpy(dtype=float)
+                if np.all(np.isfinite(tok)):
+                    tokens = tok
+            leading_space = None
+            if leading_space_by_item:
+                ls_vals = []
+                for idx in frame.index:
+                    if subject is None:
+                        item_id, item_subject = idx[0], idx[1]
+                    else:
+                        item_id, item_subject = idx[0], subject
+                    ls_vals.append(leading_space_by_item.get((item_id, item_subject), 0.0))
+                leading_space = np.asarray(ls_vals, dtype=float)
+            summary = summarize_all(bits, nbytes, tokens=tokens, leading_space=leading_space)
+            aggregated.update(EvaluationGenerator._flatten_corpus_summary(summary, subject=subject))
+
+        summarize_slice(pivot)
+
+        for subject in sorted(pivot.index.get_level_values("subject").unique()):
+            subject_frame = pivot.xs(subject, level="subject")
+            if len(subject_frame) == 0:
+                continue
+            summarize_slice(subject_frame, subject=subject)
+
+        return aggregated
+
     def run_eval(self) -> list[Result]:
         """Runs evaluation using saved completions."""
         logger.info("Running evaluation...")
@@ -353,10 +472,19 @@ class EvaluationGenerator:
             raise ValueError("No saved completions found. Run 'run_completions' first.")
 
         metrics_results = self._run_metric_calculators(responses)
+        loglikelihood_responses = [r for r in responses if isinstance(r, Loglikelihood)]
+        # Leading-space flag per item, used by the space-stripped corpus BPB.
+        leading_space_by_item: dict[tuple[int, str], float] = {}
+        for response in loglikelihood_responses:
+            ground_truth = select_ground_truth(response)
+            if ground_truth is not None:
+                leading_space_by_item[(response.id, response.subject)] = 1.0 if ground_truth.startswith(" ") else 0.0
         del responses
         aggregated_results = self._aggregate_results(metrics_results)
         results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results)
         aggregated_results.update(results_with_aggregators)
+        aggregated_results.update(self._aggregate_corpus_bpb_metrics(metrics_results, leading_space_by_item))
+        aggregated_results.update(aggregate_prior_bpb_metrics(loglikelihood_responses))
 
         wandb.log(aggregated_results)
         self.result_processor.save_aggregated_results(aggregated_results)
