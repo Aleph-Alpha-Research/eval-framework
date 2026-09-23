@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.13.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.6...v0.13.7) (2026-09-23)
+
+
+### Features
+
+* add BitsPerByteVariants (prefix/prior/corpus BPB) ([b8faad4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b8faad4f5120ca495bc20b30118a2ec2b6029d31))
+
 ## [0.13.6](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.5...v0.13.6) (2026-09-22)
 
 
