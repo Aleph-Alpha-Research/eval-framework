@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, final, override
 
 from eval_framework.choices import ChoiceReader
+from eval_framework.shared.types import BaseMetricContext
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -16,6 +17,9 @@ class SampleBody:
     cue: str  # the assistant turn priming the answer; "" for no assistant turn
     possible_completions: list[str]
     ground_truth: str
+    # Per-sample material the metric (or answer extraction) needs beyond the prompt/completion/ground_truth:
+    # gold answer structure for F1, an instruction-following spec, a code test harness. None for most kinds.
+    context: BaseMetricContext | list[BaseMetricContext] | None = None
 
 
 class EvalKind(ABC):
@@ -83,13 +87,23 @@ class Choice(EvalKind):
 # item -> a rendered prompt / cue / ground-truth string.
 ItemText = Callable[[dict[str, Any]], str]
 
+# item -> the per-sample metric context (gold structure / test harness / instruction spec), or None.
+ItemContext = Callable[[dict[str, Any]], BaseMetricContext | list[BaseMetricContext] | None]
+
+
+def NoContext(item: dict[str, Any]) -> None:
+    """The default ``ItemContext``: the sample carries no metric context."""
+    return None
+
 
 @final
 class Generative(EvalKind):
     """Free-form question -> answer kind: one sample per item, no scored candidates (the answer is extracted
     from the generation by the injected ``AnswerPolicy``). ``build_prompt`` frames the question, ``cue``
     primes the answer turn (``""`` for none), ``ground_truth`` derives the gold answer, and ``metrics`` are
-    the scoring metrics."""
+    the scoring metrics. ``context`` derives the per-sample scoring material a metric needs beyond the gold
+    string (see ``SampleBody.context``); ``initial_prompt`` is a preamble prepended once above the first
+    (few-shot) turn."""
 
     def __init__(
         self,
@@ -98,11 +112,15 @@ class Generative(EvalKind):
         cue: str,
         ground_truth: ItemText,
         metrics: list[type["BaseMetric"]],
+        context: ItemContext | None = None,
+        initial_prompt: str | None = None,
     ) -> None:
         self._build_prompt = build_prompt
         self._cue = cue
         self._ground_truth = ground_truth
         self._metrics = metrics
+        self._context: ItemContext = context if context is not None else NoContext
+        self._initial_prompt = initial_prompt
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
@@ -116,5 +134,10 @@ class Generative(EvalKind):
                 cue=self._cue,
                 possible_completions=[],
                 ground_truth=self._ground_truth(item),
+                context=self._context(item),
             )
         ]
+
+    @override
+    def initial_prompt(self, subject_label: str) -> str | None:
+        return self._initial_prompt

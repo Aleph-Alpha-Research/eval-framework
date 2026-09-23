@@ -10,8 +10,6 @@ blocks), German final-answer lines, ``minerva_de`` extraction and the German Min
 - ``MATHMinervaDE_BPB_OLMES``: bits-per-byte of the single gold solution (same prompt + few-shot).
 """
 
-import random
-from collections.abc import Callable
 from typing import Any, final, override
 
 from eval_framework.answer import ExtractFromCompletion, PickFromCandidates
@@ -19,7 +17,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice, Generative
-from eval_framework.fewshot import FewShot, FewshotExample
+from eval_framework.fewshot import FewshotExample, FunctionRenderer, SampledFewShot
 from eval_framework.metrics.completion.math_minerva_completion import (
     MathMinervaCompletionDE,
     MathMinervaCompletionRelaxedDE,
@@ -63,41 +61,9 @@ def _generative_demo(item: dict[str, Any]) -> FewshotExample:
     )
 
 
-@final
-class _SingleParagraphSampledFewShot(FewShot):
-    """Samples demonstrations from ``split``, keeping only single-paragraph solutions (no blank line) so the
-    ``\\n\\n`` stop sequence separates few-shot blocks rather than firing inside a demonstration. Leak-safe
-    against the eval item via the same oversample-and-drop guard as ``SampledFewShot``."""
-
-    def __init__(self, split: str, render: Callable[[dict[str, Any]], FewshotExample]) -> None:
-        self._split = split
-        self._render = render
-
-    @override
-    def split(self) -> str | None:
-        return self._split
-
-    @override
-    def check(self, num_fewshot: int) -> int:
-        return num_fewshot
-
-    @override
-    def examples(
-        self,
-        dataset: dict[str, list[dict[str, Any]]],
-        *,
-        sample_split: str,
-        item: dict[str, Any],
-        num_fewshot: int,
-        rnd: random.Random,
-    ) -> list[FewshotExample]:
-        pool = [ex for ex in dataset[self._split] if "\n\n" not in ex["solution"]]
-        drawn = [ex for ex in rnd.sample(pool, num_fewshot + 1) if ex != item][:num_fewshot]
-        return [self._render(ex) for ex in drawn]
-
-    @override
-    def metadata(self) -> dict[str, str]:
-        return {"fewshot_split": self._split}
+def _single_paragraph_solution(example: dict[str, Any]) -> bool:
+    # Keep only single-paragraph solutions: the "\n\n" stop must separate few-shot blocks, not fire inside one.
+    return "\n\n" not in example["solution"]
 
 
 def _de_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
@@ -115,7 +81,7 @@ def _mathminerva_de(id: str, stop_sequences: list[str], dataset: DatasetPolicy |
         ),
         answer=ExtractFromCompletion(_minerva_de_extractor, stop_sequences, max_tokens=_MINERVA_DE_MAX_TOKENS),
         sample_split="test",
-        fewshot=_SingleParagraphSampledFewShot("test", _generative_demo),
+        fewshot=SampledFewShot("test", FunctionRenderer(_generative_demo), keep=_single_paragraph_solution),
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=_de_dataset(dataset),
         language=Language.DEU,
@@ -158,7 +124,7 @@ def mathminerva_de_bpb_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         kind=Choice(_MinervaDeBpbReader(), _MinervaDeBpbStyler(cue_text="Lösung:")),
         answer=PickFromCandidates(),
         sample_split="test",
-        fewshot=_SingleParagraphSampledFewShot("test", _generative_demo),
+        fewshot=SampledFewShot("test", FunctionRenderer(_generative_demo), keep=_single_paragraph_solution),
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=_de_dataset(dataset),
         language=Language.DEU,

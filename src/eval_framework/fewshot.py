@@ -1,16 +1,21 @@
-"""Few-shot policies: where a composed eval draws its demonstrations from, how they are rendered — and
-whether it draws any.
+"""Few-shot policies: what demonstrations a composed eval shows before each item, and how they render.
 
-A ``FewShot`` owns the *source* of demonstrations (which split, sampled leak-safely) and their *rendering*
-into solved prompt/answer pairs; the eval only wraps those into USER / ASSISTANT turns. ``NoFewShot`` lets
-a benchmark declare "0-shot only" structurally, so the constraint is enforced at creation instead of via a
-placeholder split.
+Two phases, mirroring the dataset layer (``DatasetPolicy`` → ``DatasetLoader``):
+
+- ``FewShotPolicy`` is the immutable spec a benchmark holds. ``bind(num_fewshot)`` resolves the run's shot
+  count (failing fast, or pinning it for a fixed-shot policy) and produces a ``FewShotGenerator``.
+- ``FewShotGenerator`` is the per-run worker: it ``prepare``s its demonstration pool once the data is loaded,
+  then renders the demonstrations ``for_item`` at eval time — so ``ComposedEval`` never carries the shot count.
+
+Orthogonal to both is ``FewShotRenderer``: *how* a drawn row becomes a demonstration (a choice reader +
+styler, or a plain function). A policy pairs a source (sampled split / fixed block / none) with a renderer;
+the eval only wraps the rendered pairs into USER / ASSISTANT turns.
 """
 
 import logging
 import random
 from abc import ABC, abstractmethod
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, final, override
 
@@ -28,97 +33,178 @@ class FewshotExample:
     answer: str  # the assistant turn (the shown correct answer)
 
 
-class FewShot(ABC):
-    """The source of a composed eval's few-shot demonstrations, their rendering, and whether it permits any."""
+# ---------------------------------------------------------------------------
+# Rendering: one drawn row -> a demonstration
+# ---------------------------------------------------------------------------
+
+
+class FewShotRenderer(ABC):
+    """Turns one drawn dataset row into a solved demonstration — the shown prompt and its correct answer.
+
+    The *rendering* half of few-shot, orthogonal to *which rows* a policy sources."""
 
     @abstractmethod
-    def split(self) -> str | None:
-        """The dataset split demonstrations are drawn from (retained when the dataset loads), or None
-        when the policy draws none."""
+    def render(self, item: dict[str, Any]) -> FewshotExample:
+        """Render one dataset row into a demonstration (prompt + shown answer)."""
+
+
+@final
+class ChoiceRenderer(FewShotRenderer):
+    """Renders through the same choice ``reader`` + ``styler`` that score the task, so the shots look exactly
+    like the scored prompt (used by every choice / loglikelihood benchmark)."""
+
+    def __init__(self, reader: ChoiceReader, styler: "TaskStyler") -> None:
+        self._reader = reader
+        self._styler = styler
+
+    @override
+    def render(self, item: dict[str, Any]) -> FewshotExample:
+        fields = self._reader.read(item)
+        return FewshotExample(
+            prompt=self._styler.get_instruction_text(fields.raw_question, fields.choices),
+            answer=self._styler.get_fewshot_target_text(fields.choices, fields.correct_index),
+        )
+
+
+@final
+class FunctionRenderer(FewShotRenderer):
+    """Renders via a benchmark-supplied ``item -> FewshotExample`` function — for generative tasks that build
+    the demonstration directly rather than through a choice styler."""
+
+    def __init__(self, render: Callable[[dict[str, Any]], FewshotExample]) -> None:
+        self._render = render
+
+    @override
+    def render(self, item: dict[str, Any]) -> FewshotExample:
+        return self._render(item)
+
+
+# ---------------------------------------------------------------------------
+# Sourcing: policy (spec) -> generator (per-run worker)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class FewShotDoc:
+    """What ``markdown_doc`` needs to describe a policy without running it: the demonstration split (``None``
+    for a fixed block or no few-shot) and how many demonstrations to show in the rendered example."""
+
+    split: str | None
+    example_shots: int
+
+
+class FewShotPolicy(ABC):
+    """The immutable few-shot spec a benchmark holds; binds a run's shot count into a generator (mirrors
+    ``DatasetPolicy`` → ``DatasetLoader``)."""
 
     @abstractmethod
-    def check(self, num_fewshot: int) -> int:
-        """Resolve the effective shot count, called when the eval is created (before any dataset is touched).
-        Usually returns ``num_fewshot`` unchanged, but raises if the request is unsupported, or — for a
-        fixed-shot policy — pins the count (warning if the request differs)."""
+    def bind(self, num_fewshot: int) -> "FewShotGenerator":
+        """Resolve the shot count — failing fast on an unsupported request, or pinning it for a fixed-shot
+        policy — and produce the per-run generator that holds it. Called at eval creation, before any load."""
 
     @abstractmethod
-    def examples(
-        self,
-        dataset: dict[str, list[dict[str, Any]]],
-        *,
-        sample_split: str,
-        item: dict[str, Any],
-        num_fewshot: int,
-        rnd: random.Random,
-    ) -> list["FewshotExample"]:
-        """The rendered demonstrations to show before ``item`` — sampled leak-safely (never ``item``
-        itself) and formatted into solved prompt/answer pairs."""
+    def documentation(self) -> FewShotDoc:
+        """The demonstration split and example shot count for the rendered task docs."""
+
+
+class FewShotGenerator(ABC):
+    """A per-run few-shot worker, bound to a shot count: it remembers its demonstration pool once the data is
+    loaded, then renders the demonstrations to show before each eval item."""
+
+    @abstractmethod
+    def prepare(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> None:
+        """Remember the demonstration pool from the already-loaded ``dataset`` (called once per subject during
+        data loading). A same-split draw reuses the eval's already-shuffled ``sample_rows``, so demonstrations
+        are never re-ordered relative to the eval items."""
+
+    @abstractmethod
+    def for_item(self, item: dict[str, Any], rnd: random.Random) -> list[FewshotExample]:
+        """The rendered demonstrations to show before ``item`` — leak-safe against ``item`` itself."""
 
     @abstractmethod
     def metadata(self) -> dict[str, str]:
         """Few-shot metadata merged into the eval's ``get_metadata`` (e.g. the source split)."""
 
 
+def draw_demonstrations(
+    pool: list[dict[str, Any]],
+    *,
+    is_sample_split: bool,
+    item: dict[str, Any],
+    count: int,
+    rnd: random.Random,
+) -> list[dict[str, Any]]:
+    """Draw ``count`` rows from ``pool``. When the pool is the sample split, over-sample by one and drop the
+    current ``item`` if it was drawn — so its own answer never leaks — then truncate back; else draw directly.
+
+    Shared by ``_SampledGenerator`` and by benchmarks whose demonstration *rendering* is item-dependent and so
+    keep a local generator (e.g. Global-MMLU renders each shot in the current item's language)."""
+    if count <= 0:
+        return []
+    if is_sample_split:
+        drawn = rnd.sample(pool, count + 1)
+        drawn = [row for row in drawn if row != item]
+        return drawn[:count]
+    return rnd.sample(pool, count)
+
+
 @final
-class SampledFewShot(FewShot):
-    """Draws ``num_fewshot`` demonstrations at random from ``split`` and renders each with ``reader`` +
-    ``styler`` — the shown prompt, then the correct answer. When ``split`` is also the sample split, the
-    current eval item is excluded so its own answer never leaks into its prompt."""
+class SampledFewShot(FewShotPolicy):
+    """Draws demonstrations at random from ``split`` (optionally restricted to rows passing ``keep``), each
+    rendered by ``renderer``. When ``split`` is the sample split, the current eval item is excluded so its own
+    answer never leaks into its prompt."""
 
-    def __init__(self, reader: ChoiceReader, styler: "TaskStyler", split: str) -> None:
-        self._reader = reader
-        self._styler = styler
+    def __init__(
+        self,
+        split: str,
+        renderer: FewShotRenderer,
+        *,
+        keep: Callable[[dict[str, Any]], bool] | None = None,
+    ) -> None:
         self._split = split
+        self._renderer = renderer
+        self._keep = keep
 
     @override
-    def split(self) -> str | None:
-        return self._split
+    def bind(self, num_fewshot: int) -> FewShotGenerator:
+        return _SampledGenerator(num_fewshot, split=self._split, keep=self._keep, renderer=self._renderer)
 
     @override
-    def check(self, num_fewshot: int) -> int:
-        return num_fewshot  # any shot count is supported
+    def documentation(self) -> FewShotDoc:
+        return FewShotDoc(split=self._split, example_shots=1)
 
-    @override
-    def examples(
+
+@final
+class _SampledGenerator(FewShotGenerator):
+    def __init__(
         self,
-        dataset: dict[str, list[dict[str, Any]]],
+        count: int,
         *,
-        sample_split: str,
-        item: dict[str, Any],
-        num_fewshot: int,
-        rnd: random.Random,
-    ) -> list[FewshotExample]:
-        sampled = self._sample(dataset, sample_split=sample_split, item=item, num_fewshot=num_fewshot, rnd=rnd)
-        return [self._render(demonstration) for demonstration in sampled]
+        split: str,
+        keep: Callable[[dict[str, Any]], bool] | None,
+        renderer: FewShotRenderer,
+    ) -> None:
+        self._count = count
+        self._split = split
+        self._keep = keep
+        self._renderer = renderer
+        self._pool: list[dict[str, Any]] = []
+        self._is_sample_split = False
 
-    def _sample(
-        self,
-        dataset: dict[str, list[dict[str, Any]]],
-        *,
-        sample_split: str,
-        item: dict[str, Any],
-        num_fewshot: int,
-        rnd: random.Random,
-    ) -> list[dict[str, Any]]:
-        if num_fewshot <= 0:
-            return []
-        fewshot_pool = dataset[self._split]
-        if self._split == sample_split:
-            # Same split for demonstrations and evaluation: over-sample by one, drop the current item
-            # if it was drawn (so its answer never leaks), then truncate back to num_fewshot.
-            drawn = rnd.sample(fewshot_pool, num_fewshot + 1)
-            drawn = [demonstration for demonstration in drawn if demonstration != item]
-            return drawn[:num_fewshot]
-        # Separate splits: no risk of leaking the current item, sample directly.
-        return rnd.sample(fewshot_pool, num_fewshot)
+    @override
+    def prepare(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> None:
+        if self._count <= 0:
+            return  # nothing will be drawn, so a separate few-shot split need not even be present
+        self._is_sample_split = self._split == sample_split
+        rows = sample_rows if self._is_sample_split else list(dataset[self._split])
+        self._pool = [row for row in rows if self._keep(row)] if self._keep is not None else rows
 
-    def _render(self, item: dict[str, Any]) -> FewshotExample:
-        fields = self._reader.read(item)
-        return FewshotExample(
-            prompt=self._styler.get_instruction_text(fields.raw_question, fields.choices),
-            answer=self._styler.get_fewshot_target_text(fields.choices, fields.correct_index),
+    @override
+    def for_item(self, item: dict[str, Any], rnd: random.Random) -> list[FewshotExample]:
+        drawn = draw_demonstrations(
+            self._pool, is_sample_split=self._is_sample_split, item=item, count=self._count, rnd=rnd
         )
+        return [self._renderer.render(row) for row in drawn]
 
     @override
     def metadata(self) -> dict[str, str]:
@@ -126,45 +212,49 @@ class SampledFewShot(FewShot):
 
 
 @final
-class PredefinedFewShot(FewShot):
-    """A fixed, hand-written set of demonstrations (not drawn from the dataset), each rendered by ``render``.
+class PredefinedFewShot(FewShotPolicy):
+    """A fixed, hand-written set of demonstrations (not drawn from the dataset), each rendered by ``renderer``.
     The shot count is pinned to ``count`` — a benchmark whose prompt uses a canonical fixed few-shot block —
     warning (rather than sampling differently) if a different count is requested."""
 
     def __init__(
         self,
         items: list[dict[str, Any]],
-        render: Callable[[dict[str, Any]], FewshotExample],
+        renderer: FewShotRenderer,
         *,
         count: int,
         label: str,
     ) -> None:
         self._items = items
-        self._render = render
+        self._renderer = renderer
         self._count = count
         self._label = label
 
     @override
-    def split(self) -> str | None:
-        return None  # predefined exemplars, no dataset split
-
-    @override
-    def check(self, num_fewshot: int) -> int:
+    def bind(self, num_fewshot: int) -> FewShotGenerator:
         if num_fewshot != self._count:
             logger.warning(f"{self._label} uses a fixed num_fewshot of {self._count}. Got {num_fewshot}.")
-        return self._count
+        return _PredefinedGenerator(self._count, items=self._items, renderer=self._renderer)
 
     @override
-    def examples(
-        self,
-        dataset: dict[str, list[dict[str, Any]]],
-        *,
-        sample_split: str,
-        item: dict[str, Any],
-        num_fewshot: int,
-        rnd: random.Random,
-    ) -> list[FewshotExample]:
-        return [self._render(demonstration) for demonstration in self._items[:num_fewshot]]
+    def documentation(self) -> FewShotDoc:
+        return FewShotDoc(split=None, example_shots=self._count)
+
+
+@final
+class _PredefinedGenerator(FewShotGenerator):
+    def __init__(self, count: int, *, items: list[dict[str, Any]], renderer: FewShotRenderer) -> None:
+        self._count = count
+        self._items = items
+        self._renderer = renderer
+
+    @override
+    def prepare(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> None:
+        return None  # fixed exemplars, nothing to remember
+
+    @override
+    def for_item(self, item: dict[str, Any], rnd: random.Random) -> list[FewshotExample]:
+        return [self._renderer.render(demo) for demo in self._items[: self._count]]
 
     @override
     def metadata(self) -> dict[str, str]:
@@ -172,29 +262,28 @@ class PredefinedFewShot(FewShot):
 
 
 @final
-class NoFewShot(FewShot):
-    """A benchmark that only runs 0-shot: it names no source split and rejects any few-shot request."""
+class NoFewShot(FewShotPolicy):
+    """A benchmark that only runs 0-shot: it rejects any few-shot request and shows no demonstrations."""
 
     @override
-    def split(self) -> str | None:
+    def bind(self, num_fewshot: int) -> FewShotGenerator:
+        if num_fewshot != 0:
+            raise ValueError(f"This benchmark is 0-shot only; num_fewshot must be 0, got {num_fewshot}.")
+        return _NoGenerator()
+
+    @override
+    def documentation(self) -> FewShotDoc:
+        return FewShotDoc(split=None, example_shots=0)
+
+
+@final
+class _NoGenerator(FewShotGenerator):
+    @override
+    def prepare(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> None:
         return None
 
     @override
-    def check(self, num_fewshot: int) -> int:
-        if num_fewshot != 0:
-            raise ValueError(f"This benchmark is 0-shot only; num_fewshot must be 0, got {num_fewshot}.")
-        return 0
-
-    @override
-    def examples(
-        self,
-        dataset: dict[str, list[dict[str, Any]]],
-        *,
-        sample_split: str,
-        item: dict[str, Any],
-        num_fewshot: int,
-        rnd: random.Random,
-    ) -> list[FewshotExample]:
+    def for_item(self, item: dict[str, Any], rnd: random.Random) -> list[FewshotExample]:
         return []
 
     @override

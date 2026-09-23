@@ -16,7 +16,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Generative
-from eval_framework.fewshot import SampledFewShot
+from eval_framework.fewshot import ChoiceRenderer, SampledFewShot
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
@@ -68,7 +68,7 @@ def gsm8k_ellamind_de_platinum(dataset: DatasetPolicy | None = None) -> Benchmar
     # Demonstrations are sampled from the test split and rendered in the same German answer format; the eval
     # itself is free-form (the generative kind), so few-shot rendering and eval are separate policies.
     fewshot = SampledFewShot(
-        _GenerativeFewshotReader(), ClozeStyle(question_prefix="Frage: ", cue_text="Antwort:"), "test"
+        "test", ChoiceRenderer(_GenerativeFewshotReader(), ClozeStyle(question_prefix="Frage: ", cue_text="Antwort:"))
     )
     return ComposedBenchmark.compose(
         id="GSM8K_Ellamind_DE_Platinum",

@@ -8,7 +8,7 @@ from eval_framework.answer import AnswerPolicy, PickFromCandidates
 from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.eval_kind import Choice, EvalKind, SampleBody
-from eval_framework.fewshot import FewShot, SampledFewShot
+from eval_framework.fewshot import ChoiceRenderer, FewShotGenerator, FewShotPolicy, SampledFewShot
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Completion, Error, RawCompletion
 from eval_framework.subjects import NoSubject, Subjects, SubjectsSelector
@@ -32,20 +32,18 @@ LanguageSpec = Language | dict[str, Language] | dict[str, tuple[Language, Langua
 class ComposedEval(Eval):
     def __init__(
         self,
-        num_fewshot: int = 0,
         *,
         display_name: str,
         kind: EvalKind,
         answer: AnswerPolicy,
         loader: DatasetLoader,
         sample_split: str,
-        fewshot: FewShot,
+        fewshot: FewShotGenerator,
         subjects: Subjects,
         language: LanguageSpec,
         rnd: random.Random,
     ) -> None:
         self._display_name = display_name
-        self.num_fewshot = num_fewshot
         self._kind = kind
         self._answer = answer
         self.loader = loader
@@ -55,32 +53,28 @@ class ComposedEval(Eval):
         self.language = language
         self.rnd = rnd
 
-    def _load_dataset(self, load_key: str | None) -> dict[str, list[dict[str, Any]]]:
+    def _load_dataset(self, load_key: str | None) -> list[dict[str, Any]]:
+        """Load and shuffle the sample rows, and let the few-shot generator remember its demonstration pool
+        from the same loaded data. Returns the sample rows the eval iterates over."""
         hf_dataset = self.loader.load(load_key)
-
         sample_rows = list(hf_dataset[self.sample_split])
         self.rnd.shuffle(sample_rows)
-        dataset = {self.sample_split: sample_rows}
-
-        fewshot_split = self._fewshot.split()
-        if self.num_fewshot > 0 and fewshot_split is not None and fewshot_split != self.sample_split:
-            dataset[fewshot_split] = list(hf_dataset[fewshot_split])
-
-        return dataset
+        self._fewshot.prepare(hf_dataset, sample_split=self.sample_split, sample_rows=sample_rows)
+        return sample_rows
 
     @override
     def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
         for subject in self._subjects:
-            dataset = self._load_dataset(subject.load_key)
-            assert len(dataset[self.sample_split]) > 0
+            sample_rows = self._load_dataset(subject.load_key)
+            assert len(sample_rows) > 0
             initial_prompt = self._kind.initial_prompt(subject.label)
             sample_id = 0  # ids and the num_samples cap are per subject, matching BaseTask
             done = False
-            for item in dataset[self.sample_split]:
+            for item in sample_rows:
                 if done:
                     break
                 item["subject"] = subject.label
-                prefix = self._fewshot_messages(item, dataset)
+                prefix = self._fewshot_messages(item)
                 for sample_body in self._kind.samples(item):
                     yield Sample(
                         id=sample_id,
@@ -89,7 +83,7 @@ class ComposedEval(Eval):
                         ground_truth=sample_body.ground_truth,
                         # An empty candidate list means free-form generation (no candidates to score).
                         possible_completions=sample_body.possible_completions or None,
-                        context=None,
+                        context=sample_body.context,
                     )
                     sample_id += 1
                     if sample_id == num_samples:
@@ -105,11 +99,9 @@ class ComposedEval(Eval):
             messages.append(Message(role=Role.ASSISTANT, content=body.cue))
         return messages
 
-    def _fewshot_messages(self, item: dict[str, Any], dataset: dict[str, list[dict[str, Any]]]) -> list[Message]:
+    def _fewshot_messages(self, item: dict[str, Any]) -> list[Message]:
         prefix: list[Message] = []
-        for example in self._fewshot.examples(
-            dataset, sample_split=self.sample_split, item=item, num_fewshot=self.num_fewshot, rnd=self.rnd
-        ):
+        for example in self._fewshot.for_item(item, self.rnd):
             prefix.append(Message(role=Role.USER, content=example.prompt))
             prefix.append(Message(role=Role.ASSISTANT, content=example.answer))
         return prefix
@@ -246,7 +238,7 @@ class ComposedBenchmark(Benchmark):
         kind: EvalKind,
         answer: AnswerPolicy,
         sample_split: str,
-        fewshot: FewShot,
+        fewshot: FewShotPolicy,
         dataset_policy: DatasetPolicy,
         language: LanguageSpec,
     ) -> None:
@@ -268,7 +260,7 @@ class ComposedBenchmark(Benchmark):
         kind: EvalKind,
         answer: AnswerPolicy,
         sample_split: str,
-        fewshot: FewShot,
+        fewshot: FewShotPolicy,
         subjects: SubjectsSelector | None = None,
         dataset_policy: DatasetPolicy,
         language: LanguageSpec,
@@ -311,7 +303,7 @@ class ComposedBenchmark(Benchmark):
             kind=Choice(reader, styler),
             answer=PickFromCandidates(),
             sample_split=sample_split,
-            fewshot=SampledFewShot(reader, styler, fewshot_split),
+            fewshot=SampledFewShot(fewshot_split, ChoiceRenderer(reader, styler)),
             subjects=subjects,
             dataset_policy=dataset_policy,
             language=language,
@@ -333,18 +325,19 @@ class ComposedBenchmark(Benchmark):
         # Composed evals have no completion path yet, so a completion-only user prompt suffix is rejected.
         if user_prompt_suffix is not None:
             raise ValueError("user_prompt_suffix is only supported for completion tasks.")
-        num_fewshot = self._fewshot.check(num_fewshot)  # resolve/validate the shot count before loading data
+        # Bind the shot count into a per-run generator now, before any data loads, so an unsupported request
+        # (e.g. few-shot against a 0-shot-only task) fails fast.
+        fewshot = self._fewshot.bind(num_fewshot)
         subjects = self._subjects.select(custom_subjects or [])
         if custom_subjects:
             labels = [subject.label for subject in subjects]
             logger.info(f"Restricting subjects to `{labels}` for the task {self._display_name}")
         return ComposedEval(
-            num_fewshot=num_fewshot,
             display_name=self._display_name,
             kind=self._kind,
             answer=self._answer,
             sample_split=self.sample_split,
-            fewshot=self._fewshot,
+            fewshot=fewshot,
             subjects=subjects,
             language=self.language,
             loader=self.dataset_policy.loader(custom_hf_revision),
@@ -373,38 +366,40 @@ class ComposedBenchmark(Benchmark):
 
     @override
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
-        # Show one demonstration where the benchmark supports few-shot, none where it is 0-shot only;
-        # a fixed-shot policy resolves this to its pinned count.
-        fewshot_split = self._fewshot.split()
-        num_fewshot = self._fewshot.check(1 if fewshot_split is not None else 0)
+        # The docs show one demonstration where the benchmark samples them, its pinned block where fixed, and
+        # none where it is 0-shot only — the policy reports which without a run.
+        doc = self._fewshot.documentation()
+        loader = self.dataset_policy.loader(None)
         subjects = self._subjects.select([])
         instance = ComposedEval(
-            num_fewshot=num_fewshot,
             display_name=self._display_name,
             kind=self._kind,
             answer=self._answer,
             sample_split=self.sample_split,
-            fewshot=self._fewshot,
+            fewshot=self._fewshot.bind(doc.example_shots),
             subjects=subjects,
             language=self.language,
-            loader=self.dataset_policy.loader(None),
+            loader=loader,
             rnd=random.Random(RANDOM_SEED),
         )
         sample = next(iter(instance.iterate_samples(1)))
-        dataset = instance._load_dataset(subjects[0].load_key)
+        loaded = loader.load(subjects[0].load_key)
+        split_sizes = {self.sample_split: len(loaded[self.sample_split])}
+        if doc.split is not None and doc.split != self.sample_split:
+            split_sizes[doc.split] = len(loaded[doc.split])
         return render_markdown_doc(
             name=self._display_name,
             dataset_doc=self.dataset_policy.documentation(),
             sample_split=self.sample_split,
-            fewshot_split=fewshot_split,
+            fewshot_split=doc.split,
             response_type=self.response_type().name,
             metrics=[m.__name__ for m in self.metrics()],
             subjects=[subject.label for subject in subjects],
             language=self.language,
-            num_fewshot=num_fewshot,
+            num_fewshot=doc.example_shots,
             formatters=formatters,
             example_messages=sample.messages,
-            split_sizes={split: len(dataset[split]) for split in dataset},
+            split_sizes=split_sizes,
             possible_completions=sample.possible_completions,
             ground_truth=sample.ground_truth,
         )

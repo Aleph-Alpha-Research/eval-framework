@@ -11,7 +11,7 @@ from eval_framework.answer import PickFromCandidates
 from eval_framework.benchmarks.winogrande import PartialEval, WinograndeReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.fewshot import SampledFewShot
+from eval_framework.fewshot import ChoiceRenderer, SampledFewShot
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
@@ -53,7 +53,7 @@ def winogrande_ellamind_partial_eval_de(dataset: DatasetPolicy | None = None) ->
         kind=PartialEval(),
         answer=PickFromCandidates(),
         sample_split="validation",
-        fewshot=SampledFewShot(WinograndeReader(), fewshot_styler, "validation"),
+        fewshot=SampledFewShot("validation", ChoiceRenderer(WinograndeReader(), fewshot_styler)),
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=_winogrande_dataset(dataset),
         language=Language.DEU,

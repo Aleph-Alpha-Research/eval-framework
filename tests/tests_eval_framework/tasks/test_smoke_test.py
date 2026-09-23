@@ -1,6 +1,5 @@
 import pytest
 
-from eval_framework.tasks.benchmarks.drop import DropCloze, DropCompletion, DropMC, DropMC_OLMES
 from eval_framework.tasks.benchmarks.humaneval import HumanEvalBPB, HumanEvalBPB_V2
 from eval_framework.tasks.benchmarks.mbpp import MBPPBPB
 from eval_framework.tasks.benchmarks.naturalqs_open import (
@@ -25,14 +24,6 @@ def _smoke_test_task(task_cls, num_fewshot: int = 0) -> None:
         assert sample.id is not None
         assert isinstance(sample.subject, str)
         assert sample.messages
-
-
-@pytest.mark.cpu_slow
-def test_drop_tasks_smoke() -> None:
-    _smoke_test_task(DropCompletion)
-    _smoke_test_task(DropMC)
-    _smoke_test_task(DropMC_OLMES)
-    _smoke_test_task(DropCloze)
 
 
 @pytest.mark.cpu_slow

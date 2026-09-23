@@ -9,7 +9,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice, Generative, ItemText
-from eval_framework.fewshot import FewshotExample, NoFewShot, PredefinedFewShot
+from eval_framework.fewshot import FewshotExample, FunctionRenderer, NoFewShot, PredefinedFewShot
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
 from eval_framework.metrics.completion.math_minerva_completion import (
@@ -380,7 +380,7 @@ def _mathminerva_olmes(id: str, stop_sequences: list[str], dataset: DatasetPolic
         ),
         answer=ExtractFromCompletion(_minerva_extractor, stop_sequences, max_tokens=_MINERVA_MAX_TOKENS),
         sample_split="test",
-        fewshot=PredefinedFewShot(_OLMES_FEWSHOTS, _olmes_generative_demo, count=4, label=id),
+        fewshot=PredefinedFewShot(_OLMES_FEWSHOTS, FunctionRenderer(_olmes_generative_demo), count=4, label=id),
         subjects=ListOfSubjects(_MATH_SUBJECTS),
         dataset_policy=dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_DATASET_PATH),
         language=Language.ENG,
@@ -426,7 +426,9 @@ def mathminerva_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
         kind=Choice(_MINERVA_BPB_READER, _MINERVA_BPB_STYLER),
         answer=PickFromCandidates(),
         sample_split="test",
-        fewshot=PredefinedFewShot(_OLMES_FEWSHOTS, _minerva_bpb_demo, count=4, label="MATHMinervaBPB"),
+        fewshot=PredefinedFewShot(
+            _OLMES_FEWSHOTS, FunctionRenderer(_minerva_bpb_demo), count=4, label="MATHMinervaBPB"
+        ),
         subjects=ListOfSubjects(_MATH_SUBJECTS),
         dataset_policy=dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_DATASET_PATH),
         language=Language.ENG,
