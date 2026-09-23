@@ -1,16 +1,4 @@
-"""Few-shot policies: what demonstrations a composed eval shows before each item, and how they render.
-
-Two phases, mirroring the dataset layer (``DatasetPolicy`` → ``DatasetLoader``):
-
-- ``FewShotPolicy`` is the immutable spec a benchmark holds. ``bind(num_fewshot)`` resolves the run's shot
-  count (failing fast, or pinning it for a fixed-shot policy) and produces a ``FewShotGenerator``.
-- ``FewShotGenerator`` is the per-run worker: it ``prepare``s its demonstration pool once the data is loaded,
-  then renders the demonstrations ``for_item`` at eval time — so ``ComposedEval`` never carries the shot count.
-
-Orthogonal to both is ``FewShotRenderer``: *how* a drawn row becomes a demonstration (a choice reader +
-styler, or a plain function). A policy pairs a source (sampled split / fixed block / none) with a renderer;
-the eval only wraps the rendered pairs into USER / ASSISTANT turns.
-"""
+"""Few-shot policies: what demonstrations a composed eval shows before each item, and how they render."""
 
 import logging
 import random
@@ -126,28 +114,6 @@ class FewShotGenerator(ABC):
         """Few-shot metadata merged into the eval's ``get_metadata`` (e.g. the source split)."""
 
 
-def draw_demonstrations(
-    pool: list[dict[str, Any]],
-    *,
-    is_sample_split: bool,
-    item: dict[str, Any],
-    count: int,
-    rnd: random.Random,
-) -> list[dict[str, Any]]:
-    """Draw ``count`` rows from ``pool``. When the pool is the sample split, over-sample by one and drop the
-    current ``item`` if it was drawn — so its own answer never leaks — then truncate back; else draw directly.
-
-    Shared by ``_SampledGenerator`` and by benchmarks whose demonstration *rendering* is item-dependent and so
-    keep a local generator (e.g. Global-MMLU renders each shot in the current item's language)."""
-    if count <= 0:
-        return []
-    if is_sample_split:
-        drawn = rnd.sample(pool, count + 1)
-        drawn = [row for row in drawn if row != item]
-        return drawn[:count]
-    return rnd.sample(pool, count)
-
-
 @final
 class SampledFewShot(FewShotPolicy):
     """Draws demonstrations at random from ``split`` (optionally restricted to rows passing ``keep``), each
@@ -201,9 +167,14 @@ class _SampledGenerator(FewShotGenerator):
 
     @override
     def for_item(self, item: dict[str, Any], rnd: random.Random) -> list[FewshotExample]:
-        drawn = draw_demonstrations(
-            self._pool, is_sample_split=self._is_sample_split, item=item, count=self._count, rnd=rnd
-        )
+        if self._count <= 0:
+            return []
+        if self._is_sample_split:
+            # Over-sample by one and drop the current item if it was drawn, so its answer never leaks.
+            oversampled = rnd.sample(self._pool, self._count + 1)
+            drawn = [row for row in oversampled if row != item][: self._count]
+        else:
+            drawn = rnd.sample(self._pool, self._count)
         return [self._renderer.render(row) for row in drawn]
 
     @override
