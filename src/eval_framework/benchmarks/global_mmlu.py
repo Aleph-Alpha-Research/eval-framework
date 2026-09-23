@@ -5,6 +5,7 @@ MMLU translated into many languages; we evaluate French, German, Spanish, Italia
 
 import ast
 import random
+from collections.abc import Mapping
 from itertools import product
 from typing import TYPE_CHECKING, Any, final, override
 
@@ -15,7 +16,13 @@ from eval_framework.benchmarks.mmlu import MMLU_SUBJECTS
 from eval_framework.composed import ComposedBenchmark, LanguageSpec
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import EvalKind, SampleBody
-from eval_framework.fewshot import FewShot, FewshotExample
+from eval_framework.fewshot import (
+    FewShotDoc,
+    FewshotExample,
+    FewShotGenerator,
+    FewShotPolicy,
+    draw_demonstrations,
+)
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
@@ -579,36 +586,42 @@ class _GlobalMmluChoice(EvalKind):
 
 
 @final
-class _GlobalMmluFewShot(FewShot):
+class _GlobalMmluFewShot(FewShotPolicy):
+    """Local policy: demonstrations are rendered in the *current eval item's* language, so rendering can't go
+    through a row-only ``FewShotRenderer`` — the generator renders per item instead."""
+
     def __init__(self, split: str) -> None:
         self._split = split
 
     @override
-    def split(self) -> str | None:
-        return self._split
+    def bind(self, num_fewshot: int) -> FewShotGenerator:
+        return _GlobalMmluGenerator(num_fewshot, self._split)
 
     @override
-    def check(self, num_fewshot: int) -> int:
-        return num_fewshot  # any shot count is supported
+    def documentation(self) -> FewShotDoc:
+        return FewShotDoc(split=self._split, example_shots=1)
+
+
+@final
+class _GlobalMmluGenerator(FewShotGenerator):
+    def __init__(self, count: int, split: str) -> None:
+        self._count = count
+        self._split = split
+        self._pool: list[dict[str, Any]] = []
+        self._is_sample_split = False
 
     @override
-    def examples(
-        self,
-        dataset: dict[str, list[dict[str, Any]]],
-        *,
-        sample_split: str,
-        item: dict[str, Any],
-        num_fewshot: int,
-        rnd: random.Random,
-    ) -> list[FewshotExample]:
-        if num_fewshot <= 0:
-            return []
-        pool = dataset[self._split]
-        if self._split == sample_split:
-            drawn = rnd.sample(pool, num_fewshot + 1)
-            drawn = [demo for demo in drawn if demo != item][:num_fewshot]
-        else:
-            drawn = rnd.sample(pool, num_fewshot)
+    def prepare(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> None:
+        if self._count <= 0:
+            return  # nothing will be drawn, so a separate few-shot split need not even be present
+        self._is_sample_split = self._split == sample_split
+        self._pool = sample_rows if self._is_sample_split else list(dataset[self._split])
+
+    @override
+    def for_item(self, item: dict[str, Any], rnd: random.Random) -> list[FewshotExample]:
+        drawn = draw_demonstrations(
+            self._pool, is_sample_split=self._is_sample_split, item=item, count=self._count, rnd=rnd
+        )
         lang, _ = _lang_and_subject(item["subject"])
         return [
             FewshotExample(prompt=_mc_prompt(demo, lang), answer=f"{LANGUAGE_ANSWER_TEXT_MAP[lang]}: {demo['answer']}")

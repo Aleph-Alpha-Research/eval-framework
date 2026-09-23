@@ -13,7 +13,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import EvalKind, SampleBody
-from eval_framework.fewshot import SampledFewShot
+from eval_framework.fewshot import ChoiceRenderer, SampledFewShot
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import PartialEvalAccuracy
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
@@ -85,7 +85,7 @@ def winogrande_cloze(dataset: DatasetPolicy | None = None) -> Benchmark:
         kind=PartialEval(),
         answer=PickFromCandidates(),
         sample_split="train",
-        fewshot=SampledFewShot(WinograndeReader(), fewshot_styler, "train"),
+        fewshot=SampledFewShot("train", ChoiceRenderer(WinograndeReader(), fewshot_styler)),
         subjects=ListOfSubjects(["winogrande_xl"]),
         dataset_policy=dataset_policy,
         language=Language.ENG,

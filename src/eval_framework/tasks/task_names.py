@@ -6,6 +6,7 @@ from eval_framework.benchmarks.arc_ellamind import ARC_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.copa import COPA_BENCHMARKS
 from eval_framework.benchmarks.csqa import CSQA_BENCHMARKS
 from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.drop import DROP_BENCHMARKS
 from eval_framework.benchmarks.global_mmlu import GLOBAL_MMLU_BENCHMARKS
 from eval_framework.benchmarks.goldenswag import GOLDENSWAG_BENCHMARKS
 from eval_framework.benchmarks.gpqa import GPQA_BENCHMARKS
@@ -233,9 +234,9 @@ def register_csqa_tasks(registry: Registry) -> None:
 
 
 def register_drop_tasks(registry: Registry) -> None:
-    """Register drop benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.drop.DropCompletion_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.drop.DropMC_OLMES", registry=registry)
+    """Register drop benchmark tasks (composed: DropCompletion_OLMES, DropMC_OLMES)."""
+    for benchmark in DROP_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_naturalqs_open_tasks(registry: Registry) -> None:
