@@ -2,21 +2,23 @@
 
 The model completes a Python function stub; a sandboxed metric runs the result against the problem's tests.
 The ``_OLMES`` variants generate the body and are scored by execution; the ``BPB`` variants instead score the
-loglikelihood of the gold solution as a single candidate. The ``_v2`` builders are exposed so the sibling
-``humaneval_plus`` module can reuse this task's prompt shape on the EvalPlus dataset.
+loglikelihood of the gold solution as a single candidate. The builders and prompt shapes here are exposed for
+the sibling ``humaneval_plus`` and ``humaneval_ellamind`` modules to reuse (retargeted to their datasets /
+language), mirroring how their BaseTask ancestors subclassed this task.
 """
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, override
 
-from eval_framework.answer import ReconstructProgram
+from eval_framework.answer import AnswerPolicy, ReconstructProgram
 from eval_framework.choices import ChoiceFields, ChoiceReader
-from eval_framework.composed import ComposedBenchmark
+from eval_framework.composed import ComposedBenchmark, LanguageSpec
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Generative, ItemText
 from eval_framework.fewshot import FewShot, FewshotExample, FunctionRenderer, SampleSplit
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
+from eval_framework.subjects import SubjectsSelector
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -54,7 +56,7 @@ class HumanEvalMetricContext(BaseMetricContext):
 
 
 @dataclass(frozen=True)
-class _SingleGoldReader(ChoiceReader):
+class SingleGoldReader(ChoiceReader):
     """Choice reader for the BPB (loglikelihood) variants: the sole candidate is the gold solution, always at
     index 0. ``question`` renders the code prompt and ``gold`` the reference solution from the raw item, so
     the same reader serves both the scored sample and its few-shot demonstrations."""
@@ -77,7 +79,7 @@ class _BareTargetBPBStyle(BPBStyle):
         return choices[correct_index]
 
 
-def _humaneval_context(item: dict[str, Any]) -> HumanEvalMetricContext:
+def humaneval_context(item: dict[str, Any]) -> HumanEvalMetricContext:
     return HumanEvalMetricContext(test=item["test"], entry_point=item["entry_point"], prompt=item["prompt"])
 
 
@@ -100,15 +102,21 @@ def _reconstruct_program(
     )
 
 
-def _execution(
+def execution(
     id: str,
     *,
     dataset_path: str,
     metrics: list[type["BaseMetric"]],
     build_prompt: ItemText,  # item -> the code prompt
     fewshot_target: ItemText,  # item -> the demonstration solution
+    answer: AnswerPolicy | None = None,
+    subjects: SubjectsSelector | None = None,
+    language: LanguageSpec = Language.ENG,
     dataset: DatasetPolicy | None,
 ) -> Benchmark:
+    """A code-generation-scored-by-execution benchmark. ``answer`` defaults to the standard HumanEval
+    reconstruction (truncate at a stop sequence, splice into the test harness); an instruct variant can inject
+    its own (e.g. extracting a markdown code block)."""
     return ComposedBenchmark.compose(
         id=id,
         kind=Generative(
@@ -116,36 +124,43 @@ def _execution(
             cue="",  # the model continues the open code fence directly
             ground_truth=lambda item: "Success",  # execution decides pass/fail; the gold string is a placeholder
             metrics=metrics,
-            context=_humaneval_context,
+            context=humaneval_context,
         ),
-        answer=ReconstructProgram(_reconstruct_program, stop_sequences=_OLMES_STOP_SEQUENCES, max_tokens=1024),
+        answer=answer
+        if answer is not None
+        else ReconstructProgram(_reconstruct_program, stop_sequences=_OLMES_STOP_SEQUENCES, max_tokens=1024),
         sample_split="test",
         fewshot=FewShot(
             SampleSplit(),  # HumanEval has no dedicated few-shot split; draw (leak-safe) from the eval split
             FunctionRenderer(lambda row: FewshotExample(prompt=build_prompt(row), answer=fewshot_target(row))),
         ),
+        subjects=subjects,
         dataset_policy=dataset if dataset is not None else pinned_by_framework(dataset_path),
-        language=Language.ENG,
+        language=language,
     )
 
 
-def _bpb(
+def bpb(
     id: str,
     *,
     dataset_path: str,
     styler: BPBStyle,
     question: ItemText,
     gold: ItemText,
+    subjects: SubjectsSelector | None = None,
+    language: LanguageSpec = Language.ENG,
     dataset: DatasetPolicy | None,
 ) -> Benchmark:
+    """A BPB (loglikelihood-of-the-gold-solution) benchmark: one candidate, scored by ``styler``."""
     return ComposedBenchmark.choice(
         id=id,
-        reader=_SingleGoldReader(question=question, gold=gold),
+        reader=SingleGoldReader(question=question, gold=gold),
         styler=styler,
         sample_split="test",
         fewshot_split="test",
+        subjects=subjects,
         dataset_policy=dataset if dataset is not None else pinned_by_framework(dataset_path),
-        language=Language.ENG,
+        language=language,
     )
 
 
@@ -153,11 +168,11 @@ def _olmes_prompt(item: dict[str, Any]) -> str:
     return "```python\n" + item["prompt"]
 
 
-def _olmes_target(item: dict[str, Any]) -> str:
+def olmes_target(item: dict[str, Any]) -> str:
     return item["canonical_solution"] + "```"
 
 
-def _v2_prompt(item: dict[str, Any]) -> str:
+def v2_prompt(item: dict[str, Any]) -> str:
     return "```python\n" + item["prompt"].rstrip() + "\n"
 
 
@@ -166,40 +181,57 @@ def _v2_target(item: dict[str, Any]) -> str:
 
 
 def v2_execution(
-    id: str, *, dataset_path: str, metrics: list[type["BaseMetric"]], dataset: DatasetPolicy | None
+    id: str,
+    *,
+    dataset_path: str,
+    metrics: list[type["BaseMetric"]],
+    subjects: SubjectsSelector | None = None,
+    language: LanguageSpec = Language.ENG,
+    dataset: DatasetPolicy | None,
 ) -> Benchmark:
-    """The ``_OLMES_V2`` execution shape (rstrip + fenced), retargetable to another dataset / metric — the
-    building block ``humaneval_plus`` reuses."""
-    return _execution(
+    """The ``_OLMES_V2`` execution shape (rstrip + fenced), retargetable to another dataset / metric /
+    language — the building block ``humaneval_plus`` and ``humaneval_ellamind`` reuse."""
+    return execution(
         id,
         dataset_path=dataset_path,
         metrics=metrics,
-        build_prompt=_v2_prompt,
+        build_prompt=v2_prompt,
         fewshot_target=_v2_target,
+        subjects=subjects,
+        language=language,
         dataset=dataset,
     )
 
 
-def v2_bpb(id: str, *, dataset_path: str, dataset: DatasetPolicy | None) -> Benchmark:
-    """The ``BPB_V2`` loglikelihood shape (fenced gold, no leading space), retargetable to another dataset —
-    the building block ``humaneval_plus`` reuses."""
-    return _bpb(
+def v2_bpb(
+    id: str,
+    *,
+    dataset_path: str,
+    subjects: SubjectsSelector | None = None,
+    language: LanguageSpec = Language.ENG,
+    dataset: DatasetPolicy | None,
+) -> Benchmark:
+    """The ``BPB_V2`` loglikelihood shape (fenced gold, no leading space), retargetable to another dataset /
+    language — the building block ``humaneval_plus`` and ``humaneval_ellamind`` reuse."""
+    return bpb(
         id,
         dataset_path=dataset_path,
         styler=BPBStyle(question_prefix="", cue_text="", trailing_newline=False, leading_space_continuations=False),
-        question=_v2_prompt,
+        question=v2_prompt,
         gold=_v2_target,
+        subjects=subjects,
+        language=language,
         dataset=dataset,
     )
 
 
 def humaneval_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _execution(
+    return execution(
         "HumanEval_OLMES",
         dataset_path=HUMANEVAL_DATASET_PATH,
         metrics=[CodeCompletionAssertion],
         build_prompt=_olmes_prompt,
-        fewshot_target=_olmes_target,
+        fewshot_target=olmes_target,
         dataset=dataset,
     )
 
@@ -211,7 +243,7 @@ def humaneval_olmes_v2(dataset: DatasetPolicy | None = None) -> Benchmark:
 
 
 def humaneval_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _bpb(
+    return bpb(
         "HumanEvalBPB",
         dataset_path=HUMANEVAL_DATASET_PATH,
         styler=_BareTargetBPBStyle(question_prefix="", cue_text="", trailing_newline=False),
