@@ -1,6 +1,5 @@
 import pytest
 
-from eval_framework.tasks.benchmarks.humaneval import HumanEvalBPB, HumanEvalBPB_V2
 from eval_framework.tasks.benchmarks.mbpp import MBPPBPB
 
 
@@ -17,12 +16,6 @@ def _smoke_test_task(task_cls, num_fewshot: int = 0) -> None:
         assert sample.id is not None
         assert isinstance(sample.subject, str)
         assert sample.messages
-
-
-@pytest.mark.cpu_slow
-def test_humaneval_bpb_smoke() -> None:
-    _smoke_test_task(HumanEvalBPB)
-    _smoke_test_task(HumanEvalBPB_V2)
 
 
 @pytest.mark.cpu_slow

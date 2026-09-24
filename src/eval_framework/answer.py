@@ -9,7 +9,7 @@ into ``compose`` next to the eval kind, so the kind stays purely about the promp
 import re
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from typing import TYPE_CHECKING, final, override
+from typing import TYPE_CHECKING, Protocol, final, override
 
 from eval_framework.contract import ResponseType
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
@@ -160,3 +160,66 @@ class ExtractFromCompletion(AnswerPolicy):
         messages: list[Message],
     ) -> str:
         return self._extract(completion_text)
+
+
+class CodeReconstructor(Protocol):
+    """Assembles the runnable program a code-execution metric runs, out of the raw generation plus the
+    sample's scoring material — the test harness / code prompt carried in ``context`` and the gold asserts
+    in ``ground_truth``. This is the code-generation counterpart of ``ExtractFromCompletion``'s extractor,
+    but it needs more than the generation text: the snippet only becomes runnable once spliced together with
+    the problem's tests."""
+
+    def __call__(
+        self,
+        completion_text: str,
+        *,
+        context: BaseMetricContext | list[BaseMetricContext] | None,
+        ground_truth: str | list[str] | None,
+        messages: list[Message],
+    ) -> str: ...
+
+
+@final
+class ReconstructProgram(AnswerPolicy):
+    """Free-form code generation scored by execution: the model generates a solution (bounded by
+    ``stop_sequences`` / ``max_tokens``) and ``reconstruct`` turns it into the runnable program the metric
+    executes — typically the generated snippet spliced into the prompt and test harness from the sample's
+    context. The reconstructed program *is* the scored answer, so the executing metric runs it verbatim."""
+
+    def __init__(
+        self,
+        reconstruct: CodeReconstructor,
+        *,
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+    ) -> None:
+        self._reconstruct = reconstruct
+        self._stop_sequences = stop_sequences or []
+        self._max_tokens = max_tokens
+
+    @override
+    def response_type(self) -> ResponseType:
+        return ResponseType.COMPLETION
+
+    @override
+    def metrics(self) -> list[type["BaseMetric"]]:
+        return [BytesCompletion, SequencePositionsCompletion, TokenCounts, FinishReason]
+
+    @override
+    def stop_sequences(self) -> list[str]:
+        return self._stop_sequences
+
+    @override
+    def max_tokens(self) -> int | None:
+        return self._max_tokens
+
+    @override
+    def extract_answer(
+        self,
+        completion_text: str,
+        *,
+        context: BaseMetricContext | list[BaseMetricContext] | None,
+        ground_truth: str | list[str] | None,
+        messages: list[Message],
+    ) -> str:
+        return self._reconstruct(completion_text, context=context, ground_truth=ground_truth, messages=messages)
