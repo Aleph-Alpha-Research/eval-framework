@@ -21,6 +21,7 @@ from eval_framework.benchmarks.math_reasoning import MATH_REASONING_BENCHMARKS
 from eval_framework.benchmarks.medqa import MEDQA_BENCHMARKS
 from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
 from eval_framework.benchmarks.mmlu_pro import MMLU_PRO_BENCHMARKS
+from eval_framework.benchmarks.naturalqs_open import NATURALQS_OPEN_BENCHMARKS
 from eval_framework.benchmarks.piqa import PIQA_BENCHMARKS
 from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.sciq import SCIQ_BENCHMARKS
@@ -240,9 +241,9 @@ def register_drop_tasks(registry: Registry) -> None:
 
 
 def register_naturalqs_open_tasks(registry: Registry) -> None:
-    """Register naturalqs_open benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.naturalqs_open.NaturalQsOpen", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.naturalqs_open.NaturalQsOpenMC_OLMES", registry=registry)
+    """Register naturalqs_open benchmark tasks (composed: NaturalQsOpen, NaturalQsOpenMC_OLMES)."""
+    for benchmark in NATURALQS_OPEN_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_social_iqa_tasks(registry: Registry) -> None:

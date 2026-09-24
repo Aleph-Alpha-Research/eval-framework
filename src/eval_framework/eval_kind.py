@@ -16,7 +16,8 @@ class SampleBody:
     prompt: str  # the user turn
     cue: str  # the assistant turn priming the answer; "" for no assistant turn
     possible_completions: list[str]
-    ground_truth: str
+    # A single gold answer, or several equally-correct ones (e.g. open-QA where any listed answer counts).
+    ground_truth: str | list[str]
     # Per-sample material the metric (or answer extraction) needs beyond the prompt/completion/ground_truth:
     # gold answer structure for F1, an instruction-following spec, a code test harness. None for most kinds.
     context: BaseMetricContext | list[BaseMetricContext] | None = None
@@ -84,8 +85,11 @@ class Choice(EvalKind):
         return self._styler.initial_prompt(subject_label)
 
 
-# item -> a rendered prompt / cue / ground-truth string.
+# item -> a rendered prompt / cue string.
 ItemText = Callable[[dict[str, Any]], str]
+
+# item -> the gold answer: one string, or several equally-correct ones.
+ItemGroundTruth = Callable[[dict[str, Any]], str | list[str]]
 
 # item -> the per-sample metric context (gold structure / test harness / instruction spec), or None.
 ItemContext = Callable[[dict[str, Any]], BaseMetricContext | list[BaseMetricContext] | None]
@@ -110,7 +114,7 @@ class Generative(EvalKind):
         *,
         build_prompt: ItemText,
         cue: str,
-        ground_truth: ItemText,
+        ground_truth: ItemGroundTruth,
         metrics: list[type["BaseMetric"]],
         context: ItemContext | None = None,
         initial_prompt: str | None = None,
