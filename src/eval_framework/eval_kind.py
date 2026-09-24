@@ -18,8 +18,9 @@ class SampleBody:
     prompt: str  # the user turn
     cue: str  # the assistant turn priming the answer; "" for no assistant turn
     possible_completions: list[str]
-    # A single gold answer, or several equally-correct ones (e.g. open-QA where any listed answer counts).
-    ground_truth: str | list[str]
+    # A single gold answer, several equally-correct ones (open-QA), or None when the task has no gold and is
+    # scored purely from the context (e.g. IFEval's instruction checks).
+    ground_truth: str | list[str] | None
     # Per-sample material the metric (or answer extraction) needs beyond the prompt/completion/ground_truth:
     # gold answer structure for F1, an instruction-following spec, a code test harness. None for most kinds.
     context: BaseMetricContext | list[BaseMetricContext] | None = None
@@ -117,8 +118,8 @@ class Choice(EvalKind):
 # item -> a rendered prompt / cue string.
 ItemText = Callable[[dict[str, Any]], str]
 
-# item -> the gold answer: one string, or several equally-correct ones.
-ItemGroundTruth = Callable[[dict[str, Any]], str | list[str]]
+# item -> the gold answer: one string, several equally-correct ones, or None (no gold; scored via context).
+ItemGroundTruth = Callable[[dict[str, Any]], str | list[str] | None]
 
 # item -> the per-sample metric context (gold structure / test harness / instruction spec), or None.
 ItemContext = Callable[[dict[str, Any]], BaseMetricContext | list[BaseMetricContext] | None]
