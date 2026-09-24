@@ -12,10 +12,12 @@ from typing import TYPE_CHECKING, Any, final, override
 
 from eval_framework.answer import ExtractFromCompletion, first_match, last_match
 from eval_framework.choices import ChoiceReader
-from eval_framework.eval_kind import EvalKind, SampleBody
+from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
+from eval_framework.fewshot import FewshotExample
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.tasks.task_style import InitialPrompt
 from eval_framework.tasks.utils import get_n_letters
+from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -82,8 +84,9 @@ class Cot(EvalKind):
         return [AccuracyCompletion]
 
     @override
-    def initial_prompt(self, subject_label: str) -> str | None:
-        return self._preamble(subject_label) if self._preamble is not None else None
+    def messages(self, body: SampleBody, *, fewshot: list[FewshotExample], subject_label: str) -> list[Message]:
+        preamble = self._preamble(subject_label) if self._preamble is not None else None
+        return assemble_messages(fewshot, body, initial_prompt=preamble)
 
     @override
     def samples(self, item: dict[str, Any]) -> list[SampleBody]:

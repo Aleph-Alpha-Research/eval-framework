@@ -25,6 +25,31 @@ class SampleBody:
     context: BaseMetricContext | list[BaseMetricContext] | None = None
 
 
+def assemble_messages(
+    fewshot: list[FewshotExample],
+    body: SampleBody,
+    *,
+    system_prompt: str | None = None,
+    initial_prompt: str | None = None,
+) -> list[Message]:
+    """The standard prompt: an optional SYSTEM turn, the few-shot demonstrations as USER / ASSISTANT pairs,
+    then the item's USER turn and (optional) ASSISTANT cue — with ``initial_prompt`` folded once into the
+    first turn (above the demonstrations). The single assembler every kind's ``messages`` delegates to."""
+    messages: list[Message] = []
+    for example in fewshot:
+        messages.append(Message(role=Role.USER, content=example.prompt))
+        messages.append(Message(role=Role.ASSISTANT, content=example.answer))
+    messages.append(Message(role=Role.USER, content=body.prompt))
+    if initial_prompt is not None:
+        first = messages[0]
+        messages[0] = Message(role=first.role, content=f"{initial_prompt}\n\n{first.content}")
+    if body.cue:
+        messages.append(Message(role=Role.ASSISTANT, content=body.cue))
+    if system_prompt is not None:
+        messages.insert(0, Message(role=Role.SYSTEM, content=system_prompt))
+    return messages
+
+
 class EvalKind(ABC):
     """The prompt side of a task: the messages to put in front of the model and what its candidates/ground
     truth are.
@@ -43,31 +68,14 @@ class EvalKind(ABC):
     def samples(self, item: dict[str, Any]) -> list[SampleBody]:
         """The scored sample(s) for one eval item — one for most kinds, more when a kind fans out."""
 
+    @abstractmethod
     def messages(self, body: SampleBody, *, fewshot: list[FewshotExample], subject_label: str) -> list[Message]:
-        """Assemble the full message list for one sample: the few-shot demonstrations as USER / ASSISTANT
-        pairs, then the item's USER turn and (optional) ASSISTANT cue, with the preamble folded once into the
-        first turn."""
-        messages: list[Message] = []
-        for example in fewshot:
-            messages.append(Message(role=Role.USER, content=example.prompt))
-            messages.append(Message(role=Role.ASSISTANT, content=example.answer))
-        messages.append(Message(role=Role.USER, content=body.prompt))
-        preamble = self.initial_prompt(subject_label)
-        if preamble is not None:
-            first = messages[0]
-            messages[0] = Message(role=first.role, content=f"{preamble}\n\n{first.content}")
-        if body.cue:
-            messages.append(Message(role=Role.ASSISTANT, content=body.cue))
-        return messages
+        """The full message list for one sample — typically ``assemble_messages`` with the kind's own preamble
+        and/or system prompt."""
 
     def metadata(self) -> dict[str, str]:
         """Kind-specific metadata merged into the eval's ``get_metadata`` (e.g. the task style)."""
         return {}
-
-    def initial_prompt(self, subject_label: str) -> str | None:
-        """A preamble prepended once at the top of the prompt for the given subject (before any few-shot
-        examples), or None."""
-        return None
 
 
 @final
@@ -102,8 +110,8 @@ class Choice(EvalKind):
         return self._styler.get_extra_metadata()
 
     @override
-    def initial_prompt(self, subject_label: str) -> str | None:
-        return self._styler.initial_prompt(subject_label)
+    def messages(self, body: SampleBody, *, fewshot: list[FewshotExample], subject_label: str) -> list[Message]:
+        return assemble_messages(fewshot, body, initial_prompt=self._styler.initial_prompt(subject_label))
 
 
 # item -> a rendered prompt / cue string.
@@ -128,7 +136,7 @@ class Generative(EvalKind):
     primes the answer turn (``""`` for none), ``ground_truth`` derives the gold answer, and ``metrics`` are
     the scoring metrics. ``context`` derives the per-sample scoring material a metric needs beyond the gold
     string (see ``SampleBody.context``); ``initial_prompt`` is a preamble prepended once above the first
-    (few-shot) turn."""
+    (few-shot) turn, and ``system_prompt`` is a leading SYSTEM turn."""
 
     def __init__(
         self,
@@ -139,6 +147,7 @@ class Generative(EvalKind):
         metrics: list[type["BaseMetric"]],
         context: ItemContext | None = None,
         initial_prompt: str | None = None,
+        system_prompt: str | None = None,
     ) -> None:
         self._build_prompt = build_prompt
         self._cue = cue
@@ -146,6 +155,7 @@ class Generative(EvalKind):
         self._metrics = metrics
         self._context: ItemContext = context if context is not None else NoContext
         self._initial_prompt = initial_prompt
+        self._system_prompt = system_prompt
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
@@ -164,5 +174,5 @@ class Generative(EvalKind):
         ]
 
     @override
-    def initial_prompt(self, subject_label: str) -> str | None:
-        return self._initial_prompt
+    def messages(self, body: SampleBody, *, fewshot: list[FewshotExample], subject_label: str) -> list[Message]:
+        return assemble_messages(fewshot, body, system_prompt=self._system_prompt, initial_prompt=self._initial_prompt)
