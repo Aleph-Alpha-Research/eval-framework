@@ -12,14 +12,15 @@ from eval_framework.answer import PickFromCandidates
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import EvalKind, SampleBody
-from eval_framework.fewshot import ChoiceRenderer, FewShot, SampleSplit
+from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
+from eval_framework.fewshot import ChoiceRenderer, FewShot, FewshotExample, SampleSplit
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import PartialEvalAccuracy
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle
+from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -72,6 +73,10 @@ class PartialEval(EvalKind):
             )
             for opt_index, option in enumerate([item["option1"], item["option2"]])
         ]
+
+    @override
+    def messages(self, body: SampleBody, *, fewshot: list[FewshotExample], subject_label: str) -> list[Message]:
+        return assemble_messages(fewshot, body)
 
 
 def winogrande_cloze(dataset: DatasetPolicy | None = None) -> Benchmark:

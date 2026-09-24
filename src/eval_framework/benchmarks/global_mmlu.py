@@ -13,7 +13,7 @@ from eval_framework.answer import PickFromCandidates
 from eval_framework.benchmarks.mmlu import MMLU_SUBJECTS
 from eval_framework.composed import ComposedBenchmark, LanguageSpec
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import EvalKind, SampleBody
+from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
 from eval_framework.fewshot import FewShot, FewshotExample, FewShotSplit, FunctionRenderer
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyBayesianLoglikelihood,
@@ -27,6 +27,7 @@ from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.utils import get_n_letters
+from template_formatting.formatter import Message
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -565,9 +566,10 @@ class _GlobalMmluChoice(EvalKind):
         ]
 
     @override
-    def initial_prompt(self, subject_label: str) -> str | None:
+    def messages(self, body: SampleBody, *, fewshot: list[FewshotExample], subject_label: str) -> list[Message]:
         lang, subject = _lang_and_subject(subject_label)
-        return f"{LANGUAGE_INITIAL_PROMPT_TEXT_MAP[lang]} {LANGUAGE_SUBJECTS_MAP[lang][subject]}."
+        preamble = f"{LANGUAGE_INITIAL_PROMPT_TEXT_MAP[lang]} {LANGUAGE_SUBJECTS_MAP[lang][subject]}."
+        return assemble_messages(fewshot, body, initial_prompt=preamble)
 
     @override
     def samples(self, item: dict[str, Any]) -> list[SampleBody]:
