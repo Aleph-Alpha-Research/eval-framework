@@ -14,7 +14,6 @@ from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.base import Result
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, Error, Loglikelihood
-from eval_framework.tasks.benchmarks.humaneval import HumanEval_OLMES
 from eval_framework.tasks.eval_config import EvalConfig
 from tests.tests_eval_framework.conftest import MockLLM
 
@@ -102,7 +101,7 @@ def _evaluator_with_metadata(
         output_dir=tmp_path,
         num_fewshot=0,
         num_samples=2,
-        task_name=HumanEval_OLMES.NAME,
+        task_name="HumanEval_OLMES",
         llm_class=llm.__class__,
         **config_kwargs,  # type: ignore[arg-type]
     )
@@ -144,7 +143,7 @@ def test_evaluator_run_completions(tmp_path: Path, should_preempt_callable: Call
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=HumanEval_OLMES.NAME,
+        task_name="HumanEval_OLMES",
         llm_class=llm.__class__,
     )
 
@@ -167,7 +166,7 @@ def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable, w
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=HumanEval_OLMES.NAME,
+        task_name="HumanEval_OLMES",
         llm_class=llm.__class__,
     )
 
@@ -196,7 +195,7 @@ def test_evaluator_run_eval_no_completions(tmp_path: Path, wandb_run: wandb.Run)
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=HumanEval_OLMES.NAME,
+        task_name="HumanEval_OLMES",
         llm_class=llm.__class__,
     )
 
@@ -217,7 +216,7 @@ def test_evaluator_run_all(tmp_path: Path, should_preempt_callable: Callable, wa
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=HumanEval_OLMES.NAME,
+        task_name="HumanEval_OLMES",
         llm_class=llm.__class__,
     )
 
@@ -244,7 +243,7 @@ def test_aggregate_results(tmp_path: Path) -> None:
         output_dir=tmp_path,
         num_fewshot=5,
         num_samples=2,
-        task_name=HumanEval_OLMES.NAME,
+        task_name="HumanEval_OLMES",
         llm_class=llm.__class__,
     )
     evaluator = EvaluationGenerator(config, ResultsFileProcessor(tmp_path))
@@ -367,7 +366,7 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
         output_dir=tmp_path,
         num_fewshot=0,
         num_samples=2,
-        task_name=HumanEval_OLMES.NAME,
+        task_name="HumanEval_OLMES",
         llm_class=llm.__class__,
     )
     evaluator = EvaluationGenerator(config, ResultsFileProcessor(tmp_path))
@@ -445,7 +444,7 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
         output_dir=tmp_path,
         num_fewshot=0,
         num_samples=2,
-        task_name=HumanEval_OLMES.NAME,
+        task_name="HumanEval_OLMES",
         llm_class=llm.__class__,
     )
     evaluator = EvaluationGenerator(config, ResultsFileProcessor(tmp_path))

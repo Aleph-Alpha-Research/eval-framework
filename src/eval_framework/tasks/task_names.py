@@ -18,6 +18,7 @@ from eval_framework.benchmarks.hellaswag_ellamind import HELLASWAG_ELLAMIND_BENC
 from eval_framework.benchmarks.hendrycks_math_ellamind import HENDRYCKS_MATH_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.hle_ellamind import HLE_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.humaneval import HUMANEVAL_BENCHMARKS
+from eval_framework.benchmarks.humaneval_ellamind import HUMANEVAL_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.humaneval_plus import HUMANEVAL_PLUS_BENCHMARKS
 from eval_framework.benchmarks.ifeval import IFEVAL_BENCHMARKS
 from eval_framework.benchmarks.math_reasoning import MATH_REASONING_BENCHMARKS
@@ -303,11 +304,8 @@ def register_hle_ellamind_tasks(registry: Registry) -> None:
 
 def register_humaneval_ellamind_tasks(registry: Registry) -> None:
     """Register humaneval_ellamind benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_BPB_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_BPB_OLMES_V2", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDE_OLMES_V2", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.humaneval_ellamind.HumanEvalDEInstruct", registry=registry)
+    for benchmark in HUMANEVAL_ELLAMIND_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_mbpp_ellamind_tasks(registry: Registry) -> None:
