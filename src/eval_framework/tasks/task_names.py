@@ -17,6 +17,7 @@ from eval_framework.benchmarks.hellaswag import HELLASWAG_BENCHMARKS
 from eval_framework.benchmarks.hellaswag_ellamind import HELLASWAG_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.hendrycks_math_ellamind import HENDRYCKS_MATH_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.hle_ellamind import HLE_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.ifeval import IFEVAL_BENCHMARKS
 from eval_framework.benchmarks.math_reasoning import MATH_REASONING_BENCHMARKS
 from eval_framework.benchmarks.medqa import MEDQA_BENCHMARKS
 from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
@@ -177,9 +178,9 @@ def register_goldenswag_tasks(registry: Registry) -> None:
 
 
 def register_ifeval_tasks(registry: Registry) -> None:
-    """Register ifeval benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.ifeval.IFEval", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.ifeval.IFEvalDe", registry=registry)
+    """Register ifeval benchmark tasks (composed: IFEval, IFEvalDe)."""
+    for benchmark in IFEVAL_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_multipl_e_tasks(registry: Registry) -> None:
