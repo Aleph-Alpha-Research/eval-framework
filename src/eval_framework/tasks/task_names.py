@@ -28,6 +28,7 @@ from eval_framework.benchmarks.sciq import SCIQ_BENCHMARKS
 from eval_framework.benchmarks.simpleqa_ellamind import SIMPLEQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.siqa_ellamind import SIQA_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.social_iqa import SOCIAL_IQA_BENCHMARKS
+from eval_framework.benchmarks.squad import SQUAD_BENCHMARKS
 from eval_framework.benchmarks.winogrande import WINOGRANDE_BENCHMARKS
 from eval_framework.benchmarks.winogrande_ellamind import WINOGRANDE_ELLAMIND_BENCHMARKS
 from eval_framework.tasks.base import BaseTask
@@ -216,10 +217,9 @@ def register_sciq_tasks(registry: Registry) -> None:
 
 
 def register_squad_tasks(registry: Registry) -> None:
-    """Register squad benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.squad.SQuAD_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.squad.SQuAD2_MA", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.squad.SQuAD2_MA_NO_SYSPROMPT", registry=registry)
+    """Register squad benchmark tasks (composed: SQuAD_OLMES, SQuAD2_MA, SQuAD2_MA_NO_SYSPROMPT)."""
+    for benchmark in SQUAD_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_winogrande_tasks(registry: Registry) -> None:

@@ -2,7 +2,6 @@ import pytest
 
 from eval_framework.tasks.benchmarks.humaneval import HumanEvalBPB, HumanEvalBPB_V2
 from eval_framework.tasks.benchmarks.mbpp import MBPPBPB
-from eval_framework.tasks.benchmarks.squad import SQUAD2BPB
 
 
 def _smoke_test_task(task_cls, num_fewshot: int = 0) -> None:
@@ -29,8 +28,3 @@ def test_humaneval_bpb_smoke() -> None:
 @pytest.mark.cpu_slow
 def test_mbpp_bpb_smoke() -> None:
     _smoke_test_task(MBPPBPB)
-
-
-@pytest.mark.cpu_slow
-def test_squad2_bpb_smoke() -> None:
-    _smoke_test_task(SQUAD2BPB)
