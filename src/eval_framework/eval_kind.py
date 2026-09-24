@@ -4,7 +4,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, final, override
 
 from eval_framework.choices import ChoiceReader
+from eval_framework.fewshot import FewshotExample
 from eval_framework.shared.types import BaseMetricContext
+from template_formatting.formatter import Message, Role
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
@@ -24,11 +26,13 @@ class SampleBody:
 
 
 class EvalKind(ABC):
-    """The prompt side of a task: what to put in front of the model and what its candidates/ground truth are.
+    """The prompt side of a task: the messages to put in front of the model and what its candidates/ground
+    truth are.
 
-    E.g. Multiple choice vs Free Form answers. A kind deals only in text; ``ComposedEval`` owns the (fixed)
-    mapping to USER / ASSISTANT turns, and the answer side (response type, generation bounds, extraction) is
-    an injected ``AnswerPolicy``.
+    E.g. Multiple choice vs Free Form answers. A kind owns the full prompt for an item — the few-shot
+    demonstrations, its own USER turn and (optional) ASSISTANT cue, and any preamble — assembled by
+    ``messages``; ``ComposedEval`` only supplies the drawn few-shot examples and wraps the result. The answer
+    side (response type, generation bounds, extraction) is an injected ``AnswerPolicy``.
     """
 
     @abstractmethod
@@ -38,6 +42,23 @@ class EvalKind(ABC):
     @abstractmethod
     def samples(self, item: dict[str, Any]) -> list[SampleBody]:
         """The scored sample(s) for one eval item — one for most kinds, more when a kind fans out."""
+
+    def messages(self, body: SampleBody, *, fewshot: list[FewshotExample], subject_label: str) -> list[Message]:
+        """Assemble the full message list for one sample: the few-shot demonstrations as USER / ASSISTANT
+        pairs, then the item's USER turn and (optional) ASSISTANT cue, with the preamble folded once into the
+        first turn."""
+        messages: list[Message] = []
+        for example in fewshot:
+            messages.append(Message(role=Role.USER, content=example.prompt))
+            messages.append(Message(role=Role.ASSISTANT, content=example.answer))
+        messages.append(Message(role=Role.USER, content=body.prompt))
+        preamble = self.initial_prompt(subject_label)
+        if preamble is not None:
+            first = messages[0]
+            messages[0] = Message(role=first.role, content=f"{preamble}\n\n{first.content}")
+        if body.cue:
+            messages.append(Message(role=Role.ASSISTANT, content=body.cue))
+        return messages
 
     def metadata(self) -> dict[str, str]:
         """Kind-specific metadata merged into the eval's ``get_metadata`` (e.g. the task style)."""
