@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.100 - https://github.com/boto/boto3
-- **botocore** 1.43.100 - https://github.com/boto/botocore
+- **boto3** 1.43.101 - https://github.com/boto/boto3
+- **botocore** 1.43.101 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **googleapis-common-protos** 1.75.3 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
@@ -104,7 +104,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.1 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.0.1 - https://github.com/tox-dev/py-filelock
+- **filelock** 4.0.3 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -218,7 +218,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.100 (Apache-2.0)
+### boto3 1.43.101 (Apache-2.0)
 
 ```text
 Apache License
@@ -399,7 +399,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.100 (Apache-2.0)
+### botocore 1.43.101 (Apache-2.0)
 
 ```text
 Apache License
@@ -999,7 +999,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### filelock 4.0.1 (MIT)
+### filelock 4.0.3 (MIT)
 
 ```text
 MIT License
