@@ -17,7 +17,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice, Generative
-from eval_framework.fewshot import FewshotExample, FunctionRenderer, SampledFewShot
+from eval_framework.fewshot import FewShot, FewshotExample, FunctionRenderer, SampleSplit
 from eval_framework.metrics.completion.math_minerva_completion import (
     MathMinervaCompletionDE,
     MathMinervaCompletionRelaxedDE,
@@ -81,7 +81,7 @@ def _mathminerva_de(id: str, stop_sequences: list[str], dataset: DatasetPolicy |
         ),
         answer=ExtractFromCompletion(_minerva_de_extractor, stop_sequences, max_tokens=_MINERVA_DE_MAX_TOKENS),
         sample_split="test",
-        fewshot=SampledFewShot("test", FunctionRenderer(_generative_demo), keep=_single_paragraph_solution),
+        fewshot=FewShot(SampleSplit(keep=_single_paragraph_solution), FunctionRenderer(_generative_demo)),
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=_de_dataset(dataset),
         language=Language.DEU,
@@ -124,7 +124,7 @@ def mathminerva_de_bpb_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         kind=Choice(_MinervaDeBpbReader(), _MinervaDeBpbStyler(cue_text="Lösung:")),
         answer=PickFromCandidates(),
         sample_split="test",
-        fewshot=SampledFewShot("test", FunctionRenderer(_generative_demo), keep=_single_paragraph_solution),
+        fewshot=FewShot(SampleSplit(keep=_single_paragraph_solution), FunctionRenderer(_generative_demo)),
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=_de_dataset(dataset),
         language=Language.DEU,

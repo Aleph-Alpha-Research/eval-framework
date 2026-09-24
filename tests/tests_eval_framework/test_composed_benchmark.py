@@ -10,7 +10,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark, ComposedEval, LanguageSpec
 from eval_framework.contract import ResponseType
 from eval_framework.eval_kind import Choice
-from eval_framework.fewshot import ChoiceRenderer, FewShotPolicy, NoFewShot, SampledFewShot
+from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotPolicy, FewShotSplit, NoFewShot, SampleSplit
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesLoglikelihood,
@@ -140,7 +140,7 @@ def _make_benchmark(
         kind=Choice(reader=reader, styler=resolved_styler),
         answer=PickFromCandidates(),
         sample_split=sample_split,
-        fewshot=fewshot or SampledFewShot(_DUMMY_SPLIT, ChoiceRenderer(reader, resolved_styler)),
+        fewshot=fewshot or FewShot(SampleSplit(), ChoiceRenderer(reader, resolved_styler)),
         subjects=subjects,
         dataset_policy=dataset_policy or _DummyDatasetPolicy(),
         language=language,
@@ -162,7 +162,7 @@ def _make_eval(
 ) -> ComposedEval:
     """Build a ``ComposedEval`` for tests, defaulting to dummies for every argument the test does not provide."""
     resolved_styler = styler or _DummyStyler()
-    policy = fewshot or SampledFewShot(_DUMMY_SPLIT, ChoiceRenderer(reader, resolved_styler))
+    policy = fewshot or FewShot(SampleSplit(), ChoiceRenderer(reader, resolved_styler))
     return ComposedEval(
         display_name=display_name,
         kind=Choice(reader=reader, styler=resolved_styler),
@@ -383,7 +383,7 @@ def test_initial_prompt_is_prepended_once_before_the_first_fewshot_example() -> 
     benchmark = _make_benchmark(
         reader=reader,
         styler=styler,
-        fewshot=SampledFewShot("train", ChoiceRenderer(reader, styler)),
+        fewshot=FewShot(FewShotSplit("train"), ChoiceRenderer(reader, styler)),
         dataset_policy=DatasetStub({"test": [{"question": "eval q"}], "train": [{"question": "shot q"}]}),
     )
 
@@ -414,15 +414,15 @@ def test_no_fewshot_benchmark_allows_zero_shot_creation() -> None:
 
 
 def test_get_metadata_reports_fewshot_split_from_the_policy() -> None:
-    # SampledFewShot surfaces its source split in metadata; NoFewShot contributes no split at all.
-    sampled = SampledFewShot("dev", ChoiceRenderer(_DUMMY_READER, _DummyStyler()))
+    # A separate few-shot split surfaces in metadata; NoFewShot contributes no split at all.
+    sampled = FewShot(FewShotSplit("dev"), ChoiceRenderer(_DUMMY_READER, _DummyStyler()))
     assert _make_eval(fewshot=sampled).get_metadata()["fewshot_split"] == "dev"
     assert "fewshot_split" not in _make_eval(fewshot=NoFewShot()).get_metadata()
 
 
 def test_choice_wires_the_kind_and_fewshot_from_one_reader_and_styler() -> None:
     # ComposedBenchmark.choice takes the reader + styler once and drives both the scored Choice and the
-    # SampledFewShot, so a 1-shot sample styles the demonstration and the eval item identically.
+    # few-shot demonstrations, so a 1-shot sample styles the demonstration and the eval item identically.
     class _Reader(ChoiceReader):
         @override
         def read(self, item: dict[str, Any]) -> ChoiceFields:

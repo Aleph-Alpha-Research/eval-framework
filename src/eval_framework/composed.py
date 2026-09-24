@@ -8,7 +8,7 @@ from eval_framework.answer import AnswerPolicy, PickFromCandidates
 from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.eval_kind import Choice, EvalKind, SampleBody
-from eval_framework.fewshot import ChoiceRenderer, FewShotGenerator, FewShotPolicy, SampledFewShot
+from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotGenerator, FewShotPolicy, FewShotSplit, SampleSplit
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Completion, Error, RawCompletion
 from eval_framework.subjects import NoSubject, Subjects, SubjectsSelector
@@ -114,7 +114,7 @@ class ComposedEval(Eval):
             "metrics": [m.NAME for m in self._kind.metrics()],
             "subjects": [s.label for s in self._subjects],
         }
-        meta.update(self._fewshot.metadata())
+        meta.update(self._fewshot.metadata(self.sample_split))
         meta.update(self.loader.metadata())
         meta.update(self._kind.metadata())
         return meta
@@ -294,16 +294,18 @@ class ComposedBenchmark(Benchmark):
         language: LanguageSpec,
         display_name: str | None = None,
     ) -> Self:
-        """Build a choice-based benchmark. The same ``reader`` + ``styler`` drive both the scored
-        ``Choice`` and its matching ``SampledFewShot`` demonstrations, so they are given once. A choice is
-        always scored by loglikelihood over its candidates, so the answer is fixed to ``PickFromCandidates``."""
+        """Build a choice-based benchmark. The same ``reader`` + ``styler`` drive both the scored ``Choice``
+        and its matching few-shot demonstrations, so they are given once. A choice is always scored by
+        loglikelihood over its candidates, so the answer is fixed to ``PickFromCandidates``. The few-shot
+        source is picked from whether ``fewshot_split`` is the eval split (leak-safe) or a separate one."""
+        source = SampleSplit() if fewshot_split == sample_split else FewShotSplit(fewshot_split)
         return cls.compose(
             id=id,
             display_name=display_name,
             kind=Choice(reader, styler),
             answer=PickFromCandidates(),
             sample_split=sample_split,
-            fewshot=SampledFewShot(fewshot_split, ChoiceRenderer(reader, styler)),
+            fewshot=FewShot(source, ChoiceRenderer(reader, styler)),
             subjects=subjects,
             dataset_policy=dataset_policy,
             language=language,
@@ -368,7 +370,7 @@ class ComposedBenchmark(Benchmark):
     def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         # The docs show one demonstration where the benchmark samples them, its pinned block where fixed, and
         # none where it is 0-shot only — the policy reports which without a run.
-        doc = self._fewshot.documentation()
+        doc = self._fewshot.documentation(self.sample_split)
         loader = self.dataset_policy.loader(None)
         subjects = self._subjects.select([])
         instance = ComposedEval(

@@ -14,7 +14,7 @@ from eval_framework.benchmarks.mmlu import MMLU_SUBJECTS
 from eval_framework.composed import ComposedBenchmark, LanguageSpec
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import EvalKind, SampleBody
-from eval_framework.fewshot import FewshotExample, FunctionRenderer, SampledFewShot
+from eval_framework.fewshot import FewShot, FewshotExample, FewShotSplit, FunctionRenderer
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyBayesianLoglikelihood,
     AccuracyLoglikelihood,
@@ -602,7 +602,7 @@ def _global_mmlu(id: str, subjects: ListOfSubjects, language: LanguageSpec, data
         kind=_GlobalMmluChoice(),
         answer=PickFromCandidates(),
         sample_split="test",
-        fewshot=SampledFewShot("dev", FunctionRenderer(_global_mmlu_demo)),
+        fewshot=FewShot(FewShotSplit("dev"), FunctionRenderer(_global_mmlu_demo)),
         subjects=subjects,
         dataset_policy=_global_mmlu_dataset(dataset),
         language=language,
