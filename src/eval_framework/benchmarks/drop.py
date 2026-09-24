@@ -12,7 +12,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Generative
-from eval_framework.fewshot import FewshotExample, FunctionRenderer, SampledFewShot
+from eval_framework.fewshot import FewShot, FewshotExample, FewShotSplit, FunctionRenderer
 from eval_framework.metrics.completion.drop_completion import DropF1ExactMatch, DropMetricContext
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
@@ -130,7 +130,7 @@ def drop_completion_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
             max_tokens=100,
         ),
         sample_split="validation",
-        fewshot=SampledFewShot("train", FunctionRenderer(_completion_demo)),
+        fewshot=FewShot(FewShotSplit("train"), FunctionRenderer(_completion_demo)),
         dataset_policy=dataset,
         language=Language.ENG,
     )

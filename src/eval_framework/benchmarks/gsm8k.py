@@ -15,7 +15,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice, Generative
-from eval_framework.fewshot import FewshotExample, FunctionRenderer, PredefinedFewShot
+from eval_framework.fewshot import FewShot, FewshotExample, FunctionRenderer, Predefined
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletionOLMES
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
@@ -176,7 +176,9 @@ def gsm8k_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         ),
         answer=ExtractFromCompletion(clean_short_answer, _STOP_SEQUENCES, max_tokens=_MAX_TOKENS),
         sample_split="test",
-        fewshot=PredefinedFewShot(FEWSHOT_ITEMS, FunctionRenderer(_generative_demo), count=_NUM_FEWSHOT, label="GSM8K"),
+        fewshot=FewShot(
+            Predefined(FEWSHOT_ITEMS, count=_NUM_FEWSHOT, label="GSM8K"), FunctionRenderer(_generative_demo)
+        ),
         subjects=ListOfSubjects(["main"]),
         dataset_policy=_gsm8k_dataset(dataset),
         language=Language.ENG,
@@ -190,7 +192,7 @@ def gsm8k_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
         kind=Choice(_Gsm8kBpbReader(), styler),
         answer=PickFromCandidates(),
         sample_split="test",
-        fewshot=PredefinedFewShot(FEWSHOT_ITEMS, FunctionRenderer(_bpb_demo), count=_NUM_FEWSHOT, label="GSM8K"),
+        fewshot=FewShot(Predefined(FEWSHOT_ITEMS, count=_NUM_FEWSHOT, label="GSM8K"), FunctionRenderer(_bpb_demo)),
         subjects=ListOfSubjects(["main"]),
         dataset_policy=_gsm8k_dataset(dataset),
         language=Language.ENG,
