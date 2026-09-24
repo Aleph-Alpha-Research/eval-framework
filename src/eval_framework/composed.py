@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Self, final, override
 from eval_framework.answer import AnswerPolicy, PickFromCandidates
 from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
-from eval_framework.eval_kind import Choice, EvalKind, SampleBody
+from eval_framework.eval_kind import Choice, EvalKind
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotGenerator, FewShotPolicy, FewShotSplit, SampleSplit
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Completion, Error, RawCompletion
@@ -67,19 +67,19 @@ class ComposedEval(Eval):
         for subject in self._subjects:
             sample_rows = self._load_dataset(subject.load_key)
             assert len(sample_rows) > 0
-            initial_prompt = self._kind.initial_prompt(subject.label)
             sample_id = 0  # ids and the num_samples cap are per subject, matching BaseTask
             done = False
             for item in sample_rows:
                 if done:
                     break
                 item["subject"] = subject.label
-                prefix = self._fewshot_messages(item)
+                # Draw the few-shot demonstrations once per item, shared across the item's samples.
+                fewshot = self._fewshot.for_item(item, self.rnd)
                 for sample_body in self._kind.samples(item):
                     yield Sample(
                         id=sample_id,
                         subject=subject.label,
-                        messages=self._messages(prefix, sample_body, initial_prompt),
+                        messages=self._kind.messages(sample_body, fewshot=fewshot, subject_label=subject.label),
                         ground_truth=sample_body.ground_truth,
                         # An empty candidate list means free-form generation (no candidates to score).
                         possible_completions=sample_body.possible_completions or None,
@@ -89,22 +89,6 @@ class ComposedEval(Eval):
                     if sample_id == num_samples:
                         done = True
                         break
-
-    def _messages(self, prefix: list[Message], body: SampleBody, initial_prompt: str | None) -> list[Message]:
-        messages = [*prefix, Message(role=Role.USER, content=body.prompt)]
-        if initial_prompt is not None:
-            first = messages[0]
-            messages[0] = Message(role=first.role, content=f"{initial_prompt}\n\n{first.content}")
-        if body.cue:
-            messages.append(Message(role=Role.ASSISTANT, content=body.cue))
-        return messages
-
-    def _fewshot_messages(self, item: dict[str, Any]) -> list[Message]:
-        prefix: list[Message] = []
-        for example in self._fewshot.for_item(item, self.rnd):
-            prefix.append(Message(role=Role.USER, content=example.prompt))
-            prefix.append(Message(role=Role.ASSISTANT, content=example.answer))
-        return prefix
 
     @override
     def get_metadata(self) -> dict[str, str | list[str]]:
