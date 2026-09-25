@@ -116,7 +116,8 @@ def _squad2_ma(id: str, *, system_prompt: str | None, dataset: DatasetPolicy | N
             cue="",  # no assistant cue; the model answers (beginning with "Final answer:")
             ground_truth=_ma_ground_truth,
             metrics=[AccuracyCompletion, F1, F1SquadNormalized],
-            system_prompt=system_prompt,
+            # the same fixed MA system prompt for every item (or none)
+            system_prompt=(lambda item: system_prompt) if system_prompt is not None else None,
         ),
         answer=ExtractFromCompletion(_strip_answer_prefix, [], max_tokens=10_000),
         sample_split="validation",
