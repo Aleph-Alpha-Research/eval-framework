@@ -71,14 +71,15 @@ def gsm8k_ellamind_de_platinum(dataset: DatasetPolicy | None = None) -> Benchmar
         SampleSplit(),
         ChoiceRenderer(_GenerativeFewshotReader(), ClozeStyle(question_prefix="Frage: ", cue_text="Antwort:")),
     )
+    kind = Generative(
+        build_prompt=lambda item: f"Frage: {item['question']}\n",
+        cue="Antwort:",
+        ground_truth=lambda item: _normalize_number(item["final_answer"]),
+        metrics=[AccuracyCompletion],
+    )
     return ComposedBenchmark.compose(
         id="GSM8K_Ellamind_DE_Platinum",
-        kind=Generative(
-            build_prompt=lambda item: f"Frage: {item['question']}\n",
-            cue="Antwort:",
-            ground_truth=lambda item: _normalize_number(item["final_answer"]),
-            metrics=[AccuracyCompletion],
-        ),
+        kind=kind,
         answer=ExtractFromCompletion(_extract_final_integer, _STOP_SEQUENCES, max_tokens=_MAX_TOKENS),
         sample_split="test",
         fewshot=fewshot,

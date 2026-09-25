@@ -117,25 +117,31 @@ def execution(
     """A code-generation-scored-by-execution benchmark. ``answer`` defaults to the standard HumanEval
     reconstruction (truncate at a stop sequence, splice into the test harness); an instruct variant can inject
     its own (e.g. extracting a markdown code block)."""
+    kind = Generative(
+        build_prompt=build_prompt,
+        cue="",  # the model continues the open code fence directly
+        ground_truth=lambda item: "Success",  # execution decides pass/fail; the gold string is a placeholder
+        metrics=metrics,
+        context=humaneval_context,
+    )
+    answer = (
+        answer
+        if answer is not None
+        else ReconstructProgram(_reconstruct_program, stop_sequences=_OLMES_STOP_SEQUENCES, max_tokens=1024)
+    )
+    fewshot = FewShot(
+        SampleSplit(),  # HumanEval has no dedicated few-shot split; draw (leak-safe) from the eval split
+        FunctionRenderer(lambda row: FewshotExample(prompt=build_prompt(row), answer=fewshot_target(row))),
+    )
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(dataset_path)
     return ComposedBenchmark.compose(
         id=id,
-        kind=Generative(
-            build_prompt=build_prompt,
-            cue="",  # the model continues the open code fence directly
-            ground_truth=lambda item: "Success",  # execution decides pass/fail; the gold string is a placeholder
-            metrics=metrics,
-            context=humaneval_context,
-        ),
-        answer=answer
-        if answer is not None
-        else ReconstructProgram(_reconstruct_program, stop_sequences=_OLMES_STOP_SEQUENCES, max_tokens=1024),
+        kind=kind,
+        answer=answer,
         sample_split="test",
-        fewshot=FewShot(
-            SampleSplit(),  # HumanEval has no dedicated few-shot split; draw (leak-safe) from the eval split
-            FunctionRenderer(lambda row: FewshotExample(prompt=build_prompt(row), answer=fewshot_target(row))),
-        ),
+        fewshot=fewshot,
         subjects=subjects,
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(dataset_path),
+        dataset_policy=dataset_policy,
         language=language,
     )
 
@@ -152,6 +158,7 @@ def bpb(
     dataset: DatasetPolicy | None,
 ) -> Benchmark:
     """A BPB (loglikelihood-of-the-gold-solution) benchmark: one candidate, scored by ``styler``."""
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(dataset_path)
     return ComposedBenchmark.choice(
         id=id,
         reader=SingleGoldReader(question=question, gold=gold),
@@ -159,7 +166,7 @@ def bpb(
         sample_split="test",
         fewshot_split="test",
         subjects=subjects,
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(dataset_path),
+        dataset_policy=dataset_policy,
         language=language,
     )
 

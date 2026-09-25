@@ -128,19 +128,22 @@ def _boxed_extractor(strip: Callable[[str], str], *, answer_line_fallback: bool 
 
 
 def _math500(id: str, strip: Callable[[str], str], dataset: DatasetPolicy | None) -> Benchmark:
+    kind = Generative(
+        build_prompt=lambda item: _QUERY_TEMPLATE.format(Question=item["problem"]),
+        cue="",  # no assistant cue — the model produces the full worked solution
+        ground_truth=lambda item: item["answer"],
+        metrics=[MathReasoningCompletion, LanguageRawConsistencyChecker],
+    )
+    answer = ExtractFromCompletion(_boxed_extractor(strip, answer_line_fallback=True))
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(MATH500_DATASET_PATH)
     return ComposedBenchmark.compose(
         id=id,
-        kind=Generative(
-            build_prompt=lambda item: _QUERY_TEMPLATE.format(Question=item["problem"]),
-            cue="",  # no assistant cue — the model produces the full worked solution
-            ground_truth=lambda item: item["answer"],
-            metrics=[MathReasoningCompletion, LanguageRawConsistencyChecker],
-        ),
-        answer=ExtractFromCompletion(_boxed_extractor(strip, answer_line_fallback=True)),
+        kind=kind,
+        answer=answer,
         sample_split="test",
         fewshot=NoFewShot(),
         subjects=NoSubject(),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(MATH500_DATASET_PATH),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 
@@ -202,15 +205,17 @@ def aime(
     normalisation (its bug is inert on integer answers), scored by ``MathReasoningCompletion``. Callers vary the
     prompt (``build_prompt``, defaulting to the English NeMo-Skills template), dataset, subjects and language —
     e.g. localized AIME variants in the companion package reuse this."""
+    kind = Generative(
+        build_prompt=build_prompt,
+        cue="",
+        ground_truth=ground_truth,
+        metrics=[MathReasoningCompletion, LanguageRawConsistencyChecker],
+    )
+    answer = ExtractFromCompletion(_boxed_extractor(_strip_string_with_bug))  # boxed only, no Answer: fallback
     return ComposedBenchmark.compose(
         id=id,
-        kind=Generative(
-            build_prompt=build_prompt,
-            cue="",
-            ground_truth=ground_truth,
-            metrics=[MathReasoningCompletion, LanguageRawConsistencyChecker],
-        ),
-        answer=ExtractFromCompletion(_boxed_extractor(_strip_string_with_bug)),  # boxed only, no Answer: fallback
+        kind=kind,
+        answer=answer,
         sample_split=sample_split,
         fewshot=NoFewShot(),
         subjects=subjects,
@@ -221,27 +226,30 @@ def aime(
 
 def aime2024(dataset: DatasetPolicy | None = None) -> Benchmark:
     # AIME 2024 gold answers are zero-padded (range 0-999); strip the leading zeros.
+    dataset_policy = dataset if dataset is not None else pinned_by_framework("HuggingFaceH4/aime_2024")
     return aime(
         "AIME2024",
-        dataset_policy=dataset if dataset is not None else pinned_by_framework("HuggingFaceH4/aime_2024"),
+        dataset_policy=dataset_policy,
         ground_truth=lambda item: item["answer"].lstrip("0"),
         sample_split="train",
     )
 
 
 def aime2025(dataset: DatasetPolicy | None = None) -> Benchmark:
+    dataset_policy = dataset if dataset is not None else pinned_by_framework("math-ai/aime25")
     return aime(
         "AIME2025",
-        dataset_policy=dataset if dataset is not None else pinned_by_framework("math-ai/aime25"),
+        dataset_policy=dataset_policy,
         ground_truth=lambda item: item["answer"],
         sample_split="test",
     )
 
 
 def aime2026(dataset: DatasetPolicy | None = None) -> Benchmark:
+    dataset_policy = dataset if dataset is not None else pinned_by_framework("math-ai/aime26")
     return aime(
         "AIME2026",
-        dataset_policy=dataset if dataset is not None else pinned_by_framework("math-ai/aime26"),
+        dataset_policy=dataset_policy,
         ground_truth=lambda item: item["answer"],
         sample_split="test",
     )
@@ -277,19 +285,22 @@ def _gsm8k_reasoning_extractor(completion_text: str) -> str:
 
 
 def gsm8k_reasoning(dataset: DatasetPolicy | None = None) -> Benchmark:
+    kind = Generative(
+        build_prompt=lambda item: _GSM8K_REASONING_QUERY_TEMPLATE.format(question=item["question"]),
+        cue="",  # the prompt already ends on "Answer:"; the model continues from there
+        ground_truth=lambda item: extract_hash_answer(item["answer"]),
+        metrics=[AccuracyCompletion, LanguageRawConsistencyChecker],
+    )
+    answer = ExtractFromCompletion(_gsm8k_reasoning_extractor)  # boxed, then #### fallback; no stop sequences
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(GSM8K_REASONING_DATASET_PATH)
     return ComposedBenchmark.compose(
         id="GSM8KReasoning",
-        kind=Generative(
-            build_prompt=lambda item: _GSM8K_REASONING_QUERY_TEMPLATE.format(question=item["question"]),
-            cue="",  # the prompt already ends on "Answer:"; the model continues from there
-            ground_truth=lambda item: extract_hash_answer(item["answer"]),
-            metrics=[AccuracyCompletion, LanguageRawConsistencyChecker],
-        ),
-        answer=ExtractFromCompletion(_gsm8k_reasoning_extractor),  # boxed, then #### fallback; no stop sequences
+        kind=kind,
+        answer=answer,
         sample_split="test",
         fewshot=NoFewShot(),
         subjects=ListOfSubjects(["main"]),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(GSM8K_REASONING_DATASET_PATH),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 
@@ -370,19 +381,22 @@ def _olmes_generative_demo(demo: dict[str, Any]) -> FewshotExample:
 
 
 def _mathminerva_olmes(id: str, stop_sequences: list[str], dataset: DatasetPolicy | None) -> Benchmark:
+    kind = Generative(
+        build_prompt=_minerva_prompt,
+        cue="",  # the prompt ends on "Solution:"; the model continues from there
+        ground_truth=_minerva_gold,
+        metrics=[MathMinervaCompletion, MathMinervaCompletionRelaxed],
+    )
+    answer = ExtractFromCompletion(_minerva_extractor, stop_sequences, max_tokens=_MINERVA_MAX_TOKENS)
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_DATASET_PATH)
     return ComposedBenchmark.compose(
         id=id,
-        kind=Generative(
-            build_prompt=_minerva_prompt,
-            cue="",  # the prompt ends on "Solution:"; the model continues from there
-            ground_truth=_minerva_gold,
-            metrics=[MathMinervaCompletion, MathMinervaCompletionRelaxed],
-        ),
-        answer=ExtractFromCompletion(_minerva_extractor, stop_sequences, max_tokens=_MINERVA_MAX_TOKENS),
+        kind=kind,
+        answer=answer,
         sample_split="test",
         fewshot=FewShot(Predefined(_OLMES_FEWSHOTS, count=4, label=id), FunctionRenderer(_olmes_generative_demo)),
         subjects=ListOfSubjects(_MATH_SUBJECTS),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_DATASET_PATH),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 
@@ -421,16 +435,16 @@ def _minerva_bpb_demo(demo: dict[str, Any]) -> FewshotExample:
 
 
 def mathminerva_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
+    fewshot = FewShot(Predefined(_OLMES_FEWSHOTS, count=4, label="MATHMinervaBPB"), FunctionRenderer(_minerva_bpb_demo))
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_DATASET_PATH)
     return ComposedBenchmark.compose(
         id="MATHMinervaBPB",
         kind=Choice(_MINERVA_BPB_READER, _MINERVA_BPB_STYLER),
         answer=PickFromCandidates(),
         sample_split="test",
-        fewshot=FewShot(
-            Predefined(_OLMES_FEWSHOTS, count=4, label="MATHMinervaBPB"), FunctionRenderer(_minerva_bpb_demo)
-        ),
+        fewshot=fewshot,
         subjects=ListOfSubjects(_MATH_SUBJECTS),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_DATASET_PATH),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 

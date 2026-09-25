@@ -49,23 +49,23 @@ def _open_demo(item: dict[str, Any]) -> FewshotExample:
 
 
 def natural_qs_open(dataset: DatasetPolicy | None = None) -> Benchmark:
+    kind = Generative(
+        build_prompt=_open_prompt,
+        cue="Answer:",  # the model continues after the cue
+        ground_truth=_open_ground_truth,
+        metrics=[DropF1ExactMatch],
+        context=_open_context,
+    )
+    # F1 scores the whole generation; nothing is extracted
+    answer = ExtractFromCompletion(lambda completion_text: completion_text, _OPEN_STOP_SEQUENCES, max_tokens=50)
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(NQ_OPEN_DATASET_PATH)
     return ComposedBenchmark.compose(
         id="NaturalQsOpen",
-        kind=Generative(
-            build_prompt=_open_prompt,
-            cue="Answer:",  # the model continues after the cue
-            ground_truth=_open_ground_truth,
-            metrics=[DropF1ExactMatch],
-            context=_open_context,
-        ),
-        answer=ExtractFromCompletion(
-            lambda completion_text: completion_text,  # F1 scores the whole generation; nothing is extracted
-            _OPEN_STOP_SEQUENCES,
-            max_tokens=50,
-        ),
+        kind=kind,
+        answer=answer,
         sample_split="validation",
         fewshot=FewShot(FewShotSplit("train"), FunctionRenderer(_open_demo)),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(NQ_OPEN_DATASET_PATH),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 
@@ -85,13 +85,14 @@ class _NaturalQsChoiceReader(ChoiceReader):
 
 def natural_qs_open_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     """OLMES lays out the options with a leading space (" A. ...")."""
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(NQ_GEN2MC_DATASET_PATH)
     return ComposedBenchmark.choice(
         id="NaturalQsOpenMC_OLMES",
         reader=_NaturalQsChoiceReader(),
         styler=MCStyle(space_prefixed_labels=True),
         sample_split="validation",
         fewshot_split="validation",
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(NQ_GEN2MC_DATASET_PATH),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 

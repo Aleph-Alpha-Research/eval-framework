@@ -12,7 +12,7 @@ from typing import Any
 from eval_framework.answer import ExtractFromCompletion
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import Generative
+from eval_framework.eval_kind import Generative, ItemText
 from eval_framework.fewshot import FewShot, FewshotExample, FewShotSplit, FunctionRenderer
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1, F1SquadNormalized
@@ -47,23 +47,23 @@ def _olmes_demo(item: dict[str, Any]) -> FewshotExample:
 
 
 def squad_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
+    kind = Generative(
+        build_prompt=_olmes_prompt,
+        cue="Answer:",  # the model continues after the cue
+        ground_truth=_olmes_ground_truth,
+        metrics=[F1SquadNormalized],
+        initial_prompt=_OLMES_PREAMBLE,
+    )
+    # F1 scores the whole generation; nothing is extracted
+    answer = ExtractFromCompletion(lambda completion_text: completion_text, ["Title:", "\n\n"], max_tokens=50)
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(SQUAD_V1_DATASET_PATH)
     return ComposedBenchmark.compose(
         id="SQuAD_OLMES",
-        kind=Generative(
-            build_prompt=_olmes_prompt,
-            cue="Answer:",  # the model continues after the cue
-            ground_truth=_olmes_ground_truth,
-            metrics=[F1SquadNormalized],
-            initial_prompt=_OLMES_PREAMBLE,
-        ),
-        answer=ExtractFromCompletion(
-            lambda completion_text: completion_text,  # F1 scores the whole generation; nothing is extracted
-            ["Title:", "\n\n"],
-            max_tokens=50,
-        ),
+        kind=kind,
+        answer=answer,
         sample_split="validation",
         fewshot=FewShot(FewShotSplit("train"), FunctionRenderer(_olmes_demo)),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(SQUAD_V1_DATASET_PATH),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 
@@ -108,27 +108,34 @@ def _strip_answer_prefix(completion_text: str) -> str:
     return cleaned
 
 
-def _squad2_ma(id: str, *, system_prompt: str | None, dataset: DatasetPolicy | None) -> Benchmark:
+def _fixed_system_prompt(text: str) -> ItemText:
+    # SQuAD2_MA uses one fixed MA system prompt for every item; wrap it as the per-item callable Generative wants.
+    return lambda item: text
+
+
+def _squad2_ma(id: str, *, system_prompt: ItemText | None, dataset: DatasetPolicy | None) -> Benchmark:
+    kind = Generative(
+        build_prompt=_ma_prompt,
+        cue="",  # no assistant cue; the model answers (beginning with "Final answer:")
+        ground_truth=_ma_ground_truth,
+        metrics=[AccuracyCompletion, F1, F1SquadNormalized],
+        system_prompt=system_prompt,
+    )
+    answer = ExtractFromCompletion(_strip_answer_prefix, [], max_tokens=10_000)
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(SQUAD_V2_DATASET_PATH)
     return ComposedBenchmark.compose(
         id=id,
-        kind=Generative(
-            build_prompt=_ma_prompt,
-            cue="",  # no assistant cue; the model answers (beginning with "Final answer:")
-            ground_truth=_ma_ground_truth,
-            metrics=[AccuracyCompletion, F1, F1SquadNormalized],
-            # the same fixed MA system prompt for every item (or none)
-            system_prompt=(lambda item: system_prompt) if system_prompt is not None else None,
-        ),
-        answer=ExtractFromCompletion(_strip_answer_prefix, [], max_tokens=10_000),
+        kind=kind,
+        answer=answer,
         sample_split="validation",
         fewshot=FewShot(FewShotSplit("train"), FunctionRenderer(_ma_demo)),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(SQUAD_V2_DATASET_PATH),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 
 
 def squad2_ma(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _squad2_ma("SQuAD2_MA", system_prompt=_MA_SYSTEM_PROMPT, dataset=dataset)
+    return _squad2_ma("SQuAD2_MA", system_prompt=_fixed_system_prompt(_MA_SYSTEM_PROMPT), dataset=dataset)
 
 
 def squad2_ma_no_sysprompt(dataset: DatasetPolicy | None = None) -> Benchmark:

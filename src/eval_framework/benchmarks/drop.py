@@ -114,21 +114,20 @@ def drop_completion_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         dataset = pinned_by_framework(DROP_COMPLETION_DATASET_PATH).subset(
             lambda row: bool(_get_answers(row)), "questions with a parseable gold answer"
         )
+    kind = Generative(
+        build_prompt=_completion_prompt,
+        cue="Answer:",  # the model continues after the cue
+        ground_truth=_completion_ground_truth,
+        metrics=[DropF1ExactMatch],
+        context=_completion_context,
+        initial_prompt=_OLMES_PREAMBLE,
+    )
+    # F1 scores the whole generation; nothing is extracted
+    answer = ExtractFromCompletion(lambda completion_text: completion_text, _COMPLETION_STOP_SEQUENCES, max_tokens=100)
     return ComposedBenchmark.compose(
         id="DropCompletion_OLMES",
-        kind=Generative(
-            build_prompt=_completion_prompt,
-            cue="Answer:",  # the model continues after the cue
-            ground_truth=_completion_ground_truth,
-            metrics=[DropF1ExactMatch],
-            context=_completion_context,
-            initial_prompt=_OLMES_PREAMBLE,
-        ),
-        answer=ExtractFromCompletion(
-            lambda completion_text: completion_text,  # F1 scores the whole generation; nothing is extracted
-            _COMPLETION_STOP_SEQUENCES,
-            max_tokens=100,
-        ),
+        kind=kind,
+        answer=answer,
         sample_split="validation",
         fewshot=FewShot(FewShotSplit("train"), FunctionRenderer(_completion_demo)),
         dataset_policy=dataset,
@@ -156,13 +155,14 @@ class _DropChoiceReader(ChoiceReader):
 
 def drop_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     """OLMES lays out the options with a leading space (" A. ...")."""
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(DROP_CHOICE_DATASET_PATH)
     return ComposedBenchmark.choice(
         id="DropMC_OLMES",
         reader=_DropChoiceReader(),
         styler=MCStyle(question_prefix="", space_prefixed_labels=True),
         sample_split="validation",
         fewshot_split="validation",
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(DROP_CHOICE_DATASET_PATH),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 
