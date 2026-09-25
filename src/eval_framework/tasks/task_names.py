@@ -28,6 +28,7 @@ from eval_framework.benchmarks.mbpp_ellamind import MBPP_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.medqa import MEDQA_BENCHMARKS
 from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
 from eval_framework.benchmarks.mmlu_pro import MMLU_PRO_BENCHMARKS
+from eval_framework.benchmarks.multipl_e import MULTIPL_E_BENCHMARKS
 from eval_framework.benchmarks.naturalqs_open import NATURALQS_OPEN_BENCHMARKS
 from eval_framework.benchmarks.piqa import PIQA_BENCHMARKS
 from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS
@@ -188,18 +189,8 @@ def register_ifeval_tasks(registry: Registry) -> None:
 
 def register_multipl_e_tasks(registry: Registry) -> None:
     """Register multipl_e benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalCpp", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalJava", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalJs", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalPhp", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalRs", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEHumanEvalSh", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPCpp", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPJava", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPJs", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPPhp", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPRs", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.multipl_e.MultiPLEMBPPSh", registry=registry)
+    for benchmark in MULTIPL_E_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_mmlu_pro_tasks(registry: Registry) -> None:

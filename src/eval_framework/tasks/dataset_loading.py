@@ -71,6 +71,11 @@ class DatasetPolicy(ABC):
         a ``column`` of a single ``config`` (``None`` loads the default config) (see ``SubjectColumn``)."""
         return SubjectColumn(self, config, column)
 
+    def with_config(self, config: str) -> "FixedConfig":
+        """Always load the HF ``config``, ignoring the subject. Use for a task that has no subjects but whose
+        data is not in the dataset's default config (e.g. MultiPL-E loads the ``humaneval-cpp`` config)."""
+        return FixedConfig(self, config)
+
 
 @final
 class _SubsetLoader(DatasetLoader):
@@ -159,3 +164,38 @@ class SubjectColumn(DatasetPolicy):
             f"{self._inner.documentation()}\n"
             f"- Subjects share the {shared_config} config and are split by the `{self._column}` column."
         )
+
+
+@final
+class _FixedConfigLoader(DatasetLoader):
+    """Loads the inner loader's fixed ``config``, ignoring the requested subject name (the task has none)."""
+
+    def __init__(self, inner: DatasetLoader, config: str) -> None:
+        self._inner = inner
+        self._config = config
+
+    @override
+    def load(self, name: str | None) -> DatasetDict:
+        return self._inner.load(self._config)
+
+    @override
+    def metadata(self) -> dict[str, str]:
+        return self._inner.metadata()
+
+
+@final
+class FixedConfig(DatasetPolicy):
+    """Pins the HF ``config`` for a task that has no subjects but whose data is not in the dataset's default
+    config (e.g. each MultiPL-E variant loads one language config such as ``humaneval-cpp``)."""
+
+    def __init__(self, inner: DatasetPolicy, config: str) -> None:
+        self._inner = inner
+        self._config = config
+
+    @override
+    def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
+        return _FixedConfigLoader(self._inner.loader(custom_hf_revision), self._config)
+
+    @override
+    def documentation(self) -> str:
+        return f"{self._inner.documentation()}\n- Loads the `{self._config}` config."
