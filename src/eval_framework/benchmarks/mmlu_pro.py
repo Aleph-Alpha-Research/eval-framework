@@ -130,14 +130,15 @@ def mmlu_pro_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
 
 
 def _mmlu_pro_cot(id: str, answer: AnswerPolicy, dataset: DatasetPolicy | None = None) -> Benchmark:
+    kind = Cot(
+        MmluProReader(),
+        build_prompt=tulu3_cot_prompt,
+        preamble=_mmlu_pro_preamble,
+        candidates=_mmlu_pro_cot_candidates,
+    )
     return ComposedBenchmark.compose(
         id=id,
-        kind=Cot(
-            MmluProReader(),
-            build_prompt=tulu3_cot_prompt,
-            preamble=_mmlu_pro_preamble,
-            candidates=_mmlu_pro_cot_candidates,
-        ),
+        kind=kind,
         answer=answer,
         sample_split="test",
         fewshot=NoFewShot(),

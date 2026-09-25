@@ -71,14 +71,15 @@ def _de_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
 
 
 def _mathminerva_de(id: str, stop_sequences: list[str], dataset: DatasetPolicy | None) -> Benchmark:
+    kind = Generative(
+        build_prompt=_minerva_de_prompt,
+        cue="Lösung:",
+        ground_truth=_minerva_de_gold,
+        metrics=[MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE],
+    )
     return ComposedBenchmark.compose(
         id=id,
-        kind=Generative(
-            build_prompt=_minerva_de_prompt,
-            cue="Lösung:",
-            ground_truth=_minerva_de_gold,
-            metrics=[MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE],
-        ),
+        kind=kind,
         answer=ExtractFromCompletion(_minerva_de_extractor, stop_sequences, max_tokens=_MINERVA_DE_MAX_TOKENS),
         sample_split="test",
         fewshot=FewShot(SampleSplit(keep=_single_paragraph_solution), FunctionRenderer(_generative_demo)),

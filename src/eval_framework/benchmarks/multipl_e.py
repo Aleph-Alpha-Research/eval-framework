@@ -53,22 +53,23 @@ def _trim_at_stops(stop_sequences: list[str]) -> Extractor:
 
 def _multipl_e(id: str, *, prefix: str, lang: str, dataset: DatasetPolicy | None = None) -> Benchmark:
     stop_sequences = MULTIPL_E_STOP_TOKENS[lang]
+    kind = Generative(
+        build_prompt=lambda item: item["prompt"],  # the target-language function stub, verbatim
+        cue="",
+        ground_truth=lambda item: None,  # test-based; no gold string
+        metrics=[MultiPLECodeAssertion],
+        context=_context,
+    )
+    # No subjects; each variant loads its one fixed language config from the dataset (not the default one).
+    fixed_config = pinned_by_framework(MULTIPL_E_DATASET_PATH).with_hf_config(f"{prefix}-{lang}")
+    dataset_policy = dataset if dataset is not None else fixed_config
     return ComposedBenchmark.compose(
         id=id,
-        kind=Generative(
-            build_prompt=lambda item: item["prompt"],  # the target-language function stub, verbatim
-            cue="",
-            ground_truth=lambda item: None,  # test-based; no gold string
-            metrics=[MultiPLECodeAssertion],
-            context=_context,
-        ),
+        kind=kind,
         answer=ExtractFromCompletion(_trim_at_stops(stop_sequences), stop_sequences, max_tokens=_MAX_TOKENS),
         sample_split="test",
         fewshot=NoFewShot(),  # 0-shot only; MultiPL-E has no gold examples to draw from
-        # No subjects; each variant loads its one fixed language config from the dataset (not the default one).
-        dataset_policy=dataset
-        if dataset is not None
-        else pinned_by_framework(MULTIPL_E_DATASET_PATH).with_hf_config(f"{prefix}-{lang}"),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 

@@ -93,26 +93,29 @@ def _reconstruct(
 
 
 def bigcodebench_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
+    kind = Generative(
+        build_prompt=_instruction,
+        cue="",  # OLMES uses no assistant cue
+        ground_truth=lambda item: item["canonical_solution"],  # unused by the test-based metric; recorded gold
+        metrics=[CodeExecutionPassAtOneWithCodebench],
+        context=_context,
+    )
+    fewshot = FewShot(
+        SampleSplit(),  # no dedicated few-shot split; draw (leak-safe) from the eval split
+        FunctionRenderer(lambda row: FewshotExample(prompt=_instruction(row), answer=_fewshot_target(row))),
+    )
+    # The subject labels are not HF configs; the data is always the default config.
+    dataset_policy = (
+        dataset if dataset is not None else pinned_by_framework(BIGCODEBENCH_DATASET_PATH).with_hf_config(None)
+    )
     return ComposedBenchmark.compose(
         id="BigCodeBench_OLMES",
-        kind=Generative(
-            build_prompt=_instruction,
-            cue="",  # OLMES uses no assistant cue
-            ground_truth=lambda item: item["canonical_solution"],  # unused by the test-based metric; recorded gold
-            metrics=[CodeExecutionPassAtOneWithCodebench],
-            context=_context,
-        ),
+        kind=kind,
         answer=ReconstructProgram(_reconstruct, stop_sequences=_STOP_SEQUENCES),
         sample_split=_SAMPLE_SPLIT,
-        fewshot=FewShot(
-            SampleSplit(),  # no dedicated few-shot split; draw (leak-safe) from the eval split
-            FunctionRenderer(lambda row: FewshotExample(prompt=_instruction(row), answer=_fewshot_target(row))),
-        ),
+        fewshot=fewshot,
         subjects=_SUBJECTS,
-        # The subject labels are not HF configs; the data is always the default config.
-        dataset_policy=dataset
-        if dataset is not None
-        else pinned_by_framework(BIGCODEBENCH_DATASET_PATH).with_hf_config(None),
+        dataset_policy=dataset_policy,
         language=Language.ENG,
     )
 

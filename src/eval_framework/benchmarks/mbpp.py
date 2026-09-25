@@ -143,23 +143,27 @@ def execution(
 ) -> Benchmark:
     """A code-generation-scored-by-execution benchmark: the gold answers are the ``assert`` tests (appended by
     ``answer``'s reconstruction), and demonstrations are drawn from ``fewshot_source``."""
+    metrics = metrics if metrics is not None else [CodeCompletionAssertion]
+    kind = Generative(
+        build_prompt=instruction,
+        cue=cue,
+        ground_truth=mbpp_ground_truth,
+        metrics=metrics,
+        context=mbpp_context,
+    )
+    fewshot = FewShot(
+        fewshot_source,
+        FunctionRenderer(lambda row: FewshotExample(prompt=instruction(row), answer=fewshot_target(row))),
+    )
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(dataset_path)
     return ComposedBenchmark.compose(
         id=id,
-        kind=Generative(
-            build_prompt=instruction,
-            cue=cue,
-            ground_truth=mbpp_ground_truth,
-            metrics=metrics if metrics is not None else [CodeCompletionAssertion],
-            context=mbpp_context,
-        ),
+        kind=kind,
         answer=answer,
         sample_split="test",
-        fewshot=FewShot(
-            fewshot_source,
-            FunctionRenderer(lambda row: FewshotExample(prompt=instruction(row), answer=fewshot_target(row))),
-        ),
+        fewshot=fewshot,
         subjects=subjects,
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(dataset_path),
+        dataset_policy=dataset_policy,
         language=language,
     )
 
@@ -177,6 +181,7 @@ def bpb(
 ) -> Benchmark:
     """A BPB (loglikelihood-of-the-gold-solution) benchmark: one candidate, scored by ``styler``. The few-shot
     policy is passed whole because its source (predefined block vs sampled split) and renderer vary."""
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(dataset_path)
     return ComposedBenchmark.compose(
         id=id,
         kind=Choice(reader, styler),
@@ -184,7 +189,7 @@ def bpb(
         sample_split="test",
         fewshot=fewshot,
         subjects=subjects,
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(dataset_path),
+        dataset_policy=dataset_policy,
         language=language,
     )
 

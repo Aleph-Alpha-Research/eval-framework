@@ -48,19 +48,22 @@ def _ifeval(
     language: LanguageSpec,
     dataset: DatasetPolicy | None,
 ) -> Benchmark:
+    kind = Generative(
+        build_prompt=lambda item: item["prompt"],
+        cue="",  # the model answers directly; no assistant cue
+        ground_truth=lambda item: None,  # no gold answer — scored from the context's instruction checks
+        metrics=metrics,
+        context=_ifeval_context,
+    )
+    answer = ExtractFromCompletion(lambda completion_text: completion_text)  # checks run on the whole generation
+    dataset_policy = dataset if dataset is not None else pinned_by_framework(dataset_path)
     return ComposedBenchmark.compose(
         id=id,
-        kind=Generative(
-            build_prompt=lambda item: item["prompt"],
-            cue="",  # the model answers directly; no assistant cue
-            ground_truth=lambda item: None,  # no gold answer — scored from the context's instruction checks
-            metrics=metrics,
-            context=_ifeval_context,
-        ),
-        answer=ExtractFromCompletion(lambda completion_text: completion_text),  # checks run on the whole generation
+        kind=kind,
+        answer=answer,
         sample_split="train",
         fewshot=NoFewShot(),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(dataset_path),
+        dataset_policy=dataset_policy,
         language=language,
     )
 

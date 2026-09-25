@@ -166,19 +166,19 @@ def _gsm8k_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
 
 
 def gsm8k_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
+    kind = Generative(
+        build_prompt=lambda item: f"Question: {item['question']}\nAnswer:",
+        cue="",  # no assistant cue — the model continues the answer
+        ground_truth=lambda item: clean_short_answer(item["answer"]),
+        metrics=[AccuracyCompletionOLMES],
+    )
+    fewshot = FewShot(Predefined(FEWSHOT_ITEMS, count=_NUM_FEWSHOT, label="GSM8K"), FunctionRenderer(_generative_demo))
     return ComposedBenchmark.compose(
         id="GSM8K_OLMES",
-        kind=Generative(
-            build_prompt=lambda item: f"Question: {item['question']}\nAnswer:",
-            cue="",  # no assistant cue — the model continues the answer
-            ground_truth=lambda item: clean_short_answer(item["answer"]),
-            metrics=[AccuracyCompletionOLMES],
-        ),
+        kind=kind,
         answer=ExtractFromCompletion(clean_short_answer, _STOP_SEQUENCES, max_tokens=_MAX_TOKENS),
         sample_split="test",
-        fewshot=FewShot(
-            Predefined(FEWSHOT_ITEMS, count=_NUM_FEWSHOT, label="GSM8K"), FunctionRenderer(_generative_demo)
-        ),
+        fewshot=fewshot,
         subjects=ListOfSubjects(["main"]),
         dataset_policy=_gsm8k_dataset(dataset),
         language=Language.ENG,
