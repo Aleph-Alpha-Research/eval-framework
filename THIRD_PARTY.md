@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.98,<2` |
+| `boto3` | `>=1.43.99,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.8.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.101` |
+| `botocore` | `1.43.102` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.1` |
 | `click` | `8.5.0` |
@@ -50,7 +50,7 @@ and first-party/internal packages are excluded.
 | `dill` | `0.4.1` |
 | `filelock` | `4.0.3` |
 | `fsspec` | `2026.6.0` |
-| `googleapis-common-protos` | `1.75.3` |
+| `googleapis-common-protos` | `1.75.4` |
 | `h11` | `0.16.0` |
 | `hf-xet` | `1.6.0` |
 | `httpcore` | `1.0.9` |

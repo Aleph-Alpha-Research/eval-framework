@@ -7,11 +7,10 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 | License (SPDX) | Count |
 |---|---|
+| `Apache-2.0` | 20 |
 | `MIT` | 20 |
-| `Apache-2.0` | 19 |
 | `BSD-3-Clause` | 18 |
 | `PSF-2.0` | 2 |
-| `UNKNOWN` | 2 |
 | `Apache-2.0 AND CNRI-Python` | 1 |
 | `Apache-2.0 OR BSD-2-Clause` | 1 |
 | `Apache-2.0 OR BSD-3-Clause` | 1 |
@@ -22,13 +21,15 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 | `LGPL-2.1-only` | 1 |
 | `MPL-2.0` | 1 |
 | `MPL-2.0 AND MIT` | 1 |
+| `UNKNOWN` | 1 |
 
 ## Apache-2.0
 
-- **boto3** 1.43.101 - https://github.com/boto/boto3
-- **botocore** 1.43.101 - https://github.com/boto/botocore
+- **boto3** 1.43.102 - https://github.com/boto/boto3
+- **botocore** 1.43.102 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
-- **googleapis-common-protos** 1.75.3 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
+- **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
+- **googleapis-common-protos** 1.75.4 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
 - **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
@@ -136,7 +137,6 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## UNKNOWN
 
-- **google-crc32c** 1.8.0 - https://github.com/googleapis/python-crc32c
 - **llm-sandbox** 0.3.44 - https://vndee.github.io/llm-sandbox/
 
 ## Full license texts
@@ -218,7 +218,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.101 (Apache-2.0)
+### boto3 1.43.102 (Apache-2.0)
 
 ```text
 Apache License
@@ -399,7 +399,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.101 (Apache-2.0)
+### botocore 1.43.102 (Apache-2.0)
 
 ```text
 Apache License
@@ -1059,7 +1059,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### google-crc32c 1.8.0 (UNKNOWN)
+### google-crc32c 1.9.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -1265,7 +1265,7 @@ Apache License
    limitations under the License.
 ```
 
-### googleapis-common-protos 1.75.3 (Apache-2.0)
+### googleapis-common-protos 1.75.4 (Apache-2.0)
 
 ```text
 Apache License
