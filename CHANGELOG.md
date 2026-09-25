@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.13.8](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.7...v0.13.8) (2026-09-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.99,&lt;2 ([8033d80](https://github.com/Aleph-Alpha-Research/eval-framework/commit/8033d805503e143bc1b031a0887ef00778ad06b3))
+
 ## [0.13.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.6...v0.13.7) (2026-09-23)
 
 
