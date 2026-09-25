@@ -13,7 +13,12 @@ from typing import final, override
 
 from huggingface_hub import HfApi
 
-from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy, HfDatasetLoader
+from eval_framework.tasks.dataset_loading import (
+    DatasetLoader,
+    DatasetPolicy,
+    FixedHfConfigLoader,
+    HfDatasetLoader,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +106,7 @@ class Pinned(DatasetPolicy):
         self._dataset_path = dataset_path
 
     @override
-    def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
+    def loader(self, custom_hf_revision: str | None) -> HfDatasetLoader:
         revision = custom_hf_revision or pinned_revision(self._lockfile, self._dataset_path)
         return HfDatasetLoader(self._dataset_path, revision)
 
@@ -110,6 +115,31 @@ class Pinned(DatasetPolicy):
         url = f"https://huggingface.co/datasets/{self._dataset_path}"
         revision = pinned_revision(self._lockfile, self._dataset_path)
         return f"- Link to dataset: [{url}]({url})\n- Revision: {revision}"
+
+    def with_hf_config(self, hf_config: str | None) -> "FixedHfConfig":
+        """Always load ``hf_config`` (``None`` = the dataset's default config), ignoring the subject — for an HF
+        dataset whose subjects are labels rather than configs, or a task with a fixed non-default config."""
+        return FixedHfConfig(self, hf_config)
+
+
+@final
+class FixedHfConfig(DatasetPolicy):
+    """Loads a fixed HF config from an underlying ``Pinned`` policy, regardless of subject (here the subject is a
+    label, not a config)."""
+
+    def __init__(self, base: Pinned, hf_config: str | None) -> None:
+        self._base = base
+        self._hf_config = hf_config
+
+    @override
+    def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
+        base = self._base.loader(custom_hf_revision)
+        return FixedHfConfigLoader(base.dataset_path, base.revision, self._hf_config)
+
+    @override
+    def documentation(self) -> str:
+        config = f"`{self._hf_config}`" if self._hf_config is not None else "default"
+        return f"{self._base.documentation()}\n- Loads the {config} config."
 
 
 def pinned_by_framework(dataset_path: str) -> Pinned:

@@ -10,11 +10,23 @@ from typing import Any, final, override
 from datasets import DatasetDict, DownloadConfig, load_dataset
 
 
+def _load_hf_dataset(dataset_path: str, revision: str | None, hf_config: str | None) -> DatasetDict:
+    """Load ``dataset_path`` at ``revision`` from Hugging Face, selecting the ``hf_config`` config
+    (``None`` = the dataset's default config)."""
+    cache_dir = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
+    download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
+    return load_dataset(
+        path=dataset_path, name=hf_config, revision=revision, cache_dir=cache_dir, download_config=download_config
+    )
+
+
 class DatasetLoader(ABC):
-    """Loads a benchmark's dataset splits, selecting the subject config via ``name``."""
+    """Loads a benchmark's dataset splits for one subject."""
 
     @abstractmethod
-    def load(self, name: str | None) -> DatasetDict: ...
+    def load(self, name: str | None) -> DatasetDict:
+        """Load the splits for subject ``name`` (``None`` = the task's single unnamed slice). Each loader decides
+        how a subject selects data — ``HfDatasetLoader`` treats the subject as the HF config."""
 
     @abstractmethod
     def metadata(self) -> dict[str, str]:
@@ -24,11 +36,31 @@ class DatasetLoader(ABC):
 
 @final
 class HfDatasetLoader(DatasetLoader):
-    """Loads one Hugging Face dataset, pinned to ``revision``."""
+    """Loads one Hugging Face dataset pinned to ``revision``, treating the requested subject as the HF config."""
 
     def __init__(self, dataset_path: str, revision: str | None) -> None:
-        self._dataset_path = dataset_path
+        self.dataset_path = dataset_path
         self.revision = revision
+
+    @override
+    def metadata(self) -> dict[str, str]:
+        return {"dataset_path": self.dataset_path}
+
+    @override
+    def load(self, name: str | None) -> DatasetDict:
+        # ``name`` is the subject; for a plain HF dataset the subject *is* the config to load.
+        return _load_hf_dataset(self.dataset_path, self.revision, hf_config=name)
+
+
+@final
+class FixedHfConfigLoader(DatasetLoader):
+    """Loads a fixed HF config, ignoring the requested subject — for a dataset whose subjects are labels rather
+    than configs (or a task with no subjects but a non-default config)."""
+
+    def __init__(self, dataset_path: str, revision: str | None, hf_config: str | None) -> None:
+        self._dataset_path = dataset_path
+        self._revision = revision
+        self._hf_config = hf_config
 
     @override
     def metadata(self) -> dict[str, str]:
@@ -36,16 +68,7 @@ class HfDatasetLoader(DatasetLoader):
 
     @override
     def load(self, name: str | None) -> DatasetDict:
-        cache_dir = os.environ.get("HF_DATASET_CACHE_DIR", f"{Path.home()}/.cache/huggingface/datasets")
-        download_config = DownloadConfig(cache_dir=cache_dir, max_retries=5)
-        dataset = load_dataset(
-            path=self._dataset_path,
-            name=name,
-            revision=self.revision,
-            cache_dir=cache_dir,
-            download_config=download_config,
-        )
-        return dataset
+        return _load_hf_dataset(self._dataset_path, self._revision, hf_config=self._hf_config)
 
 
 class DatasetPolicy(ABC):
@@ -70,11 +93,6 @@ class DatasetPolicy(ABC):
         """By default the loaded config names the subject; call this when the subject is instead encoded in
         a ``column`` of a single ``config`` (``None`` loads the default config) (see ``SubjectColumn``)."""
         return SubjectColumn(self, config, column)
-
-    def with_config(self, config: str) -> "FixedConfig":
-        """Always load the HF ``config``, ignoring the subject. Use for a task that has no subjects but whose
-        data is not in the dataset's default config (e.g. MultiPL-E loads the ``humaneval-cpp`` config)."""
-        return FixedConfig(self, config)
 
 
 @final
@@ -164,38 +182,3 @@ class SubjectColumn(DatasetPolicy):
             f"{self._inner.documentation()}\n"
             f"- Subjects share the {shared_config} config and are split by the `{self._column}` column."
         )
-
-
-@final
-class _FixedConfigLoader(DatasetLoader):
-    """Loads the inner loader's fixed ``config``, ignoring the requested subject name (the task has none)."""
-
-    def __init__(self, inner: DatasetLoader, config: str) -> None:
-        self._inner = inner
-        self._config = config
-
-    @override
-    def load(self, name: str | None) -> DatasetDict:
-        return self._inner.load(self._config)
-
-    @override
-    def metadata(self) -> dict[str, str]:
-        return self._inner.metadata()
-
-
-@final
-class FixedConfig(DatasetPolicy):
-    """Pins the HF ``config`` for a task that has no subjects but whose data is not in the dataset's default
-    config (e.g. each MultiPL-E variant loads one language config such as ``humaneval-cpp``)."""
-
-    def __init__(self, inner: DatasetPolicy, config: str) -> None:
-        self._inner = inner
-        self._config = config
-
-    @override
-    def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
-        return _FixedConfigLoader(self._inner.loader(custom_hf_revision), self._config)
-
-    @override
-    def documentation(self) -> str:
-        return f"{self._inner.documentation()}\n- Loads the `{self._config}` config."
