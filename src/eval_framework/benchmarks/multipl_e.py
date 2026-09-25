@@ -68,7 +68,7 @@ def _multipl_e(id: str, *, prefix: str, lang: str, dataset: DatasetPolicy | None
         # No subjects; each variant loads its one fixed language config from the dataset (not the default one).
         dataset_policy=dataset
         if dataset is not None
-        else pinned_by_framework(MULTIPL_E_DATASET_PATH).with_config(f"{prefix}-{lang}"),
+        else pinned_by_framework(MULTIPL_E_DATASET_PATH).with_hf_config(f"{prefix}-{lang}"),
         language=Language.ENG,
     )
 

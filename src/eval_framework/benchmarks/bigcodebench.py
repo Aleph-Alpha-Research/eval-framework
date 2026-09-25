@@ -5,7 +5,7 @@ snippet with the problem's unittest harness (via functions carried, serialized, 
 runs it. Only the OLMES 3-shot variant is registered.
 """
 
-from typing import Any, final, override
+from typing import Any
 
 from eval_framework.answer import ReconstructProgram
 from eval_framework.composed import ComposedBenchmark
@@ -17,7 +17,7 @@ from eval_framework.metrics.completion.code_execution_pass_at_one import (
     CodeExecutionPassAtOneWithCodebench,
 )
 from eval_framework.shared.types import BaseMetricContext
-from eval_framework.subjects import Subject, Subjects, SubjectsSelector
+from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -54,25 +54,10 @@ _STOP_SEQUENCES = [
 # NOTE: must be the same serializer class the metric uses to decode.
 _SERIALIZER = CallableSerializer()
 
-
-@final
-class _OlmesSubjects(SubjectsSelector):
-    """The OLMES variant carries two subject labels, ``original`` and ``calibrated``, that both load the default
-    config and (unlike the base task's other variants, which OLMES overrides) produce identical prompts. Kept
-    for parity with the BaseTask task rather than collapsed to one slice."""
-
-    _NAMES = ("original", "calibrated")
-
-    @override
-    def select(self, tokens: list[str]) -> Subjects:
-        if tokens and tokens != ["*"]:
-            unknown = [token for token in tokens if token not in self._NAMES]
-            if unknown:
-                raise ValueError(f"Unknown subject(s) {unknown}; this task's subjects are {list(self._NAMES)}.")
-            names = [name for name in self._NAMES if name in tokens]
-        else:
-            names = list(self._NAMES)
-        return tuple(Subject(load_key=None, label=name) for name in names)
+# These two subjects have no effect: they produce identical prompts and scoring, and both load the same data.
+# They select different response formats in other (non-registered) variants, but not here; kept as-is, faithfully
+# ported from an earlier version. The data is a single fixed config regardless of subject (see with_config below).
+_SUBJECTS = ListOfSubjects(["original", "calibrated"])
 
 
 def _instruction(item: dict[str, Any]) -> str:
@@ -123,8 +108,11 @@ def bigcodebench_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
             SampleSplit(),  # no dedicated few-shot split; draw (leak-safe) from the eval split
             FunctionRenderer(lambda row: FewshotExample(prompt=_instruction(row), answer=_fewshot_target(row))),
         ),
-        subjects=_OlmesSubjects(),
-        dataset_policy=dataset if dataset is not None else pinned_by_framework(BIGCODEBENCH_DATASET_PATH),
+        subjects=_SUBJECTS,
+        # The subject labels are not HF configs; the data is always the default config.
+        dataset_policy=dataset
+        if dataset is not None
+        else pinned_by_framework(BIGCODEBENCH_DATASET_PATH).with_hf_config(None),
         language=Language.ENG,
     )
 
