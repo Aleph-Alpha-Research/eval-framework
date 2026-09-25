@@ -31,7 +31,7 @@
     "ARC_OLMES.NoStripConcatFormatter": "700ac8c8914a26979089911f125b5675",
     "BigCodeBench_OLMES.ConcatFormatter": "33bb9fdffe4aca8c84a3d5df0488430b",
     "BigCodeBench_OLMES.Llama3Formatter": "553c5e44571515e2dd5b4c1657905b11",
-    "BigCodeBench_OLMES.NoStripConcatFormatter": "33bb9fdffe4aca8c84a3d5df0488430b",
+    "BigCodeBench_OLMES.NoStripConcatFormatter": "4fd83dac0666bee99da5492b363912d6",
     "COPA_OLMES.ConcatFormatter": "db31ba5881bf199cd1cb788503eb3fb6",
     "COPA_OLMES.Llama3Formatter": "7bfae4470a25178687adf831eda8478b",
     "COPA_OLMES.NoStripConcatFormatter": "395ab135563e1d12f47d4d57926f98fd",
