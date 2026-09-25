@@ -1,24 +1,80 @@
+"""Specification of the composed BigCodeBench task.
+
+Only the OLMES 3-shot variant is registered. ``test_formatter_hash`` pins it against the real HuggingFace data;
+the offline tests pin the assembled prompt + execution context, and the reconstruction of the scored snippet.
+"""
+
+from typing import Any
+
 import pytest
 from datasets import DownloadConfig, load_dataset
 
-from eval_framework.tasks.registry import Registry
-from eval_framework.tasks.task_names import register_bigcodebench_tasks
+from eval_framework.benchmarks.bigcodebench import (
+    _PROMPT_INSTRUCTION,
+    BIGCODEBENCH_BENCHMARKS,
+    _reconstruct,
+    bigcodebench_olmes,
+)
+from eval_framework.contract import Benchmark
+from eval_framework.metrics.completion.code_execution_pass_at_one import CodeExecutionPassAtOneContext
 from eval_framework.tasks.utils import (
     BIG_CODE_BENCH_PACKAGE_MAPPING,
     extract_imports,
     extract_python_code_from_response,
 )
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
-from tests.tests_eval_framework.tasks.benchmarks.utils import run_formatter_hash_test
+from template_formatting.formatter import (
+    BaseFormatter,
+    ConcatFormatter,
+    Llama3Formatter,
+    Message,
+    NoStripConcatFormatter,
+    Role,
+)
+from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
+from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
 
-_NUM_FEWSHOT = {
-    "BigCodeBench": 0,
-    "BigCodeBench_OLMES": 3,
+
+@pytest.mark.formatter_hash
+@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter, NoStripConcatFormatter])
+@pytest.mark.parametrize("benchmark", BIGCODEBENCH_BENCHMARKS, ids=lambda b: b.id())
+def test_formatter_hash(benchmark: Benchmark, formatter_cls: type[BaseFormatter]) -> None:
+    assert_benchmark_formatter_hash(benchmark, formatter_cls, num_fewshot=3)  # OLMES is 3-shot
+
+
+_ROW: dict[str, Any] = {
+    "complete_prompt": 'def add(a, b):\n    """Adds two numbers."""\n',
+    "code_prompt": "def add(a, b):",
+    "test": (
+        "import unittest\n\nclass T(unittest.TestCase):\n    def test(self):\n        self.assertEqual(add(1, 2), 3)\n"
+    ),
+    "canonical_solution": "    return a + b",
 }
 
-# Registry for this test suite only holding bigcodebench tasks
-_bigcodebench_registry = Registry()
-register_bigcodebench_tasks(registry=_bigcodebench_registry)
+
+def test_olmes_prompt_and_context() -> None:
+    sample = first_sample(bigcodebench_olmes(dataset=DatasetStub({"v0.1.2": [_ROW]})), num_fewshot=0)
+    assert sample.messages == [
+        Message(role=Role.USER, content=_PROMPT_INSTRUCTION + "\n```\n" + _ROW["complete_prompt"].strip() + "\n")
+    ]
+    assert sample.ground_truth == _ROW["canonical_solution"]
+    assert sample.possible_completions is None
+    assert isinstance(sample.context, CodeExecutionPassAtOneContext)
+    assert sample.context.code_prompt == _ROW["code_prompt"]
+    assert sample.context.test_code == _ROW["test"]
+
+
+def test_reconstruct_prepends_code_prompt_and_strips_fences() -> None:
+    context = CodeExecutionPassAtOneContext(
+        run_env="python:3.12",
+        code_prompt="def add(a, b):\n",
+        test_code="t",
+        snippet_merge_fn="merge",
+        output_parse_fn="parse",
+        package_downloads={},
+    )
+    result = _reconstruct("```python\n    return a + b\n```", context=context, ground_truth=None, messages=[])
+    # code_prompt + the generated body with the markdown fences stripped out.
+    assert result == "def add(a, b):\n\n    return a + b\n"
 
 
 class TestExtractPythonCodeFromResponse:
@@ -303,44 +359,20 @@ def hello_world():
         assert extract_python_code_from_response(response) == expected
 
 
-def test_all_imports_in_mapping() -> None:
-    """Test that all imports in the BigCodeBench dataset are in our mapping."""
-    # Load the dataset
+def test_all_dataset_imports_in_mapping() -> None:
+    """Every third-party import used by the real BigCodeBench solutions must be in the package mapping, so the
+    sandbox can install it. Skips only if the dataset can't be downloaded (unlike the original, which also
+    swallowed assertion failures via a broad try/except)."""
     try:
         dataset = load_dataset(path="bigcode/bigcodebench", download_config=DownloadConfig(max_retries=5))
-
-        # Process each split
-        for split, data in dataset.items():
-            if split in ["v0.1.4"]:  # Adjust based on available splits
-                all_unique_imports = set()
-
-                # Collect all unique imports from this split
-                for item in dataset[split]:
-                    code = item.get("solution", "")
-                    if not code:
-                        continue
-
-                    _, packages = extract_imports(code)
-                    all_unique_imports.update(packages)
-
-                # Check if all imports are in the mapping
-                missing_imports = [imp for imp in all_unique_imports if imp not in BIG_CODE_BENCH_PACKAGE_MAPPING]
-
-                # Print missing imports for debugging
-                if missing_imports:
-                    print(f"Missing imports in mapping: {missing_imports}")
-
-                # Assert all imports are in the mapping
-                assert len(missing_imports) == 0, f"Found {len(missing_imports)} imports not in the mapping"
-
     except Exception as e:
-        pytest.skip(f"Skipping dataset test due to error: {str(e)}")
+        pytest.skip(f"Could not download the BigCodeBench dataset: {e}")
 
-
-@pytest.mark.formatter_hash
-@pytest.mark.parametrize("formatter_cls", [Llama3Formatter, ConcatFormatter])
-@pytest.mark.parametrize("task_name", _bigcodebench_registry.task_names())
-def test_formatter_hash(task_name: str, formatter_cls: type[BaseFormatter]) -> None:
-    run_formatter_hash_test(
-        task_name, formatter_cls, num_fewshot=_NUM_FEWSHOT.get(task_name, 1), registry=_bigcodebench_registry
-    )
+    all_imports: set[str] = set()
+    for item in dataset["v0.1.4"]:
+        code = item.get("solution", "")
+        if code:
+            _, packages = extract_imports(code)
+            all_imports.update(packages)
+    missing = sorted(imp for imp in all_imports if imp not in BIG_CODE_BENCH_PACKAGE_MAPPING)
+    assert not missing, f"{len(missing)} dataset imports not in the mapping: {missing}"

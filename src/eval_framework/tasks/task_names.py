@@ -3,6 +3,7 @@ from enum import Enum
 from eval_framework.benchmarks.arc import ARC_BENCHMARKS
 from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK
 from eval_framework.benchmarks.arc_ellamind import ARC_ELLAMIND_BENCHMARKS
+from eval_framework.benchmarks.bigcodebench import BIGCODEBENCH_BENCHMARKS
 from eval_framework.benchmarks.copa import COPA_BENCHMARKS
 from eval_framework.benchmarks.csqa import CSQA_BENCHMARKS
 from eval_framework.benchmarks.csqa_ellamind import CSQA_ELLAMIND_BENCHMARKS
@@ -158,7 +159,8 @@ def register_mbpp_tasks(registry: Registry) -> None:
 
 def register_bigcodebench_tasks(registry: Registry) -> None:
     """Register bigcodebench benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.bigcodebench.BigCodeBench_OLMES", registry=registry)
+    for benchmark in BIGCODEBENCH_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_arc_de_tasks(registry: Registry) -> None:
