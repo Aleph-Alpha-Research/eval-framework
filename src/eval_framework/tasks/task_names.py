@@ -22,6 +22,8 @@ from eval_framework.benchmarks.humaneval_ellamind import HUMANEVAL_ELLAMIND_BENC
 from eval_framework.benchmarks.humaneval_plus import HUMANEVAL_PLUS_BENCHMARKS
 from eval_framework.benchmarks.ifeval import IFEVAL_BENCHMARKS
 from eval_framework.benchmarks.math_reasoning import MATH_REASONING_BENCHMARKS
+from eval_framework.benchmarks.mbpp import MBPP_BENCHMARKS
+from eval_framework.benchmarks.mbpp_ellamind import MBPP_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.medqa import MEDQA_BENCHMARKS
 from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
 from eval_framework.benchmarks.mmlu_pro import MMLU_PRO_BENCHMARKS
@@ -150,10 +152,8 @@ def register_humaneval_plus_tasks(registry: Registry) -> None:
 
 def register_mbpp_tasks(registry: Registry) -> None:
     """Register mbpp benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPPBPB", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPP_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPP_EvalPlus", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mbpp.MBPP_BPB_EvalPlus", registry=registry)
+    for benchmark in MBPP_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_bigcodebench_tasks(registry: Registry) -> None:
@@ -310,11 +310,8 @@ def register_humaneval_ellamind_tasks(registry: Registry) -> None:
 
 def register_mbpp_ellamind_tasks(registry: Registry) -> None:
     """Register mbpp_ellamind benchmark tasks."""
-    register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_BPB_OLMES", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_EvalPlus", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDE_BPB_EvalPlus", registry=registry)
-    register_lazy_task("eval_framework.tasks.benchmarks.mbpp_ellamind.MBPPDEEvalPlusInstruct", registry=registry)
+    for benchmark in MBPP_ELLAMIND_BENCHMARKS:
+        registry.add(benchmark)
 
 
 def register_piqa_ellamind_tasks(registry: Registry) -> None:
