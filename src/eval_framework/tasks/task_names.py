@@ -40,7 +40,7 @@ from eval_framework.benchmarks.squad import SQUAD_BENCHMARKS
 from eval_framework.benchmarks.winogrande import WINOGRANDE_BENCHMARKS
 from eval_framework.benchmarks.winogrande_ellamind import WINOGRANDE_ELLAMIND_BENCHMARKS
 from eval_framework.tasks.base import BaseTask
-from eval_framework.tasks.registry import Registry, register_lazy_task
+from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.registry import registry as global_registry
 
 
