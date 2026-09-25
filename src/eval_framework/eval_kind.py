@@ -24,18 +24,20 @@ class SampleBody:
     # Per-sample material the metric (or answer extraction) needs beyond the prompt/completion/ground_truth:
     # gold answer structure for F1, an instruction-following spec, a code test harness. None for most kinds.
     context: BaseMetricContext | list[BaseMetricContext] | None = None
+    # A leading SYSTEM turn for this sample, or None for none.
+    system_prompt: str | None = None
 
 
 def assemble_messages(
     fewshot: list[FewshotExample],
     body: SampleBody,
     *,
-    system_prompt: str | None = None,
     initial_prompt: str | None = None,
 ) -> list[Message]:
-    """The standard prompt: an optional SYSTEM turn, the few-shot demonstrations as USER / ASSISTANT pairs,
-    then the item's USER turn and (optional) ASSISTANT cue — with ``initial_prompt`` folded once into the
-    first turn (above the demonstrations). The single assembler every kind's ``messages`` delegates to."""
+    """The standard prompt: an optional SYSTEM turn (from ``body.system_prompt``), the few-shot demonstrations
+    as USER / ASSISTANT pairs, then the item's USER turn and (optional) ASSISTANT cue — with ``initial_prompt``
+    folded once into the first turn (above the demonstrations). The single assembler every kind's ``messages``
+    delegates to."""
     messages: list[Message] = []
     for example in fewshot:
         messages.append(Message(role=Role.USER, content=example.prompt))
@@ -46,8 +48,8 @@ def assemble_messages(
         messages[0] = Message(role=first.role, content=f"{initial_prompt}\n\n{first.content}")
     if body.cue:
         messages.append(Message(role=Role.ASSISTANT, content=body.cue))
-    if system_prompt is not None:
-        messages.insert(0, Message(role=Role.SYSTEM, content=system_prompt))
+    if body.system_prompt is not None:
+        messages.insert(0, Message(role=Role.SYSTEM, content=body.system_prompt))
     return messages
 
 
@@ -137,7 +139,8 @@ class Generative(EvalKind):
     primes the answer turn (``""`` for none), ``ground_truth`` derives the gold answer, and ``metrics`` are
     the scoring metrics. ``context`` derives the per-sample scoring material a metric needs beyond the gold
     string (see ``SampleBody.context``); ``initial_prompt`` is a preamble prepended once above the first
-    (few-shot) turn, and ``system_prompt`` is a leading SYSTEM turn."""
+    (few-shot) turn, and ``system_prompt`` derives a leading SYSTEM turn per item (``None`` for no system
+    turn — e.g. an instruction-following task that carries its constraints in the system prompt)."""
 
     def __init__(
         self,
@@ -148,7 +151,7 @@ class Generative(EvalKind):
         metrics: list[type["BaseMetric"]],
         context: ItemContext | None = None,
         initial_prompt: str | None = None,
-        system_prompt: str | None = None,
+        system_prompt: ItemText | None = None,
     ) -> None:
         self._build_prompt = build_prompt
         self._cue = cue
@@ -171,9 +174,10 @@ class Generative(EvalKind):
                 possible_completions=[],
                 ground_truth=self._ground_truth(item),
                 context=self._context(item),
+                system_prompt=self._system_prompt(item) if self._system_prompt is not None else None,
             )
         ]
 
     @override
     def messages(self, body: SampleBody, *, fewshot: list[FewshotExample], subject_label: str) -> list[Message]:
-        return assemble_messages(fewshot, body, system_prompt=self._system_prompt, initial_prompt=self._initial_prompt)
+        return assemble_messages(fewshot, body, initial_prompt=self._initial_prompt)
