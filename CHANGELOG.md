@@ -14,6 +14,21 @@
 
 ### Bug Fixes
 
+## [0.13.9](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.8...v0.13.9) (2026-09-26)
+
+
+### Features
+
+* system prompt can change per benchmark item ([fc3d870](https://github.com/Aleph-Alpha-Research/eval-framework/commit/fc3d870133bff7702267aed75073d9ecb941917d))
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.100,&lt;2 ([2df473f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2df473fd3a60865cd9f587498259082939ff1f2e))
+* **deps:** update dependency openai to &gt;=3.17.0,&lt;4 ([ef8fce2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ef8fce2f7ed2a873bcc74f3c965eb01b77081ec4))
+* **deps:** update dependency openai to &gt;=3.18.0,&lt;4 ([129fd2b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/129fd2bbcab7b59f2cff79bd3a920238b3a4fff9))
+* **deps:** update dependency openai to &gt;=3.19.0,&lt;4 ([85e5337](https://github.com/Aleph-Alpha-Research/eval-framework/commit/85e533777f4aa994a0f67bc9a83c9f8897450f14))
+
 ## [0.13.8](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.7...v0.13.8) (2026-09-25)
 
 
