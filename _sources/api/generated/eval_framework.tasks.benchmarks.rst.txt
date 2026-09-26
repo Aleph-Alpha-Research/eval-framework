@@ -1,0 +1,10 @@
+eval\_framework.tasks.benchmarks package
+========================================
+
+Module contents
+---------------
+
+.. automodule:: eval_framework.tasks.benchmarks
+   :members:
+   :show-inheritance:
+   :undoc-members:

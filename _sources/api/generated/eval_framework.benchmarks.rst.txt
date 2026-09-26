@@ -1,0 +1,333 @@
+eval\_framework.benchmarks package
+==================================
+
+Submodules
+----------
+
+eval\_framework.benchmarks.arc module
+-------------------------------------
+
+.. automodule:: eval_framework.benchmarks.arc
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.arc\_de module
+-----------------------------------------
+
+.. automodule:: eval_framework.benchmarks.arc_de
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.arc\_ellamind module
+-----------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.arc_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.bigcodebench module
+----------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.bigcodebench
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.copa module
+--------------------------------------
+
+.. automodule:: eval_framework.benchmarks.copa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.cot module
+-------------------------------------
+
+.. automodule:: eval_framework.benchmarks.cot
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.csqa module
+--------------------------------------
+
+.. automodule:: eval_framework.benchmarks.csqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.csqa\_ellamind module
+------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.csqa_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.drop module
+--------------------------------------
+
+.. automodule:: eval_framework.benchmarks.drop
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.global\_mmlu module
+----------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.global_mmlu
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.goldenswag module
+--------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.goldenswag
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.gpqa module
+--------------------------------------
+
+.. automodule:: eval_framework.benchmarks.gpqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.gpqa\_ellamind module
+------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.gpqa_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.gsm8k module
+---------------------------------------
+
+.. automodule:: eval_framework.benchmarks.gsm8k
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.gsm8k\_ellamind module
+-------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.gsm8k_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.hellaswag module
+-------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.hellaswag
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.hellaswag\_ellamind module
+-----------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.hellaswag_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.hendrycks\_math\_ellamind module
+-----------------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.hendrycks_math_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.hle\_ellamind module
+-----------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.hle_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.humaneval module
+-------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.humaneval
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.humaneval\_ellamind module
+-----------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.humaneval_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.humaneval\_plus module
+-------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.humaneval_plus
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.ifeval module
+----------------------------------------
+
+.. automodule:: eval_framework.benchmarks.ifeval
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.math\_reasoning module
+-------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.math_reasoning
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.mbpp module
+--------------------------------------
+
+.. automodule:: eval_framework.benchmarks.mbpp
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.mbpp\_ellamind module
+------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.mbpp_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.medqa module
+---------------------------------------
+
+.. automodule:: eval_framework.benchmarks.medqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.mmlu module
+--------------------------------------
+
+.. automodule:: eval_framework.benchmarks.mmlu
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.mmlu\_pro module
+-------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.mmlu_pro
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.multipl\_e module
+--------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.multipl_e
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.naturalqs\_open module
+-------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.naturalqs_open
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.piqa module
+--------------------------------------
+
+.. automodule:: eval_framework.benchmarks.piqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.piqa\_ellamind module
+------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.piqa_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.sciq module
+--------------------------------------
+
+.. automodule:: eval_framework.benchmarks.sciq
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.simpleqa\_ellamind module
+----------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.simpleqa_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.siqa\_ellamind module
+------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.siqa_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.social\_iqa module
+---------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.social_iqa
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.squad module
+---------------------------------------
+
+.. automodule:: eval_framework.benchmarks.squad
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.winogrande module
+--------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.winogrande
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.benchmarks.winogrande\_ellamind module
+------------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.winogrande_ellamind
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: eval_framework.benchmarks
+   :members:
+   :show-inheritance:
+   :undoc-members:
