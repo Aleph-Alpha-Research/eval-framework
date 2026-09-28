@@ -25,7 +25,6 @@ from eval_framework.benchmarks.ifeval import IFEVAL_BENCHMARKS
 from eval_framework.benchmarks.math_reasoning import MATH_REASONING_BENCHMARKS
 from eval_framework.benchmarks.mbpp import MBPP_BENCHMARKS
 from eval_framework.benchmarks.mbpp_ellamind import MBPP_ELLAMIND_BENCHMARKS
-from eval_framework.benchmarks.medqa import MEDQA_BENCHMARKS
 from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
 from eval_framework.benchmarks.mmlu_pro import MMLU_PRO_BENCHMARKS
 from eval_framework.benchmarks.multipl_e import MULTIPL_E_BENCHMARKS
@@ -82,7 +81,6 @@ def register_all_tasks(registry: Registry | None = None) -> None:
     register_drop_tasks(registry=registry)
     register_naturalqs_open_tasks(registry=registry)
     register_social_iqa_tasks(registry=registry)
-    register_medqa_tasks(registry=registry)
     register_arc_ellamind_tasks(registry=registry)
     register_csqa_ellamind_tasks(registry=registry)
     register_gpqa_ellamind_tasks(registry=registry)
@@ -244,12 +242,6 @@ def register_naturalqs_open_tasks(registry: Registry) -> None:
 def register_social_iqa_tasks(registry: Registry) -> None:
     """Register social_iqa benchmark tasks."""
     for benchmark in SOCIAL_IQA_BENCHMARKS:
-        registry.add(benchmark)
-
-
-def register_medqa_tasks(registry: Registry) -> None:
-    """Register medqa benchmark tasks."""
-    for benchmark in MEDQA_BENCHMARKS:
         registry.add(benchmark)
 
 
