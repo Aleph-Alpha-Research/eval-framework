@@ -10,9 +10,9 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.101,<2` |
+| `boto3` | `>=1.43.102,<2` |
 | `datasets` | `>=5.0.1,<6` |
-| `google-crc32c` | `>=1.8.0,<2` |
+| `google-crc32c` | `>=1.9.0,<2` |
 | `jsonlines` | `>=4,<5` |
 | `jsonschema` | `>=4.26.0,<5` |
 | `langdetect` | `>=1.0.9,<2` |
