@@ -1079,7 +1079,7 @@ requires-dist = [
     { name = "datasets", specifier = ">=5.0.1,<6" },
     { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38.1,<0.39" },
     { name = "eval-framework", extras = ["determined", "api", "openai", "transformers", "accelerate", "optional"], marker = "extra == 'all'" },
-    { name = "google-crc32c", specifier = ">=1.8.0,<2" },
+    { name = "google-crc32c", specifier = ">=1.9.0,<2" },
     { name = "jinja2", marker = "extra == 'optional'", specifier = ">=3.1.6,<4" },
     { name = "jsonlines", specifier = ">=4,<5" },
     { name = "jsonschema", specifier = ">=4.26.0,<5" },
