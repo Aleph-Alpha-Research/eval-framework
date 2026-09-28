@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.13.11](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.10...v0.13.11) (2026-09-28)
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.102,&lt;2 ([7dd8570](https://github.com/Aleph-Alpha-Research/eval-framework/commit/7dd857086d634f7e23dae0633463c15667b46d4e))
+* **deps:** update dependency google-crc32c to &gt;=1.9.0,&lt;2 ([c119841](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c119841b229be6179f645bf0cd15f47341c54ab7))
+
 ## [0.13.10](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.9...v0.13.10) (2026-09-27)
 
 
