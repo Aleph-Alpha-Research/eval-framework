@@ -147,12 +147,3 @@ def test_gpqa_cot_extracts_parenthesised_letter(completion: str, expected: str) 
 def test_gpqa_cot_v2_extracts_leniently(completion: str, expected: str) -> None:
     answer = tulu_answer_v2(4)
     assert answer.extract_answer(completion, context=None, ground_truth=None, messages=[]) == expected
-
-
-def test_gpqa_diamond_cot_appends_a_user_prompt_suffix() -> None:
-    # COT is completed free-form, so its kind accepts the suffix, appended to the evaluated user turn.
-    benchmark = gpqa_diamond_cot(dataset=DatasetStub({"train": [_EVAL_ROW]}))
-    plain = first_sample(benchmark, num_fewshot=0, custom_subjects=["gpqa_diamond"])
-    evaluation = benchmark.create(0, ["gpqa_diamond"], None, user_prompt_suffix="/think_short", seed=42)
-    suffixed = next(iter(evaluation.iterate_samples(1)))
-    assert suffixed.messages[-1].content == f"{plain.messages[-1].content}/think_short"

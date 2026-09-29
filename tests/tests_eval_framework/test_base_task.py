@@ -1,6 +1,5 @@
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 
@@ -8,10 +7,8 @@ from eval_framework.metrics.completion.accuracy_completion import AccuracyComple
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import BytesCompletion, SequencePositionsCompletion
 from eval_framework.metrics.efficiency.finish_reason import FinishReason
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
-from eval_framework.run import parse_args
 from eval_framework.tasks import dataset_revisions as dr
 from eval_framework.tasks.base import BaseTask, ResponseType, hf_dataset_link
-from template_formatting.formatter import Message, Role
 
 
 @pytest.mark.parametrize(
@@ -131,63 +128,6 @@ def test_base_task() -> None:
 
     task2 = MyTask2.with_overwrite(0, custom_subjects=None, custom_hf_revision=None)
     assert task2.NAME == "MyTask2"
-
-
-def test_user_prompt_suffix_only_applies_to_evaluated_user_turn() -> None:
-    class MyTask(BaseTask):
-        RESPONSE_TYPE = ResponseType.COMPLETION
-        REVISION_LOCKFILE = None
-
-        def _get_example_messages(self, item: dict[str, Any]) -> list[Message]:
-            return [
-                Message(role=Role.USER, content="fewshot question"),
-                Message(role=Role.ASSISTANT, content="fewshot answer"),
-            ]
-
-        def _get_instruction_messages(self, item: dict[str, Any]) -> list[Message]:
-            return [
-                Message(role=Role.SYSTEM, content="instruction context"),
-                Message(role=Role.USER, content="evaluated question"),
-                Message(role=Role.ASSISTANT, content="intermediate cue"),
-            ]
-
-    task = MyTask.with_overwrite(
-        1,
-        custom_subjects=None,
-        custom_hf_revision=None,
-        user_prompt_suffix="/think_short",
-    )
-
-    messages = task._get_messages({})
-
-    assert [message.content for message in messages] == [
-        "fewshot question",
-        "fewshot answer",
-        "instruction context",
-        "evaluated question/think_short",
-        "intermediate cue",
-    ]
-
-
-def test_user_prompt_suffix_rejected_for_loglikelihood_task() -> None:
-    class MyTask(BaseTask):
-        RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-        REVISION_LOCKFILE = None
-
-    with pytest.raises(ValueError, match="only supported for completion tasks"):
-        MyTask.with_overwrite(
-            0,
-            custom_subjects=None,
-            custom_hf_revision=None,
-            user_prompt_suffix="/think_short",
-        )
-
-
-def test_cli_user_prompt_suffix_parsing() -> None:
-    with patch("sys.argv", ["run.py", "--user-prompt-suffix", "/think_short"]):
-        args = parse_args()
-
-    assert args.user_prompt_suffix == "/think_short"
 
 
 def _pinned_task(lockfile: Path | None) -> type[BaseTask]:

@@ -29,7 +29,6 @@ class TaskArgs(BaseModel):
     judge_model_args: dict[str, Any] = {}
     task_subjects: list[str] | None = None
     hf_revision: str | None = None
-    user_prompt_suffix: str | None = None
     repeats: int | None = None
 
 
@@ -106,7 +105,6 @@ class DeterminedContext(EvalContext):
             "task_subjects",
             "batch_size",
             "hf_revision",
-            "user_prompt_suffix",
             "judge_model_name",
             "judge_model_args",
             "repeats",
@@ -119,9 +117,6 @@ class DeterminedContext(EvalContext):
         # Hyperparameters take precedence over core context
         llm_name = self.hparams.llm_name or self.llm_name
         judge_model_name = self.hparams.task_args.judge_model_name or self.judge_model_name
-        user_prompt_suffix = self.hparams.task_args.user_prompt_suffix
-        if user_prompt_suffix is None:
-            user_prompt_suffix = self.user_prompt_suffix
 
         llm_class = _load_model(llm_name, models_path=self.models_path)
         llm_judge_class: type[BaseLLM] | None = (
@@ -140,7 +135,6 @@ class DeterminedContext(EvalContext):
             task_name=self.hparams.task_args.task_name,
             task_subjects=self.hparams.task_args.task_subjects,
             hf_revision=self.hparams.task_args.hf_revision or self.hf_revision,
-            user_prompt_suffix=user_prompt_suffix,
             output_dir=self.hparams.output_dir,
             llm_judge_class=llm_judge_class,
             judge_model_args=self.hparams.task_args.judge_model_args or self.judge_model_args,

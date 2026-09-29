@@ -103,7 +103,6 @@ class Benchmark(ABC):
         num_fewshot: int,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
-        user_prompt_suffix: str | None = None,
         seed: int | None = None,
     ) -> Eval: ...
 

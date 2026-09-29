@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, final, override
 
 from eval_framework.answer import ExtractFromCompletion, first_match, last_match
 from eval_framework.choices import ChoiceReader
-from eval_framework.eval_kind import BenchmarkKind, EvalKind, SampleBody, WithUserPromptSuffix, assemble_messages
+from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
 from eval_framework.fewshot import FewshotExample
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.tasks.task_style import InitialPrompt
@@ -61,7 +61,7 @@ def tulu_answer_v2(n_options: int) -> ExtractFromCompletion:
 
 
 @final
-class Cot(BenchmarkKind, EvalKind):
+class Cot(EvalKind):
     """Multiple-choice chain-of-thought (see the module docstring). ``build_prompt`` renders the body,
     ``preamble`` an optional subject-templated top line, and ``candidates`` any inert scored letters kept for
     faithful parity with a loglikelihood baseline (free-form scoring ignores them)."""
@@ -78,13 +78,6 @@ class Cot(BenchmarkKind, EvalKind):
         self._build_prompt = build_prompt
         self._preamble = preamble
         self._candidates = candidates
-
-    @override
-    def bind(self, *, user_prompt_suffix: str | None) -> EvalKind:
-        # The chain of thought is completed free-form, so the suffix is supported.
-        if user_prompt_suffix is None:
-            return self
-        return WithUserPromptSuffix(self, user_prompt_suffix)
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
