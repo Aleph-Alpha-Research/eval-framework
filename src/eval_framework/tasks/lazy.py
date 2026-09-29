@@ -35,10 +35,9 @@ class Lazy(Benchmark):
         num_fewshot: int,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
-        user_prompt_suffix: str | None = None,
         seed: int | None = None,
     ) -> Eval:
-        return self._loaded_factory().create(num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix, seed)
+        return self._loaded_factory().create(num_fewshot, custom_subjects, custom_hf_revision, seed)
 
     def response_type(self) -> ResponseType:
         return self._loaded_factory().response_type()

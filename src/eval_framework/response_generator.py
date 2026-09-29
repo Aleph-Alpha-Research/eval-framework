@@ -86,7 +86,6 @@ class ResponseGenerator:
             config.num_fewshot,
             config.task_subjects,
             config.hf_revision,
-            user_prompt_suffix=config.user_prompt_suffix,
             seed=RANDOM_SEED,
         )
 
@@ -355,7 +354,6 @@ class ResponseGenerator:
             "llm_name",
             "llm_args",
             "repeats",
-            "user_prompt_suffix",
         ]
         for key in keys:
             if loaded_metadata.get(key) != current_metadata[key]:

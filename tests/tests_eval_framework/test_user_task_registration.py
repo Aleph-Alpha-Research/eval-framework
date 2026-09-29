@@ -24,7 +24,7 @@ class DummyBenchmark(Benchmark):
     def subjects(self):
         raise NotImplementedError
 
-    def create(self, num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix=None, seed=None):
+    def create(self, num_fewshot, custom_subjects, custom_hf_revision, seed=None):
         raise NotImplementedError
 
     def markdown_doc(self, formatters):
@@ -56,7 +56,7 @@ class DummyBenchmark(Benchmark):
     def subjects(self):
         raise NotImplementedError
 
-    def create(self, num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix=None, seed=None):
+    def create(self, num_fewshot, custom_subjects, custom_hf_revision, seed=None):
         raise NotImplementedError
 
     def markdown_doc(self, formatters):

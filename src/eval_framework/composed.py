@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Self, final, override
 from eval_framework.answer import AnswerPolicy, PickFromCandidates
 from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
-from eval_framework.eval_kind import BenchmarkKind, Choice, EvalKind
+from eval_framework.eval_kind import Choice, EvalKind
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotGenerator, FewShotPolicy, FewShotSplit, SampleSplit
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Completion, Error, RawCompletion
@@ -35,7 +35,6 @@ class ComposedEval(Eval):
         *,
         display_name: str,
         kind: EvalKind,
-        metrics: list[type["BaseMetric"]],
         answer: AnswerPolicy,
         loader: DatasetLoader,
         sample_split: str,
@@ -46,7 +45,6 @@ class ComposedEval(Eval):
     ) -> None:
         self._display_name = display_name
         self._kind = kind
-        self._metrics = metrics
         self._answer = answer
         self.loader = loader
         self.sample_split = sample_split
@@ -97,7 +95,7 @@ class ComposedEval(Eval):
         meta: dict[str, str | list[str]] = {
             "sample_split": self.sample_split,
             "response_type": self.get_response_type().value,
-            "metrics": [m.NAME for m in self._metrics],
+            "metrics": [m.NAME for m in self._kind.metrics()],
             "subjects": [s.label for s in self._subjects],
         }
         meta.update(self._fewshot.metadata(self.sample_split))
@@ -221,7 +219,7 @@ class ComposedBenchmark(Benchmark):
         id: str,
         display_name: str,
         subjects: SubjectsSelector,
-        kind: BenchmarkKind,
+        kind: EvalKind,
         answer: AnswerPolicy,
         sample_split: str,
         fewshot: FewShotPolicy,
@@ -243,7 +241,7 @@ class ComposedBenchmark(Benchmark):
         cls,
         *,
         id: str,
-        kind: BenchmarkKind,
+        kind: EvalKind,
         answer: AnswerPolicy,
         sample_split: str,
         fewshot: FewShotPolicy,
@@ -307,10 +305,10 @@ class ComposedBenchmark(Benchmark):
         num_fewshot: int,
         custom_subjects: list[str] | None,
         custom_hf_revision: str | None,
-        user_prompt_suffix: str | None = None,
         seed: int | None = None,
     ) -> Eval:
-        kind = self._kind.bind(user_prompt_suffix=user_prompt_suffix)
+        # Bind the shot count into a per-run generator now, before any data loads, so an unsupported request
+        # (e.g. few-shot against a 0-shot-only task) fails fast.
         fewshot = self._fewshot.bind(num_fewshot)
         subjects = self._subjects.select(custom_subjects or [])
         if custom_subjects:
@@ -318,8 +316,7 @@ class ComposedBenchmark(Benchmark):
             logger.info(f"Restricting subjects to `{labels}` for the task {self._display_name}")
         return ComposedEval(
             display_name=self._display_name,
-            kind=kind,
-            metrics=self._kind.metrics(),
+            kind=self._kind,
             answer=self._answer,
             sample_split=self.sample_split,
             fewshot=fewshot,
@@ -358,8 +355,7 @@ class ComposedBenchmark(Benchmark):
         subjects = self._subjects.select([])
         instance = ComposedEval(
             display_name=self._display_name,
-            kind=self._kind.bind(user_prompt_suffix=None),
-            metrics=self._kind.metrics(),
+            kind=self._kind,
             answer=self._answer,
             sample_split=self.sample_split,
             fewshot=self._fewshot.bind(doc.example_shots),

@@ -216,7 +216,7 @@ class _PrecedenceStub(Eval, Benchmark):
     def subjects(self) -> list:
         return ["stub"]
 
-    def create(self, num_fewshot, custom_subjects, custom_hf_revision, user_prompt_suffix=None, seed=None) -> Eval:
+    def create(self, num_fewshot, custom_subjects, custom_hf_revision, seed=None) -> Eval:
         return self
 
     def markdown_doc(self, formatters) -> str:
