@@ -54,18 +54,13 @@ def assemble_messages(
 
 
 class EvalKind(ABC):
-    """The prompt side of a task: the messages to put in front of the model and what its candidates/ground
-    truth are.
+    """The bound, per-run prompt assembler: the messages to put in front of the model and what its
+    candidates/ground truth are.
 
-    E.g. Multiple choice vs Free Form answers. A kind owns the full prompt for an item — the few-shot
-    demonstrations, its own USER turn and (optional) ASSISTANT cue, and any preamble — assembled by
-    ``messages``; ``ComposedEval`` only supplies the drawn few-shot examples and wraps the result. The answer
-    side (response type, generation bounds, extraction) is an injected ``AnswerPolicy``.
+    A kind owns the full prompt for an item — the few-shot demonstrations, its own USER turn and (optional)
+    ASSISTANT cue, and any preamble — assembled by ``messages``; ``ComposedEval`` only supplies the drawn
+    few-shot examples and wraps the result.
     """
-
-    @abstractmethod
-    def metrics(self) -> list[type["BaseMetric"]]:
-        """The metrics this kind is scored with."""
 
     @abstractmethod
     def samples(self, item: dict[str, Any]) -> list[SampleBody]:
@@ -81,14 +76,77 @@ class EvalKind(ABC):
         return {}
 
 
+class BenchmarkKind(ABC):
+    """The prompt side a benchmark author declares: the scoring metrics, and how the user-supplied run
+    arguments bind into the per-run assembler.
+
+    E.g. multiple choice vs free-form answers. The answer side (response type, generation bounds,
+    extraction) is an injected ``AnswerPolicy``.
+    """
+
+    @abstractmethod
+    def metrics(self) -> list[type["BaseMetric"]]:
+        """The metrics this kind is scored with."""
+
+    @abstractmethod
+    def bind(self, *, user_prompt_suffix: str | None) -> EvalKind:
+        """The benchmark -> eval transition: fold the user-supplied arguments this kind is concerned with
+        into the per-run assembler, or reject them. ``user_prompt_suffix`` steers a reasoning model's
+        thinking budget through a control token on the evaluated user turn (e.g. ``/think_short``); a kind
+        scored by loglikelihood over fixed candidates generates nothing — there is no trace to steer — and
+        raises."""
+
+
+def reject_user_prompt_suffix(user_prompt_suffix: str | None) -> None:
+    """The ``bind`` guard of a kind the model never completes free-form: any requested suffix is an error."""
+    if user_prompt_suffix is not None:
+        raise ValueError("user_prompt_suffix is only supported for completion tasks.")
+
+
 @final
-class Choice(EvalKind):
+class WithUserPromptSuffix(EvalKind):
+    """An assembler with the user-supplied suffix appended verbatim to the evaluated user turn — the last
+    USER message of the inner assembly (the few-shot turns precede it; the cue is an ASSISTANT turn).
+
+    Appending after assembly matches ``BaseTask``: an initial prompt folds into the *first* message, so the
+    suffix ends the evaluated turn either way."""
+
+    def __init__(self, inner: EvalKind, suffix: str) -> None:
+        self._inner = inner
+        self._suffix = suffix
+
+    @override
+    def samples(self, item: dict[str, Any]) -> list[SampleBody]:
+        return self._inner.samples(item)
+
+    @override
+    def messages(self, body: SampleBody, *, fewshot: list[FewshotExample], subject_label: str) -> list[Message]:
+        messages = self._inner.messages(body, fewshot=fewshot, subject_label=subject_label)
+        for index in reversed(range(len(messages))):
+            if messages[index].role == Role.USER:
+                suffixed = Message(role=Role.USER, content=f"{messages[index].content}{self._suffix}")
+                return [*messages[:index], suffixed, *messages[index + 1 :]]
+        raise ValueError("Cannot append user_prompt_suffix: the assembled prompt contains no user message.")
+
+    @override
+    def metadata(self) -> dict[str, str]:
+        return self._inner.metadata()
+
+
+@final
+class Choice(BenchmarkKind, EvalKind):
     """Choice-based eval kind: wraps a reader (item -> ChoiceFields) and a styler (multiple-choice /
     cloze / BPB), producing exactly one scored sample per item."""
 
     def __init__(self, reader: ChoiceReader, styler: "TaskStyler") -> None:
         self._reader = reader
         self._styler = styler
+
+    @override
+    def bind(self, *, user_prompt_suffix: str | None) -> EvalKind:
+        # The candidates are scored by loglikelihood; the model never completes the prompt free-form.
+        reject_user_prompt_suffix(user_prompt_suffix)
+        return self
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
@@ -133,7 +191,7 @@ def NoContext(item: dict[str, Any]) -> None:
 
 
 @final
-class Generative(EvalKind):
+class Generative(BenchmarkKind, EvalKind):
     """Free-form question -> answer kind: one sample per item, no scored candidates (the answer is extracted
     from the generation by the injected ``AnswerPolicy``). ``build_prompt`` frames the question, ``cue``
     primes the answer turn (``""`` for none), ``ground_truth`` derives the gold answer, and ``metrics`` are
@@ -160,6 +218,13 @@ class Generative(EvalKind):
         self._context: ItemContext = context if context is not None else NoContext
         self._initial_prompt = initial_prompt
         self._system_prompt = system_prompt
+
+    @override
+    def bind(self, *, user_prompt_suffix: str | None) -> EvalKind:
+        # Free-form completion supports the suffix; it lands on the evaluated user turn.
+        if user_prompt_suffix is None:
+            return self
+        return WithUserPromptSuffix(self, user_prompt_suffix)
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:

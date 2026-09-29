@@ -13,7 +13,13 @@ from eval_framework.answer import PickFromCandidates
 from eval_framework.benchmarks.mmlu import MMLU_SUBJECTS
 from eval_framework.composed import ComposedBenchmark, LanguageSpec
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
+from eval_framework.eval_kind import (
+    BenchmarkKind,
+    EvalKind,
+    SampleBody,
+    assemble_messages,
+    reject_user_prompt_suffix,
+)
 from eval_framework.fewshot import FewShot, FewshotExample, FewShotSplit, FunctionRenderer
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyBayesianLoglikelihood,
@@ -551,9 +557,15 @@ class _GlobalMmluDataset(DatasetPolicy):
 
 
 @final
-class _GlobalMmluChoice(EvalKind):
+class _GlobalMmluChoice(BenchmarkKind, EvalKind):
     """Localized multiple-choice loglikelihood: the preamble, the "Question"/"Answer" labels and the subject
     name are rendered in the subject's language (encoded in the subject label); scored over the four letters."""
+
+    @override
+    def bind(self, *, user_prompt_suffix: str | None) -> EvalKind:
+        # The four letters are scored by loglikelihood; the model never completes the prompt free-form.
+        reject_user_prompt_suffix(user_prompt_suffix)
+        return self
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:

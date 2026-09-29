@@ -12,7 +12,13 @@ from eval_framework.answer import PickFromCandidates
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
+from eval_framework.eval_kind import (
+    BenchmarkKind,
+    EvalKind,
+    SampleBody,
+    assemble_messages,
+    reject_user_prompt_suffix,
+)
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FewshotExample, SampleSplit
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import PartialEvalAccuracy
 from eval_framework.subjects import ListOfSubjects
@@ -46,13 +52,19 @@ class WinograndeReader(ChoiceReader):
 
 
 @final
-class PartialEval(EvalKind):
+class PartialEval(BenchmarkKind, EvalKind):
     """Winogrande partial evaluation: one item becomes two samples, each scoring the shared sentence
     suffix under one option — ``p(suffix | prefix + option)``. ``PartialEvalAccuracy`` pairs the two
     (consecutive ids) and picks the option under which the suffix is likelier."""
 
     def __init__(self) -> None:
         self._reader = WinograndeReader()
+
+    @override
+    def bind(self, *, user_prompt_suffix: str | None) -> EvalKind:
+        # The sentence suffix is scored by loglikelihood; the model never completes the prompt free-form.
+        reject_user_prompt_suffix(user_prompt_suffix)
+        return self
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
