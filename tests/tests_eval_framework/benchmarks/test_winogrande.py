@@ -53,3 +53,9 @@ def test_winogrande_partial_eval_fans_one_item_into_a_scored_pair() -> None:
     assert all(s.possible_completions == [" is too large."] for s in samples)
     assert samples[0].messages[-1].content == "The trophy doesn't fit in the suitcase because the trophy"
     assert samples[1].messages[-1].content == "The trophy doesn't fit in the suitcase because the suitcase"
+
+
+def test_user_prompt_suffix_is_rejected() -> None:
+    # Partial evaluation scores by loglikelihood; the completion-only suffix is rejected at bind time.
+    with pytest.raises(ValueError, match="only supported for completion tasks"):
+        winogrande_cloze().create(0, None, None, user_prompt_suffix="/think_short")

@@ -76,3 +76,9 @@ def test_global_mmlu_prompt_is_localized(
     ]
     assert sample.ground_truth == " B"
     assert sample.possible_completions == [" A", " B", " C", " D"]
+
+
+def test_user_prompt_suffix_is_rejected() -> None:
+    # The four letters are scored by loglikelihood; the completion-only suffix is rejected at bind time.
+    with pytest.raises(ValueError, match="only supported for completion tasks"):
+        global_mmlu().create(0, None, None, user_prompt_suffix="/think_short")

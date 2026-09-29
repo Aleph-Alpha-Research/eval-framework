@@ -5,12 +5,21 @@ from unittest.mock import patch
 import pytest
 from datasets import Dataset, DatasetDict
 
-from eval_framework.answer import PickFromCandidates
+from eval_framework.answer import ExtractFromCompletion, PickFromCandidates
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark, ComposedEval, LanguageSpec
 from eval_framework.contract import ResponseType
-from eval_framework.eval_kind import Choice
-from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotPolicy, FewShotSplit, NoFewShot, SampleSplit
+from eval_framework.eval_kind import Choice, Generative
+from eval_framework.fewshot import (
+    ChoiceRenderer,
+    FewShot,
+    FewshotExample,
+    FewShotPolicy,
+    FewShotSplit,
+    FunctionRenderer,
+    NoFewShot,
+    SampleSplit,
+)
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesLoglikelihood,
@@ -163,9 +172,11 @@ def _make_eval(
     """Build a ``ComposedEval`` for tests, defaulting to dummies for every argument the test does not provide."""
     resolved_styler = styler or _DummyStyler()
     policy = fewshot or FewShot(SampleSplit(), ChoiceRenderer(reader, resolved_styler))
+    kind = Choice(reader=reader, styler=resolved_styler)
     return ComposedEval(
         display_name=display_name,
-        kind=Choice(reader=reader, styler=resolved_styler),
+        kind=kind,
+        metrics=kind.metrics(),
         answer=PickFromCandidates(),
         loader=loader,
         sample_split=sample_split,
@@ -264,10 +275,49 @@ def test_id_stays_on_benchmark_display_name_reaches_eval() -> None:
     assert task.display_name() == "Nice Name"
 
 
-def test_user_prompt_suffix_rejected() -> None:
-    # Composed evals have no completion path, so create rejects a user prompt suffix
+def test_user_prompt_suffix_rejected_by_a_loglikelihood_kind() -> None:
+    # The kind decides at bind time; a choice kind's candidates are never completed free-form.
     with pytest.raises(ValueError, match="only supported for completion tasks"):
         _make_benchmark().create(0, None, None, user_prompt_suffix="/think_short")
+
+
+def test_user_prompt_suffix_is_appended_to_the_evaluated_user_turn() -> None:
+    # Given a free-form benchmark with a preamble, one demonstration and a cue
+    def demo(item: dict[str, Any]) -> FewshotExample:
+        return FewshotExample(prompt=item["question"], answer=item["answer"])
+
+    kind = Generative(
+        build_prompt=lambda item: item["question"],
+        cue="Answer:",
+        ground_truth=lambda item: item["answer"],
+        metrics=[],
+        initial_prompt="preamble",
+    )
+    rows = [
+        {"question": "fewshot question", "answer": "fewshot answer"},
+        {"question": "evaluated question", "answer": "evaluated answer"},
+    ]
+    benchmark = ComposedBenchmark.compose(
+        id="SuffixedTask",
+        kind=kind,
+        answer=ExtractFromCompletion(lambda completion_text: completion_text),
+        sample_split="test",
+        fewshot=FewShot(SampleSplit(), FunctionRenderer(demo)),
+        dataset_policy=DatasetStub({"test": rows}),
+        language=None,
+    )
+
+    # When it is created with a user prompt suffix
+    evaluation = benchmark.create(1, None, None, user_prompt_suffix="/think_short", seed=42)
+    sample = next(iter(evaluation.iterate_samples(1)))
+
+    # Then the suffix lands on the evaluated user turn only: demonstration, folded preamble and cue untouched
+    assert [message.content for message in sample.messages] == [
+        "preamble\n\nfewshot question",
+        "fewshot answer",
+        "evaluated question/think_short",
+        "Answer:",
+    ]
 
 
 def test_cli_user_prompt_suffix_parsing() -> None:
