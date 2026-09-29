@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.102,<2` |
+| `boto3` | `>=1.43.103,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.9.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.103` |
+| `botocore` | `1.43.104` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.1` |
 | `click` | `8.5.0` |
@@ -48,7 +48,7 @@ and first-party/internal packages are excluded.
 | `colorama` | `0.4.6` |
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
-| `filelock` | `4.0.4` |
+| `filelock` | `4.0.6` |
 | `fsspec` | `2026.6.0` |
 | `googleapis-common-protos` | `1.75.4` |
 | `h11` | `0.16.0` |
@@ -72,7 +72,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.66b0` |
 | `packaging` | `26.3` |
 | `pandas` | `3.0.6` |
-| `platformdirs` | `4.12.0` |
+| `platformdirs` | `4.12.1` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `25.0.1` |
 | `pydantic-core` | `2.46.5` |
