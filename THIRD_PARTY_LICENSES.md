@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.105 - https://github.com/boto/boto3
-- **botocore** 1.43.105 - https://github.com/boto/botocore
+- **boto3** 1.43.106 - https://github.com/boto/boto3
+- **botocore** 1.43.106 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
 - **googleapis-common-protos** 1.75.5 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
@@ -106,7 +106,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **annotated-types** 0.8.0 - https://github.com/annotated-types/annotated-types
 - **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
-- **charset-normalizer** 3.5.1 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
+- **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
 - **filelock** 4.0.7 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
@@ -220,7 +220,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.105 (Apache-2.0)
+### boto3 1.43.106 (Apache-2.0)
 
 ```text
 Apache License
@@ -401,7 +401,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.105 (Apache-2.0)
+### botocore 1.43.106 (Apache-2.0)
 
 ```text
 Apache License
@@ -607,7 +607,7 @@ one at http://mozilla.org/MPL/2.0/.
 @(#) $RCSfile: certdata.txt,v $ $Revision: 1.80 $ $Date: 2011/11/03 15:11:58 $
 ```
 
-### charset-normalizer 3.5.1 (MIT)
+### charset-normalizer 3.5.2 (MIT)
 
 ```text
 MIT License
