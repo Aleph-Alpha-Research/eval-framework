@@ -40,9 +40,9 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.105` |
+| `botocore` | `1.43.106` |
 | `certifi` | `2026.7.22` |
-| `charset-normalizer` | `3.5.1` |
+| `charset-normalizer` | `3.5.2` |
 | `click` | `8.5.0` |
 | `cloudpickle` | `3.1.2` |
 | `colorama` | `0.4.6` |
