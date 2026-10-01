@@ -14,6 +14,22 @@
 
 ### Bug Fixes
 
+## [0.14.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.12...v0.14.0) (2026-10-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* user-prompt-suffix removed
+
+### Features
+
+* user-prompt-suffix removed ([2c9ea92](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2c9ea9290190beba303ea065a5aca5a5ea54eb39))
+
+
+### Bug Fixes
+
+* composed benchmarks respect user prompt suffix ([995728c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/995728c258d5af8dd165159576e3c04d659141e3))
+
 ## [0.13.12](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.13.11...v0.13.12) (2026-09-29)
 
 
