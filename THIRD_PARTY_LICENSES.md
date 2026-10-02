@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.106 - https://github.com/boto/boto3
-- **botocore** 1.43.106 - https://github.com/boto/botocore
+- **boto3** 1.43.107 - https://github.com/boto/boto3
+- **botocore** 1.43.107 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
 - **googleapis-common-protos** 1.75.5 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
@@ -81,7 +81,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **multiprocess** 0.70.19 - https://github.com/uqfoundation/multiprocess
 - **pandas** 3.0.6 - https://pandas.pydata.org
 - **protobuf** 7.36.2 - https://developers.google.com/protocol-buffers/
-- **python-dotenv** 1.2.3 - https://github.com/theskumar/python-dotenv
+- **python-dotenv** 1.2.4 - https://github.com/theskumar/python-dotenv
 - **scipy** 1.18.1 - https://scipy.org/
 - **sympy** 1.14.0 - https://sympy.org
 
@@ -107,7 +107,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.0.7 - https://github.com/tox-dev/py-filelock
+- **filelock** 4.0.9 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -139,7 +139,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## UNKNOWN
 
-- **llm-sandbox** 0.3.44 - https://vndee.github.io/llm-sandbox/
+- **llm-sandbox** 0.3.45 - https://vndee.github.io/llm-sandbox/
 
 ## Full license texts
 
@@ -220,7 +220,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.106 (Apache-2.0)
+### boto3 1.43.107 (Apache-2.0)
 
 ```text
 Apache License
@@ -401,7 +401,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.106 (Apache-2.0)
+### botocore 1.43.107 (Apache-2.0)
 
 ```text
 Apache License
@@ -1001,7 +1001,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### filelock 4.0.7 (MIT)
+### filelock 4.0.9 (MIT)
 
 ```text
 MIT License
@@ -2364,7 +2364,7 @@ Apache License
    limitations under the License.
 ```
 
-### llm-sandbox 0.3.44 (UNKNOWN)
+### llm-sandbox 0.3.45 (UNKNOWN)
 
 ```text
 MIT License
@@ -17490,7 +17490,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The above BSD License Applies to all code, even that also covered by Apache 2.0.
 ```
 
-### python-dotenv 1.2.3 (BSD-3-Clause)
+### python-dotenv 1.2.4 (BSD-3-Clause)
 
 ```text
 Copyright (c) 2014, Saurabh Kumar (python-dotenv), 2013, Ted Tieken (django-dotenv-rw), 2013, Jacob Kaplan-Moss (django-dotenv)
