@@ -55,6 +55,7 @@ class OpenAIModel(BaseLLM):
     LLM_NAME: str | None = None
     DEFAULT_FORMATTER: Callable[[], BaseFormatter] | None = None
     BYTES_PER_TOKEN: float = 4.0  # rule of thumb according to https://platform.openai.com/tokenizer
+    SUPPORTS_CONCURRENT_REQUESTS = True  # the OpenAI client is thread-safe
 
     def __init__(
         self,
@@ -267,6 +268,10 @@ class OpenAIModel(BaseLLM):
                     reasoning=reasoning,
                     finish_reason=choice.finish_reason,
                 )
+
+        if len(messages) <= 1:
+            # Avoid thread-pool setup per request when the response generator already drives concurrency.
+            return [_process_one(m) for m in messages]
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = list(executor.map(_process_one, messages))
