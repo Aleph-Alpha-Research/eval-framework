@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.107 - https://github.com/boto/boto3
-- **botocore** 1.43.107 - https://github.com/boto/botocore
+- **boto3** 1.43.108 - https://github.com/boto/boto3
+- **botocore** 1.43.108 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
 - **googleapis-common-protos** 1.75.5 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
@@ -220,7 +220,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.107 (Apache-2.0)
+### boto3 1.43.108 (Apache-2.0)
 
 ```text
 Apache License
@@ -401,7 +401,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.107 (Apache-2.0)
+### botocore 1.43.108 (Apache-2.0)
 
 ```text
 Apache License
