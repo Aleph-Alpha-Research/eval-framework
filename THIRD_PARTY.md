@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.105,<2` |
+| `boto3` | `>=1.43.106,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.9.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -48,7 +48,7 @@ and first-party/internal packages are excluded.
 | `colorama` | `0.4.6` |
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
-| `filelock` | `4.0.9` |
+| `filelock` | `4.0.10` |
 | `fsspec` | `2026.6.0` |
 | `googleapis-common-protos` | `1.75.5` |
 | `h11` | `0.16.0` |
@@ -72,7 +72,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.66b0` |
 | `packaging` | `26.3` |
 | `pandas` | `3.0.6` |
-| `platformdirs` | `4.12.2` |
+| `platformdirs` | `4.12.3` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `25.0.1` |
 | `pydantic-core` | `2.46.5` |
@@ -86,6 +86,6 @@ and first-party/internal packages are excluded.
 | `tqdm` | `4.70.1` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.4` |
-| `tzdata` | `2026.4` |
+| `tzdata` | `2026.5` |
 | `urllib3` | `2.8.0` |
 | `xxhash` | `4.0.1` |
