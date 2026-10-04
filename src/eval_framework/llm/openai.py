@@ -4,7 +4,6 @@ import math
 import os
 import traceback
 from collections.abc import Callable, Sequence
-from functools import partial
 
 import tiktoken
 from openai import OpenAI, omit
@@ -27,7 +26,7 @@ from eval_framework.shared.types import (
     RawLoglikelihood,
 )
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFFormatter, Message, Role
+from template_formatting.formatter import BaseFormatter, Message, Role
 
 logger = logging.getLogger(__name__)
 
@@ -478,40 +477,3 @@ class DeepseekModel(OpenAIModel):
         encoder = self._encoder
         assert encoder is not None
         return len(encoder.encode(text))  # type: ignore[union-attr]
-
-
-### Model Aliases ###
-
-
-class OpenAI_gpt_4o_mini(OpenAIModel):
-    LLM_NAME = "gpt-4o-mini-2024-07-18"
-
-
-class OpenAI_gpt_4o_mini_with_ConcatFormatter(OpenAIModel):
-    LLM_NAME = "gpt-4o-mini-2024-07-18"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
-class OpenAI_davinci_002(OpenAIModel):
-    LLM_NAME = "davinci-002"
-    DEFAULT_FORMATTER = ConcatFormatter
-
-
-class Deepseek_reasoner(DeepseekModel):
-    LLM_NAME = "deepseek-reasoner"  # DeepSeek-V3.2-Exp (Thinking Mode)
-    # multi-round conversations for reasoning model documented here:
-    # https://api-docs.deepseek.com/guides/reasoning_model#api-example
-    # does not support completion API
-
-
-class Deepseek_chat(DeepseekModel):
-    LLM_NAME = "deepseek-chat"  # DeepSeek-V3.2-Exp (Non-thinking Mode)
-
-
-class Deepseek_chat_with_formatter(DeepseekModel):
-    LLM_NAME = "deepseek-chat"  # DeepSeek-V3.2-Exp (Non-thinking Mode)
-    DEFAULT_FORMATTER = partial(HFFormatter, "deepseek-ai/DeepSeek-V3.2-Exp")
-    """
-        <｜begin▁of▁sentence｜><｜User｜>Question: What color is the night sky?
-        <｜Assistant｜></think>Answer:
-    """
