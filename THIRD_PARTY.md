@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.106,<2` |
+| `boto3` | `>=1.43.108,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.9.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -25,7 +25,7 @@ and first-party/internal packages are excluded.
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.13.5,<3` |
-| `python-dotenv` | `>=1.2.3,<2` |
+| `python-dotenv` | `>=1.2.4,<2` |
 | `python-iso639` | `>=2026.7.23` |
 | `pyyaml` | `>=6.0.3,<7` |
 | `scipy` | `>=1.18.1,<2` |
@@ -48,7 +48,7 @@ and first-party/internal packages are excluded.
 | `colorama` | `0.4.6` |
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
-| `filelock` | `4.0.10` |
+| `filelock` | `4.0.12` |
 | `fsspec` | `2026.6.0` |
 | `googleapis-common-protos` | `1.75.5` |
 | `h11` | `0.16.0` |
@@ -80,7 +80,7 @@ and first-party/internal packages are excluded.
 | `referencing` | `0.37.0` |
 | `regex` | `2026.9.29` |
 | `requests` | `2.34.2` |
-| `rpds-py` | `2026.6.3` |
+| `rpds-py` | `2026.9.1` |
 | `s3transfer` | `0.19.2` |
 | `six` | `1.17.0` |
 | `tqdm` | `4.70.1` |
