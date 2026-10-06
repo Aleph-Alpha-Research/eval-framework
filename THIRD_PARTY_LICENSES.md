@@ -107,7 +107,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.0.10 - https://github.com/tox-dev/py-filelock
+- **filelock** 4.0.12 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -117,7 +117,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **pydantic_core** 2.46.5 - https://github.com/pydantic
 - **PyYAML** 6.0.3 - https://pyyaml.org/
 - **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
-- **rpds-py** 2026.6.3 - https://github.com/crate-py/rpds
+- **rpds-py** 2026.9.1 - https://github.com/crate-py/rpds
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **typing-inspection** 0.4.4 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.8.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
@@ -1001,7 +1001,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### filelock 4.0.10 (MIT)
+### filelock 4.0.12 (MIT)
 
 ```text
 MIT License
@@ -18158,7 +18158,7 @@ Apache License
       of your accepting any such warranty or additional liability.
 ```
 
-### rpds-py 2026.6.3 (MIT)
+### rpds-py 2026.9.1 (MIT)
 
 ```text
 Copyright (c) 2023 Julian Berman
