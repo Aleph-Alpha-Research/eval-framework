@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.14.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.14.3...v0.14.4) (2026-10-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency boto3 to &gt;=1.43.108,&lt;2 ([ecbff6c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ecbff6ca631750f3b4ac0046c8803f0911f5ec34))
+* **deps:** update dependency openai to &gt;=3.24.0,&lt;4 ([2b4d6fa](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2b4d6fa8ee7ad4c22d813ee594363165bd44e624))
+
 ## [0.14.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.14.2...v0.14.3) (2026-10-05)
 
 
