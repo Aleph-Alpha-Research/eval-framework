@@ -31,7 +31,7 @@ The eval-framework follows a modular architecture with three main extensible bas
    - New tasks should ideally contain a TASK_STYLER which assembles the prompt from underlying messages. There should be a very good reason to not have this.
    - Three task styles: `COMPLETION`, `LOGLIKELIHOODS`, and LLM-judge-based
    - Requires: `NAME`, `DATASET_PATH`, `SUBJECTS`, and scoring methods
-   - Loaded dynamically from `src/eval_framework/tasks/benchmarks/` directory
+   - Loaded dynamically from `src/eval_framework/benchmarks/` directory
 
 3. **BaseMetric** (`src/eval_framework/metrics/base.py`) - Evaluation metrics
    - Computes scores for task responses (accuracy, BLEU, F1, etc.)
@@ -105,7 +105,8 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 ## Development Patterns
 
 **Adding a New Task**
-1. Create class inheriting from `BaseTask` in `src/eval_framework/tasks/benchmarks/`
+
+1. Create class inheriting from `BaseTask` in `src/eval_framework/benchmarks/`
 2. Implement required class attributes: `NAME`, `DATASET_PATH`, `SAMPLE_SPLIT`, `FEWSHOT_SPLIT`, `SUBJECTS`
 3. If using custom metrics, inherit from `BaseMetric`
 4. Task is discovered via registry; add it to `task_names.py` to be discoverable.

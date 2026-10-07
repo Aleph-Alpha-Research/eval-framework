@@ -275,18 +275,18 @@ class GeographyQATask(BaseTask[str]):
 Add a registration call for your new benchmark to `register_all_tasks` in `src/eval_framework/tasks/task_names.py`:
 
 ```python
-register_lazy_task("eval_framework.tasks.benchmarks.geographyqa.GeographyQA")
+register_lazy_task("eval_framework.benchmarks.geographyqa.GeographyQA")
 ```
 
 The task will now be available through `registry()["GeographyQA"]`.
 
 ### Testing your benchmark
 
-Add a per-benchmark test file at `tests/tests_eval_framework/tasks/benchmarks/test_<module>.py` (for example `test_geographyqa.py` next to `src/eval_framework/tasks/benchmarks/geographyqa.py`). Use `get_task_names_for_module` from `tests.tests_eval_framework.tasks.benchmarks.utils` to parametrize formatter hash tests over the tasks registered in that module.
+Add a per-benchmark test file at `tests/tests_eval_framework/benchmarks/test_<module>.py` (for example `test_geographyqa.py` next to `src/eval_framework/benchmarks/geographyqa.py`). Use `get_task_names_for_module` from `tests.tests_eval_framework.tasks.benchmarks.utils` to parametrize formatter hash tests over the tasks registered in that module.
 
 > [!TIP]
 > CI runs formatter hash tests when task-related paths change. During development, target only your benchmark file or task name:
-> `uv run pytest tests/tests_eval_framework/tasks/benchmarks/test_geographyqa.py -m formatter_hash -k "YourTaskName"`
+> `uv run pytest tests/tests_eval_framework/benchmarks/test_geographyqa.py -m formatter_hash -k "YourTaskName"`
 
 #### Automatic Formatting Tests
 
@@ -303,12 +303,12 @@ When you add a new task:
 Run the formatter hash test only for your newly created task (replace `YourTaskName` and the test file as needed):
 
 ```bash
-uv run pytest tests/tests_eval_framework/tasks/benchmarks/test_geographyqa.py -m formatter_hash -k "YourTaskName"
+uv run pytest tests/tests_eval_framework/benchmarks/test_geographyqa.py -m formatter_hash -k "YourTaskName"
 ```
 
 #### Custom Task Tests (Optional)
 
-If your benchmark has specific logic that needs testing, add tests to `tests/tests_eval_framework/tasks/benchmarks/test_<module>.py` or a dedicated file in that directory.
+If your benchmark has specific logic that needs testing, add tests to `tests/tests_eval_framework/benchmarks/test_<module>.py` or a dedicated file in that directory.
 
 ### Update benchmark documentation
 
