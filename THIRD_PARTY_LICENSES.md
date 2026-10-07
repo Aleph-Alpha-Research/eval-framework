@@ -30,19 +30,19 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
 - **googleapis-common-protos** 1.75.5 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
-- **hf-xet** 1.6.0 - https://github.com/huggingface/xet-core
+- **hf-xet** 1.7.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 0.36.2 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.3 - https://www.nltk.org/
-- **opentelemetry-api** 1.45.0 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
-- **opentelemetry-exporter-http-transport** 0.66b0 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
-- **opentelemetry-exporter-otlp-common** 0.66b0 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
-- **opentelemetry-exporter-otlp-proto-common** 1.45.0 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common
-- **opentelemetry-exporter-otlp-proto-http** 1.45.0 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-http
-- **opentelemetry-proto** 1.45.0 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto
-- **opentelemetry-sdk** 1.45.0 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk
-- **opentelemetry-semantic-conventions** 0.66b0 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions
+- **opentelemetry-api** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
+- **opentelemetry-exporter-http-transport** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
+- **opentelemetry-exporter-otlp-common** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
+- **opentelemetry-exporter-otlp-proto-common** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common
+- **opentelemetry-exporter-otlp-proto-http** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-http
+- **opentelemetry-proto** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto
+- **opentelemetry-sdk** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk
+- **opentelemetry-semantic-conventions** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions
 - **pyarrow** 25.0.1 - https://arrow.apache.org/
 - **python-iso639** 2026.7.23 - https://github.com/jacksonllee/iso639
 - **requests** 2.34.2 - https://github.com/psf/requests
@@ -1500,7 +1500,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### hf-xet 1.6.0 (Apache-2.0)
+### hf-xet 1.7.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -11767,7 +11767,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### opentelemetry-api 1.45.0 (Apache-2.0)
+### opentelemetry-api 1.45.1 (Apache-2.0)
 
 ```text
 Apache License
@@ -11973,7 +11973,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-exporter-http-transport 0.66b0 (Apache-2.0)
+### opentelemetry-exporter-http-transport 0.66b1 (Apache-2.0)
 
 ```text
 Apache License
@@ -12179,7 +12179,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-exporter-otlp-common 0.66b0 (Apache-2.0)
+### opentelemetry-exporter-otlp-common 0.66b1 (Apache-2.0)
 
 ```text
 Apache License
@@ -12385,7 +12385,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-exporter-otlp-proto-common 1.45.0 (Apache-2.0)
+### opentelemetry-exporter-otlp-proto-common 1.45.1 (Apache-2.0)
 
 ```text
 Apache License
@@ -12591,7 +12591,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-exporter-otlp-proto-http 1.45.0 (Apache-2.0)
+### opentelemetry-exporter-otlp-proto-http 1.45.1 (Apache-2.0)
 
 ```text
 Apache License
@@ -12797,7 +12797,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-proto 1.45.0 (Apache-2.0)
+### opentelemetry-proto 1.45.1 (Apache-2.0)
 
 ```text
 Apache License
@@ -13003,7 +13003,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-sdk 1.45.0 (Apache-2.0)
+### opentelemetry-sdk 1.45.1 (Apache-2.0)
 
 ```text
 Apache License
@@ -13209,7 +13209,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-semantic-conventions 0.66b0 (Apache-2.0)
+### opentelemetry-semantic-conventions 0.66b1 (Apache-2.0)
 
 ```text
 Apache License
