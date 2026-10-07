@@ -282,7 +282,7 @@ The task will now be available through `registry()["GeographyQA"]`.
 
 ### Testing your benchmark
 
-Add a per-benchmark test file at `tests/tests_eval_framework/benchmarks/test_<module>.py` (for example `test_geographyqa.py` next to `src/eval_framework/benchmarks/geographyqa.py`). Use `get_task_names_for_module` from `tests.tests_eval_framework.tasks.benchmarks.utils` to parametrize formatter hash tests over the tasks registered in that module.
+Add a per-benchmark test file at `tests/tests_eval_framework/benchmarks/test_<module>.py` (for example `test_geographyqa.py` next to `src/eval_framework/benchmarks/geographyqa.py`). Parametrize a `formatter_hash` test over your module's benchmark list and call `assert_benchmark_formatter_hash` from `tests.tests_eval_framework.benchmarks.utils` (e.g. see `test_mmlu.py`).
 
 > [!TIP]
 > CI runs formatter hash tests when task-related paths change. During development, target only your benchmark file or task name:
@@ -290,9 +290,9 @@ Add a per-benchmark test file at `tests/tests_eval_framework/benchmarks/test_<mo
 
 #### Automatic Formatting Tests
 
-Benchmark formatter tests use `@pytest.mark.formatter_hash` and shared helpers in `tests/tests_eval_framework/tasks/benchmarks/utils.py`. If your task needs non-default initialization arguments (for example, a specific `num_fewshot`), pass them via `run_formatter_hash_test(..., num_fewshot=...)`.
+Benchmark formatter tests use `@pytest.mark.formatter_hash` and shared helpers in `tests/tests_eval_framework/benchmarks/utils.py`. If your task needs non-default initialization arguments (for example, a specific `num_fewshot`), pass them via `assert_benchmark_formatter_hash(..., num_fewshot=...)`.
 
-The expected formatter outputs are tracked as hashes in `tests/tests_eval_framework/tasks/benchmarks/task-prompts-hashes.json`.
+The expected formatter outputs are tracked as hashes in `tests/tests_eval_framework/benchmarks/task-prompts-hashes.json`.
 
 When you add a new task:
 
