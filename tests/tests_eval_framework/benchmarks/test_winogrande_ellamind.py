@@ -22,8 +22,7 @@ from eval_framework.benchmarks.winogrande_ellamind import (
 )
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
-from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
-from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
+from tests.tests_eval_framework.benchmarks.utils import DatasetStub, assert_benchmark_formatter_hash, first_sample
 
 
 @pytest.mark.formatter_hash

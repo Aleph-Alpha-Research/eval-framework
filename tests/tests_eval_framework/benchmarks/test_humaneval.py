@@ -30,8 +30,7 @@ from template_formatting.formatter import (
     NoStripConcatFormatter,
     Role,
 )
-from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
-from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
+from tests.tests_eval_framework.benchmarks.utils import DatasetStub, assert_benchmark_formatter_hash, first_sample
 
 # The shot count each variant's recorded hash was taken with (the OLMES 3-shot recommendation; everything
 # else at the harness default of 1).

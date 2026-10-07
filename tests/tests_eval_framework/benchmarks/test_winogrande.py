@@ -19,8 +19,7 @@ from template_formatting.formatter import (
     Llama3Formatter,
     NoStripConcatFormatter,
 )
-from tests.tests_eval_framework.benchmarks.utils import DatasetStub
-from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
+from tests.tests_eval_framework.benchmarks.utils import DatasetStub, assert_benchmark_formatter_hash
 
 
 @pytest.mark.formatter_hash
