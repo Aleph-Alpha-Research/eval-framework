@@ -146,7 +146,6 @@ jobs:
             task_related:
               - 'src/eval_framework/tasks/**'
               - 'src/eval_framework/benchmarks/**'
-              - 'tests/tests_eval_framework/tasks/benchmarks/**'
               - 'tests/tests_eval_framework/benchmarks/**'
               - 'src/template_formatting/**'
 
