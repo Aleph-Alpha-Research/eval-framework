@@ -134,7 +134,7 @@ class BaseHFLLM(BaseLLM):
 
     def __del__(self) -> None:
         if hasattr(self, "model"):
-            num_gpus = len(cast(dict[str, Any], self.model.hf_device_map))
+            num_gpus = len(getattr(self.model, "hf_device_map", {}))
             del self.model
             if num_gpus > 1 and torch.distributed.is_initialized():
                 torch.distributed.destroy_process_group()
