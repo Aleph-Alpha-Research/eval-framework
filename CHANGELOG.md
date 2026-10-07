@@ -14,6 +14,17 @@
 
 ### Bug Fixes
 
+## [0.15.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.14.4...v0.15.0) (2026-10-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **llm:** remove hardcoded OpenAI and DeepSeek model aliases
+
+### Code Refactoring
+
+* **llm:** remove hardcoded OpenAI and DeepSeek model aliases ([16199e2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/16199e237b1c49d256bcdeb5c1f6c78d16c839b1))
+
 ## [0.14.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.14.3...v0.14.4) (2026-10-06)
 
 
