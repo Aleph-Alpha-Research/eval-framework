@@ -3,6 +3,9 @@
 A benchmark's dataset is an injected policy, so a test can build the real benchmark over a fictional
 in-memory dataset and assert its assembled messages — no download, and ``composed.py`` stays an
 implementation detail.
+
+Hash helpers use the real Hugging Face data and compare the hash of the formatted prompt plus its completions and ground
+truth against ``task-prompts-hashes.json`` to indicate prompt changes.
 """
 
 import random
@@ -71,7 +74,7 @@ def assert_benchmark_formatter_hash(
 ) -> None:
     """Pin one benchmark x formatter against its recorded hash, keyed by ``benchmark.id()``. No registry: the
     caller parametrises over the benchmark objects directly."""
-    sample = _sample_for_hash(benchmark, label=repr(benchmark.id()), num_fewshot=num_fewshot)
+    sample = _sample_for_hash(benchmark, num_fewshot=num_fewshot)
     assert_hash_string(
         task_name=benchmark.id(),
         suffix_key=formatter_cls.__name__,
@@ -79,7 +82,7 @@ def assert_benchmark_formatter_hash(
     )
 
 
-def _sample_for_hash(benchmark: Benchmark, *, label: str, num_fewshot: int) -> Sample:
+def _sample_for_hash(benchmark: Benchmark, *, num_fewshot: int) -> Sample:
     """First assembled sample (full HF data, seed 42), retrying 0-shot if the requested shot count can't
     be created."""
     _seed_for_determinism()
@@ -87,6 +90,7 @@ def _sample_for_hash(benchmark: Benchmark, *, label: str, num_fewshot: int) -> S
         instance = benchmark.create(num_fewshot=num_fewshot, custom_subjects=None, custom_hf_revision=None, seed=42)
         return next(iter(instance.iterate_samples(1)))
     except Exception as e:
+        label = repr(benchmark.id())
         print(f"Failed to instantiate {label}: {e}; retrying with 0-shot", file=sys.stderr)
         try:
             instance = benchmark.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=42)
