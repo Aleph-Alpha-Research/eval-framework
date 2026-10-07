@@ -31,8 +31,7 @@ from template_formatting.formatter import (
     NoStripConcatFormatter,
     Role,
 )
-from tests.tests_eval_framework.benchmarks.utils import DatasetStub, first_sample
-from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
+from tests.tests_eval_framework.benchmarks.utils import DatasetStub, assert_benchmark_formatter_hash, first_sample
 
 # MBPP_OLMES's recorded hash is 3-shot; the rest were recorded at the harness default of 1 (the fixed 3-shot
 # EvalPlus block ignores the requested count anyway).

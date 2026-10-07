@@ -3,7 +3,7 @@ import pytest
 from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK, ArcDeReader
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter
-from tests.tests_eval_framework.tasks.benchmarks.utils import assert_benchmark_formatter_hash
+from tests.tests_eval_framework.benchmarks.utils import assert_benchmark_formatter_hash
 
 
 @pytest.mark.formatter_hash

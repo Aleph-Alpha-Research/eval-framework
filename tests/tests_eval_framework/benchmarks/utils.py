@@ -1,4 +1,4 @@
-"""Test helpers for specifying composed benchmarks offline.
+"""Test helpers for offline prompt tests and formatter hash pinning tests.
 
 A benchmark's dataset is an injected policy, so a test can build the real benchmark over a fictional
 in-memory dataset and assert its assembled messages — no download, and ``composed.py`` stays an
