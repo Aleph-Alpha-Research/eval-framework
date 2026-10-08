@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.108` |
+| `botocore` | `1.43.109` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.2` |
 | `click` | `8.5.0` |
@@ -72,7 +72,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.66b1` |
 | `packaging` | `26.3` |
 | `pandas` | `3.0.6` |
-| `platformdirs` | `4.12.3` |
+| `platformdirs` | `4.12.4` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `25.0.1` |
 | `pydantic-core` | `2.46.5` |
