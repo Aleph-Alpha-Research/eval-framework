@@ -14,6 +14,14 @@
 
 ### Bug Fixes
 
+## [0.15.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.15.0...v0.15.1) (2026-10-08)
+
+
+### Documentation
+
+* update hash directory ([5ea00ee](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5ea00eec14cfb4f90a403558e59a6fabb33a9428))
+* update task/benchmark paths ([e559d97](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e559d97485a8e0cfc4cc520e1d9804049e172a9f))
+
 ## [0.15.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.14.4...v0.15.0) (2026-10-07)
 
 
