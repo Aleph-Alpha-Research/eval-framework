@@ -13,11 +13,11 @@ from tokenizers import Tokenizer
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
+    PreTrainedTokenizerBase,
     StoppingCriteria,
     StoppingCriteriaList,
 )
 from transformers.models.gpt2 import GPT2Tokenizer
-from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.errors import raise_errors
@@ -134,7 +134,7 @@ class BaseHFLLM(BaseLLM):
 
     def __del__(self) -> None:
         if hasattr(self, "model"):
-            num_gpus = len(cast(dict[str, Any], self.model.hf_device_map))
+            num_gpus = len(getattr(self.model, "hf_device_map", {}))
             del self.model
             if num_gpus > 1 and torch.distributed.is_initialized():
                 torch.distributed.destroy_process_group()
@@ -238,8 +238,11 @@ class BaseHFLLM(BaseLLM):
 
     def _model_generate(self, redis_key: Any, prompt_token_count: int, **kwargs: Any) -> tuple[str, int]:
         with torch.no_grad():
-            outputs = self.model.generate(**kwargs)[0]
+            # transformers' `GenerativePreTrainedModel` protocol doesn't match the inferred `_BaseModelWithGenerate`
+            outputs = self.model.generate(**kwargs)[0]  # type: ignore[misc]
+
             completion = self.tokenizer.decode(outputs[prompt_token_count:], skip_special_tokens=True)
+            completion = cast(str, completion)  # for mypy: `completion` is a string since outputs is a 1-D tensor.
 
             if kwargs["stopping_criteria"][0].__class__.__name__ == "StopSequenceCriteria":
                 for stop_sequence in kwargs["stopping_criteria"][0].stop_sequences:
@@ -320,7 +323,8 @@ class BaseHFLLM(BaseLLM):
             span_lp = tok_lp[-num_choice_tokens:].tolist()
             span_ids = target_ids[-num_choice_tokens:].tolist()
             bits = [float(-lp / math.log(2)) for lp in span_lp]
-            byte_lens = [len(self.tokenizer.decode([token_id]).encode("utf-8")) for token_id in span_ids]
+            # cast for mypy: decode of a single sequence returns a string
+            byte_lens = [len(cast(str, self.tokenizer.decode([token_id])).encode("utf-8")) for token_id in span_ids]
             return PerTokenScores(bits=bits, byte_lens=byte_lens)
 
     @property
