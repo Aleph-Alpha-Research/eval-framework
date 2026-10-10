@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.110` |
+| `botocore` | `1.43.111` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.2` |
 | `click` | `8.5.0` |
@@ -48,7 +48,7 @@ and first-party/internal packages are excluded.
 | `colorama` | `0.4.6` |
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
-| `filelock` | `4.0.12` |
+| `filelock` | `4.1.0` |
 | `fsspec` | `2026.6.0` |
 | `googleapis-common-protos` | `1.75.5` |
 | `h11` | `0.16.0` |
@@ -74,7 +74,7 @@ and first-party/internal packages are excluded.
 | `pandas` | `3.0.6` |
 | `platformdirs` | `4.12.4` |
 | `protobuf` | `7.36.2` |
-| `pyarrow` | `25.0.1` |
+| `pyarrow` | `26.0.0` |
 | `pydantic-core` | `2.50.0` |
 | `python-dateutil` | `2.9.0.post0` |
 | `referencing` | `0.37.0` |
