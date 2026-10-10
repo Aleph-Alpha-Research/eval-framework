@@ -25,8 +25,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0
 
-- **boto3** 1.43.110 - https://github.com/boto/boto3
-- **botocore** 1.43.110 - https://github.com/boto/botocore
+- **boto3** 1.43.111 - https://github.com/boto/boto3
+- **botocore** 1.43.111 - https://github.com/boto/botocore
 - **datasets** 5.0.1 - https://github.com/huggingface/datasets
 - **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
 - **googleapis-common-protos** 1.75.5 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
@@ -43,7 +43,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **opentelemetry-proto** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto
 - **opentelemetry-sdk** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk
 - **opentelemetry-semantic-conventions** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions
-- **pyarrow** 25.0.1 - https://arrow.apache.org/
+- **pyarrow** 26.0.0 - https://arrow.apache.org/
 - **python-iso639** 2026.7.23 - https://github.com/jacksonllee/iso639
 - **requests** 2.34.2 - https://github.com/psf/requests
 - **s3transfer** 0.19.2 - https://github.com/boto/s3transfer
@@ -107,7 +107,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.0.12 - https://github.com/tox-dev/py-filelock
+- **filelock** 4.1.0 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -220,7 +220,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### boto3 1.43.110 (Apache-2.0)
+### boto3 1.43.111 (Apache-2.0)
 
 ```text
 Apache License
@@ -401,7 +401,7 @@ Apache License
    END OF TERMS AND CONDITIONS
 ```
 
-### botocore 1.43.110 (Apache-2.0)
+### botocore 1.43.111 (Apache-2.0)
 
 ```text
 Apache License
@@ -1001,7 +1001,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### filelock 4.0.12 (MIT)
+### filelock 4.1.0 (MIT)
 
 ```text
 MIT License
@@ -14605,7 +14605,7 @@ the pattern ``psycopg/adapter*.{h,c}`` and ``psycopg/microprotocol*.{h,c}``:
  3. This notice may not be removed or altered from any source distribution.
 ```
 
-### pyarrow 25.0.1 (Apache-2.0)
+### pyarrow 26.0.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -15230,48 +15230,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
---------------------------------------------------------------------------------
-
-The files in cpp/src/arrow/vendored/uriparser/ have the following license
-(BSD 3-Clause License)
-
-uriparser - RFC 3986 URI parsing library
-
-Copyright (C) 2007, Weijia Song <songweijia@gmail.com>
-Copyright (C) 2007, Sebastian Pipping <sebastian@pipping.org>
-All rights reserved.
-
-Redistribution  and use in source and binary forms, with or without
-modification,  are permitted provided that the following conditions
-are met:
-
-    * Redistributions   of  source  code  must  retain  the   above
-      copyright  notice, this list of conditions and the  following
-      disclaimer.
-
-    * Redistributions  in  binary  form must  reproduce  the  above
-      copyright  notice, this list of conditions and the  following
-      disclaimer   in  the  documentation  and/or  other  materials
-      provided with the distribution.
-
-    * Neither  the name of the <ORGANIZATION> nor the names of  its
-      contributors  may  be  used to endorse  or  promote  products
-      derived  from  this software without specific  prior  written
-      permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT  NOT
-LIMITED  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND  FITNESS
-FOR  A  PARTICULAR  PURPOSE ARE DISCLAIMED. IN NO EVENT  SHALL  THE
-COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL,    SPECIAL,   EXEMPLARY,   OR   CONSEQUENTIAL   DAMAGES
-(INCLUDING,  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES;  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-STRICT  LIABILITY,  OR  TORT (INCLUDING  NEGLIGENCE  OR  OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-OF THE POSSIBILITY OF SUCH DAMAGE.
 
 --------------------------------------------------------------------------------
 
