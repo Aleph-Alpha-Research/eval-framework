@@ -326,7 +326,9 @@ class HFFormatter(BaseFormatter):
                 }
             )
 
-        return self.tokenizer.apply_chat_template(hf_chat, **template_kwargs)
+        formatted = self.tokenizer.apply_chat_template(hf_chat, **template_kwargs)
+        assert isinstance(formatted, str)  # tokenize=False yields the rendered template as a string
+        return formatted
 
 
 class ReasoningFormatter(BaseFormatter):

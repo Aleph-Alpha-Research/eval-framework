@@ -6,18 +6,18 @@ import warnings
 from collections.abc import Callable, Sequence
 from functools import partial
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Protocol
 
 import torch
-from tokenizers import Tokenizer
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
+    PreTrainedConfig,
+    PreTrainedTokenizerBase,
     StoppingCriteria,
     StoppingCriteriaList,
 )
 from transformers.models.gpt2 import GPT2Tokenizer
-from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.errors import raise_errors
@@ -36,8 +36,24 @@ from template_formatting.formatter import BaseFormatter, ConcatFormatter, HFForm
 logger = logging.getLogger(__name__)
 
 
+class CausalLM(Protocol):
+    """The part of a loaded causal LM that ``BaseHFLLM`` relies on.
+
+    ``AutoModelForCausalLM.from_pretrained`` is annotated with a ``TYPE_CHECKING``-only class whose ``generate``
+    cannot be called under mypy: transformers 5.19 declares ``device`` and ``dtype`` as settable members of its
+    ``GenerativePreTrainedModel`` protocol, while ``PreTrainedModel`` exposes them as read-only properties.
+    Narrowing to this protocol at assignment keeps the call sites type-checked against what is actually used.
+    """
+
+    config: PreTrainedConfig
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any: ...
+
+    def generate(self, *args: Any, **kwargs: Any) -> Any: ...
+
+
 class StopSequenceCriteria(StoppingCriteria):
-    def __init__(self, tokenizer: Tokenizer, stop_sequences: list[str], prompt_token_count: int) -> None:
+    def __init__(self, tokenizer: PreTrainedTokenizerBase, stop_sequences: list[str], prompt_token_count: int) -> None:
         self.tokenizer = tokenizer
         self.stop_sequences = stop_sequences
         self.prompt_token_count = prompt_token_count
@@ -62,7 +78,7 @@ class StopSequenceCriteria(StoppingCriteria):
 
 
 class RepeatedTokenSequenceCriteria(StoppingCriteria):
-    def __init__(self, tokenizer: Tokenizer, completion_start_index: int) -> None:
+    def __init__(self, tokenizer: PreTrainedTokenizerBase, completion_start_index: int) -> None:
         self.tokenizer = tokenizer
         # Initialize with an empty string to store the last line
         self.last_line = ""
@@ -98,7 +114,11 @@ class BaseHFLLM(BaseLLM):
     def __init__(self, formatter: BaseFormatter | None = None, bytes_per_token: float | None = None) -> None:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = self._load_tokenizer()
-        self.model = AutoModelForCausalLM.from_pretrained(self.LLM_NAME, device_map="auto")
+        # transformers >= 5 loads weights in the checkpoint's dtype (usually bfloat16) by default. Load in float32
+        # explicitly so loglikelihoods and judge verdicts stay identical to earlier versions of the framework.
+        self.model: CausalLM = AutoModelForCausalLM.from_pretrained(
+            self.LLM_NAME, device_map="auto", dtype=torch.float32
+        )
         logger.info(f"{RED}[ Model initialized --------------------- {RESET}{self.LLM_NAME} {RED}]{RESET}")
         self._set_formatter(formatter)
         # set bytes_per_token_scalar for non-standard models
@@ -134,7 +154,10 @@ class BaseHFLLM(BaseLLM):
 
     def __del__(self) -> None:
         if hasattr(self, "model"):
-            num_gpus = len(cast(dict[str, Any], self.model.hf_device_map))
+            # transformers only sets hf_device_map when it dispatched the model across accelerators;
+            # a CPU-only load has no such attribute.
+            device_map: dict[str, Any] = getattr(self.model, "hf_device_map", {})
+            num_gpus = len(device_map)
             del self.model
             if num_gpus > 1 and torch.distributed.is_initialized():
                 torch.distributed.destroy_process_group()
@@ -240,6 +263,7 @@ class BaseHFLLM(BaseLLM):
         with torch.no_grad():
             outputs = self.model.generate(**kwargs)[0]
             completion = self.tokenizer.decode(outputs[prompt_token_count:], skip_special_tokens=True)
+            assert isinstance(completion, str)  # decoding a single sequence yields a single string
 
             if kwargs["stopping_criteria"][0].__class__.__name__ == "StopSequenceCriteria":
                 for stop_sequence in kwargs["stopping_criteria"][0].stop_sequences:
@@ -320,7 +344,11 @@ class BaseHFLLM(BaseLLM):
             span_lp = tok_lp[-num_choice_tokens:].tolist()
             span_ids = target_ids[-num_choice_tokens:].tolist()
             bits = [float(-lp / math.log(2)) for lp in span_lp]
-            byte_lens = [len(self.tokenizer.decode([token_id]).encode("utf-8")) for token_id in span_ids]
+            byte_lens = []
+            for token_id in span_ids:
+                token_text = self.tokenizer.decode([token_id])
+                assert isinstance(token_text, str)  # decoding a single sequence yields a single string
+                byte_lens.append(len(token_text.encode("utf-8")))
             return PerTokenScores(bits=bits, byte_lens=byte_lens)
 
     @property
