@@ -107,14 +107,14 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.1.0 - https://github.com/tox-dev/py-filelock
+- **filelock** 4.1.1 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jmespath** 1.1.0 - https://github.com/jmespath/jmespath.py
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
 - **jsonschema-specifications** 2025.9.1 - https://github.com/python-jsonschema/jsonschema-specifications
-- **platformdirs** 4.12.4 - https://github.com/tox-dev/platformdirs
-- **pydantic** 2.14.0 - https://github.com/pydantic/pydantic
-- **pydantic_core** 2.50.0 - https://github.com/pydantic
+- **platformdirs** 4.13.0 - https://github.com/tox-dev/platformdirs
+- **pydantic** 2.14.1 - https://github.com/pydantic/pydantic
+- **pydantic_core** 2.50.1 - https://github.com/pydantic
 - **PyYAML** 6.0.3 - https://pyyaml.org/
 - **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
 - **rpds-py** 2026.9.1 - https://github.com/crate-py/rpds
@@ -1001,7 +1001,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### filelock 4.1.0 (MIT)
+### filelock 4.1.1 (MIT)
 
 ```text
 MIT License
@@ -14488,7 +14488,7 @@ https://opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
   terms specified in this license.
 ```
 
-### platformdirs 4.12.4 (MIT)
+### platformdirs 4.13.0 (MIT)
 
 ```text
 MIT License
@@ -17337,7 +17337,7 @@ DAMAGES.
                      END OF TERMS AND CONDITIONS
 ```
 
-### pydantic 2.14.0 (MIT)
+### pydantic 2.14.1 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -17363,7 +17363,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### pydantic_core 2.50.0 (MIT)
+### pydantic_core 2.50.1 (MIT)
 
 ```text
 The MIT License (MIT)

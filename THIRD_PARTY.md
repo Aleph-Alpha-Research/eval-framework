@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `boto3` | `>=1.43.109,<2` |
+| `boto3` | `>=1.43.110,<2` |
 | `datasets` | `>=5.0.1,<6` |
 | `google-crc32c` | `>=1.9.0,<2` |
 | `jsonlines` | `>=4,<5` |
@@ -24,7 +24,7 @@ and first-party/internal packages are excluded.
 | `numpy` | `>=2.5.3` |
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
-| `pydantic` | `>=2.13.5,<3` |
+| `pydantic` | `>=2.14.0,<3` |
 | `python-dotenv` | `>=1.2.4,<2` |
 | `python-iso639` | `>=2026.7.23` |
 | `pyyaml` | `>=6.0.3,<7` |
@@ -48,7 +48,7 @@ and first-party/internal packages are excluded.
 | `colorama` | `0.4.6` |
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
-| `filelock` | `4.1.0` |
+| `filelock` | `4.1.1` |
 | `fsspec` | `2026.6.0` |
 | `googleapis-common-protos` | `1.75.5` |
 | `h11` | `0.16.0` |
@@ -72,10 +72,10 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.66b1` |
 | `packaging` | `26.3` |
 | `pandas` | `3.0.6` |
-| `platformdirs` | `4.12.4` |
+| `platformdirs` | `4.13.0` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.0` |
-| `pydantic-core` | `2.50.0` |
+| `pydantic-core` | `2.50.1` |
 | `python-dateutil` | `2.9.0.post0` |
 | `referencing` | `0.37.0` |
 | `regex` | `2026.9.29` |
