@@ -27,6 +27,7 @@ from eval_framework.benchmarks.mbpp import MBPP_BENCHMARKS
 from eval_framework.benchmarks.mbpp_ellamind import MBPP_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
 from eval_framework.benchmarks.mmlu_pro import MMLU_PRO_BENCHMARKS
+from eval_framework.benchmarks.mmlu_prox import MMLU_PROX_BENCHMARKS
 from eval_framework.benchmarks.multipl_e import MULTIPL_E_BENCHMARKS
 from eval_framework.benchmarks.naturalqs_open import NATURALQS_OPEN_BENCHMARKS
 from eval_framework.benchmarks.piqa import PIQA_BENCHMARKS
@@ -72,6 +73,7 @@ def register_all_tasks(registry: Registry | None = None) -> None:
     register_mbpp_tasks(registry=registry)
     register_mmlu_tasks(registry=registry)
     register_mmlu_pro_tasks(registry=registry)
+    register_mmlu_prox_tasks(registry=registry)
     register_global_mmlu_tasks(registry=registry)
     register_piqa_tasks(registry=registry)
     register_sciq_tasks(registry=registry)
@@ -194,6 +196,12 @@ def register_multipl_e_tasks(registry: Registry) -> None:
 def register_mmlu_pro_tasks(registry: Registry) -> None:
     """Register mmlu_pro benchmark tasks."""
     for benchmark in MMLU_PRO_BENCHMARKS:
+        registry.add(benchmark)
+
+
+def register_mmlu_prox_tasks(registry: Registry) -> None:
+    """Register mmlu_prox benchmark tasks."""
+    for benchmark in MMLU_PROX_BENCHMARKS:
         registry.add(benchmark)
 
 

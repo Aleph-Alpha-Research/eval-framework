@@ -10,14 +10,17 @@ truth against ``task-prompts-hashes.json`` to indicate prompt changes.
 
 import random
 import sys
+from collections.abc import Sequence
 from typing import Any, final, override
 
 import pytest
 from datasets import Dataset, DatasetDict
 
 from eval_framework.contract import Benchmark, Sample
+from eval_framework.llm.base import BaseLLM
+from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
-from template_formatting.formatter import BaseFormatter
+from template_formatting.formatter import BaseFormatter, Message
 from tests.tests_eval_framework.utils import assert_hash_string
 
 
@@ -67,6 +70,47 @@ def _seed_for_determinism() -> None:
         datasets.set_random_seed(42)
     except (ImportError, AttributeError):
         pass
+
+
+@final
+class StubLlm(BaseLLM):
+    """An LLM double answering every sample with the same fixed completion — for specifying answer extraction
+    through the public ``Eval.generate_completions`` boundary."""
+
+    def __init__(self, completion: str) -> None:
+        self._completion = completion
+
+    @override
+    def generate_from_messages(
+        self,
+        messages: list[Sequence[Message]],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+    ) -> list[RawCompletion]:
+        raise NotImplementedError
+
+    @override
+    def generate_from_samples(
+        self,
+        samples: list[Sample],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+    ) -> list[RawCompletion]:
+        completion = self._completion
+        for stop in stop_sequences or []:
+            completion = completion.split(stop)[0]  # backends cut at the first stop sequence; so does the stub
+        return [
+            RawCompletion(prompt="stub", prompt_num_tokens=0, completion=completion, completion_num_tokens=0)
+            for _ in samples
+        ]
+
+    @override
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+        raise NotImplementedError
 
 
 def assert_benchmark_formatter_hash(
