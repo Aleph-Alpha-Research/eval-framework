@@ -33,8 +33,6 @@ _NUM_FEWSHOT = {
     "MATH500": 0,
     "MATH500_V2": 0,
     "AIME2024": 0,
-    "AIME2025": 0,
-    "AIME2026": 0,
     "GSM8KReasoning": 0,
     "MATHMinerva_OLMES": 4,
     "MATHMinerva_OLMES_NONL": 4,
