@@ -235,26 +235,6 @@ def aime2024(dataset: DatasetPolicy | None = None) -> Benchmark:
     )
 
 
-def aime2025(dataset: DatasetPolicy | None = None) -> Benchmark:
-    dataset_policy = dataset if dataset is not None else pinned_by_framework("math-ai/aime25")
-    return aime(
-        "AIME2025",
-        dataset_policy=dataset_policy,
-        ground_truth=lambda item: item["answer"],
-        sample_split="test",
-    )
-
-
-def aime2026(dataset: DatasetPolicy | None = None) -> Benchmark:
-    dataset_policy = dataset if dataset is not None else pinned_by_framework("math-ai/aime26")
-    return aime(
-        "AIME2026",
-        dataset_policy=dataset_policy,
-        ground_truth=lambda item: item["answer"],
-        sample_split="test",
-    )
-
-
 GSM8K_REASONING_DATASET_PATH = "openai/gsm8k"
 
 # Zero-shot reasoning prompt (boxed final answer). Distinct from the OLMES gsm8k variants in benchmarks/gsm8k.py.
@@ -453,8 +433,6 @@ MATH_REASONING_BENCHMARKS: list[Benchmark] = [
     math500_with_bug(),
     math500_v2(),
     aime2024(),
-    aime2025(),
-    aime2026(),
     gsm8k_reasoning(),
     mathminerva_olmes(),
     mathminerva_olmes_nonl(),
