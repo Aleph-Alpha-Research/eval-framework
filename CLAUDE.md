@@ -23,7 +23,7 @@ The eval-framework follows a modular architecture with three main extensible bas
 
 1. **BaseLLM** (`src/eval_framework/llm/base.py`) - Language model implementations
    - Used to define how to get responses from models (HuggingFace, OpenAI, custom APIs, etc.)
-   - Implementations: `HFLLM`, `OpenAILLM`, `VLLMRunner`, `MistralLLM`, `AlephAlphaLLM`.
+   - Implementations: `OpenAIModel` (any OpenAI-compatible endpoint), `AlephAlphaAPIModel`.
    - Requires: `LLM_NAME`, `DEFAULT_FORMATTER`, and methods like `_get_completion()`
 
 2. **BaseTask** (`src/eval_framework/tasks/base.py`) - Benchmark/task definitions
@@ -125,13 +125,11 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 ## Dependencies & Extras
 
 Optional extras (install with `uv sync --all-extras`):
-- `transformers`: HuggingFace model evaluation
 - `openai`: OpenAI API support
 - `vllm`: vLLM inference engine
 - `mistral`: Mistral model support
 - `api`: Aleph Alpha client
 - `determined`: Determined AI integration
-- `flash_attn`: Flash attention optimization (handled with build-group flag)
 
 ## Conventions
 

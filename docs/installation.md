@@ -24,29 +24,23 @@ To select specific optional features, you can install them individually. Availab
 - `api` for Aleph Alpha client inference
 - `determined` for distributed evaluation
 - `mistral` for Mistral model inference
-- `transformers` for HuggingFace inference
 - `vllm` for VLLM inference
 - `all` installs all extras
 
 You can install them as follows:
 
 ```bash
-   uv sync --extra transformers
-```
-
-Or, you can install group extras like `flash-attn`:
-
-```bash
-# Install flash-attention optional extra (requires compilation)
-uv sync --all-extras --group flash-attn
+   uv sync --extra openai
 ```
 
 ### 3. Test Your Installation
 
+The example below talks to the OpenAI API and needs `OPENAI_API_KEY` to be set. Any OpenAI-compatible server (for example vLLM) can be targeted by adding `base_url=http://host:port/v1` to `--llm-args`.
+
 ```bash
 uv run eval_framework \
-    --models src/eval_framework/llm/models.py \
-    --llm-name Smollm135MInstruct \
+    --llm-name eval_framework.llm.openai.OpenAIModel \
+    --llm-args model_name="gpt-4o-mini" \
     --task-name "MMLU" \
     --task-subjects "abstract_algebra" "anatomy" \
     --output-dir ./eval_results \
@@ -133,15 +127,15 @@ However, we recommend using the uv solver to avoid many dependency version issue
 uv pip install eval-framework
 
 # or with optional extras
-uv pip install eval-framework[transformers]
+uv pip install eval-framework[openai]
 ```
 
 This allows you to run an evaluation without going through `uv run`:
 
 ```bash
 eval_framework \
-    --models src/eval_framework/llm/models.py \
-    --llm-name Smollm135MInstruct \
+    --llm-name eval_framework.llm.openai.OpenAIModel \
+    --llm-args model_name="gpt-4o-mini" \
     --task-name "MMLU" \
     --task-subjects "abstract_algebra" "anatomy" \
     --output-dir ./eval_results \
