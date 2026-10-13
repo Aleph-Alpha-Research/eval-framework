@@ -1,12 +1,13 @@
-import concurrent.futures
+import asyncio
 import logging
 import math
 import os
 import traceback
 from collections.abc import Callable, Sequence
+from typing import Any
 
 import tiktoken
-from openai import OpenAI, omit
+from openai import AsyncOpenAI, OpenAI, omit
 from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
     ChatCompletionMessageParam,
@@ -65,6 +66,8 @@ class OpenAIModel(BaseLLM):
         base_url: str | None = None,
         bytes_per_token: float | None = None,
         response_format: ResponseFormat | None = None,
+        max_retries: int | None = None,
+        request_timeout: float | None = None,
     ) -> None:
         """
         Initialize the OpenAIModel.
@@ -80,6 +83,8 @@ class OpenAIModel(BaseLLM):
             bytes_per_token: Optional custom bytes per token scalar for non-standard models.
             response_format: Optional OpenAI ``response_format`` payload for structured output, e.g.
                 ``{"type": "json_schema", "json_schema": {...}}``. Only used by the chat completion API.
+            max_retries: Retries per request on connection errors and retryable status codes. SDK default if None.
+            request_timeout: Per-request timeout in seconds. SDK default if None.
         """
         assert model_name is not None or self.LLM_NAME is not None, "A model name must be specified."
         self._model_name = model_name if model_name else self.LLM_NAME
@@ -94,11 +99,23 @@ class OpenAIModel(BaseLLM):
         self._top_p = top_p
         self._response_format = response_format
 
-        self._client = OpenAI(
-            api_key=api_key if api_key is not None else os.getenv("OPENAI_API_KEY", ""),
-            organization=organization,
-            base_url=base_url,
-        )
+        client_kwargs: dict[str, Any] = {
+            "api_key": api_key if api_key is not None else os.getenv("OPENAI_API_KEY", ""),
+            "organization": organization,
+            "base_url": base_url,
+        }
+        if max_retries is not None:
+            client_kwargs["max_retries"] = max_retries
+        if request_timeout is not None:
+            client_kwargs["timeout"] = request_timeout
+        # XXX: the sync client only serves subclasses that call `self._client` directly; drop it once
+        # they moved to `self._async_client`.
+        self._client = OpenAI(**client_kwargs)
+        self._async_client = AsyncOpenAI(**client_kwargs)
+        # One loop for the model's lifetime: the client's pooled connections are bound to the loop that
+        # opened them, so a fresh `asyncio.run` per call would reuse connections from a closed loop.
+        self._runner = asyncio.Runner()
+        self._closed = False
 
         self._encoder: tiktoken.Encoding | PreTrainedTokenizerBase | None = self._get_encoder_or_none()
 
@@ -172,103 +189,129 @@ class OpenAIModel(BaseLLM):
         if effective_top_p is not None:
             assert 0.0 <= effective_top_p <= 1.0, "top_p must be between 0.0 and 1.0"
 
-        def _process_one(single_messages: Sequence[Message]) -> RawCompletion:
-            # Adjust max tokens based on bytes_per_token_scalar so that non-standard models generate full responses
-            scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
+        scaled_max_tokens = math.ceil(max_tokens * self.bytes_per_token_scalar) if max_tokens is not None else None
 
+        async def _run() -> list[RawCompletion]:
             if self._formatter is not None:
-                # Use formatter and text completion API
-                prompt = self._formatter.format(single_messages, output_mode="string")
-                # documentation: https://platform.openai.com/docs/api-reference/completions/create
-                assert self._model_name is not None
-                response = self._client.completions.create(
-                    model=self._model_name,
-                    prompt=prompt,
-                    temperature=effective_temperature,
-                    top_p=effective_top_p,
-                    max_tokens=scaled_max_tokens,
-                    stop=stop_sequences,
-                )
-                completion = response.choices[0].text
-                usage = getattr(response, "usage", None)
-                prompt_tokens = getattr(usage, "prompt_tokens", None) if usage is not None else None
-                completion_tokens = getattr(usage, "completion_tokens", None) if usage is not None else None
-                return RawCompletion(
-                    prompt=prompt,
-                    prompt_num_tokens=(
-                        prompt_tokens
-                        if prompt_tokens is not None
-                        else (self._count_tokens(prompt) if self._encoder is not None else None)
-                    ),
-                    concat_compression=(
-                        ConcatCompression.calculate(
-                            single_messages,
-                            count_tokens=self._count_tokens,
-                            completion=completion,
+                return list(
+                    await asyncio.gather(
+                        *(
+                            self._complete(m, stop_sequences, scaled_max_tokens, effective_temperature, effective_top_p)
+                            for m in messages
                         )
-                        if self._encoder is not None
-                        else None
-                    ),
-                    completion=completion,
-                    completion_num_tokens=(
-                        completion_tokens
-                        if completion_tokens is not None
-                        else (self._count_tokens(completion) if self._encoder is not None else None)
-                    ),
-                    finish_reason=response.choices[0].finish_reason,
+                    )
                 )
+            return list(
+                await asyncio.gather(
+                    *(
+                        self._chat(m, stop_sequences, scaled_max_tokens, effective_temperature, effective_top_p)
+                        for m in messages
+                    )
+                )
+            )
 
-            else:
-                # Use chat completion API
-                chat_messages = [_to_chat_completion_message(m) for m in single_messages]
-                assert self._model_name is not None
-                chat_response = self._client.chat.completions.create(
-                    model=self._model_name,
-                    messages=chat_messages,
-                    temperature=effective_temperature,
-                    top_p=effective_top_p,
-                    max_tokens=scaled_max_tokens,
-                    stop=stop_sequences,
-                    response_format=self._response_format if self._response_format is not None else omit,
-                )
-                prompt = "\n".join([f"{m.get('role', '')}: {m.get('content', '')}" for m in chat_messages])
-                prompt_tokens = getattr(chat_response.usage, "prompt_tokens", None)
-                completion_tokens = getattr(chat_response.usage, "completion_tokens", None)
-                completion_details = getattr(chat_response.usage, "completion_tokens_details", None)
-                reasoning_tokens = getattr(completion_details, "reasoning_tokens", None)
-                choice = chat_response.choices[0]
-                completion = choice.message.content or ""
-                # vLLM's reasoning parser returns the think block as `reasoning`; older
-                # versions named the field `reasoning_content`.
-                reasoning = getattr(choice.message, "reasoning", None) or getattr(
-                    choice.message, "reasoning_content", None
-                )
-                return RawCompletion(
-                    prompt=prompt,
-                    prompt_num_tokens=prompt_tokens,
-                    concat_compression=(
-                        ConcatCompression.calculate(
-                            single_messages,
-                            count_tokens=self._count_tokens,
-                            completion=completion,
-                        )
-                        if self._encoder is not None
-                        else None
-                    ),
-                    completion=completion,
-                    completion_num_tokens=(
-                        completion_tokens
-                        if completion_tokens is not None
-                        else (self._count_tokens(completion) if self._encoder is not None else None)
-                    ),
-                    reasoning_num_tokens=reasoning_tokens,
-                    reasoning=reasoning,
-                    finish_reason=choice.finish_reason,
-                )
+        return self._runner.run(_run())
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            results = list(executor.map(_process_one, messages))
-        return results
+    async def _complete(
+        self,
+        single_messages: Sequence[Message],
+        stop_sequences: list[str] | None,
+        max_tokens: int | None,
+        temperature: float,
+        top_p: float | None,
+    ) -> RawCompletion:
+        assert self._formatter is not None
+        assert self._model_name is not None
+        prompt = self._formatter.format(single_messages, output_mode="string")
+        # documentation: https://platform.openai.com/docs/api-reference/completions/create
+        response = await self._async_client.completions.create(
+            model=self._model_name,
+            prompt=prompt,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            stop=stop_sequences,
+        )
+        completion = response.choices[0].text
+        usage = getattr(response, "usage", None)
+        prompt_tokens = getattr(usage, "prompt_tokens", None) if usage is not None else None
+        completion_tokens = getattr(usage, "completion_tokens", None) if usage is not None else None
+        return RawCompletion(
+            prompt=prompt,
+            prompt_num_tokens=(
+                prompt_tokens
+                if prompt_tokens is not None
+                else (self._count_tokens(prompt) if self._encoder is not None else None)
+            ),
+            concat_compression=(
+                ConcatCompression.calculate(
+                    single_messages,
+                    count_tokens=self._count_tokens,
+                    completion=completion,
+                )
+                if self._encoder is not None
+                else None
+            ),
+            completion=completion,
+            completion_num_tokens=(
+                completion_tokens
+                if completion_tokens is not None
+                else (self._count_tokens(completion) if self._encoder is not None else None)
+            ),
+            finish_reason=response.choices[0].finish_reason,
+        )
+
+    async def _chat(
+        self,
+        single_messages: Sequence[Message],
+        stop_sequences: list[str] | None,
+        max_tokens: int | None,
+        temperature: float,
+        top_p: float | None,
+    ) -> RawCompletion:
+        assert self._model_name is not None
+        chat_messages = [_to_chat_completion_message(m) for m in single_messages]
+        chat_response = await self._async_client.chat.completions.create(
+            model=self._model_name,
+            messages=chat_messages,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            stop=stop_sequences,
+            response_format=self._response_format if self._response_format is not None else omit,
+        )
+        prompt = "\n".join([f"{m.get('role', '')}: {m.get('content', '')}" for m in chat_messages])
+        prompt_tokens = getattr(chat_response.usage, "prompt_tokens", None)
+        completion_tokens = getattr(chat_response.usage, "completion_tokens", None)
+        completion_details = getattr(chat_response.usage, "completion_tokens_details", None)
+        reasoning_tokens = getattr(completion_details, "reasoning_tokens", None)
+        choice = chat_response.choices[0]
+        completion = choice.message.content or ""
+        # vLLM's reasoning parser returns the think block as `reasoning`; older
+        # versions named the field `reasoning_content`.
+        reasoning = getattr(choice.message, "reasoning", None) or getattr(choice.message, "reasoning_content", None)
+        return RawCompletion(
+            prompt=prompt,
+            prompt_num_tokens=prompt_tokens,
+            concat_compression=(
+                ConcatCompression.calculate(
+                    single_messages,
+                    count_tokens=self._count_tokens,
+                    completion=completion,
+                )
+                if self._encoder is not None
+                else None
+            ),
+            completion=completion,
+            completion_num_tokens=(
+                completion_tokens
+                if completion_tokens is not None
+                else (self._count_tokens(completion) if self._encoder is not None else None)
+            ),
+            reasoning_num_tokens=reasoning_tokens,
+            reasoning=reasoning,
+            finish_reason=choice.finish_reason,
+        )
 
     def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         """
@@ -372,9 +415,21 @@ class OpenAIModel(BaseLLM):
             )
         return results
 
+    def close(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+        self._runner.run(self._async_client.close())
+        self._runner.close()
+        self._client.close()
+
     def __del__(self) -> None:
-        if hasattr(self, "_client"):
-            self._client.close()
+        if not hasattr(self, "_runner"):
+            return
+        try:
+            self.close()
+        except Exception:
+            pass
 
 
 class OpenAIEmbeddingModel(BaseLLM):

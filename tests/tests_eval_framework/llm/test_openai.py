@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 from openai import omit
 from openai.types.chat.completion_create_params import ResponseFormat
@@ -33,6 +35,13 @@ def test_openai_embedding_model():
     assert cosine_sims[1][0] < 1.0
 
 
+def _mock_async_client(mocker: MockerFixture) -> MagicMock:
+    mocker.patch("eval_framework.llm.openai.OpenAI")
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.AsyncOpenAI", return_value=mock_client)
+    return mock_client
+
+
 def _make_chat_response(
     mocker: MockerFixture,
     content: str = "test",
@@ -50,10 +59,9 @@ def _make_chat_response(
 
 def test_generate_from_messages_keeps_reasoning_and_finish_reason(mocker: MockerFixture) -> None:
     # Given a chat response whose think block was split off by the server
-    mock_client = mocker.MagicMock()
-    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
-    mock_client.chat.completions.create.return_value = _make_chat_response(
-        mocker, content="42", reasoning="let me think", finish_reason="length"
+    mock_client = _mock_async_client(mocker)
+    mock_client.chat.completions.create = mocker.AsyncMock(
+        return_value=_make_chat_response(mocker, content="42", reasoning="let me think", finish_reason="length")
     )
     model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18")
 
@@ -67,9 +75,8 @@ def test_generate_from_messages_keeps_reasoning_and_finish_reason(mocker: Mocker
 
 
 def test_openai_chat_api_top_p_generate_from_messages(mocker: MockerFixture) -> None:
-    mock_client = mocker.MagicMock()
-    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
-    mock_client.chat.completions.create.return_value = _make_chat_response(mocker)
+    mock_client = _mock_async_client(mocker)
+    mock_client.chat.completions.create = mocker.AsyncMock(return_value=_make_chat_response(mocker))
 
     model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18", top_p=0.85)
     _MESSAGES = [[Message(role=Role.USER, content="Hello")]]
@@ -84,9 +91,8 @@ def test_openai_chat_api_top_p_generate_from_messages(mocker: MockerFixture) -> 
 
 
 def test_openai_chat_api_forwards_response_format(mocker: MockerFixture) -> None:
-    mock_client = mocker.MagicMock()
-    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
-    mock_client.chat.completions.create.return_value = _make_chat_response(mocker)
+    mock_client = _mock_async_client(mocker)
+    mock_client.chat.completions.create = mocker.AsyncMock(return_value=_make_chat_response(mocker))
     _MESSAGES = [[Message(role=Role.USER, content="Hello")]]
 
     OpenAIModel(model_name="gpt-4o-mini-2024-07-18").generate_from_messages(_MESSAGES)
@@ -101,7 +107,7 @@ def test_openai_chat_api_forwards_response_format(mocker: MockerFixture) -> None
 
 
 def test_generate_from_messages_validates_temperature_and_top_p(mocker: MockerFixture) -> None:
-    mocker.patch("eval_framework.llm.openai.OpenAI")
+    _mock_async_client(mocker)
     model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18")
     with pytest.raises(AssertionError, match="[Tt]emperature"):
         model.generate_from_messages([], temperature=3.0)
@@ -114,9 +120,8 @@ def test_generate_from_messages_validates_temperature_and_top_p(mocker: MockerFi
 
 
 def test_generate_from_messages_preserves_message_roles(mocker: MockerFixture) -> None:
-    mock_client = mocker.MagicMock()
-    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
-    mock_client.chat.completions.create.return_value = _make_chat_response(mocker)
+    mock_client = _mock_async_client(mocker)
+    mock_client.chat.completions.create = mocker.AsyncMock(return_value=_make_chat_response(mocker))
 
     model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18")
     messages = [
