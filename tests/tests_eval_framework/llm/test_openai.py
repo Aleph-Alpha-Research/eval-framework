@@ -1,3 +1,4 @@
+import math
 from unittest.mock import MagicMock
 
 import pytest
@@ -8,7 +9,9 @@ from pytest_mock import MockerFixture
 from eval_framework.llm.openai import (
     OpenAIEmbeddingModel,
     OpenAIModel,
+    _choice_start,
 )
+from eval_framework.tasks.base import Sample
 from eval_framework.utils.helpers import pairwise_cosine_similarity
 from template_formatting.formatter import ConcatFormatter, Message, Role
 
@@ -202,3 +205,91 @@ def test_generate_from_messages_with_formatter_skips_request_for_no_messages(moc
 
     assert model.generate_from_messages([]) == []
     mock_client.completions.create.assert_not_called()
+
+
+def _make_logprobs_choice(
+    mocker: MockerFixture, index: int, tokens: list[str], token_logprobs: list[float | None]
+) -> MagicMock:
+    choice = mocker.MagicMock()
+    choice.index = index
+    choice.logprobs.tokens = tokens
+    choice.logprobs.token_logprobs = token_logprobs
+    offsets, pos = [], 0
+    for token in tokens:
+        offsets.append(pos)
+        pos += len(token)
+    choice.logprobs.text_offset = offsets
+    return choice
+
+
+def _sample(messages: list[Message], choices: list[str]) -> Sample:
+    return Sample(id=0, subject="s", messages=messages, possible_completions=choices, ground_truth=choices[0])
+
+
+def test_logprobs_requests_echoed_logprobs_for_all_choices_of_a_sample(mocker: MockerFixture) -> None:
+    # Given a sample with two choices and no formatter configured
+    mock_client = _mock_async_client(mocker)
+    response = mocker.MagicMock()
+    response.choices = [
+        _make_logprobs_choice(mocker, 0, ["Q", ":", " 4"], [None, -0.5, -1.0]),
+        _make_logprobs_choice(mocker, 1, ["Q", ":", " 5"], [None, -0.5, -3.0]),
+    ]
+    mock_client.completions.create = mocker.AsyncMock(return_value=response)
+    model = OpenAIModel(model_name="some-vllm-model")
+    sample = _sample([Message(role=Role.USER, content="Q:")], [" 4", " 5"])
+
+    # When
+    [result] = model.logprobs([sample])
+
+    # Then one echo request carries prompt plus choice for every choice, built with ConcatFormatter
+    mock_client.completions.create.assert_called_once()
+    call_kwargs = mock_client.completions.create.call_args.kwargs
+    assert call_kwargs["prompt"] == ["Q: 4", "Q: 5"]
+    assert call_kwargs["echo"] is True
+    assert call_kwargs["max_tokens"] == 0
+    assert call_kwargs["logprobs"] == 1
+    assert result.prompt == "Q:"
+    assert result.prompt_num_tokens == 2
+    assert result.loglikelihoods == {" 4": -1.0, " 5": -3.0}
+    assert result.loglikelihoods_num_tokens == {" 4": 1, " 5": 1}
+    assert result.loglikelihoods_per_token[" 4"].byte_lens == [2]
+    assert result.loglikelihoods_per_token[" 4"].bits == pytest.approx([1.0 / math.log(2)])
+    assert result.raw_loglikelihood_error is None
+
+
+def test_logprobs_scores_choices_by_text_offset_without_a_local_tokenizer(mocker: MockerFixture) -> None:
+    # Given a server whose tokenization merges the prompt's last character with the choice's first
+    mock_client = _mock_async_client(mocker)
+    response = mocker.MagicMock()
+    response.choices = [_make_logprobs_choice(mocker, 0, ["ab", "cd", "e"], [None, -2.0, -4.0])]
+    mock_client.completions.create = mocker.AsyncMock(return_value=response)
+    model = OpenAIModel(model_name="some-vllm-model", formatter=ConcatFormatter())
+    sample = _sample([Message(role=Role.USER, content="abc")], ["de"])
+
+    # When
+    [result] = model.logprobs([sample])
+
+    # Then the straddling token is scored as part of the choice
+    assert result.loglikelihoods == {"de": -6.0}
+    assert result.loglikelihoods_num_tokens == {"de": 2}
+    assert result.prompt_num_tokens == 1
+
+
+def test_logprobs_captures_request_errors_per_sample(mocker: MockerFixture) -> None:
+    mock_client = _mock_async_client(mocker)
+    mock_client.completions.create = mocker.AsyncMock(side_effect=RuntimeError("boom"))
+    model = OpenAIModel(model_name="some-vllm-model")
+
+    [result] = model.logprobs([_sample([Message(role=Role.USER, content="Q:")], [" 4"])])
+
+    assert result.loglikelihoods == {}
+    assert result.prompt_num_tokens is None
+    assert result.raw_loglikelihood_error is not None
+    assert result.raw_loglikelihood_error.error_class == "RuntimeError"
+
+
+def test_choice_start_handles_boundary_cases() -> None:
+    assert _choice_start(["ab", "cd"], [0, 2], prompt_len=2) == 1
+    assert _choice_start(["ab", "cd"], [0, 2], prompt_len=1) == 0
+    assert _choice_start(["ab", "cd"], [0, 2], prompt_len=4) == 2
+    assert _choice_start([], [], prompt_len=0) == 0

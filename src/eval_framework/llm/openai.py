@@ -18,6 +18,7 @@ from openai.types.chat.completion_create_params import ResponseFormat
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
 from eval_framework.llm.base import BaseLLM
+from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import (
     ConcatCompression,
     Error,
@@ -26,7 +27,7 @@ from eval_framework.shared.types import (
     RawLoglikelihood,
 )
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import BaseFormatter, Message, Role
+from template_formatting.formatter import BaseFormatter, ConcatFormatter, Message, Role
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,15 @@ def _to_chat_completion_message(message: Message) -> ChatCompletionMessageParam:
                 "Cannot send a Message without a role through the chat completion API; "
                 "the legacy roleless format is only supported for fine-tuning."
             )
+
+
+def _choice_start(tokens: list[str], text_offset: list[int], prompt_len: int) -> int:
+    """Index of the first echoed token belonging to the completion; a token straddling the boundary counts."""
+    for i, offset in enumerate(text_offset):
+        end = text_offset[i + 1] if i + 1 < len(text_offset) else offset + len(tokens[i])
+        if end > prompt_len:
+            return i
+    return len(tokens)
 
 
 class OpenAIModel(BaseLLM):
@@ -321,105 +331,81 @@ class OpenAIModel(BaseLLM):
 
     def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
         """
-        Compute total log-probabilities for possible completions given each sample's prompt.
+        Sum the log-probabilities of each possible completion given the sample's prompt, read back from a
+        completions request with `echo=True`.
 
-        Args:
-            samples: List of Sample objects, each with prompt messages and possible completions.
-
-        Returns:
-            List of RawLoglikelihood objects mapping each prompt and completion to its log-probability.
-
-        Note:
-            Uses the OpenAI completions API with echo=True; chat logprobs are not supported.
+        vLLM is the supported backend. OpenAI serves echoed logprobs only for babbage-002 and davinci-002;
+        any other OpenAI-compatible server works on a best-effort basis. Prompts are built with the
+        configured formatter, or with `ConcatFormatter` when there is none, which suits base models only.
         """
-        if self._encoder is None:
-            raise NotImplementedError(
-                "OpenAIModel.logprobs() requires a local tokenizer/encoder, but none is available."
-            )
-        assert self._model_name in ["babbage-002", "davinci-002"], (
-            "Log-probs for prompt tokens are only supported for a limited set of models."
-        )
-        # apparently OpenAI stopped providing logprobs of prompt tokens, see discussion in:
-        # https://github.com/EleutherAI/lm-evaluation-harness/issues/1196
+        formatter = self._formatter or ConcatFormatter()
 
-        assert self._formatter is not None, "Log-probs require a formatter to create text prompts."
-        results: list[RawLoglikelihood] = []
-        for sample in samples:
-            prompt = self._formatter.format(sample.messages, output_mode="string") if sample.messages else ""
-            choices_log_probs: dict[str, float] = {}
-            choices_num_tokens: dict[str, int] = {}
-            choices_per_token: dict[str, PerTokenScores] = {}
-            prompt_num_tokens: int | None = self._count_tokens(prompt)
-            error: Error | None = None
+        async def _run() -> list[RawLoglikelihood]:
+            return list(await asyncio.gather(*(self._logprobs_one(sample, formatter) for sample in samples)))
 
-            for choice in sample.possible_completions or []:
-                if error is not None:
-                    continue
+        return self._runner.run(_run())
 
-                # Tokenize prompt and completion
-                prompt_tokens = self._encoder.encode(prompt)
-                completion_tokens = self._encoder.encode(choice)
-                full_text = prompt + choice
+    async def _logprobs_one(self, sample: Sample, formatter: BaseFormatter) -> RawLoglikelihood:
+        assert self._model_name is not None
+        prompt = formatter.format(sample.messages, output_mode="string") if sample.messages else ""
+        choices = list(sample.possible_completions or [])
+        prompt_num_tokens: int | None = None
+        choices_log_probs: dict[str, float] = {}
+        choices_num_tokens: dict[str, int] = {}
+        choices_per_token: dict[str, PerTokenScores] = {}
+        error: Error | None = None
 
-                try:
-                    response = self._client.completions.create(
-                        model=self._model_name,
-                        prompt=full_text,
-                        echo=True,
-                        max_tokens=0,
-                        logprobs=1,
-                        temperature=0,
-                    )
-
-                    choice_obj = response.choices[0]
-                    if not hasattr(choice_obj, "logprobs") or choice_obj.logprobs is None:
-                        raise ValueError("Logprobs not returned in response.")
-
-                    all_tokens = getattr(choice_obj.logprobs, "tokens", None)
-                    all_logprobs = getattr(choice_obj.logprobs, "token_logprobs", None)
-
-                    if all_tokens is None or all_logprobs is None:
-                        raise ValueError("Logprobs response missing expected 'tokens' or 'token_logprobs' fields.")
-
-                    if len(all_tokens) != len(prompt_tokens) + len(completion_tokens):
-                        raise ValueError(
-                            f"Token count mismatch: tokens in response ({len(all_tokens)}) != prompt+completion "
-                            f"({len(prompt_tokens) + len(completion_tokens)})"
-                        )
-
-                    # Sum logprobs for the completion portion
-                    completion_logprobs = all_logprobs[len(prompt_tokens) :]
-                    completion_token_strs = all_tokens[len(prompt_tokens) :]
-                    choices_log_probs[choice] = sum(completion_logprobs)
-                    choices_num_tokens[choice] = len(completion_tokens)
-                    # Per-token scores consumed by the extended BPB metrics (prefix and prior BPB):
-                    # bits[j] = -log2 p(token j) and byte_lens[j] is that token's UTF-8 byte length
-                    # (from the API-returned token string here). Summing -log(2) * bits recovers the
-                    # total loglikelihood, so classical BitsPerByte is unaffected. Same layout as the
-                    # HF adapter.
-                    choices_per_token[choice] = PerTokenScores(
-                        bits=[float(-lp / math.log(2)) for lp in completion_logprobs],
-                        byte_lens=[len(str(t).encode("utf-8")) for t in completion_token_strs],
-                    )
-
-                except Exception as e:
-                    error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
-                    prompt_num_tokens = None
-                    choices_log_probs = {}
-                    choices_num_tokens = {}
-                    choices_per_token = {}
-
-            results.append(
-                RawLoglikelihood(
-                    prompt=prompt,
-                    prompt_num_tokens=prompt_num_tokens,
-                    loglikelihoods=choices_log_probs,
-                    loglikelihoods_num_tokens=choices_num_tokens,
-                    loglikelihoods_per_token=choices_per_token,
-                    raw_loglikelihood_error=error,
+        try:
+            if choices:
+                response = await self._async_client.completions.create(
+                    model=self._model_name,
+                    prompt=[prompt + choice for choice in choices],
+                    echo=True,
+                    max_tokens=0,
+                    logprobs=1,
+                    temperature=0,
                 )
-            )
-        return results
+                if len(response.choices) != len(choices):
+                    raise ValueError(f"Expected {len(choices)} choices in the response, got {len(response.choices)}.")
+                for choice, choice_obj in zip(choices, sorted(response.choices, key=lambda c: c.index), strict=True):
+                    logprobs = choice_obj.logprobs
+                    if (
+                        logprobs is None
+                        or logprobs.tokens is None
+                        or logprobs.token_logprobs is None
+                        or logprobs.text_offset is None
+                    ):
+                        raise ValueError("Logprobs response missing 'tokens', 'token_logprobs' or 'text_offset'.")
+                    start = _choice_start(logprobs.tokens, logprobs.text_offset, len(prompt))
+                    choice_logprobs = logprobs.token_logprobs[start:]
+                    if any(lp is None for lp in choice_logprobs):
+                        raise ValueError("Logprob missing for a completion token.")
+                    choices_log_probs[choice] = float(sum(choice_logprobs))
+                    choices_num_tokens[choice] = len(choice_logprobs)
+                    # Per-token scores consumed by the extended BPB metrics (prefix and prior BPB):
+                    # bits[j] = -log2 p(token j) and byte_lens[j] is that token's UTF-8 byte length.
+                    choices_per_token[choice] = PerTokenScores(
+                        bits=[float(-lp / math.log(2)) for lp in choice_logprobs],
+                        byte_lens=[len(t.encode("utf-8")) for t in logprobs.tokens[start:]],
+                    )
+                    prompt_num_tokens = start
+        except Exception as e:
+            if raise_errors():
+                raise
+            error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
+            prompt_num_tokens = None
+            choices_log_probs = {}
+            choices_num_tokens = {}
+            choices_per_token = {}
+
+        return RawLoglikelihood(
+            prompt=prompt,
+            prompt_num_tokens=prompt_num_tokens,
+            loglikelihoods=choices_log_probs,
+            loglikelihoods_num_tokens=choices_num_tokens,
+            loglikelihoods_per_token=choices_per_token,
+            raw_loglikelihood_error=error,
+        )
 
     def close(self) -> None:
         if self._closed:
