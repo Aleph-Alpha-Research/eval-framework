@@ -4,12 +4,12 @@ import importlib.metadata
 from pathlib import Path
 from unittest.mock import patch
 
-from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.result_processors.base import Result
 from eval_framework.result_processors.result_processor import ResultsFileProcessor, generate_output_dir
 from eval_framework.shared.types import BaseMetricContext, Completion, Loglikelihood
 from eval_framework.tasks.eval_config import EvalConfig
 from template_formatting.formatter import Message, Role
+from tests.tests_eval_framework.conftest import MockLLM
 
 # here no tests are listed that would need a GPU runner -> no pytest markers set
 
@@ -22,7 +22,7 @@ def test_generate_output_dir_with_valid_values() -> None:
         num_fewshot=5,
         num_samples=10,
         task_name=task_name,
-        llm_class=Qwen3_0_6B,
+        llm_class=MockLLM,
     )
 
     version_str = f"v{importlib.metadata.version('eval_framework')}"
@@ -52,7 +52,7 @@ def test_generate_output_dir_with_none_values() -> None:
         num_fewshot=0,
         num_samples=None,
         task_name=task_name,
-        llm_class=Qwen3_0_6B,
+        llm_class=MockLLM,
     )
 
     version_str = f"v{importlib.metadata.version('eval_framework')}"

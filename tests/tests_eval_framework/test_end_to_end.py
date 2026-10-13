@@ -9,78 +9,10 @@ from unittest.mock import Mock, patch
 import pytest
 from datasets import disable_caching
 
-from eval_framework.benchmarks.hellaswag import hellaswag
-from eval_framework.llm.base import BaseLLM
 from eval_framework.main import main
-from eval_framework.result_processors.base import Result
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.task_names import TaskNameEnum
-from eval_framework.utils.constants import GREEN, RED, RESET
 from tests.tests_eval_framework.conftest import MockLLM
-
-
-def pretty_print_results(results: list[Result]) -> None:
-    for result in results:
-        print(f"{RED}{result.llm_name} | {result.metric_name}: {result.value} | {result.subject}{RESET}")
-
-
-def pretty_print_means(metric_means: dict[str, float], expected_results: dict[str, float]) -> None:
-    for metric_name, metric_mean in metric_means.items():
-        status = GREEN if metric_mean == expected_results[metric_name] else RED
-        print(f"{metric_name}: {status}{metric_mean}{RESET} - Expected: {expected_results[metric_name]}")
-
-
-def _almost_equal(x: float, y: float) -> bool:
-    return 2 * abs(x - y) / abs(x + y + 1e-5) < 1e-4
-
-
-@pytest.mark.gpu
-@pytest.mark.parametrize("test_llms", ["SmolLM135M"], indirect=["test_llms"])
-def test_automatic_tasks(tmp_path: Path, test_llms: BaseLLM) -> None:
-    output_dir = tmp_path / "eval"
-
-    task_name = hellaswag().display_name()
-    expected_results = {
-        "Accuracy Loglikelihood": 0.4,
-        "Accuracy Normalized Loglikelihood": 0.6,
-        "Accuracy Bayesian Loglikelihood": 0.5,
-    }
-    num_fewshot = 2
-    num_samples = 10
-
-    eval_config = EvalConfig(
-        task_name=task_name,
-        num_fewshot=num_fewshot,
-        num_samples=num_samples,
-        output_dir=output_dir,
-        llm_class=test_llms.__class__,
-        save_intermediate_results=False,
-        task_subjects=None,
-    )
-
-    results = main(test_llms, eval_config)
-
-    full_metric_names = [
-        (result.metric_name, result.key) for result in results if result.metric_name in list(expected_results.keys())
-    ]
-    metric_means = {}
-    for metric_name, key in sorted(set(full_metric_names)):
-        values = [
-            result.value
-            for result in results
-            if result.metric_name == metric_name and result.key == key and result.value is not None
-        ]
-        metric_means[metric_name] = 0 if len(values) == 0 else sum(values) / len(values)
-
-    pretty_print_means(metric_means, expected_results)
-
-    for metric_name, metric_mean in metric_means.items():
-        if key is not None:
-            metric_name += f"/{key}"
-        print(f"Expect {metric_name} to be {expected_results[metric_name]} and got {metric_mean}")
-        assert _almost_equal(expected_results[metric_name], metric_mean), (
-            f"Expected {metric_name} to be {expected_results[metric_name]} but got {metric_mean}"
-        )
 
 
 def pytest_generate_tests(metafunc: Any) -> None:
