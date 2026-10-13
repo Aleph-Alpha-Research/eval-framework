@@ -1,29 +1,8 @@
 # Model Arguments
 
-The Eval-Framework provides a set of model wrapper classes that standardize how LLMs are loaded, formatted, and used for evaluation. Each wrapper manages specific model backends, such as Hugging Face, OpenAI, Aleph Alpha API, or vLLM-based models.
+The Eval-Framework provides a set of model wrapper classes that standardize how LLMs are loaded, formatted, and used for evaluation. Each wrapper manages specific model backends, such as OpenAI-compatible endpoints, the Aleph Alpha API, or vLLM-based models.
 
 The following sections describe the **constructor arguments** for each model class, highlighting configuration options, defaults, and their purpose. Understanding these arguments allows you to customize evaluation behavior, token limits, concurrency, and model-specific settings.
-
-## HFLLM Class — Constructor Arguments
-
-`HFLLM` is a high-level wrapper for Hugging Face causal language models within the evaluation framework.
-It extends `BaseHFLLM`, managing model loading (from local checkpoints, HF Hub, or W&B), formatting, and text generation.
-
-### HFLLM Constructor Argument Reference
-
-| **Argument** | **Type** | **Description** | **Default** |
-|:-------------|-----------|-----------------|:------------:|
-| `checkpoint_path` | `str \| Path \| None` | Path to a **local checkpoint directory or model weights**. Used when loading from disk instead of HF Hub. | `None` |
-| `model_name` | `str \| None` | Hugging Face model name (e.g. `"EleutherAI/pythia-410m"`). Used to load from the Hub. | `None` |
-| `artifact_name` | `str \| None` | Weights & Biases artifact name (e.g. `"org/model:latest"`). Used to fetch models from W&B registry. | `None` |
-| `formatter` | `BaseFormatter \| None` | Explicit formatter instance used to convert chat messages into model prompts. If not provided, falls back to `DEFAULT_FORMATTER`. |                  `None`                 |
-| `formatter_name` | `str \| None` | Name of a formatter class (e.g. `"ConcatFormatter"`, `"HFFormatter"`). Used when `formatter` is not provided. | `None` |
-| `formatter_kwargs` | `dict[str, Any] \| None` | Keyword arguments for the formatter constructor (used with `formatter_name`). | `None` |
-| `checkpoint_name` | `str \| None` | Custom display/logging name for the checkpoint. If omitted, inferred from model or artifact name. | `None` |
-| `bytes_per_token` | `float \| None` | Used to scale token generation limits based on model tokenizer density. Passed to the parent class `BaseHFLLM`. See [Deep Dive: bytes_per_token](#deep-dive-bytes-per-token). | `None` *(internally defaults to `4.0`)* |
-| `**kwargs` | `Any` | Additional keyword args passed to `BaseHFLLM` / `BaseLLM`. | — |
-
----
 
 ## AlephAlphaAPIModel — Constructor Arguments
 
@@ -144,7 +123,7 @@ and a model with *longer tokens* would produce *shorter outputs*.
 * If you empirically know your tokenizer’s average bytes/token, pass it explicitly:
 
   ```python
-  model = HFLLM(model_name="my-model", bytes_per_token=3.2)
+  model = OpenAIModel(model_name="my-model", bytes_per_token=3.2)
   ```
 * Common approximate values:
 

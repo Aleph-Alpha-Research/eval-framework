@@ -188,8 +188,8 @@ docker run --gpus all \
   -v $(pwd)/results:/results \
   eval_framework:v0.2.3 \
   eval_framework \
-    --models /eval_framework/src/eval_framework/llm/models.py \
-    --llm-name Smollm135MInstruct \
+    --llm-name eval_framework.llm.openai.OpenAIModel \
+    --llm-args model_name="gpt-4o-mini" \
     --task-name MMLU \
     --task-subjects abstract_algebra \
     --output-dir /results \

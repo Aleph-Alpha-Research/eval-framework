@@ -18,7 +18,6 @@ This repository contains a large and diverse test suite. To keep iteration fast,
   - CPU tests excluding slow/external tests (3 min)
   - CPU slow tests (3–4 min)
   - Formatter hash tests (3 min)
-  - GPU tests / optional extras (12 min)
 
 **Recommended local command:**
 For most contributors, running the CPU fast tests is sufficient:
@@ -31,15 +30,14 @@ uv run --all-extras pytest -n auto --max-worker-restart=0 -v \
 
 ---
 
-### 2. Advanced / GPU Tests
+### 2. Advanced Tests
 
-* **Runs on:** PR workflow (`test-docker-gpu`)
-* **Runtime:** ~12 min
-* **Purpose:** Run GPU tests or all optional extras together. Typically only required if debugging GPU-specific issues.
+* **Runs on:** manually, when reproducing a CI failure or debugging dependency issues
+* **Purpose:** Install all optional extras together, or run the tests that need external services.
 * **Includes:**
 
-  * GPU tests excluding CPU-slow / external API / vllm (12 min)
-  * Optional extras (`vllm`, `mistral`) installations
+  * Install tests for all optional extras together
+  * Tests marked `external_api` (need credentials for the external services they call)
 
 **Recommended local command (advanced users):**
 
@@ -47,7 +45,7 @@ uv run --all-extras pytest -n auto --max-worker-restart=0 -v \
 uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
 ```
 
-> ⚠️ Warning: Running GPU/full extras locally may take significant time and requires a GPU.
+> ⚠️ Warning: The `external_api` tests call real services and need the corresponding credentials.
 
 ---
 
@@ -55,7 +53,7 @@ uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/in
 
 The authoritative definition of which tests belong to each tier is encoded in the GitHub workflows:
 
-* `tests.yml` → PR tests, CPU and GPU tests, linting
+* `tests.yml` → PR tests, CPU tests, linting
 
 ---
 
@@ -63,4 +61,4 @@ The authoritative definition of which tests belong to each tier is encoded in th
 
 * Run **fast PR tests** before pushing code.
 * Do **not** attempt to run the full suite unless reproducing a CI failure.
-* CI automatically runs GPU and slow tests on PRs.
+* CI automatically runs the slow tests on PRs.

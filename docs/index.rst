@@ -13,7 +13,7 @@ Key Features
 - **Scalability:** Distributed evaluation with Determined AI support.
 - **Extensibility:** Easily add custom models, benchmarks, and metrics.
 - **Comprehensive Benchmarks:** 90+ tasks covering reasoning, coding, math, knowledge, long-context, and safety.
-- **Flexible Model Integration:** HuggingFace, custom APIs, and BaseLLM-based models.
+- **Flexible Model Integration:** OpenAI-compatible endpoints, the Aleph Alpha API, and BaseLLM-based models.
 - **Robust Metrics:** Completion metrics, loglikelihood metrics, LLM-as-a-judge evaluations, and efficiency metrics.
 - **Perturbation Testing & Analysis:** Configurable perturbation types, confidence intervals, and significance testing.
 - **Docker Support:** Pre-configured for local or distributed setups.
@@ -21,7 +21,7 @@ Key Features
 Quick Start
 -----------
 
-The codebase is compatible with **Python 3.12** and **PyTorch 2.5**. GPU support requires appropriate CUDA dependencies.
+The codebase is compatible with **Python 3.12**.
 
 Install the library via uv (recommended):
 
@@ -34,13 +34,14 @@ Install the library via uv (recommended):
    # Install all dependencies
    uv sync --all-extras
 
-Now, you can run a single benchmark locally:
+Now, you can run a single benchmark locally. The example talks to the OpenAI API and needs ``OPENAI_API_KEY`` to be set;
+any OpenAI-compatible server (for example vLLM) can be targeted by adding ``base_url=http://host:port/v1`` to ``--llm-args``:
 
 .. code-block:: bash
 
    uv run eval_framework \
-        --models src/eval_framework/llm/models.py \
-        --llm-name Smollm135MInstruct \
+        --llm-name eval_framework.llm.openai.OpenAIModel \
+        --llm-args model_name="gpt-4o-mini" \
         --task-name "MMLU" \
         --task-subjects "abstract_algebra" \
         --output-dir ./eval_results \
@@ -66,7 +67,6 @@ Documentation Overview
    benchmarks_and_metrics.md
    controlling_upload_results.md
    docker_guide.md
-   evaluate_huggingface_model.md
    loglikelihood_task_guide.md
    model_arguments.md
    overview_dataloading.md
