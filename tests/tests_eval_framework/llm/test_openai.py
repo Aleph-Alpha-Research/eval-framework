@@ -137,3 +137,19 @@ def test_generate_from_messages_preserves_message_roles(mocker: MockerFixture) -
     sent_messages = mock_client.chat.completions.create.call_args.kwargs["messages"]
     assert [m["role"] for m in sent_messages] == ["system", "user", "assistant"]
     assert [m["content"] for m in sent_messages] == ["system prompt", "user prompt", "assistant prompt"]
+
+
+def test_generate_from_messages_omits_unset_sampling_arguments(mocker: MockerFixture) -> None:
+    # Given no top_p, max_tokens or stop sequences
+    mock_client = _mock_async_client(mocker)
+    mock_client.chat.completions.create = mocker.AsyncMock(return_value=_make_chat_response(mocker))
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18")
+
+    # When
+    model.generate_from_messages([[Message(role=Role.USER, content="Hello")]], stop_sequences=[])
+
+    # Then the request leaves them to the server's defaults instead of sending nulls or an empty list
+    call_kwargs = mock_client.chat.completions.create.call_args.kwargs
+    assert call_kwargs["top_p"] is omit
+    assert call_kwargs["max_tokens"] is omit
+    assert call_kwargs["stop"] is omit

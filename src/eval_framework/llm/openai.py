@@ -228,9 +228,9 @@ class OpenAIModel(BaseLLM):
             model=self._model_name,
             prompt=prompt,
             temperature=temperature,
-            top_p=top_p,
-            max_tokens=max_tokens,
-            stop=stop_sequences,
+            top_p=top_p if top_p is not None else omit,
+            max_tokens=max_tokens if max_tokens is not None else omit,
+            stop=stop_sequences if stop_sequences else omit,
         )
         completion = response.choices[0].text
         usage = getattr(response, "usage", None)
@@ -275,9 +275,9 @@ class OpenAIModel(BaseLLM):
             model=self._model_name,
             messages=chat_messages,
             temperature=temperature,
-            top_p=top_p,
-            max_tokens=max_tokens,
-            stop=stop_sequences,
+            top_p=top_p if top_p is not None else omit,
+            max_tokens=max_tokens if max_tokens is not None else omit,
+            stop=stop_sequences if stop_sequences else omit,
             response_format=self._response_format if self._response_format is not None else omit,
         )
         prompt = "\n".join([f"{m.get('role', '')}: {m.get('content', '')}" for m in chat_messages])
