@@ -10,7 +10,7 @@ from eval_framework.llm.openai import (
     OpenAIModel,
 )
 from eval_framework.utils.helpers import pairwise_cosine_similarity
-from template_formatting.formatter import Message, Role
+from template_formatting.formatter import ConcatFormatter, Message, Role
 
 # NOTE: an API key in your .env file is required to run these API tests
 
@@ -153,3 +153,52 @@ def test_generate_from_messages_omits_unset_sampling_arguments(mocker: MockerFix
     assert call_kwargs["top_p"] is omit
     assert call_kwargs["max_tokens"] is omit
     assert call_kwargs["stop"] is omit
+
+
+def _make_completion_choice(mocker: MockerFixture, index: int, text: str, finish_reason: str = "stop") -> MagicMock:
+    choice = mocker.MagicMock()
+    choice.index = index
+    choice.text = text
+    choice.finish_reason = finish_reason
+    return choice
+
+
+def test_generate_from_messages_with_formatter_batches_completions(mocker: MockerFixture) -> None:
+    # Given a formatter and a server that returns the batch's choices out of order
+    mock_client = _mock_async_client(mocker)
+    response = mocker.MagicMock()
+    response.choices = [
+        _make_completion_choice(mocker, index=1, text="second", finish_reason="length"),
+        _make_completion_choice(mocker, index=0, text="first"),
+    ]
+    response.usage.prompt_tokens = 10
+    response.usage.completion_tokens = 4
+    mock_client.completions.create = mocker.AsyncMock(return_value=response)
+    model = OpenAIModel(model_name="some-vllm-model", formatter=ConcatFormatter())
+    messages = [
+        [Message(role=Role.USER, content="one")],
+        [Message(role=Role.USER, content="two")],
+    ]
+
+    # When
+    results = model.generate_from_messages(messages, max_tokens=8, stop_sequences=["END"])
+
+    # Then all prompts travel in one request and come back in prompt order
+    mock_client.completions.create.assert_called_once()
+    call_kwargs = mock_client.completions.create.call_args.kwargs
+    assert call_kwargs["prompt"] == [ConcatFormatter().format(m, output_mode="string") for m in messages]
+    assert call_kwargs["max_tokens"] == 8
+    assert call_kwargs["stop"] == ["END"]
+    assert [r.completion for r in results] == ["first", "second"]
+    assert [r.finish_reason for r in results] == ["stop", "length"]
+    assert [r.prompt_num_tokens for r in results] == [5, 5]
+    assert [r.completion_num_tokens for r in results] == [2, 2]
+
+
+def test_generate_from_messages_with_formatter_skips_request_for_no_messages(mocker: MockerFixture) -> None:
+    mock_client = _mock_async_client(mocker)
+    mock_client.completions.create = mocker.AsyncMock()
+    model = OpenAIModel(model_name="some-vllm-model", formatter=ConcatFormatter())
+
+    assert model.generate_from_messages([]) == []
+    mock_client.completions.create.assert_not_called()

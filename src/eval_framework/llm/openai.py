@@ -193,13 +193,8 @@ class OpenAIModel(BaseLLM):
 
         async def _run() -> list[RawCompletion]:
             if self._formatter is not None:
-                return list(
-                    await asyncio.gather(
-                        *(
-                            self._complete(m, stop_sequences, scaled_max_tokens, effective_temperature, effective_top_p)
-                            for m in messages
-                        )
-                    )
+                return await self._complete_batched(
+                    messages, stop_sequences, scaled_max_tokens, effective_temperature, effective_top_p
                 )
             return list(
                 await asyncio.gather(
@@ -212,54 +207,65 @@ class OpenAIModel(BaseLLM):
 
         return self._runner.run(_run())
 
-    async def _complete(
+    async def _complete_batched(
         self,
-        single_messages: Sequence[Message],
+        messages: list[Sequence[Message]],
         stop_sequences: list[str] | None,
         max_tokens: int | None,
         temperature: float,
         top_p: float | None,
-    ) -> RawCompletion:
+    ) -> list[RawCompletion]:
+        """One completions request for all prompts; usage comes back aggregated over the batch."""
         assert self._formatter is not None
         assert self._model_name is not None
-        prompt = self._formatter.format(single_messages, output_mode="string")
+        if not messages:
+            return []
+        prompts = [self._formatter.format(m, output_mode="string") for m in messages]
         # documentation: https://platform.openai.com/docs/api-reference/completions/create
         response = await self._async_client.completions.create(
             model=self._model_name,
-            prompt=prompt,
+            prompt=prompts,
             temperature=temperature,
             top_p=top_p if top_p is not None else omit,
             max_tokens=max_tokens if max_tokens is not None else omit,
             stop=stop_sequences if stop_sequences else omit,
         )
-        completion = response.choices[0].text
-        usage = getattr(response, "usage", None)
-        prompt_tokens = getattr(usage, "prompt_tokens", None) if usage is not None else None
-        completion_tokens = getattr(usage, "completion_tokens", None) if usage is not None else None
-        return RawCompletion(
-            prompt=prompt,
-            prompt_num_tokens=(
-                prompt_tokens
-                if prompt_tokens is not None
-                else (self._count_tokens(prompt) if self._encoder is not None else None)
-            ),
-            concat_compression=(
-                ConcatCompression.calculate(
-                    single_messages,
-                    count_tokens=self._count_tokens,
+        if len(response.choices) != len(prompts):
+            raise ValueError(f"Expected {len(prompts)} choices in the response, got {len(response.choices)}.")
+        choices = sorted(response.choices, key=lambda c: c.index)
+        usage = response.usage
+        results: list[RawCompletion] = []
+        for single_messages, prompt, choice in zip(messages, prompts, choices, strict=True):
+            completion = choice.text
+            prompt_tokens: int | None
+            completion_tokens: int | None
+            if self._encoder is not None:
+                prompt_tokens = self._count_tokens(prompt)
+                completion_tokens = self._count_tokens(completion)
+            elif usage is not None:
+                prompt_tokens = usage.prompt_tokens // len(prompts)
+                completion_tokens = usage.completion_tokens // len(prompts)
+            else:
+                prompt_tokens, completion_tokens = None, None
+            results.append(
+                RawCompletion(
+                    prompt=prompt,
+                    prompt_num_tokens=prompt_tokens,
+                    concat_compression=(
+                        ConcatCompression.calculate(
+                            single_messages,
+                            count_tokens=self._count_tokens,
+                            completion=completion,
+                        )
+                        if self._encoder is not None
+                        else None
+                    ),
                     completion=completion,
+                    completion_num_tokens=completion_tokens,
+                    finish_reason=choice.finish_reason,
                 )
-                if self._encoder is not None
-                else None
-            ),
-            completion=completion,
-            completion_num_tokens=(
-                completion_tokens
-                if completion_tokens is not None
-                else (self._count_tokens(completion) if self._encoder is not None else None)
-            ),
-            finish_reason=response.choices[0].finish_reason,
-        )
+            )
+        return results
 
     async def _chat(
         self,
