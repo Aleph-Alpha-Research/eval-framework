@@ -180,25 +180,23 @@ def test_local_context() -> None:
 def test_import_models(tmp_path: Path) -> None:
     llm_dir = Path(eval_framework.llm.__path__[0])
     models = import_models(llm_dir / "models.py")
-    huggingface = import_models(llm_dir / "huggingface.py")
+    aleph_alpha = import_models(llm_dir / "aleph_alpha.py")
 
-    assert "SmolLM135M" in models
-    assert "Pythia410m" in models
-    assert "HFLLM" in huggingface
-    del huggingface["HFLLM"]
+    assert "AlephAlphaAPIModel" in models
+    assert "OpenAIModel" in models
+    assert "Llama31_8B_Instruct_API" in aleph_alpha
 
     for model in models.values():
         assert issubclass(model, BaseLLM)
 
     shutil.copy(llm_dir / "models.py", tmp_path / "models.py")
-    shutil.copy(llm_dir / "huggingface.py", tmp_path / "huggingface.py")
+    shutil.copy(llm_dir / "aleph_alpha.py", tmp_path / "aleph_alpha.py")
     models2 = import_models(tmp_path / "models.py")
-    huggingface2 = import_models(tmp_path / "huggingface.py")
+    aleph_alpha2 = import_models(tmp_path / "aleph_alpha.py")
 
-    assert "SmolLM135M" in models2
-    assert "Pythia410m" in models2
-    assert "HFLLM" in huggingface2
-    del huggingface2["HFLLM"]
+    assert "AlephAlphaAPIModel" in models2
+    assert "OpenAIModel" in models2
+    assert "Llama31_8B_Instruct_API" in aleph_alpha2
 
     for model in models2.values():
         assert issubclass(model, BaseLLM)

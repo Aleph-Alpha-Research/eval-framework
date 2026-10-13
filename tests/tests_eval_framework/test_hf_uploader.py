@@ -5,9 +5,9 @@ import pytest
 import wandb
 from pytest_mock import MockerFixture
 
-from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.result_processors.hf_uploader import HFUploader
 from eval_framework.tasks.eval_config import EvalConfig
+from tests.tests_eval_framework.conftest import MockLLM
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def sample_config(tmp_path: Path) -> EvalConfig:
         output_dir=tmp_path,
         hf_upload_repo="test-org/test-repo",
         hf_upload_dir="results",
-        llm_class=Qwen3_0_6B,
+        llm_class=MockLLM,
     )
 
 
@@ -89,7 +89,7 @@ def test_init_turned_off() -> None:
         task_name="ARC",
         num_fewshot=0,
         num_samples=10,
-        llm_class=Qwen3_0_6B,
+        llm_class=MockLLM,
     )
     uploader = HFUploader(sample_config)
 

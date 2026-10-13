@@ -7,9 +7,9 @@ from unittest.mock import Mock
 import pytest
 import wandb
 
-from eval_framework.llm.huggingface import Qwen3_0_6B
 from eval_framework.result_processors.wandb_uploader import WandbUploader, register_artifact_upload_function
 from eval_framework.tasks.eval_config import EvalConfig
+from tests.tests_eval_framework.conftest import MockLLM
 from tests.tests_eval_framework.mock_wandb import MockArtifact
 
 
@@ -36,7 +36,7 @@ def sample_config(tmp_path: Path) -> EvalConfig:
         output_dir=tmp_path,
         wandb_upload_results=True,
         hf_upload_dir="results",
-        llm_class=Qwen3_0_6B,
+        llm_class=MockLLM,
     )
 
 
@@ -124,7 +124,7 @@ def test_turned_off(mock_wandb: Mock) -> None:
         task_name="ARC",
         num_fewshot=0,
         num_samples=10,
-        llm_class=Qwen3_0_6B,
+        llm_class=MockLLM,
         wandb_upload_results=False,
     )
     with wandb.init():
@@ -152,7 +152,7 @@ def test_name_and_alias(mock_wandb: Mock, sample_config: EvalConfig, sample_outp
 
         assert len(mock_wandb.run._logged_artifacts) == 1
         artifact = mock_wandb.run._logged_artifacts[0]
-        assert artifact.name.split(":")[0] == "test-model__ARC__fs0s10_ad9f5"
+        assert artifact.name.split(":")[0] == "test-model__ARC__fs0s10_71f82"
         assert "H-03b43ebe7c" in artifact.aliases
 
 
@@ -164,5 +164,5 @@ def test_long_artifact_name(mock_wandb: Mock, sample_config: EvalConfig, sample_
 
         assert len(mock_wandb.run._logged_artifacts) == 1
         artifact = mock_wandb.run._logged_artifacts[0]
-        assert artifact.name.split(":")[0].endswith("__ARC__fs0s10_ad9f5")
+        assert artifact.name.split(":")[0].endswith("__ARC__fs0s10_71f82")
         assert len(artifact.name.split(":")[0]) <= 255

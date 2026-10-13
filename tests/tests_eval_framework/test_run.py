@@ -5,31 +5,17 @@ from argparse import Namespace
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from eval_framework.context.local import _load_model as _load_model_orig
 from eval_framework.run import run
-from tests.tests_eval_framework.conftest import MockLLM
-
-
-def _load_model_mock(llm_name: str, models_path, *, info: str = ""):
-    """Return MockLLM for SmolLM135M/Smollm135MInstruct to avoid downloading real models.
-    Use a subclass with the same __name__ as the requested class so output paths match
-    the test assertions (which use llm_name, i.e. the class name)."""
-    clazz = _load_model_orig(llm_name, models_path, info=info)
-    if clazz.__name__ in ("SmolLM135M", "Smollm135MInstruct"):
-        return type(clazz.__name__, (MockLLM,), {})
-    return clazz
 
 
 @patch("argparse.ArgumentParser.parse_args")
-@patch("eval_framework.context.local._load_model", side_effect=_load_model_mock)
 def test_run(
-    _mock_load_model: Mock,
     mock_parse_args: Mock,
     tmp_path: Path,
 ) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
     task_name = "ARC"
-    llm_name = "SmolLM135M"
+    llm_name = "MockLLM"
     mock_parse_args.return_value = Namespace(
         context="local",
         models=Path(__file__).parent / "conftest.py",
@@ -48,7 +34,7 @@ def test_run(
         hf_upload_repo="",
         llm_args=[],
         judge_models=Path(__file__).parent / "conftest.py",
-        judge_model_name="Smollm135MInstruct",
+        judge_model_name="MockLLM",
         judge_model_args={},
         batch_size=2,
         task_subjects=None,
@@ -70,16 +56,14 @@ def test_run(
 
 
 @patch("argparse.ArgumentParser.parse_args")
-@patch("eval_framework.context.local._load_model", side_effect=_load_model_mock)
 def test_run_path(
-    _mock_load_model: Mock,
     mock_parse_args: Mock,
     tmp_path: Path,
 ) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
     task_name = "ARC"
     module = "tests.tests_eval_framework.conftest"
-    llm_name = "SmolLM135M"
+    llm_name = "MockLLM"
     mock_parse_args.return_value = Namespace(
         context="local",
         models=None,
@@ -98,7 +82,7 @@ def test_run_path(
         hf_upload_repo="",
         llm_args=[],
         judge_models=Path(__file__).parent / "conftest.py",
-        judge_model_name="tests.tests_eval_framework.conftest.Smollm135MInstruct",
+        judge_model_name="tests.tests_eval_framework.conftest.MockLLM",
         judge_model_args={},
         batch_size=2,
         task_subjects=None,
@@ -122,7 +106,7 @@ def test_run_path(
 def test_run_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
     task_name = "ARC"
-    llm_name = "SmolLM135M"
+    llm_name = "MockLLM"
     mock_parse_args.return_value = Namespace(
         context="local",
         models=Path(__file__).parent / "conftest.py",
@@ -166,7 +150,7 @@ def test_run_path_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
     version_str = f"v{importlib.metadata.version('eval_framework')}"
     task_name = "ARC"
     module = "tests.tests_eval_framework.conftest"
-    llm_name = "SmolLM135M"
+    llm_name = "MockLLM"
     mock_parse_args.return_value = Namespace(
         context="local",
         models=None,

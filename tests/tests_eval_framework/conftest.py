@@ -4,10 +4,8 @@ from unittest.mock import Mock
 
 import pytest
 import wandb
-from _pytest.fixtures import FixtureRequest
 
 from eval_framework.llm.base import BaseLLM, Sample
-from eval_framework.llm.huggingface import Pythia410m, SmolLM135M, Smollm135MInstruct
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.utils import close_pools
 from template_formatting.formatter import Message
@@ -62,21 +60,6 @@ class MockLLM(BaseLLM):
             )
             for _ in messages
         ]
-
-
-model_dict = {
-    "Pythia410m": Pythia410m,
-    "SmolLM135M": SmolLM135M,
-    "Smollm135MInstruct": Smollm135MInstruct,
-    "MockLLM": MockLLM,
-}
-
-
-@pytest.fixture()
-def test_llms(request: FixtureRequest) -> BaseLLM:
-    if request.param not in model_dict:
-        raise ValueError(f"Unknown LLM name: {request.param}")
-    return model_dict[request.param]()
 
 
 @pytest.fixture
