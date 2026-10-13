@@ -51,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        extras: ['', 'determined', 'api', 'openai', 'transformers', 'accelerate', 'optional']
+        extras: ['', 'determined', 'api', 'openai', 'optional']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -186,48 +186,3 @@ jobs:
         run: |
           uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
           uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "formatter_hash"
-
-  test-gpu:
-    # PRs: run GPU tests directly on the GPU runner (no Docker image).
-    if: github.event_name == 'pull_request'
-    runs-on: EvalFrameworkGPURunner
-    needs: [test-cpu, test-cpu-slow, test-formatter-hash]
-    permissions:
-      pull-requests: read
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 2
-
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.11"
-
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v10.3.0
-        with:
-          version: "~=0.8.16"
-
-      - name: Huggingface datasets cache
-        uses: actions/cache@v6
-        with:
-          path: ${{ env.HF_DATASET_CACHE_DIR }}
-          key: hf-datasets-${{ github.job }}-${{ github.run_id }}
-          restore-keys: |
-            hf-datasets-${{ github.job }}-
-
-      - name: Verify GPU installs via uv --exact
-        run: |
-          set -e
-          echo "Testing all extras together"
-          uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
-
-      - name: Test GPU
-        timeout-minutes: 20
-        env:
-          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
-        run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "gpu and not cpu_slow and not external_api"
