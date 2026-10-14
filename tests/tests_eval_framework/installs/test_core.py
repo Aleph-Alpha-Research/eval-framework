@@ -8,3 +8,7 @@ def test_core_import() -> None:
     from template_formatting.formatter import BaseFormatter
 
     assert BaseFormatter is not None
+
+    from eval_framework.llm.openai import OpenAIModel
+
+    assert OpenAIModel is not None
