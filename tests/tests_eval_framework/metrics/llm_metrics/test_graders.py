@@ -1,5 +1,4 @@
 import json
-import random
 from collections.abc import Sequence
 
 import pytest
@@ -165,14 +164,21 @@ def test_comparison_grader_corrects_outcome_for_randomized_order(seed: int) -> N
         INSTRUCTION, "first answer", "second answer", Language("en"), randomize_order=True, seed=seed
     )
 
-    swapped = random.Random(seed).choice([True, False])
     user_prompt = judge.message(Role.USER)
-    if swapped:
-        assert user_prompt.index("second answer") < user_prompt.index("first answer")
-        assert output.outcome == MatchOutcome.B_WINS
-    else:
-        assert user_prompt.index("first answer") < user_prompt.index("second answer")
-        assert output.outcome == MatchOutcome.A_WINS
+    swapped = user_prompt.index("second answer") < user_prompt.index("first answer")
+    assert output.outcome == (MatchOutcome.B_WINS if swapped else MatchOutcome.A_WINS)
+
+
+def test_comparison_grader_randomizes_order_across_seeds() -> None:
+    swaps = set()
+    for seed in range(4):
+        judge = ScriptedJudge(json.dumps({"explanation": "because", "better_answer": "Answer 1 is better"}))
+        ComparisonGrader(judge).grade(
+            INSTRUCTION, "first answer", "second answer", Language("en"), randomize_order=True, seed=seed
+        )
+        user_prompt = judge.message(Role.USER)
+        swaps.add(user_prompt.index("second answer") < user_prompt.index("first answer"))
+    assert swaps == {True, False}
 
 
 @pytest.mark.parametrize(
