@@ -21,7 +21,7 @@ and first-party/internal packages are excluded.
 | `lxml` | `>=6.1.3,<7` |
 | `mysql-connector-python` | `>=26.7.0,<27` |
 | `nltk` | `>=3.10.3,<4` |
-| `numpy` | `>=2.5.3` |
+| `numpy` | `>=2.5.4` |
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.0,<3` |
@@ -40,7 +40,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `botocore` | `1.43.112` |
+| `botocore` | `1.43.113` |
 | `certifi` | `2026.7.22` |
 | `charset-normalizer` | `3.5.2` |
 | `click` | `8.5.0` |
