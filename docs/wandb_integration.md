@@ -87,15 +87,3 @@ hyperparameters:
 
 **Required:**
 - `WANDB_API_KEY`: Your WandB API key from [wandb.ai/authorize](https://wandb.ai/authorize)
-
-**Optional (for S3-backed artifacts):**
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_ENDPOINT_URL`
-
-*Note: AWS variables are only needed if using reference-backed artifacts. Direct WandB artifact storage doesn't require them.*
-
-**Custom ones:**
-- `WANDB_CACHE_SKIP`: Whether to use W&B cache when downloading model artifacts (defaults to False to avoid double storage).
-- `WANDB_ARTIFACT_DIR`: Directory where model artifacts will be downloaded (if not given, a temporary one will be used).
-- `WANDB_ARTIFACT_WAIT_TIMEOUT_SEC`: How long to wait for an artifact to become available on W&B if a corresponding "-local" version of the artifact is available.
