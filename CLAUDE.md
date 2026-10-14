@@ -22,7 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The eval-framework follows a modular architecture with three main extensible base classes:
 
 1. **BaseLLM** (`src/eval_framework/llm/base.py`) - Language model implementations
-   - Used to define how to get responses from models (HuggingFace, OpenAI, custom APIs, etc.)
+   - Used to define how to get responses from models (OpenAI-compatible endpoints, Aleph Alpha API, custom APIs, etc.)
    - Implementations: `OpenAIModel` (any OpenAI-compatible endpoint), `AlephAlphaAPIModel`.
    - Requires: `LLM_NAME`, `DEFAULT_FORMATTER`, and methods like `_get_completion()`
 
@@ -68,7 +68,7 @@ The eval-framework follows a modular architecture with three main extensible bas
 - **`llm/`**: Language model interfaces
   - `base.py`: `BaseLLM` abstract class
   - `models.py`: Registry of default models
-  - Model-specific files for each provider (HuggingFace, OpenAI, etc.)
+  - Model-specific files for each provider (OpenAI, Aleph Alpha)
 
 - **`metrics/`**: Evaluation metrics
   - `base.py`: `BaseMetric` class
@@ -124,11 +124,10 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 ## Dependencies & Extras
 
 Optional extras (install with `uv sync --all-extras`):
-- `openai`: OpenAI API support
-- `vllm`: vLLM inference engine
-- `mistral`: Mistral model support
+- `openai`: OpenAI-compatible endpoints (OpenAI, vLLM, TGI, ...)
 - `api`: Aleph Alpha client
 - `determined`: Determined AI integration
+- `optional`: HuggingFace chat-template formatting
 
 ## Conventions
 

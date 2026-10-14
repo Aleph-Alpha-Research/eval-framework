@@ -25,7 +25,7 @@
 
 ## Other features
 
-- Flexible Model Integration: Supports models loaded via HuggingFace Transformers or custom implementations using the BaseLLM class.
+- Flexible Model Integration: Supports OpenAI-compatible endpoints, the Aleph Alpha API, or custom implementations using the BaseLLM class.
 - Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
 - Custom Metrics: Easily define new metrics using the BaseMetric class.
 - Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
@@ -145,7 +145,7 @@ For the full list of tasks and metrics, see [Detailed Task Table](https://aleph-
 
 Eval-Framework provides a unified interface for evaluating language models across diverse benchmarks. The framework follows this interaction model:
 
-1. **Define Your Model** - Specify which model to evaluate (HuggingFace, API, or custom)
+1. **Define Your Model** - Specify which model to evaluate (OpenAI-compatible endpoint, Aleph Alpha API, or custom)
 2. **Choose Your Task** - Select from 150+ available benchmarks or create custom ones
 3. **Configure Evaluation** - Set parameters like few-shot examples, sample count, and output format
 4. **Run Evaluation** - Execute locally via CLI/script or distribute via Determined AI

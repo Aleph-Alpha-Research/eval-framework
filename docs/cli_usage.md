@@ -121,34 +121,6 @@ uv run eval_framework \
 Every keyword argument of the `OpenAIModel` constructor can be set through `--llm-args`; see the
 [Model Arguments guide](model_arguments.md) for the full list.
 
-## Configuring Sampling Parameters for vLLM Models
-
-vLLM models support configurable sampling parameters through the `--llm-args` parameter. You can specify individual sampling parameters using dot notation:
-
-```bash
-uv run eval_framework \
-    --llm-name 'eval_framework.llm.models.Qwen3_0_6B_VLLM' \
-    --llm-args sampling_params.temperature=0.7 sampling_params.top_p=0.95 sampling_params.max_tokens=150 \
-    --task-name "MMLU" \
-    --task-subjects "abstract_algebra" \
-    --output-dir ./eval_results \
-    --num-fewshot 5 \
-    --num-samples 10
-```
-
-You can also combine sampling parameters with other model arguments:
-
-```bash
-uv run eval_framework \
-    --llm-name 'eval_framework.llm.models.Qwen3_0_6B_VLLM' \
-    --llm-args max_model_len=2048 sampling_params.temperature=0.8 sampling_params.top_p=0.9 \
-    --task-name "MMLU" \
-    --task-subjects "abstract_algebra" \
-    --output-dir ./eval_results \
-    --num-fewshot 5 \
-    --num-samples 10
-```
-
 ## Running a Task Suite
 
 Task suites let you run multiple tasks in one command and aggregate their scores. You can define a suite in a `.yaml` file:
@@ -191,7 +163,8 @@ Then pass the suite file to the CLI:
 
 ```bash
 uv run eval_framework \
-    --llm-name 'eval_framework.llm.models.Qwen3_0_6B_VLLM' \
+    --llm-name 'eval_framework.llm.openai.OpenAIModel' \
+    --llm-args model_name="gpt-4o-mini" \
     --task-suite my_suite.yaml \
     --output-dir ./eval_results
 ```
