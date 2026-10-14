@@ -14,8 +14,7 @@ from openai.types.chat import (
     ChatCompletionUserMessageParam,
 )
 from openai.types.chat.completion_create_params import ResponseFormat
-from tokenizers import Tokenizer
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import (
@@ -101,7 +100,7 @@ class OpenAIModel(BaseLLM):
             base_url=base_url,
         )
 
-        self._encoder: tiktoken.Encoding | Tokenizer | None = self._get_encoder_or_none()
+        self._encoder: tiktoken.Encoding | PreTrainedTokenizerBase | None = self._get_encoder_or_none()
 
         # set bytes_per_token_scalar for non-standard models
         if bytes_per_token is not None and bytes_per_token <= 0:
@@ -470,7 +469,7 @@ class DeepseekModel(OpenAIModel):
         # DeepSeek uses HF tokenization; override the base encoder (which may be None).
         self._encoder = self._get_encoder()
 
-    def _get_encoder(self) -> Tokenizer:
+    def _get_encoder(self) -> PreTrainedTokenizerBase:
         return AutoTokenizer.from_pretrained(self._tokenizer_name)
 
     def _count_tokens(self, text: str) -> int:
