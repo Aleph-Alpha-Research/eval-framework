@@ -25,7 +25,7 @@ For most contributors, running the CPU fast tests is sufficient:
 ```bash
 # Run the tests that PR CI runs
 uv run --all-extras pytest -n auto --max-worker-restart=0 -v \
-    -m "not gpu and not cpu_slow and not external_api and not formatter_hash"
+    -m "not cpu_slow and not external_api and not formatter_hash"
 ````
 
 ---
