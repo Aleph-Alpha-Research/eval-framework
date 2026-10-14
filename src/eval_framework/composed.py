@@ -337,9 +337,9 @@ class ComposedBenchmark(Benchmark):
         return self._kind.metrics() + self._answer.metrics()
 
     @override
-    def subjects(self) -> list[Any]:
-        """The benchmark's subjects"""
-        return [subject.label for subject in self._subjects.select([])]
+    def subjects(self, tokens: list[str] | None = None) -> list[str]:
+        """The labels of the subjects the given selector tokens cover (no tokens = all)."""
+        return [subject.label for subject in self._subjects.select(tokens or [])]
 
     @override
     def display_name(self) -> str:

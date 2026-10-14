@@ -8,7 +8,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import BytesC
 from eval_framework.metrics.efficiency.finish_reason import FinishReason
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
 from eval_framework.tasks import dataset_revisions as dr
-from eval_framework.tasks.base import BaseTask, ResponseType, hf_dataset_link
+from eval_framework.tasks.base import BaseTask, Eager, ResponseType, hf_dataset_link
 
 
 @pytest.mark.parametrize(
@@ -100,6 +100,29 @@ def test_task_custom_subjects(
         task = MyTask.with_overwrite(num_fewshot=0, custom_subjects=custom_subjects, custom_hf_revision=None)
         result = task.SUBJECTS
         assert result == expected_value
+
+
+def test_eager_subjects_resolves_tokens_against_the_raw_subjects() -> None:
+    # Given a task with tuple subjects, wrapped the way the registry wraps it
+    class MyTask(BaseTask):
+        REVISION_LOCKFILE = None
+        SUBJECTS = [("EN_US", "topic1"), ("EN_US", "topic2"), ("DE_DE", "topic1")]
+        NAME = "MyTask"
+        RESPONSE_TYPE = ResponseType.COMPLETION
+        METRICS: list = []
+
+        def _get_instruction_text(self, item: dict[str, Any]) -> str:
+            return ""
+
+        def _get_ground_truth(self, item: dict[str, Any]) -> list[str]:
+            return []
+
+    benchmark = Eager.from_base_task(MyTask)
+
+    # When resolving a part-wise token / Then matching used the tuple parts (as a run does), and the
+    # chosen subjects come back stringified -- the form samples and result keys carry
+    assert benchmark.subjects(["EN_US,*"]) == ["('EN_US', 'topic1')", "('EN_US', 'topic2')"]
+    assert benchmark.subjects() == ["('EN_US', 'topic1')", "('EN_US', 'topic2')", "('DE_DE', 'topic1')"]
 
 
 def test_base_task() -> None:

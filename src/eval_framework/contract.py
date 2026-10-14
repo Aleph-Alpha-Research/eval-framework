@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict
 
@@ -90,8 +90,10 @@ class Benchmark(ABC):
         """The benchmark's metrics"""
 
     @abstractmethod
-    def subjects(self) -> list[Any]:
-        """Subjects of the benchmark"""
+    def subjects(self, tokens: list[str] | None = None) -> list[str]:
+        """Labels of the subjects a run with these ``--task-subjects`` tokens evaluates (no tokens =
+        all), exactly as they appear in samples and aggregated-result keys. Raises ``ValueError`` for
+        a token no subject matches, mirroring what ``create`` does with the same tokens."""
 
     @abstractmethod
     def display_name(self) -> str:

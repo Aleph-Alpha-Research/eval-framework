@@ -174,6 +174,29 @@ def _make_eval(
     )
 
 
+def test_subjects_resolves_tokens_through_its_selector() -> None:
+    # Given a selector that records how it is invoked and labels its single slice
+    class _SpySelector(SubjectsSelector):
+        def __init__(self) -> None:
+            self.calls: list[list[str]] = []
+
+        @override
+        def select(self, tokens: list[str]) -> Subjects:
+            self.calls.append(tokens)
+            return (Subject(load_key="a/1.jsonl", label="('a', 1)"),)
+
+    selector = _SpySelector()
+    benchmark = _make_benchmark(subjects=selector)
+
+    # When asking for the subjects of a filtered run and of an unfiltered one
+    filtered = benchmark.subjects(["a,*"])
+    unfiltered = benchmark.subjects()
+
+    # Then the tokens reach the selector verbatim ("no selection" = all) and the labels come back
+    assert filtered == unfiltered == ["('a', 1)"]
+    assert selector.calls == [["a,*"], []]
+
+
 def test_create_forwards_custom_subjects_to_its_selector() -> None:
     # Given a selector that records how create invokes it (selection itself is tested in test_subjects.py)
     class _SpySelector(SubjectsSelector):

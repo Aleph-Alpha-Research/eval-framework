@@ -1,5 +1,5 @@
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from eval_framework.contract import Benchmark, Eval, ResponseType
 from template_formatting.formatter import BaseFormatter
@@ -45,8 +45,8 @@ class Lazy(Benchmark):
     def metrics(self) -> list[type["BaseMetric"]]:
         return self._loaded_factory().metrics()
 
-    def subjects(self) -> list[Any]:
-        return self._loaded_factory().subjects()
+    def subjects(self, tokens: list[str] | None = None) -> list[str]:
+        return self._loaded_factory().subjects(tokens)
 
     def display_name(self) -> str:
         return self._loaded_factory().display_name()

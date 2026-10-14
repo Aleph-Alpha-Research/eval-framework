@@ -617,9 +617,14 @@ class Eager(Benchmark):
         """The eval's metrics"""
         return self._metrics
 
-    def subjects(self) -> list[Any]:
-        """The eval's subjects"""
-        return self._subjects
+    def subjects(self, tokens: list[str] | None = None) -> list[str]:
+        """The labels of the subjects the given selector tokens cover (no tokens = all).
+
+        Tokens are resolved against the task's raw ``SUBJECTS`` — the same call the eval itself makes
+        — so tuple subjects keep their part-by-part matching; the chosen subjects are then stringified,
+        which is the form samples and aggregated-result keys carry."""
+        chosen = resolve_overwrite_subjects(tokens, self._subjects, self._id) if tokens else self._subjects
+        return [str(subject) for subject in chosen]
 
     def display_name(self) -> str:
         """The eval's human-readable display name."""
