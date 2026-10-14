@@ -931,7 +931,7 @@ dependencies = [
     { name = "scipy" },
     { name = "sympy" },
     { name = "tiktoken" },
-    { name = "transformers" },
+    { name = "transformers", extra = ["chat-template"] },
     { name = "wandb" },
     { name = "xmltodict" },
 ]
@@ -940,9 +940,7 @@ dependencies = [
 all = [
     { name = "aleph-alpha-client" },
     { name = "determined" },
-    { name = "jinja2" },
     { name = "tensorboard" },
-    { name = "transformers" },
 ]
 api = [
     { name = "aleph-alpha-client" },
@@ -950,10 +948,6 @@ api = [
 determined = [
     { name = "determined" },
     { name = "tensorboard" },
-]
-optional = [
-    { name = "jinja2" },
-    { name = "transformers" },
 ]
 
 [package.dev-dependencies]
@@ -977,9 +971,8 @@ requires-dist = [
     { name = "antlr4-python3-runtime", specifier = "==4.11.0" },
     { name = "datasets", specifier = ">=5.0.1,<6" },
     { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38.1,<0.39" },
-    { name = "eval-framework", extras = ["determined", "api", "optional"], marker = "extra == 'all'" },
+    { name = "eval-framework", extras = ["determined", "api"], marker = "extra == 'all'" },
     { name = "google-crc32c", specifier = ">=1.9.0,<2" },
-    { name = "jinja2", marker = "extra == 'optional'", specifier = ">=3.1.6,<4" },
     { name = "jsonlines", specifier = ">=4,<5" },
     { name = "jsonschema", specifier = ">=4.26.0,<5" },
     { name = "langdetect", specifier = ">=1.0.9,<2" },
@@ -1000,12 +993,11 @@ requires-dist = [
     { name = "sympy", specifier = ">=1.14.0,<2" },
     { name = "tensorboard", marker = "extra == 'determined'", specifier = "==2.21.0" },
     { name = "tiktoken", specifier = ">=0.14.0,<1" },
-    { name = "transformers", specifier = ">=4.45.2,<6" },
-    { name = "transformers", marker = "extra == 'optional'", specifier = ">=4.45.2,<6" },
+    { name = "transformers", extras = ["chat-template"], specifier = ">=4.45.2,<6" },
     { name = "wandb", specifier = ">=0.30.0,<1" },
     { name = "xmltodict", specifier = ">=1.0.4,<1.1" },
 ]
-provides-extras = ["determined", "api", "optional", "all"]
+provides-extras = ["determined", "api", "all"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -3951,6 +3943,12 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/65/d3/5b7c2f1a52ff0e57355efdc21554aab7e4602f6592ab4582a34c988ab956/transformers-5.10.1.tar.gz", hash = "sha256:31112d1dcdfcf9934242acbba891f44e2279ff74b9b8ba4595640e0e04195a3a", size = 8798372, upload-time = "2026-06-03T15:37:03.289Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e3/8c/3119596c7fcd9b8b8d924d5b5ba1bfdfafd6d8738bdd81ca09c60b4a38b3/transformers-5.10.1-py3-none-any.whl", hash = "sha256:ccb919ea1b77338b44d0d45d23f7472081906b1bb6ed8e5f5cf4d692d1da03d4", size = 11003770, upload-time = "2026-06-03T15:37:00.433Z" },
+]
+
+[package.optional-dependencies]
+chat-template = [
+    { name = "jinja2" },
+    { name = "jmespath" },
 ]
 
 [[package]]
