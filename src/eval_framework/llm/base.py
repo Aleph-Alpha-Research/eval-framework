@@ -2,11 +2,10 @@ from abc import ABC, abstractmethod
 from collections.abc import Generator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
 
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
-from template_formatting.formatter import BaseFormatter, Message
+from template_formatting.formatter import Message
 
 
 class BaseLLM(ABC):
@@ -151,41 +150,3 @@ class BaseLLM(ABC):
                 if file_root is None:
                     raise ValueError(f"Could not find HuggingFace checkpoint in artifact {artifact_base}:{version}")
                 yield file_root, artifact_name
-
-    def _get_final_formatter(
-        self,
-        formatter: BaseFormatter | None = None,
-        formatter_name: str | None = None,
-        formatter_kwargs: dict[str, Any] | None = None,
-    ) -> BaseFormatter | None:
-        if (num_provided := sum(x is not None for x in [formatter, formatter_name])) == 0:
-            return None  # none given, so will use the default of the class
-        elif num_provided > 1:
-            raise ValueError("At most one of `formatter` or `formatter_name` must be provided.")
-
-        if formatter:
-            if formatter_kwargs:
-                raise ValueError("Cannot provide `formatter_kwargs` when `formatter` is provided.")
-            return formatter
-        elif formatter_name:
-            kwargs = formatter_kwargs or {}
-            match formatter_name:
-                case "Llama3Formatter":
-                    from template_formatting.formatter import Llama3Formatter
-
-                    return Llama3Formatter()
-                case "MistralFormatter" | "MagistralFormatter":
-                    from eval_framework.llm.mistral import MagistralFormatter
-
-                    return MagistralFormatter(**kwargs)
-                case "ConcatFormatter":
-                    from template_formatting.formatter import ConcatFormatter
-
-                    return ConcatFormatter()
-                case "HFFormatter":
-                    from template_formatting.formatter import HFFormatter
-
-                    return HFFormatter(**kwargs)
-                case _:
-                    raise ValueError(f"Unsupported formatter: {formatter_name}.")
-        return None
