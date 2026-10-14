@@ -28,6 +28,7 @@ from eval_framework.benchmarks.mbpp_ellamind import MBPP_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.mmlu import MMLU_BENCHMARKS
 from eval_framework.benchmarks.mmlu_pro import MMLU_PRO_BENCHMARKS
 from eval_framework.benchmarks.mmlu_prox import MMLU_PROX_BENCHMARKS
+from eval_framework.benchmarks.multi_if import MULTI_IF_BENCHMARKS
 from eval_framework.benchmarks.multipl_e import MULTIPL_E_BENCHMARKS
 from eval_framework.benchmarks.naturalqs_open import NATURALQS_OPEN_BENCHMARKS
 from eval_framework.benchmarks.piqa import PIQA_BENCHMARKS
@@ -69,6 +70,7 @@ def register_all_tasks(registry: Registry | None = None) -> None:
     register_humaneval_tasks(registry=registry)
     register_humaneval_plus_tasks(registry=registry)
     register_ifeval_tasks(registry=registry)
+    register_multi_if_tasks(registry=registry)
     register_multipl_e_tasks(registry=registry)
     register_mbpp_tasks(registry=registry)
     register_mmlu_tasks(registry=registry)
@@ -184,6 +186,12 @@ def register_goldenswag_tasks(registry: Registry) -> None:
 def register_ifeval_tasks(registry: Registry) -> None:
     """Register ifeval benchmark tasks (composed: IFEval, IFEvalDe)."""
     for benchmark in IFEVAL_BENCHMARKS:
+        registry.add(benchmark)
+
+
+def register_multi_if_tasks(registry: Registry) -> None:
+    """Register multi_if benchmark tasks."""
+    for benchmark in MULTI_IF_BENCHMARKS:
         registry.add(benchmark)
 
 
