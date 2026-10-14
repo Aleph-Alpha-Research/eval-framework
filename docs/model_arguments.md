@@ -38,6 +38,12 @@ It manages model configuration, authentication, and request parameters for the O
 | `organization`    | `str \| None`           | Optional OpenAI **organization ID** for multi-org API usage or billing separation.                                                           |                  `None`                 |
 | `base_url`        | `str \| None`           | Custom **API base URL**, e.g., for Azure OpenAI endpoints or local proxies.                                                                  |                  `None`                 |
 | `bytes_per_token` | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes-per-token).             | `None` *(internally defaults to `4.0`)* |
+| `max_retries`     | `int \| None`           | Retries per request on connection errors and retryable status codes.                                                                         |          `None` *(SDK default)*         |
+| `request_timeout` | `float \| None`         | Per-request timeout in seconds.                                                                                                              |          `None` *(SDK default)*         |
+
+With a formatter configured, prompts go to the completions API in one batched request per call; without one, each message sequence goes to the chat completions API.
+
+`logprobs()` reads echoed prompt logprobs from the completions API (`echo=True`). vLLM is the supported backend. OpenAI serves this only for `babbage-002` and `davinci-002`; other OpenAI-compatible servers work on a best-effort basis. Prompts are built with the configured formatter, or `ConcatFormatter` when none is set, which suits base models only.
 
 ---
 
