@@ -14,6 +14,27 @@
 
 ### Bug Fixes
 
+## [0.16.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.15.5...v0.16.0) (2026-10-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove AIME2025 and AIME2026 tasks
+
+### Features
+
+* add MMLU-ProX benchmarks ([b0801a6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b0801a687b93c7744e46f6e40017673df56984f1))
+
+
+### Bug Fixes
+
+* **deps:** update dependency numpy to &gt;=2.5.4 ([7f45cc5](https://github.com/Aleph-Alpha-Research/eval-framework/commit/7f45cc53aa904777937e92cb7073201162153132))
+
+
+### Code Refactoring
+
+* remove AIME2025 and AIME2026 tasks ([9d8b4cd](https://github.com/Aleph-Alpha-Research/eval-framework/commit/9d8b4cd63e49aea7c00ee69c894aa7ba076d963e))
+
 ## [0.15.5](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.15.4...v0.15.5) (2026-10-13)
 
 
