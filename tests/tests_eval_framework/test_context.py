@@ -184,7 +184,7 @@ def test_import_models(tmp_path: Path) -> None:
 
     assert "AlephAlphaAPIModel" in models
     assert "OpenAIModel" in models
-    assert "Llama31_8B_Instruct_API" in aleph_alpha
+    assert "AlephAlphaAPIModel" in aleph_alpha
 
     for model in models.values():
         assert issubclass(model, BaseLLM)
@@ -196,7 +196,7 @@ def test_import_models(tmp_path: Path) -> None:
 
     assert "AlephAlphaAPIModel" in models2
     assert "OpenAIModel" in models2
-    assert "Llama31_8B_Instruct_API" in aleph_alpha2
+    assert "AlephAlphaAPIModel" in aleph_alpha2
 
     for model in models2.values():
         assert issubclass(model, BaseLLM)
