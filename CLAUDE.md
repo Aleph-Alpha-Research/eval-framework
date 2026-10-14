@@ -126,7 +126,6 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 Optional extras (install with `uv sync --all-extras`):
 - `api`: Aleph Alpha client
 - `determined`: Determined AI integration
-- `optional`: HuggingFace chat-template formatting
 
 ## Conventions
 
