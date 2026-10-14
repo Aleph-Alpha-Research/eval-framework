@@ -47,7 +47,6 @@ pip install eval_framework
 There are optional extras available to unlock specific features of the library:
 - `api` for inference using the aleph-alpha client.
 - `determined` for running jobs via determined.
-- `openai` for inference against OpenAI-compatible HTTP endpoints.
 
 As a short hand, the `all` extra installs all of the above.
 
@@ -163,7 +162,7 @@ Eval-Framework provides a unified interface for evaluating language models acros
 
 1. **Install the framework** (see Quick Start above)
 ```
-pip install eval_framework[openai]
+pip install eval_framework
 ```
 
 2. **Create and run your first evaluation against an OpenAI-compatible endpoint** (requires `OPENAI_API_KEY`; pass `base_url=...` to the constructor to target a self-hosted server such as vLLM):

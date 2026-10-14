@@ -124,7 +124,6 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 ## Dependencies & Extras
 
 Optional extras (install with `uv sync --all-extras`):
-- `openai`: OpenAI-compatible endpoints (OpenAI, vLLM, TGI, ...)
 - `api`: Aleph Alpha client
 - `determined`: Determined AI integration
 - `optional`: HuggingFace chat-template formatting
