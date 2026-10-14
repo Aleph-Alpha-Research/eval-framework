@@ -23,14 +23,13 @@ To select specific optional features, you can install them individually. Availab
 
 - `api` for Aleph Alpha client inference
 - `determined` for distributed evaluation
-- `openai` for OpenAI-compatible endpoints (OpenAI, vLLM, TGI, ...)
 - `optional` for HuggingFace chat-template formatting
 - `all` installs all extras
 
 You can install them as follows:
 
 ```bash
-   uv sync --extra openai
+   uv sync --extra api
 ```
 
 ### 3. Test Your Installation
@@ -118,7 +117,7 @@ It is also possible to download Eval-Framework through pip:
 pip install eval-framework
 
 # or with optional extras
-pip install eval-framework[openai]
+pip install eval-framework[api]
 ```
 
 However, we recommend using the uv solver to avoid many dependency version issues, so:
@@ -127,7 +126,7 @@ However, we recommend using the uv solver to avoid many dependency version issue
 uv pip install eval-framework
 
 # or with optional extras
-uv pip install eval-framework[openai]
+uv pip install eval-framework[api]
 ```
 
 This allows you to run an evaluation without going through `uv run`:
