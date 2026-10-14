@@ -94,7 +94,6 @@ The eval-framework follows a modular architecture with three main extensible bas
 ## Testing
 
 Run tests with markers to filter by type:
-- `pytest -m "not gpu"` - Skip GPU-only tests
 - `pytest -m "not slow_download"` - Skip large downloads
 - `pytest -m "not external_api"` - Skip external service tests
 - `pytest -k <test_name>` - Run specific test by name

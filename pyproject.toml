@@ -134,7 +134,6 @@ testpaths = ["./tests"]
 minversion = 8.0
 addopts = "-p 'no:legacypath' --doctest-modules -n auto"
 markers = [
-    "gpu: needs a GPU runner, otherwise test can not be run",
     "cpu_slow: runs for a long time (on CPU)",
     "slow_download: smoke tests that download large datasets (>15s); excluded from CI, run manually with -m slow_download",
     "external_api: needs external services for execution",
