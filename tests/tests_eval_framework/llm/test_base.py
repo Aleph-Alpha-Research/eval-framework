@@ -1,14 +1,7 @@
 import pytest
 
 from eval_framework.shared.types import Completion, LanguageMetricContext
-from template_formatting.formatter import (
-    ConcatFormatter,
-    HFFormatter,
-    IdentityFormatter,
-    Llama3Formatter,
-    Message,
-    Role,
-)
+from template_formatting.formatter import Message, Role
 
 
 def test_completion_languages() -> None:
@@ -92,20 +85,5 @@ LLM_INIT_SOURCE_PARAMS = [
         "/download",
         "MyModel_checkpoint_CN",
         id="artifact_name w/CN",
-    ),
-]
-
-LLM_INIT_FORMATTER_PARAMS = [
-    pytest.param(dict(model_name="org/other"), ConcatFormatter, id="default init"),
-    pytest.param(dict(model_name="org/other", formatter=IdentityFormatter()), IdentityFormatter, id="formatter"),
-    pytest.param(dict(model_name="org/other", formatter_name="Llama3Formatter"), Llama3Formatter, id="formatter_name"),
-    pytest.param(
-        dict(
-            model_name="org/other",
-            formatter_name="HFFormatter",
-            formatter_kwargs=dict(hf_llm_name="HuggingFaceTB/SmolLM-135M-Instruct"),
-        ),
-        HFFormatter,
-        id="formatter_kwargs",
     ),
 ]
