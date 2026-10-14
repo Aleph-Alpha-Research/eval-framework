@@ -23,7 +23,6 @@ To select specific optional features, you can install them individually. Availab
 
 - `api` for Aleph Alpha client inference
 - `determined` for distributed evaluation
-- `optional` for HuggingFace chat-template formatting
 - `all` installs all extras
 
 You can install them as follows:

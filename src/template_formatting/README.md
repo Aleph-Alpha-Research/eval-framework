@@ -35,10 +35,6 @@ uv sync
 ```
 This command ensures that all dependencies listed in your pyproject.toml file are correctly installed and available for use in your project.
 
-To install all dependencies (including optional ones), run
-```bash
-uv install --extras optional
-```
 
 ## Usage
 **Running Commands with uv**
