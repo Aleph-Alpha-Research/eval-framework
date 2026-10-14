@@ -901,7 +901,6 @@ version = "0.16.0"
 source = { editable = "." }
 dependencies = [
     { name = "antlr4-python3-runtime" },
-    { name = "boto3" },
     { name = "datasets" },
     { name = "google-crc32c" },
     { name = "jsonlines" },
@@ -971,7 +970,6 @@ dev = [
 requires-dist = [
     { name = "aleph-alpha-client", marker = "extra == 'api'", specifier = ">=11.5.1" },
     { name = "antlr4-python3-runtime", specifier = "==4.11.0" },
-    { name = "boto3", specifier = ">=1.43.111,<2" },
     { name = "datasets", specifier = ">=5.0.1,<6" },
     { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38.1,<0.39" },
     { name = "eval-framework", extras = ["determined", "api", "openai", "optional"], marker = "extra == 'all'" },
