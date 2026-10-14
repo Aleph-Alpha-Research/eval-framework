@@ -23,8 +23,8 @@ To select specific optional features, you can install them individually. Availab
 
 - `api` for Aleph Alpha client inference
 - `determined` for distributed evaluation
-- `mistral` for Mistral model inference
-- `vllm` for VLLM inference
+- `openai` for OpenAI-compatible endpoints (OpenAI, vLLM, TGI, ...)
+- `optional` for HuggingFace chat-template formatting
 - `all` installs all extras
 
 You can install them as follows:
@@ -118,7 +118,7 @@ It is also possible to download Eval-Framework through pip:
 pip install eval-framework
 
 # or with optional extras
-pip install eval-framework[transformers]
+pip install eval-framework[openai]
 ```
 
 However, we recommend using the uv solver to avoid many dependency version issues, so:

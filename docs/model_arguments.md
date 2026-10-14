@@ -1,6 +1,6 @@
 # Model Arguments
 
-The Eval-Framework provides a set of model wrapper classes that standardize how LLMs are loaded, formatted, and used for evaluation. Each wrapper manages specific model backends, such as OpenAI-compatible endpoints, the Aleph Alpha API, or vLLM-based models.
+The Eval-Framework provides a set of model wrapper classes that standardize how LLMs are loaded, formatted, and used for evaluation. Each wrapper manages specific model backends, such as OpenAI-compatible endpoints or the Aleph Alpha API.
 
 The following sections describe the **constructor arguments** for each model class, highlighting configuration options, defaults, and their purpose. Understanding these arguments allows you to customize evaluation behavior, token limits, concurrency, and model-specific settings.
 
@@ -38,45 +38,6 @@ It manages model configuration, authentication, and request parameters for the O
 | `organization`    | `str \| None`           | Optional OpenAI **organization ID** for multi-org API usage or billing separation.                                                           |                  `None`                 |
 | `base_url`        | `str \| None`           | Custom **API base URL**, e.g., for Azure OpenAI endpoints or local proxies.                                                                  |                  `None`                 |
 | `bytes_per_token` | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes-per-token).             | `None` *(internally defaults to `4.0`)* |
-
----
-
-## BaseVLLMModel — Constructor Arguments
-
-`BaseVLLMModel` defines the core initialization logic for all vLLM-backed models.
-It manages GPU allocation, tokenizer setup, and internal sampling parameter normalization.
-
-### BaseVLLMModel Constructor Argument Reference
-
-| **Argument**             | **Type**                                   | **Description**                                                                                                                             |          **Default**         |
-| :----------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------: |
-| `formatter`                     | `BaseFormatter \| None` | Explicit formatter instance used to convert chat messages into model prompts. If not provided, falls back to `DEFAULT_FORMATTER`. |                  `None`                 |
-| `max_model_len`          | `int \| None`                              | Maximum sequence length (token context limit). Used to configure the vLLM engine.                                                           |            `None`            |
-| `tensor_parallel_size`   | `int`                                      | Number of GPUs for tensor-level parallel inference.                                                                                         |              `1`             |
-| `gpu_memory_utilization` | `float`                                    | Fraction of total GPU memory reserved for model weights and KV cache.                                                                       |             `0.9`            |
-| `batch_size`             | `int`                                      | Number of sequences processed per batch.                                                                                                    |              `1`             |
-| `checkpoint_path`        | `str \| Path \| None`                      | Local model path or checkpoint directory.                                                                                                   |            `None`            |
-| `checkpoint_name`        | `str \| None`                              | Human-readable identifier for the checkpoint.                                                                                               |            `None`            |
-| `sampling_params`        | `SamplingParams \| dict[str, Any] \| None` | Sampling configuration parameters.                                                                                                          |            `None`            |
-| `bytes_per_token` | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes-per-token).             | `None` *(internally defaults to `4.0`)* |
-| `**kwargs`               | `Any`                                      | Any remaining parameters forwarded to the `LLM` engine constructor.                                                                         |               —              |
-
----
-
-## MistralVLLM — Constructor Arguments
-
-`MistralVLLM` is a specialized subclass of `VLLMModel` → `BaseVLLMModel` designed to run **Mistral** Hugging Face models using the **vLLM** inference backend.
-It provides flexible model loading (from local files, Hugging Face Hub, or Weights & Biases), GPU-efficient parallelism, and tunable sampling behavior.
-
-### MistralVLLM Constructor Argument Reference
-
-| **Argument**             | **Type**                                   | **Description**                                                                                                                                                                          |               **Default**               |
-| :----------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------: |
-| `model_name`             | `str \| None`                              | Hugging Face model identifier (e.g. `"mistralai/Mistral-7B-v0.1"`). Used if `checkpoint_path` is not provided.                                                                           |                  `None`                 |
-| `artifact_name`          | `str \| None`                              | **Weights & Biases artifact** reference (e.g. `"org/model:latest"`). Used for pulling models from W&B registry.                                                                          |                  `None`                 |
-| `formatter_name`         | `str \| None`                              | Name of a registered formatter class (e.g. `"ConcatFormatter"`, `"HFFormatter"`). Used when `formatter` is not supplied.                                                                 |                  `None`                 |
-| `formatter_kwargs`       | `dict[str, Any] \| None`                   | Keyword arguments passed to the formatter constructor.                                                                                                                                   |                  `None`                 |
-| `**kwargs`               | `Any`                                      | Additional keyword arguments passed through to `BaseVLLMModel` / `BaseLLM`.                                                                                                              |                    —                    |
 
 ---
 
