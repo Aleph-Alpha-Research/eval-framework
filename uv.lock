@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12, <3.15"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
@@ -921,6 +921,7 @@ dependencies = [
     { name = "mysql-connector-python" },
     { name = "nltk" },
     { name = "numpy" },
+    { name = "openai" },
     { name = "psycopg2-binary" },
     { name = "pycountry" },
     { name = "pydantic" },
@@ -929,6 +930,8 @@ dependencies = [
     { name = "pyyaml" },
     { name = "scipy" },
     { name = "sympy" },
+    { name = "tiktoken" },
+    { name = "transformers" },
     { name = "wandb" },
     { name = "xmltodict" },
 ]
@@ -938,9 +941,7 @@ all = [
     { name = "aleph-alpha-client" },
     { name = "determined" },
     { name = "jinja2" },
-    { name = "openai" },
     { name = "tensorboard" },
-    { name = "tiktoken" },
     { name = "transformers" },
 ]
 api = [
@@ -949,11 +950,6 @@ api = [
 determined = [
     { name = "determined" },
     { name = "tensorboard" },
-]
-openai = [
-    { name = "openai" },
-    { name = "tiktoken" },
-    { name = "transformers" },
 ]
 optional = [
     { name = "jinja2" },
@@ -981,7 +977,7 @@ requires-dist = [
     { name = "antlr4-python3-runtime", specifier = "==4.11.0" },
     { name = "datasets", specifier = ">=5.0.1,<6" },
     { name = "determined", marker = "extra == 'determined'", specifier = ">=0.38.1,<0.39" },
-    { name = "eval-framework", extras = ["determined", "api", "openai", "optional"], marker = "extra == 'all'" },
+    { name = "eval-framework", extras = ["determined", "api", "optional"], marker = "extra == 'all'" },
     { name = "google-crc32c", specifier = ">=1.9.0,<2" },
     { name = "jinja2", marker = "extra == 'optional'", specifier = ">=3.1.6,<4" },
     { name = "jsonlines", specifier = ">=4,<5" },
@@ -993,7 +989,7 @@ requires-dist = [
     { name = "mysql-connector-python", specifier = ">=26.7.0,<27" },
     { name = "nltk", specifier = ">=3.10.3,<4" },
     { name = "numpy", specifier = ">=2.5.4" },
-    { name = "openai", marker = "extra == 'openai'", specifier = ">=3.28.0,<4" },
+    { name = "openai", specifier = ">=3.28.0,<4" },
     { name = "psycopg2-binary", specifier = ">=2.9.13,<3" },
     { name = "pycountry", specifier = ">=26.2.16,<27" },
     { name = "pydantic", specifier = ">=2.14.0,<3" },
@@ -1003,13 +999,13 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.18.1,<2" },
     { name = "sympy", specifier = ">=1.14.0,<2" },
     { name = "tensorboard", marker = "extra == 'determined'", specifier = "==2.21.0" },
-    { name = "tiktoken", marker = "extra == 'openai'", specifier = ">=0.14.0,<1" },
-    { name = "transformers", marker = "extra == 'openai'", specifier = ">=4.45.2,<6" },
+    { name = "tiktoken", specifier = ">=0.14.0,<1" },
+    { name = "transformers", specifier = ">=4.45.2,<6" },
     { name = "transformers", marker = "extra == 'optional'", specifier = ">=4.45.2,<6" },
     { name = "wandb", specifier = ">=0.30.0,<1" },
     { name = "xmltodict", specifier = ">=1.0.4,<1.1" },
 ]
-provides-extras = ["determined", "api", "openai", "optional", "all"]
+provides-extras = ["determined", "api", "optional", "all"]
 
 [package.metadata.requires-dev]
 dev = [

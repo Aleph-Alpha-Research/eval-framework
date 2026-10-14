@@ -44,6 +44,9 @@ dependencies = [
   # https://github.com/sympy/sympy/blob/0204fa34e8f6f6f8ccb4de01209be9a2345c9d6e/doc/src/contributing/dependencies.md?plain=1#L125
   "antlr4-python3-runtime==4.11.0",
   "scipy>=1.18.1,<2",  # required for the aggregation of pass@k metrics
+  "openai>=3.28.0,<4",
+  "tiktoken>=0.14.0,<1",
+  "transformers>=4.45.2,<6",
 ]
 
 [project.optional-dependencies]
@@ -53,11 +56,6 @@ determined = [
   "tensorboard==2.21.0"
 ]
 api = ["aleph-alpha-client>=11.5.1"]
-openai = [
-  "openai>=3.28.0,<4",
-  "tiktoken>=0.14.0,<1",
-  "transformers>=4.45.2,<6",
-]
 
 
 # from template-formatting
@@ -66,7 +64,7 @@ optional = [
   "jinja2>=3.1.6,<4"
 ]
 all = [
-  "eval_framework[determined,api,openai,optional]"
+  "eval_framework[determined,api,optional]"
 ]
 
 [project.urls]
