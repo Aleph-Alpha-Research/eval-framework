@@ -1,55 +1,21 @@
-import importlib.util
-import inspect
-import sys
 from contextlib import AbstractContextManager
-from os import PathLike
 from pathlib import Path
 from typing import Any
 
-import eval_framework
-from eval_framework.llm.base import BaseLLM
 from eval_framework.tasks.eval_config import EvalConfig
 
 
-def import_models(models_file: PathLike | str) -> dict[str, type[BaseLLM]]:
-    models_file = Path(models_file).resolve()
-    library_path = Path(eval_framework.__path__[0]).resolve()
-
-    # Imports from the eval_framework module need special care to avoid
-    # import issues
-    if models_file.is_relative_to(library_path):
-        relative_path = models_file.relative_to(library_path.parent)
-        module_name = ".".join(relative_path.with_suffix("").parts)
-        module = importlib.import_module(module_name)
-    else:
-        module_name = models_file.stem
-
-        spec = importlib.util.spec_from_file_location(module_name, str(models_file))
-
-        if spec is None:
-            raise ImportError(f"Could not load module '{models_file}'.")
-
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-
-        if spec.loader is None:
-            raise ImportError(f"Could not load module '{models_file}'.")
-
-        spec.loader.exec_module(module)
-
-    subclasses = {}
-    for name, clazz in inspect.getmembers(module, inspect.isclass):
-        if issubclass(clazz, BaseLLM) and clazz is not BaseLLM:
-            subclasses[name] = clazz
-
-    return subclasses
+def require_model_names(llm_args: dict[str, Any], judge_model_args: dict[str, Any]) -> None:
+    """Fail early when `OpenAIModel`, used for both the model and the judge, would be missing its `model_name`."""
+    if "model_name" not in llm_args:
+        raise ValueError("llm_args must set model_name, e.g. `--llm-args model_name=gpt-4o-mini`.")
+    if judge_model_args and "model_name" not in judge_model_args:
+        raise ValueError("judge_model_args must set model_name, e.g. `--judge-model-args model_name=gpt-4o`.")
 
 
 class EvalContext(AbstractContextManager):
     def __init__(
         self,
-        llm_name: str,
-        models_path: Path,
         num_samples: int | None = None,
         max_tokens: int | None = None,
         num_fewshot: int | None = None,
@@ -65,8 +31,6 @@ class EvalContext(AbstractContextManager):
         hf_upload_dir: str | None = None,
         hf_upload_repo: str | None = None,
         llm_args: dict[str, Any] | None = None,
-        judge_models_path: Path | None = None,
-        judge_model_name: str | None = None,
         judge_model_args: dict[str, Any] | None = None,
         batch_size: int | None = None,
         description: str | None = None,
@@ -74,8 +38,6 @@ class EvalContext(AbstractContextManager):
         delete_output_dir_after_upload: bool | None = None,
         repeats: int | None = None,
     ) -> None:
-        self.llm_name = llm_name
-        self.models_path = models_path
         self.num_samples = num_samples
         self.max_tokens = max_tokens
         self.num_fewshot = num_fewshot
@@ -91,8 +53,6 @@ class EvalContext(AbstractContextManager):
         self.hf_upload_dir = hf_upload_dir
         self.hf_upload_repo = hf_upload_repo
         self.llm_args = llm_args if llm_args is not None else {}
-        self.judge_models_path = judge_models_path
-        self.judge_model_name = judge_model_name
         self.judge_model_args = judge_model_args if judge_model_args is not None else {}
         self.batch_size = batch_size
         self.description = description
