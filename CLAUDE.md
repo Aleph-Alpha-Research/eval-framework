@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Install pre-commit hooks: `uv tool install pre-commit && uv run pre-commit install`
 
 ### Common Commands
-- **Run evaluation (CLI)**: `eval_framework --models src/eval_framework/llm/models.py --llm-name <MODEL> --task-name <TASK> --output-dir <OUTPUT_DIR>`
+- **Run evaluation (CLI)**: `eval_framework --llm-args model_name=<MODEL> [base_url=<URL>] --task-name <TASK> --output-dir <OUTPUT_DIR>` (the CLI always uses `OpenAIModel`; `model_name` is required in `--llm-args` and, for a judge, in `--judge-model-args`)
 - **Run tests**: `pytest` or `pytest tests/tests_eval_framework/<test_file>.py` for specific tests
 - **Run linting**: `pre-commit run --all-files` (formats code with ruff, checks imports)
 - **Type checking**: `mypy` (checks source code in `src/` and `utils/`)
@@ -114,7 +114,7 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 1. Extend `BaseLLM` in `src/eval_framework/llm/`
 2. Set `LLM_NAME` and `DEFAULT_FORMATTER`
 3. Implement `_get_completion()` or `_get_loglikelihoods()` as needed
-4. Register in `models.py` for CLI discovery
+4. The CLI always uses `OpenAIModel`; use a custom model through the Python API (`EvalConfig(llm_class=...)`)
 
 **Custom Metrics**
 - Inherit from `BaseMetric`
