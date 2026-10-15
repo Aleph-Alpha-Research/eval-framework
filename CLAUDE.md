@@ -22,8 +22,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The eval-framework follows a modular architecture with three main extensible base classes:
 
 1. **BaseLLM** (`src/eval_framework/llm/base.py`) - Language model implementations
-   - Used to define how to get responses from models (OpenAI-compatible endpoints, Aleph Alpha API, custom APIs, etc.)
-   - Implementations: `OpenAIModel` (any OpenAI-compatible endpoint), `AlephAlphaAPIModel`.
+   - Used to define how to get responses from models (OpenAI-compatible endpoints, custom APIs, etc.)
+   - Implementations: `OpenAIModel` (any OpenAI-compatible endpoint).
    - Requires: `LLM_NAME`, `DEFAULT_FORMATTER`, and methods like `_get_completion()`
 
 2. **BaseTask** (`src/eval_framework/tasks/base.py`) - Benchmark/task definitions
@@ -68,7 +68,7 @@ The eval-framework follows a modular architecture with three main extensible bas
 - **`llm/`**: Language model interfaces
   - `base.py`: `BaseLLM` abstract class
   - `models.py`: Registry of default models
-  - Model-specific files for each provider (OpenAI, Aleph Alpha)
+  - `openai.py`: OpenAI-compatible models
 
 - **`metrics/`**: Evaluation metrics
   - `base.py`: `BaseMetric` class
@@ -124,7 +124,6 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 ## Dependencies & Extras
 
 Optional extras (install with `uv sync --all-extras`):
-- `api`: Aleph Alpha client
 - `determined`: Determined AI integration
 
 ## Conventions

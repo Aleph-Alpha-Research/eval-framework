@@ -25,7 +25,7 @@
 
 ## Other features
 
-- Flexible Model Integration: Supports OpenAI-compatible endpoints, the Aleph Alpha API, or custom implementations using the BaseLLM class.
+- Flexible Model Integration: Supports OpenAI-compatible endpoints or custom implementations using the BaseLLM class.
 - Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
 - Custom Metrics: Easily define new metrics using the BaseMetric class.
 - Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
@@ -45,7 +45,6 @@ pip install eval_framework
 ```
 
 There are optional extras available to unlock specific features of the library:
-- `api` for inference using the aleph-alpha client.
 - `determined` for running jobs via determined.
 
 As a short hand, the `all` extra installs all of the above.
@@ -144,7 +143,7 @@ For the full list of tasks and metrics, see [Detailed Task Table](https://aleph-
 
 Eval-Framework provides a unified interface for evaluating language models across diverse benchmarks. The framework follows this interaction model:
 
-1. **Define Your Model** - Specify which model to evaluate (OpenAI-compatible endpoint, Aleph Alpha API, or custom)
+1. **Define Your Model** - Specify which model to evaluate (OpenAI-compatible endpoint or custom)
 2. **Choose Your Task** - Select from 150+ available benchmarks or create custom ones
 3. **Configure Evaluation** - Set parameters like few-shot examples, sample count, and output format
 4. **Run Evaluation** - Execute locally via CLI/script or distribute via Determined AI
@@ -152,7 +151,7 @@ Eval-Framework provides a unified interface for evaluating language models acros
 
 ### Core Components
 
-- **Models**: Defined via the `BaseLLM` interface (OpenAI-compatible endpoints, Aleph Alpha API, custom APIs); see the [Model Arguments guide](https://aleph-alpha-research.github.io/eval-framework/model_arguments.html)
+- **Models**: Defined via the `BaseLLM` interface (OpenAI-compatible endpoints, custom APIs); see the [Model Arguments guide](https://aleph-alpha-research.github.io/eval-framework/model_arguments.html)
 - **Tasks**: Inherit from [`BaseTask`](https://aleph-alpha-research.github.io/eval-framework/add_new_benchmark_guide.html) (completion, loglikelihood, or LLM-judge based)
 - **Metrics**: Automatic scoring via [`BaseMetric`](https://aleph-alpha-research.github.io/eval-framework/benchmarks_and_metrics.html) classes
 - **Formatters**: Handle prompt construction and model-specific formatting

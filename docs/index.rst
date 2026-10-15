@@ -13,7 +13,7 @@ Key Features
 - **Scalability:** Distributed evaluation with Determined AI support.
 - **Extensibility:** Easily add custom models, benchmarks, and metrics.
 - **Comprehensive Benchmarks:** 90+ tasks covering reasoning, coding, math, knowledge, long-context, and safety.
-- **Flexible Model Integration:** OpenAI-compatible endpoints, the Aleph Alpha API, and BaseLLM-based models.
+- **Flexible Model Integration:** OpenAI-compatible endpoints and BaseLLM-based models.
 - **Robust Metrics:** Completion metrics, loglikelihood metrics, LLM-as-a-judge evaluations, and efficiency metrics.
 - **Perturbation Testing & Analysis:** Configurable perturbation types, confidence intervals, and significance testing.
 - **Docker Support:** Pre-configured for local or distributed setups.

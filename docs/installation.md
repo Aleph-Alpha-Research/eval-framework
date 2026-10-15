@@ -21,14 +21,13 @@ uv sync --all-extras
 
 To select specific optional features, you can install them individually. Available extras are:
 
-- `api` for Aleph Alpha client inference
 - `determined` for distributed evaluation
 - `all` installs all extras
 
 You can install them as follows:
 
 ```bash
-   uv sync --extra api
+   uv sync --extra determined
 ```
 
 ### 3. Test Your Installation
@@ -66,10 +65,6 @@ Create a `.env` file in the project root:
 # API Keys (if using external models)
 HF_TOKEN="your_huggingface_token"        # For private HuggingFace models
 OPENAI_API_KEY="your_openai_key"         # For OpenAI models as judges
-AA_TOKEN="your_aleph_alpha_token"        # For Aleph Alpha API
-
-# Optional: Inference endpoints
-AA_INFERENCE_ENDPOINT="your_inference_url"
 
 # Debug mode
 DEBUG=false
@@ -116,7 +111,7 @@ It is also possible to download Eval-Framework through pip:
 pip install eval-framework
 
 # or with optional extras
-pip install eval-framework[api]
+pip install eval-framework[determined]
 ```
 
 However, we recommend using the uv solver to avoid many dependency version issues, so:
@@ -125,7 +120,7 @@ However, we recommend using the uv solver to avoid many dependency version issue
 uv pip install eval-framework
 
 # or with optional extras
-uv pip install eval-framework[api]
+uv pip install eval-framework[determined]
 ```
 
 This allows you to run an evaluation without going through `uv run`:
