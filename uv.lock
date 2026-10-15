@@ -991,7 +991,7 @@ requires-dist = [
     { name = "sympy", specifier = ">=1.14.0,<2" },
     { name = "tensorboard", marker = "extra == 'determined'", specifier = "==2.21.0" },
     { name = "tiktoken", specifier = ">=0.14.0,<1" },
-    { name = "transformers", extras = ["chat-template"], specifier = ">=4.57.6,<6" },
+    { name = "transformers", extras = ["chat-template"], specifier = ">=5.19.0,<6" },
     { name = "wandb", specifier = ">=0.30.0,<1" },
     { name = "xmltodict", specifier = ">=1.0.4,<1.1" },
 ]
