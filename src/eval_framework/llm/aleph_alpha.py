@@ -16,6 +16,7 @@ from aleph_alpha_client import (
 )
 from aleph_alpha_client.prompt import Text
 from dotenv import load_dotenv
+from openai.types.chat.completion_create_params import ResponseFormat
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.errors import raise_errors
@@ -201,7 +202,10 @@ class AlephAlphaAPIModel(BaseLLM):
         max_tokens: int | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> list[RawCompletion]:
+        if response_format is not None:
+            raise NotImplementedError("response_format is not supported by AlephAlphaAPIModel.")
         effective_temperature = temperature if temperature is not None else self._temperature
         if effective_temperature is not None and not (0 <= effective_temperature <= 2):
             raise ValueError(f"temperature must be between 0 and 2, got {effective_temperature}")
