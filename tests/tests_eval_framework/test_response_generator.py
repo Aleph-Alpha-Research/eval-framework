@@ -5,6 +5,7 @@ from unittest.mock import Mock
 
 import pytest
 from dateutil import parser
+from openai.types.chat.completion_create_params import ResponseFormat
 
 from eval_framework.contract import Benchmark, Eval
 from eval_framework.llm.base import BaseLLM
@@ -514,6 +515,7 @@ class SaboteurLLM(BaseLLM):
         max_tokens: int | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> list[RawCompletion]:
         raise RuntimeError("inference connection failed")
 

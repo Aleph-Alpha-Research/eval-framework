@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 
+from openai.types.chat.completion_create_params import ResponseFormat
+
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import Sample
 from template_formatting.formatter import Message
@@ -22,6 +24,7 @@ class BaseLLM(ABC):
         max_tokens: int | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> list[RawCompletion]:
         """
         stop_sequences and max_tokens are injected by the task if exist. They should be overwritten or
@@ -49,6 +52,7 @@ class BaseLLM(ABC):
         max_tokens: int | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> list[RawCompletion]:
         """
         stop_sequences and max_tokens are injected by the task if exist. They should be overwritten or
@@ -85,6 +89,7 @@ class BaseLLM(ABC):
         max_tokens: int | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> list[RawCompletion]:
         """Generates a model response for each sample.
 
@@ -92,10 +97,12 @@ class BaseLLM(ABC):
         otherwise falls back to 'generate_from_messages'.
         """
         try:
-            return self.generate_from_samples(samples, stop_sequences, max_tokens, temperature, top_p)
+            return self.generate_from_samples(samples, stop_sequences, max_tokens, temperature, top_p, response_format)
         except NotImplementedError:
             messages: list[Sequence[Message]] = [sample.messages for sample in samples]
-            return self.generate_from_messages(messages, stop_sequences, max_tokens, temperature, top_p)
+            return self.generate_from_messages(
+                messages, stop_sequences, max_tokens, temperature, top_p, response_format
+            )
 
     def post_process_completion(self, completion: str, sample: Sample) -> str:
         """

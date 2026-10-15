@@ -15,6 +15,7 @@ from typing import Any, final, override
 
 import pytest
 from datasets import Dataset, DatasetDict
+from openai.types.chat.completion_create_params import ResponseFormat
 
 from eval_framework.contract import Benchmark, Sample
 from eval_framework.llm.base import BaseLLM
@@ -88,6 +89,7 @@ class StubLlm(BaseLLM):
         max_tokens: int | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> list[RawCompletion]:
         raise NotImplementedError
 
@@ -99,6 +101,7 @@ class StubLlm(BaseLLM):
         max_tokens: int | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> list[RawCompletion]:
         completion = self._completion
         for stop in stop_sequences or []:

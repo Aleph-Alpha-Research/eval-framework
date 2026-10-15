@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 import wandb
+from openai.types.chat.completion_create_params import ResponseFormat
 
 from eval_framework.llm.base import BaseLLM, Sample
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
@@ -49,6 +50,7 @@ class MockLLM(BaseLLM):
         max_tokens: int | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> list[RawCompletion]:
         self.generate_counter += 1
         return [

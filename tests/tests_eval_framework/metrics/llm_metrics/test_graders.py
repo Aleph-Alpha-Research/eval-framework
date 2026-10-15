@@ -2,6 +2,7 @@ import json
 from collections.abc import Sequence
 
 import pytest
+from openai.types.chat.completion_create_params import ResponseFormat
 
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.llm.graders.chatbot_style_grader import ChatbotStyleGrader
@@ -56,6 +57,7 @@ class ScriptedJudge(BaseLLM):
         max_tokens: int | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> list[RawCompletion]:
         self.prompts.extend(messages)
         return [

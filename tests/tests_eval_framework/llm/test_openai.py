@@ -96,7 +96,7 @@ def test_openai_chat_api_forwards_response_format(mocker: MockerFixture) -> None
         "type": "json_schema",
         "json_schema": {"name": "verdict", "schema": {"type": "object"}},
     }
-    OpenAIModel(model_name="gpt-4o-mini-2024-07-18", response_format=response_format).generate_from_messages(_MESSAGES)
+    OpenAIModel(model_name="gpt-4o-mini-2024-07-18").generate_from_messages(_MESSAGES, response_format=response_format)
     assert mock_client.chat.completions.create.call_args.kwargs["response_format"] == response_format
 
 
