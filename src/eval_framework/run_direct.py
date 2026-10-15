@@ -20,8 +20,8 @@ if __name__ == "__main__":
         "judge_model_name": None,
         "judge_model_args": {},
         # ---
-        "llm_name": "Llama31_8B_Instruct_API",
-        "llm_args": {},
+        "llm_name": "OpenAIModel",
+        "llm_args": {"model_name": "gpt-4o-mini"},
         "num_samples": 1,
         "max_tokens": None,
         "num_fewshot": 4,
