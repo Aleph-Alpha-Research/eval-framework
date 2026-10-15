@@ -985,7 +985,7 @@ requires-dist = [
     { name = "openai", specifier = ">=3.28.0,<4" },
     { name = "psycopg2-binary", specifier = ">=2.9.13,<3" },
     { name = "pycountry", specifier = ">=26.2.16,<27" },
-    { name = "pydantic", specifier = ">=2.14.0,<3" },
+    { name = "pydantic", specifier = ">=2.14.1,<3" },
     { name = "python-dotenv", specifier = ">=1.2.4,<2" },
     { name = "python-iso639", specifier = ">=2026.7.23" },
     { name = "pyyaml", specifier = ">=6.0.3,<7" },
