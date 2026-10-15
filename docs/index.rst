@@ -40,7 +40,6 @@ any OpenAI-compatible server (for example vLLM) can be targeted by adding ``base
 .. code-block:: bash
 
    uv run eval_framework \
-        --llm-name eval_framework.llm.openai.OpenAIModel \
         --llm-args model_name="gpt-4o-mini" \
         --task-name "MMLU" \
         --task-subjects "abstract_algebra" \
