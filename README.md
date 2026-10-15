@@ -25,7 +25,7 @@
 
 ## Other features
 
-- Flexible Model Integration: Supports OpenAI-compatible endpoints or custom implementations using the BaseLLM class.
+- Flexible Model Integration: The CLI evaluates any OpenAI-compatible endpoint via `OpenAIModel`; custom `BaseLLM` implementations can be used through the Python API (`EvalConfig(llm_class=...)`).
 - Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
 - Custom Metrics: Easily define new metrics using the BaseMetric class.
 - Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
@@ -71,9 +71,10 @@ uv python install 3.12 --reinstall
 
 To evaluate a single benchmark locally, you can use the following command. The example below talks to the OpenAI API and needs `OPENAI_API_KEY` to be set. Any OpenAI-compatible server (for example vLLM) can be targeted by adding `base_url=http://host:port/v1` to `--llm-args`.
 
+The evaluated model and the LLM judge are always instantiated as `OpenAIModel`. Configure them with `--llm-args` and `--judge-model-args` (e.g. `model_name=...`, `base_url=...`); `model_name` is required in both, and passing `--judge-model-args` enables the judge.
+
 ```bash
 eval_framework \
-    --llm-name eval_framework.llm.openai.OpenAIModel \
     --llm-args model_name="gpt-4o-mini" \
     --task-name "MMLU" \
     --task-subjects "abstract_algebra" \
