@@ -59,8 +59,7 @@ Add the `--wandb-project` (and potentially `--wandb-entity` if not the default o
 ```bash
 uv run eval_framework \
     --context local \
-    --models tests/conftest.py \
-    --llm-name Llama31_8B_Instruct_HF \
+    --llm-args model_name="gpt-4o-mini" \
     --task-name ARC \
     --num-fewshot 3 \
     --num-samples 100 \
@@ -75,7 +74,8 @@ Add `wandb_project` (and potentially `wandb_entity` if not the default one) as a
 ```yaml
 hyperparameters:
   experiment_name: "my_experiment"
-  llm_name: "Llama31_8B_Instruct_HF"
+  llm_args:
+    model_name: "gpt-4o-mini"
   wandb_project: "my_wandb_project"
   task_args:
     - task_name: "ARC"
