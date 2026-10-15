@@ -176,7 +176,7 @@ suite = TaskSuite(
 
 ```bash
 uv run eval_framework \
-    --llm-name 'eval_framework.llm.models.MyModel' \
+    --llm-args model_name="gpt-4o-mini" \
     --task-suite suites/mathsuite.py \
     --output-dir ./eval_results
 ```
