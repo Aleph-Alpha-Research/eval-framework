@@ -14,6 +14,44 @@
 
 ### Bug Fixes
 
+## [0.17.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.16.0...v0.17.0) (2026-10-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* replace the optional extra with transformers[chat-template]
+* make openai a core dependency
+* **llm:** HFLLM and the bundled Pythia, SmolLM and Qwen3 model classes are gone, as are the `transformers` and `accelerate` extras. Evaluate local checkpoints with OpenAIModel against a vLLM or similar OpenAI-compatible server.
+
+### Features
+
+* make openai a core dependency ([a8c77c1](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a8c77c1833d03a0d61ba8b9819fcddf63649d297))
+
+
+### Bug Fixes
+
+* **deps:** update dependency datasets to &gt;=5.1.0,&lt;6 ([59f3ffe](https://github.com/Aleph-Alpha-Research/eval-framework/commit/59f3ffeed91ea6a139fe5966f36afa0c1cf23d89))
+* **deps:** update dependency openai to &gt;=3.29.0,&lt;4 ([1aaaed2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/1aaaed21f391aa919cda1cbc1af5f70b6d661fe8))
+* **deps:** update dependency pydantic to &gt;=2.14.1,&lt;3 ([2cd5bbe](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2cd5bbecac12f851d800aaf4f4ab6d25d8d840fb))
+* **deps:** update dependency transformers to &gt;=5.19.0,&lt;6 ([f175826](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f175826afa220dc5560348f715bfba5a61ad36ca))
+* **deps:** update dependency transformers to v4 ([c1dece7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c1dece77a8e9d135e3ae6babd53cf67f9098d3d3))
+* narrow apply_chat_template return type for transformers v5 ([5fd5343](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5fd5343e61c9b7bdc828471320a5b3ac22a37255))
+* tokenizer type annotation ([63995e1](https://github.com/Aleph-Alpha-Research/eval-framework/commit/63995e10bc8f852db466c8d5d81620ca7e523225))
+
+
+### Documentation
+
+* describe the OpenAI-compatible path instead of HFLLM ([484e8f2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/484e8f25887d0ddf9ece0c7883d61c311972d64d))
+* drop references to extras and model classes that do not exist ([212a420](https://github.com/Aleph-Alpha-Research/eval-framework/commit/212a420c8bb6e9c2e884c3115c5d3c6d309d1c81))
+* drop the openai extra from install instructions ([2d95ccf](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2d95ccf84319a586462224023531fbba821932b8))
+* drop the optional extra from install instructions ([c3061de](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c3061de55e40a5608f44993fbd1ff4bea4d7577f))
+
+
+### Code Refactoring
+
+* **llm:** remove the HuggingFace transformers backend ([c03f17b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c03f17b1586439a96473ca34651d7199d925d0dd))
+* replace the optional extra with transformers[chat-template] ([e31e60b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e31e60b1cc9fc8018f07d4f0f0ba9ee111f4f64c))
+
 ## [0.16.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.15.5...v0.16.0) (2026-10-14)
 
 
