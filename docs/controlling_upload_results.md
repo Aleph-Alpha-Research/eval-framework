@@ -15,8 +15,7 @@ Add the `--hf-upload-repo` and `--hf-upload-dir` arguments to your CLI command:
 ```bash
 uv run eval_framework \
     --context local \
-    --models tests/conftest.py \
-    --llm-name Llama31_8B_Instruct_HF \
+    --llm-args model_name="gpt-4o-mini" \
     --task-name ARC \
     --num-fewshot 3 \
     --num-samples 100 \
@@ -32,7 +31,8 @@ Add the `--hf-upload-repo` and `hf_upload_dir` parameter as a hyperparameter in 
 ```yaml
 hyperparameters:
   experiment_name: "my_experiment"
-  llm_name: "Llama31_8B_Instruct_HF"
+  llm_args:
+    model_name: "gpt-4o-mini"
   hf_upload_dir: "my_arbitrary_name"  # Note: underscores in YAML
   task_args:
     - task_name: "ARC"
