@@ -19,19 +19,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Core Architecture**
 
-The eval-framework follows a modular architecture with three main extensible base classes:
+The eval-framework follows a modular architecture built around three extension points:
 
 1. **BaseLLM** (`src/eval_framework/llm/base.py`) - Language model implementations
    - Used to define how to get responses from models (OpenAI-compatible endpoints, custom APIs, etc.)
    - Implementations: `OpenAIModel` (any OpenAI-compatible endpoint).
-   - Requires: `LLM_NAME`, `DEFAULT_FORMATTER`, and methods like `_get_completion()`
+   - Requires: `generate_from_messages()` (completions) and `logprobs()` (loglikelihoods)
 
-2. **BaseTask** (`src/eval_framework/tasks/base.py`) - Benchmark/task definitions
-   - Represents evaluation benchmarks (MMLU, HumanEval, InfiniteBench, etc.)
-   - New tasks should ideally contain a TASK_STYLER which assembles the prompt from underlying messages. There should be a very good reason to not have this.
-   - Three task styles: `COMPLETION`, `LOGLIKELIHOODS`, and LLM-judge-based
-   - Requires: `NAME`, `DATASET_PATH`, `SUBJECTS`, and scoring methods
-   - Loaded dynamically from `src/eval_framework/benchmarks/` directory
+2. **Benchmark / Eval** (`src/eval_framework/contract.py`) - Benchmark definitions
+   - A `Benchmark` is an immutable, registered description of a benchmark (id, metrics, subjects, docs). Its
+     `create(num_fewshot, custom_subjects, custom_hf_revision, seed)` is a factory for an `Eval`: one concrete
+     run that yields `Sample`s and generates completions.
+   - Benchmarks are built with `ComposedBenchmark` (`src/eval_framework/composed.py`), which plugs together
+     independent parts instead of subclassing:
+     - `DatasetPolicy` (`tasks/dataset_loading.py`, `tasks/dataset_revisions.py`): where the data comes from,
+       e.g. `pinned_by_framework("allenai/ai2_arc")`, `.subset(...)`, `.subject_encoded_in_column(...)`
+     - `SubjectsSelector` (`subjects.py`): which slices to evaluate, `NoSubject` (default) or `ListOfSubjects`
+     - `EvalKind` (`eval_kind.py`): the prompt side — messages, candidates, ground truth, scoring metrics.
+       `Choice(reader, styler)` for choice-based tasks, `Generative(...)` for free-form ones
+     - `AnswerPolicy` (`answer.py`): the answer side — response type, stop sequences, max tokens, extraction.
+       `PickFromCandidates`, `ExtractFromCompletion` or `ReconstructProgram`
+     - `FewShotPolicy` (`fewshot.py`): `FewShot(source, renderer)` or `NoFewShot`. Sources: `SampleSplit`
+       (eval split, leak-safe), `FewShotSplit(split)`, `Predefined(items, ...)`. Renderers: `ChoiceRenderer`,
+       `FunctionRenderer`
+     - `ChoiceReader` (`choices.py`): the only place that knows a dataset's item schema (choice tasks)
+     - `TaskStyler` (`tasks/task_style.py`): how a choice prompt is presented and scored — `MCStyle`,
+       `ClozeStyle`, `BPBStyle`, and `.with_abstention_option(...)`. Only used by choice-based tasks; the
+       response type comes from the `AnswerPolicy`, not the styler
+   - Response types (`ResponseType`): `COMPLETION` and `LOGLIKELIHOODS`. LLM-judge scoring is a metric choice,
+     not a separate type.
+   - `BaseTask` (`tasks/base.py`) is legacy: no built-in benchmark uses it. It is still accepted for user plugins
+     via `register_task`, which wraps it in an `Eager` benchmark.
 
 3. **BaseMetric** (`src/eval_framework/metrics/base.py`) - Evaluation metrics
    - Computes scores for task responses (accuracy, BLEU, F1, etc.)
@@ -58,16 +76,23 @@ The eval-framework follows a modular architecture with three main extensible bas
 
 **Key Modules**
 
-- **`tasks/`**: Task definitions, dataset handling, task loading
-  - `base.py`: `BaseTask` class definition
-  - `task_loader.py`: Dynamic task discovery and loading
-  - `task_style.py`: Enum for task types (completion, loglikelihood, etc.)
-  - `benchmarks/`: Individual task implementations (MMLU, HumanEval, etc.)
-  - `perturbation.py`: Robustness testing via text perturbations
+- **Top-level benchmark modules** (`src/eval_framework/`)
+  - `contract.py`: `Benchmark`, `Eval`, `Sample`, `ResponseType`
+  - `composed.py`: `ComposedBenchmark` and `ComposedEval`
+  - `eval_kind.py`, `answer.py`, `fewshot.py`, `subjects.py`, `choices.py`: the composable parts (see above)
+  - `benchmarks/`: Individual benchmark implementations (ARC, MMLU, GSM8K, HumanEval, etc.)
+
+- **`tasks/`**: Dataset handling, registration, legacy task base
+  - `registry.py`: The registry of `Benchmark`s, keyed by `id()`
+  - `task_names.py`: Registers all built-in benchmarks
+  - `task_loader.py`: Loads user plugin modules from a directory
+  - `task_style.py`: `TaskStyler` classes for choice-based prompts
+  - `dataset_loading.py`, `dataset_revisions.py`: `DatasetPolicy` implementations and pinned HF revisions
+  - `base.py`: Legacy `BaseTask`, plus shared enums (`TaskStyle`, `Language`)
 
 - **`llm/`**: Language model interfaces
   - `base.py`: `BaseLLM` abstract class
-  - `models.py`: Registry of default models
+  - `models.py`: Default models file (re-exports `OpenAIModel`)
   - `openai.py`: OpenAI-compatible models
 
 - **`metrics/`**: Evaluation metrics
@@ -75,7 +100,7 @@ The eval-framework follows a modular architecture with three main extensible bas
   - Subdirectories for metric types (completion, loglikelihood, llm_judge)
 
 - **`template_formatting/`**: Prompt formatting (separate package)
-  - `formatter.py`: `Formatter` base class for prompt construction
+  - `formatter.py`: `BaseFormatter` base class for prompt construction
   - `mistral_formatter.py`: Mistral-specific formatting
 
 - **Context System** (`context/`):
@@ -103,22 +128,32 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 
 ## Development Patterns
 
-**Adding a New Task**
+**Adding a New Benchmark**
 
-1. Create class inheriting from `BaseTask` in `src/eval_framework/benchmarks/`
-2. Implement required class attributes: `NAME`, `DATASET_PATH`, `SAMPLE_SPLIT`, `FEWSHOT_SPLIT`, `SUBJECTS`
-3. If using custom metrics, inherit from `BaseMetric`
-4. Task is discovered via registry; add it to `task_names.py` to be discoverable.
+Do not subclass `BaseTask`. Write a module in `src/eval_framework/benchmarks/` with factory functions that return a
+`ComposedBenchmark`:
+
+1. **Choice-based** (multiple choice, cloze, BPB): write a `ChoiceReader` for the item schema and call
+   `ComposedBenchmark.choice(id=..., reader=..., styler=..., sample_split=..., fewshot_split=..., subjects=...,
+   dataset_policy=..., language=...)`. The same reader + styler render the few-shot demos. Reference: `arc.py`.
+2. **Generative** (free-form answers, code): call `ComposedBenchmark.compose(...)` with a `Generative(...)` kind, an
+   `AnswerPolicy` (e.g. `ExtractFromCompletion`) and a `FewShotPolicy`. Reference: `gsm8k.py`.
+3. Variants differ only in the arguments they pass (e.g. the styler); share a private helper rather than copying.
+   If a task doesn't fit `Choice` or `Generative`, write a new `EvalKind` (see `cot.py`, `winogrande.py`) instead
+   of adding options to `Generative`.
+4. Collect the module's benchmarks in a `<NAME>_BENCHMARKS: list[Benchmark]` constant and register it in
+   `tasks/task_names.py` (a `register_<name>_tasks` function calling `registry.add(...)`, invoked from
+   `register_all_tasks`).
+5. If using custom metrics, inherit from `BaseMetric`.
 
 **Adding a New Model**
 1. Extend `BaseLLM` in `src/eval_framework/llm/`
-2. Set `LLM_NAME` and `DEFAULT_FORMATTER`
-3. Implement `_get_completion()` or `_get_loglikelihoods()` as needed
-4. Register in `models.py` for CLI discovery
+2. Implement `generate_from_messages()` and/or `logprobs()` as needed
+3. Register in `models.py` for CLI discovery
 
 **Custom Metrics**
 - Inherit from `BaseMetric`
-- Implement `compute()` for single samples.
+- Implement `calculate()` for single responses.
 - Supports context objects for additional evaluation data
 
 ## Dependencies & Extras
@@ -147,4 +182,4 @@ Optional extras (install with `uv sync --all-extras`):
 - Main docs in `docs/` (auto-generated task tables from code)
 - Architecture & guides in `docs/*.md` (linked in README)
 - Task coverage and metrics listed in `docs/benchmarks_and_metrics.md`
-- Results interpretation guide in `docs/understanding_results_guide.html`
+- Results interpretation guide in `docs/understanding_results_guide.md`
