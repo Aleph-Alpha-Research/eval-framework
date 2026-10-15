@@ -1,26 +1,8 @@
 # Model Arguments
 
-The Eval-Framework provides a set of model wrapper classes that standardize how LLMs are loaded, formatted, and used for evaluation. Each wrapper manages specific model backends, such as OpenAI-compatible endpoints or the Aleph Alpha API.
+The Eval-Framework provides a set of model wrapper classes that standardize how LLMs are loaded, formatted, and used for evaluation. Each wrapper manages specific model backends, such as OpenAI-compatible endpoints.
 
 The following sections describe the **constructor arguments** for each model class, highlighting configuration options, defaults, and their purpose. Understanding these arguments allows you to customize evaluation behavior, token limits, concurrency, and model-specific settings.
-
-## AlephAlphaAPIModel — Constructor Arguments
-
-`AlephAlphaAPIModel` is a wrapper around the Aleph Alpha API, extending `BaseLLM`.
-It handles formatter setup, request concurrency, retry behavior, and timeout management.
-
-### AlephAlphaAPIModel Constructor Argument Reference
-
-| **Argument**                    | **Type**                | **Description**                                                                                                                   |               **Default**               |
-| :------------------------------ | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------: |
-| `formatter`                     | `BaseFormatter \| None` | Explicit formatter instance used to convert chat messages into model prompts. If not provided, falls back to `DEFAULT_FORMATTER`. |                  `None`                 |
-| `checkpoint_name`               | `str \| None`           | Custom display or logging name for the model. If omitted, uses the class-level `LLM_NAME`.                                        |                  `None`                 |
-| `max_retries`                   | `int`                   | Maximum number of retry attempts for failed API requests (e.g. network errors, rate limits).                                      |                  `100`                  |
-| `max_async_concurrent_requests` | `int`                   | Maximum number of concurrent asynchronous API requests allowed. Controls throughput and parallelism.                              |                   `32`                  |
-| `request_timeout_seconds`       | `int`                   | Maximum number of seconds before an API request times out.                                                                        |    `1805` *(30 minutes + 5 seconds)*    |
-| `bytes_per_token`               | `float \| None`         | Used to scale token-based limits based on model tokenizer density. See [Deep Dive: bytes_per_token](#deep-dive-bytes-per-token).  | `None` *(internally defaults to `4.0`)* |
-
----
 
 ## OpenAIModel — Constructor Arguments
 
