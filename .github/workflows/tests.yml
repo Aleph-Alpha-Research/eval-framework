@@ -51,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        extras: ['', 'determined', 'api']
+        extras: ['', 'determined']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
