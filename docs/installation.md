@@ -36,7 +36,6 @@ The example below talks to the OpenAI API and needs `OPENAI_API_KEY` to be set. 
 
 ```bash
 uv run eval_framework \
-    --llm-name eval_framework.llm.openai.OpenAIModel \
     --llm-args model_name="gpt-4o-mini" \
     --task-name "MMLU" \
     --task-subjects "abstract_algebra" "anatomy" \
@@ -127,7 +126,6 @@ This allows you to run an evaluation without going through `uv run`:
 
 ```bash
 eval_framework \
-    --llm-name eval_framework.llm.openai.OpenAIModel \
     --llm-args model_name="gpt-4o-mini" \
     --task-name "MMLU" \
     --task-subjects "abstract_algebra" "anatomy" \
