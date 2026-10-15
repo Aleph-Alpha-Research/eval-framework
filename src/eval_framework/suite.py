@@ -14,7 +14,7 @@ import wandb
 import yaml
 from pydantic import BaseModel, BeforeValidator, ConfigDict, field_validator, model_validator
 
-from eval_framework.context.local import _load_model
+from eval_framework.llm.openai import OpenAIModel
 from eval_framework.result_processors.result_processor import generate_output_dir
 from eval_framework.run import _run_single_task
 from eval_framework.tasks.eval_config import EvalConfig
@@ -319,7 +319,7 @@ def run_suite(
 def _load_aggregated_results(resolved_kwargs: dict[str, Any]) -> dict[str, Any]:
     """Load the aggregated_results.json for a completed task run."""
 
-    llm_class = _load_model(resolved_kwargs["llm_name"], models_path=resolved_kwargs["models"])
+    llm_class = OpenAIModel
     llm_instance = llm_class(**resolved_kwargs.get("llm_args", {}))
 
     config = EvalConfig(

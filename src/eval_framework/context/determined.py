@@ -8,9 +8,9 @@ from determined.core._context import init as determined_core_init
 from determined.core._distributed import DummyDistributedContext
 from pydantic import AfterValidator, BaseModel, ConfigDict
 
-from eval_framework.context.eval import EvalContext
-from eval_framework.context.local import _load_model
+from eval_framework.context.eval import EvalContext, require_model_names
 from eval_framework.llm.base import BaseLLM
+from eval_framework.llm.openai import OpenAIModel
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import validate_task_name
 from eval_framework.tasks.task_loader import load_extra_tasks
@@ -25,7 +25,6 @@ class TaskArgs(BaseModel):
     num_samples: int | None = None
     max_tokens: int | None = None
     batch_size: int | None = None
-    judge_model_name: str | None = None
     judge_model_args: dict[str, Any] = {}
     task_subjects: list[str] | None = None
     hf_revision: str | None = None
@@ -34,7 +33,6 @@ class TaskArgs(BaseModel):
 
 class Hyperparameters(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    llm_name: str
     output_dir: Path
     hf_upload_dir: str | None = None
     hf_upload_repo: str | None = None
@@ -80,7 +78,6 @@ class DeterminedContext(EvalContext):
         self.hparams = Hyperparameters(**info.trial.hparams)
 
         for name in [
-            "llm_name",
             "llm_args",
             "output_dir",
             "hf_upload_dir",
@@ -105,7 +102,6 @@ class DeterminedContext(EvalContext):
             "task_subjects",
             "batch_size",
             "hf_revision",
-            "judge_model_name",
             "judge_model_args",
             "repeats",
         ]:
@@ -115,20 +111,17 @@ class DeterminedContext(EvalContext):
                 logger.info(f"CLI argument {name} ({val_cli}) is being overridden by hyperparameters: ({val_hparams}).")
 
         # Hyperparameters take precedence over core context
-        llm_name = self.hparams.llm_name or self.llm_name
-        judge_model_name = self.hparams.task_args.judge_model_name or self.judge_model_name
+        llm_args = self.hparams.llm_args or self.llm_args
+        judge_model_args = self.hparams.task_args.judge_model_args or self.judge_model_args
+        require_model_names(llm_args, judge_model_args)
 
-        llm_class = _load_model(llm_name, models_path=self.models_path)
-        llm_judge_class: type[BaseLLM] | None = (
-            _load_model(judge_model_name, models_path=self.judge_models_path, info="judge")
-            if judge_model_name
-            else None
-        )
+        llm_class = OpenAIModel
+        llm_judge_class: type[BaseLLM] | None = OpenAIModel if judge_model_args else None
 
         # for all optional hyperparameters, resort to the respective CLI argument if the hyperparameter is not set
         self.config = EvalConfig(
             llm_class=llm_class,
-            llm_args=self.hparams.llm_args or self.llm_args,
+            llm_args=llm_args,
             num_samples=self.hparams.task_args.num_samples or self.num_samples,
             max_tokens=self.hparams.task_args.max_tokens or self.max_tokens,
             num_fewshot=self.hparams.task_args.num_fewshot,
@@ -137,7 +130,7 @@ class DeterminedContext(EvalContext):
             hf_revision=self.hparams.task_args.hf_revision or self.hf_revision,
             output_dir=self.hparams.output_dir,
             llm_judge_class=llm_judge_class,
-            judge_model_args=self.hparams.task_args.judge_model_args or self.judge_model_args,
+            judge_model_args=judge_model_args,
             hf_upload_dir=self.hparams.hf_upload_dir or self.hf_upload_dir,
             hf_upload_repo=self.hparams.hf_upload_repo or self.hf_upload_repo,
             wandb_project=self.hparams.wandb_project or self.wandb_project,

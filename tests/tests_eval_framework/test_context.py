@@ -1,4 +1,3 @@
-import shutil
 from collections.abc import Generator
 from pathlib import Path
 from unittest import mock
@@ -6,11 +5,8 @@ from unittest import mock
 import pytest
 
 import eval_framework.context.determined as determined
-import eval_framework.llm
 from eval_framework.context.determined import DeterminedContext
-from eval_framework.context.eval import import_models
 from eval_framework.context.local import LocalContext
-from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.openai import OpenAIModel
 
 
@@ -20,7 +16,6 @@ def mock_get_cluster_info_minimal() -> Generator[mock.Mock, None, None]:
         mock_info = mock.Mock()
         mock_info.trial = mock.Mock()
         mock_info.trial.hparams = {
-            "llm_name": OpenAIModel.__name__,
             "output_dir": "dummy",
             "task_args": {
                 "num_fewshot": 0,
@@ -37,11 +32,10 @@ def mock_get_cluster_info_maximal() -> Generator[mock.Mock, None, None]:
         mock_info = mock.Mock()
         mock_info.trial = mock.Mock()
         mock_info.trial.hparams = {
-            "llm_name": OpenAIModel.__name__,
             "output_dir": "dummy",
             "hf_upload_dir": "hf_dummy",
             "description": "det_description",
-            "llm_args": {"dummy_key": "dummy_val"},
+            "llm_args": {"model_name": "det_model"},
             "task_args": {
                 "num_fewshot": 0,
                 "num_samples": 10,
@@ -49,8 +43,7 @@ def mock_get_cluster_info_maximal() -> Generator[mock.Mock, None, None]:
                 "batch_size": 16,
                 "task_subjects": ["subject1", "subject2"],
                 "task_name": "ARC",
-                "judge_model_name": OpenAIModel.__name__,
-                "judge_model_args": {},
+                "judge_model_args": {"model_name": "det_judge"},
             },
         }
         mock_get_cluster_info.return_value = mock_info
@@ -60,11 +53,7 @@ def mock_get_cluster_info_maximal() -> Generator[mock.Mock, None, None]:
 def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) -> None:
     # Test that values from determined configuration are used if given but otherwise run.py values are used.
     # Here, we specify as few values as possible in the hparams to test that run.py values are used.
-    models_path = Path(eval_framework.__path__[0]) / "llm" / "openai.py"
-    judge_model_name = OpenAIModel.__name__
     with DeterminedContext(
-        llm_name="some_llm",  # overriden by hparams
-        models_path=models_path,
         num_samples=10000,
         max_tokens=111,
         num_fewshot=555,  # overriden by hparams
@@ -72,10 +61,8 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         task_subjects=None,
         output_dir=Path("dummyXXX"),  # overriden by hparams
         hf_upload_dir="dummy123",
-        llm_args={"run_key": "run_val"},
-        judge_model_name=judge_model_name,
-        judge_model_args={},
-        judge_models_path=models_path,
+        llm_args={"model_name": "run_model"},
+        judge_model_args={"model_name": "run_judge"},
         batch_size=1,
         description="d",
     ) as ctx:
@@ -91,9 +78,10 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
         assert ctx.config.task_subjects is None
         assert ctx.config.output_dir == Path("dummy")
         assert ctx.config.hf_upload_dir == "dummy123"
-        assert ctx.config.llm_args == {"run_key": "run_val"}
+        assert ctx.config.llm_args == {"model_name": "run_model"}
         assert ctx.config.llm_judge_class is not None
-        assert ctx.config.llm_judge_class.__name__ == judge_model_name
+        assert ctx.config.llm_judge_class.__name__ == OpenAIModel.__name__
+        assert ctx.config.judge_model_args == {"model_name": "run_judge"}
         assert ctx.config.judge_model_args is not None
         assert ctx.config.batch_size == 1
         assert ctx.config.description == "d"
@@ -104,10 +92,7 @@ def test_determined_context_minimal(mock_get_cluster_info_minimal: mock.Mock) ->
 def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) -> None:
     # Test that values from determined configuration are used if given but otherwise run.py values are used.
     # Here, we specify as many values as possible in the hparams to test that they are used.
-    models_path = Path(eval_framework.__path__[0]) / "llm" / "openai.py"
     with DeterminedContext(
-        llm_name="some_llm",  # overriden by hparams
-        models_path=models_path,
         num_samples=10000,  # overriden by hparams
         max_tokens=111,  # overriden by hparams
         num_fewshot=555,  # overriden by hparams
@@ -115,10 +100,8 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         task_subjects=None,  # overriden by hparams
         output_dir=Path("dummyXXX"),  # overriden by hparams
         hf_upload_dir="dummy123",  # overriden by hparams
-        llm_args={"run_key": "run_val"},  # overriden by hparams
-        judge_model_name="some_judge_llm",  # overriden by hparams
-        judge_model_args={},
-        judge_models_path=models_path,
+        llm_args={"model_name": "run_model"},  # overriden by hparams
+        judge_model_args={"model_name": "run_judge"},  # overriden by hparams
         batch_size=1,  # overriden by hparams
         description="d",  # overriden by hparams
         repeats=100,
@@ -135,10 +118,10 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
         assert ctx.config.task_subjects == ["subject1", "subject2"]
         assert ctx.config.output_dir == Path("dummy")
         assert ctx.config.hf_upload_dir == "hf_dummy"
-        assert ctx.config.llm_args == {"dummy_key": "dummy_val"}
+        assert ctx.config.llm_args == {"model_name": "det_model"}
         assert ctx.config.llm_judge_class is not None
         assert ctx.config.llm_judge_class.__name__ == OpenAIModel.__name__
-        assert ctx.config.judge_model_args is not None
+        assert ctx.config.judge_model_args == {"model_name": "det_judge"}
         assert ctx.config.batch_size == 16
         assert ctx.config.description == "det_description"
         assert ctx.config.repeats == 100
@@ -146,19 +129,14 @@ def test_determined_context_maximal(mock_get_cluster_info_maximal: mock.Mock) ->
 
 
 def test_local_context() -> None:
-    models_path = Path(eval_framework.__path__[0]) / "llm" / "openai.py"
     with LocalContext(
-        llm_name=OpenAIModel.__name__,
-        models_path=models_path,
         num_samples=10,
         num_fewshot=0,
         task_name="ARC",
         output_dir=Path("dummy"),
         hf_upload_dir="dummy22",
-        llm_args={"dummy": "dummy"},
-        judge_model_name=OpenAIModel.__name__,
-        judge_model_args={},
-        judge_models_path=models_path,
+        llm_args={"model_name": "m"},
+        judge_model_args={"model_name": "judge"},
         batch_size=1,
         repeats=1,
     ) as ctx:
@@ -170,33 +148,31 @@ def test_local_context() -> None:
         assert ctx.config.task_name == "ARC"
         assert ctx.config.output_dir == Path("dummy")
         assert ctx.config.hf_upload_dir == "dummy22"
-        assert ctx.config.llm_args == {"dummy": "dummy"}
+        assert ctx.config.llm_args == {"model_name": "m"}
         assert ctx.config.llm_judge_class is not None
         assert ctx.config.llm_judge_class.__name__ == OpenAIModel.__name__
         assert ctx.config.judge_model_args is not None
         assert ctx.config.repeats == 1
 
 
-def test_import_models(tmp_path: Path) -> None:
-    llm_dir = Path(eval_framework.llm.__path__[0])
-    models = import_models(llm_dir / "models.py")
-    openai = import_models(llm_dir / "openai.py")
+def test_local_context_without_judge_model_args() -> None:
+    with LocalContext(
+        task_name="ARC", num_fewshot=0, batch_size=1, output_dir=Path("dummy"), llm_args={"model_name": "m"}
+    ) as ctx:
+        assert ctx.config is not None
+        assert ctx.config.llm_judge_class is None
 
-    assert "OpenAIModel" in models
-    assert "OpenAIModel" in openai
-    assert "DeepseekModel" in openai
 
-    for model in models.values():
-        assert issubclass(model, BaseLLM)
-
-    shutil.copy(llm_dir / "models.py", tmp_path / "models.py")
-    shutil.copy(llm_dir / "openai.py", tmp_path / "openai_models.py")
-    models2 = import_models(tmp_path / "models.py")
-    openai2 = import_models(tmp_path / "openai_models.py")
-
-    assert "OpenAIModel" in models2
-    assert "OpenAIModel" in openai2
-    assert "DeepseekModel" in openai2
-
-    for model in models2.values():
-        assert issubclass(model, BaseLLM)
+@pytest.mark.parametrize(
+    ("llm_args", "judge_model_args", "match"),
+    [
+        ({}, {}, "llm_args must set model_name"),
+        ({"model_name": "m"}, {"temperature": "0"}, "judge_model_args must set model_name"),
+    ],
+)
+def test_local_context_requires_model_names(
+    llm_args: dict[str, str], judge_model_args: dict[str, str], match: str
+) -> None:
+    context = LocalContext(task_name="ARC", llm_args=llm_args, judge_model_args=judge_model_args)
+    with pytest.raises(ValueError, match=match):
+        context.__enter__()

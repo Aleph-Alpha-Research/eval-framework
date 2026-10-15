@@ -13,8 +13,6 @@ def test_cli_nested_sampling_params_parsing() -> None:
     """Test CLI args with nested sampling_params get parsed correctly."""
     test_args = [
         "run.py",
-        "--llm-name",
-        "Qwen3_0_6B_VLLM",
         "--task-name",
         "MMLU",
         "--llm-args",
@@ -57,8 +55,6 @@ def test_multiple_nested_keys() -> None:
     """Test parsing multiple levels of nesting in CLI args."""
     test_args = [
         "run.py",
-        "--llm-name",
-        "test",
         "--llm-args",
         "sampling_params.temperature=0.5",
         "sampling_params.stop=END",
