@@ -14,6 +14,36 @@
 
 ### Bug Fixes
 
+## [0.18.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.17.0...v0.18.0) (2026-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** remove api extra and aleph-alpha-client dependency
+* remove Aleph Alpha API client
+* pass response_format to generate instead of OpenAIModel constructor
+* Benchmark subjects allows for filtering
+
+### Features
+
+* Benchmark subjects allows for filtering ([ca4c630](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ca4c630a5d10a394402edf930f1afde6d0afe219))
+* remove Aleph Alpha API client ([100990c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/100990c8b36f93504f79ece642db15ecbc85d9bd))
+
+
+### Documentation
+
+* remove Aleph Alpha API references ([e96c7cc](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e96c7cc01fb1f047b5b2cbe46213de0d69a095df))
+
+
+### Code Refactoring
+
+* pass response_format to generate instead of OpenAIModel constructor ([4494f1e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4494f1e0327635c4dce1e381f49bab7d16dbb848))
+
+
+### Build System
+
+* **deps:** remove api extra and aleph-alpha-client dependency ([a82d535](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a82d53571120ee8d0a4140782a659ac8e85b2531))
+
 ## [0.17.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.16.0...v0.17.0) (2026-10-15)
 
 
