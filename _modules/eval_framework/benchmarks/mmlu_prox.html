@@ -1,0 +1,830 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>eval_framework.benchmarks.mmlu_prox - Eval-Framework v0.18.0</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">Eval-Framework v0.18.0</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <span class="sidebar-brand-text">Eval-Framework v0.18.0</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli_usage.html">Using the CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../completion_task_guide.html">Creating Completion Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../add_new_benchmark_guide.html">How to Add a New Benchmark to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../benchmarks_and_metrics.html">Included Benchmark Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../controlling_upload_results.html">Controlling HuggingFace Upload Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../docker_guide.html">Docker Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../loglikelihood_task_guide.html">Creating Loglikelihood Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_arguments.html">Model Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview_dataloading.html">Overview Dataloading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../understanding_results_guide.html">Understanding Evaluation Results Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../using_determined.html">Using Determined</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utils in <code class="docutils literal notranslate"><span class="pre">eval-framework</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../wandb_integration.html">Weights and Biases Integration with Eval-Framework</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing Guidelines</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../CONTRIBUTING.html">Contributing to Eval Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../testing.html">Testing</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.benchmarks.html">eval_framework.benchmarks package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.aggregators.html">eval_framework.metrics.aggregators package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.benchmarks.html">eval_framework.benchmarks package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.aggregators.html">eval_framework.metrics.aggregators package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.aggregators.html">eval_framework.metrics.aggregators package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/generated/modules.html">eval_framework</a><input aria-label="Toggle navigation of eval_framework" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.html">eval_framework package</a><input aria-label="Toggle navigation of eval_framework package" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.benchmarks.html">eval_framework.benchmarks package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.context.html">eval_framework.context package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.llm.html">eval_framework.llm package</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.html">eval_framework.metrics package</a><input aria-label="Toggle navigation of eval_framework.metrics package" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.aggregators.html">eval_framework.metrics.aggregators package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.completion.html">eval_framework.metrics.completion package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.efficiency.html">eval_framework.metrics.efficiency package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.llm.html">eval_framework.metrics.llm package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../api/generated/eval_framework.metrics.loglikelihood.html">eval_framework.metrics.loglikelihood package</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.result_processors.html">eval_framework.result_processors package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/eval_framework.tasks.html">eval_framework.tasks package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for eval_framework.benchmarks.mmlu_prox</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""MMLU-ProX: multilingual MMLU-Pro.</span>
+
+<span class="sd">https://huggingface.co/datasets/li-lab/MMLU-ProX</span>
+<span class="sd">"""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">final</span><span class="p">,</span> <span class="n">override</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetDict</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.answer</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnswerPolicy</span><span class="p">,</span> <span class="n">ExtractFromCompletion</span><span class="p">,</span> <span class="n">first_match</span><span class="p">,</span> <span class="n">last_match</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.benchmarks.cot</span><span class="w"> </span><span class="kn">import</span> <span class="n">CotPrompt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.benchmarks.mmlu_pro</span><span class="w"> </span><span class="kn">import</span> <span class="n">MMLU_PRO_SUBJECTS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.choices</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChoiceFields</span><span class="p">,</span> <span class="n">ChoiceReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.composed</span><span class="w"> </span><span class="kn">import</span> <span class="n">ComposedBenchmark</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.contract</span><span class="w"> </span><span class="kn">import</span> <span class="n">Benchmark</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.eval_kind</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvalKind</span><span class="p">,</span> <span class="n">SampleBody</span><span class="p">,</span> <span class="n">assemble_messages</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.fewshot</span><span class="w"> </span><span class="kn">import</span> <span class="n">FewShot</span><span class="p">,</span> <span class="n">FewshotExample</span><span class="p">,</span> <span class="n">FewShotPolicy</span><span class="p">,</span> <span class="n">FewShotSplit</span><span class="p">,</span> <span class="n">FunctionRenderer</span><span class="p">,</span> <span class="n">NoFewShot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseMetric</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.metrics.completion.accuracy_completion</span><span class="w"> </span><span class="kn">import</span> <span class="n">AccuracyCompletion</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.subjects</span><span class="w"> </span><span class="kn">import</span> <span class="n">ListOfSubjects</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Language</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.dataset_loading</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetLoader</span><span class="p">,</span> <span class="n">DatasetPolicy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.dataset_revisions</span><span class="w"> </span><span class="kn">import</span> <span class="n">pinned_by_framework</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.task_style</span><span class="w"> </span><span class="kn">import</span> <span class="n">BPBStyle</span><span class="p">,</span> <span class="n">ClozeStyle</span><span class="p">,</span> <span class="n">InitialPrompt</span><span class="p">,</span> <span class="n">MCStyle</span><span class="p">,</span> <span class="n">TaskStyler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">eval_framework.tasks.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_n_letters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">template_formatting.formatter</span><span class="w"> </span><span class="kn">import</span> <span class="n">Message</span>
+
+<span class="n">_MMLU_MAX_NUM_OPTIONS</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># MMLU-Pro(X) has at most 10 options</span>
+
+
+<div class="viewcode-block" id="MMLUProXReader">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.MMLUProXReader">[docs]</a>
+<span class="nd">@final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MMLUProXReader</span><span class="p">(</span><span class="n">ChoiceReader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Reads an MMLU-ProX item, returns question, up to 10 answer options, and the correct index.</span>
+
+<span class="sd">    Options are stored flat as ``option_0`` .. ``option_9``. Rows with fewer than 10 options are</span>
+<span class="sd">    padded, with ``None`` in the test split but the literal string ``"N/A"`` in the validation</span>
+<span class="sd">    split; both are dropped here, matching the official MMLU-Pro evaluation code (the</span>
+<span class="sd">    lm-evaluation-harness MMLU-ProX tasks drop only ``None``, so their fewshot examples show</span>
+<span class="sd">    "N/A" as an answer option). We deviate from this by dropping both ``None`` and ``"N/A"``.</span>
+<span class="sd">    """</span>
+
+<div class="viewcode-block" id="MMLUProXReader.read">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.MMLUProXReader.read">[docs]</a>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ChoiceFields</span><span class="p">:</span>
+        <span class="n">raw_options</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="sa">f</span><span class="s2">"option_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">_MMLU_MAX_NUM_OPTIONS</span><span class="p">)]</span>
+        <span class="c1"># Drop both None and "N/A"</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">[</span><span class="n">option</span> <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">raw_options</span> <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">option</span> <span class="o">!=</span> <span class="s2">"N/A"</span><span class="p">]</span>
+        <span class="c1"># BUG-HINT: on one MMLU-ProX test row (question_id 3787, chemistry, identical in the `en` and `de`</span>
+        <span class="c1"># configs) ``answer_index`` is 1 while the ``answer`` column says "C", and the question's</span>
+        <span class="c1"># electronegativities support the answer column. The choice benchmarks built on this index score</span>
+        <span class="c1"># that row against a wrong gold; the CoT variants read the ``answer`` column and are unaffected.</span>
+        <span class="n">correct_index</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">"answer_index"</span><span class="p">]</span>
+        <span class="c1"># Assert that padding is trailing, otherwise it would shift answer_index off the answer.</span>
+        <span class="k">assert</span> <span class="n">raw_options</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">choices</span><span class="p">)]</span> <span class="o">==</span> <span class="n">choices</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Non-trailing padded option in item </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'question_id'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">correct_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">choices</span><span class="p">),</span> <span class="sa">f</span><span class="s2">"answer_index points at a padded option in </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="s1">'question_id'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">return</span> <span class="n">ChoiceFields</span><span class="p">(</span><span class="n">raw_question</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">"question"</span><span class="p">],</span> <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">,</span> <span class="n">correct_index</span><span class="o">=</span><span class="n">correct_index</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MMLUProXDatasetLoader">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.MMLUProXDatasetLoader">[docs]</a>
+<span class="nd">@final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MMLUProXDatasetLoader</span><span class="p">(</span><span class="n">DatasetLoader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Loads one MMLU-ProX language and filters its rows to one category.</span>
+
+<span class="sd">    MMLU-ProX has two subject axes, but a benchmark's subjects can only carry one: the language</span>
+<span class="sd">    is fixed per benchmark instance (it is the HuggingFace config the wrapped loader downloads),</span>
+<span class="sd">    while the ``name`` this loader receives from the subject selection is the category to filter</span>
+<span class="sd">    rows by. Both splits are filtered, so fewshot examples are category-matched.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">inner</span><span class="p">:</span> <span class="n">DatasetLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_language</span> <span class="o">=</span> <span class="n">language</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inner</span> <span class="o">=</span> <span class="n">inner</span>
+
+<div class="viewcode-block" id="MMLUProXDatasetLoader.load">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.MMLUProXDatasetLoader.load">[docs]</a>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatasetDict</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"MMLU-ProX subjects are the categories; a category must be selected"</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inner</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_language</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dataset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="p">[</span><span class="s2">"category"</span><span class="p">]</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MMLUProXDatasetLoader.metadata">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.MMLUProXDatasetLoader.metadata">[docs]</a>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inner</span><span class="o">.</span><span class="n">metadata</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MMLUProXDatasetPolicy">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.MMLUProXDatasetPolicy">[docs]</a>
+<span class="nd">@final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MMLUProXDatasetPolicy</span><span class="p">(</span><span class="n">DatasetPolicy</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Pins an MMLU-ProX dataset via the framework lockfile; its loaders load one language."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span> <span class="o">=</span> <span class="n">pinned_by_framework</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_language</span> <span class="o">=</span> <span class="n">language</span>
+
+<div class="viewcode-block" id="MMLUProXDatasetPolicy.loader">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.MMLUProXDatasetPolicy.loader">[docs]</a>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">custom_hf_revision</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatasetLoader</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">MMLUProXDatasetLoader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_language</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span><span class="o">.</span><span class="n">loader</span><span class="p">(</span><span class="n">custom_hf_revision</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="MMLUProXDatasetPolicy.documentation">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.MMLUProXDatasetPolicy.documentation">[docs]</a>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">documentation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pinned</span><span class="o">.</span><span class="n">documentation</span><span class="p">()</span></div>
+</div>
+
+
+
+<span class="c1"># Supported languages: HF config -&gt; Language enum. Extend together with the styler blocks below.</span>
+<span class="n">_MMLU_PROX_LANGUAGES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"de"</span><span class="p">:</span> <span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">}</span>
+
+<span class="c1"># German category names, following the lm-evaluation-harness MMLU-ProX/de task descriptions.</span>
+<span class="n">_CATEGORY_NAMES_DE</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"biology"</span><span class="p">:</span> <span class="s2">"Biologie"</span><span class="p">,</span>
+    <span class="s2">"business"</span><span class="p">:</span> <span class="s2">"Wirtschaft"</span><span class="p">,</span>
+    <span class="s2">"chemistry"</span><span class="p">:</span> <span class="s2">"Chemie"</span><span class="p">,</span>
+    <span class="s2">"computer science"</span><span class="p">:</span> <span class="s2">"Informatik"</span><span class="p">,</span>
+    <span class="s2">"economics"</span><span class="p">:</span> <span class="s2">"Ökonomie"</span><span class="p">,</span>
+    <span class="s2">"engineering"</span><span class="p">:</span> <span class="s2">"Ingenieurwesen"</span><span class="p">,</span>
+    <span class="s2">"health"</span><span class="p">:</span> <span class="s2">"Gesundheit"</span><span class="p">,</span>
+    <span class="s2">"history"</span><span class="p">:</span> <span class="s2">"Geschichte"</span><span class="p">,</span>
+    <span class="s2">"law"</span><span class="p">:</span> <span class="s2">"Recht"</span><span class="p">,</span>
+    <span class="s2">"math"</span><span class="p">:</span> <span class="s2">"Mathematik"</span><span class="p">,</span>
+    <span class="s2">"other"</span><span class="p">:</span> <span class="s2">"Sonstiges"</span><span class="p">,</span>
+    <span class="s2">"philosophy"</span><span class="p">:</span> <span class="s2">"Philosophie"</span><span class="p">,</span>
+    <span class="s2">"physics"</span><span class="p">:</span> <span class="s2">"Physik"</span><span class="p">,</span>
+    <span class="s2">"psychology"</span><span class="p">:</span> <span class="s2">"Psychologie"</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_mc_preamble_de</span><span class="p">(</span><span class="n">subject</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Die folgenden sind Multiple-Choice-Fragen (mit Antworten) über </span><span class="si">{</span><span class="n">_CATEGORY_NAMES_DE</span><span class="p">[</span><span class="n">subject</span><span class="p">]</span><span class="si">}</span><span class="s2">."</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cloze_preamble_de</span><span class="p">(</span><span class="n">subject</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="c1"># Cloze/BPB prompts show no answer options, so the preamble must not claim multiple choice.</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Die folgenden sind Fragen (mit Antworten) über </span><span class="si">{</span><span class="n">_CATEGORY_NAMES_DE</span><span class="p">[</span><span class="n">subject</span><span class="p">]</span><span class="si">}</span><span class="s2">."</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_mmlu_prox_benchmark</span><span class="p">(</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">styler</span><span class="p">:</span> <span class="n">TaskStyler</span><span class="p">,</span>
+    <span class="n">language</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">lite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+    <span class="n">dataset_path</span> <span class="o">=</span> <span class="s2">"li-lab/MMLU-ProX-Lite"</span> <span class="k">if</span> <span class="n">lite</span> <span class="k">else</span> <span class="s2">"li-lab/MMLU-ProX"</span>
+    <span class="n">dataset_policy</span> <span class="o">=</span> <span class="n">dataset</span> <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">MMLUProXDatasetPolicy</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ComposedBenchmark</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
+        <span class="n">reader</span><span class="o">=</span><span class="n">MMLUProXReader</span><span class="p">(),</span>
+        <span class="n">styler</span><span class="o">=</span><span class="n">styler</span><span class="p">,</span>
+        <span class="n">sample_split</span><span class="o">=</span><span class="s2">"test"</span><span class="p">,</span>
+        <span class="n">fewshot_split</span><span class="o">=</span><span class="s2">"validation"</span><span class="p">,</span>
+        <span class="c1"># The subjects are the 14 MMLU-Pro categories (identical in MMLU-ProX)</span>
+        <span class="n">subjects</span><span class="o">=</span><span class="n">ListOfSubjects</span><span class="p">(</span><span class="n">MMLU_PRO_SUBJECTS</span><span class="p">),</span>
+        <span class="c1"># The language axis lives in the dataset policy so that we can select the right question/answer cues.</span>
+        <span class="n">dataset_policy</span><span class="o">=</span><span class="n">dataset_policy</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="n">_MMLU_PROX_LANGUAGES</span><span class="p">[</span><span class="n">language</span><span class="p">],</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="mmlu_prox_lilab_de_mc">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lilab_de_mc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lilab_de_mc</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_benchmark</span><span class="p">(</span>
+        <span class="s2">"MMLUProX_LiLab_DE_MC"</span><span class="p">,</span>
+        <span class="n">MCStyle</span><span class="o">.</span><span class="n">for_language</span><span class="p">(</span><span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">,</span> <span class="n">initial_prompt</span><span class="o">=</span><span class="n">_mc_preamble_de</span><span class="p">),</span>
+        <span class="s2">"de"</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mmlu_prox_lilab_de_mc_olmes">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lilab_de_mc_olmes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lilab_de_mc_olmes</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_benchmark</span><span class="p">(</span>
+        <span class="s2">"MMLUProX_LiLab_DE_MC_OLMES"</span><span class="p">,</span>
+        <span class="n">MCStyle</span><span class="o">.</span><span class="n">for_language</span><span class="p">(</span><span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">,</span> <span class="n">space_prefixed_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initial_prompt</span><span class="o">=</span><span class="n">_mc_preamble_de</span><span class="p">),</span>
+        <span class="s2">"de"</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mmlu_prox_lite_lilab_de_mc">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lite_lilab_de_mc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lite_lilab_de_mc</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_benchmark</span><span class="p">(</span>
+        <span class="s2">"MMLUProXLite_LiLab_DE_MC"</span><span class="p">,</span>
+        <span class="n">MCStyle</span><span class="o">.</span><span class="n">for_language</span><span class="p">(</span><span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">,</span> <span class="n">initial_prompt</span><span class="o">=</span><span class="n">_mc_preamble_de</span><span class="p">),</span>
+        <span class="s2">"de"</span><span class="p">,</span>
+        <span class="n">lite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mmlu_prox_lite_lilab_de_mc_olmes">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lite_lilab_de_mc_olmes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lite_lilab_de_mc_olmes</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_benchmark</span><span class="p">(</span>
+        <span class="s2">"MMLUProXLite_LiLab_DE_MC_OLMES"</span><span class="p">,</span>
+        <span class="n">MCStyle</span><span class="o">.</span><span class="n">for_language</span><span class="p">(</span><span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">,</span> <span class="n">space_prefixed_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initial_prompt</span><span class="o">=</span><span class="n">_mc_preamble_de</span><span class="p">),</span>
+        <span class="s2">"de"</span><span class="p">,</span>
+        <span class="n">lite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mmlu_prox_lilab_de_cloze">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lilab_de_cloze">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lilab_de_cloze</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_benchmark</span><span class="p">(</span>
+        <span class="s2">"MMLUProX_LiLab_DE_CLOZE"</span><span class="p">,</span>
+        <span class="n">ClozeStyle</span><span class="o">.</span><span class="n">for_language</span><span class="p">(</span><span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">,</span> <span class="n">initial_prompt</span><span class="o">=</span><span class="n">_cloze_preamble_de</span><span class="p">),</span>
+        <span class="s2">"de"</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mmlu_prox_lite_lilab_de_cloze">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lite_lilab_de_cloze">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lite_lilab_de_cloze</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_benchmark</span><span class="p">(</span>
+        <span class="s2">"MMLUProXLite_LiLab_DE_CLOZE"</span><span class="p">,</span>
+        <span class="n">ClozeStyle</span><span class="o">.</span><span class="n">for_language</span><span class="p">(</span><span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">,</span> <span class="n">initial_prompt</span><span class="o">=</span><span class="n">_cloze_preamble_de</span><span class="p">),</span>
+        <span class="s2">"de"</span><span class="p">,</span>
+        <span class="n">lite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mmlu_prox_lilab_de_bpb">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lilab_de_bpb">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lilab_de_bpb</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_benchmark</span><span class="p">(</span>
+        <span class="s2">"MMLUProX_LiLab_DE_BPB"</span><span class="p">,</span>
+        <span class="n">BPBStyle</span><span class="o">.</span><span class="n">for_language</span><span class="p">(</span><span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">,</span> <span class="n">initial_prompt</span><span class="o">=</span><span class="n">_cloze_preamble_de</span><span class="p">),</span>
+        <span class="s2">"de"</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mmlu_prox_lite_lilab_de_bpb">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lite_lilab_de_bpb">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lite_lilab_de_bpb</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_benchmark</span><span class="p">(</span>
+        <span class="s2">"MMLUProXLite_LiLab_DE_BPB"</span><span class="p">,</span>
+        <span class="n">BPBStyle</span><span class="o">.</span><span class="n">for_language</span><span class="p">(</span><span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">,</span> <span class="n">initial_prompt</span><span class="o">=</span><span class="n">_cloze_preamble_de</span><span class="p">),</span>
+        <span class="s2">"de"</span><span class="p">,</span>
+        <span class="n">lite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># --- chain-of-thought (generative) variants ------------------------------------------------------------------</span>
+
+<span class="c1"># Cue closing every v1 prompt, and the prefix the dataset's ``cot_content`` starts with instead of it.</span>
+<span class="n">_COT_CUE_DE</span> <span class="o">=</span> <span class="s2">"Antwort: Denken wir Schritt für Schritt nach."</span>
+<span class="n">_COT_CONTENT_PREFIX_DE</span> <span class="o">=</span> <span class="s2">"A: Denken wir Schritt für Schritt nach."</span>
+<span class="n">_COT_ANSWER_RE_DE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"Die Antwort ist \(?([ABCDEFGHIJ])\)?"</span><span class="p">)</span>
+<span class="n">_COT_ANSWER_RE_DE_V2</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">rf</span><span class="s2">"\b(?:Antwort\s+ist|answer\s+is):?\s*\(?([</span><span class="si">{</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_n_letters</span><span class="p">(</span><span class="n">_MMLU_MAX_NUM_OPTIONS</span><span class="p">))</span><span class="si">}</span><span class="s2">])\b\)?"</span><span class="p">,</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cot_preamble_de</span><span class="p">(</span><span class="n">subject</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">_mc_preamble_de</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span><span class="si">}</span><span class="s2"> Denken Sie Schritt für Schritt nach und beenden Sie Ihre Antwort mit "</span>
+        <span class="s1">'"Die Antwort ist (X)", wobei X der richtige Buchstabe ist.'</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cot_preamble_de_v2</span><span class="p">(</span><span class="n">subject</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">_mc_preamble_de</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span><span class="si">}</span><span class="s2"> Geben Sie eine KNAPPE Begründung und beenden Sie Ihre Antwort mit "</span>
+        <span class="s1">'"Die Antwort ist (X)", wobei X der richtige Buchstabe ist.'</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cot_body_de</span><span class="p">(</span><span class="n">raw_question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">choices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">choice</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">choice</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">get_n_letters</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">choices</span><span class="p">)),</span> <span class="n">choices</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Frage:</span><span class="se">\n</span><span class="si">{</span><span class="n">raw_question</span><span class="si">}</span><span class="se">\n</span><span class="s2">Optionen:</span><span class="se">\n</span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cot_body_de_v2</span><span class="p">(</span><span class="n">raw_question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">choices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="c1"># "(A) ..."-labelled options, matching the "(X)" answer format the v2 preamble asks for.</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">) </span><span class="si">{</span><span class="n">choice</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">choice</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">get_n_letters</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">choices</span><span class="p">)),</span> <span class="n">choices</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Frage:</span><span class="se">\n</span><span class="si">{</span><span class="n">raw_question</span><span class="si">}</span><span class="se">\n</span><span class="s2">Optionen:</span><span class="se">\n</span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="nd">@final</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_AnswerColumnCot</span><span class="p">(</span><span class="n">EvalKind</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Multiple-choice chain-of-thought over MMLU-ProX rows, scored by accuracy on the extracted letter.</span>
+
+<span class="sd">    Differs from the shared ``Cot`` kind in two ways: the gold letter is the dataset's ``answer`` column</span>
+<span class="sd">    rather than derived from ``answer_index`` (the two disagree on one test row, and the answer column is</span>
+<span class="sd">    the correct one — see ``MMLUProXReader``), and the assistant cue is configurable (``""`` for none)."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">:</span> <span class="n">ChoiceReader</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">build_prompt</span><span class="p">:</span> <span class="n">CotPrompt</span><span class="p">,</span> <span class="n">preamble</span><span class="p">:</span> <span class="n">InitialPrompt</span><span class="p">,</span> <span class="n">cue</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span> <span class="o">=</span> <span class="n">reader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_build_prompt</span> <span class="o">=</span> <span class="n">build_prompt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preamble</span> <span class="o">=</span> <span class="n">preamble</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cue</span> <span class="o">=</span> <span class="n">cue</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">BaseMetric</span><span class="p">]]:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">AccuracyCompletion</span><span class="p">]</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SampleBody</span><span class="p">]:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">SampleBody</span><span class="p">(</span>
+                <span class="n">prompt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_build_prompt</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">raw_question</span><span class="p">,</span> <span class="n">fields</span><span class="o">.</span><span class="n">choices</span><span class="p">),</span>
+                <span class="n">cue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cue</span><span class="p">,</span>
+                <span class="n">possible_completions</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">ground_truth</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">"answer"</span><span class="p">],</span>  <span class="c1"># the bare answer letter</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">messages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="n">SampleBody</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">fewshot</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FewshotExample</span><span class="p">],</span> <span class="n">subject_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Message</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">assemble_messages</span><span class="p">(</span><span class="n">fewshot</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">initial_prompt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_preamble</span><span class="p">(</span><span class="n">subject_label</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_cot_fewshot_de</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">FewShot</span><span class="p">:</span>
+    <span class="c1"># Demonstrations answer with the row's worked reasoning, its "A:" prefix replaced by the cue (keeping</span>
+    <span class="c1"># the dataset's missing whitespace after it).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">demo</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">FewshotExample</span><span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">MMLUProXReader</span><span class="p">()</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">FewshotExample</span><span class="p">(</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">_cot_body_de</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">raw_question</span><span class="p">,</span> <span class="n">fields</span><span class="o">.</span><span class="n">choices</span><span class="p">),</span>
+            <span class="n">answer</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="s2">"cot_content"</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">_COT_CONTENT_PREFIX_DE</span><span class="p">,</span> <span class="n">_COT_CUE_DE</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">FewShot</span><span class="p">(</span><span class="n">FewShotSplit</span><span class="p">(</span><span class="s2">"validation"</span><span class="p">),</span> <span class="n">FunctionRenderer</span><span class="p">(</span><span class="n">demo</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_mmlu_prox_cot_benchmark</span><span class="p">(</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">EvalKind</span><span class="p">,</span>
+    <span class="n">answer</span><span class="p">:</span> <span class="n">AnswerPolicy</span><span class="p">,</span>
+    <span class="n">fewshot</span><span class="p">:</span> <span class="n">FewShotPolicy</span><span class="p">,</span>
+    <span class="n">lite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+    <span class="n">dataset_path</span> <span class="o">=</span> <span class="s2">"li-lab/MMLU-ProX-Lite"</span> <span class="k">if</span> <span class="n">lite</span> <span class="k">else</span> <span class="s2">"li-lab/MMLU-ProX"</span>
+    <span class="n">dataset_policy</span> <span class="o">=</span> <span class="n">dataset</span> <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">MMLUProXDatasetPolicy</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="s2">"de"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ComposedBenchmark</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">,</span>
+        <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+        <span class="n">answer</span><span class="o">=</span><span class="n">answer</span><span class="p">,</span>
+        <span class="n">sample_split</span><span class="o">=</span><span class="s2">"test"</span><span class="p">,</span>
+        <span class="n">fewshot</span><span class="o">=</span><span class="n">fewshot</span><span class="p">,</span>
+        <span class="n">subjects</span><span class="o">=</span><span class="n">ListOfSubjects</span><span class="p">(</span><span class="n">MMLU_PRO_SUBJECTS</span><span class="p">),</span>
+        <span class="n">dataset_policy</span><span class="o">=</span><span class="n">dataset_policy</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="n">Language</span><span class="o">.</span><span class="n">DEU</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="mmlu_prox_lilab_de_cot">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lilab_de_cot">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lilab_de_cot</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""MMLU-ProX German, 5-shot chain-of-thought (generative), mirroring lm-evaluation-harness</span>
+<span class="sd">    ``lm_eval/tasks/mmlu_prox/de`` for result parity. Run with ``num_fewshot=5`` for parity.</span>
+
+<span class="sd">    Differences to the lm-eval implementation (all deliberate):</span>
+
+<span class="sd">    - Preamble: lm-eval says "Im Folgenden sind Multiple-Choice-Fragen (mit Antworten) zu {X}.";</span>
+<span class="sd">      we keep the GlobalMMLU-style first sentence of the loglikelihood siblings ("Die folgenden</span>
+<span class="sd">      sind ... über {X}.") and append lm-eval's instruction sentence verbatim.</span>
+<span class="sd">    - Preamble separator: the framework puts a blank line between preamble and first question,</span>
+<span class="sd">      lm-eval a single newline.</span>
+<span class="sd">    - "N/A" option padding: ``MMLUProXReader`` drops it, lm-eval drops only ``None``,</span>
+<span class="sd">      so 21 of its 70 fewshot examples list "N/A" as an answer option.</span>
+<span class="sd">    - Fewshot selection: lm-eval takes the first n validation rows, we sample randomly (seeded).</span>
+<span class="sd">      The validation split holds exactly 5 rows per category, so with 5-shot both use the same</span>
+<span class="sd">      rows and only the order differs.</span>
+<span class="sd">    - The cue is a separate assistant message (a prefill under chat templates); lm-eval appends it</span>
+<span class="sd">      to the user text. Under ``ConcatFormatter`` both render identically.</span>
+<span class="sd">    - Metric: lm-eval scores ``exact_match`` with ignore_case/ignore_punctuation on the extracted</span>
+<span class="sd">      letter; the regex only ever yields one uppercase letter, so plain ``AccuracyCompletion``</span>
+<span class="sd">      is equivalent.</span>
+<span class="sd">    - Test-split order is shuffled by the framework (irrelevant for full runs).</span>
+<span class="sd">    - Token budget: lm-eval caps generation at 2048 tokens; ``max_tokens`` stays unset, because</span>
+<span class="sd">      reasoning models routinely think past 2048 tokens and the cap turned 35-52% of their</span>
+<span class="sd">      completions into length terminations.</span>
+<span class="sd">    - Stop sequences: lm-eval stops on "&lt;/s&gt;", "Q:", "Frage:" and "&lt;|im_end|&gt;"; none are set here.</span>
+<span class="sd">      This benchmark is meant for post-trained models, which end their turn via EOS anyway, and a</span>
+<span class="sd">      "Frage:" stop would truncate a reasoning model that restates the question mid-thought.</span>
+
+<span class="sd">    Identical: per-example layout ("Frage:\\n...\\nOptionen:\\nA. ...\\n"), fewshot targets from the</span>
+<span class="sd">    row's ``cot_content`` with its "A:" prefix replaced by the cue (including the dataset's missing</span>
+<span class="sd">    whitespace after the cue), and extraction regex.</span>
+
+<span class="sd">    Differences to eval-framework's ``MMLU_PRO_COT`` (TIGER-Lab/MMLU-Pro, English): that task uses</span>
+<span class="sd">    the Tülu-3 zero-shot prompt with "(A)"-style options, the regex "Therefore, the answer is (X)"</span>
+<span class="sd">    and the stop sequence "Question:", and forbids fewshots.</span>
+<span class="sd">    """</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">_AnswerColumnCot</span><span class="p">(</span><span class="n">MMLUProXReader</span><span class="p">(),</span> <span class="n">build_prompt</span><span class="o">=</span><span class="n">_cot_body_de</span><span class="p">,</span> <span class="n">preamble</span><span class="o">=</span><span class="n">_cot_preamble_de</span><span class="p">,</span> <span class="n">cue</span><span class="o">=</span><span class="n">_COT_CUE_DE</span><span class="p">)</span>
+    <span class="n">answer</span> <span class="o">=</span> <span class="n">ExtractFromCompletion</span><span class="p">(</span><span class="n">first_match</span><span class="p">(</span><span class="n">_COT_ANSWER_RE_DE</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_cot_benchmark</span><span class="p">(</span><span class="s2">"MMLUProX_LiLab_DE_COT"</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">answer</span><span class="p">,</span> <span class="n">_cot_fewshot_de</span><span class="p">(),</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mmlu_prox_lite_lilab_de_cot">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lite_lilab_de_cot">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lite_lilab_de_cot</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``mmlu_prox_lilab_de_cot`` on the MMLU-ProX-Lite subset (588 German test rows, same validation split)."""</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">_AnswerColumnCot</span><span class="p">(</span><span class="n">MMLUProXReader</span><span class="p">(),</span> <span class="n">build_prompt</span><span class="o">=</span><span class="n">_cot_body_de</span><span class="p">,</span> <span class="n">preamble</span><span class="o">=</span><span class="n">_cot_preamble_de</span><span class="p">,</span> <span class="n">cue</span><span class="o">=</span><span class="n">_COT_CUE_DE</span><span class="p">)</span>
+    <span class="n">answer</span> <span class="o">=</span> <span class="n">ExtractFromCompletion</span><span class="p">(</span><span class="n">first_match</span><span class="p">(</span><span class="n">_COT_ANSWER_RE_DE</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_cot_benchmark</span><span class="p">(</span><span class="s2">"MMLUProXLite_LiLab_DE_COT"</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">answer</span><span class="p">,</span> <span class="n">_cot_fewshot_de</span><span class="p">(),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mmlu_prox_lilab_de_cot_v2">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lilab_de_cot_v2">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lilab_de_cot_v2</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``mmlu_prox_lilab_de_cot`` aligned with ``MMLU_PRO_COT_V2``: no assistant cue, lenient last-match</span>
+<span class="sd">    extraction, 0-shot only.</span>
+
+<span class="sd">    The v1 cue is an assistant prefill. Chat servers close it as a finished turn, so reasoning models answer</span>
+<span class="sd">    in a fresh turn and some skip closing their think block, which leaves the answer outside the scored</span>
+<span class="sd">    content. Some chat templates reject the trailing assistant message outright.</span>
+
+<span class="sd">    Also aligned with ``MMLU_PRO_COT_V2``'s prompt: the preamble asks for CONCISE reasoning rather than</span>
+<span class="sd">    step-by-step thinking, and options are labelled "(A) ..." to match the "(X)" answer format. v1 keeps</span>
+<span class="sd">    lm-eval's wording and "A. ..." labels for parity.</span>
+<span class="sd">    """</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">_AnswerColumnCot</span><span class="p">(</span><span class="n">MMLUProXReader</span><span class="p">(),</span> <span class="n">build_prompt</span><span class="o">=</span><span class="n">_cot_body_de_v2</span><span class="p">,</span> <span class="n">preamble</span><span class="o">=</span><span class="n">_cot_preamble_de_v2</span><span class="p">,</span> <span class="n">cue</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">answer</span> <span class="o">=</span> <span class="n">ExtractFromCompletion</span><span class="p">(</span><span class="n">last_match</span><span class="p">(</span><span class="n">_COT_ANSWER_RE_DE_V2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_cot_benchmark</span><span class="p">(</span><span class="s2">"MMLUProX_LiLab_DE_COT_V2"</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">answer</span><span class="p">,</span> <span class="n">NoFewShot</span><span class="p">(),</span> <span class="kc">False</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="mmlu_prox_lite_lilab_de_cot_v2">
+<a class="viewcode-back" href="../../../api/generated/eval_framework.benchmarks.html#eval_framework.benchmarks.mmlu_prox.mmlu_prox_lite_lilab_de_cot_v2">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mmlu_prox_lite_lilab_de_cot_v2</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">DatasetPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Benchmark</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``mmlu_prox_lilab_de_cot_v2`` on the MMLU-ProX-Lite subset (588 German test rows, same validation split)."""</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">_AnswerColumnCot</span><span class="p">(</span><span class="n">MMLUProXReader</span><span class="p">(),</span> <span class="n">build_prompt</span><span class="o">=</span><span class="n">_cot_body_de_v2</span><span class="p">,</span> <span class="n">preamble</span><span class="o">=</span><span class="n">_cot_preamble_de_v2</span><span class="p">,</span> <span class="n">cue</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">answer</span> <span class="o">=</span> <span class="n">ExtractFromCompletion</span><span class="p">(</span><span class="n">last_match</span><span class="p">(</span><span class="n">_COT_ANSWER_RE_DE_V2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">_mmlu_prox_cot_benchmark</span><span class="p">(</span><span class="s2">"MMLUProXLite_LiLab_DE_COT_V2"</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">answer</span><span class="p">,</span> <span class="n">NoFewShot</span><span class="p">(),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span></div>
+
+
+
+<span class="n">MMLU_PROX_BENCHMARKS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Benchmark</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">mmlu_prox_lilab_de_mc</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lilab_de_mc_olmes</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lilab_de_cloze</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lilab_de_bpb</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lilab_de_cot</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lilab_de_cot_v2</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lite_lilab_de_mc</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lite_lilab_de_mc_olmes</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lite_lilab_de_cloze</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lite_lilab_de_bpb</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lite_lilab_de_cot</span><span class="p">(),</span>
+    <span class="n">mmlu_prox_lite_lilab_de_cot_v2</span><span class="p">(),</span>
+<span class="p">]</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Aleph Alpha Research
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
