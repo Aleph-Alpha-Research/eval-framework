@@ -171,9 +171,7 @@ class TestResolveToEvalKwargs:
         leaf = TaskSuite(tasks="MMLU")
         defaults = {"temperature": 0.7, "top_p": 0.9, "num_fewshot": 5}
         cli_kwargs = {
-            "llm_name": "MyModel",
             "llm_args": {"apikey": "apivalue"},
-            "models": "models.py",
             "task_name": "ignored",
         }
         result = resolve_to_evalconfig_kwargs(leaf, defaults, cli_kwargs)
@@ -195,13 +193,13 @@ class TestResolveToEvalKwargs:
         leaf = TaskSuite(tasks="T")
         defaults = {}
         cli_kwargs = {
-            "llm_name": "M",
+            "description": "M",
             "llm_args": {},
             "task_name": "old",
             "wandb_project": "proj",
         }
         result = resolve_to_evalconfig_kwargs(leaf, defaults, cli_kwargs)
-        assert result["llm_name"] == "M"
+        assert result["description"] == "M"
         assert result["wandb_project"] == "proj"
         assert result["task_name"] == "T"
 
@@ -379,9 +377,7 @@ class TestComputeAggregates:
 
 
 _BASE_CLI_KWARGS: dict = {
-    "llm_name": "MockLLM",
     "llm_args": {},
-    "models": "models.py",
     "task_name": None,
     "output_dir": "outputs",
     "wandb_project": None,

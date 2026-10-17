@@ -49,13 +49,14 @@ hyperparameters:
     type: categorical
     ...
   output_dir: <OUTPUT_DIR>
-  llm_name: <LLM_NAME>
-  model_path: <MODEL_PATH>
-entrypoint: uv run eval_framework --context determined --models <YOUR_MODEL_DEFINITIONS>.py
+  llm_args:
+    model_name: <MODEL_NAME>
+    base_url: <OPENAI_COMPATIBLE_BASE_URL>
+entrypoint: uv run eval_framework --context determined
 ```
 
-- `<YOUR_MODEL_DEFINITIONS>.py` should define your model configuration.
-- See `examples/local_evaluation/` for sample model definition files.
+- The model is always `eval_framework.llm.openai.OpenAIModel`; configure it through `llm_args` (any `OpenAIModel` constructor argument). `model_name` is required. The former `llm_name` and `task_args.judge_model_name` hyperparameters are rejected.
+- To enable an LLM judge, set `judge_model_args` (e.g. `model_name`) under `task_args`; the judge is also an `OpenAIModel`.
 
 ## 6. Set Up Authentication Tokens
 

@@ -8,18 +8,15 @@ The Eval-Framework CLI provides a flexible interface for evaluating LLMs across 
 uv run eval_framework [OPTIONS]
 ```
 
-### Required Arguments
+### Model Selection
 
-**`--llm-name LLM_NAME`**
-Either a module path to a model, or the name of a model found in the file provided via the `--models` flag.
+The evaluated model is always `eval_framework.llm.openai.OpenAIModel`. Configure it through `--llm-args`, which must
+include `model_name` (e.g. `--llm-args model_name="gpt-4o-mini" base_url="http://localhost:8000/v1"`).
 
 ### Execution Configuration
 
-**`--models MODELS`**
-Path to the Python module file containing model classes.
-
 **`--llm-args [LLM_ARGS ...]`**
-Arguments to pass to the LLM as key=value pairs.
+Arguments to pass to the `OpenAIModel` constructor as key=value pairs. `model_name` is required.
 
 **`--task-name TASK_NAME`**
 The name of the task to evaluate.
@@ -54,14 +51,11 @@ A tag name, a branch name, or commit hash for the task HF dataset.
 
 ### Judge Models
 
-**`--judge-models JUDGE_MODELS`**
-The path to the Python module file containing LLM judge model classes.
-
-**`--judge-model-name JUDGE_MODEL_NAME`**
-The class derived from `eval_framework.llm.base.BaseLLM` found in the judge-models module to instantiate for LLM judge evaluation metrics.
+The LLM judge is always an `eval_framework.llm.openai.OpenAIModel`.
 
 **`--judge-model-args JUDGE_MODEL_ARGS`**
-The args of the judge model used.
+Arguments to pass to the judge `OpenAIModel` constructor as key=value pairs; `model_name` is required (e.g.
+`model_name="gpt-4o"`). Setting this enables the LLM judge, which is required for tasks scored with LLM-judge metrics.
 
 ### Perturbations
 
@@ -109,7 +103,6 @@ Any model served through an OpenAI-compatible API (the OpenAI API itself, vLLM, 
 
 ```bash
 uv run eval_framework \
-    --llm-name 'eval_framework.llm.openai.OpenAIModel' \
     --llm-args model_name="Qwen/Qwen3-0.6B" base_url="http://localhost:8000/v1" \
     --task-name "MMLU" \
     --task-subjects "abstract_algebra" \
@@ -163,7 +156,6 @@ Then pass the suite file to the CLI:
 
 ```bash
 uv run eval_framework \
-    --llm-name 'eval_framework.llm.openai.OpenAIModel' \
     --llm-args model_name="gpt-4o-mini" \
     --task-suite my_suite.yaml \
     --output-dir ./eval_results

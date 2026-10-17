@@ -35,28 +35,11 @@ def parse_args() -> argparse.Namespace:
         help="The context in which the evaluation is run.",
     )
     parser.add_argument(
-        "--models",
-        type=Path,
-        required=False,
-        default=Path(__file__).parent / "llm" / "models.py",
-        help="The path to the Python module file containing model classes.",
-    )
-    parser.add_argument(
         "--extra-tasks-dir",
         type=Path,
         default=None,
         required=False,
         help="Directory containing additional task plugin modules to load.",
-    )
-    parser.add_argument(
-        "--llm-name",
-        type=str,
-        required=False,
-        help=(
-            "Either a full import path for a model (e.g., `eval_framework.llm.openai.OpenAIModel`) or the "
-            "name of a class derived from `eval_framework.llm.base.BaseLLM` that can be found in the "
-            "models file. The resulting model is instantiated with the arguments provided via `--llm-args`."
-        ),
     )
     parser.add_argument(
         "--llm-args",
@@ -119,12 +102,6 @@ def parse_args() -> argparse.Namespace:
         required=False,
         default=None,
         help="A tag name, a branch name, or commit hash for the task HF dataset.",
-    )
-    parser.add_argument(
-        "--judge-models",
-        type=Path,
-        required=False,
-        help="The path to the Python module file containing LLM judge model classes.",
     )
     parser.add_argument(
         "--output-dir",
@@ -207,17 +184,6 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--judge-model-name",
-        type=str,
-        required=False,
-        help=(
-            "Either a full import path for a judge (e.g., `eval_framework.llm.openai.OpenAIModel`) or the "
-            "name of a class derived from `eval_framework.llm.base.BaseLLM` that can be found in the "
-            "models file. The resulting judge model is instantiated with the arguments provided via "
-            "`--judge-model-args`."
-        ),
-    )
-    parser.add_argument(
         "--judge-model-args",
         type=str,
         required=False,
@@ -298,8 +264,6 @@ def _run_single_task(kwargs: dict) -> None:
     context_name = kwargs.pop("context")
 
     context = CONTEXT[context_name](
-        llm_name=kwargs["llm_name"],
-        models_path=kwargs["models"],
         num_samples=kwargs["num_samples"],
         max_tokens=kwargs["max_tokens"],
         num_fewshot=kwargs["num_fewshot"],
@@ -316,8 +280,6 @@ def _run_single_task(kwargs: dict) -> None:
         hf_upload_dir=kwargs["hf_upload_dir"],
         hf_upload_repo=kwargs["hf_upload_repo"],
         llm_args=kwargs["llm_args"],
-        judge_models_path=kwargs["judge_models"],
-        judge_model_name=kwargs["judge_model_name"],
         judge_model_args=kwargs["judge_model_args"],
         batch_size=kwargs["batch_size"],
         description=kwargs["description"],
