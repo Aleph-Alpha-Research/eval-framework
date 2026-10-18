@@ -21,7 +21,7 @@ and first-party/internal packages are excluded.
 | `mysql-connector-python` | `>=26.7.0,<27` |
 | `nltk` | `>=3.10.3,<4` |
 | `numpy` | `>=2.5.4` |
-| `openai` | `>=3.29.0,<4` |
+| `openai` | `>=3.31.0,<4` |
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.1,<3` |
@@ -52,7 +52,7 @@ and first-party/internal packages are excluded.
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
 | `distro` | `1.9.0` |
-| `filelock` | `4.2.0` |
+| `filelock` | `4.2.1` |
 | `fsspec` | `2026.7.0` |
 | `googleapis-common-protos` | `1.75.5` |
 | `h11` | `0.16.0` |
@@ -81,7 +81,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.66b1` |
 | `packaging` | `26.3` |
 | `pandas` | `3.0.6` |
-| `platformdirs` | `4.13.3` |
+| `platformdirs` | `4.13.4` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.0` |
 | `pydantic-core` | `2.50.1` |
