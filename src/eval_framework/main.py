@@ -9,9 +9,10 @@ from typing import Any, Literal
 
 import wandb
 
-from eval_framework.evaluation_generator import EvaluationGenerator, Result
+from eval_framework.evaluation_generator import EvaluationGenerator
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator
+from eval_framework.result_processors.base import Result
 from eval_framework.result_processors.hf_uploader import HFUploader
 from eval_framework.result_processors.result_processor import ResultsFileProcessor, generate_output_dir
 from eval_framework.result_processors.wandb_uploader import WandbUploader

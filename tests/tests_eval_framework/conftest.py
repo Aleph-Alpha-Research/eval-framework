@@ -7,7 +7,8 @@ import pytest
 import wandb
 from openai.types.chat.completion_create_params import ResponseFormat
 
-from eval_framework.llm.base import BaseLLM, Sample
+from eval_framework.contract import Sample
+from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.utils import close_pools
 from template_formatting.formatter import Message

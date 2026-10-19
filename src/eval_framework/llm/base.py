@@ -3,8 +3,8 @@ from collections.abc import Sequence
 
 from openai.types.chat.completion_create_params import ResponseFormat
 
+from eval_framework.contract import Sample
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
-from eval_framework.tasks.base import Sample
 from template_formatting.formatter import Message
 
 

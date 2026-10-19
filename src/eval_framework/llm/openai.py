@@ -16,6 +16,7 @@ from openai.types.chat import (
 from openai.types.chat.completion_create_params import ResponseFormat
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
+from eval_framework.contract import Sample
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import (
     ConcatCompression,
@@ -24,7 +25,6 @@ from eval_framework.shared.types import (
     RawCompletion,
     RawLoglikelihood,
 )
-from eval_framework.tasks.base import Sample
 from template_formatting.formatter import BaseFormatter, Message, Role
 
 logger = logging.getLogger(__name__)

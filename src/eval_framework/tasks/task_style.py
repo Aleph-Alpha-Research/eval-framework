@@ -63,6 +63,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, Self, final
 
+from eval_framework.contract import ResponseType
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyBayesianLoglikelihood,
@@ -74,7 +75,7 @@ from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariant
 from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
-from eval_framework.tasks.base import Language, ResponseType, TaskStyle
+from eval_framework.tasks.base import Language, TaskStyle
 from eval_framework.tasks.utils import get_n_letters
 
 if TYPE_CHECKING:
