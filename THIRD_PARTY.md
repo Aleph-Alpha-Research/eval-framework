@@ -31,7 +31,7 @@ and first-party/internal packages are excluded.
 | `scipy` | `>=1.18.1,<2` |
 | `sympy` | `>=1.14.0,<2` |
 | `tiktoken` | `>=0.14.0,<1` |
-| `transformers` | `>=5.19.0,<6` |
+| `transformers` | `>=5.20.0,<6` |
 | `wandb` | `>=0.30.0,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
@@ -43,7 +43,7 @@ and first-party/internal packages are excluded.
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.15.1` |
 | `attrs` | `26.1.0` |
-| `certifi` | `2026.7.22` |
+| `certifi` | `2026.10.18` |
 | `charset-normalizer` | `3.5.2` |
 | `click` | `8.5.0` |
 | `cloudpickle` | `3.1.2` |
@@ -52,15 +52,15 @@ and first-party/internal packages are excluded.
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
 | `distro` | `1.9.0` |
-| `filelock` | `4.2.1` |
+| `filelock` | `4.2.4` |
 | `fsspec` | `2026.7.0` |
 | `googleapis-common-protos` | `1.75.5` |
 | `h11` | `0.16.0` |
 | `hf-xet` | `1.7.0` |
 | `httpcore` | `1.0.9` |
-| `httpcore2` | `2.13.1` |
+| `httpcore2` | `2.14.0` |
 | `httpx` | `0.28.1` |
-| `httpx2` | `2.13.1` |
+| `httpx2` | `2.14.0` |
 | `httpx2-jsfetch` | `1.0` |
 | `huggingface-hub` | `2.2.0` |
 | `idna` | `3.20` |
@@ -81,7 +81,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.66b1` |
 | `packaging` | `26.3` |
 | `pandas` | `3.0.6` |
-| `platformdirs` | `4.13.4` |
+| `platformdirs` | `4.13.5` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.0` |
 | `pydantic-core` | `2.50.1` |
