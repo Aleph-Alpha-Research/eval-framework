@@ -14,7 +14,7 @@ from openai.types.chat import (
     ChatCompletionUserMessageParam,
 )
 from openai.types.chat.completion_create_params import ResponseFormat
-from transformers import AutoTokenizer, PreTrainedTokenizerBase
+from transformers import PreTrainedTokenizerBase
 
 from eval_framework.contract import Sample
 from eval_framework.llm.base import BaseLLM
@@ -438,41 +438,3 @@ class OpenAIEmbeddingModel(BaseLLM):
                 self._client.close()
             except Exception:
                 pass
-
-
-class DeepseekModel(OpenAIModel):
-    """
-    General Deepseek model wrapper using OpenAI-compatible API for deepseek-chat and deepseek-reasoner models.
-
-    Using the deepseek API: https://api-docs.deepseek.com/quick_start/pricing
-    """
-
-    def __init__(
-        self,
-        model_name: str | None = None,
-        formatter: BaseFormatter | None = None,
-        temperature: float | None = None,
-        api_key: str | None = None,
-        organization: str | None = None,
-        base_url: str | None = None,
-        tokenizer_name: str | None = None,
-    ) -> None:
-        super().__init__(
-            model_name=model_name,
-            formatter=formatter,
-            temperature=temperature,
-            api_key=os.getenv("DEEPSEEK_API_KEY", ""),
-            organization=organization,
-            base_url="https://api.deepseek.com/beta",
-        )
-        self._tokenizer_name = tokenizer_name if tokenizer_name is not None else "deepseek-ai/DeepSeek-V3.2-Exp"
-        # DeepSeek uses HF tokenization; override the base encoder (which may be None).
-        self._encoder = self._get_encoder()
-
-    def _get_encoder(self) -> PreTrainedTokenizerBase:
-        return AutoTokenizer.from_pretrained(self._tokenizer_name)
-
-    def _count_tokens(self, text: str) -> int:
-        encoder = self._encoder
-        assert encoder is not None
-        return len(encoder.encode(text))  # type: ignore[union-attr]
