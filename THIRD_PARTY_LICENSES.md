@@ -86,9 +86,9 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **dill** 0.4.1 - https://github.com/uqfoundation/dill
 - **fsspec** 2026.7.0 - https://github.com/fsspec/filesystem_spec
 - **httpcore** 1.0.9 - https://www.encode.io/httpcore/
-- **httpcore2** 2.13.1 - https://github.com/pydantic/httpx2
+- **httpcore2** 2.14.0 - https://github.com/pydantic/httpx2
 - **httpx** 0.28.1 - https://github.com/encode/httpx
-- **httpx2** 2.13.1 - https://github.com/pydantic/httpx2
+- **httpx2** 2.14.0 - https://github.com/pydantic/httpx2
 - **idna** 3.20 - https://github.com/kjd/idna
 - **joblib** 1.6.0 - https://joblib.readthedocs.io
 - **jsonlines** 4.0.0 - https://github.com/wbolster/jsonlines
@@ -128,14 +128,14 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.2.1 - https://github.com/tox-dev/py-filelock
+- **filelock** 4.2.4 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jiter** 0.17.0 - https://github.com/pydantic/jiter/
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
 - **jsonschema-specifications** 2025.9.1 - https://github.com/python-jsonschema/jsonschema-specifications
 - **markdown-it-py** 4.2.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
-- **platformdirs** 4.13.4 - https://github.com/tox-dev/platformdirs
+- **platformdirs** 4.13.5 - https://github.com/tox-dev/platformdirs
 - **pydantic** 2.14.1 - https://github.com/pydantic/pydantic
 - **pydantic_core** 2.50.1 - https://github.com/pydantic
 - **PyYAML** 6.0.3 - https://pyyaml.org/
@@ -153,7 +153,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## MPL-2.0
 
-- **certifi** 2026.7.22 - https://github.com/certifi/python-certifi
+- **certifi** 2026.10.18 - https://github.com/certifi/python-certifi
 
 ## MPL-2.0 AND MIT
 
@@ -273,7 +273,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### certifi 2026.7.22 (MPL-2.0)
+### certifi 2026.10.18 (MPL-2.0)
 
 ```text
 This package contains a modified version of ca-bundle.crt:
@@ -1104,7 +1104,7 @@ Apache License
    limitations under the License.
 ```
 
-### filelock 4.2.1 (MIT)
+### filelock 4.2.4 (MIT)
 
 ```text
 MIT License
@@ -1841,7 +1841,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### httpcore2 2.13.1 (BSD-3-Clause)
+### httpcore2 2.14.0 (BSD-3-Clause)
 
 ```text
 Copyright © 2026 to present Pydantic Services Inc. and individual contributors.
@@ -1891,7 +1891,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### httpx2 2.13.1 (BSD-3-Clause)
+### httpx2 2.14.0 (BSD-3-Clause)
 
 ```text
 Copyright © 2026 to present Pydantic Services Inc. and individual contributors.
@@ -14925,7 +14925,7 @@ https://opensource.apple.com/source/tcl/tcl-14/tcl/license.terms
   terms specified in this license.
 ```
 
-### platformdirs 4.13.4 (MIT)
+### platformdirs 4.13.5 (MIT)
 
 ```text
 MIT License
