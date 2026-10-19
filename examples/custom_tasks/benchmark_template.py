@@ -16,8 +16,9 @@ Example: Geography Question Answering benchmark that tests knowledge of world ca
 
 from typing import Any
 
-from eval_framework.metrics.completion import AccuracyCompletion  # Import your metrics
-from eval_framework.tasks.base import BaseTask, ResponseType, Sample
+from eval_framework.contract import ResponseType, Sample
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion  # Import your metrics
+from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import Registry, register_task
 
 
