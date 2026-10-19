@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.18.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.18.1...v0.18.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* **deps:** update dependency transformers to &gt;=5.20.0,&lt;6 ([16383a5](https://github.com/Aleph-Alpha-Research/eval-framework/commit/16383a561b5507ee5aa6255919e8b86d77720d11))
+
 ## [0.18.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.18.0...v0.18.1) (2026-10-18)
 
 
