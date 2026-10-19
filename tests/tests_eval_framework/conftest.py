@@ -1,3 +1,4 @@
+import os
 from collections.abc import Callable, Generator, Sequence
 from typing import Any
 from unittest.mock import Mock
@@ -11,6 +12,8 @@ from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.utils import close_pools
 from template_formatting.formatter import Message
 from tests.tests_eval_framework.mock_wandb import MockArtifact, MockWandb, MockWandbApi, MockWandbRun
+
+os.environ.setdefault("WANDB_MODE", "disabled")
 
 
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int | pytest.ExitCode) -> None:
