@@ -78,9 +78,6 @@ The eval-framework follows a modular architecture with three main extensible bas
   - `formatter.py`: `Formatter` base class for prompt construction
   - `mistral_formatter.py`: Mistral-specific formatting
 
-- **Context System** (`context/`):
-  - `LocalContext`: Run evaluations locally
-
 **Configuration**
 
 - **EvalConfig** (`tasks/eval_config.py`): Main configuration dataclass
