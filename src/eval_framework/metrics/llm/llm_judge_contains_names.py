@@ -1,4 +1,4 @@
-from eval_framework.llm.base import BaseLLM
+from eval_framework.llm.base import JudgeLLM
 from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.metrics.llm.graders.contains_names_grader import ContainsNamesGrader
@@ -9,7 +9,7 @@ from eval_framework.shared.types import Completion
 class LLMJudgeAvoidsNames(BaseLLMJudgeMetric):
     NAME = "Avoids Names"
 
-    def __init__(self, llm_judge: BaseLLM):
+    def __init__(self, llm_judge: JudgeLLM):
         super().__init__(llm_judge)
         self._grader = ContainsNamesGrader(llm_judge)
 
