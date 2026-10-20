@@ -31,7 +31,7 @@ Install the library via uv (recommended):
    cd eval-framework
 
    # Install all dependencies
-   uv sync --all-extras
+   uv sync
 
 Now, you can run a single benchmark locally. The example talks to the OpenAI API and needs ``OPENAI_API_KEY`` to be set;
 any OpenAI-compatible server (for example vLLM) can be targeted by adding ``base_url=http://host:port/v1`` to ``--llm-args``:

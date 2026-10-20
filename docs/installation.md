@@ -8,7 +8,7 @@ Follow the official [installation instructions](https://docs.astral.sh/uv/gettin
 
 ### 2. Install Eval Framework
 
-Clone the repository and install all dependencies, including optional extras:
+Clone the repository and install all dependencies:
 
 ```bash
 # Clone the repository
@@ -16,18 +16,7 @@ git clone https://github.com/Aleph-Alpha-Research/eval-framework/tree/main
 cd eval-framework
 
 # Install all dependencies
-uv sync --all-extras
-```
-
-To select specific optional features, you can install them individually. Available extras are:
-
-- `determined` for distributed evaluation
-- `all` installs all extras
-
-You can install them as follows:
-
-```bash
-   uv sync --extra determined
+uv sync
 ```
 
 ### 3. Test Your Installation
@@ -104,18 +93,12 @@ It is also possible to download Eval-Framework through pip:
 
 ```bash
 pip install eval-framework
-
-# or with optional extras
-pip install eval-framework[determined]
 ```
 
 However, we recommend using the uv solver to avoid many dependency version issues, so:
 
 ```bash
 uv pip install eval-framework
-
-# or with optional extras
-uv pip install eval-framework[determined]
 ```
 
 This allows you to run an evaluation without going through `uv run`:

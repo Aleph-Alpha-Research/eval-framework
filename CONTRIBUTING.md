@@ -31,7 +31,7 @@ We welcome several types of contributions:
 
 5. **Install the project dependencies**:
    ```bash
-   uv sync --all-extras
+   uv sync
    ```
 
 6. **Install pre-commit**:

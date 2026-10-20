@@ -49,16 +49,6 @@ dependencies = [
   "transformers[chat-template]>=5.20.1,<6",
 ]
 
-[project.optional-dependencies]
-# Model-specific extras
-determined = [
-  "determined>=0.38.1,<0.39",
-  "tensorboard==2.21.0"
-]
-all = [
-  "eval_framework[determined]"
-]
-
 [project.urls]
 repository = "https://github.com/Aleph-Alpha-Research/eval-framework"
 
@@ -86,11 +76,6 @@ build-backend = "uv_build"
 
 [tool.uv.build-backend]
 module-name = ["eval_framework", "template_formatting"]
-
-[tool.uv]
-override-dependencies = [
-  "requests>=2.32,<3",  # fix for determined
-]
 
 [tool.ruff]
 line-length = 120
