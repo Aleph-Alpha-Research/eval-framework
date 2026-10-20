@@ -315,7 +315,7 @@ def test_response_generator_llm_token_overloading(
     )
     generator = ResponseGenerator(llm, config, NoopResultProcessor(), benchmark_registry=registry)  # type: ignore[arg-type]
 
-    assert generator.generate(lambda: False)
+    generator.generate()
 
     # The task is asked to generate with the precedence-merged max tokens and stop sequences.
     assert expected_max_tokens == task.called_max_tokens
@@ -364,7 +364,7 @@ def test_response_generator_metadata_handling(tmp_path: Path) -> None:
     config = EvalConfig(task_name="AIME2024", num_fewshot=0, num_samples=1, llm_class=llm.__class__)
 
     generator = ResponseGenerator(llm, config, ResultsFileProcessor(tmp_path))
-    generator.generate(lambda: False)
+    generator.generate()
 
     metadata = generator._get_metadata()
     start = parser.parse(str(metadata.get("start_time")))
@@ -393,7 +393,7 @@ def test_response_generator_repeats_generates_multiple_outputs(tmp_path: Path) -
 
     generator = ResponseGenerator(llm, config, ResultsFileProcessor(tmp_path))
 
-    responses, preempted = generator.generate(lambda: False)
+    responses = generator.generate()
     assert len(responses) == 3
     assert all(response.prompt == responses[0].prompt for response in responses)
 
@@ -414,8 +414,7 @@ def test_response_generator_repeats_with_intermediate_results_writes_unique_ids(
     result_processor = ResultsFileProcessor(tmp_path)
     generator = ResponseGenerator(llm, config, result_processor)
 
-    responses, preempted = generator.generate(lambda: False)
-    assert not preempted
+    responses = generator.generate()
     assert len(responses) == repeats
 
     # Re-loading should not treat the file as corrupted (duplicate (id, subject) pairs).
@@ -463,11 +462,11 @@ def test_with_wrong_loaded_metadata(tmp_path: Path) -> None:
         generator = ResponseGenerator(config.llm_class(), config, ResultsFileProcessor(tmp_path))
 
         if i == 0 or i == len(configs) - 1:
-            generator.generate(lambda: False)
+            generator.generate()
         else:
             # THEN the second generator should raise an error because intermediate results are not compatible
             with pytest.raises(ValueError):
-                generator.generate(lambda: False)
+                generator.generate()
 
 
 def test_generate_completions_applies_model_then_task_post_processing() -> None:
@@ -585,7 +584,7 @@ def test_fail_on_error_propagates_llm_failure() -> None:
     # Then the original exception propagates
     with pytest.raises(RuntimeError, match="inference connection failed"):
         # When running the generator
-        generator.generate(should_preempt_callable=lambda: False)
+        generator.generate()
 
 
 @temporary_registry
@@ -602,7 +601,7 @@ def test_fail_on_error_disabled_swallows_llm_failure() -> None:
     generator = ResponseGenerator(SaboteurLLM(), config, NoopResultProcessor())  # type: ignore[arg-type]
 
     # When running the generator
-    responses, _ = generator.generate(should_preempt_callable=lambda: False)
+    responses = generator.generate()
 
     # Then the failure is captured per-sample as an Error, not raised
     assert len(responses) == 1

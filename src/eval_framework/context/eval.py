@@ -61,9 +61,3 @@ class EvalContext(AbstractContextManager):
         self.repeats = repeats
 
         self.config: EvalConfig | None = None
-
-    def should_preempt(self) -> bool:
-        return False
-
-    def get_trial_id(self) -> int | None:
-        return None

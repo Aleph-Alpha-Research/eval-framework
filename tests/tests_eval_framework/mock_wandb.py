@@ -64,9 +64,6 @@ class MockWandbRun:
         self.exit_code = exit_code
         self._finished = True
 
-    def mark_preempting(self) -> None:
-        pass
-
     def get_logged_data(self) -> list[dict]:
         return self.logged_data
 

@@ -1,6 +1,5 @@
 import threading
 import time
-from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -92,9 +91,7 @@ def _make_completions(count: int) -> list[Completion]:
     ]
 
 
-def _evaluator_with_metadata(
-    tmp_path: Path, should_preempt_callable: Callable, **config_kwargs: object
-) -> EvaluationGenerator:
+def _evaluator_with_metadata(tmp_path: Path, **config_kwargs: object) -> EvaluationGenerator:
     """Run the response generator first so metadata.json exists, then return an evaluator."""
     llm = MockLLM()
     config = EvalConfig(
@@ -106,15 +103,15 @@ def _evaluator_with_metadata(
         **config_kwargs,  # type: ignore[arg-type]
     )
     file_processor = ResultsFileProcessor(tmp_path / "evaluator_test_output")
-    ResponseGenerator(llm, config, file_processor).generate(should_preempt_callable)
+    ResponseGenerator(llm, config, file_processor).generate()
     return EvaluationGenerator(config, file_processor)
 
 
-def test_run_metric_calculators_is_serial_by_default(tmp_path: Path, should_preempt_callable: Callable) -> None:
+def test_run_metric_calculators_is_serial_by_default(tmp_path: Path) -> None:
     SerialProbeMetric.in_flight = 0
     SerialProbeMetric.max_in_flight = 0
 
-    evaluator = _evaluator_with_metadata(tmp_path, should_preempt_callable)
+    evaluator = _evaluator_with_metadata(tmp_path)
     evaluator.metrics = [SerialProbeMetric]
     responses = _make_completions(8)
 
@@ -124,10 +121,10 @@ def test_run_metric_calculators_is_serial_by_default(tmp_path: Path, should_pree
     assert [r.value for r in results] == [float(i) for i in range(8)]
 
 
-def test_run_metric_calculators_fans_out_judge_metrics(tmp_path: Path, should_preempt_callable: Callable) -> None:
+def test_run_metric_calculators_fans_out_judge_metrics(tmp_path: Path) -> None:
     JudgeProbeMetric.barrier.reset()
 
-    evaluator = _evaluator_with_metadata(tmp_path, should_preempt_callable, llm_judge_class=MockLLM)
+    evaluator = _evaluator_with_metadata(tmp_path, llm_judge_class=MockLLM)
     evaluator.metrics = [JudgeProbeMetric]
     responses = _make_completions(2 * PROBE_CONCURRENCY)
 
@@ -136,7 +133,7 @@ def test_run_metric_calculators_fans_out_judge_metrics(tmp_path: Path, should_pr
     assert [r.value for r in results] == [float(i) for i in range(2 * PROBE_CONCURRENCY)]
 
 
-def test_evaluator_run_completions(tmp_path: Path, should_preempt_callable: Callable) -> None:
+def test_evaluator_run_completions(tmp_path: Path) -> None:
     llm = MockLLM()
 
     config = EvalConfig(
@@ -152,7 +149,7 @@ def test_evaluator_run_completions(tmp_path: Path, should_preempt_callable: Call
     file_processor = ResultsFileProcessor(test_output_dir)
     response_generator = ResponseGenerator(llm, config, file_processor)
 
-    _ = response_generator.generate(should_preempt_callable)
+    _ = response_generator.generate()
 
     output_dir = Path(file_processor.output_dir)
     assert output_dir == test_output_dir
@@ -160,7 +157,7 @@ def test_evaluator_run_completions(tmp_path: Path, should_preempt_callable: Call
     assert (output_dir / "metadata.json").exists()
 
 
-def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable, wandb_run: wandb.Run) -> None:
+def test_evaluator_run_eval(tmp_path: Path, wandb_run: wandb.Run) -> None:
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,
@@ -179,7 +176,7 @@ def test_evaluator_run_eval(tmp_path: Path, should_preempt_callable: Callable, w
         evaluator.run_eval()
 
     response_generator = ResponseGenerator(llm, config, file_processor)
-    _ = response_generator.generate(should_preempt_callable)
+    _ = response_generator.generate()
 
     _ = evaluator.run_eval()
 
@@ -210,7 +207,7 @@ def test_evaluator_run_eval_no_completions(tmp_path: Path, wandb_run: wandb.Run)
     assert str(exc_info.value) == "No saved completions found. Run 'run_completions' first."
 
 
-def test_evaluator_run_all(tmp_path: Path, should_preempt_callable: Callable, wandb_run: wandb.Run) -> None:
+def test_evaluator_run_all(tmp_path: Path, wandb_run: wandb.Run) -> None:
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,
@@ -224,7 +221,7 @@ def test_evaluator_run_all(tmp_path: Path, should_preempt_callable: Callable, wa
 
     file_processor = ResultsFileProcessor(test_output_dir)
     response_generator = ResponseGenerator(llm, config, file_processor)
-    _ = response_generator.generate(should_preempt_callable)
+    _ = response_generator.generate()
 
     evaluator = EvaluationGenerator(config, file_processor)
     _ = evaluator.run_eval()

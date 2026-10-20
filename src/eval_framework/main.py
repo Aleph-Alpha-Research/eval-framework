@@ -1,10 +1,7 @@
-import json
 import logging
 import os
 import shutil
-from collections.abc import Callable
-from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 import wandb
 
@@ -25,8 +22,6 @@ logger = logging.getLogger(__name__)
 def main(
     llm: BaseLLM,
     config: EvalConfig,
-    should_preempt_callable: Callable[[], bool] | None = None,
-    trial_id: int | None = None,
     verbosity: int = 1,
 ) -> list[Result]:
     """Runs the entire evaluation process: responses generation and evaluation."""
@@ -40,24 +35,6 @@ def main(
     logger.info(f"Configuration: num_fewshot={config.num_fewshot}, num_samples={config.num_samples}")
     logger.info(f"Output directory: {output_dir}")
 
-    if not should_preempt_callable:
-        should_preempt_callable = lambda: False  # noqa: E731
-    preemption_data = None
-
-    if trial_id:
-        preemption_data = _read_preemption_data(config, trial_id)
-
-    if preemption_data is None:
-        output_dir = generate_output_dir(llm.name, config)
-        wandb_run_id = config.wandb_run_id  # defaults to none, if no run_id is provided then it starts a new one
-    else:
-        logger.info("Found preempted run restarting ...")
-        output_dir = preemption_data["output_dir"]
-        wandb_run_id = preemption_data.get("wandb_run_id", None)
-
-    logger.info(f"Output directory: {output_dir}")
-    assert output_dir is not None
-
     file_processor = ResultsFileProcessor(output_dir)
     response_generator = ResponseGenerator(llm, config, file_processor)
 
@@ -66,28 +43,17 @@ def main(
         project=config.wandb_project,
         group=(config.wandb_group or llm.name)[:127],
         job_type=config.task_name[:63],
-        id=wandb_run_id,  # (potentially resuming run after preemption)
+        id=config.wandb_run_id,  # none starts a new run
         config=response_generator._get_metadata(),
         resume="allow",
         mode=_wandb_mode(config.wandb_project),
         settings=wandb.Settings(disable_code=True),  # ("wandb-history" artifacts not needed)
-    ) as run:
+    ):
         for additional_artifact in os.getenv("WANDB_ADDITIONAL_ARTIFACT_REFERENCES", "").split(","):
             if additional_artifact.strip():
                 wandb.use_artifact(additional_artifact.strip())
 
-        _, preempted = response_generator.generate(should_preempt_callable)
-
-        if preempted:
-            logger.info("Response generation was preempted")
-            assert trial_id is not None
-            run.mark_preempting()
-            _save_preemption_data(config, trial_id, output_dir, wandb_run_id=run.id)
-            wandb.finish(exit_code=1)
-            return []
-        # update config from response generator with get metadata
-        if trial_id is not None:
-            _delete_preemption_file(config, trial_id)
+        response_generator.generate()
 
         evaluator = EvaluationGenerator(config, file_processor)
         results = evaluator.run_eval()
@@ -103,34 +69,6 @@ def main(
                 logger.warning("Could not delete output directory, some files remain.")
 
     return results
-
-
-def _read_preemption_data(config: EvalConfig, trial_id: int) -> dict[str, Any] | None:
-    preemption_file = config.output_dir / f"preemption_trial_{trial_id}.json"
-    if not preemption_file.is_file():
-        return None
-    with open(preemption_file, "rb") as f:
-        preemption_data = json.load(f)
-        preemption_data["output_dir"] = Path(preemption_data["output_dir"])
-        preemption_data["wandb_run_id"] = preemption_data.get("wandb_run_id", "")
-        logger.info(f"Loaded preemption data from {preemption_file}")
-        return preemption_data
-
-
-def _save_preemption_data(config: EvalConfig, trial_id: int, output_dir: Path, wandb_run_id: str = "") -> None:
-    preemption_file = config.output_dir / f"preemption_trial_{trial_id}.json"
-    with open(preemption_file, "w") as f:
-        json.dump({"output_dir": str(output_dir), "wandb_run_id": wandb_run_id}, f)
-
-
-def _delete_preemption_file(config: EvalConfig, trial_id: int) -> None:
-    preemption_file = config.output_dir / f"preemption_trial_{trial_id}.json"
-    if preemption_file.is_file():
-        preemption_file.unlink()
-        logger.info(f"Deleted preemption file: {preemption_file}")
-    else:
-        logger.info(f"No preemption file found to delete: {preemption_file}")
-    logger.info(f"Saved preemption data to {preemption_file}")
 
 
 def _wandb_mode(project: str | None) -> Literal["online", "disabled"] | None:

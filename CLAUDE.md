@@ -88,7 +88,6 @@ The eval-framework follows a modular architecture with three main extensible bas
   - `llm_class`: Which LLM class to instantiate
   - `num_fewshot`, `num_samples`: Evaluation parameters
   - `output_dir`, `wandb_project`: Output and logging settings
-  - Supports preemption for distributed runs
 
 ## Testing
 

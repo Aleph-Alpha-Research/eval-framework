@@ -177,14 +177,8 @@ class ResponseGenerator:
             case _:
                 raise KeyError(f"Task type {self.task} not supported")
 
-    def _run_task_against_model(
-        self, should_preempt_callable: Callable[[], bool]
-    ) -> tuple[list[Completion | Loglikelihood], bool]:
-        """
-        Runs the task against the model and generates responses.
-        :param should_preempt_callable: function to check if preempt is called
-        :return: list of responses, preempted
-        """
+    def _run_task_against_model(self) -> list[Completion | Loglikelihood]:
+        """Runs the task against the model and generates responses."""
         logger.info(f"{RED}[ Running task {self.task.display_name()} against model ------------ ]{RESET}")
         self.start_time, monotonic_start = time.time(), time.monotonic()
         run_fn = self._generative_output_type_selector()
@@ -192,14 +186,12 @@ class ResponseGenerator:
         responses = self.result_processor.load_responses()  # load responses if present
         subject_response_id_mapping = self._map_subject_response_ids(responses)
         self.result_processor.save_metadata(self._get_metadata())
-        responses, preempted = self._curate_responses(
-            responses, subject_response_id_mapping, run_fn, should_preempt_callable
-        )
+        responses = self._curate_responses(responses, subject_response_id_mapping, run_fn)
         self.end_time, monotonic_end = time.time(), time.monotonic()
         self.total_time = monotonic_end - monotonic_start
         self.result_processor.save_metadata(self._get_metadata())  # overwrite with updated timing
 
-        return responses, preempted
+        return responses
 
     def _map_subject_response_ids(self, responses: list[Completion | Loglikelihood]) -> dict[str, set[int]]:
         """
@@ -222,16 +214,14 @@ class ResponseGenerator:
         responses: list[Completion | Loglikelihood],
         subject_response_id_mapping: dict[str, set[int]],
         generative_output_function: Callable[[list[Sample]], list[Completion] | list[Loglikelihood]],
-        should_preempt_callable: Callable[[], bool],
-    ) -> tuple[list[Completion | Loglikelihood], bool]:
+    ) -> list[Completion | Loglikelihood]:
         """
         Generates responses for the task and saves them along with metadata.
         :param responses: list of responses
         :param subject_response_id_mapping: mapping of subject to response id
         :param generative_output_function: function to generate responses
         :param metadata: metadata dictionary
-        :param should_preempt_callable: function to check if preempt is called
-        :return: None
+        :return: all responses
         """
 
         def _process_batch(samples_batch: list[Sample]) -> None:
@@ -249,7 +239,7 @@ class ResponseGenerator:
         # In order to enable parallelism we group samples in batches and send them in parallel to the `run_fn`.
         # The BaseLLM class is then in charge of managing the parallelism (eg, using AsyncClient in API models).
         # If samples_batch_size = 1, samples are run sequentially; in any case, we return here after finishing each
-        # individual batch to honor preemption requests and save cached results.
+        # individual batch to save cached results.
         samples_batch_size = self.config.batch_size
         repeats = self.config.repeats
 
@@ -288,17 +278,11 @@ class ResponseGenerator:
                     _process_batch(samples_batch)
                     samples_batch = []
 
-                if should_preempt_callable():
-                    logger.info("Preempt")
-                    if not self.save_intermediate_results:
-                        self.result_processor.save_responses(responses)
-                    return responses, True
-
             _process_batch(samples_batch)
 
         if not self.save_intermediate_results:
             self.result_processor.save_responses(responses)
-        return responses, False
+        return responses
 
     def _get_metadata(self) -> dict[str, Any]:
         """Prepares metadata dictionary from the configuration."""
@@ -343,17 +327,14 @@ class ResponseGenerator:
     def __del__(self) -> None:
         self.llm.__del__()
 
-    def generate(self, should_preempt_callable: Callable[[], bool]) -> tuple[list[Completion | Loglikelihood], bool]:
-        """Generates responses and saves them along with metadata.
-        :param should_preempt_callable: function to check if preempt is called
-        :return: list of responses, preempted: whether the process was preempted or not
-        """
+    def generate(self) -> list[Completion | Loglikelihood]:
+        """Generates responses and saves them along with metadata."""
         logger.info(f"{RED}[ Running responses generation ---------- ]{RESET}")
         logger.info(f"{RED}[ Will save into {self.result_processor.output_dir} ---------- ]{RESET}")
-        responses, preempted = self._run_task_against_model(should_preempt_callable)
+        responses = self._run_task_against_model()
         logger.info("Completions generated and saved.")
 
-        return responses, preempted
+        return responses
 
 
 def repeat_samples(samples: Iterable[Sample], repeats: int) -> Iterable[Sample]:

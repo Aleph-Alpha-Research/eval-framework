@@ -1,5 +1,5 @@
 import os
-from collections.abc import Callable, Generator, Sequence
+from collections.abc import Generator, Sequence
 from typing import Any
 from unittest.mock import Mock
 
@@ -66,11 +66,6 @@ class MockLLM(BaseLLM):
             )
             for _ in messages
         ]
-
-
-@pytest.fixture
-def should_preempt_callable() -> Callable[[], bool]:
-    return lambda: False
 
 
 @pytest.fixture
