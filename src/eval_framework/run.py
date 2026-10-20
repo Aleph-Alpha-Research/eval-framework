@@ -274,8 +274,6 @@ def _run_single_task(kwargs: dict) -> None:
         main(
             llm=ctx.config.llm_class(**ctx.config.llm_args),
             config=ctx.config,
-            should_preempt_callable=ctx.should_preempt,
-            trial_id=ctx.get_trial_id(),
             verbosity=log_level,
         )
 
