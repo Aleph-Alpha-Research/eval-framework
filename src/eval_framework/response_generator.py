@@ -4,15 +4,6 @@ import traceback
 from collections.abc import Callable, Iterable
 from datetime import UTC, datetime
 from functools import partial
-
-from eval_framework.tasks.registry import Registry, registry
-
-try:
-    from determined._info import get_cluster_info
-except ImportError:
-    get_cluster_info = None  # type: ignore[assignment]
-
-
 from typing import Any
 
 from tqdm import tqdm
@@ -31,6 +22,7 @@ from eval_framework.shared.types import (
 )
 from eval_framework.tasks.base import RANDOM_SEED, Language
 from eval_framework.tasks.eval_config import EvalConfig
+from eval_framework.tasks.registry import Registry, registry
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag
 
@@ -327,17 +319,6 @@ class ResponseGenerator:
 
         # add task specific metadata
         metadata["task_metadata"] = self.task.get_metadata()
-
-        try:
-            assert get_cluster_info is not None, "Determined cluster info not available"
-            info = get_cluster_info()
-            if info is not None:
-                metadata["determined_agent_id"] = info.agent_id
-                if info.task_type == "TRIAL":
-                    metadata["determined_experiment_id"] = info.trial.experiment_id
-                    metadata["determined_trial_id"] = info.trial.trial_id
-        except Exception as e:
-            logger.info(f"{e}; cluster info not available in local context")
 
         return metadata
 

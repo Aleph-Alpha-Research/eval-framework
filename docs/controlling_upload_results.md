@@ -14,7 +14,6 @@ Add the `--hf-upload-repo` and `--hf-upload-dir` arguments to your CLI command:
 
 ```bash
 uv run eval_framework \
-    --context local \
     --llm-args model_name="gpt-4o-mini" \
     --task-name ARC \
     --num-fewshot 3 \
@@ -23,24 +22,6 @@ uv run eval_framework \
     --hf-upload-repo "my_arbitrary_repo"  # Hugging Face repository
     --hf-upload-dir "my_arbitrary_name"
 ```
-
-### Method 2: Determined Configuration
-
-Add the `--hf-upload-repo` and `hf_upload_dir` parameter as a hyperparameter in your Determined experiment config:
-
-```yaml
-hyperparameters:
-  experiment_name: "my_experiment"
-  llm_args:
-    model_name: "gpt-4o-mini"
-  hf_upload_dir: "my_arbitrary_name"  # Note: underscores in YAML
-  task_args:
-    - task_name: "ARC"
-      num_fewshot: 3
-      num_samples: 100
-```
-
-**Important for Determined**: Due to strict type checking, the `hf_upload_dir` parameter must be present when starting the framework as a Determined experiment. Use an empty string `""` if you don't want to upload results.
 
 ## Repository Structure
 
@@ -53,12 +34,7 @@ By default, results are uploaded to your specified HuggingFace dataset repositor
 You can specify a different repository with:
 
 ```bash
-# CLI
 --hf-upload-repo "username/repository-name"
-
-# Determined config
-hyperparameters:
-  hf_upload_repo: "username/repository-name"
 ```
 
 ### Directory Structure
