@@ -957,7 +957,7 @@ requires-dist = [
     { name = "tensorboard", marker = "extra == 'determined'", specifier = "==2.21.0" },
     { name = "tiktoken", specifier = ">=0.14.0,<1" },
     { name = "transformers", extras = ["chat-template"], specifier = ">=5.20.1,<6" },
-    { name = "wandb", specifier = ">=0.30.0,<1" },
+    { name = "wandb", specifier = ">=0.31.0,<1" },
     { name = "xmltodict", specifier = ">=1.0.4,<1.1" },
 ]
 provides-extras = ["determined", "all"]
