@@ -1,4 +1,4 @@
-from eval_framework.llm.base import BaseLLM
+from eval_framework.llm.base import JudgeLLM
 from eval_framework.metrics.base import (
     MetricResult,
 )
@@ -15,7 +15,7 @@ class LLMJudgeFormatCorrectnessContext(BaseMetricContext):
 class LLMJudgeFormatCorrectness(BaseLLMJudgeMetric):
     NAME = "Format Correctness"
 
-    def __init__(self, llm_judge: BaseLLM):
+    def __init__(self, llm_judge: JudgeLLM):
         super().__init__(llm_judge)
         self._grader = FormatCorrectnessGrader(llm_judge)
 

@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 
-from eval_framework.llm.base import BaseLLM as StructuredOutputChatModel
+from eval_framework.llm.base import JudgeLLM
 from eval_framework.metrics.llm.graders.language import Language
 from eval_framework.metrics.llm.graders.models import GradingOutput, PromptTemplate, parse_json_output
 
@@ -43,7 +43,7 @@ Votre évaluation doit être formatée en JSON comme suit :
 
     def __init__(
         self,
-        grading_model: StructuredOutputChatModel,
+        grading_model: JudgeLLM,
         prompt_templates: Mapping[Language, PromptTemplate] = PROMPT_TEMPLATES,
     ) -> None:
         self._grading_model = grading_model
