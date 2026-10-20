@@ -3,12 +3,13 @@ from openai import omit
 from openai.types.chat.completion_create_params import ResponseFormat
 from pytest_mock import MockerFixture
 
+from eval_framework.contract import Sample
 from eval_framework.llm.openai import (
     OpenAIEmbeddingModel,
     OpenAIModel,
 )
 from eval_framework.utils.helpers import pairwise_cosine_similarity
-from template_formatting.formatter import Message, Role
+from template_formatting.formatter import ConcatFormatter, Message, Role
 
 # NOTE: an API key in your .env file is required to run these API tests
 
@@ -132,3 +133,79 @@ def test_generate_from_messages_preserves_message_roles(mocker: MockerFixture) -
     sent_messages = mock_client.chat.completions.create.call_args.kwargs["messages"]
     assert [m["role"] for m in sent_messages] == ["system", "user", "assistant"]
     assert [m["content"] for m in sent_messages] == ["system prompt", "user prompt", "assistant prompt"]
+
+
+def _position(token: str, logprob: float) -> dict[int, dict[str, float | str]]:
+    return {hash(token): {"logprob": logprob, "decoded_token": token}}
+
+
+def test_logprobs_sums_choice_tokens_from_vllm_prompt_logprobs(mocker: MockerFixture) -> None:
+    # Given a vLLM response for "Q: hi" + " yes" where " yes" is split into two tokens
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    prompt_logprobs = [None, _position("Q", -9.0), _position(":", -8.0), _position(" ye", -1.0), _position("s", -0.5)]
+    mock_client.completions.create.return_value.choices = [
+        mocker.MagicMock(model_extra={"prompt_logprobs": prompt_logprobs})
+    ]
+    model = OpenAIModel(model_name="some-vllm-model", formatter=ConcatFormatter())
+    sample = Sample(
+        id=0,
+        subject="s",
+        messages=[Message(role=Role.USER, content="Q:")],
+        ground_truth=" yes",
+        possible_completions=[" yes"],
+    )
+
+    # When
+    [result] = model.logprobs([sample])
+
+    # Then only the choice tokens are summed and the rest counts as prompt
+    assert result.loglikelihoods == {" yes": -1.5}
+    assert result.loglikelihoods_num_tokens == {" yes": 2}
+    assert result.prompt_num_tokens == 3
+    assert mock_client.completions.create.call_args.kwargs["extra_body"] == {"prompt_logprobs": 0}
+
+
+def test_logprobs_raises_when_server_returns_no_prompt_logprobs(mocker: MockerFixture) -> None:
+    # Given a server that does not return prompt_logprobs
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    mock_client.completions.create.return_value.choices = [mocker.MagicMock(model_extra={})]
+    model = OpenAIModel(model_name="some-model", formatter=ConcatFormatter())
+    sample = Sample(
+        id=0,
+        subject="s",
+        messages=[Message(role=Role.USER, content="Q:")],
+        ground_truth="a",
+        possible_completions=["a"],
+    )
+
+    # When / Then
+    with pytest.raises(AssertionError, match="prompt_logprobs"):
+        model.logprobs([sample])
+
+
+def test_logprobs_includes_token_straddling_prompt_and_choice(mocker: MockerFixture) -> None:
+    # Given a prompt ending in a space, so the tokenizer merges it into the choice token " A"
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    prompt_logprobs = [None, _position("Answer", -9.0), _position(":", -8.0), _position(" A", -0.25)]
+    mock_client.completions.create.return_value.choices = [
+        mocker.MagicMock(model_extra={"prompt_logprobs": prompt_logprobs})
+    ]
+    model = OpenAIModel(model_name="some-vllm-model", formatter=ConcatFormatter())
+    sample = Sample(
+        id=0,
+        subject="s",
+        messages=[Message(role=Role.USER, content="Answer: ")],
+        ground_truth="A",
+        possible_completions=["A"],
+    )
+
+    # When
+    [result] = model.logprobs([sample])
+
+    # Then the merged token is scored rather than silently dropped
+    assert result.loglikelihoods == {"A": -0.25}
+    assert result.loglikelihoods_num_tokens == {"A": 1}
+    assert result.prompt_num_tokens == 3
