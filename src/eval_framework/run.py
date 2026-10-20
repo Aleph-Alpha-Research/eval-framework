@@ -4,12 +4,6 @@ import logging
 from pathlib import Path
 from typing import Any
 
-try:
-    from eval_framework.context.determined import DeterminedContext
-except ImportError:
-    DeterminedContext = None  # type: ignore
-
-
 from eval_framework.context.local import LocalContext
 from eval_framework.main import main
 from eval_framework.tasks.task_loader import load_extra_tasks
@@ -18,22 +12,9 @@ from eval_framework.utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
 
-CONTEXT = {
-    "local": LocalContext,
-    "determined": DeterminedContext,
-}
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--context",
-        type=str,
-        required=False,
-        default="local",
-        choices=["local", "determined"],
-        help="The context in which the evaluation is run.",
-    )
     parser.add_argument(
         "--extra-tasks-dir",
         type=Path,
@@ -261,9 +242,7 @@ def _run_single_task(kwargs: dict) -> None:
     if kwargs.get("extra_tasks_dir"):
         load_extra_tasks(kwargs["extra_tasks_dir"])
 
-    context_name = kwargs.pop("context")
-
-    context = CONTEXT[context_name](
+    context = LocalContext(
         num_samples=kwargs["num_samples"],
         max_tokens=kwargs["max_tokens"],
         num_fewshot=kwargs["num_fewshot"],

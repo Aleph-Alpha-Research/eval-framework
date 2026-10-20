@@ -19,7 +19,6 @@
 
 ## Why Choose This Framework?
 
-- **Scalability**: Built for distributed evaluation. Currently providing an integration with Determined AI.
 - **Extensibility**: Easily add custom models, benchmarks, and metrics with object-oriented base classes.
 - **Comprehensive**: Comes pre-loaded with over 90 tasks covering a broad and diverse range, from reasoning and coding to safety and long-context. Also comes with a comprehensive set of metrics, including LLM-as-a-judge evaluations.
 
@@ -147,7 +146,7 @@ Eval-Framework provides a unified interface for evaluating language models acros
 1. **Define Your Model** - Specify which model to evaluate (OpenAI-compatible endpoint or custom)
 2. **Choose Your Task** - Select from 150+ available benchmarks or create custom ones
 3. **Configure Evaluation** - Set parameters like few-shot examples, sample count, and output format
-4. **Run Evaluation** - Execute locally via CLI/script or distribute via Determined AI
+4. **Run Evaluation** - Execute locally via CLI/script
 5. **Analyze Results** - Review detailed JSON outputs, metrics, and generated reports
 
 ### Core Components
@@ -205,7 +204,6 @@ if __name__ == "__main__":
 - **Use CLI interface**: See [CLI usage guide](https://aleph-alpha-research.github.io/eval-framework/cli_usage.html) for command-line evaluation options
 - **Understand model arguments**: Read out [Model Arguments guide](https://aleph-alpha-research.github.io/eval-framework/model_arguments.html)
 - **Create custom benchmarks**: Follow our [benchmark creation guide](https://aleph-alpha-research.github.io/eval-framework/add_new_benchmark_guide.html)
-- **Scale your evaluations**: Use [Determined AI integration](https://aleph-alpha-research.github.io/eval-framework/using_determined.html) for distributed evaluation
 - **Understand your results**: Read our [results interpretation guide](https://aleph-alpha-research.github.io/eval-framework/understanding_results_guide.html)
 - **Log results in WandB**: See how [we integrate WandB](https://aleph-alpha-research.github.io/eval-framework/wandb_integration.html) for metric and lineage tracking
 
@@ -225,7 +223,6 @@ if __name__ == "__main__":
 
 ### Scaling & Production
 
-- **[Using Determined](https://aleph-alpha-research.github.io/eval-framework/using_determined.html)** - Guide for distributed evaluation using Determined AI
 - **[Controlling Upload Results](https://aleph-alpha-research.github.io/eval-framework/controlling_upload_results.html)** - How to manage and control the upload of evaluation results
 
 ### Contributing

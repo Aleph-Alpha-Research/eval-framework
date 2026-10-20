@@ -80,7 +80,6 @@ The eval-framework follows a modular architecture with three main extensible bas
 
 - **Context System** (`context/`):
   - `LocalContext`: Run evaluations locally
-  - `DeterminedContext`: Distributed evaluation via Determined AI
 
 **Configuration**
 

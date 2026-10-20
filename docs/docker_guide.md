@@ -142,43 +142,6 @@ docker run -it --gpus all \
   /bin/bash
 ```
 
-## Determined AI Integration
-
-> **Note:** For a detailed guide see the [Using Determined guide](using_determined.md).
-
-
-Add to `experiment.yaml`:
-
-```yaml
-name: eval-framework-experiment
-
-environment:
-  image: registry.gitlab.aleph-alpha.de/research/public-registry/eval_framework:v0.2.3
-  registry_auth:
-    username: token
-    password: $GL_REGISTRY_TOKEN
-  environment_variables:
-    - HF_TOKEN
-    - WANDB_API_KEY
-
-resources:
-  slots_per_trial: 1
-
-entrypoint: |
-  eval_framework \
-    --task-name MMLU \
-    --output-dir /tmp/results \
-    --num-fewshot 5
-```
-
-Submit:
-
-```bash
-export HF_TOKEN="hf_your_token_here"
-export GL_REGISTRY_TOKEN="glpat_your_token_here"
-det experiment create experiment.yaml .
-```
-
 ## Example Workflows
 
 ### Single Evaluation

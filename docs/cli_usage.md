@@ -88,11 +88,6 @@ Description of the run. This will be added to the metadata of the run to help wi
 **`--verbosity VERBOSITY`**
 Set the logging verbosity level: 0=CRITICAL, 1=INFO, 2=DEBUG.
 
-### Environment
-
-**`--context {local,determined}`**
-The context in which the evaluation is run.
-
 **`-h, --help`**
 Show help message and exit.
 

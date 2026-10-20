@@ -58,29 +58,12 @@ Add the `--wandb-project` (and potentially `--wandb-entity` if not the default o
 
 ```bash
 uv run eval_framework \
-    --context local \
     --llm-args model_name="gpt-4o-mini" \
     --task-name ARC \
     --num-fewshot 3 \
     --num-samples 100 \
     --output-dir "./test_outputs_folder" \
     --wandb-project "my_wandb_project"
-```
-
-### Method 2: Determined Configuration
-
-Add `wandb_project` (and potentially `wandb_entity` if not the default one) as a hyperparameter in your Determined experiment config:
-
-```yaml
-hyperparameters:
-  experiment_name: "my_experiment"
-  llm_args:
-    model_name: "gpt-4o-mini"
-  wandb_project: "my_wandb_project"
-  task_args:
-    - task_name: "ARC"
-      num_fewshot: 3
-      num_samples: 100
 ```
 
 ### Environment Variables
