@@ -14,6 +14,17 @@
 
 ### Bug Fixes
 
+## [0.18.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.18.2...v0.18.3) (2026-10-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency llm-sandbox to v0.3.46 ([f62061a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f62061a1fa0c51dc36af1ca86fd1fb6eceba762d))
+* **deps:** update dependency openai to &gt;=3.32.0,&lt;4 ([05bdb13](https://github.com/Aleph-Alpha-Research/eval-framework/commit/05bdb136af9199c51d75ae6f69f8de6f77de8358))
+* **deps:** update dependency openai to &gt;=3.33.0,&lt;4 ([53bff8e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/53bff8ef38da6776098d911794e51dbb2934d1bf))
+* **deps:** update dependency transformers to &gt;=5.20.1,&lt;6 ([e04995d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e04995d6b6ea76a3468c53054e0be4d8317c64f7))
+* **deps:** update dependency wandb to &gt;=0.31.0,&lt;1 ([9d76bd7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/9d76bd7768094f850ab3348b17a6515011c48c91))
+
 ## [0.18.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.18.1...v0.18.2) (2026-10-19)
 
 
