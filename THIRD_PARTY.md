@@ -16,12 +16,12 @@ and first-party/internal packages are excluded.
 | `jsonschema` | `>=4.26.0,<5` |
 | `langdetect` | `>=1.0.9,<2` |
 | `lingua-language-detector` | `>=2.2.0,<3` |
-| `llm-sandbox` | `==0.3.45` |
+| `llm-sandbox` | `==0.3.46` |
 | `lxml` | `>=6.1.3,<7` |
 | `mysql-connector-python` | `>=26.7.0,<27` |
 | `nltk` | `>=3.10.3,<4` |
 | `numpy` | `>=2.5.4` |
-| `openai` | `>=3.31.0,<4` |
+| `openai` | `>=3.33.0,<4` |
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.1,<3` |
@@ -31,8 +31,8 @@ and first-party/internal packages are excluded.
 | `scipy` | `>=1.18.1,<2` |
 | `sympy` | `>=1.14.0,<2` |
 | `tiktoken` | `>=0.14.0,<1` |
-| `transformers` | `>=5.20.0,<6` |
-| `wandb` | `>=0.30.0,<1` |
+| `transformers` | `>=5.20.1,<6` |
+| `wandb` | `>=0.31.0,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
 ## Transitive
@@ -58,9 +58,9 @@ and first-party/internal packages are excluded.
 | `h11` | `0.16.0` |
 | `hf-xet` | `1.7.0` |
 | `httpcore` | `1.0.9` |
-| `httpcore2` | `2.14.0` |
+| `httpcore2` | `2.15.1` |
 | `httpx` | `0.28.1` |
-| `httpx2` | `2.14.0` |
+| `httpx2` | `2.15.1` |
 | `httpx2-jsfetch` | `1.0` |
 | `huggingface-hub` | `2.2.0` |
 | `idna` | `3.20` |
@@ -104,4 +104,4 @@ and first-party/internal packages are excluded.
 | `typing-inspection` | `0.4.4` |
 | `tzdata` | `2026.5` |
 | `urllib3` | `2.8.0` |
-| `xxhash` | `4.0.1` |
+| `xxhash` | `4.0.2` |
