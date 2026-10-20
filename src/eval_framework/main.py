@@ -1,4 +1,3 @@
-import gc
 import json
 import logging
 import os
@@ -28,8 +27,6 @@ def main(
     config: EvalConfig,
     should_preempt_callable: Callable[[], bool] | None = None,
     trial_id: int | None = None,
-    *args: Any,
-    resource_cleanup: bool = False,
     verbosity: int = 1,
 ) -> list[Result]:
     """Runs the entire evaluation process: responses generation and evaluation."""
@@ -91,10 +88,6 @@ def main(
         # update config from response generator with get metadata
         if trial_id is not None:
             _delete_preemption_file(config, trial_id)
-
-        if resource_cleanup:
-            del response_generator
-            gc.collect()
 
         evaluator = EvaluationGenerator(config, file_processor)
         results = evaluator.run_eval()
