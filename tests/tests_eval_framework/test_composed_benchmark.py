@@ -8,8 +8,16 @@ from eval_framework.answer import PickFromCandidates
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark, ComposedEval, LanguageSpec
 from eval_framework.contract import ResponseType
-from eval_framework.eval_kind import Choice
-from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotPolicy, FewShotSplit, NoFewShot, SampleSplit
+from eval_framework.eval_kind import Choice, SampleBody, assemble_messages
+from eval_framework.fewshot import (
+    ChoiceRenderer,
+    FewShot,
+    FewshotExample,
+    FewShotPolicy,
+    FewShotSplit,
+    NoFewShot,
+    SampleSplit,
+)
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesLoglikelihood,
@@ -466,4 +474,33 @@ def test_choice_wires_the_kind_and_fewshot_from_one_reader_and_styler() -> None:
         Message(role=Role.ASSISTANT, content="A: x"),
         Message(role=Role.USER, content="Q: eval"),
         Message(role=Role.ASSISTANT, content="A:"),
+    ]
+
+
+def test_assemble_messages_places_history_between_demonstrations_and_user_turn() -> None:
+    # Given a conversational body with a system prompt, an answer cue and two history turns
+    body = SampleBody(
+        prompt="final question",
+        cue="Answer:",
+        possible_completions=[],
+        ground_truth=None,
+        system_prompt="be terse",
+        history=[
+            Message(role=Role.USER, content="first request"),
+            Message(role=Role.ASSISTANT, content="first reply"),
+        ],
+    )
+
+    # When the messages are assembled with one demonstration
+    messages = assemble_messages([FewshotExample(prompt="demo question", answer="demo answer")], body)
+
+    # Then the conversation sits verbatim between the demonstrations and the item's user turn
+    assert messages == [
+        Message(role=Role.SYSTEM, content="be terse"),
+        Message(role=Role.USER, content="demo question"),
+        Message(role=Role.ASSISTANT, content="demo answer"),
+        Message(role=Role.USER, content="first request"),
+        Message(role=Role.ASSISTANT, content="first reply"),
+        Message(role=Role.USER, content="final question"),
+        Message(role=Role.ASSISTANT, content="Answer:"),
     ]

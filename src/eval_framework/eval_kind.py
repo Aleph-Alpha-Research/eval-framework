@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, final, override
 
 from eval_framework.choices import ChoiceReader
@@ -26,6 +26,9 @@ class SampleBody:
     context: BaseMetricContext | list[BaseMetricContext] | None = None
     # A leading SYSTEM turn for this sample, or None for none.
     system_prompt: str | None = None
+    # The turns preceding the user turn, for an item that is itself a conversation; [] for the usual
+    # single-turn item. Placed verbatim between the demonstrations and the user turn.
+    history: list[Message] = field(default_factory=list)
 
 
 def assemble_messages(
@@ -35,13 +38,14 @@ def assemble_messages(
     initial_prompt: str | None = None,
 ) -> list[Message]:
     """The standard prompt: an optional SYSTEM turn (from ``body.system_prompt``), the few-shot demonstrations
-    as USER / ASSISTANT pairs, then the item's USER turn and (optional) ASSISTANT cue — with ``initial_prompt``
-    folded once into the first turn (above the demonstrations). The single assembler every kind's ``messages``
-    delegates to."""
+    as USER / ASSISTANT pairs, then the item's history turns, its USER turn and (optional) ASSISTANT cue — with
+    ``initial_prompt`` folded once into the first turn (above the demonstrations). The single assembler every
+    kind's ``messages`` delegates to."""
     messages: list[Message] = []
     for example in fewshot:
         messages.append(Message(role=Role.USER, content=example.prompt))
         messages.append(Message(role=Role.ASSISTANT, content=example.answer))
+    messages.extend(body.history)
     messages.append(Message(role=Role.USER, content=body.prompt))
     if initial_prompt is not None:
         first = messages[0]
