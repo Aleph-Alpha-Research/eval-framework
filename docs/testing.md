@@ -24,7 +24,7 @@ For most contributors, running the CPU fast tests is sufficient:
 
 ```bash
 # Run the tests that PR CI runs
-uv run --all-extras pytest -n auto --max-worker-restart=0 -v \
+uv run pytest -n auto --max-worker-restart=0 -v \
     -m "not cpu_slow and not external_api and not formatter_hash"
 ````
 
@@ -42,7 +42,7 @@ uv run --all-extras pytest -n auto --max-worker-restart=0 -v \
 **Recommended local command (advanced users):**
 
 ```bash
-uv run --exact --all-extras pytest -v --noconftest tests/tests_eval_framework/installs/
+uv run --exact pytest -v --noconftest tests/tests_eval_framework/installs/
 ```
 
 > ⚠️ Warning: The `external_api` tests call real services and need the corresponding credentials.

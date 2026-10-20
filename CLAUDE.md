@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quick Start
 
 ### Setup
-- Install dependencies: `uv sync --all-extras`
+- Install dependencies: `uv sync`
 - Install Python 3.12: `uv python install 3.12 --reinstall` (if needed)
 - Install pre-commit hooks: `uv tool install pre-commit && uv run pre-commit install`
 
@@ -118,11 +118,6 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 - Inherit from `BaseMetric`
 - Implement `compute()` for single samples.
 - Supports context objects for additional evaluation data
-
-## Dependencies & Extras
-
-Optional extras (install with `uv sync --all-extras`):
-- `determined`: Determined AI integration
 
 ## Conventions
 

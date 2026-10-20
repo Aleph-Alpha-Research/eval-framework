@@ -22,8 +22,8 @@ jobs:
         with:
           version: "~=0.8.16"
 
-      - name: Install project with all extras
-        run: uv sync --all-extras
+      - name: Install project
+        run: uv sync
         working-directory: src
 
       - name: Install Sphinx and extensions

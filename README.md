@@ -43,24 +43,19 @@ The easiest way to get started is by installing the library via `pip` and use it
 pip install eval_framework
 ```
 
-There are optional extras available to unlock specific features of the library:
-- `determined` for running jobs via determined.
-
-As a short hand, the `all` extra installs all of the above.
-
 We use `uv` to better resolve dependencies when downloading the extras. You can install uv with:
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 or by follwing the `uv` [installation docs.](https://docs.astral.sh/uv/getting-started/installation/)
 
-Now, you can safely install the project with all optional extras:
+Now, you can safely install the project:
 ```bash
-uv sync --all-extras
+uv sync
 ```
 or with pip
 ```bash
-uv pip install eval_framework[all]
+uv pip install eval_framework
 ```
 
 Tip: ensure python is properly installed with uv:

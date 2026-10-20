@@ -42,16 +42,12 @@ jobs:
         run: ./utils/dependency_check.sh
 
       - name: Run MyPy
-        run: uv run --all-extras mypy
+        run: uv run mypy
 
   test-extras:
     # Test uv installs (CPU)
     runs-on: ubuntu-latest
     needs: [lint]
-    strategy:
-      fail-fast: false
-      matrix:
-        extras: ['']
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
@@ -63,13 +59,7 @@ jobs:
 
       - name: Verify install and functionality via uv --exact
         run: |
-          if [ "${{ matrix.extras }}" != "" ]; then
-            echo "Testing extra: ${{ matrix.extras }}"
-            uv run --exact --extra ${{ matrix.extras }} pytest -v --noconftest tests/tests_eval_framework/installs/test_${{ matrix.extras }}.py
-          else
-            echo "Testing core install"
-            uv run --exact pytest --noconftest -v tests/tests_eval_framework/installs/test_core.py
-          fi
+          uv run --exact pytest --noconftest -v tests/tests_eval_framework/installs/test_core.py
 
   test-cpu:
     runs-on: cpu-runner-8c-32gb-01
@@ -95,8 +85,8 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not cpu_slow and not external_api and not formatter_hash"
+          uv run python -c "import nltk; nltk.download('punkt_tab')"
+          uv run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "not cpu_slow and not external_api and not formatter_hash"
 
   test-cpu-slow:
     runs-on: cpu-runner-8c-32gb-01
@@ -122,8 +112,8 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "cpu_slow and not slow_download and not external_api and not formatter_hash"
+          uv run python -c "import nltk; nltk.download('punkt_tab')"
+          uv run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "cpu_slow and not slow_download and not external_api and not formatter_hash"
 
   test-formatter-hash:
     runs-on: cpu-runner-8c-32gb-01
@@ -184,5 +174,5 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
         run: |
-          uv run --all-extras python -c "import nltk; nltk.download('punkt_tab')"
-          uv run --all-extras pytest -n auto --max-worker-restart=0 --durations=30 -v -m "formatter_hash"
+          uv run python -c "import nltk; nltk.download('punkt_tab')"
+          uv run pytest -n auto --max-worker-restart=0 --durations=30 -v -m "formatter_hash"
