@@ -297,7 +297,6 @@ def _run_single_task(kwargs: dict) -> None:
             config=ctx.config,
             should_preempt_callable=ctx.should_preempt,
             trial_id=ctx.get_trial_id(),
-            resource_cleanup=kwargs.pop("resource_cleanup", False),
             verbosity=log_level,
         )
 

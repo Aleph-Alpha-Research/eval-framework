@@ -1,5 +1,4 @@
 import glob
-import importlib
 import importlib.metadata
 from argparse import Namespace
 from pathlib import Path
@@ -38,7 +37,6 @@ def _namespace(tmp_path: Path, task_name: str, judge_model_args: list[str]) -> N
         description="",
         extra_tasks_dir=None,
         save_logs=True,
-        resource_cleanup=True,
         delete_output_dir_after_upload=False,
         randomize_judge_order=False,
         repeats=1,
