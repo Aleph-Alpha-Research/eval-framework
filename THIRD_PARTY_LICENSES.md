@@ -153,7 +153,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## MPL-2.0
 
-- **certifi** 2026.10.18 - https://github.com/certifi/python-certifi
+- **certifi** 2026.10.19 - https://github.com/certifi/python-certifi
 
 ## MPL-2.0 AND MIT
 
@@ -273,7 +273,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### certifi 2026.10.18 (MPL-2.0)
+### certifi 2026.10.19 (MPL-2.0)
 
 ```text
 This package contains a modified version of ca-bundle.crt:
