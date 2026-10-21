@@ -5,7 +5,7 @@ import random
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, final, override
+from typing import TYPE_CHECKING, Any, Protocol, final, override
 
 from eval_framework.choices import ChoiceReader
 
@@ -13,6 +13,15 @@ if TYPE_CHECKING:
     from eval_framework.tasks.task_style import TaskStyler
 
 logger = logging.getLogger(__name__)
+
+
+class Pool(Protocol):
+    """The rows a few-shot source draws from: a list or HF Dataset. Only len
+    and indexing are required, so a dataset split is used in place and selected rows are decoded."""
+
+    def __len__(self) -> int: ...
+
+    def __getitem__(self, index: int, /) -> dict[str, Any]: ...
 
 
 @dataclass(frozen=True)
@@ -93,15 +102,11 @@ class FewShotSource(ABC):
         """The effective shot count — usually ``num_fewshot`` unchanged; a fixed source pins it."""
 
     @abstractmethod
-    def build_pool(
-        self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def build_pool(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> Pool:
         """The candidate demonstration rows, from the already-loaded data (called once per subject)."""
 
     @abstractmethod
-    def draw(
-        self, pool: list[dict[str, Any]], *, item: dict[str, Any], count: int, rnd: random.Random
-    ) -> list[dict[str, Any]]:
+    def draw(self, pool: Pool, *, item: dict[str, Any], count: int, rnd: random.Random) -> list[dict[str, Any]]:
         """Select ``count`` rows from ``pool`` to show before ``item``."""
 
     @abstractmethod
@@ -126,17 +131,13 @@ class SampleSplit(FewShotSource):
         return num_fewshot
 
     @override
-    def build_pool(
-        self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def build_pool(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> Pool:
         return [row for row in sample_rows if self._keep(row)] if self._keep is not None else sample_rows
 
     @override
-    def draw(
-        self, pool: list[dict[str, Any]], *, item: dict[str, Any], count: int, rnd: random.Random
-    ) -> list[dict[str, Any]]:
+    def draw(self, pool: Pool, *, item: dict[str, Any], count: int, rnd: random.Random) -> list[dict[str, Any]]:
         # Over-sample by one and drop the current item if it was drawn, so its answer never leaks.
-        oversampled = rnd.sample(pool, count + 1)
+        oversampled = [pool[i] for i in rnd.sample(range(len(pool)), count + 1)]
         return [row for row in oversampled if row != item][:count]
 
     @override
@@ -162,20 +163,16 @@ class FewShotSplit(FewShotSource):
         return num_fewshot
 
     @override
-    def build_pool(
-        self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def build_pool(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> Pool:
         assert self._split != sample_split, (
             f"FewShotSplit({self._split!r}) names the sample split; use SampleSplit() so draws stay leak-safe."
         )
-        rows = list(dataset[self._split])
-        return [row for row in rows if self._keep(row)] if self._keep is not None else rows
+        pool = dataset[self._split]
+        return pool.filter(self._keep) if self._keep is not None else pool
 
     @override
-    def draw(
-        self, pool: list[dict[str, Any]], *, item: dict[str, Any], count: int, rnd: random.Random
-    ) -> list[dict[str, Any]]:
-        return rnd.sample(pool, count)
+    def draw(self, pool: Pool, *, item: dict[str, Any], count: int, rnd: random.Random) -> list[dict[str, Any]]:
+        return [pool[i] for i in rnd.sample(range(len(pool)), count)]
 
     @override
     def metadata(self, sample_split: str) -> dict[str, str]:
@@ -204,16 +201,12 @@ class Predefined(FewShotSource):
         return self._count
 
     @override
-    def build_pool(
-        self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def build_pool(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> Pool:
         return self._items
 
     @override
-    def draw(
-        self, pool: list[dict[str, Any]], *, item: dict[str, Any], count: int, rnd: random.Random
-    ) -> list[dict[str, Any]]:
-        return pool[:count]
+    def draw(self, pool: Pool, *, item: dict[str, Any], count: int, rnd: random.Random) -> list[dict[str, Any]]:
+        return [pool[i] for i in range(min(count, len(pool)))]
 
     @override
     def metadata(self, sample_split: str) -> dict[str, str]:
@@ -284,7 +277,7 @@ class _Generator(FewShotGenerator):
         self._count = count
         self._source = source
         self._renderer = renderer
-        self._pool: list[dict[str, Any]] = []
+        self._pool: Pool = []
 
     @override
     def prepare(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> None:
