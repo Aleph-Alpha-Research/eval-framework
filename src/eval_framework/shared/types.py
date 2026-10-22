@@ -1,8 +1,9 @@
+import math
 import re
 from collections.abc import Callable, Sequence
 from typing import Annotated, NamedTuple, Self, TypeVar, cast
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from eval_framework.metrics.llm.graders.language import detect_language_of
 from eval_framework.utils.helpers import count_bytes
@@ -220,6 +221,50 @@ class PerTokenScores(BaseModel):
     byte_lens: list[int]
 
 
+class MaskedTokenScores(BaseModel):
+    """Scores for selected tokens in a full input, potentially spanning multiple turns.
+
+    Token indices refer to the full model input, including any special tokens. Byte
+    spans are half-open UTF-8 offsets in the rendered text before special tokens are
+    inserted. They describe the requested mask; boundary-crossing tokens may be
+    excluded, so scored bytes can be fewer than requested bytes.
+
+    Tokens sharing a byte range (for example Unicode byte-fallback tokens) count
+    those bytes once across their ``byte_lens`` entries; individual entries may be
+    zero. These scores are deliberately separate from ``PerTokenScores`` because
+    a disjoint mask does not describe a completion prefix or support Prior BPB.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    bits: list[float]
+    byte_lens: list[int]
+    token_indices: list[int]
+    byte_spans: list[tuple[int, int]]
+    requested_bytes: int
+    total_input_tokens: int
+
+    @model_validator(mode="after")
+    def validate_scores(self) -> Self:
+        if not self.bits or len(self.bits) != len(self.byte_lens) or len(self.bits) != len(self.token_indices):
+            raise ValueError("Masked score vectors must have equal, nonzero lengths")
+        if any(not math.isfinite(bits) or bits < 0 for bits in self.bits):
+            raise ValueError("Masked token bits must be finite and nonnegative")
+        if any(length < 0 for length in self.byte_lens) or not 0 < sum(self.byte_lens) <= self.requested_bytes:
+            raise ValueError("Scored byte lengths must be nonnegative and total between 1 and requested_bytes")
+        if self.token_indices != sorted(set(self.token_indices)) or any(
+            not 0 <= index < self.total_input_tokens for index in self.token_indices
+        ):
+            raise ValueError("Masked token indices must be strictly increasing and within the full input")
+        previous_end = 0
+        for start, end in self.byte_spans:
+            if start < previous_end or end <= start:
+                raise ValueError("Requested byte spans must be nonnegative, nonempty, sorted, and disjoint")
+            previous_end = end
+        if sum(end - start for start, end in self.byte_spans) != self.requested_bytes:
+            raise ValueError("Requested byte spans must total requested_bytes")
+        return self
+
+
 class BaseLoglikelihood(BaseModel):
     model_config = ConfigDict(extra="forbid")
     prompt: str
@@ -228,6 +273,8 @@ class BaseLoglikelihood(BaseModel):
     loglikelihoods_num_tokens: dict[str, int]  # Is empty if the model does not report per-choice token counts
     # choice -> per-token scores; keys match loglikelihoods; {} if the backend has no per-token logprobs
     loglikelihoods_per_token: dict[str, PerTokenScores] = {}
+    # Explicit masked-score details; never feed these into completion-prefix estimators.
+    masked_loglikelihoods: dict[str, MaskedTokenScores] = {}
     concat_compression: Annotated[ConcatCompression | None, "Compression info for the concat formatter"] = None
 
 

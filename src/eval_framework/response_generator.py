@@ -150,6 +150,7 @@ class ResponseGenerator:
                     loglikelihoods=raw_loglikelihood.loglikelihoods,
                     loglikelihoods_num_tokens=raw_loglikelihood.loglikelihoods_num_tokens,
                     loglikelihoods_per_token=raw_loglikelihood.loglikelihoods_per_token,
+                    masked_loglikelihoods=raw_loglikelihood.masked_loglikelihoods,
                     error=raw_loglikelihood.raw_loglikelihood_error,
                 )
             )

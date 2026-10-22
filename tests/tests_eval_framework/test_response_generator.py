@@ -12,7 +12,7 @@ from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator, repeat_samples
 from eval_framework.result_processors.base import ResultProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
-from eval_framework.shared.types import Completion, RawCompletion, RawLoglikelihood
+from eval_framework.shared.types import Completion, MaskedTokenScores, RawCompletion, RawLoglikelihood
 from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import Registry, register_task
@@ -71,6 +71,49 @@ def test_generate_completions_message_handling() -> None:
         Message(role=Role.USER, content="Hello"),
         Message(role=Role.ASSISTANT, content="generated text"),
     ]
+
+
+def test_masked_loglikelihoods_survive_generation_and_storage(tmp_path: Path) -> None:
+    task = _PrecedenceStub(None, None)
+    registry = Registry()
+    registry.add(task)
+    llm = Mock(spec=BaseLLM)
+    scores = MaskedTokenScores(
+        bits=[1.0, 2.0],
+        byte_lens=[1, 2],
+        token_indices=[1, 3],
+        byte_spans=[(1, 2), (3, 5)],
+        requested_bytes=3,
+        total_input_tokens=4,
+    )
+    llm.logprobs.return_value = [
+        RawLoglikelihood(
+            prompt="text!",
+            prompt_num_tokens=4,
+            loglikelihoods={"text!": -2.0794415416798357},
+            loglikelihoods_num_tokens={"text!": 2},
+            masked_loglikelihoods={"text!": scores},
+        )
+    ]
+    config = EvalConfig(task_name=task.id(), num_fewshot=0, llm_class=llm.__class__)
+    processor = ResultsFileProcessor(tmp_path)
+    generator = ResponseGenerator(llm, config, processor, benchmark_registry=registry)
+    responses = generator._generate_loglikelihoods(
+        [
+            Sample(
+                id=0,
+                subject="stub",
+                ground_truth="text!",
+                messages=[Message(role=Role.USER, content="text!")],
+                possible_completions=["text!"],
+            )
+        ]
+    )
+    processor.save_responses(responses)
+    loaded = processor.load_responses()
+    assert loaded == responses
+    assert responses[0].masked_loglikelihoods == {"text!": scores}
+    assert responses[0].loglikelihoods_per_token == {}
 
 
 # test strategy:
