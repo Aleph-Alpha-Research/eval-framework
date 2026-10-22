@@ -58,9 +58,9 @@ and first-party/internal packages are excluded.
 | `h11` | `0.16.0` |
 | `hf-xet` | `1.7.0` |
 | `httpcore` | `1.0.9` |
-| `httpcore2` | `2.15.1` |
+| `httpcore2` | `2.16.0` |
 | `httpx` | `0.28.1` |
-| `httpx2` | `2.15.1` |
+| `httpx2` | `2.16.0` |
 | `httpx2-jsfetch` | `1.0` |
 | `huggingface-hub` | `2.2.0` |
 | `idna` | `3.20` |
@@ -86,7 +86,7 @@ and first-party/internal packages are excluded.
 | `pyarrow` | `26.0.0` |
 | `pydantic-core` | `2.50.1` |
 | `pygments` | `2.21.0` |
-| `python-dateutil` | `2.9.0.post0` |
+| `python-dateutil` | `3.0.0` |
 | `referencing` | `0.37.0` |
 | `regex` | `2026.9.29` |
 | `requests` | `2.34.2` |
