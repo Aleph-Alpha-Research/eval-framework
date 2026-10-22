@@ -8,7 +8,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 | License (SPDX) | Count |
 |---|---|
 | `MIT` | 27 |
-| `Apache-2.0` | 24 |
+| `Apache-2.0` | 25 |
 | `BSD-3-Clause` | 20 |
 | `BSD-2-Clause` | 2 |
 | `PSF-2.0` | 2 |
@@ -45,8 +45,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **huggingface_hub** 2.2.0 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
-- **nltk** 3.10.3 - https://www.nltk.org/
-- **openai** 3.35.1 - https://github.com/openai/openai-python
+- **nltk** 3.10.4 - https://www.nltk.org/
+- **openai** 3.36.0 - https://github.com/openai/openai-python
 - **opentelemetry-api** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
 - **opentelemetry-exporter-http-transport** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
 - **opentelemetry-exporter-otlp-common** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
@@ -60,6 +60,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **requests** 2.34.2 - https://github.com/psf/requests
 - **safetensors** 0.8.0 - https://github.com/huggingface/safetensors
 - **tokenizers** 0.23.3 - https://github.com/huggingface/tokenizers
+- **tzdata** 2026.5 - https://github.com/python/tzdata
 
 ## Apache-2.0 AND CNRI-Python
 
@@ -71,7 +72,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0 OR BSD-3-Clause
 
-- **python-dateutil** 2.9.0.post0 - https://github.com/dateutil/dateutil
+- **python-dateutil** 3.0.0 - https://github.com/dateutil/dateutil
 
 ## BSD-2-Clause
 
@@ -86,9 +87,9 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **dill** 0.4.1 - https://github.com/uqfoundation/dill
 - **fsspec** 2026.7.0 - https://github.com/fsspec/filesystem_spec
 - **httpcore** 1.0.9 - https://www.encode.io/httpcore/
-- **httpcore2** 2.15.1 - https://github.com/pydantic/httpx2
+- **httpcore2** 2.16.0 - https://github.com/pydantic/httpx2
 - **httpx** 0.28.1 - https://github.com/encode/httpx
-- **httpx2** 2.15.1 - https://github.com/pydantic/httpx2
+- **httpx2** 2.16.0 - https://github.com/pydantic/httpx2
 - **idna** 3.20 - https://github.com/kjd/idna
 - **joblib** 1.6.0 - https://joblib.readthedocs.io
 - **jsonlines** 4.0.0 - https://github.com/wbolster/jsonlines
@@ -1841,7 +1842,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### httpcore2 2.15.1 (BSD-3-Clause)
+### httpcore2 2.16.0 (BSD-3-Clause)
 
 ```text
 Copyright © 2026 to present Pydantic Services Inc. and individual contributors.
@@ -1891,7 +1892,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### httpx2 2.15.1 (BSD-3-Clause)
+### httpx2 2.16.0 (BSD-3-Clause)
 
 ```text
 Copyright © 2026 to present Pydantic Services Inc. and individual contributors.
@@ -10852,7 +10853,7 @@ Written Offer for Source Code
        offers spare parts or customer support for that product model.
 ```
 
-### nltk 3.10.3 (Apache-2.0)
+### nltk 3.10.4 (Apache-2.0)
 
 ```text
 Apache License
@@ -11998,7 +11999,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### openai 3.35.1 (Apache-2.0)
+### openai 3.36.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -17856,7 +17857,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### python-dateutil 2.9.0.post0 (Apache-2.0 OR BSD-3-Clause)
+### python-dateutil 3.0.0 (Apache-2.0 OR BSD-3-Clause)
 
 ```text
 Copyright 2017- Paul Ganssle <paul@ganssle.io>
@@ -20634,6 +20635,27 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
+```
+
+### tzdata 2026.5 (Apache-2.0)
+
+```text
+Apache Software License 2.0
+
+Copyright (c) 2020, Paul Ganssle (Google)
+Copyright (c) 2026, Stan Ulbrych
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```
 
 ### urllib3 2.8.0 (MIT)
