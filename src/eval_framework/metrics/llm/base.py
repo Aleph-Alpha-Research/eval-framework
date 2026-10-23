@@ -1,6 +1,6 @@
 import traceback
 
-from eval_framework.llm.base import BaseLLM
+from eval_framework.llm.base import JudgeLLM
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import Completion, Error
 
@@ -10,7 +10,7 @@ class BaseLLMJudgeMetric(BaseMetric[Completion]):
     # backpressure against the judge API's rate limit.
     MAX_WORKERS = 100
 
-    def __init__(self, llm_judge: BaseLLM, randomize_order: bool = False) -> None:
+    def __init__(self, llm_judge: JudgeLLM, randomize_order: bool = False) -> None:
         self._llm_judge = llm_judge
         self._randomize_order = randomize_order
 

@@ -16,7 +16,7 @@ import mysql.connector.abstracts
 import psycopg2  # type: ignore
 from pydantic import BaseModel
 
-from eval_framework.llm.base import BaseLLM
+from eval_framework.llm.base import JudgeLLM
 from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.metrics.llm.graders.language import Language
@@ -60,7 +60,7 @@ _POSTGRES_PORT = 0
 class LLMJudgeSql(BaseLLMJudgeMetric):
     NAME = "SQL Quality"
 
-    def __init__(self, llm_judge: BaseLLM):
+    def __init__(self, llm_judge: JudgeLLM):
         super().__init__(llm_judge)
         self._grader = SqlQualityGrader(llm_judge)
 

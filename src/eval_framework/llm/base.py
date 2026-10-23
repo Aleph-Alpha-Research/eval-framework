@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from typing import Protocol
 
 from openai.types.chat.completion_create_params import ResponseFormat
 
@@ -125,3 +126,15 @@ class BaseLLM(ABC):
         Method for custom resource cleanup (particularly GPUs)
         """
         pass
+
+
+class JudgeLLM(Protocol):
+    def generate_from_messages(
+        self,
+        messages: list[Sequence[Message]],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        response_format: ResponseFormat | None = None,
+    ) -> list[RawCompletion]: ...
