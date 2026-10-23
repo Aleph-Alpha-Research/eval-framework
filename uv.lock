@@ -532,7 +532,7 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.18.1,<2" },
     { name = "sympy", specifier = ">=1.14.0,<2" },
     { name = "tiktoken", specifier = ">=0.14.0,<1" },
-    { name = "transformers", extras = ["chat-template"], specifier = ">=5.20.1,<6" },
+    { name = "transformers", extras = ["chat-template"], specifier = ">=5.20.2,<6" },
     { name = "wandb", specifier = ">=0.31.0,<1" },
     { name = "xmltodict", specifier = ">=1.0.4,<1.1" },
 ]
