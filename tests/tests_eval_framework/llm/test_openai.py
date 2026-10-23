@@ -1,5 +1,6 @@
+import httpx
 import pytest
-from openai import omit
+from openai import AuthenticationError, RateLimitError, omit
 from openai.types.chat.completion_create_params import ResponseFormat
 from pytest_mock import MockerFixture
 
@@ -8,6 +9,7 @@ from eval_framework.llm.openai import (
     OpenAIEmbeddingModel,
     OpenAIModel,
 )
+from eval_framework.llm.retry import LLMUnavailable, RetryPolicy
 from eval_framework.utils.helpers import pairwise_cosine_similarity
 from template_formatting.formatter import ConcatFormatter, Message, Role
 
@@ -209,3 +211,60 @@ def test_logprobs_includes_token_straddling_prompt_and_choice(mocker: MockerFixt
     assert result.loglikelihoods == {"A": -0.25}
     assert result.loglikelihoods_num_tokens == {"A": 1}
     assert result.prompt_num_tokens == 3
+
+
+def _rate_limit_error() -> RateLimitError:
+    request = httpx.Request("POST", "https://openrouter.ai/api/v1/chat/completions")
+    return RateLimitError("throttled", response=httpx.Response(429, request=request), body=None)
+
+
+def test_retrying_openai_model_recovers_from_a_rate_limit(mocker: MockerFixture) -> None:
+    # Given a client that is throttled once before answering
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    mocker.patch("time.sleep")
+    mock_client.chat.completions.create.side_effect = [_rate_limit_error(), _make_chat_response(mocker, content="42")]
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18").with_retry()
+
+    # When
+    results = model.generate_from_messages([[Message(role=Role.USER, content="hi")]])
+
+    # Then the answer comes from the second request
+    assert results[0].completion == "42"
+    assert mock_client.chat.completions.create.call_count == 2
+
+
+def test_retrying_openai_model_recovers_from_a_choiceless_body(mocker: MockerFixture) -> None:
+    # Given a 200 body without choices, as OpenRouter returns for a provider error
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    mocker.patch("time.sleep")
+    choiceless = mocker.MagicMock()
+    choiceless.choices = None
+    mock_client.chat.completions.create.side_effect = [choiceless, _make_chat_response(mocker, content="42")]
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18").with_retry()
+
+    # When
+    results = model.generate_from_messages([[Message(role=Role.USER, content="hi")]])
+
+    # Then
+    assert results[0].completion == "42"
+    assert mock_client.chat.completions.create.call_count == 2
+
+
+def test_retrying_openai_model_gives_up_on_a_rejected_key_after_its_budget(mocker: MockerFixture) -> None:
+    # Given a client whose key is rejected on every attempt
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    mocker.patch("time.sleep")
+    request = httpx.Request("POST", "https://openrouter.ai/api/v1/chat/completions")
+    mock_client.chat.completions.create.side_effect = AuthenticationError(
+        "bad key", response=httpx.Response(401, request=request), body=None
+    )
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18").with_retry(RetryPolicy(attempts=2))
+
+    # When / Then the retries are spent before the misconfiguration surfaces, with the key error as cause
+    with pytest.raises(LLMUnavailable) as excinfo:
+        model.generate_from_messages([[Message(role=Role.USER, content="hi")]])
+    assert isinstance(excinfo.value.__cause__, AuthenticationError)
+    assert mock_client.chat.completions.create.call_count == 2
