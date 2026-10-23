@@ -74,6 +74,24 @@ class JudgeProbeMetric(BaseLLMJudgeMetric):
         return [MetricResult(metric_name=self.NAME, value=float(response.id), higher_is_better=True)]
 
 
+class FlakyJudge(MockLLM):
+    """Fails its first call the way a throttled provider does, then answers."""
+
+    def generate_from_messages(self, messages, *args, **kwargs):  # type: ignore[no-untyped-def]
+        if self.generate_counter == 0:
+            self.generate_counter += 1
+            raise IndexError("list index out of range")
+        return super().generate_from_messages(messages, *args, **kwargs)
+
+
+class JudgeAnswerMetric(BaseLLMJudgeMetric):
+    NAME = "JudgeAnswer"
+
+    def calculate(self, response: Completion) -> list[MetricResult]:
+        answer = self._llm_judge.generate_from_messages([[]])[0].completion
+        return [MetricResult(metric_name=self.NAME, value=float("fake" in answer), higher_is_better=True)]
+
+
 def _make_completions(count: int) -> list[Completion]:
     return [
         Completion(
@@ -131,6 +149,20 @@ def test_run_metric_calculators_fans_out_judge_metrics(tmp_path: Path) -> None:
     results = evaluator._run_metric_calculators(responses)  # type: ignore[arg-type]
 
     assert [r.value for r in results] == [float(i) for i in range(2 * PROBE_CONCURRENCY)]
+
+
+def test_run_metric_calculators_retries_a_flaky_judge(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Given a judge whose first call fails transiently
+    monkeypatch.setattr("time.sleep", lambda _: None)
+    evaluator = _evaluator_with_metadata(tmp_path, llm_judge_class=FlakyJudge)
+    evaluator.metrics = [JudgeAnswerMetric]
+
+    # When
+    results = evaluator._run_metric_calculators(_make_completions(1))  # type: ignore[arg-type]
+
+    # Then the sample is scored from the judge's second answer rather than recorded as an error
+    assert results[0].error is None
+    assert results[0].value == 1.0
 
 
 def test_evaluator_run_completions(tmp_path: Path) -> None:
