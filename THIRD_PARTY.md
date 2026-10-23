@@ -31,7 +31,7 @@ and first-party/internal packages are excluded.
 | `scipy` | `>=1.18.1,<2` |
 | `sympy` | `>=1.14.0,<2` |
 | `tiktoken` | `>=0.14.0,<1` |
-| `transformers` | `>=5.20.1,<6` |
+| `transformers` | `>=5.20.2,<6` |
 | `wandb` | `>=0.31.0,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
@@ -54,7 +54,7 @@ and first-party/internal packages are excluded.
 | `distro` | `1.9.0` |
 | `filelock` | `4.2.4` |
 | `fsspec` | `2026.7.0` |
-| `googleapis-common-protos` | `1.75.5` |
+| `googleapis-common-protos` | `1.76.0` |
 | `h11` | `0.16.0` |
 | `hf-xet` | `1.7.0` |
 | `httpcore` | `1.0.9` |
@@ -80,7 +80,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-sdk` | `1.45.1` |
 | `opentelemetry-semantic-conventions` | `0.66b1` |
 | `packaging` | `26.3` |
-| `pandas` | `3.0.6` |
+| `pandas` | `3.1.0` |
 | `platformdirs` | `4.13.5` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.0` |
