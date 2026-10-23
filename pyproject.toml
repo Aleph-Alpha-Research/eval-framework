@@ -1,6 +1,6 @@
 [project]
 name = "eval-framework"
-version = "0.18.3"
+version = "0.19.0"
 description = "Evaluation Framework"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -46,7 +46,7 @@ dependencies = [
   "scipy>=1.18.1,<2",  # required for the aggregation of pass@k metrics
   "openai>=3.35.1,<4",
   "tiktoken>=0.14.0,<1",
-  "transformers[chat-template]>=5.20.2,<6",
+  "transformers[chat-template]>=5.20.1,<6",
 ]
 
 [project.urls]

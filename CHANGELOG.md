@@ -14,6 +14,55 @@
 
 ### Bug Fixes
 
+## [0.19.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.18.3...v0.19.0) (2026-10-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* delete context folder
+* drop the determined and all extras
+* remove preemption handling
+* remove Determined context and run metadata ids
+* **llm:** remove DeepseekModel
+* the removed CLI flags are rejected by argparse, and Determined configs containing llm_name or task_args.judge_model_name fail validation. Pass the model via --llm-args model_name=<model>. Custom BaseLLM implementations must be used through the Python API.
+
+### Features
+
+* always use OpenAIModel and remove model-selection arguments ([5428e20](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5428e203e4b28b7329a54c559e88b40b0177a5e0))
+* remove Determined context and run metadata ids ([66887df](https://github.com/Aleph-Alpha-Research/eval-framework/commit/66887df76d5d5fe387c9aea5d7222f56b877b95a))
+* SampleBody contains history ([596a4d9](https://github.com/Aleph-Alpha-Research/eval-framework/commit/596a4d9b13c1058fc9ccf9d56529b04d39095a81))
+
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=3.35.0,&lt;4 ([8b00fa7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/8b00fa72e4bbaee08b522fd460951a83790aa42a))
+* **deps:** update dependency openai to &gt;=3.35.1,&lt;4 ([aa66011](https://github.com/Aleph-Alpha-Research/eval-framework/commit/aa66011df51cac6768aefbb1b4f9a43dcbb5ee1d))
+* **deps:** update dependency transformers to &gt;=5.20.2,&lt;6 ([cf05d9d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/cf05d9ddbfe37228cee8d0fe697a791e5bb8ff5b))
+* openai client implements logprobs for all models ([5ea8031](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5ea80315c4d8a088f4418636e31bd8d698993011))
+
+
+### Documentation
+
+* **cli:** document that the model and judge are always OpenAIModel ([af04f84](https://github.com/Aleph-Alpha-Research/eval-framework/commit/af04f84689812c45df9870d791f6f2a2cc570ba5))
+* configure task suite examples via --llm-args ([94b4b13](https://github.com/Aleph-Alpha-Research/eval-framework/commit/94b4b13dee670466ed271e50a9fe646353798695))
+* **determined:** configure the model via llm_args instead of a models file ([0d57449](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0d57449a80beb0f4c4b8fa70a0e8bd281a7bcc52))
+* drop --llm-name from OpenAIModel examples ([93fa133](https://github.com/Aleph-Alpha-Research/eval-framework/commit/93fa133314a4f8a102f470f8620685e9a7c2b216))
+* **readme:** stop asking for model class names and clarify custom models ([83f28c0](https://github.com/Aleph-Alpha-Research/eval-framework/commit/83f28c0227f461a1bfbd63ae05861cebc02b1e13))
+* update CLAUDE.md for the OpenAIModel-only CLI ([f63bc87](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f63bc876f6a686a9cff059b8994305a3276b944a))
+* use OpenAIModel args in upload and W&B guides ([de7668d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/de7668dd96ec5a64763833b9575adb1f3a3cf9ac))
+
+
+### Miscellaneous Chores
+
+* drop the determined and all extras ([fdf6c5e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/fdf6c5e97a176ba49ad547f095dfa76d2e050e04))
+
+
+### Code Refactoring
+
+* delete context folder ([2520e56](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2520e5619d2cedc518f2eb91eeaacd780dff61fb))
+* **llm:** remove DeepseekModel ([b3cd442](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b3cd4427296f98d55efbc8992c7c61ebf4319c9b))
+* remove preemption handling ([d30f1ac](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d30f1acc53c1ec340b77f0de4ae46a5c74a520e5))
+
 ## [0.18.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.18.2...v0.18.3) (2026-10-20)
 
 
