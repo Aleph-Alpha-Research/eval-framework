@@ -1,0 +1,21 @@
+eval\_framework.metrics.aggregators package
+===========================================
+
+Submodules
+----------
+
+eval\_framework.metrics.aggregators.aggregators module
+------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.aggregators.aggregators
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: eval_framework.metrics.aggregators
+   :members:
+   :show-inheritance:
+   :undoc-members:
