@@ -107,7 +107,7 @@ def _evaluator_with_metadata(tmp_path: Path, **config_kwargs: object) -> Evaluat
     return EvaluationGenerator(config, file_processor)
 
 
-def test_run_metric_calculators_is_serial_by_default(tmp_path: Path) -> None:
+def test_compute_metrics_is_serial_by_default(tmp_path: Path) -> None:
     SerialProbeMetric.in_flight = 0
     SerialProbeMetric.max_in_flight = 0
 
@@ -115,20 +115,20 @@ def test_run_metric_calculators_is_serial_by_default(tmp_path: Path) -> None:
     evaluator.metrics = [SerialProbeMetric]
     responses = _make_completions(8)
 
-    results = evaluator._run_metric_calculators(responses)  # type: ignore[arg-type]
+    results = evaluator._compute_metrics(responses)  # type: ignore[arg-type]
 
     assert SerialProbeMetric.max_in_flight == 1
     assert [r.value for r in results] == [float(i) for i in range(8)]
 
 
-def test_run_metric_calculators_fans_out_judge_metrics(tmp_path: Path) -> None:
+def test_compute_metrics_fans_out_judge_metrics(tmp_path: Path) -> None:
     JudgeProbeMetric.barrier.reset()
 
     evaluator = _evaluator_with_metadata(tmp_path, llm_judge_class=MockLLM)
     evaluator.metrics = [JudgeProbeMetric]
     responses = _make_completions(2 * PROBE_CONCURRENCY)
 
-    results = evaluator._run_metric_calculators(responses)  # type: ignore[arg-type]
+    results = evaluator._compute_metrics(responses)  # type: ignore[arg-type]
 
     assert [r.value for r in results] == [float(i) for i in range(2 * PROBE_CONCURRENCY)]
 
@@ -234,7 +234,7 @@ def test_evaluator_run_all(tmp_path: Path, wandb_run: wandb.Run) -> None:
     assert (output_dir / "aggregated_results.json").exists()
 
 
-def test_aggregate_results(tmp_path: Path) -> None:
+def test_summarize_samples(tmp_path: Path) -> None:
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,
@@ -293,7 +293,7 @@ def test_aggregate_results(tmp_path: Path) -> None:
             )
         )
 
-    aggregated_results = evaluator._aggregate_results(results)
+    aggregated_results = evaluator._summarize_samples(results)
 
     assert aggregated_results == pytest.approx(
         {
@@ -339,7 +339,7 @@ def test_aggregate_results(tmp_path: Path) -> None:
             ),  # NaN appear, cannot compute the std of only one value (division by N-1)
             "NumSamples metric1 - subject2": 2,
             "StdErr metric1": float("nan"),
-            "NumSamples metric1": 16,
+            "NumSamples metric1": 8,
             "StdErr metric2 - subject1": 0,
             "NumSamples metric2 - subject1": 2,
             "StdErr metric2 - subject2": float("nan"),
@@ -357,7 +357,7 @@ def test_aggregate_results(tmp_path: Path) -> None:
     )
 
 
-def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
+def test_summarize_problems_with_pass_at_k(tmp_path: Path) -> None:
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,
@@ -405,7 +405,7 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
             )
         )
 
-    aggregated = evaluator._aggregate_results_with_aggregators(results)
+    aggregated = evaluator._summarize_problems(results)
     # The pass@1 DF that gets aggregated is:
     # p1 s1 k1 2/3
     # p2 s1 k1 0
@@ -435,7 +435,7 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
     }
 
 
-def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
+def test_summarize_problems_with_identifier_mean(tmp_path: Path) -> None:
     llm = MockLLM()
     config = EvalConfig(
         output_dir=tmp_path,
@@ -483,7 +483,7 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
             )
         )
 
-    aggregated = evaluator._aggregate_results_with_aggregators(results)
+    aggregated = evaluator._summarize_problems(results)
 
     # The aggregator with IdentifierMean DF that gets aggregated is:
     # p1 s1 k1 2/3
@@ -500,4 +500,47 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
         "IdentifierMean ExactMatch - key2 - subject1": 1,
         "IdentifierMean ExactMatch - key1 - subject2": 1,
         "IdentifierMean ExactMatch - key2 - subject2": 0,
+    }
+
+
+def test_summarize_problems_keeps_keys_of_one_sample_apart(tmp_path: Path) -> None:
+    llm = MockLLM()
+    config = EvalConfig(
+        output_dir=tmp_path,
+        num_fewshot=0,
+        num_samples=1,
+        task_name="HumanEval_OLMES",
+        llm_class=llm.__class__,
+    )
+    evaluator = EvaluationGenerator(config, ResultsFileProcessor(tmp_path))
+    evaluator.metrics = [MockPassAtKMetric]
+
+    results = [
+        Result(
+            id=0,
+            metric_name="ExactMatch",
+            num_fewshot=0,
+            key=key,
+            subject="subject1",
+            llm_name="llm_name",
+            task_name="task_name",
+            metric_class_name="MockPassAtKMetric",
+            value=value,
+            higher_is_better=True,
+        )
+        for key, value in (("key1", 1.0), ("key2", 0.0))
+    ]
+
+    aggregated = evaluator._summarize_problems(results)
+
+    # One attempt per (key, subject, problem) cell, so pass@2 of a single attempt is the attempt itself.
+    assert aggregated == {
+        "Pass@1 MockPassAtKMetric.ExactMatch": 0.5,
+        "Pass@1 MockPassAtKMetric.ExactMatch (micro)": 0.5,
+        "Pass@1 ExactMatch - key1 - subject1": 1.0,
+        "Pass@1 ExactMatch - key2 - subject1": 0.0,
+        "Pass@2 MockPassAtKMetric.ExactMatch": 0.5,
+        "Pass@2 MockPassAtKMetric.ExactMatch (micro)": 0.5,
+        "Pass@2 ExactMatch - key1 - subject1": 1.0,
+        "Pass@2 ExactMatch - key2 - subject1": 0.0,
     }

@@ -1,6 +1,5 @@
 import logging
-import math
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from typing import Any, cast
@@ -24,6 +23,45 @@ from eval_framework.utils.tqdm_handler import get_disable_bar_flag
 logger = logging.getLogger(__name__)
 
 
+STDERR_EXCLUDED = ("SequencePositions", "Bytes")
+
+
+def _results_frame(results: list[Result], **extra: Callable[[Result], Any]) -> pd.DataFrame:
+    rows = [
+        {
+            "metric_name": r.metric_name,
+            "metric_class_name": r.metric_class_name,
+            "subject": r.subject,
+            "key": r.key or "",
+            "value": r.value,
+            "error": r.error,
+            **{name: fn(r) for name, fn in extra.items()},
+        }
+        for r in results
+    ]
+    return pd.DataFrame(rows)
+
+
+def _scope_statistics(frame: pd.DataFrame, metric: str, scope: str = "", micro: bool = False) -> dict[str, float]:
+    """Macro statistics over (key, subject) cells for one metric within one scope."""
+    error_free = frame.loc[frame["error"].isnull()]
+    cells = error_free.groupby(["key", "subject"])["value"].agg(["mean", "std"])
+    out = {
+        f"ErrorFreeRatio {metric}{scope}": frame["error"].isnull().mean(),
+        f"Average {metric}{scope}": cells["mean"].mean(),
+        "_std": cells["std"].mean(),
+        "_n": len(error_free),
+    }
+    if micro:
+        out[f"Average {metric} (micro)"] = error_free["value"].mean()
+    if frame["error"].notna().any():
+        value = frame["value"].mask(frame["error"].notna() & frame["value"].isna(), 0.0)
+        out[f"Average {metric} (including Errors){scope}"] = (
+            value.groupby([frame["key"], frame["subject"]]).mean().mean()
+        )
+    return out
+
+
 class EvaluationGenerator:
     def __init__(self, config: EvalConfig, result_processor: ResultProcessor) -> None:
         logger.info("EvaluationGenerator initialized")
@@ -39,7 +77,7 @@ class EvaluationGenerator:
         self.metrics = eval_.metrics()
         self.task_name = eval_.display_name()
 
-    def _results_for(
+    def _compute_sample_results(
         self,
         metric: BaseMetric[Completion | Loglikelihood],
         response: Completion | Loglikelihood,
@@ -81,7 +119,7 @@ class EvaluationGenerator:
             if self.save_intermediate_results:
                 self.result_processor.save_metrics_result(result)
 
-    def _run_metric_calculators(self, responses: list[Completion | Loglikelihood]) -> list[Result]:
+    def _compute_metrics(self, responses: list[Completion | Loglikelihood]) -> list[Result]:
         results: list[Result] = self.result_processor.load_metrics_results()
         llm_name = self.result_processor.load_metadata()["llm_name"]
 
@@ -89,12 +127,6 @@ class EvaluationGenerator:
         for result in results:
             subject_result_id_existing.add(f"{result.subject}_{result.id}_{result.metric_class_name}")
 
-        """
-        we have three dimensions: subject, metric, sample_id
-        we wanna average over sample_id
-        and also over all subjects by averaging over the averages
-        dict[metric, dict[subject, dict[sample_id, list[result]]]]
-        """
         llm_judge = None
         for metric_class in self.metrics:
             raw_metric: BaseMetric[Any]
@@ -118,7 +150,7 @@ class EvaluationGenerator:
                 for response in responses
                 if f"{response.subject}_{response.id}_{metric.__class__.__name__}" not in subject_result_id_existing
             ]
-            compute = partial(self._results_for, metric, llm_name=llm_name)
+            compute = partial(self._compute_sample_results, metric, llm_name=llm_name)
             desc = f"Calculating {metric.NAME}"
 
             if metric.MAX_WORKERS > 1:
@@ -137,215 +169,57 @@ class EvaluationGenerator:
             self.result_processor.save_metrics_results(results)
         return results
 
-    def _aggregate_results(self, results: list[Result]) -> dict[str, float | None]:
-        data = pd.DataFrame(
-            [
-                {
-                    "metric_name": r.metric_name,
-                    "subject": r.subject,
-                    "key": r.key,
-                    "value": r.value,
-                    "error": r.error,
-                }
-                for r in results
-            ]
-        )
-        if len(data) == 0:
+    @staticmethod
+    def _summarize_samples(results: list[Result]) -> dict[str, float | None]:
+        data = _results_frame(results)
+        if data.empty:
             return {}
-        data.fillna({"key": ""}, inplace=True)
-        metrics = sorted(data["metric_name"].unique())
-        aggregated_results: dict[str, float | None] = {}
-
-        for metric in metrics:
-            # filter for metric
-            data_subset = data[data["metric_name"] == metric][["subject", "key", "value", "error"]]
-
-            # filter and count errors
-            total_count = len(data_subset)
-
-            mask = data_subset["error"].isnull()
-            data_subset_error_free = data_subset.loc[mask, ["subject", "key", "value"]]
-
-            error_free_ratio = float(len(data_subset_error_free) / total_count)
-            aggregated_results[f"ErrorFreeRatio {metric}"] = error_free_ratio
-
-            # Default average is weighted by key and subject (macro average).
-            # aggregate by key and subject first to have equal weights for all key / subject combinations
-            key_subject_mean = data_subset_error_free.groupby(["key", "subject"]).mean()
-            aggregated_results[f"Average {metric}"] = float(key_subject_mean[["value"]].mean()["value"])
-            # Additionally, report the plain mean over all samples (micro average or per-sample average).
-            aggregated_results[f"Average {metric} (micro)"] = float(data_subset_error_free["value"].mean())
-
-            if error_free_ratio < 1.0:
-                # Treat error samples (with value=None) as 0 for the "including errors" average
-                data_subset_with_errors = data_subset[["key", "subject", "value", "error"]].copy()
-                # Only fill value with 0 where there's an error (not for all None values)
-                error_mask = data_subset_with_errors["error"].notna()
-                data_subset_with_errors.loc[error_mask, "value"] = data_subset_with_errors.loc[
-                    error_mask, "value"
-                ].fillna(0.0)
-                key_subject_mean_with_errors = data_subset_with_errors.groupby(["key", "subject"])["value"].mean()
-                aggregated_results[f"Average {metric} (including Errors)"] = float(key_subject_mean_with_errors.mean())
-
-            std_err_mean_sum_of_squares = 0.0
-            std_err_mean_total_num_samples = 0.0
-            std_err_mean_num_subjects = 0
-
-            for column in ["key", "subject"]:
-                if len(data_subset[column].unique()) > 1:
-                    for name, _group in key_subject_mean.groupby([column]):
-                        mask = data_subset[column] == name[0]
-                        group = data_subset.loc[mask, ["subject", "key", "value", "error"]]
-                        # group = data_subset[data[column] == name][["subject", "key", "value", "error"]]
-                        group_total_count = len(group)
-                        group_error_free = group[group["error"].isnull()][["subject", "key", "value"]]
-                        group_error_free_ratio = float(len(group_error_free) / group_total_count)
-                        aggregated_results[f"ErrorFreeRatio {metric} - {name[0]}"] = group_error_free_ratio
-
-                        group_key_subject_mean = group_error_free.groupby(["key", "subject"]).mean()
-                        value = float(group_key_subject_mean[["value"]].mean()["value"])
-                        aggregated_results[f"Average {metric} - {name[0]}"] = value
-
-                        if group_error_free_ratio < 1.0:
-                            # Treat error samples (with value=None) as 0 for the "including errors" average
-                            group_with_errors = group[["key", "subject", "value", "error"]].copy()
-                            # Only fill value with 0 where there's an error (not for all None values)
-                            error_mask = group_with_errors["error"].notna()
-                            group_with_errors.loc[error_mask, "value"] = group_with_errors.loc[
-                                error_mask, "value"
-                            ].fillna(0.0)
-                            group_key_subject_mean_with_errors = group_with_errors.groupby(["key", "subject"])[
-                                "value"
-                            ].mean()
-                            value_with_errors = float(group_key_subject_mean_with_errors.mean())
-                            aggregated_results[f"Average {metric} (including Errors) - {name[0]}"] = value_with_errors
-
-                        if not ("SequencePositions" in metric or "Bytes" in metric):
-                            # calculate standard error for selected  metrics
-                            group_key_subject_std = group_error_free.groupby(["key", "subject"]).std()
-                            std = float(group_key_subject_std[["value"]].mean()["value"])
-                            num_samples = len(group_error_free)
-
-                            if math.isnan(std) or num_samples == 0:
-                                aggregated_results[f"StdErr {metric} - {name[0]}"] = float("nan")
-                            else:
-                                aggregated_results[f"StdErr {metric} - {name[0]}"] = std / np.sqrt(num_samples)
-                            aggregated_results[f"NumSamples {metric} - {name[0]}"] = num_samples
-
-                            std_err_mean_sum_of_squares += std**2 / num_samples
-                            std_err_mean_total_num_samples += num_samples
-                            std_err_mean_num_subjects += 1
-
-            if not ("SequencePositions" in metric or "Bytes" in metric):
-                # calculate standard error for selected  metrics
-                if std_err_mean_total_num_samples > 0:
-                    # calculate the standard error of the mean (SEM) for the aggregated results (eg. add in quadrature)
-                    # SEM = sqrt(sum(variance_i * n_i) / i)
-                    # where variance_i is the variance of each group and i is the number of groups
-                    # (the combined mean is also not weighted by the number of samples)
-                    if math.isnan(std) or std_err_mean_total_num_samples == 0:
-                        aggregated_results[f"StdErr {metric}"] = float("nan")
-                    else:
-                        aggregated_results[f"StdErr {metric}"] = np.sqrt(
-                            std_err_mean_sum_of_squares / std_err_mean_num_subjects
-                        )
-                    aggregated_results[f"NumSamples {metric}"] = std_err_mean_total_num_samples
+        out: dict[str, float] = {}
+        for metric, frame in data.groupby("metric_name"):
+            with_stderr = not any(s in metric for s in STDERR_EXCLUDED)
+            overall = _scope_statistics(frame, metric, micro=True)
+            slices = []
+            for column in ("key", "subject"):
+                if frame[column].nunique() > 1:
+                    for name, group in frame.groupby(column):
+                        stats = _scope_statistics(group, metric, f" - {name}")
+                        slices.append(stats)
+                        if with_stderr:
+                            stats[f"StdErr {metric} - {name}"] = stats["_std"] / np.sqrt(stats["_n"])
+                            stats[f"NumSamples {metric} - {name}"] = stats["_n"]
+                        out.update(stats)
+            if with_stderr:
+                if slices:
+                    out[f"StdErr {metric}"] = np.sqrt(np.mean([s["_std"] ** 2 / s["_n"] for s in slices]))
+                    out[f"NumSamples {metric}"] = overall["_n"]
                 else:
-                    # if there are no sub-groups to combine, calculate the SEM here directly
-                    key_subject_std = data_subset_error_free.groupby(["key", "subject"]).std()
-                    std = float(key_subject_std[["value"]].mean()["value"])
-                    num_samples = len(data_subset_error_free)
-                    if math.isnan(std) or num_samples == 0:
-                        aggregated_results[f"StdErr {metric}"] = float("nan")
-                    else:
-                        aggregated_results[f"StdErr {metric}"] = std / np.sqrt(num_samples)
-                    aggregated_results[f"NumSamples {metric}"] = num_samples
+                    out[f"StdErr {metric}"] = overall["_std"] / np.sqrt(overall["_n"])
+                    out[f"NumSamples {metric}"] = overall["_n"]
+            out.update(overall)
+        summary: dict[str, float | None] = {k: float(v) for k, v in out.items() if not k.startswith("_")}
+        nbytes, npos = summary.get("Average Bytes"), summary.get("Average SequencePositions")
+        if nbytes and npos:
+            summary["Average Bytes per Sequence Position"] = nbytes / npos
+        return summary
 
-        if (
-            "Average Bytes" in aggregated_results
-            and "Average SequencePositions" in aggregated_results
-            and aggregated_results["Average Bytes"]
-            and aggregated_results["Average SequencePositions"]
-        ):
-            aggregated_results["Average Bytes per Sequence Position"] = (
-                aggregated_results["Average Bytes"] / aggregated_results["Average SequencePositions"]
-            )
-
-        return aggregated_results
-
-    def _aggregate_results_with_aggregators(self, results: list[Result]) -> dict[str, float | None]:
-        data = pd.DataFrame(
-            [
-                {
-                    "metric_name": r.metric_name,
-                    "metric_class_name": r.metric_class_name,
-                    "subject": r.subject,
-                    "key": r.key,
-                    "value": r.value,
-                    "error": r.error,
-                    # Repeats of one problem carry consecutive ids (see `repeat_samples`).
-                    "problem": r.id // self.config.repeats,
-                }
-                for r in results
-            ]
-        )
-        if len(data) == 0:
+    def _summarize_problems(self, results: list[Result]) -> dict[str, float | None]:
+        # Repeats of one problem carry consecutive ids (see `repeat_samples`).
+        data = _results_frame(results, problem=lambda r: r.id // self.config.repeats)
+        if data.empty:
             return {}
-        data = data.fillna({"key": ""})
-        aggregated_results: dict[str, float | None] = {}
-        data = data.loc[data.error.isnull()]
-
-        for (metric_name, current_metric_class), metric_group in data.groupby(["metric_name", "metric_class_name"]):
-            # The reason we groupby over both metric_name and metric_class_name is because we want to aggregate
-            # results for a single metric. Two metric classes can implement the same metric name. We want to separate
-            # those cases. We cannot group over only metric_class_name because each metric class can implement
-            # multiple metrics with different names.
-            current_metric = None
-            # now loop over the self.metrics list and find the metric class that matches the current_metric_class
-            for metric_class in self.metrics:
-                if metric_class.__name__ == current_metric_class:
-                    current_metric = metric_class
-                    break
-            if current_metric is None:
-                raise ValueError(f"Metric {metric_name} not found in metrics list")
-
-            for aggregator in current_metric.AGGREGATORS:
-                # Compute the aggregator per problem (collapsing the repeats of each problem into one score).
-                per_problem = aggregator(metric_group, ["subject", "problem"])
-                # Macro average: mean per key/subject group, then mean over groups, giving equal weight to every group.
-                aggregated_results[f"{aggregator.name} {current_metric_class}.{metric_name}"] = (
-                    per_problem.groupby(["key", "subject"]).agg({"value": "mean"})["value"].mean().item()
-                )
-                # Micro average: plain mean over all problems.
-                aggregated_results[f"{aggregator.name} {current_metric_class}.{metric_name} (micro)"] = (
-                    per_problem["value"].mean().item()
-                )
-
-        # Loop to additionally compute per-subject/per-key breakdown metric scores, e.g. for only subject="algebra"
-        for (key, subject, metric_name, current_metric_class), ksm_group in data.groupby(
-            ["key", "subject", "metric_name", "metric_class_name"]
-        ):
-            current_metric = None
-            # now loop over the self.metrics list and find the metric class that matches the current_metric_class
-            for metric_class in self.metrics:
-                if metric_class.__name__ == current_metric_class:
-                    current_metric = metric_class
-                    break
-
-            if current_metric is None:
-                raise ValueError(f"Metric {metric_name} not found in metrics list. This should never happen.")
-
-            for aggregator in current_metric.AGGREGATORS:
-                save_string = (
-                    f"{aggregator.name} {metric_name} - {subject}"
-                    if not key
-                    else f"{aggregator.name} {metric_name} - {key} - {subject}"
-                )
-                aggregated_results[save_string] = (
-                    aggregator(ksm_group, ["subject", "problem"])["value"].mean().mean().item()
-                )
-
-        return aggregated_results
+        data = data.loc[data["error"].isnull()]
+        metric_by_class = {cls.__name__: cls for cls in self.metrics}
+        out: dict[str, float | None] = {}
+        for (metric, cls_name), frame in data.groupby(["metric_name", "metric_class_name"]):
+            for aggregator in metric_by_class[cls_name].AGGREGATORS:
+                per_problem = aggregator(frame, ["key", "subject", "problem"])
+                by_cell = per_problem.groupby(["key", "subject"])["value"].mean()
+                out[f"{aggregator.name} {cls_name}.{metric}"] = float(by_cell.mean())
+                out[f"{aggregator.name} {cls_name}.{metric} (micro)"] = float(per_problem["value"].mean())
+                for (key, subject), value in by_cell.items():
+                    label = f"{key} - {subject}" if key else subject
+                    out[f"{aggregator.name} {metric} - {label}"] = float(value)
+        return out
 
     @staticmethod
     def _flatten_corpus_summary(summary: dict, subject: str | None = None) -> dict[str, float | None]:
@@ -471,7 +345,7 @@ class EvaluationGenerator:
         if not responses:
             raise ValueError("No saved completions found. Run 'run_completions' first.")
 
-        metrics_results = self._run_metric_calculators(responses)
+        metrics_results = self._compute_metrics(responses)
         loglikelihood_responses = [r for r in responses if isinstance(r, Loglikelihood)]
         # Leading-space flag per item, used by the space-stripped corpus BPB.
         leading_space_by_item: dict[tuple[int, str], float] = {}
@@ -480,8 +354,8 @@ class EvaluationGenerator:
             if ground_truth is not None:
                 leading_space_by_item[(response.id, response.subject)] = 1.0 if ground_truth.startswith(" ") else 0.0
         del responses
-        aggregated_results = self._aggregate_results(metrics_results)
-        results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results)
+        aggregated_results = self._summarize_samples(metrics_results)
+        results_with_aggregators = self._summarize_problems(metrics_results)
         aggregated_results.update(results_with_aggregators)
         aggregated_results.update(self._aggregate_corpus_bpb_metrics(metrics_results, leading_space_by_item))
         aggregated_results.update(aggregate_prior_bpb_metrics(loglikelihood_responses))
