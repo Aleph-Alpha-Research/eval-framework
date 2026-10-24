@@ -42,7 +42,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
 - **googleapis-common-protos** 1.76.0 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
 - **hf-xet** 1.7.0 - https://github.com/huggingface/xet-core
-- **huggingface_hub** 2.2.0 - https://github.com/huggingface/huggingface_hub
+- **huggingface_hub** 2.3.0 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
@@ -131,7 +131,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
 - **filelock** 4.2.4 - https://github.com/tox-dev/py-filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
-- **jiter** 0.17.0 - https://github.com/pydantic/jiter/
+- **jiter** 0.18.0 - https://github.com/pydantic/jiter/
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
 - **jsonschema-specifications** 2025.9.1 - https://github.com/python-jsonschema/jsonschema-specifications
 - **markdown-it-py** 4.2.0 - https://github.com/executablebooks/markdown-it-py
@@ -154,7 +154,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## MPL-2.0
 
-- **certifi** 2026.10.19 - https://github.com/certifi/python-certifi
+- **certifi** 2026.10.23 - https://github.com/certifi/python-certifi
 
 ## MPL-2.0 AND MIT
 
@@ -274,7 +274,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### certifi 2026.10.19 (MPL-2.0)
+### certifi 2026.10.23 (MPL-2.0)
 
 ```text
 This package contains a modified version of ca-bundle.crt:
@@ -1910,7 +1910,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### huggingface_hub 2.2.0 (Apache-2.0)
+### huggingface_hub 2.3.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -2152,7 +2152,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### jiter 0.17.0 (MIT)
+### jiter 0.18.0 (MIT)
 
 ```text
 The MIT License (MIT)
