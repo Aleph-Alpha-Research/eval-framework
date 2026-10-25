@@ -19,9 +19,9 @@ and first-party/internal packages are excluded.
 | `llm-sandbox` | `==0.3.46` |
 | `lxml` | `>=6.1.3,<7` |
 | `mysql-connector-python` | `>=26.7.0,<27` |
-| `nltk` | `>=3.10.3,<4` |
+| `nltk` | `>=3.10.4,<4` |
 | `numpy` | `>=2.5.4` |
-| `openai` | `>=3.35.1,<4` |
+| `openai` | `>=3.36.0,<4` |
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.1,<3` |
