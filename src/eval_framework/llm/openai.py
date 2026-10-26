@@ -6,7 +6,7 @@ from collections.abc import Callable, Sequence
 from typing import Any
 
 import tiktoken
-from openai import OpenAI, omit
+from openai import APIConnectionError, ConflictError, InternalServerError, OpenAI, RateLimitError, omit
 from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
     ChatCompletionMessageParam,
@@ -72,6 +72,25 @@ def _choice_loglikelihood(prompt_logprobs: Sequence[Any], choice: str) -> tuple[
     return total, num_tokens
 
 
+# The failures one call can have without the model being misconfigured. The OpenAI SDK's own
+# ``max_retries`` covers HTTP status codes only: OpenRouter answers provider errors and rate limits
+# with a 200 body whose ``choices`` is missing, ``null`` or empty, or carries no message
+# (``TypeError``, ``IndexError``, ``AttributeError`` out of the client), and a truncated body raises
+# ``JSONDecodeError`` (a ``ValueError``, as is pydantic's ``ValidationError`` when a provider reports
+# a token count in a type ``RawCompletion`` rejects). Other 4xx responses (bad key, unknown model,
+# rejected request) would fail every row the same way and are not retried.
+TRANSIENT_ERRORS: tuple[type[Exception], ...] = (
+    TypeError,
+    IndexError,
+    AttributeError,
+    ValueError,
+    APIConnectionError,  # includes APITimeoutError
+    RateLimitError,
+    InternalServerError,
+    ConflictError,
+)
+
+
 class OpenAIModel(BaseLLM):
     """
     LLM wrapper for OpenAI API providing text/chat completions and log-probability evaluation output.
@@ -131,6 +150,9 @@ class OpenAIModel(BaseLLM):
         self.bytes_per_token_scalar = (
             4.0 / bytes_per_token if bytes_per_token is not None else 4.0 / self.BYTES_PER_TOKEN
         )
+
+    def is_retryable(self, exc: Exception) -> bool:
+        return isinstance(exc, TRANSIENT_ERRORS)
 
     def _get_encoder_or_none(self) -> tiktoken.Encoding | None:
         assert self._model_name is not None
