@@ -519,7 +519,7 @@ requires-dist = [
     { name = "lingua-language-detector", specifier = ">=2.2.0,<3" },
     { name = "llm-sandbox", extras = ["docker"], specifier = "==0.3.46" },
     { name = "lxml", specifier = ">=6.1.3,<7" },
-    { name = "mysql-connector-python", specifier = ">=26.7.0,<27" },
+    { name = "mysql-connector-python", specifier = ">=26.10.0,<27" },
     { name = "nltk", specifier = ">=3.10.4,<4" },
     { name = "numpy", specifier = ">=2.5.4" },
     { name = "openai", specifier = ">=3.36.1,<4" },
