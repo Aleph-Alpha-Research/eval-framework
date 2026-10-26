@@ -8,7 +8,7 @@ from eval_framework.answer import PickFromCandidates
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark, ComposedEval, LanguageSpec
 from eval_framework.contract import ResponseType
-from eval_framework.eval_kind import Choice, SampleBody, assemble_messages
+from eval_framework.eval_kind import Choice, Generative, SampleBody, assemble_messages
 from eval_framework.fewshot import (
     ChoiceRenderer,
     FewShot,
@@ -504,3 +504,19 @@ def test_assemble_messages_places_history_between_demonstrations_and_user_turn()
         Message(role=Role.USER, content="final question"),
         Message(role=Role.ASSISTANT, content="Answer:"),
     ]
+
+
+def test_generative_derives_the_cue_from_the_item_when_given_a_callable() -> None:
+    # Given a generative kind whose cue varies per item (a per-language code fence)
+    kind = Generative(
+        build_prompt=lambda item: item["text"],
+        cue=lambda item: f"```{item['language']}\n",
+        ground_truth=lambda item: item["code"],
+        metrics=[],
+    )
+
+    # When reading one item's sample
+    [body] = kind.samples({"text": "Reverse a list.", "language": "go", "code": "func reverse() {}"})
+
+    # Then the cue is rendered from that item
+    assert body.cue == "```go\n"
