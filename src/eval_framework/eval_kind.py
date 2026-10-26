@@ -140,7 +140,8 @@ def NoContext(item: dict[str, Any]) -> None:
 class Generative(EvalKind):
     """Free-form question -> answer kind: one sample per item, no scored candidates (the answer is extracted
     from the generation by the injected ``AnswerPolicy``). ``build_prompt`` frames the question, ``cue``
-    primes the answer turn (``""`` for none), ``ground_truth`` derives the gold answer, and ``metrics`` are
+    primes the answer turn — a static string, or an ``ItemText`` when the cue varies per item, e.g. a
+    per-language code fence (``""`` for none) —, ``ground_truth`` derives the gold answer, and ``metrics`` are
     the scoring metrics. ``context`` derives the per-sample scoring material a metric needs beyond the gold
     string (see ``SampleBody.context``); ``initial_prompt`` is a preamble prepended once above the first
     (few-shot) turn, and ``system_prompt`` derives a leading SYSTEM turn per item (``None`` for no system
@@ -150,7 +151,7 @@ class Generative(EvalKind):
         self,
         *,
         build_prompt: ItemText,
-        cue: str,
+        cue: str | ItemText,
         ground_truth: ItemGroundTruth,
         metrics: list[type["BaseMetric"]],
         context: ItemContext | None = None,
@@ -158,7 +159,7 @@ class Generative(EvalKind):
         system_prompt: ItemText | None = None,
     ) -> None:
         self._build_prompt = build_prompt
-        self._cue = cue
+        self._cue: ItemText = cue if callable(cue) else (lambda item: cue)
         self._ground_truth = ground_truth
         self._metrics = metrics
         self._context: ItemContext = context if context is not None else NoContext
@@ -174,7 +175,7 @@ class Generative(EvalKind):
         return [
             SampleBody(
                 prompt=self._build_prompt(item),
-                cue=self._cue,
+                cue=self._cue(item),
                 possible_completions=[],
                 ground_truth=self._ground_truth(item),
                 context=self._context(item),
