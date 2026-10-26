@@ -28,6 +28,16 @@ from template_formatting.formatter import BaseFormatter, Message, Role
 logger = logging.getLogger(__name__)
 
 
+class EmptyCompletionError(ValueError):
+    pass
+
+
+def _require_choices(response: Any) -> None:
+    # OpenRouter reports a provider error as HTTP 200 with an `error` body and no choices.
+    if not response.choices:
+        raise EmptyCompletionError(f"Response has no choices: {response.model_extra}")
+
+
 def _to_chat_completion_message(message: Message) -> ChatCompletionMessageParam:
     match message.role:
         case Role.SYSTEM:
@@ -205,6 +215,7 @@ class OpenAIModel(BaseLLM):
                     max_tokens=scaled_max_tokens,
                     stop=stop_sequences,
                 )
+                _require_choices(response)
                 completion = response.choices[0].text
                 usage = getattr(response, "usage", None)
                 prompt_tokens = getattr(usage, "prompt_tokens", None) if usage is not None else None
@@ -252,6 +263,7 @@ class OpenAIModel(BaseLLM):
                 completion_tokens = getattr(chat_response.usage, "completion_tokens", None)
                 completion_details = getattr(chat_response.usage, "completion_tokens_details", None)
                 reasoning_tokens = getattr(completion_details, "reasoning_tokens", None)
+                _require_choices(chat_response)
                 choice = chat_response.choices[0]
                 completion = choice.message.content or ""
                 # vLLM's reasoning parser returns the think block as `reasoning`; older

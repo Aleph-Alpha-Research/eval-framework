@@ -5,6 +5,7 @@ from pytest_mock import MockerFixture
 
 from eval_framework.contract import Sample
 from eval_framework.llm.openai import (
+    EmptyCompletionError,
     OpenAIEmbeddingModel,
     OpenAIModel,
 )
@@ -65,6 +66,21 @@ def test_generate_from_messages_keeps_reasoning_and_finish_reason(mocker: Mocker
     assert result.completion == "42"
     assert result.reasoning == "let me think"
     assert result.finish_reason == "length"
+
+
+def test_generate_from_messages_raises_with_the_error_body_when_response_has_no_choices(
+    mocker: MockerFixture,
+) -> None:
+    # Given a 200 response carrying an error body instead of choices, as OpenRouter sends
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    response = mocker.MagicMock(choices=None, model_extra={"error": {"code": 502, "message": "upstream failed"}})
+    mock_client.chat.completions.create.return_value = response
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18")
+
+    # When / Then
+    with pytest.raises(EmptyCompletionError, match="upstream failed"):
+        model.generate_from_messages([[Message(role=Role.USER, content="Hello")]])
 
 
 def test_openai_chat_api_top_p_generate_from_messages(mocker: MockerFixture) -> None:
