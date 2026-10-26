@@ -268,19 +268,34 @@ def test_retrying_openai_model_recovers_from_a_choiceless_body(mocker: MockerFix
     assert mock_client.chat.completions.create.call_count == 2
 
 
-def test_retrying_openai_model_gives_up_on_a_rejected_key_after_its_budget(mocker: MockerFixture) -> None:
-    # Given a client whose key is rejected on every attempt
+def test_retrying_openai_model_gives_up_on_a_throttled_key_after_its_budget(mocker: MockerFixture) -> None:
+    # Given a client that is throttled on every attempt
     mock_client = mocker.MagicMock()
     mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
     mocker.patch("time.sleep")
+    mock_client.chat.completions.create.side_effect = _rate_limit_error()
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18").with_retry(RetryPolicy(attempts=2))
+
+    # When / Then the retries are spent before the model is given up on, with the throttle as cause
+    with pytest.raises(LLMUnavailable) as excinfo:
+        model.generate_from_messages([[Message(role=Role.USER, content="hi")]])
+    assert isinstance(excinfo.value.__cause__, RateLimitError)
+    assert mock_client.chat.completions.create.call_count == 2
+
+
+def test_retrying_openai_model_raises_a_rejected_key_at_once(mocker: MockerFixture) -> None:
+    # Given a client whose key is rejected
+    mock_client = mocker.MagicMock()
+    mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
+    sleep = mocker.patch("time.sleep")
     request = httpx.Request("POST", "https://openrouter.ai/api/v1/chat/completions")
     mock_client.chat.completions.create.side_effect = AuthenticationError(
         "bad key", response=httpx.Response(401, request=request), body=None
     )
-    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18").with_retry(RetryPolicy(attempts=2))
+    model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18").with_retry()
 
-    # When / Then the retries are spent before the misconfiguration surfaces, with the key error as cause
-    with pytest.raises(LLMUnavailable) as excinfo:
+    # When / Then the misconfiguration surfaces on the first attempt, since every row would fail the same way
+    with pytest.raises(AuthenticationError):
         model.generate_from_messages([[Message(role=Role.USER, content="hi")]])
-    assert isinstance(excinfo.value.__cause__, AuthenticationError)
-    assert mock_client.chat.completions.create.call_count == 2
+    assert mock_client.chat.completions.create.call_count == 1
+    sleep.assert_not_called()
