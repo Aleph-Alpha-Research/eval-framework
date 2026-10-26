@@ -14,6 +14,15 @@
 
 ### Bug Fixes
 
+## [0.19.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.1...v0.19.2) (2026-10-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mysql-connector-python to &gt;=26.10.0,&lt;27 ([bc436b9](https://github.com/Aleph-Alpha-Research/eval-framework/commit/bc436b9b20ad6e9dfb300325db7b43ccd0e38166))
+* **deps:** update dependency openai to &gt;=3.36.1,&lt;4 ([f5c1c22](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f5c1c22c796d3ee1e182ac7f4d6aca1d7f5f941b))
+* **deps:** update dependency openai to &gt;=3.37.0,&lt;4 ([7bc0e60](https://github.com/Aleph-Alpha-Research/eval-framework/commit/7bc0e608a1651caf5530811a641b97f3dfa01655))
+
 ## [0.19.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.0...v0.19.1) (2026-10-25)
 
 
