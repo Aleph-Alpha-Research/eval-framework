@@ -10,12 +10,7 @@ from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.arc_ellamind import (
-    ARC_ELLAMIND_BENCHMARKS,
-    arc_ellamind_bpb_de,
-    arc_ellamind_cloze_de,
-    arc_ellamind_mc_de,
-)
+from eval_framework.benchmarks.arc_ellamind import ARC_ELLAMIND_BENCHMARKS, arc_ellamind
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -53,7 +48,7 @@ _HARD_ROW: dict[str, Any] = {
 
 def test_arc_ellamind_cloze_zeroshot_prompt() -> None:
     # Given the cloze benchmark restricted to ARC-Easy over one fictional row
-    benchmark = arc_ellamind_cloze_de(dataset=DatasetStub({"test": [_EASY_ROW]}))
+    benchmark = arc_ellamind("CLOZE", "DE", dataset=DatasetStub({"test": [_EASY_ROW]}))
     sample = first_sample(benchmark, num_fewshot=0, custom_subjects=["ARC-Easy"])
     # Then the German cloze prompt scores the full answer texts:
     assert sample.messages == [
@@ -66,7 +61,7 @@ def test_arc_ellamind_cloze_zeroshot_prompt() -> None:
 
 def test_arc_ellamind_mc_zeroshot_prompt() -> None:
     # Given the multiple-choice benchmark restricted to ARC-Challenge over one fictional row
-    benchmark = arc_ellamind_mc_de(dataset=DatasetStub({"test": [_HARD_ROW]}))
+    benchmark = arc_ellamind("MC", "DE", dataset=DatasetStub({"test": [_HARD_ROW]}))
     sample = first_sample(benchmark, num_fewshot=0, custom_subjects=["ARC-Challenge"])
     # Then the options are lettered (not space-prefixed) and the letters are scored:
     assert sample.messages == [
@@ -79,7 +74,7 @@ def test_arc_ellamind_mc_zeroshot_prompt() -> None:
 
 def test_arc_ellamind_bpb_scores_only_the_ground_truth() -> None:
     # BPB scores a single forward pass over the correct answer only.
-    benchmark = arc_ellamind_bpb_de(dataset=DatasetStub({"test": [_EASY_ROW]}))
+    benchmark = arc_ellamind("BPB", "DE", dataset=DatasetStub({"test": [_EASY_ROW]}))
     sample = first_sample(benchmark, num_fewshot=0, custom_subjects=["ARC-Easy"])
     assert sample.ground_truth == " Wasser"
     assert sample.possible_completions == [" Wasser"]
