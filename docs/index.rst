@@ -62,6 +62,7 @@ Documentation Overview
 
    completion_task_guide.md
    add_new_benchmark_guide.md
+   naming_convention.md
    benchmarks_and_metrics.md
    controlling_upload_results.md
    docker_guide.md
