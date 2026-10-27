@@ -14,8 +14,8 @@ from eval_framework.benchmarks.humaneval import CODE_TO_EXECUTE, HumanEvalMetric
 from eval_framework.benchmarks.humaneval_ellamind import (
     HUMANEVAL_ELLAMIND_BENCHMARKS,
     _instruct_reconstruct,
+    humaneval_bpb_olmes_v2,
     humaneval_de_bpb_olmes,
-    humaneval_de_bpb_olmes_v2,
     humaneval_de_instruct,
     humaneval_de_olmes,
 )
@@ -71,7 +71,7 @@ def test_de_bpb_olmes_scores_bare_solution() -> None:
 
 
 def test_de_bpb_olmes_v2_scores_fenced_solution() -> None:
-    sample = first_sample(humaneval_de_bpb_olmes_v2(dataset=_stub()), num_fewshot=0)
+    sample = first_sample(humaneval_bpb_olmes_v2("DE", dataset=_stub()), num_fewshot=0)
     gold = _ROW["canonical_solution"].rstrip() + "\n```"
     assert sample.messages == [Message(role=Role.USER, content="```python\n" + _ROW["prompt"].rstrip() + "\n")]
     assert sample.possible_completions == [gold]

@@ -1,11 +1,12 @@
-"""German HumanEval (EllaMind): https://huggingface.co/datasets/ellamind/humaneval-multilingual
+"""German and French HumanEval (EllaMind): https://huggingface.co/datasets/ellamind/humaneval-multilingual
 
-The German counterpart of HumanEval — the dataset mirrors the original, so these reuse the builders and prompt
-shapes from the ``humaneval`` module, retargeted to the German ``deu`` subject. ``HumanEvalDEInstruct`` differs:
-it asks (in German) for the function in a markdown block and extracts the code from the free-form response.
+Translated counterparts of HumanEval — the dataset mirrors the original, so these reuse the builders and prompt
+shapes from the ``humaneval`` module, retargeted to the German ``deu`` subject (every variant) or the French
+``fra`` subject (the two OLMES V2 variants only). ``HumanEvalDEInstruct`` differs: it asks (in German) for the
+function in a markdown block and extracts the code from the free-form response.
 """
 
-from typing import Any
+from typing import Any, Literal
 
 from eval_framework.answer import ReconstructProgram
 from eval_framework.benchmarks.humaneval import (
@@ -32,8 +33,16 @@ from template_formatting.formatter import Message
 HUMANEVAL_ELLAMIND_DATASET_PATH = "ellamind/humaneval-multilingual"
 _SUBJECTS = ListOfSubjects(["deu"])
 
+LanguageCode = Literal["DE", "FR"]
 
-def _de_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
+# Language code -> (language, dataset config), for the variants offered in more than one language.
+_LANGUAGES: dict[LanguageCode, tuple[Language, str]] = {
+    "DE": (Language.DEU, "deu"),
+    "FR": (Language.FRA, "fra"),
+}
+
+
+def _dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
     return dataset if dataset is not None else pinned_by_framework(HUMANEVAL_ELLAMIND_DATASET_PATH)
 
 
@@ -48,18 +57,19 @@ def humaneval_de_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         fewshot_target=olmes_target,
         subjects=_SUBJECTS,
         language=Language.DEU,
-        dataset=_de_dataset(dataset),
+        dataset=_dataset(dataset),
     )
 
 
-def humaneval_de_olmes_v2(dataset: DatasetPolicy | None = None) -> Benchmark:
+def humaneval_olmes_v2(language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
+    lang, config = _LANGUAGES[language]
     return v2_execution(
-        "HumanEvalDE_OLMES_V2",
+        f"HumanEval{language}_OLMES_V2",
         dataset_path=HUMANEVAL_ELLAMIND_DATASET_PATH,
         metrics=[CodeCompletionAssertion],
-        subjects=_SUBJECTS,
-        language=Language.DEU,
-        dataset=_de_dataset(dataset),
+        subjects=ListOfSubjects([config]),
+        language=lang,
+        dataset=_dataset(dataset),
     )
 
 
@@ -74,17 +84,19 @@ def humaneval_de_bpb_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         gold=lambda item: item["canonical_solution"],
         subjects=_SUBJECTS,
         language=Language.DEU,
-        dataset=_de_dataset(dataset),
+        dataset=_dataset(dataset),
     )
 
 
-def humaneval_de_bpb_olmes_v2(dataset: DatasetPolicy | None = None) -> Benchmark:
+def humaneval_bpb_olmes_v2(language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
+    """``HumanEval{language}_BPB_OLMES_V2`` for a language token of ``_LANGUAGES``, e.g. ``"DE"`` or ``"FR"``."""
+    lang, config = _LANGUAGES[language]
     return v2_bpb(
-        "HumanEvalDE_BPB_OLMES_V2",
+        f"HumanEval{language}_BPB_OLMES_V2",
         dataset_path=HUMANEVAL_ELLAMIND_DATASET_PATH,
-        subjects=_SUBJECTS,
-        language=Language.DEU,
-        dataset=_de_dataset(dataset),
+        subjects=ListOfSubjects([config]),
+        language=lang,
+        dataset=_dataset(dataset),
     )
 
 
@@ -128,14 +140,16 @@ def humaneval_de_instruct(dataset: DatasetPolicy | None = None) -> Benchmark:
         answer=ReconstructProgram(_instruct_reconstruct, stop_sequences=[], max_tokens=1024),
         subjects=_SUBJECTS,
         language=Language.DEU,
-        dataset=_de_dataset(dataset),
+        dataset=_dataset(dataset),
     )
 
 
 HUMANEVAL_ELLAMIND_BENCHMARKS: list[Benchmark] = [
     humaneval_de_olmes(),
-    humaneval_de_olmes_v2(),
+    humaneval_olmes_v2("DE"),
     humaneval_de_bpb_olmes(),
-    humaneval_de_bpb_olmes_v2(),
+    humaneval_bpb_olmes_v2("DE"),
     humaneval_de_instruct(),
+    humaneval_olmes_v2("FR"),
+    humaneval_bpb_olmes_v2("FR"),
 ]
