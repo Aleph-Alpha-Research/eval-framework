@@ -89,6 +89,9 @@ InitialPrompt = Callable[[str], str]
 _DEFAULT_QUESTION_CUE_TEXT: dict[Language, tuple[str, str]] = {
     Language.ENG: ("Question: ", "Answer:"),
     Language.DEU: ("Frage: ", "Antwort:"),
+    Language.FRA: ("Question : ", "Réponse :"),
+    Language.SPA: ("Pregunta: ", "Respuesta:"),
+    Language.ITA: ("Domanda: ", "Risposta:"),
 }
 
 
