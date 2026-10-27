@@ -28,7 +28,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache 2.0 License
 
-- **transformers** 5.20.2 - https://github.com/huggingface/transformers
+- **transformers** 5.21.0 - https://github.com/huggingface/transformers
 
 ## Apache Software License; MIT License
 
@@ -46,7 +46,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
-- **openai** 3.37.0 - https://github.com/openai/openai-python
+- **openai** 3.39.0 - https://github.com/openai/openai-python
 - **opentelemetry-api** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
 - **opentelemetry-exporter-http-transport** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
 - **opentelemetry-exporter-otlp-common** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
@@ -11999,7 +11999,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### openai 3.37.0 (Apache-2.0)
+### openai 3.39.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -19038,7 +19038,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### transformers 5.20.2 (Apache 2.0 License)
+### transformers 5.21.0 (Apache 2.0 License)
 
 ```text
 Copyright 2018- The Hugging Face team. All rights reserved.
