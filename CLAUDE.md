@@ -100,7 +100,7 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 
 **Adding a New Task**
 
-1. Create class inheriting from `BaseTask` in `src/eval_framework/benchmarks/`
+1. Create class inheriting from `BaseTask` in `src/eval_framework/benchmarks/`; name it per `docs/naming_convention.md` (`{Dataset}_{Source}_{Language}[_{Style}][_{Variant}][_{Subset}]`, required for new tasks)
 2. Implement required class attributes: `NAME`, `DATASET_PATH`, `SAMPLE_SPLIT`, `FEWSHOT_SPLIT`, `SUBJECTS`
 3. If using custom metrics, inherit from `BaseMetric`
 4. Task is discovered via registry; add it to `task_names.py` to be discoverable.
