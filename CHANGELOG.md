@@ -14,6 +14,18 @@
 
 ### Bug Fixes
 
+## [0.19.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.2...v0.19.3) (2026-10-27)
+
+
+### Features
+
+* retry transient judge failures ([34cf05c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/34cf05cc4e459a76eba11f7082032a892cd14586))
+
+
+### Bug Fixes
+
+* **deps:** update dependency transformers to &gt;=5.20.2,&lt;6 ([9a752ad](https://github.com/Aleph-Alpha-Research/eval-framework/commit/9a752ad8e18d099e1b527156672637e6c4afc010))
+
 ## [0.19.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.1...v0.19.2) (2026-10-26)
 
 
