@@ -5,8 +5,10 @@ We use the task's **class name** as its identifier, which is what needs to be pa
 `--task-name` flag, what is logged in results, and what names the output directory.
 
 > [!NOTE]
-> We are iteratively rolling out this naming convention. For now, we only require new tasks to follow this convention.
-> We will gradually migrate existing tasks to this convention as well.
+> We are iteratively rolling out this naming convention. For now, we ask new tasks to follow it.
+> However, the convention is not final and will be revised based on experience, so exceptions are possible if the PR gives a good reason.
+> These exceptions should inform the next iteration of the convention.
+> Once it is finalized, we will gradually migrate existing tasks to it as well.
 
 ## Canonical grammar
 
