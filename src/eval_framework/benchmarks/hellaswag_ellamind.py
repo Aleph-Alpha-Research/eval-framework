@@ -1,10 +1,10 @@
-"""German HellaSwag (EllaMind) tasks.
+"""Multilingual HellaSwag (EllaMind) tasks.
 
 https://huggingface.co/datasets/ellamind/hellaswag-multilingual
 
 HellaSwag is a sentence-completion task: the prompt is a partial sentence (``"{activity}: {context}"``)
 and the model scores full-sentence endings. There is no natural MC variant. HellaSwag supplies separate
-easy and hard distractors.
+easy and hard distractors. Each language is one config of the dataset (``deu``, ``fra``, ``spa``, ``ita``).
 """
 
 from typing import Any, Literal, final, override
@@ -16,7 +16,25 @@ from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, TaskStyler, shuffle_correct_with_distractors
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, shuffle_correct_with_distractors
+
+Variant = Literal["EASY", "HARD", "BPB"]
+LanguageCode = Literal["DE", "FR", "ES", "IT"]
+
+# Variant -> (styler class, distractor level). Sentence-completion styling: no question prefix, no cue, the
+# continuation follows the context directly.
+_VARIANTS: dict[Variant, tuple[type[ClozeStyle] | type[BPBStyle], Literal["easy", "hard"]]] = {
+    "EASY": (ClozeStyle, "easy"),
+    "HARD": (ClozeStyle, "hard"),
+    "BPB": (BPBStyle, "easy"),
+}
+# Language code -> (language, dataset config).
+_LANGUAGES: dict[LanguageCode, tuple[Language, str]] = {
+    "DE": (Language.DEU, "deu"),
+    "FR": (Language.FRA, "fra"),
+    "ES": (Language.SPA, "spa"),
+    "IT": (Language.ITA, "ita"),
+}
 
 
 @final
@@ -42,40 +60,22 @@ class HellaswagReader(ChoiceReader):
         )
 
 
-def _hellaswag_ellamind_benchmark(
-    id: str, styler: TaskStyler, distractor_level: Literal["easy", "hard"], dataset: DatasetPolicy | None = None
-) -> Benchmark:
+def hellaswag_ellamind(variant: Variant, language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
+    styler_cls, distractor_level = _VARIANTS[variant]
+    lang, config = _LANGUAGES[language]
     dataset_policy = dataset if dataset is not None else pinned_by_framework("ellamind/hellaswag-multilingual")
     return ComposedBenchmark.choice(
-        id=id,
+        id=f"HELLASWAG_ELLAMIND_{variant}_{language}",
         reader=HellaswagReader(distractor_level),
-        styler=styler,
+        styler=styler_cls(question_prefix="", trailing_newline=False, cue_text=""),
         sample_split="validation",
         fewshot_split="validation",
-        subjects=ListOfSubjects(["deu"]),
+        subjects=ListOfSubjects([config]),
         dataset_policy=dataset_policy,
-        language=Language.DEU,
+        language=lang,
     )
 
 
-# Sentence-completion styling: no question prefix, no cue, the continuation follows the context directly.
-def hellaswag_ellamind_easy_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    styler = ClozeStyle(question_prefix="", trailing_newline=False, cue_text="")
-    return _hellaswag_ellamind_benchmark("HELLASWAG_ELLAMIND_EASY_DE", styler, "easy", dataset)
-
-
-def hellaswag_ellamind_hard_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    styler = ClozeStyle(question_prefix="", trailing_newline=False, cue_text="")
-    return _hellaswag_ellamind_benchmark("HELLASWAG_ELLAMIND_HARD_DE", styler, "hard", dataset)
-
-
-def hellaswag_ellamind_bpb_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    styler = BPBStyle(question_prefix="", trailing_newline=False, cue_text="")
-    return _hellaswag_ellamind_benchmark("HELLASWAG_ELLAMIND_BPB_DE", styler, "easy", dataset)
-
-
 HELLASWAG_ELLAMIND_BENCHMARKS: list[Benchmark] = [
-    hellaswag_ellamind_easy_de(),
-    hellaswag_ellamind_hard_de(),
-    hellaswag_ellamind_bpb_de(),
+    hellaswag_ellamind(variant, language) for language in _LANGUAGES for variant in _VARIANTS
 ]

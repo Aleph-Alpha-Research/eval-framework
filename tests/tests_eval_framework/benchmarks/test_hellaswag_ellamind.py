@@ -1,6 +1,6 @@
 """Specification of the German HellaSwag (EllaMind) tasks.
 
-Each spec test builds the real benchmark (via its ``hellaswag_ellamind_*_de`` constructor) over a fictional
+Each spec test builds the real benchmark (via the ``hellaswag_ellamind`` factory, German slice) over a fictional
 dataset and asserts the assembled messages, ground truth, and scored completions — so this file reads as
 HellaSwag's prompt spec, with ``composed.py`` an implementation detail. The rows are fictional so this open
 source codebase does not leak the real dataset into training data. HellaSwag is sentence-completion: no
@@ -10,16 +10,12 @@ endings. ``test_formatter_hash`` separately pins the real benchmarks against the
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import partial
 from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.hellaswag_ellamind import (
-    HELLASWAG_ELLAMIND_BENCHMARKS,
-    hellaswag_ellamind_bpb_de,
-    hellaswag_ellamind_easy_de,
-    hellaswag_ellamind_hard_de,
-)
+from eval_framework.benchmarks.hellaswag_ellamind import HELLASWAG_ELLAMIND_BENCHMARKS, hellaswag_ellamind
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -102,9 +98,9 @@ _BPB = _ExpectedPrompt(
 @pytest.mark.parametrize(
     "make_benchmark, expected",
     [
-        pytest.param(hellaswag_ellamind_easy_de, _EASY, id="easy"),
-        pytest.param(hellaswag_ellamind_hard_de, _HARD, id="hard"),
-        pytest.param(hellaswag_ellamind_bpb_de, _BPB, id="bpb"),
+        pytest.param(partial(hellaswag_ellamind, "EASY", "DE"), _EASY, id="easy"),
+        pytest.param(partial(hellaswag_ellamind, "HARD", "DE"), _HARD, id="hard"),
+        pytest.param(partial(hellaswag_ellamind, "BPB", "DE"), _BPB, id="bpb"),
     ],
 )
 def test_hellaswag_zeroshot_prompt(make_benchmark: Callable[..., Benchmark], expected: _ExpectedPrompt) -> None:
@@ -133,9 +129,9 @@ def _oneshot(eval_expected: _ExpectedPrompt) -> _ExpectedPrompt:
 @pytest.mark.parametrize(
     "make_benchmark, expected",
     [
-        pytest.param(hellaswag_ellamind_easy_de, _oneshot(_EASY), id="easy"),
-        pytest.param(hellaswag_ellamind_hard_de, _oneshot(_HARD), id="hard"),
-        pytest.param(hellaswag_ellamind_bpb_de, _oneshot(_BPB), id="bpb"),
+        pytest.param(partial(hellaswag_ellamind, "EASY", "DE"), _oneshot(_EASY), id="easy"),
+        pytest.param(partial(hellaswag_ellamind, "HARD", "DE"), _oneshot(_HARD), id="hard"),
+        pytest.param(partial(hellaswag_ellamind, "BPB", "DE"), _oneshot(_BPB), id="bpb"),
     ],
 )
 def test_hellaswag_oneshot_prompt(make_benchmark: Callable[..., Benchmark], expected: _ExpectedPrompt) -> None:
