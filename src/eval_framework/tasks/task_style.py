@@ -92,7 +92,19 @@ _DEFAULT_QUESTION_CUE_TEXT: dict[Language, tuple[str, str]] = {
     Language.FRA: ("Question : ", "Réponse :"),
     Language.SPA: ("Pregunta: ", "Respuesta:"),
     Language.ITA: ("Domanda: ", "Risposta:"),
+    Language.CES: ("Otázka: ", "Odpověď:"),
+    Language.DAN: ("Spørgsmål: ", "Svar:"),
+    Language.FIN: ("Kysymys: ", "Vastaus:"),
+    Language.NLD: ("Vraag: ", "Antwoord:"),
+    Language.POL: ("Pytanie: ", "Odpowiedź:"),
 }
+
+
+def question_cue_text(language: Language) -> tuple[str, str]:
+    if language not in _DEFAULT_QUESTION_CUE_TEXT:
+        known = ", ".join(lang.name for lang in _DEFAULT_QUESTION_CUE_TEXT)
+        raise ValueError(f"No default question prefix and cue for {language.name}; known languages: {known}.")
+    return _DEFAULT_QUESTION_CUE_TEXT[language]
 
 
 # ---------------------------------------------------------------------------
@@ -176,7 +188,7 @@ class TaskStyler(ABC):
         Any explicitly passed keyword arguments take precedence over the defaults.
         """
         if language in _DEFAULT_QUESTION_CUE_TEXT:
-            prefix, cue = _DEFAULT_QUESTION_CUE_TEXT[language]
+            prefix, cue = question_cue_text(language)
             kwargs.setdefault("question_prefix", prefix)
             kwargs.setdefault("cue_text", cue)
         return cls(**kwargs)
