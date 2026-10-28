@@ -7,19 +7,21 @@ and the model scores full-sentence endings. There is no natural MC variant. Hell
 easy and hard distractors. Each language is one config of the dataset (``deu``, ``fra``, ``spa``, ``ita``).
 """
 
-from typing import Any, Literal, final, override
+from typing import Any, Literal, final, get_args, override
 
+from eval_framework.benchmarks.utils.ellamind_languages import ellamind_language
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, shuffle_correct_with_distractors
 
 Variant = Literal["EASY", "HARD", "BPB"]
+# The languages this dataset offers (see ``ellamind_languages`` for the token -> language/config table).
 LanguageCode = Literal["DE", "FR", "ES", "IT"]
+_LANGUAGES: tuple[LanguageCode, ...] = get_args(LanguageCode)
 
 # Variant -> (styler class, distractor level). Sentence-completion styling: no question prefix, no cue, the
 # continuation follows the context directly.
@@ -27,13 +29,6 @@ _VARIANTS: dict[Variant, tuple[type[ClozeStyle] | type[BPBStyle], Literal["easy"
     "EASY": (ClozeStyle, "easy"),
     "HARD": (ClozeStyle, "hard"),
     "BPB": (BPBStyle, "easy"),
-}
-# Language code -> (language, dataset config).
-_LANGUAGES: dict[LanguageCode, tuple[Language, str]] = {
-    "DE": (Language.DEU, "deu"),
-    "FR": (Language.FRA, "fra"),
-    "ES": (Language.SPA, "spa"),
-    "IT": (Language.ITA, "ita"),
 }
 
 
@@ -62,7 +57,7 @@ class HellaswagReader(ChoiceReader):
 
 def hellaswag_ellamind(variant: Variant, language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
     styler_cls, distractor_level = _VARIANTS[variant]
-    lang, config = _LANGUAGES[language]
+    lang, config = ellamind_language(language)
     dataset_policy = dataset if dataset is not None else pinned_by_framework("ellamind/hellaswag-multilingual")
     return ComposedBenchmark.choice(
         id=f"HELLASWAG_ELLAMIND_{variant}_{language}",
