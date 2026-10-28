@@ -14,6 +14,26 @@
 
 ### Bug Fixes
 
+## [0.19.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.3...v0.19.4) (2026-10-28)
+
+
+### Features
+
+* Generative now supports per item cue ([1415bae](https://github.com/Aleph-Alpha-Research/eval-framework/commit/1415bae5c9aad9f01a3356a5c3cd41a3698c13b8))
+* retry only transient openai failures ([64e85bf](https://github.com/Aleph-Alpha-Research/eval-framework/commit/64e85bf3d56f87eddc3ecb1b418aed1de25f2a2d))
+
+
+### Bug Fixes
+
+* **llm:** raise with the error body when a response has no choices ([df9c0b3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/df9c0b321dee593be1a16ee554ee7ec22bd57261))
+
+
+### Documentation
+
+* add naming convention for tasks ([99d4895](https://github.com/Aleph-Alpha-Research/eval-framework/commit/99d48958f476da84109048536447f6830a4d57bb))
+* link task naming convention in relevant docs ([b0fffd4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b0fffd41278614100732e5f50404b2b37013dc9a))
+* update task naming guidelines to allow exceptions and future revisions ([1e733f5](https://github.com/Aleph-Alpha-Research/eval-framework/commit/1e733f509e2ae7949d618e5b3107eae5d03b3add))
+
 ## [0.19.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.2...v0.19.3) (2026-10-27)
 
 
