@@ -15,6 +15,7 @@ from eval_framework.tasks.task_style import (
     MCStyle,
     answer_key_to_index,
     format_mc_prompt,
+    question_cue_text,
     shuffle_correct_with_distractors,
 )
 
@@ -609,3 +610,15 @@ def test_instance_properties_are_styler_backed() -> None:
     # Check compatibility access points for metadata.
     assert task.RESPONSE_TYPE == ResponseType.LOGLIKELIHOODS
     assert all(metric in task.METRICS for metric in task.TASK_STYLER.metrics)
+
+
+def test_question_cue_text_unknown_language_raises() -> None:
+    with pytest.raises(ValueError, match="SWE"):
+        question_cue_text(Language.SWE)
+
+
+def test_for_language_unknown_language_keeps_styler_defaults() -> None:
+    """The lenient counterpart: a styler built for a language without defaults keeps its own (English) ones."""
+    styler = ClozeStyle.for_language(Language.SWE)
+    assert styler.question_prefix == "Question: "
+    assert styler.get_cue_text() == "Answer:"

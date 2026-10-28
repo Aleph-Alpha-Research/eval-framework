@@ -49,6 +49,8 @@ class Language(Enum):
     SPA = "Spanish"
     POR = "Portuguese"
     NLD = "Dutch"
+    CES = "Czech"
+    DAN = "Danish"
     FIN = "Finnish"
     SWE = "Swedish"
     ARB = "Arabic"
