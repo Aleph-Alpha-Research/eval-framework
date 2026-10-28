@@ -93,7 +93,7 @@ def gsm8k_ellamind_de_bpb_platinum(dataset: DatasetPolicy | None = None) -> Benc
     return ComposedBenchmark.choice(
         id="GSM8K_Ellamind_DE_BPB_Platinum",
         reader=_BpbReader(),
-        styler=BPBStyle(question_prefix="Frage: ", cue_text="Antwort:"),
+        styler=BPBStyle.for_language(Language.DEU),
         sample_split="test",
         fewshot_split="test",
         subjects=ListOfSubjects(["deu"]),
