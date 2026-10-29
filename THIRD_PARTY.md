@@ -56,7 +56,7 @@ and first-party/internal packages are excluded.
 | `fsspec` | `2026.7.0` |
 | `googleapis-common-protos` | `1.76.0` |
 | `h11` | `0.16.0` |
-| `hf-xet` | `1.7.0` |
+| `hf-xet` | `1.7.1` |
 | `httpcore` | `1.0.9` |
 | `httpcore2` | `2.16.0` |
 | `httpx` | `0.28.1` |
@@ -81,7 +81,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.66b1` |
 | `packaging` | `26.3` |
 | `pandas` | `3.1.0` |
-| `platformdirs` | `4.13.5` |
+| `platformdirs` | `4.14.0` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.0` |
 | `pydantic-core` | `2.50.1` |
@@ -102,6 +102,6 @@ and first-party/internal packages are excluded.
 | `typer` | `0.27.3` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.4` |
-| `tzdata` | `2026.5` |
+| `tzdata` | `2026.6` |
 | `urllib3` | `2.8.0` |
 | `xxhash` | `4.0.2` |
