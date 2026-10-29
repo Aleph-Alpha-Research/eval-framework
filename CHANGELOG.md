@@ -14,6 +14,15 @@
 
 ### Bug Fixes
 
+## [0.19.5](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.4...v0.19.5) (2026-10-29)
+
+
+### Features
+
+* multi-lingual arc ([780de73](https://github.com/Aleph-Alpha-Research/eval-framework/commit/780de73e0099a449286c1f8fab6c19b9149d87d1))
+* multi-lingual hellaswag ([d2e6f21](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d2e6f219fa73df6d12a1610d0b640258320f2636))
+* multi-lingual humaneval ([91075f2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/91075f26a9082b02179403c11dacdb0115e025de))
+
 ## [0.19.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.3...v0.19.4) (2026-10-28)
 
 
