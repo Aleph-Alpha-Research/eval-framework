@@ -22,6 +22,7 @@ from eval_framework.benchmarks.humaneval import HUMANEVAL_BENCHMARKS
 from eval_framework.benchmarks.humaneval_ellamind import HUMANEVAL_ELLAMIND_BENCHMARKS
 from eval_framework.benchmarks.humaneval_plus import HUMANEVAL_PLUS_BENCHMARKS
 from eval_framework.benchmarks.ifeval import IFEVAL_BENCHMARKS
+from eval_framework.benchmarks.lbpp import LBPP_BENCHMARKS
 from eval_framework.benchmarks.math_reasoning import MATH_REASONING_BENCHMARKS
 from eval_framework.benchmarks.mbpp import MBPP_BENCHMARKS
 from eval_framework.benchmarks.mbpp_ellamind import MBPP_ELLAMIND_BENCHMARKS
@@ -71,6 +72,7 @@ def register_all_tasks(registry: Registry | None = None) -> None:
     register_ifeval_tasks(registry=registry)
     register_multipl_e_tasks(registry=registry)
     register_mbpp_tasks(registry=registry)
+    register_lbpp_tasks(registry=registry)
     register_mmlu_tasks(registry=registry)
     register_mmlu_pro_tasks(registry=registry)
     register_mmlu_prox_tasks(registry=registry)
@@ -155,6 +157,12 @@ def register_humaneval_plus_tasks(registry: Registry) -> None:
 def register_mbpp_tasks(registry: Registry) -> None:
     """Register mbpp benchmark tasks."""
     for benchmark in MBPP_BENCHMARKS:
+        registry.add(benchmark)
+
+
+def register_lbpp_tasks(registry: Registry) -> None:
+    """Register lbpp benchmark tasks."""
+    for benchmark in LBPP_BENCHMARKS:
         registry.add(benchmark)
 
 
