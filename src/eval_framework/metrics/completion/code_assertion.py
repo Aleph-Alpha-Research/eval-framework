@@ -62,3 +62,9 @@ class HumanEvalPlusCodeCompletionAssertion(CodeCompletionAssertion):
     """CodeCompletionAssertion with numpy installed in the sandbox, needed by some HumanEvalPlus tests."""
 
     PACKAGES = ["numpy"]
+
+
+class LBPPCodeCompletionAssertion(CodeCompletionAssertion):
+    """CodeCompletionAssertion with the third-party packages some LBPP solutions and tests import."""
+
+    PACKAGES = ["numpy", "pandas", "pytest"]
