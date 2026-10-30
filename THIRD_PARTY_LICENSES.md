@@ -28,7 +28,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache 2.0 License
 
-- **transformers** 5.21.0 - https://github.com/huggingface/transformers
+- **transformers** 5.22.0 - https://github.com/huggingface/transformers
 
 ## Apache Software License; MIT License
 
@@ -42,19 +42,19 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
 - **googleapis-common-protos** 1.76.0 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
 - **hf-xet** 1.7.1 - https://github.com/huggingface/xet-core
-- **huggingface_hub** 2.3.0 - https://github.com/huggingface/huggingface_hub
+- **huggingface_hub** 2.4.0 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
 - **openai** 3.41.0 - https://github.com/openai/openai-python
-- **opentelemetry-api** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
-- **opentelemetry-exporter-http-transport** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
-- **opentelemetry-exporter-otlp-common** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
-- **opentelemetry-exporter-otlp-proto-common** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common
-- **opentelemetry-exporter-otlp-proto-http** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-http
-- **opentelemetry-proto** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto
-- **opentelemetry-sdk** 1.45.1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk
-- **opentelemetry-semantic-conventions** 0.66b1 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions
+- **opentelemetry-api** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
+- **opentelemetry-exporter-http-transport** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
+- **opentelemetry-exporter-otlp-common** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
+- **opentelemetry-exporter-otlp-proto-common** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common
+- **opentelemetry-exporter-otlp-proto-http** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-http
+- **opentelemetry-proto** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto
+- **opentelemetry-sdk** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk
+- **opentelemetry-semantic-conventions** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions
 - **pyarrow** 26.0.0 - https://arrow.apache.org/
 - **python-iso639** 2026.7.23 - https://github.com/jacksonllee/iso639
 - **requests** 2.34.2 - https://github.com/psf/requests
@@ -137,8 +137,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **markdown-it-py** 4.2.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
 - **platformdirs** 4.14.0 - https://github.com/tox-dev/platformdirs
-- **pydantic** 2.14.1 - https://github.com/pydantic/pydantic
-- **pydantic_core** 2.50.1 - https://github.com/pydantic
+- **pydantic** 2.14.2 - https://github.com/pydantic/pydantic
+- **pydantic_core** 2.50.2 - https://github.com/pydantic
 - **PyYAML** 6.0.3 - https://pyyaml.org/
 - **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
 - **rich** 15.0.0 - https://github.com/Textualize/rich
@@ -1910,7 +1910,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### huggingface_hub 2.3.0 (Apache-2.0)
+### huggingface_hub 2.4.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -12205,7 +12205,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-api 1.45.1 (Apache-2.0)
+### opentelemetry-api 1.45.2 (Apache-2.0)
 
 ```text
 Apache License
@@ -12411,7 +12411,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-exporter-http-transport 0.66b1 (Apache-2.0)
+### opentelemetry-exporter-http-transport 0.66b2 (Apache-2.0)
 
 ```text
 Apache License
@@ -12617,7 +12617,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-exporter-otlp-common 0.66b1 (Apache-2.0)
+### opentelemetry-exporter-otlp-common 0.66b2 (Apache-2.0)
 
 ```text
 Apache License
@@ -12823,7 +12823,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-exporter-otlp-proto-common 1.45.1 (Apache-2.0)
+### opentelemetry-exporter-otlp-proto-common 1.45.2 (Apache-2.0)
 
 ```text
 Apache License
@@ -13029,7 +13029,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-exporter-otlp-proto-http 1.45.1 (Apache-2.0)
+### opentelemetry-exporter-otlp-proto-http 1.45.2 (Apache-2.0)
 
 ```text
 Apache License
@@ -13235,7 +13235,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-proto 1.45.1 (Apache-2.0)
+### opentelemetry-proto 1.45.2 (Apache-2.0)
 
 ```text
 Apache License
@@ -13441,7 +13441,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-sdk 1.45.1 (Apache-2.0)
+### opentelemetry-sdk 1.45.2 (Apache-2.0)
 
 ```text
 Apache License
@@ -13647,7 +13647,7 @@ Apache License
    limitations under the License.
 ```
 
-### opentelemetry-semantic-conventions 0.66b1 (Apache-2.0)
+### opentelemetry-semantic-conventions 0.66b2 (Apache-2.0)
 
 ```text
 Apache License
@@ -16746,7 +16746,7 @@ DAMAGES.
                      END OF TERMS AND CONDITIONS
 ```
 
-### pydantic 2.14.1 (MIT)
+### pydantic 2.14.2 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -16772,7 +16772,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### pydantic_core 2.50.1 (MIT)
+### pydantic_core 2.50.2 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -19038,7 +19038,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### transformers 5.21.0 (Apache 2.0 License)
+### transformers 5.22.0 (Apache 2.0 License)
 
 ```text
 Copyright 2018- The Hugging Face team. All rights reserved.

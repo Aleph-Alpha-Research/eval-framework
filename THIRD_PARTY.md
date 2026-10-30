@@ -21,7 +21,7 @@ and first-party/internal packages are excluded.
 | `mysql-connector-python` | `>=26.10.0,<27` |
 | `nltk` | `>=3.10.4,<4` |
 | `numpy` | `>=2.5.4` |
-| `openai` | `>=3.37.0,<4` |
+| `openai` | `>=3.39.0,<4` |
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.1,<3` |
@@ -31,7 +31,7 @@ and first-party/internal packages are excluded.
 | `scipy` | `>=1.18.1,<2` |
 | `sympy` | `>=1.14.0,<2` |
 | `tiktoken` | `>=0.14.0,<1` |
-| `transformers` | `>=5.20.2,<6` |
+| `transformers` | `>=5.21.0,<6` |
 | `wandb` | `>=0.31.0,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
@@ -62,7 +62,7 @@ and first-party/internal packages are excluded.
 | `httpx` | `0.28.1` |
 | `httpx2` | `2.16.0` |
 | `httpx2-jsfetch` | `1.0` |
-| `huggingface-hub` | `2.3.0` |
+| `huggingface-hub` | `2.4.0` |
 | `idna` | `3.20` |
 | `jiter` | `0.18.0` |
 | `joblib` | `1.6.0` |
@@ -71,20 +71,20 @@ and first-party/internal packages are excluded.
 | `mdurl` | `0.1.2` |
 | `mpmath` | `1.3.0` |
 | `multiprocess` | `0.70.19` |
-| `opentelemetry-api` | `1.45.1` |
-| `opentelemetry-exporter-http-transport` | `0.66b1` |
-| `opentelemetry-exporter-otlp-common` | `0.66b1` |
-| `opentelemetry-exporter-otlp-proto-common` | `1.45.1` |
-| `opentelemetry-exporter-otlp-proto-http` | `1.45.1` |
-| `opentelemetry-proto` | `1.45.1` |
-| `opentelemetry-sdk` | `1.45.1` |
-| `opentelemetry-semantic-conventions` | `0.66b1` |
+| `opentelemetry-api` | `1.45.2` |
+| `opentelemetry-exporter-http-transport` | `0.66b2` |
+| `opentelemetry-exporter-otlp-common` | `0.66b2` |
+| `opentelemetry-exporter-otlp-proto-common` | `1.45.2` |
+| `opentelemetry-exporter-otlp-proto-http` | `1.45.2` |
+| `opentelemetry-proto` | `1.45.2` |
+| `opentelemetry-sdk` | `1.45.2` |
+| `opentelemetry-semantic-conventions` | `0.66b2` |
 | `packaging` | `26.3` |
 | `pandas` | `3.1.0` |
 | `platformdirs` | `4.14.0` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.0` |
-| `pydantic-core` | `2.50.1` |
+| `pydantic-core` | `2.50.2` |
 | `pygments` | `2.21.0` |
 | `python-dateutil` | `3.0.0` |
 | `referencing` | `0.37.0` |
