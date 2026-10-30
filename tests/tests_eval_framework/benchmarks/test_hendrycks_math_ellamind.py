@@ -25,6 +25,9 @@ _NUM_FEWSHOT = {
     "MATHMinervaDE_OLMES": 1,
     "MATHMinervaDE_OLMES_NONL": 1,
     "MATHMinervaDE_BPB_OLMES": 1,
+    "MATHMinervaFR_OLMES": 1,
+    "MATHMinervaFR_OLMES_NONL": 1,
+    "MATHMinervaFR_BPB_OLMES": 1,
 }
 
 
