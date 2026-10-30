@@ -1,6 +1,6 @@
-"""Specification of the composed German MBPP (EllaMind) tasks.
+"""Specification of the composed multilingual MBPP (EllaMind) tasks.
 
-These reuse the ``mbpp`` builders/reconstructs with a German instruction wrapper and same-split few-shot
+These reuse the ``mbpp`` builders/reconstructs with a per-language instruction wrapper and same-split few-shot
 sampling. ``test_formatter_hash`` pins each against the real data (1-shot, as recorded); the offline tests pin
 the assembled German prompt / candidates against a stub dataset.
 """
@@ -9,12 +9,7 @@ from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.mbpp_ellamind import (
-    MBPP_ELLAMIND_BENCHMARKS,
-    mbpp_de_bpb_olmes,
-    mbpp_de_evalplus_instruct,
-    mbpp_de_olmes,
-)
+from eval_framework.benchmarks.mbpp_ellamind import MBPP_ELLAMIND_BENCHMARKS, mbpp_ellamind
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -46,7 +41,7 @@ def _stub() -> DatasetStub:
 
 
 def test_de_olmes_prompt() -> None:
-    sample = first_sample(mbpp_de_olmes(dataset=_stub()), num_fewshot=0)
+    sample = first_sample(mbpp_ellamind("OLMES", "DE", dataset=_stub()), num_fewshot=0)
     assert sample.messages[0] == Message(
         role=Role.USER,
         content=(
@@ -60,7 +55,7 @@ def test_de_olmes_prompt() -> None:
 
 
 def test_de_bpb_olmes_scores_fenced_solution() -> None:
-    sample = first_sample(mbpp_de_bpb_olmes(dataset=_stub()), num_fewshot=0)
+    sample = first_sample(mbpp_ellamind("BPB_OLMES", "DE", dataset=_stub()), num_fewshot=0)
     gold = _ROW["code"] + "\n```"
     assert sample.messages[-1] == Message(
         role=Role.USER, content=_ROW["text"] + "\n```python\n"
@@ -70,7 +65,7 @@ def test_de_bpb_olmes_scores_fenced_solution() -> None:
 
 
 def test_de_instruct_prompt_has_no_cue() -> None:
-    sample = first_sample(mbpp_de_evalplus_instruct(dataset=_stub()), num_fewshot=0)
+    sample = first_sample(mbpp_ellamind("EvalPlusInstruct", "DE", dataset=_stub()), num_fewshot=0)
     assert all(m.role != Role.ASSISTANT for m in sample.messages)  # cue="" → no assistant turn
     assert sample.messages[-1].role == Role.USER
     assert sample.messages[-1].content.startswith("Bitte erstelle ein in sich geschlossenes Python-Skript,")
