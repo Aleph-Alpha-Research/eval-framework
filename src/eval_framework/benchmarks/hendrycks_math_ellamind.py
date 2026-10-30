@@ -24,7 +24,7 @@ _MAX_TOKENS = 1024
 
 TaskVariant = Literal["OLMES", "OLMES_NONL", "BPB"]
 
-LanguageCode = Literal["DE"]
+LanguageCode = Literal["DE", "FR"]
 _LANGUAGES: tuple[LanguageCode, ...] = get_args(LanguageCode)
 
 # Variant -> task-id template. The ids predate the naming convention and are kept for continuity.
@@ -63,6 +63,13 @@ _LOCALES: dict[LanguageCode, MinervaLocale] = {
         final_answer_line="Finale Antwort: Die finale Antwort lautet ${answer}$. Ich hoffe, die Antwort ist korrekt.",
         cot_style="minerva_de",
         metrics=[MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE],
+    ),
+    "FR": MinervaLocale(
+        problem_prefix="Objectif :",
+        solution_cue="Réponse :",
+        final_answer_line="Réponse finale : La réponse finale est ${answer}$. J'espère que la réponse est correcte.",
+        cot_style="minerva_fr",
+        metrics=[MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE],  # This shouldn't matter.
     ),
 }
 
