@@ -13,7 +13,7 @@ from sympy.parsing.latex.errors import LaTeXParsingError
 INVALID_ANSWER = "[invalidanswer]"
 END_SEQ = "I hope it is correct."
 END_SEQ_DE = "Ich hoffe, die Antwort ist korrekt."  # German pendant to END_SEQ
-
+END_SEQ_FR = "J'espère que la réponse est correcte."  # French pendant to END_SEQ
 # Minerva normalize_final_answer: appendix D of Lewkowycz et al. (2022)
 SUBSTITUTIONS = [
     ("an ", ""),
@@ -173,12 +173,48 @@ def get_unnormalized_answer_de(text: str, relaxed: bool = False) -> str:
     return INVALID_ANSWER
 
 
+def get_unnormalized_answer_fr(text: str, relaxed: bool = False) -> str:
+    """French analogue of ``get_unnormalized_answer``.
+
+    Strict form: ``Réponse finale : La réponse finale est $…$. J'espère que la réponse est correcte.`` (French
+    typography puts a space before the colon, as in the other EllaMind French prompts). Relaxed form accepts any
+    capitalisation, missing accents, the colon with or without the space, an optional ``La`` before ``réponse
+    finale``, an optional ``La réponse (finale) est`` lead-in, and strips a trailing hope phrase such as
+    ``J'espère que la réponse est correcte`` / ``J'espère que c'est correct``.
+    """
+    if relaxed:
+        match = re.search(
+            r"(?i)(?:la\s+)?r[ée]ponse\s+finale\s*:\s*(?:la\s+r[ée]ponse\s+(?:finale\s+)?est\s*)?(.*)",
+            text,
+            re.DOTALL,
+        )
+        if match:
+            raw = match.group(1).strip()
+            raw = re.sub(
+                r"\.?\s*j['’]\s*esp[èe]re\s+qu(?:e|['’])\s*(?:la\s+r[ée]ponse|elle|ce|c['’])\s*(?:est|soit)\s+correcte?\.?\s*$",
+                "",
+                raw,
+                flags=re.IGNORECASE,
+            ).strip()
+            return raw
+        return INVALID_ANSWER
+    text = text + END_SEQ_FR
+    match = re.search(
+        r"Réponse finale : La réponse finale est(.*?)\. J'espère que la réponse est correcte\.",
+        text,
+    )
+    if match:
+        return match.group(1).strip()
+    return INVALID_ANSWER
+
+
 # Registry of supported `cot_style` values
 # Keys are the strings passed by metric configurations; values are language-specific final-answer extractors
 # `(text: str, relaxed: bool) -> str`. Extend this dict to add a new language.
 COT_EXTRACTORS = {
     "minerva": get_unnormalized_answer,
     "minerva_de": get_unnormalized_answer_de,
+    "minerva_fr": get_unnormalized_answer_fr,
 }
 
 

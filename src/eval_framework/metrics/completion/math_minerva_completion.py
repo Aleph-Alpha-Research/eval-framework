@@ -117,3 +117,17 @@ class MathMinervaCompletionRelaxedDE(MathMinervaCompletionDE):
 
     NAME = "Math Minerva Completion Relaxed DE"
     RELAXED = True
+
+
+class MathMinervaCompletionFR(MathMinervaCompletion):
+    """MathMinervaCompletion with French final-answer extraction (``Réponse finale : …``)."""
+
+    NAME = "Math Minerva Completion FR"
+    COT_STYLE = "minerva_fr"
+
+
+class MathMinervaCompletionRelaxedFR(MathMinervaCompletionFR):
+    """MathMinervaCompletionFR with relaxed=True by default."""
+
+    NAME = "Math Minerva Completion Relaxed FR"
+    RELAXED = True

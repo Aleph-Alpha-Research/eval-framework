@@ -1,3 +1,19 @@
+"""Multilingual Hendrycks Math (EllaMind), minerva-style — composed.
+
+https://huggingface.co/datasets/ellamind/hendrycks-math-multilingual
+
+The per-language counterparts of the Minerva-OLMES MATH tasks, one dataset config per language (``deu`` or
+``fra``). Each language sets its problem and solution markers (``Aufgabe:`` / ``Lösung:`` in German), its
+final-answer line, its ``minerva_<lang>`` answer extraction and its Minerva metrics. Few-shot demonstrations
+are sampled from the dataset (single-paragraph solutions only, so the ``\\n\\n`` stop separates blocks).
+Three registered variants per language:
+
+- ``MATHMinerva{LANG}_OLMES`` / ``MATHMinerva{LANG}_OLMES_NONL``: free-form, differ only in stop sequences.
+- ``MATHMinerva{LANG}_BPB_OLMES``: bits-per-byte of the single gold solution (same prompt + few-shot).
+
+German has 4947 samples; French has only 100.
+"""
+
 from dataclasses import dataclass
 from typing import Any, Literal, final, get_args, override
 
@@ -11,7 +27,9 @@ from eval_framework.fewshot import FewShot, FewshotExample, FunctionRenderer, Sa
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.completion.math_minerva_completion import (
     MathMinervaCompletionDE,
+    MathMinervaCompletionFR,
     MathMinervaCompletionRelaxedDE,
+    MathMinervaCompletionRelaxedFR,
 )
 from eval_framework.metrics.completion.minerva_math_utils import extract_answers, normalized_gold_from_solution
 from eval_framework.subjects import ListOfSubjects
@@ -24,7 +42,7 @@ _MAX_TOKENS = 1024
 
 TaskVariant = Literal["OLMES", "OLMES_NONL", "BPB"]
 
-LanguageCode = Literal["DE"]
+LanguageCode = Literal["DE", "FR"]
 _LANGUAGES: tuple[LanguageCode, ...] = get_args(LanguageCode)
 
 # Variant -> task-id template. The ids predate the naming convention and are kept for continuity.
@@ -63,6 +81,13 @@ _LOCALES: dict[LanguageCode, MinervaLocale] = {
         final_answer_line="Finale Antwort: Die finale Antwort lautet ${answer}$. Ich hoffe, die Antwort ist korrekt.",
         cot_style="minerva_de",
         metrics=[MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE],
+    ),
+    "FR": MinervaLocale(
+        problem_prefix="Problème :",
+        solution_cue="Solution :",
+        final_answer_line="Réponse finale : La réponse finale est ${answer}$. J'espère que la réponse est correcte.",
+        cot_style="minerva_fr",
+        metrics=[MathMinervaCompletionFR, MathMinervaCompletionRelaxedFR],
     ),
 }
 
