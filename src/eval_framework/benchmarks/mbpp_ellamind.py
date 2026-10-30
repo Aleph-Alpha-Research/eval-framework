@@ -43,7 +43,7 @@ MBPP_ELLAMIND_DATASET_PATH = "ellamind/mbpp-multilingual"
 TaskVariant = Literal["OLMES", "BPB_OLMES", "EvalPlus", "BPB_EvalPlus", "EvalPlusInstruct"]
 
 # The languages this file offers (see ``ellamind_languages`` for the token -> language/config table).
-LanguageCode = Literal["DE"]
+LanguageCode = Literal["DE", "FR"]
 _LANGUAGES: tuple[LanguageCode, ...] = get_args(LanguageCode)
 
 # Variant -> task-id template. The ids predate the naming convention and are kept for continuity.
@@ -86,6 +86,17 @@ _LOCALES: dict[LanguageCode, MbppLocale] = {
         evalplus_cue=(
             "Hier ist ein Python-Skript mit einer in sich geschlossenen Funktion, "
             "die das Problem löst und die entsprechenden Tests besteht:\n```python"
+        ),
+    ),
+    "FR": MbppLocale(
+        preamble=(
+            "Veuillez créer un script Python autonome qui résout le problème suivant dans un bloc de code Markdown :"
+        ),
+        preamble_stop="\nVeuillez créer",
+        olmes_cue="Voici la fonction complète :\n\n```python\n",
+        evalplus_cue=(
+            "Voici un script Python avec une fonction autonome qui résout le problème et"
+            " réussit les tests correspondants :"
         ),
     ),
 }
