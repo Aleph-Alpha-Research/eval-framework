@@ -142,6 +142,21 @@ def test_the_bpb_candidate_is_the_gold_solution_closing_its_fence() -> None:
     assert sample.possible_completions == ["\ndef shout(text: str) -> str:\n    return text.upper()\n```"]
 
 
+def test_another_language_names_itself_in_the_preamble_and_cue() -> None:
+    # Given one problem (its fields reused as stand-ins for a Rust row)
+    # When the 0-shot Rust BPB sample is assembled
+    benchmark = lbpp_bpb(dataset=DatasetStub({"test": [_EVAL_ROW]}), language="rust")
+    sample = first_sample(benchmark, num_fewshot=0)
+
+    # Then its own id, a Rust preamble and a cue opening a rust fence
+    assert benchmark.id() == "LBPP_Cohere_EN_BPB_Rust"
+    assert sample.messages[0].content.startswith("Please provide a self-contained Rust script that solves")
+    assert sample.messages[-1].content == (
+        "Below is a Rust script with a self-contained function that solves the problem and passes"
+        " corresponding tests:\n```rust"
+    )
+
+
 def test_a_field_pickling_an_object_is_refused() -> None:
     # Given a tampered row whose tests unpickle to a global (here a harmless builtin) instead of a plain value
     tampered = {**_EVAL_ROW, "test_list": base64.b64encode(zlib.compress(pickle.dumps(print))).decode()}
