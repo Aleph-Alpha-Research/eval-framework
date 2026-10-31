@@ -511,7 +511,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "antlr4-python3-runtime", specifier = "==4.11.0" },
-    { name = "datasets", specifier = ">=5.0.1,<6" },
+    { name = "datasets", specifier = ">=5.1.0,<6" },
     { name = "google-crc32c", specifier = ">=1.9.0,<2" },
     { name = "jsonlines", specifier = ">=4,<5" },
     { name = "jsonschema", specifier = ">=4.26.0,<5" },
