@@ -19,6 +19,7 @@ from eval_framework.benchmarks.humaneval import (
     v2_execution,
     v2_prompt,
 )
+from eval_framework.benchmarks.utils.ellamind_languages import ellamind_language
 from eval_framework.contract import Benchmark
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
@@ -33,13 +34,9 @@ from template_formatting.formatter import Message
 HUMANEVAL_ELLAMIND_DATASET_PATH = "ellamind/humaneval-multilingual"
 _SUBJECTS = ListOfSubjects(["deu"])
 
+# The languages of the variants offered in more than one language (see ``ellamind_languages`` for the
+# token -> language/config table).
 LanguageCode = Literal["DE", "FR"]
-
-# Language code -> (language, dataset config), for the variants offered in more than one language.
-_LANGUAGES: dict[LanguageCode, tuple[Language, str]] = {
-    "DE": (Language.DEU, "deu"),
-    "FR": (Language.FRA, "fra"),
-}
 
 
 def _dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
@@ -62,7 +59,7 @@ def humaneval_de_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
 
 
 def humaneval_olmes_v2(language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
-    lang, config = _LANGUAGES[language]
+    lang, config = ellamind_language(language)
     return v2_execution(
         f"HumanEval{language}_OLMES_V2",
         dataset_path=HUMANEVAL_ELLAMIND_DATASET_PATH,
@@ -89,8 +86,8 @@ def humaneval_de_bpb_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
 
 
 def humaneval_bpb_olmes_v2(language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
-    """``HumanEval{language}_BPB_OLMES_V2`` for a language token of ``_LANGUAGES``, e.g. ``"DE"`` or ``"FR"``."""
-    lang, config = _LANGUAGES[language]
+    """``HumanEval{language}_BPB_OLMES_V2`` for a language token of ``LanguageCode``, e.g. ``"DE"`` or ``"FR"``."""
+    lang, config = ellamind_language(language)
     return v2_bpb(
         f"HumanEval{language}_BPB_OLMES_V2",
         dataset_path=HUMANEVAL_ELLAMIND_DATASET_PATH,

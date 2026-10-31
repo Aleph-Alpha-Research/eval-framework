@@ -1,20 +1,40 @@
-"""German PIQA (EllaMind) tasks.
+"""Multilingual PIQA (EllaMind) tasks.
 
 https://huggingface.co/datasets/ellamind/piqa-multilingual
 
-PIQA supplies separate easy and hard distractors.
+PIQA supplies separate easy and hard distractors. Each language is one config of the dataset (``deu``). The
+prompt opens with a language-specific "Goal:" prefix (PIQA's ``goal`` field is a goal, not a question) and
+closes with the framework's default answer cue for the language.
 """
 
-from typing import Any, Literal, final, override
+from typing import Any, Literal, final, get_args, override
 
+from eval_framework.benchmarks.utils.ellamind_languages import ellamind_language
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
+
+TaskVariant = Literal["CLOZE_EASY", "CLOZE_HARD", "MC_EASY", "MC_HARD", "BPB"]
+
+LanguageCode = Literal["DE", "FR"]
+_LANGUAGES: tuple[LanguageCode, ...] = get_args(LanguageCode)
+
+# Variant -> (styler class, distractor level). BPB scores only the gold continuation, so its distractor level
+# is irrelevant; ``easy`` is used.
+_VARIANTS: dict[TaskVariant, tuple[type[TaskStyler], Literal["easy", "hard"]]] = {
+    "CLOZE_EASY": (ClozeStyle, "easy"),
+    "CLOZE_HARD": (ClozeStyle, "hard"),
+    "MC_EASY": (MCStyle, "easy"),
+    "MC_HARD": (MCStyle, "hard"),
+    "BPB": (BPBStyle, "easy"),
+}
+
+# PIQA's prompt opens with the goal, so the usual "Question:" prefix is replaced by a per-language "Goal:".
+_GOAL_PREFIX: dict[LanguageCode, str] = {"DE": "Ziel: ", "FR": "Objectif : "}
 
 
 @final
@@ -35,60 +55,23 @@ class PiqaReader(ChoiceReader):
         return ChoiceFields(raw_question=item["goal"], choices=choices, correct_index=correct_index)
 
 
-_QUESTION_PREFIX = "Ziel: "
-_CUE_TEXT = "Antwort:"
-
-
-def _piqa_ellamind_benchmark(
-    id: str, styler: TaskStyler, distractor_level: Literal["easy", "hard"], dataset: DatasetPolicy | None = None
-) -> Benchmark:
+def piqa_ellamind(task_variant: TaskVariant, language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
+    """Build ``PIQA_ELLAMIND_{variant}_{language}``, e.g. ``piqa_ellamind("MC_EASY", "DE")``."""
+    styler_cls, distractor_level = _VARIANTS[task_variant]
+    lang, config = ellamind_language(language)
     dataset_policy = dataset if dataset is not None else pinned_by_framework("ellamind/piqa-multilingual")
     return ComposedBenchmark.choice(
-        id=id,
+        id=f"PIQA_ELLAMIND_{task_variant}_{language}",
         reader=PiqaReader(distractor_level),
-        styler=styler,
+        styler=styler_cls.for_language(lang, question_prefix=_GOAL_PREFIX[language]),
         sample_split="validation",
         fewshot_split="validation",
-        subjects=ListOfSubjects(["deu"]),
+        subjects=ListOfSubjects([config]),
         dataset_policy=dataset_policy,
-        language=Language.DEU,
-    )
-
-
-def piqa_ellamind_cloze_easy_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _piqa_ellamind_benchmark(
-        "PIQA_ELLAMIND_CLOZE_EASY_DE", ClozeStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT), "easy", dataset
-    )
-
-
-def piqa_ellamind_cloze_hard_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _piqa_ellamind_benchmark(
-        "PIQA_ELLAMIND_CLOZE_HARD_DE", ClozeStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT), "hard", dataset
-    )
-
-
-def piqa_ellamind_mc_easy_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _piqa_ellamind_benchmark(
-        "PIQA_ELLAMIND_MC_EASY_DE", MCStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT), "easy", dataset
-    )
-
-
-def piqa_ellamind_mc_hard_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _piqa_ellamind_benchmark(
-        "PIQA_ELLAMIND_MC_HARD_DE", MCStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT), "hard", dataset
-    )
-
-
-def piqa_ellamind_bpb_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _piqa_ellamind_benchmark(
-        "PIQA_ELLAMIND_BPB_DE", BPBStyle(question_prefix=_QUESTION_PREFIX, cue_text=_CUE_TEXT), "easy", dataset
+        language=lang,
     )
 
 
 PIQA_ELLAMIND_BENCHMARKS: list[Benchmark] = [
-    piqa_ellamind_cloze_easy_de(),
-    piqa_ellamind_cloze_hard_de(),
-    piqa_ellamind_mc_easy_de(),
-    piqa_ellamind_mc_hard_de(),
-    piqa_ellamind_bpb_de(),
+    piqa_ellamind(task_variant, language) for language in _LANGUAGES for task_variant in _VARIANTS
 ]

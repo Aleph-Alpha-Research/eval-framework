@@ -6,28 +6,23 @@ subjects are the rows of that config tagged by the ``arc_config`` column. Cloze 
 MC the letter labels, BPB only the ground-truth answer's bits-per-byte.
 """
 
-from typing import Any, Literal, final, override
+from typing import Any, Literal, final, get_args, override
 
+from eval_framework.benchmarks.utils.ellamind_languages import ellamind_language
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, answer_key_to_index
 
 Style = Literal["CLOZE", "MC", "BPB"]
+# The languages this dataset offers (see ``ellamind_languages`` for the token -> language/config table).
 LanguageCode = Literal["DE", "FR", "ES", "IT"]
+_LANGUAGES: tuple[LanguageCode, ...] = get_args(LanguageCode)
 
-# Style -> styler, and language code -> (language, dataset config).
 _STYLES: dict[Style, type[TaskStyler]] = {"CLOZE": ClozeStyle, "MC": MCStyle, "BPB": BPBStyle}
-_LANGUAGES: dict[LanguageCode, tuple[Language, str]] = {
-    "DE": (Language.DEU, "deu"),
-    "FR": (Language.FRA, "fra"),
-    "ES": (Language.SPA, "spa"),
-    "IT": (Language.ITA, "ita"),
-}
 
 
 @final
@@ -46,7 +41,7 @@ class ArcEllamindReader(ChoiceReader):
 
 def arc_ellamind(style: Style, language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
     """Build ``ARC_ELLAMIND_{style}_{language}``, e.g. ``arc_ellamind("CLOZE", "DE")``."""
-    lang, config = _LANGUAGES[language]
+    lang, config = ellamind_language(language)
     # ARC-Easy and ARC-Challenge share the language's single config, tagged by the ``arc_config`` column.
     source = (
         dataset

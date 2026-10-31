@@ -1,64 +1,104 @@
-"""German Hendrycks Math (EllaMind), minerva-style — composed.
+from dataclasses import dataclass
+from typing import Any, Literal, final, get_args, override
 
-https://huggingface.co/datasets/ellamind/hendrycks-math-multilingual
-
-The German counterpart of the Minerva-OLMES MATH tasks: ``Aufgabe:`` / ``Lösung:`` prompt markers, few-shot
-demonstrations sampled from the dataset (single-paragraph solutions only, so the ``\\n\\n`` stop separates
-blocks), German final-answer lines, ``minerva_de`` extraction and the German Minerva metrics.
-
-- ``MATHMinervaDE_OLMES`` / ``MATHMinervaDE_OLMES_NONL``: free-form, differ only in stop sequences.
-- ``MATHMinervaDE_BPB_OLMES``: bits-per-byte of the single gold solution (same prompt + few-shot).
-"""
-
-from typing import Any, final, override
-
-from eval_framework.answer import ExtractFromCompletion, PickFromCandidates
+from eval_framework.answer import AnswerPolicy, ExtractFromCompletion, PickFromCandidates
+from eval_framework.benchmarks.utils.ellamind_languages import ellamind_language
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.eval_kind import Choice, Generative
+from eval_framework.eval_kind import Choice, EvalKind, Generative
 from eval_framework.fewshot import FewShot, FewshotExample, FunctionRenderer, SampleSplit
+from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.completion.math_minerva_completion import (
     MathMinervaCompletionDE,
     MathMinervaCompletionRelaxedDE,
 )
 from eval_framework.metrics.completion.minerva_math_utils import extract_answers, normalized_gold_from_solution
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle
 
-HENDRYCKS_MATH_DE_DATASET_PATH = "ellamind/hendrycks-math-multilingual"
-_MINERVA_DE_MAX_TOKENS = 1024
+HENDRYCKS_MATH_ELLAMIND_DATASET_PATH = "ellamind/hendrycks-math-multilingual"
+_MAX_TOKENS = 1024
+
+TaskVariant = Literal["OLMES", "OLMES_NONL", "BPB"]
+
+LanguageCode = Literal["DE", "FR"]
+_LANGUAGES: tuple[LanguageCode, ...] = get_args(LanguageCode)
+
+# Variant -> task-id template. The ids predate the naming convention and are kept for continuity.
+_TASK_ID_TEMPLATES: dict[TaskVariant, str] = {
+    "OLMES": "MATHMinerva{language}_OLMES",
+    "OLMES_NONL": "MATHMinerva{language}_OLMES_NONL",
+    "BPB": "MATHMinerva{language}_BPB_OLMES",
+}
 
 
-def _minerva_de_prompt(item: dict[str, Any]) -> str:
-    return "Aufgabe:\n" + item["problem"] + "\n\n"
+@dataclass(frozen=True, kw_only=True)
+class MinervaLocale:
+    """One language's wording of the Minerva prompt, and the extraction and metrics that understand it."""
+
+    problem_prefix: str
+    """Opens the problem block (``Problem:``); also the stop sequence of a free-form generation."""
+    solution_cue: str
+    """Primes the solution turn (``Solution:``)."""
+    final_answer_line: str
+    """Closes a shown solution; ``{answer}`` is the item's extracted answer. Its wording must be what the
+    language's ``cot_style`` extractor parses."""
+    cot_style: str
+    """Key into ``minerva_math_utils.COT_EXTRACTORS``."""
+    metrics: list[type[BaseMetric]]
+    """The strict and relaxed Minerva metrics for ``cot_style``."""
+
+    def __post_init__(self) -> None:
+        if "{answer}" not in self.final_answer_line:
+            raise ValueError(f"final_answer_line must contain '{{answer}}': {self.final_answer_line!r}")
 
 
-def _minerva_de_answer_line(item: dict[str, Any]) -> str:
-    return (
-        f"Finale Antwort: Die finale Antwort lautet ${item['extracted_answer']}$. Ich hoffe, die Antwort ist korrekt."
-    )
+_LOCALES: dict[LanguageCode, MinervaLocale] = {
+    "DE": MinervaLocale(
+        problem_prefix="Aufgabe:",
+        solution_cue="Lösung:",
+        final_answer_line="Finale Antwort: Die finale Antwort lautet ${answer}$. Ich hoffe, die Antwort ist korrekt.",
+        cot_style="minerva_de",
+        metrics=[MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE],
+    ),
+    "FR": MinervaLocale(
+        problem_prefix="Objectif :",
+        solution_cue="Réponse :",
+        final_answer_line="Réponse finale : La réponse finale est ${answer}$. J'espère que la réponse est correcte.",
+        cot_style="minerva_fr",
+        metrics=[MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE],  # This shouldn't matter.
+    ),
+}
 
 
-def _minerva_de_gold(item: dict[str, Any]) -> str:
+@final
+class _MinervaPrompt:
+    """Assembles the Minerva prompt pieces in one language — shared by the generative and BPB variants."""
+
+    def __init__(self, locale: MinervaLocale) -> None:
+        self._locale = locale
+
+    def problem(self, item: dict[str, Any]) -> str:
+        return f"{self._locale.problem_prefix}\n{item['problem']}\n\n"
+
+    def solution(self, item: dict[str, Any]) -> str:
+        """The gold solution closed by the final-answer line: the BPB target and the body of a demonstration."""
+        return f"{item['solution']}\n{self._locale.final_answer_line.format(answer=item['extracted_answer'])}"
+
+    def demo(self, item: dict[str, Any]) -> FewshotExample:
+        return FewshotExample(prompt=self.problem(item), answer=f"{self._locale.solution_cue} {self.solution(item)}")
+
+    def extract(self, completion_text: str) -> str:
+        candidates = extract_answers(completion_text, use_cot=True, cot_style=self._locale.cot_style, relaxed=True)
+        return candidates[0] if candidates else "[no_answer]"
+
+
+def _minerva_gold(item: dict[str, Any]) -> str:
     # "" reads the same as None to the minerva metric; keeps the gold a str (see math_reasoning._minerva_gold).
     return normalized_gold_from_solution(item["solution"]) or ""
-
-
-def _minerva_de_extractor(completion_text: str) -> str:
-    candidates = extract_answers(completion_text, use_cot=True, cot_style="minerva_de", relaxed=True)
-    return candidates[0] if candidates else "[no_answer]"
-
-
-def _generative_demo(item: dict[str, Any]) -> FewshotExample:
-    # Fewshot answer = the "Lösung:" cue, the solution, then the German Minerva final-answer line.
-    return FewshotExample(
-        prompt=_minerva_de_prompt(item),
-        answer=f"Lösung: {item['solution']}\n{_minerva_de_answer_line(item)}",
-    )
 
 
 def _single_paragraph_solution(example: dict[str, Any]) -> bool:
@@ -66,74 +106,69 @@ def _single_paragraph_solution(example: dict[str, Any]) -> bool:
     return "\n\n" not in example["solution"]
 
 
-def _de_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
-    return dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_DE_DATASET_PATH)
-
-
-def _mathminerva_de(id: str, stop_sequences: list[str], dataset: DatasetPolicy | None) -> Benchmark:
-    kind = Generative(
-        build_prompt=_minerva_de_prompt,
-        cue="Lösung:",
-        ground_truth=_minerva_de_gold,
-        metrics=[MathMinervaCompletionDE, MathMinervaCompletionRelaxedDE],
-    )
-    return ComposedBenchmark.compose(
-        id=id,
-        kind=kind,
-        answer=ExtractFromCompletion(_minerva_de_extractor, stop_sequences, max_tokens=_MINERVA_DE_MAX_TOKENS),
-        sample_split="test",
-        fewshot=FewShot(SampleSplit(keep=_single_paragraph_solution), FunctionRenderer(_generative_demo)),
-        subjects=ListOfSubjects(["deu"]),
-        dataset_policy=_de_dataset(dataset),
-        language=Language.DEU,
-    )
-
-
-def mathminerva_de_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mathminerva_de("MATHMinervaDE_OLMES", ["Aufgabe:", "\n\n"], dataset)
-
-
-def mathminerva_de_olmes_nonl(dataset: DatasetPolicy | None = None) -> Benchmark:
-    # Same as MATHMinervaDE_OLMES but stops only on "Aufgabe:" (drops the blank-line stop).
-    return _mathminerva_de("MATHMinervaDE_OLMES_NONL", ["Aufgabe:"], dataset)
-
-
 @final
-class _MinervaDeBpbStyler(BPBStyle):
-    """BPB scoring of the single gold solution, but under the German Minerva prompt (``Aufgabe:`` / ``Lösung:``,
+class _MinervaBpbStyler(BPBStyle):
+    """BPB scoring of the single gold solution, but under the Minerva prompt (problem prefix on its own line,
     blank line before the cue) rather than the cloze ``question_prefix`` layout."""
+
+    def __init__(self, locale: MinervaLocale) -> None:
+        super().__init__(cue_text=locale.solution_cue)
+        self._problem_prefix = locale.problem_prefix
 
     @override
     def get_instruction_text(self, raw_question: str, choices: list[str]) -> str:
-        return f"Aufgabe:\n{raw_question}\n\n"
+        return f"{self._problem_prefix}\n{raw_question}\n\n"
 
 
 @final
-class _MinervaDeBpbReader(ChoiceReader):
-    """The single scored 'choice' is the gold solution plus the German final-answer line."""
+class _MinervaBpbReader(ChoiceReader):
+    """The single scored 'choice' is the gold solution plus the language's final-answer line."""
+
+    def __init__(self, prompt: _MinervaPrompt) -> None:
+        self._prompt = prompt
 
     @override
     def read(self, item: dict[str, Any]) -> ChoiceFields:
-        choice = f"{item['solution']}\n{_minerva_de_answer_line(item)}"
-        return ChoiceFields(raw_question=item["problem"], choices=[choice], correct_index=0)
+        return ChoiceFields(raw_question=item["problem"], choices=[self._prompt.solution(item)], correct_index=0)
 
 
-def mathminerva_de_bpb_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
-    # Same prompt and few-shot as the generative variant; only the eval turn changes to a scored gold solution.
+def hendrycks_math_ellamind(
+    task_variant: TaskVariant, language: LanguageCode, dataset: DatasetPolicy | None = None
+) -> Benchmark:
+    """Build ``MATHMinerva{language}_{variant}``, e.g. ``hendrycks_math_ellamind("OLMES", "DE")``."""
+    locale = _LOCALES[language]
+    prompt = _MinervaPrompt(locale)
+    lang, config = ellamind_language(language)
+
+    kind: EvalKind
+    answer: AnswerPolicy
+    if task_variant == "BPB":
+        # Same prompt and few-shot as the generative variants; only the eval turn changes to a scored gold solution.
+        kind = Choice(_MinervaBpbReader(prompt), _MinervaBpbStyler(locale))
+        answer = PickFromCandidates()
+    else:
+        # OLMES stops at the next problem or a blank line; OLMES_NONL drops the blank-line stop.
+        stop_sequences = [locale.problem_prefix] if task_variant == "OLMES_NONL" else [locale.problem_prefix, "\n\n"]
+        kind = Generative(
+            build_prompt=prompt.problem,
+            cue=locale.solution_cue,
+            ground_truth=_minerva_gold,
+            metrics=locale.metrics,
+        )
+        answer = ExtractFromCompletion(prompt.extract, stop_sequences, max_tokens=_MAX_TOKENS)
+
     return ComposedBenchmark.compose(
-        id="MATHMinervaDE_BPB_OLMES",
-        kind=Choice(_MinervaDeBpbReader(), _MinervaDeBpbStyler(cue_text="Lösung:")),
-        answer=PickFromCandidates(),
+        id=_TASK_ID_TEMPLATES[task_variant].format(language=language),
+        kind=kind,
+        answer=answer,
         sample_split="test",
-        fewshot=FewShot(SampleSplit(keep=_single_paragraph_solution), FunctionRenderer(_generative_demo)),
-        subjects=ListOfSubjects(["deu"]),
-        dataset_policy=_de_dataset(dataset),
-        language=Language.DEU,
+        fewshot=FewShot(SampleSplit(keep=_single_paragraph_solution), FunctionRenderer(prompt.demo)),
+        subjects=ListOfSubjects([config]),
+        dataset_policy=dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_ELLAMIND_DATASET_PATH),
+        language=lang,
     )
 
 
 HENDRYCKS_MATH_ELLAMIND_BENCHMARKS: list[Benchmark] = [
-    mathminerva_de_olmes(),
-    mathminerva_de_olmes_nonl(),
-    mathminerva_de_bpb_olmes(),
+    hendrycks_math_ellamind(task_variant, language) for language in _LANGUAGES for task_variant in get_args(TaskVariant)
 ]

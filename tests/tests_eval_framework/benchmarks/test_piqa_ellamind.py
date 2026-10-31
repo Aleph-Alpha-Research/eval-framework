@@ -1,6 +1,6 @@
 """Specification of the German PIQA (EllaMind) tasks.
 
-Each spec test builds the real benchmark (via its ``piqa_ellamind_*_de`` constructor) over a fictional
+Each spec test builds the real benchmark (via the ``piqa_ellamind`` factory, German slice) over a fictional
 dataset and asserts the assembled messages, ground truth, and scored completions — so this file reads
 as PIQA's prompt spec, with ``composed.py`` an implementation detail. ``test_formatter_hash`` separately
 pins the real benchmarks against the real HuggingFace data.
@@ -8,18 +8,12 @@ pins the real benchmarks against the real HuggingFace data.
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import partial
 from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.piqa_ellamind import (
-    PIQA_ELLAMIND_BENCHMARKS,
-    piqa_ellamind_bpb_de,
-    piqa_ellamind_cloze_easy_de,
-    piqa_ellamind_cloze_hard_de,
-    piqa_ellamind_mc_easy_de,
-    piqa_ellamind_mc_hard_de,
-)
+from eval_framework.benchmarks.piqa_ellamind import PIQA_ELLAMIND_BENCHMARKS, piqa_ellamind
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -110,11 +104,11 @@ _BPB = _ExpectedPrompt(
 @pytest.mark.parametrize(
     "make_benchmark, expected",
     [
-        pytest.param(piqa_ellamind_mc_easy_de, _MC_EASY, id="mc_easy"),
-        pytest.param(piqa_ellamind_mc_hard_de, _MC_HARD, id="mc_hard"),
-        pytest.param(piqa_ellamind_cloze_easy_de, _CLOZE_EASY, id="cloze_easy"),
-        pytest.param(piqa_ellamind_cloze_hard_de, _CLOZE_HARD, id="cloze_hard"),
-        pytest.param(piqa_ellamind_bpb_de, _BPB, id="bpb"),
+        pytest.param(partial(piqa_ellamind, "MC_EASY", "DE"), _MC_EASY, id="mc_easy"),
+        pytest.param(partial(piqa_ellamind, "MC_HARD", "DE"), _MC_HARD, id="mc_hard"),
+        pytest.param(partial(piqa_ellamind, "CLOZE_EASY", "DE"), _CLOZE_EASY, id="cloze_easy"),
+        pytest.param(partial(piqa_ellamind, "CLOZE_HARD", "DE"), _CLOZE_HARD, id="cloze_hard"),
+        pytest.param(partial(piqa_ellamind, "BPB", "DE"), _BPB, id="bpb"),
     ],
 )
 def test_piqa_zeroshot_prompt(make_benchmark: Callable[..., Benchmark], expected: _ExpectedPrompt) -> None:
@@ -162,11 +156,19 @@ def _oneshot(fewshot_messages: list[Message], eval_expected: _ExpectedPrompt) ->
 @pytest.mark.parametrize(
     "make_benchmark, expected",
     [
-        pytest.param(piqa_ellamind_mc_easy_de, _oneshot(_MC_EASY_FEWSHOT_MESSAGES, _MC_EASY), id="mc_easy"),
-        pytest.param(piqa_ellamind_mc_hard_de, _oneshot(_MC_HARD_FEWSHOT_MESSAGES, _MC_HARD), id="mc_hard"),
-        pytest.param(piqa_ellamind_cloze_easy_de, _oneshot(_CLOZE_FEWSHOT_MESSAGES, _CLOZE_EASY), id="cloze_easy"),
-        pytest.param(piqa_ellamind_cloze_hard_de, _oneshot(_CLOZE_FEWSHOT_MESSAGES, _CLOZE_HARD), id="cloze_hard"),
-        pytest.param(piqa_ellamind_bpb_de, _oneshot(_CLOZE_FEWSHOT_MESSAGES, _BPB), id="bpb"),
+        pytest.param(
+            partial(piqa_ellamind, "MC_EASY", "DE"), _oneshot(_MC_EASY_FEWSHOT_MESSAGES, _MC_EASY), id="mc_easy"
+        ),
+        pytest.param(
+            partial(piqa_ellamind, "MC_HARD", "DE"), _oneshot(_MC_HARD_FEWSHOT_MESSAGES, _MC_HARD), id="mc_hard"
+        ),
+        pytest.param(
+            partial(piqa_ellamind, "CLOZE_EASY", "DE"), _oneshot(_CLOZE_FEWSHOT_MESSAGES, _CLOZE_EASY), id="cloze_easy"
+        ),
+        pytest.param(
+            partial(piqa_ellamind, "CLOZE_HARD", "DE"), _oneshot(_CLOZE_FEWSHOT_MESSAGES, _CLOZE_HARD), id="cloze_hard"
+        ),
+        pytest.param(partial(piqa_ellamind, "BPB", "DE"), _oneshot(_CLOZE_FEWSHOT_MESSAGES, _BPB), id="bpb"),
     ],
 )
 def test_piqa_oneshot_prompt(make_benchmark: Callable[..., Benchmark], expected: _ExpectedPrompt) -> None:

@@ -1,4 +1,4 @@
-"""Specification of the composed German Hendrycks-Math (EllaMind) minerva tasks."""
+"""Specification of the composed multilingual Hendrycks-Math (EllaMind) minerva tasks."""
 
 from typing import Any
 
@@ -6,8 +6,7 @@ import pytest
 
 from eval_framework.benchmarks.hendrycks_math_ellamind import (
     HENDRYCKS_MATH_ELLAMIND_BENCHMARKS,
-    mathminerva_de_bpb_olmes,
-    mathminerva_de_olmes,
+    hendrycks_math_ellamind,
 )
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
@@ -26,6 +25,9 @@ _NUM_FEWSHOT = {
     "MATHMinervaDE_OLMES": 1,
     "MATHMinervaDE_OLMES_NONL": 1,
     "MATHMinervaDE_BPB_OLMES": 1,
+    "MATHMinervaFR_OLMES": 1,
+    "MATHMinervaFR_OLMES_NONL": 1,
+    "MATHMinervaFR_BPB_OLMES": 1,
 }
 
 
@@ -57,7 +59,7 @@ _FEWSHOT_TARGET = (
 
 
 def test_de_olmes_zeroshot_prompt() -> None:
-    benchmark = mathminerva_de_olmes(dataset=DatasetStub({"test": [_EVAL_ROW]}))
+    benchmark = hendrycks_math_ellamind("OLMES", "DE", dataset=DatasetStub({"test": [_EVAL_ROW]}))
     sample = first_sample(benchmark, num_fewshot=0, custom_subjects=["deu"])
     assert sample.messages == [
         Message(role=Role.USER, content="Aufgabe:\nWas ist 2 + 2?\n\n"),
@@ -69,7 +71,7 @@ def test_de_olmes_zeroshot_prompt() -> None:
 
 def test_de_olmes_oneshot_renders_german_final_answer() -> None:
     # Two single-paragraph rows: the sampler shows the other row as the one demonstration.
-    benchmark = mathminerva_de_olmes(dataset=DatasetStub({"test": [_FEWSHOT_ROW, _EVAL_ROW]}))
+    benchmark = hendrycks_math_ellamind("OLMES", "DE", dataset=DatasetStub({"test": [_FEWSHOT_ROW, _EVAL_ROW]}))
     sample = first_sample(benchmark, num_fewshot=1, custom_subjects=["deu"])
     assert sample.messages == [
         Message(role=Role.USER, content="Aufgabe:\nWas ist 3 + 3?\n\n"),
@@ -80,7 +82,7 @@ def test_de_olmes_oneshot_renders_german_final_answer() -> None:
 
 
 def test_de_bpb_scores_single_gold_solution() -> None:
-    benchmark = mathminerva_de_bpb_olmes(dataset=DatasetStub({"test": [_EVAL_ROW]}))
+    benchmark = hendrycks_math_ellamind("BPB", "DE", dataset=DatasetStub({"test": [_EVAL_ROW]}))
     sample = first_sample(benchmark, num_fewshot=0, custom_subjects=["deu"])
     gold = (
         " Die Antwort ist \\boxed{4}.\n"

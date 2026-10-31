@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from eval_framework.metrics.completion.math_minerva_completion import MathMinervaCompletion
 from eval_framework.metrics.completion.minerva_math_utils import extract_answers, is_equiv_minerva
 from eval_framework.shared.types import Completion
@@ -40,6 +42,32 @@ class TestMathMinervaCompletion:
 
         assert extract_answers(german, cot_style="minerva_de", relaxed=True)[0] == "24"
         assert extract_answers(german, relaxed=True)[0] != "24"
+
+    def test_extract_answers_can_select_french(self) -> None:
+        # Bare number: the ``$…$`` fallback of ``extract_answers`` must not mask a non-matching phrase.
+        french = "Réponse finale : La réponse finale est 24. J'espère que la réponse est correcte."
+
+        assert extract_answers(french, cot_style="minerva_fr")[0] == "24"
+        assert extract_answers(french)[0] != "24"
+        assert extract_answers(french, cot_style="minerva_de")[0] != "24"
+
+    def test_extract_answers_french_strict_requires_canonical_wording(self) -> None:
+        no_space_before_colon = "Réponse finale: La réponse finale est 24. J'espère que la réponse est correcte."
+
+        assert extract_answers(no_space_before_colon, cot_style="minerva_fr")[0] != "24"
+        assert extract_answers(no_space_before_colon, cot_style="minerva_fr", relaxed=True)[0] == "24"
+
+    @pytest.mark.parametrize(
+        "french",
+        [
+            "réponse finale : la réponse est 24. j'espère que c'est correct.",
+            "Reponse finale : 24 J’espère qu’elle est correcte",
+            "La réponse finale : La réponse finale est 24. J'espère que ce soit correct.",
+        ],
+    )
+    def test_extract_answers_french_relaxed_selection(self, french: str) -> None:
+        assert extract_answers(french, cot_style="minerva_fr", relaxed=True)[0] == "24"
+        assert extract_answers(french, relaxed=True)[0] != "24"
 
     def test_is_equiv_minerva_refuses_implausibly_long_candidates_without_running_sympy(self) -> None:
         # Unguarded, parsing this burns the full 5s timeout.
