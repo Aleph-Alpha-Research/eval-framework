@@ -1,0 +1,45 @@
+eval\_framework.llm package
+===========================
+
+Submodules
+----------
+
+eval\_framework.llm.base module
+-------------------------------
+
+.. automodule:: eval_framework.llm.base
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.llm.models module
+---------------------------------
+
+.. automodule:: eval_framework.llm.models
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.llm.openai module
+---------------------------------
+
+.. automodule:: eval_framework.llm.openai
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.llm.retry module
+--------------------------------
+
+.. automodule:: eval_framework.llm.retry
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: eval_framework.llm
+   :members:
+   :show-inheritance:
+   :undoc-members:

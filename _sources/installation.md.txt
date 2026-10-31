@@ -1,0 +1,114 @@
+# Installation
+
+This guide provides detailed installation instructions and dependency information for the **eval-framework**.
+
+### 1. Install `uv`
+
+Follow the official [installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
+
+### 2. Install Eval Framework
+
+Clone the repository and install all dependencies:
+
+```bash
+# Clone the repository
+git clone https://github.com/Aleph-Alpha-Research/eval-framework/tree/main
+cd eval-framework
+
+# Install all dependencies
+uv sync
+```
+
+### 3. Test Your Installation
+
+The example below talks to the OpenAI API and needs `OPENAI_API_KEY` to be set. Any OpenAI-compatible server (for example vLLM) can be targeted by adding `base_url=http://host:port/v1` to `--llm-args`.
+
+```bash
+uv run eval_framework \
+    --llm-args model_name="gpt-4o-mini" \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" "anatomy" \
+    --output-dir ./eval_results \
+    --num-fewshot 5 \
+    --num-samples 10
+```
+
+<!-- #### Pre-commit Hooks
+
+To help with development, enable pre-commit hooks:
+
+```bash
+uv tool install pre-commit
+uv run pre-commit install
+```
+-->
+
+## Environment Configuration
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```bash
+# API Keys (if using external models)
+HF_TOKEN="your_huggingface_token"        # For private HuggingFace models
+OPENAI_API_KEY="your_openai_key"         # For OpenAI models as judges
+
+# Debug mode
+DEBUG=false
+```
+
+## Docker Installation
+
+### Available Dockerfiles
+
+| Dockerfile              | Purpose                                     |
+| ----------------------- | ------------------------------------------- |
+| `Dockerfile`            | Main evaluation framework with CUDA support |
+| `src/eval_framework/tasks/Dockerfile_codebench`  | Specialized for BigCodeBench coding tasks   |
+
+
+### Build from Source
+
+#### Main Evaluation Framework
+
+```bash
+# Build main image (uses Dockerfile)
+docker build -t eval-framework .
+
+# Run with GPU support
+docker run -it --gpus all -v $(pwd):/workspace eval-framework
+```
+
+#### Specialized Builds
+
+```bash
+# BigCodeBench coding tasks (build context must be the tasks directory so COPY utils.py resolves)
+docker build -f src/eval_framework/tasks/Dockerfile_codebench -t eval-framework-codebench src/eval_framework/tasks/
+```
+
+## PyPI installation
+
+It is also possible to download Eval-Framework through pip:
+
+```bash
+pip install eval-framework
+```
+
+However, we recommend using the uv solver to avoid many dependency version issues, so:
+
+```bash
+uv pip install eval-framework
+```
+
+This allows you to run an evaluation without going through `uv run`:
+
+```bash
+eval_framework \
+    --llm-args model_name="gpt-4o-mini" \
+    --task-name "MMLU" \
+    --task-subjects "abstract_algebra" "anatomy" \
+    --output-dir ./eval_results \
+    --num-fewshot 5 \
+    --num-samples 10
+```
