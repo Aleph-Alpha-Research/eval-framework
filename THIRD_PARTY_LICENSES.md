@@ -28,7 +28,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache 2.0 License
 
-- **transformers** 5.22.0 - https://github.com/huggingface/transformers
+- **transformers** 5.22.1 - https://github.com/huggingface/transformers
 
 ## Apache Software License; MIT License
 
@@ -41,7 +41,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **distro** 1.9.0 - https://github.com/python-distro/distro
 - **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
 - **googleapis-common-protos** 1.76.0 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
-- **hf-xet** 1.7.1 - https://github.com/huggingface/xet-core
+- **hf-xet** 1.8.0 - https://github.com/huggingface/xet-core
 - **huggingface_hub** 2.4.0 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
@@ -129,7 +129,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.2.4 - https://github.com/tox-dev/py-filelock
+- **filelock** 4.2.5 - https://github.com/tox-dev/filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jiter** 0.18.0 - https://github.com/pydantic/jiter/
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -1105,7 +1105,7 @@ Apache License
    limitations under the License.
 ```
 
-### filelock 4.2.4 (MIT)
+### filelock 4.2.5 (MIT)
 
 ```text
 MIT License
@@ -1604,7 +1604,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### hf-xet 1.7.1 (Apache-2.0)
+### hf-xet 1.8.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -19038,7 +19038,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### transformers 5.22.0 (Apache 2.0 License)
+### transformers 5.22.1 (Apache 2.0 License)
 
 ```text
 Copyright 2018- The Hugging Face team. All rights reserved.
