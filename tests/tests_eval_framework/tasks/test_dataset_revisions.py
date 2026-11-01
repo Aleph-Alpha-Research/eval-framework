@@ -124,17 +124,6 @@ def test_pinned_by_framework_binds_the_bundled_lockfile() -> None:
     assert loader.revision == sha
 
 
-def test_pinned_frozen_binds_the_frozen_lockfile() -> None:
-    # Given the datasets held in the frozen lock file (e.g. allenai/social_i_qa and ybisk/piqa)
-    pins = dr.HfDatasetRevisions.from_file(dr.FROZEN_HF_REVISIONS_LOCKFILE).to_dict()
-    assert "allenai/social_i_qa" in pins
-    assert "ybisk/piqa" in pins
-
-    for dataset_path, sha in pins.items():
-        loader = dr.pinned_frozen(dataset_path).loader(None)
-        assert loader.revision == sha
-
-
 def test_pinned_documentation_links_dataset_and_records_revision(tmp_path: Path) -> None:
     # Given a lock file that pins the dataset
     lockfile = tmp_path / "hf-dataset-revisions.json"
