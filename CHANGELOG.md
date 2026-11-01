@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.19.8](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.7...v0.19.8) (2026-11-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=3.41.0,&lt;4 ([281ef7f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/281ef7fd428aa9451267be934110ff20edd30eff))
+
 ## [0.19.7](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.6...v0.19.7) (2026-10-31)
 
 
