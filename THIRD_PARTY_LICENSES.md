@@ -46,7 +46,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
-- **openai** 3.41.0 - https://github.com/openai/openai-python
+- **openai** 3.42.0 - https://github.com/openai/openai-python
 - **opentelemetry-api** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
 - **opentelemetry-exporter-http-transport** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
 - **opentelemetry-exporter-otlp-common** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
@@ -129,14 +129,14 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.15.1 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.2.5 - https://github.com/tox-dev/filelock
+- **filelock** 4.2.6 - https://github.com/tox-dev/filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jiter** 0.18.0 - https://github.com/pydantic/jiter/
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
 - **jsonschema-specifications** 2025.9.1 - https://github.com/python-jsonschema/jsonschema-specifications
 - **markdown-it-py** 4.2.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
-- **platformdirs** 4.14.0 - https://github.com/tox-dev/platformdirs
+- **platformdirs** 4.14.2 - https://github.com/tox-dev/platformdirs
 - **pydantic** 2.14.2 - https://github.com/pydantic/pydantic
 - **pydantic_core** 2.50.2 - https://github.com/pydantic
 - **PyYAML** 6.0.3 - https://pyyaml.org/
@@ -1105,7 +1105,7 @@ Apache License
    limitations under the License.
 ```
 
-### filelock 4.2.5 (MIT)
+### filelock 4.2.6 (MIT)
 
 ```text
 MIT License
@@ -11999,7 +11999,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### openai 3.41.0 (Apache-2.0)
+### openai 3.42.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -13897,7 +13897,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### platformdirs 4.14.0 (MIT)
+### platformdirs 4.14.2 (MIT)
 
 ```text
 MIT License
