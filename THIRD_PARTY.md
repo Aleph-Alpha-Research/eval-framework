@@ -10,7 +10,7 @@ and first-party/internal packages are excluded.
 | Package | Constraint |
 |---|---|
 | `antlr4-python3-runtime` | `==4.11.0` |
-| `datasets` | `>=5.0.1,<6` |
+| `datasets` | `>=5.1.0,<6` |
 | `google-crc32c` | `>=1.9.0,<2` |
 | `jsonlines` | `>=4,<5` |
 | `jsonschema` | `>=4.26.0,<5` |
@@ -24,14 +24,14 @@ and first-party/internal packages are excluded.
 | `openai` | `>=3.41.0,<4` |
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
-| `pydantic` | `>=2.14.1,<3` |
+| `pydantic` | `>=2.14.2,<3` |
 | `python-dotenv` | `>=1.2.4,<2` |
 | `python-iso639` | `>=2026.7.23` |
 | `pyyaml` | `>=6.0.3,<7` |
 | `scipy` | `>=1.18.1,<2` |
 | `sympy` | `>=1.14.0,<2` |
 | `tiktoken` | `>=0.14.0,<1` |
-| `transformers` | `>=5.21.0,<6` |
+| `transformers` | `>=5.22.0,<6` |
 | `wandb` | `>=0.31.0,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
@@ -41,7 +41,7 @@ and first-party/internal packages are excluded.
 |---|---|
 | `annotated-doc` | `0.0.5` |
 | `annotated-types` | `0.8.0` |
-| `anyio` | `4.15.1` |
+| `anyio` | `4.16.0` |
 | `attrs` | `26.1.0` |
 | `certifi` | `2026.10.23` |
 | `charset-normalizer` | `3.5.2` |
@@ -81,12 +81,12 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.66b2` |
 | `packaging` | `26.3` |
 | `pandas` | `3.1.0` |
-| `platformdirs` | `4.14.2` |
+| `platformdirs` | `4.14.3` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.0` |
 | `pydantic-core` | `2.50.2` |
 | `pygments` | `2.21.0` |
-| `python-dateutil` | `3.0.0` |
+| `python-dateutil` | `4.0.0` |
 | `referencing` | `0.37.0` |
 | `regex` | `2026.9.29` |
 | `requests` | `2.34.2` |
