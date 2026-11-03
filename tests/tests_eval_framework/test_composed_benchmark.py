@@ -369,7 +369,7 @@ def test_num_samples_caps_per_subject_not_in_total() -> None:
     # When capping at two samples
     samples = list(task.iterate_samples(num_samples=2))
 
-    # Then num_samples caps per subject (like BaseTask): two from each; ids restart at 0 per subject
+    # Then num_samples caps per subject: two from each; ids restart at 0 per subject
     assert [sample.subject for sample in samples] == ["a", "a", "b", "b"]
     assert [sample.id for sample in samples] == [0, 1, 0, 1]
 
@@ -434,6 +434,12 @@ def test_get_metadata_reports_fewshot_split_from_the_policy() -> None:
     sampled = FewShot(FewShotSplit("dev"), ChoiceRenderer(_DUMMY_READER, _DummyStyler()))
     assert _make_eval(fewshot=sampled).get_metadata()["fewshot_split"] == "dev"
     assert "fewshot_split" not in _make_eval(fewshot=NoFewShot()).get_metadata()
+
+
+def test_get_metadata_reports_the_kinds_extra_metadata() -> None:
+    # The kind's own metadata is merged in — for a Choice eval that is the styler's task style,
+    # so results record which prompt style produced them.
+    assert _make_eval().get_metadata()["task_style"] == TaskStyle.MULTIPLE_CHOICE.value
 
 
 def test_choice_wires_the_kind_and_fewshot_from_one_reader_and_styler() -> None:

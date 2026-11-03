@@ -1,107 +1,101 @@
-import functools
-from collections.abc import Callable, Iterable
+from collections.abc import Sequence
+from typing import override
 
 import pytest
 
-from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
-from eval_framework.tasks.registry import Registry, register_lazy_task, register_task, with_registry
+from eval_framework.contract import Benchmark, Eval, ResponseType
+from eval_framework.tasks.registry import Lazy, Registry
+from template_formatting.formatter import BaseFormatter
 
 
-class BenchmarkStub(BaseTask[str]):
-    """A minimal task used only to exercise registry registration and lookup — its topic is irrelevant.
-    ``NAME`` normalizes to the class name so eager and lazy registration key it identically."""
+class _BenchmarkStub(Benchmark):
+    """A minimal benchmark used only to exercise registry registration and lookup — its topic is
+    irrelevant."""
 
-    REVISION_LOCKFILE = None
+    def __init__(self, id: str = "BenchmarkStub") -> None:
+        self._id = id
 
-    NAME = "Benchmark Stub"
-    DATASET_PATH = "stub"
-    SAMPLE_SPLIT = "test"
-    FEWSHOT_SPLIT = "test"
-    SUBJECTS = ["stub"]
-    LANGUAGE = Language.ENG
-    RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS: list = []
+    @override
+    def id(self) -> str:
+        return self._id
 
-    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
-        return iter([])
+    @override
+    def response_type(self) -> ResponseType:
+        return ResponseType.COMPLETION
 
+    @override
+    def metrics(self) -> list:
+        return []
 
-class MultiWordBenchmarkStub(BenchmarkStub):
-    """A longer name, to exercise whitespace/case/punctuation normalization in lookups."""
+    @override
+    def subjects(self, tokens: list[str] | None = None) -> list[str]:
+        return ["stub"]
 
-    NAME = "Multi Word Benchmark Stub"
+    @override
+    def display_name(self) -> str:
+        return "Benchmark Stub"
 
+    @override
+    def create(
+        self,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+        seed: int | None = None,
+    ) -> Eval:
+        raise NotImplementedError("the registry never creates evals itself")
 
-def temporary_registry[**P, T](fun: Callable[P, T]) -> Callable[P, T]:
-    """Decorator to run a function with a temporary empty task registry."""
-
-    @functools.wraps(fun)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-        temp_registry = Registry()
-        with with_registry(temp_registry):
-            return fun(*args, **kwargs)
-
-    return wrapper
+    @override
+    def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
+        return ""
 
 
 def test_case_insensitive_lookup() -> None:
+    # Given benchmarks registered under their ids
     registry = Registry()
+    registry.add(_BenchmarkStub())
 
-    register_task(BenchmarkStub, registry)
-
+    # Then lookups normalize case, whitespace and separators onto the registered key
     assert "Benchmark Stub" in registry
     assert set(registry.task_names()) == {"BenchmarkStub"}
-    assert registry["Benchmark Stub"].id() == BenchmarkStub.__name__
-    assert registry["benchmark stub"].id() == BenchmarkStub.__name__
-    assert registry["BenchmarkStub"].id() == BenchmarkStub.__name__
+    assert registry["Benchmark Stub"].id() == "BenchmarkStub"
+    assert registry["benchmark stub"].id() == "BenchmarkStub"
+    assert registry["BenchmarkStub"].id() == "BenchmarkStub"
 
-    register_task(MultiWordBenchmarkStub, registry)
+    registry.add(_BenchmarkStub(id="MultiWordBenchmarkStub"))
     assert set(registry.task_names()) == {"BenchmarkStub", "MultiWordBenchmarkStub"}
-    assert registry["multi word benchmark stub"].id() == MultiWordBenchmarkStub.__name__
-    assert registry["MULTI WORD BENCHMARK STUB"].id() == MultiWordBenchmarkStub.__name__
-    assert registry["Multi Word     Benchmark Stub"].id() == MultiWordBenchmarkStub.__name__
-    assert registry["Multi-Word_Benchmark-Stub"].id() == MultiWordBenchmarkStub.__name__
+    assert registry["multi word benchmark stub"].id() == "MultiWordBenchmarkStub"
+    assert registry["MULTI WORD BENCHMARK STUB"].id() == "MultiWordBenchmarkStub"
+    assert registry["Multi Word     Benchmark Stub"].id() == "MultiWordBenchmarkStub"
+    assert registry["Multi-Word_Benchmark-Stub"].id() == "MultiWordBenchmarkStub"
 
     with pytest.raises(ValueError):
         registry["Multi.Word.Benchmark.Stub"]
 
 
-def test_register_non_task() -> None:
+def test_duplicate_registration_is_rejected() -> None:
+    # Given a registered benchmark, When adding another whose id normalizes to the same key
     registry = Registry()
+    registry.add(_BenchmarkStub())
 
-    with pytest.raises(ValueError):
-        register_task(int, registry=registry)  # type: ignore[arg-type]
-
-    class MyTask:
-        pass
-
-    with pytest.raises(ValueError):
-        register_task(MyTask, registry=registry)  # type: ignore[arg-type]
+    # Then the second registration is rejected
+    with pytest.raises(ValueError, match="duplicate"):
+        registry.add(_BenchmarkStub(id="Benchmark-Stub"))
 
 
-def test_lazy_registration() -> None:
+def test_lazy_registration_defers_loading_until_lookup() -> None:
+    # Given a lazily registered benchmark whose load is counted
     registry = Registry()
-    register_lazy_task(f"{BenchmarkStub.__module__}.{BenchmarkStub.__name__}", registry=registry)
-    assert registry["Benchmark Stub"].display_name() == BenchmarkStub.NAME
+    loads: list[int] = []
 
+    def load() -> Benchmark:
+        loads.append(1)
+        return _BenchmarkStub()
 
-def test_subjects() -> None:
-    registry = Registry()
-    register_task(BenchmarkStub, registry)
-    assert registry["Benchmark Stub"].subjects() == BenchmarkStub.SUBJECTS
+    registry.add(Lazy(id="BenchmarkStub", load=load))
 
-    registry = Registry()
-    register_lazy_task(f"{BenchmarkStub.__module__}.{BenchmarkStub.__name__}", registry=registry)
-    assert registry["Benchmark Stub"].subjects() == BenchmarkStub.SUBJECTS
-
-
-def test_deprecated_register_methods_warn() -> None:
-    registry = Registry()
-    with pytest.warns(DeprecationWarning):
-        registry.register(BenchmarkStub)
-    assert registry["Benchmark Stub"].id() == BenchmarkStub.__name__
-
-    registry = Registry()
-    with pytest.warns(DeprecationWarning):
-        registry.register_lazy(f"{MultiWordBenchmarkStub.__module__}.{MultiWordBenchmarkStub.__name__}")
-    assert registry["Multi Word Benchmark Stub"].subjects() == MultiWordBenchmarkStub.SUBJECTS
+    # Then registration alone loads nothing, and a lookup delegates to the loaded benchmark
+    assert loads == []
+    assert registry["Benchmark Stub"].display_name() == "Benchmark Stub"
+    assert registry["Benchmark Stub"].subjects() == ["stub"]
+    assert loads == [1]  # memoized: both delegating calls share one load

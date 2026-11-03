@@ -4,7 +4,7 @@ The model completes a Python function stub; a sandboxed metric runs the result a
 The ``_OLMES`` variants generate the body and are scored by execution; the ``BPB`` variants instead score the
 loglikelihood of the gold solution as a single candidate. The builders and prompt shapes here are exposed for
 the sibling ``humaneval_plus`` and ``humaneval_ellamind`` modules to reuse (retargeted to their datasets /
-language), mirroring how their BaseTask ancestors subclassed this task.
+language).
 """
 
 from dataclasses import dataclass
