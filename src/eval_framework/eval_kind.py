@@ -127,6 +127,9 @@ ItemText = Callable[[dict[str, Any]], str]
 # item -> the gold answer: one string, several equally-correct ones, or None (no gold; scored via context).
 ItemGroundTruth = Callable[[dict[str, Any]], str | list[str] | None]
 
+# item -> the leading SYSTEM turn's text, or None when this item gets no SYSTEM turn.
+ItemSystemPrompt = Callable[[dict[str, Any]], str | None]
+
 # item -> the per-sample metric context (gold structure / test harness / instruction spec), or None.
 ItemContext = Callable[[dict[str, Any]], BaseMetricContext | list[BaseMetricContext] | None]
 
@@ -144,8 +147,8 @@ class Generative(EvalKind):
     per-language code fence (``""`` for none) —, ``ground_truth`` derives the gold answer, and ``metrics`` are
     the scoring metrics. ``context`` derives the per-sample scoring material a metric needs beyond the gold
     string (see ``SampleBody.context``); ``initial_prompt`` is a preamble prepended once above the first
-    (few-shot) turn, and ``system_prompt`` derives a leading SYSTEM turn per item (``None`` for no system
-    turn — e.g. an instruction-following task that carries its constraints in the system prompt)."""
+    (few-shot) turn, and ``system_prompt`` derives a leading SYSTEM turn per item — returning ``None`` sends
+    no SYSTEM turn for that item (pass ``None`` when the kind never has one)."""
 
     def __init__(
         self,
@@ -156,7 +159,7 @@ class Generative(EvalKind):
         metrics: list[type["BaseMetric"]],
         context: ItemContext | None = None,
         initial_prompt: str | None = None,
-        system_prompt: ItemText | None = None,
+        system_prompt: ItemSystemPrompt | None = None,
     ) -> None:
         self._build_prompt = build_prompt
         self._cue: ItemText = cue if callable(cue) else (lambda item: cue)
