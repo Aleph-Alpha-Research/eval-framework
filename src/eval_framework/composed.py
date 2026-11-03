@@ -67,7 +67,7 @@ class ComposedEval(Eval):
         for subject in self._subjects:
             sample_rows = self._load_dataset(subject.load_key)
             assert len(sample_rows) > 0
-            sample_id = 0  # ids and the num_samples cap are per subject, matching BaseTask
+            sample_id = 0  # ids and the num_samples cap are per subject
             done = False
             for item in sample_rows:
                 if done:
@@ -157,7 +157,7 @@ class ComposedEval(Eval):
 
             try:
                 error = None
-                # First the model-specific cleanup, then the answer policy's extraction (matching BaseTask).
+                # First the model-specific cleanup, then the answer policy's extraction.
                 completion = llm.post_process_completion(raw_completion.completion, sample)
                 completion = self._answer.extract_answer(
                     completion,

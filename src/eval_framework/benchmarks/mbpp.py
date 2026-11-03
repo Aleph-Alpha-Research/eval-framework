@@ -4,7 +4,7 @@ The model writes a Python function; a sandboxed metric appends the gold ``assert
 ``_OLMES`` / ``_EvalPlus`` variants generate the body (scored by execution) from a fixed 3-shot block; the
 ``BPB`` variants score the loglikelihood of the gold solution as a single candidate. The builders, reconstruct
 functions, and shared pieces here are exposed for the sibling ``mbpp_ellamind`` module to reuse (retargeted to
-the German dataset), mirroring how its BaseTask ancestors subclassed this task.
+the German dataset).
 """
 
 import ast

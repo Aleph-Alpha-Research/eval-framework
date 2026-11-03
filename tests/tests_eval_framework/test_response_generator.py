@@ -7,18 +7,21 @@ import pytest
 from dateutil import parser
 from openai.types.chat.completion_create_params import ResponseFormat
 
-from eval_framework.contract import Benchmark, Eval
+from eval_framework.answer import ExtractFromCompletion
+from eval_framework.composed import ComposedBenchmark
+from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
+from eval_framework.eval_kind import Generative
+from eval_framework.fewshot import NoFewShot
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator, repeat_samples
 from eval_framework.result_processors.base import ResultProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import Completion, RawCompletion, RawLoglikelihood
-from eval_framework.tasks.base import BaseTask, Language, ResponseType, Sample
 from eval_framework.tasks.eval_config import EvalConfig
-from eval_framework.tasks.registry import Registry, register_task
+from eval_framework.tasks.registry import Registry
 from template_formatting.formatter import Message, Role
+from tests.tests_eval_framework.benchmarks.utils import DatasetStub
 from tests.tests_eval_framework.conftest import MockLLM
-from tests.tests_eval_framework.tasks.test_registry import temporary_registry
 
 
 def test_generate_completions_message_handling() -> None:
@@ -199,7 +202,7 @@ class _PrecedenceStub(Eval, Benchmark):
     the merged precedence through the public run, with no patching."""
 
     def __init__(self, stop_sequences: list[str] | None, max_tokens: int | None) -> None:
-        self._stop_sequences = list(stop_sequences or [])  # BaseTask normalised None -> []
+        self._stop_sequences = list(stop_sequences or [])  # the Eval contract reports "no stops" as []
         self._max_tokens = max_tokens
         self.called_stop_sequences: list[str] | None = None
         self.called_max_tokens: int | None = None
@@ -469,41 +472,6 @@ def test_with_wrong_loaded_metadata(tmp_path: Path) -> None:
                 generator.generate()
 
 
-def test_generate_completions_applies_model_then_task_post_processing() -> None:
-    # generate_completions must apply the model's post-processing (llm.post_process_completion) BEFORE the
-    # task's own (post_process_generated_completion). The markers make the order visible:
-    # raw -> MODEL[raw] -> TASK[MODEL[raw]]. This is a property of BaseTask.generate_completions, so it runs
-    # on a BaseTask double built directly — no registry, no ResponseGenerator. (The composed equivalent, a
-    # kind's extract_answer, is covered in the composed tests.)
-    class MarkerLLM(MockLLM):
-        def post_process_completion(self, completion: str, sample: Sample) -> str:
-            return f"MODEL[{completion}]"
-
-    class MarkerTask(StubTask):
-        def post_process_generated_completion(self, completion_text: str, sample: Sample | None = None) -> str:
-            return f"TASK[{super().post_process_generated_completion(completion_text, sample)}]"
-
-    task = MarkerTask.with_overwrite(num_fewshot=0, custom_subjects=None, custom_hf_revision=None)
-    llm = MarkerLLM()
-    llm.generate = Mock(  # type: ignore[method-assign]
-        return_value=[
-            RawCompletion(prompt="prompt", completion="raw_answer", prompt_num_tokens=None, completion_num_tokens=None)
-        ]
-    )
-    sample = Sample(
-        id=0,
-        subject="stub",
-        ground_truth="A",
-        messages=[Message(role=Role.USER, content="Test question")],
-        possible_completions=None,
-    )
-
-    completions = task.generate_completions(llm, [sample])
-
-    assert completions[0].raw_completion == "raw_answer"
-    assert completions[0].completion == "TASK[MODEL[raw_answer]]"
-
-
 class SaboteurLLM(BaseLLM):
     """LLM that always raises — drives the fail_on_error code path without mocks."""
 
@@ -543,43 +511,44 @@ class NoopResultProcessor(ResultProcessor):
         return []
 
 
-class StubTask(BaseTask[str]):
-    """Minimal task that yields a single sample, no HF dataset loader."""
-
-    REVISION_LOCKFILE = None
-
-    NAME = "StubTask"
-    DATASET_PATH = "stub"
-    SAMPLE_SPLIT = "test"
-    FEWSHOT_SPLIT = "test"
-    SUBJECTS = ["stub"]
-    LANGUAGE = Language.ENG
-    RESPONSE_TYPE = ResponseType.COMPLETION
-    METRICS: list = []
-
-    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
-        yield Sample(
-            id=0,
-            messages=[Message(role=Role.USER, content="Hello")],
-            ground_truth="A",
-            subject="stub",
-            possible_completions=None,
-        )
+def _stub_registry() -> Registry:
+    """A registry holding one single-sample benchmark ("StubBenchmark"), no HF dataset loader."""
+    kind = Generative(
+        build_prompt=lambda item: item["question"],
+        cue="",
+        ground_truth=lambda item: item["answer"],
+        metrics=[],
+    )
+    benchmark = ComposedBenchmark.compose(
+        id="StubBenchmark",
+        kind=kind,
+        answer=ExtractFromCompletion(lambda completion_text: completion_text),
+        sample_split="test",
+        fewshot=NoFewShot(),
+        dataset_policy=DatasetStub({"test": [{"question": "Hello", "answer": "A"}]}),
+        language=None,
+    )
+    registry = Registry()
+    registry.add(benchmark)
+    return registry
 
 
-@temporary_registry
 def test_fail_on_error_propagates_llm_failure() -> None:
     # Given a generator configured with fail_on_error=True against an LLM that always raises
-    register_task(StubTask)
     config = EvalConfig(
-        task_name="StubTask",
+        task_name="StubBenchmark",
         num_fewshot=0,
         num_samples=1,
         llm_class=SaboteurLLM,
         save_intermediate_results=False,
         fail_on_error=True,
     )
-    generator = ResponseGenerator(SaboteurLLM(), config, NoopResultProcessor())  # type: ignore[arg-type]
+    generator = ResponseGenerator(
+        SaboteurLLM(),
+        config,
+        NoopResultProcessor(),  # type: ignore[arg-type]
+        benchmark_registry=_stub_registry(),
+    )
 
     # Then the original exception propagates
     with pytest.raises(RuntimeError, match="inference connection failed"):
@@ -587,18 +556,21 @@ def test_fail_on_error_propagates_llm_failure() -> None:
         generator.generate()
 
 
-@temporary_registry
 def test_fail_on_error_disabled_swallows_llm_failure() -> None:
     # Given a generator with the default fail_on_error=False against an LLM that always raises
-    register_task(StubTask)
     config = EvalConfig(
-        task_name="StubTask",
+        task_name="StubBenchmark",
         num_fewshot=0,
         num_samples=1,
         llm_class=SaboteurLLM,
         save_intermediate_results=False,
     )
-    generator = ResponseGenerator(SaboteurLLM(), config, NoopResultProcessor())  # type: ignore[arg-type]
+    generator = ResponseGenerator(
+        SaboteurLLM(),
+        config,
+        NoopResultProcessor(),  # type: ignore[arg-type]
+        benchmark_registry=_stub_registry(),
+    )
 
     # When running the generator
     responses = generator.generate()

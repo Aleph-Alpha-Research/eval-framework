@@ -1,60 +1,30 @@
 """Task-style helpers and strategy classes for choice-based evaluation tasks.
 
-This module provides injectable styling strategies — ``MCStyle`` and
-``ClozeStyle`` — that reduce boilerplate in multiple-choice and cloze
-evaluation tasks.  Using a task styler is entirely optional; existing tasks that
-override ``BaseTask`` methods directly continue to work unchanged.
+This module provides injectable styling strategies — ``MCStyle``, ``ClozeStyle``, ``MCCompletionStyle``
+and ``BPBStyle`` — that render one choice item (question plus answer options) into the prompt text,
+answer cue, scored candidates and ground truth. The styler also declares the response type, metrics
+and metadata of its style.
 
 Quick-start
 -----------
-A new choice-based task sets ``TASK_STYLER`` on its ``BaseTask`` subclass and
-implements **three data-access methods**:
-
-* ``_get_raw_question(item) -> str``   — the bare question string
-* ``_get_choices(item) -> list[str]``  — ordered list of answer options
-* ``_get_correct_index(item) -> int``  — 0-based index of the correct answer
-
-``BaseTask`` automatically delegates its styling hooks to the task styler.
-``RESPONSE_TYPE`` and ``METRICS`` are read from the styler by callers that need
-them (e.g. ``EvaluationGenerator``).
+A choice-based benchmark pairs a ``ChoiceReader`` (item -> raw question, choices, correct index) with
+a styler via ``ComposedBenchmark.choice``, which drives both the scored sample and the few-shot
+demonstrations from the same pair:
 
 .. code-block:: python
 
-    class MyTask(BaseTask[str]):
-        NAME = "MyTask"
-        DATASET_PATH = "my/dataset"
-        SAMPLE_SPLIT = "test"
-        FEWSHOT_SPLIT = "train"
-        SUBJECTS = ["my_subject"]
-        TASK_STYLER = ClozeStyle(question_prefix="Question: ", cue_text="Answer:")
+    benchmark = ComposedBenchmark.choice(
+        id="MyBenchmark",
+        reader=MyChoiceReader(),
+        styler=ClozeStyle(question_prefix="Question: ", cue_text="Answer:"),
+        sample_split="test",
+        fewshot_split="train",
+        dataset_policy=Pinned("my/dataset"),
+        language=Language.ENG,
+    )
 
-        def _get_raw_question(self, item): return item["question"]
-        def _get_choices(self, item): return item["choices"]
-        def _get_correct_index(self, item): return item["answer_idx"]
-
-For task families with both MC and Cloze variants, a shared base class holds the
-dataset attributes and data-access methods.  Variants only differ in ``TASK_STYLER``:
-
-.. code-block:: python
-
-    class _ARC_Base(BaseTask[str]):
-        DATASET_PATH = "allenai/ai2_arc"
-        ...
-        def _get_raw_question(self, item): return item["question"]
-        def _get_choices(self, item): return item["choices"]["text"]
-        def _get_correct_index(self, item): ...
-
-    class ARC(_ARC_Base):
-        NAME = "ARC"
-        TASK_STYLER = ClozeStyle()
-
-    class ARC_MC(_ARC_Base):
-        NAME = "ARC_MC"
-        TASK_STYLER = MCStyle(space_prefixed_labels=True)
-
-    class ARC_BPB(_ARC_Base):
-        NAME = "ARC_BPB"
-        TASK_STYLER = BPBStyle()
+Task families with MC, Cloze and BPB variants share the reader and differ only in the styler each
+variant's builder injects.
 """
 
 import hashlib
@@ -115,10 +85,8 @@ def question_cue_text(language: Language) -> tuple[str, str]:
 class TaskStyler(ABC):
     """Strategy object that controls prompt assembly and scoring for choice-based tasks.
 
-    Concrete implementations (``MCStyle``, ``ClozeStyle``) are assigned to a
-    task's ``TASK_STYLER`` class attribute.  ``BaseTask`` delegates its
-    styling hooks to this object, so task authors only implement data-access
-    methods.
+    Concrete implementations (``MCStyle``, ``ClozeStyle``) are injected into the ``Choice``
+    eval kind alongside a ``ChoiceReader``, so benchmark authors only supply data access.
 
     Attributes:
         response_type: The response type the task should use (e.g. LOGLIKELIHOODS).

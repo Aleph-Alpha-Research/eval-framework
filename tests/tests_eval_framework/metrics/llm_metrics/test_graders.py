@@ -4,6 +4,7 @@ from collections.abc import Sequence
 import pytest
 from openai.types.chat.completion_create_params import ResponseFormat
 
+from eval_framework.contract import Sample
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.llm.graders.chatbot_style_grader import ChatbotStyleGrader
 from eval_framework.metrics.llm.graders.coherence_grader import CoherenceGrader
@@ -15,7 +16,6 @@ from eval_framework.metrics.llm.graders.instruction_grader import InstructionGra
 from eval_framework.metrics.llm.graders.language import Language, LanguageNotSupportedError
 from eval_framework.metrics.llm.graders.refusal_grader import RefusalGrader
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
-from eval_framework.tasks.base import Sample
 from template_formatting.formatter import Message, Role
 
 INSTRUCTION = "Mike likes Pizza, Jenny does not.\nWho likes Pizza?"

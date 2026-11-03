@@ -3,6 +3,7 @@ from typing import Any
 
 import pytest
 
+from eval_framework.contract import Sample
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.llm.llm_judge_mtbench_pair import (
@@ -17,7 +18,6 @@ from eval_framework.metrics.llm.llm_judge_mtbench_single import (
     MTBenchJudgeSingleMetricContext,
 )
 from eval_framework.shared.types import Completion, RawCompletion, RawLoglikelihood
-from eval_framework.tasks.base import Sample
 from template_formatting.formatter import Message
 
 

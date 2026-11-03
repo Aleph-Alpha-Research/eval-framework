@@ -1,8 +1,8 @@
 """Pinned Hugging Face dataset revisions.
 
 A lock file maps dataset paths to pinned commit SHAs, so an eval runs against a reproducible
-dataset revision. ``BaseTask`` resolves its pin from the lock file named by ``REVISION_LOCKFILE``;
-composed benchmarks take a ``Pinned`` policy instead (usually via ``pinned_by_framework``).
+dataset revision. Benchmarks resolve their pin through a ``Pinned`` dataset policy (usually via
+``pinned_by_framework``).
 """
 
 import json

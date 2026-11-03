@@ -1,5 +1,3 @@
-from enum import Enum
-
 from eval_framework.benchmarks.arc import ARC_BENCHMARKS
 from eval_framework.benchmarks.arc_de import ARC_DE_BENCHMARK
 from eval_framework.benchmarks.arc_ellamind import ARC_ELLAMIND_BENCHMARKS
@@ -40,15 +38,8 @@ from eval_framework.benchmarks.social_iqa import SOCIAL_IQA_BENCHMARKS
 from eval_framework.benchmarks.squad import SQUAD_BENCHMARKS
 from eval_framework.benchmarks.winogrande import WINOGRANDE_BENCHMARKS
 from eval_framework.benchmarks.winogrande_ellamind import WINOGRANDE_ELLAMIND_BENCHMARKS
-from eval_framework.tasks.base import BaseTask
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.registry import registry as global_registry
-
-
-class TaskNameEnum(Enum):
-    @property
-    def value(self) -> type[BaseTask]:
-        return super().value
 
 
 def register_all_tasks(registry: Registry | None = None) -> None:

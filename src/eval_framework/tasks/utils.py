@@ -6,7 +6,7 @@ import string
 import threading
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, NamedTuple, overload
+from typing import Any, NamedTuple
 
 import dill
 from llm_sandbox import SandboxSession
@@ -37,23 +37,6 @@ def extract_python_code_from_response(llm_response: str) -> str:
         if matches := re.findall(pattern, llm_response, re.DOTALL):
             return matches[0].strip()
     return llm_response
-
-
-class classproperty[T]:
-    """Descriptor supporting property-like access on classes and instances."""
-
-    def __init__(self, fget: Callable[[Any], T]) -> None:
-        self.fget = fget
-
-    @overload
-    def __get__(self, obj: None, owner: type[Any]) -> T: ...
-
-    @overload
-    def __get__(self, obj: object, owner: type[Any] | None = None) -> T: ...
-
-    def __get__(self, obj: object | None, owner: type[Any] | None = None) -> T:
-        cls = owner if owner is not None else type(obj)
-        return self.fget(cls)
 
 
 _pools: dict[tuple[str | None, tuple[str, ...] | None], ContainerPoolManager] = {}
