@@ -69,10 +69,14 @@ class Language(Enum):
     ENG = "English"
     FIN = "Finnish"
     FRA = "French"
+    HUN = "Hungarian"
     ITA = "Italian"
     NLD = "Dutch"
     POL = "Polish"
+    POR = "Portuguese"
+    RUS = "Russian"
     SPA = "Spanish"
+    UKR = "Ukrainian"
 
 
 # A subject-templated preamble: maps a subject label to the preamble text (e.g. MMLU's
@@ -91,6 +95,10 @@ _DEFAULT_QUESTION_CUE_TEXT: dict[Language, tuple[str, str]] = {
     Language.FIN: ("Kysymys: ", "Vastaus:"),
     Language.NLD: ("Vraag: ", "Antwoord:"),
     Language.POL: ("Pytanie: ", "Odpowiedź:"),
+    Language.RUS: ("Вопрос: ", "Ответ:"),
+    Language.UKR: ("Питання: ", "Відповідь:"),
+    Language.HUN: ("Kérdés: ", "Válasz:"),
+    Language.POR: ("Pergunta: ", "Resposta:"),
 }
 
 

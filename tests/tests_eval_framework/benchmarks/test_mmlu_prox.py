@@ -231,7 +231,7 @@ _BPB = _ExpectedPrompt(
     [
         pytest.param(partial(mmlu_prox, "MC", "DE"), _MC, id="mc_de"),
         pytest.param(partial(mmlu_prox, "MC_OLMES", "DE"), _MC_OLMES, id="mc_olmes_de"),
-        pytest.param(partial(mmlu_prox, "CLOZE", "DE"), _CLOZE, id="cloze_de"),
+        pytest.param(partial(mmlu_prox, "Cloze", "DE"), _CLOZE, id="cloze_de"),
         pytest.param(partial(mmlu_prox, "BPB", "DE"), _BPB, id="bpb_de"),
     ],
 )
@@ -286,7 +286,7 @@ def _oneshot(
             id="mc_olmes_de",
         ),
         pytest.param(
-            partial(mmlu_prox, "CLOZE", "DE"),
+            partial(mmlu_prox, "Cloze", "DE"),
             _oneshot(_QA_PREAMBLE, _CLOZE_FEWSHOT_MESSAGES, _CLOZE_EVAL_MESSAGES, _CLOZE),
             id="cloze_de",
         ),
