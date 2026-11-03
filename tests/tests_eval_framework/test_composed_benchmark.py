@@ -520,3 +520,27 @@ def test_generative_derives_the_cue_from_the_item_when_given_a_callable() -> Non
 
     # Then the cue is rendered from that item
     assert body.cue == "```go\n"
+
+
+def test_generative_lets_the_item_decide_whether_there_is_a_system_turn() -> None:
+    # Given a generative kind whose system prompt comes from per-item data that may be empty
+    kind = Generative(
+        build_prompt=lambda item: item["question"],
+        cue="",
+        ground_truth=lambda item: None,
+        metrics=[],
+        system_prompt=lambda item: item["instructions"] or None,
+    )
+
+    # When reading an item with instructions and one without
+    [with_instructions] = kind.samples({"question": "q", "instructions": "be terse"})
+    [without_instructions] = kind.samples({"question": "q", "instructions": ""})
+
+    # Then only the item with instructions gets a SYSTEM turn
+    assert kind.messages(with_instructions, fewshot=[], subject_label="s") == [
+        Message(role=Role.SYSTEM, content="be terse"),
+        Message(role=Role.USER, content="q"),
+    ]
+    assert kind.messages(without_instructions, fewshot=[], subject_label="s") == [
+        Message(role=Role.USER, content="q"),
+    ]
