@@ -67,6 +67,10 @@ _DEFAULT_QUESTION_CUE_TEXT: dict[Language, tuple[str, str]] = {
     Language.FIN: ("Kysymys: ", "Vastaus:"),
     Language.NLD: ("Vraag: ", "Antwoord:"),
     Language.POL: ("Pytanie: ", "Odpowiedź:"),
+    Language.RUS: ("Вопрос: ", "Ответ:"),
+    Language.UKR: ("Питання: ", "Відповідь:"),
+    Language.HUN: ("Kérdés: ", "Válasz:"),
+    Language.POR: ("Pergunta: ", "Resposta:"),
 }
 
 
