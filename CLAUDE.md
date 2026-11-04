@@ -19,19 +19,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Core Architecture**
 
-The eval-framework follows a modular architecture with three main extensible base classes:
+The eval-framework follows a modular architecture with three main extension points:
 
 1. **BaseLLM** (`src/eval_framework/llm/base.py`) - Language model implementations
    - Used to define how to get responses from models (OpenAI-compatible endpoints, custom APIs, etc.)
    - Implementations: `OpenAIModel` (any OpenAI-compatible endpoint).
    - Requires: `LLM_NAME`, `DEFAULT_FORMATTER`, and methods like `_get_completion()`
 
-2. **BaseTask** (`src/eval_framework/tasks/base.py`) - Benchmark/task definitions
-   - Represents evaluation benchmarks (MMLU, HumanEval, InfiniteBench, etc.)
-   - New tasks should ideally contain a TASK_STYLER which assembles the prompt from underlying messages. There should be a very good reason to not have this.
-   - Three task styles: `COMPLETION`, `LOGLIKELIHOODS`, and LLM-judge-based
-   - Requires: `NAME`, `DATASET_PATH`, `SUBJECTS`, and scoring methods
-   - Loaded dynamically from `src/eval_framework/benchmarks/` directory
+2. **ComposedBenchmark** (`src/eval_framework/composed.py`) - Benchmark/task definitions
+   - A benchmark is assembled from injected parts via `ComposedBenchmark.compose`: an `EvalKind`
+     (the prompt side — `Generative` for free-form answers, `Choice(reader, styler)` for choice
+     tasks), an `AnswerPolicy` (the response side — `ExtractFromCompletion` for generation,
+     `PickFromCandidates` for loglikelihood scoring), a `FewShotPolicy`, a `DatasetPolicy`
+     (loading + revision pinning, e.g. `pinned_by_framework`), and a `SubjectsSelector`
+   - Never subclass `ComposedEval`; new behavior goes into the injected parts
+   - Benchmark modules live in `src/eval_framework/benchmarks/`, one builder function per variant,
+     each module exposing a `*_BENCHMARKS` list
 
 3. **BaseMetric** (`src/eval_framework/metrics/base.py`) - Evaluation metrics
    - Computes scores for task responses (accuracy, BLEU, F1, etc.)
@@ -58,12 +61,18 @@ The eval-framework follows a modular architecture with three main extensible bas
 
 **Key Modules**
 
-- **`tasks/`**: Task definitions, dataset handling, task loading
-  - `base.py`: `BaseTask` class definition
-  - `task_loader.py`: Dynamic task discovery and loading
-  - `task_style.py`: Enum for task types (completion, loglikelihood, etc.)
-  - `benchmarks/`: Individual task implementations (MMLU, HumanEval, etc.)
-  - `perturbation.py`: Robustness testing via text perturbations
+- **`composed.py` / `eval_kind.py` / `answer.py` / `fewshot.py` / `subjects.py` / `choices.py`**: the
+  composition vocabulary — benchmark assembly, prompt kinds, answer policies, few-shot policies,
+  subject selection, choice readers
+
+- **`benchmarks/`**: Individual benchmark modules (MMLU, HumanEval, GSM8K, etc.)
+
+- **`tasks/`**: Registry, dataset handling, shared task vocabulary
+  - `registry.py`: `Registry` of `Benchmark`s, plus `Lazy` for deferred loading
+  - `task_names.py`: registers every benchmark module's `*_BENCHMARKS` list (`register_all_tasks`)
+  - `dataset_loading.py` / `dataset_revisions.py`: dataset policies and pinned HF revisions (lock files)
+  - `task_style.py`: `TaskStyler` strategies for choice-based prompts (`MCStyle`, `ClozeStyle`, `BPBStyle`)
+  - `base.py`: shared vocabulary (`Language`, `TaskStyle`, subject-token matching)
 
 - **`llm/`**: Language model interfaces
   - `base.py`: `BaseLLM` abstract class
@@ -100,10 +109,15 @@ Tests use pytest fixtures and mocking. Ensure `WANDB_MODE=disabled` is set in en
 
 **Adding a New Task**
 
-1. Create class inheriting from `BaseTask` in `src/eval_framework/benchmarks/`; name it per `docs/naming_convention.md` (`{Dataset}_{Source}_{Language}[_{Style}][_{Variant}][_{Subset}]`, required for new tasks)
-2. Implement required class attributes: `NAME`, `DATASET_PATH`, `SAMPLE_SPLIT`, `FEWSHOT_SPLIT`, `SUBJECTS`
+1. Create a module in `src/eval_framework/benchmarks/` with one builder function per variant returning
+   `ComposedBenchmark.compose(...)`; model it on an existing module (e.g. `gsm8k.py` for generative,
+   `arc.py` for choice tasks). Name benchmark ids per `docs/naming_convention.md`
+   (`{Dataset}_{Source}_{Language}[_{Style}][_{Variant}][_{Subset}]`, required for new tasks)
+2. Pin the dataset revision in `tasks/hf-dataset-revisions.json` and use `pinned_by_framework` as the
+   dataset policy
 3. If using custom metrics, inherit from `BaseMetric`
-4. Task is discovered via registry; add it to `task_names.py` to be discoverable.
+4. Expose the module's benchmarks as a `*_BENCHMARKS` list and register it in `register_all_tasks`
+   (`tasks/task_names.py`); add formatter-hash tests in `tests/tests_eval_framework/benchmarks/`
 
 **Adding a New Model**
 1. Extend `BaseLLM` in `src/eval_framework/llm/`

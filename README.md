@@ -19,13 +19,13 @@
 
 ## Why Choose This Framework?
 
-- **Extensibility**: Easily add custom models, benchmarks, and metrics with object-oriented base classes.
+- **Extensibility**: Easily add custom models, benchmarks, and metrics.
 - **Comprehensive**: Comes pre-loaded with over 90 tasks covering a broad and diverse range, from reasoning and coding to safety and long-context. Also comes with a comprehensive set of metrics, including LLM-as-a-judge evaluations.
 
 ## Other features
 
 - Flexible Model Integration: The CLI evaluates any OpenAI-compatible endpoint via `OpenAIModel`; custom `BaseLLM` implementations can be used through the Python API (`EvalConfig(llm_class=...)`).
-- Custom Benchmarks: Easily add new benchmarks with minimal code using the BaseTask class.
+- Custom Benchmarks: Easily add new benchmarks with minimal code by composing reusable parts (`ComposedBenchmark`).
 - Custom Metrics: Easily define new metrics using the BaseMetric class.
 - Perturbation Testing: Robustness analysis with configurable perturbation types and probabilities.
 - Rich Outputs: Generates JSON results, plots, and detailed analysis reports.
@@ -147,7 +147,7 @@ Eval-Framework provides a unified interface for evaluating language models acros
 ### Core Components
 
 - **Models**: Defined via the `BaseLLM` interface (OpenAI-compatible endpoints, custom APIs); see the [Model Arguments guide](https://aleph-alpha-research.github.io/eval-framework/model_arguments.html)
-- **Tasks**: Inherit from [`BaseTask`](https://aleph-alpha-research.github.io/eval-framework/add_new_benchmark_guide.html) (completion, loglikelihood, or LLM-judge based)
+- **Tasks**: [Composed](https://aleph-alpha-research.github.io/eval-framework/overview_dataloading.html) from reusable parts via `ComposedBenchmark` (completion, loglikelihood, or LLM-judge based)
 - **Metrics**: Automatic scoring via [`BaseMetric`](https://aleph-alpha-research.github.io/eval-framework/benchmarks_and_metrics.html) classes
 - **Formatters**: Handle prompt construction and model-specific formatting
 - **Results**: Structured outputs with sample-level details and aggregated statistics
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
 - **Use CLI interface**: See [CLI usage guide](https://aleph-alpha-research.github.io/eval-framework/cli_usage.html) for command-line evaluation options
 - **Understand model arguments**: Read out [Model Arguments guide](https://aleph-alpha-research.github.io/eval-framework/model_arguments.html)
-- **Create custom benchmarks**: Follow our [benchmark creation guide](https://aleph-alpha-research.github.io/eval-framework/add_new_benchmark_guide.html)
+- **Create custom benchmarks**: Model a new benchmark module on an existing one in `src/eval_framework/benchmarks/`
 - **Understand your results**: Read our [results interpretation guide](https://aleph-alpha-research.github.io/eval-framework/understanding_results_guide.html)
 - **Log results in WandB**: See how [we integrate WandB](https://aleph-alpha-research.github.io/eval-framework/wandb_integration.html) for metric and lineage tracking
 
@@ -212,8 +212,7 @@ if __name__ == "__main__":
 ### Advanced Usage
 
 - **[Understanding Model Arguments](https://aleph-alpha-research.github.io/eval-framework/model_arguments.html)** - Thorough guide on each constructor argument for salient model classes
-- **[Adding New Benchmarks](https://aleph-alpha-research.github.io/eval-framework/add_new_benchmark_guide.html)** - Complete guide with practical examples for adding new benchmarks
-- **[Task Naming Convention](https://aleph-alpha-research.github.io/eval-framework/naming_convention.html)** - How task class names are structured (the identifier passed to `--task-name`)
+- **[Task Naming Convention](https://aleph-alpha-research.github.io/eval-framework/naming_convention.html)** - How task names are structured (the identifier passed to `--task-name`)
 - **[Benchmarks and Metrics](https://aleph-alpha-research.github.io/eval-framework/benchmarks_and_metrics.html)** - Comprehensive overview of all available benchmarks and evaluation metrics
 - **[Overview of Dataloading](https://aleph-alpha-research.github.io/eval-framework/overview_dataloading.html)** - Explanation of dataloading and task/sample/message structure
 
