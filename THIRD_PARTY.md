@@ -83,7 +83,7 @@ and first-party/internal packages are excluded.
 | `pandas` | `3.1.0` |
 | `platformdirs` | `4.14.3` |
 | `protobuf` | `7.36.2` |
-| `pyarrow` | `26.0.0` |
+| `pyarrow` | `26.0.1` |
 | `pydantic-core` | `2.50.2` |
 | `pygments` | `2.21.0` |
 | `python-dateutil` | `4.0.0` |
