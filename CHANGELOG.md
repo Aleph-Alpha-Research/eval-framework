@@ -14,6 +14,23 @@
 
 ### Bug Fixes
 
+## [0.20.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.9...v0.20.0) (2026-11-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* system prompt is optional depending on item
+
+### Features
+
+* add bpb versions for non-python subsets ([e0f41a9](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e0f41a9b2bc6a01e961f0833c2f754d7877ee8a8))
+* add LBPP for Python ([48316ba](https://github.com/Aleph-Alpha-Research/eval-framework/commit/48316ba2139b214af7ddbc8876acbaeec24811c0))
+* multi-lingual gsm8k ([79a8b73](https://github.com/Aleph-Alpha-Research/eval-framework/commit/79a8b7384fb9ec2628883bea299e06c14bc848cc))
+* multi-lingual mbpp ([019ce31](https://github.com/Aleph-Alpha-Research/eval-framework/commit/019ce3183b76270196c03eb92cb4875869923ee4))
+* multi-lingual minerva math ([084406b](https://github.com/Aleph-Alpha-Research/eval-framework/commit/084406bd6530e1209b1fa5629e08658c3a8a7a35))
+* multi-lingual Piqa ([190e626](https://github.com/Aleph-Alpha-Research/eval-framework/commit/190e626d001b0c31b05ecfb5fe0fec0daa9be412))
+* system prompt is optional depending on item ([3a42073](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3a42073abb90834dad2b82c3815a46d4ff00c381))
+
 ## [0.19.9](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.19.8...v0.19.9) (2026-11-03)
 
 
