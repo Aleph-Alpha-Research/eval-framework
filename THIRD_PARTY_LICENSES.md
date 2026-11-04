@@ -45,7 +45,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
-- **openai** 3.42.1 - https://github.com/openai/openai-python
+- **openai** 3.44.0 - https://github.com/openai/openai-python
 - **opentelemetry-api** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
 - **opentelemetry-exporter-http-transport** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
 - **opentelemetry-exporter-otlp-common** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
@@ -54,7 +54,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **opentelemetry-proto** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto
 - **opentelemetry-sdk** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk
 - **opentelemetry-semantic-conventions** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions
-- **pyarrow** 26.0.0 - https://arrow.apache.org/
+- **pyarrow** 26.0.1 - https://arrow.apache.org/
 - **python-iso639** 2026.7.23 - https://github.com/jacksonllee/iso639
 - **requests** 2.34.2 - https://github.com/psf/requests
 - **safetensors** 0.8.0 - https://github.com/huggingface/safetensors
@@ -11995,7 +11995,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### openai 3.42.1 (Apache-2.0)
+### openai 3.44.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -14010,7 +14010,7 @@ the pattern ``psycopg/adapter*.{h,c}`` and ``psycopg/microprotocol*.{h,c}``:
  3. This notice may not be removed or altered from any source distribution.
 ```
 
-### pyarrow 26.0.0 (Apache-2.0)
+### pyarrow 26.0.1 (Apache-2.0)
 
 ```text
 Apache License
