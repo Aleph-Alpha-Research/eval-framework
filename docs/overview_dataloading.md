@@ -1,38 +1,23 @@
 ## Overview Dataloading
 
-To evaluate models on benchmarks, we define custom tasks that inherit from `BaseTask` to handle dataset loading and formatting. The framework supports two main evaluation types: **completion tasks** (text generation) and **loglikelihood tasks** (multiple choice ranking).
+To evaluate models on benchmarks, we compose tasks from reusable parts (`ComposedBenchmark.compose`): a
+dataset policy loads the data, an eval kind renders each dataset item into a prompt, and an answer policy
+defines how the model's response is obtained. The framework supports two main evaluation types:
+**completion tasks** (text generation) and **loglikelihood tasks** (multiple choice ranking).
 
-### Core Data Types
+### From Dataset Item to Scored Response
 
-The framework uses different data types based on the evaluation approach:
+Each evaluated sample passes through this pipeline:
 
-```python
-from eval_framework.shared.types import Completion, Loglikelihood, RawCompletion, RawLoglikelihood
-from template_formatting.formatter import Message, Role
-
-
-# For completion tasks (text generation)
-class Completion(BaseModel):
-    completion_text: str  # Generated text from the model
-    # Additional fields based on actual implementation
-
-
-# For loglikelihood tasks (multiple choice)
-class Loglikelihood(BaseModel):
-    loglikelihoods: list[float]  # Probability scores for each choice
-    # Additional fields based on actual implementation
-
-
-# Raw response types from LLMs
-class RawCompletion(BaseModel):
-    text: str  # Raw generated text
-    # Additional fields based on actual implementation
-
-
-class RawLoglikelihood(BaseModel):
-    loglikelihoods: list[float]  # Raw probability scores
-    # Additional fields based on actual implementation
-```
+1. **Loading** — the benchmark's `DatasetPolicy` loads the dataset for one subject at a pinned revision,
+   and the rows of the sample split are shuffled with a seeded RNG.
+2. **Sample creation** — the benchmark's `EvalKind` turns one dataset item (a `dict` row) into the scored
+   sample: the prompt messages, the candidate completions (loglikelihood tasks), the ground truth, and any
+   per-sample metric context. The result is a `Sample` (`eval_framework.contract`).
+3. **Model response** — the model returns a `RawCompletion` (generated text) or `RawLoglikelihood`
+   (a log-probability per candidate), defined in `eval_framework.shared.types`.
+4. **Answer extraction** — the `AnswerPolicy` post-processes the response into the scored `Completion` or
+   `Loglikelihood`, which the metrics consume.
 
 ### Message Structure
 
@@ -45,87 +30,25 @@ from template_formatting.formatter import Message, Role
 class Message(BaseModel):
     role: Role  # SYSTEM, USER, or ASSISTANT
     content: str  # Message content
-    # Additional fields based on actual formatter implementation
 ```
 
-### Task Implementation Pattern
+A model-specific formatter renders this message list into the final prompt string (or chat request).
 
-Custom tasks inherit from `BaseTask` and implement specific methods based on their evaluation type:
+### Prompt Assembly
 
-#### For Completion Tasks:
-```python
-from eval_framework.tasks.base import BaseTask
-from eval_framework.models.sample import ResponseType
+Eval kinds assemble the message list with `assemble_messages` (`eval_framework.eval_kind`), which builds
+the standard prompt shape:
 
-
-class MyCompletionTask(BaseTask[str]):
-    NAME = "My Task"
-    DATASET_PATH = "dataset_name"
-    RESPONSE_TYPE = ResponseType.COMPLETION
-
-    def _get_instruction_text(self, item: dict) -> str:
-        """Format the question/instruction."""
-        return f"Question: {item['question']}"
-
-    def _get_ground_truth(self, item: dict) -> str:
-        """Return the expected answer."""
-        return item["answer"]
-```
-
-#### For Loglikelihood Tasks:
-```python
-class MyLoglikelihoodTask(BaseTask[str]):
-    NAME = "My Task"
-    DATASET_PATH = "dataset_name"
-    RESPONSE_TYPE = ResponseType.LOGLIKELIHOODS
-
-    def _get_instruction_text(self, item: dict) -> str:
-        """Format the question without choices."""
-        return f"Question: {item['question']}"
-
-    def _get_ground_truth(self, item: dict) -> str:
-        """Return the correct answer choice."""
-        return item["choices"][item["answer_idx"]]
-
-    def _get_possible_completions(self, item: dict) -> list[str]:
-        """Return all answer choices for ranking."""
-        return item["choices"]
-```
-
-### Few-Shot Example Construction
-
-The framework automatically constructs few-shot prompts using these methods:
-
-```python
-# Example prompt construction for a two-shot scenario
-def construct_prompt(self, item: dict) -> list[Message]:
-    messages = []
-
-    # 1. System prompt (optional)
-    if system_prompt := self._get_system_prompt_text(item):
-        messages.append(Message(role=Role.SYSTEM, content=system_prompt))
-
-    # 2. Few-shot examples
-    fewshot_examples = self._sample_fewshot_examples(item)
-    for example in fewshot_examples:
-        # User instruction
-        messages.append(Message(role=Role.USER, content=self._get_instruction_text(example)))
-        # Assistant response
-        messages.append(Message(role=Role.ASSISTANT, content=self._get_fewshot_target_text(example)))
-
-    # 3. Actual instruction
-    messages.append(Message(role=Role.USER, content=self._get_instruction_text(item)))
-
-    # 4. Response cue (optional)
-    if cue := self._get_cue_text(item):
-        messages.append(Message(role=Role.ASSISTANT, content=cue))
-
-    return messages
-```
+1. **System turn** (optional) — only when the sample carries a system prompt.
+2. **Few-shot demonstrations** — the benchmark's `FewShotPolicy` draws examples from the few-shot split
+   and renders each as a USER / ASSISTANT pair.
+3. **The item's USER turn** — the question or instruction, rendered from the dataset item.
+4. **Answer cue** (optional) — a final ASSISTANT turn (e.g. `"Answer:"`) that the model's generation
+   continues, used to anchor the expected answer format.
 
 ### Example: Geography Quiz
 
-Here's how a complete geography quiz task might look:
+Here's how a complete geography quiz prompt might look (two-shot):
 
 ```python
 messages = [
