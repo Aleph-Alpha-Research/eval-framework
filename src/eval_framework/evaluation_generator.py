@@ -1,5 +1,4 @@
 import logging
-import math
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
@@ -22,6 +21,25 @@ from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag
 
 logger = logging.getLogger(__name__)
+
+
+def _standard_error_of_cell_mean(values: pd.DataFrame) -> tuple[float, int]:
+    """Standard error of the unweighted mean of per (key, subject) cell means."""
+    cells = values.groupby(["key", "subject"])["value"].agg(["std", "count"])
+    cells = cells[cells["count"] > 0]
+    num_samples = int(cells["count"].sum())
+
+    measured = cells[(cells["count"] > 1) & cells["std"].notna()]
+    if cells.empty or measured.empty:
+        return float("nan"), num_samples
+
+    degrees_of_freedom = float((measured["count"] - 1).sum())
+    pooled_variance = float(((measured["count"] - 1) * measured["std"] ** 2).sum() / degrees_of_freedom)
+
+    cell_variance = cells["std"].pow(2).where(cells["count"] > 1, pooled_variance).fillna(pooled_variance)
+    variance_of_mean = float((cell_variance / cells["count"]).sum())
+
+    return float(np.sqrt(variance_of_mean) / len(cells)), num_samples
 
 
 class EvaluationGenerator:
@@ -187,10 +205,6 @@ class EvaluationGenerator:
                 key_subject_mean_with_errors = data_subset_with_errors.groupby(["key", "subject"])["value"].mean()
                 aggregated_results[f"Average {metric} (including Errors)"] = float(key_subject_mean_with_errors.mean())
 
-            std_err_mean_sum_of_squares = 0.0
-            std_err_mean_total_num_samples = 0.0
-            std_err_mean_num_subjects = 0
-
             for column in ["key", "subject"]:
                 if len(data_subset[column].unique()) > 1:
                     for name, _group in key_subject_mean.groupby([column]):
@@ -221,45 +235,14 @@ class EvaluationGenerator:
                             aggregated_results[f"Average {metric} (including Errors) - {name[0]}"] = value_with_errors
 
                         if not ("SequencePositions" in metric or "Bytes" in metric):
-                            # calculate standard error for selected  metrics
-                            group_key_subject_std = group_error_free.groupby(["key", "subject"]).std()
-                            std = float(group_key_subject_std[["value"]].mean()["value"])
-                            num_samples = len(group_error_free)
-
-                            if math.isnan(std) or num_samples == 0:
-                                aggregated_results[f"StdErr {metric} - {name[0]}"] = float("nan")
-                            else:
-                                aggregated_results[f"StdErr {metric} - {name[0]}"] = std / np.sqrt(num_samples)
-                            aggregated_results[f"NumSamples {metric} - {name[0]}"] = num_samples
-
-                            std_err_mean_sum_of_squares += std**2 / num_samples
-                            std_err_mean_total_num_samples += num_samples
-                            std_err_mean_num_subjects += 1
+                            group_std_err, group_num_samples = _standard_error_of_cell_mean(group_error_free)
+                            aggregated_results[f"StdErr {metric} - {name[0]}"] = group_std_err
+                            aggregated_results[f"NumSamples {metric} - {name[0]}"] = group_num_samples
 
             if not ("SequencePositions" in metric or "Bytes" in metric):
-                # calculate standard error for selected  metrics
-                if std_err_mean_total_num_samples > 0:
-                    # calculate the standard error of the mean (SEM) for the aggregated results (eg. add in quadrature)
-                    # SEM = sqrt(sum(variance_i * n_i) / i)
-                    # where variance_i is the variance of each group and i is the number of groups
-                    # (the combined mean is also not weighted by the number of samples)
-                    if math.isnan(std) or std_err_mean_total_num_samples == 0:
-                        aggregated_results[f"StdErr {metric}"] = float("nan")
-                    else:
-                        aggregated_results[f"StdErr {metric}"] = np.sqrt(
-                            std_err_mean_sum_of_squares / std_err_mean_num_subjects
-                        )
-                    aggregated_results[f"NumSamples {metric}"] = std_err_mean_total_num_samples
-                else:
-                    # if there are no sub-groups to combine, calculate the SEM here directly
-                    key_subject_std = data_subset_error_free.groupby(["key", "subject"]).std()
-                    std = float(key_subject_std[["value"]].mean()["value"])
-                    num_samples = len(data_subset_error_free)
-                    if math.isnan(std) or num_samples == 0:
-                        aggregated_results[f"StdErr {metric}"] = float("nan")
-                    else:
-                        aggregated_results[f"StdErr {metric}"] = std / np.sqrt(num_samples)
-                    aggregated_results[f"NumSamples {metric}"] = num_samples
+                std_err, num_samples = _standard_error_of_cell_mean(data_subset_error_free)
+                aggregated_results[f"StdErr {metric}"] = std_err
+                aggregated_results[f"NumSamples {metric}"] = num_samples
 
         if (
             "Average Bytes" in aggregated_results
