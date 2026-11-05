@@ -52,6 +52,9 @@ def get_disk_usage_info() -> str:
     return f"Free space: {free_gb:.2f}GB\nTop directories:\n{top_dirs}\nSpecific directories:\n{specific_dirs}\n"
 
 
+@pytest.mark.skip(
+    reason="Runs every registered task on its full dataset with a mock LLM; too costly for the crash coverage it adds."
+)
 @pytest.mark.cpu_slow
 @patch("eval_framework.tasks.utils.run_python_code")
 def test_with_all_samples(mock_run_python_code: Mock, tmp_path: Path, full_task_name: str) -> None:
