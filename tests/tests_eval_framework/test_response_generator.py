@@ -526,7 +526,6 @@ def _stub_registry() -> Registry:
         sample_split="test",
         fewshot=NoFewShot(),
         dataset_policy=DatasetStub({"test": [{"question": "Hello", "answer": "A"}]}),
-        language=None,
     )
     registry = Registry()
     registry.add(benchmark)

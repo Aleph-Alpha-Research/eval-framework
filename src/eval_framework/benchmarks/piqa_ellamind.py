@@ -70,7 +70,6 @@ def piqa_ellamind(task_variant: TaskVariant, language: LanguageCode, dataset: Da
         fewshot_split="validation",
         subjects=ListOfSubjects([config]),
         dataset_policy=dataset_policy,
-        language=lang,
     )
 
 

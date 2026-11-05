@@ -57,8 +57,7 @@ class HellaswagReader(ChoiceReader):
 
 def hellaswag_ellamind(variant: Variant, language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
     styler_cls, distractor_level = _VARIANTS[variant]
-    ellamind_lang = ellamind_language(language)
-    lang, config = ellamind_lang.language, ellamind_lang.config
+    config = ellamind_language(language).config
     dataset_policy = dataset if dataset is not None else pinned_by_framework("ellamind/hellaswag-multilingual")
     return ComposedBenchmark.choice(
         id=f"HELLASWAG_ELLAMIND_{variant}_{language}",
@@ -68,7 +67,6 @@ def hellaswag_ellamind(variant: Variant, language: LanguageCode, dataset: Datase
         fewshot_split="validation",
         subjects=ListOfSubjects([config]),
         dataset_policy=dataset_policy,
-        language=lang,
     )
 
 

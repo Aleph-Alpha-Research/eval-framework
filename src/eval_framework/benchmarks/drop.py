@@ -14,7 +14,6 @@ from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Generative
 from eval_framework.fewshot import FewShot, FewshotExample, FewShotSplit, FunctionRenderer
 from eval_framework.metrics.completion.drop_completion import DropF1ExactMatch, DropMetricContext
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import MCStyle
@@ -131,7 +130,6 @@ def drop_completion_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         sample_split="validation",
         fewshot=FewShot(FewShotSplit("train"), FunctionRenderer(_completion_demo)),
         dataset_policy=dataset,
-        language=Language.ENG,
     )
 
 
@@ -163,7 +161,6 @@ def drop_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         sample_split="validation",
         fewshot_split="validation",
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 

@@ -59,7 +59,6 @@ def arc_ellamind(style: Style, language: LanguageCode, dataset: DatasetPolicy | 
         fewshot_split="test",
         subjects=ListOfSubjects(["ARC-Easy", "ARC-Challenge"]),
         dataset_policy=source,
-        language=lang,
     )
 
 

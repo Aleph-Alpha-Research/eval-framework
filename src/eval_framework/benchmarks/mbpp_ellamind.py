@@ -33,7 +33,6 @@ from eval_framework.benchmarks.utils.ellamind_languages import ellamind_language
 from eval_framework.contract import Benchmark
 from eval_framework.fewshot import ChoiceRenderer, FewShot, SampleSplit
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle
@@ -128,11 +127,11 @@ class _MbppInstruction:
         return f"{self._preamble}\n```\n{_norm_text(item)}\n{item['test_list'][0]}\n```\n"
 
 
-# A variant builder: ``(id, locale, subjects, language, dataset) -> Benchmark``.
-_Builder = Callable[[str, MbppLocale, ListOfSubjects, Language, DatasetPolicy], Benchmark]
+# A variant builder: ``(id, locale, subjects, dataset) -> Benchmark``.
+_Builder = Callable[[str, MbppLocale, ListOfSubjects, DatasetPolicy], Benchmark]
 
 
-def _olmes(id: str, locale: MbppLocale, subjects: ListOfSubjects, lang: Language, dataset: DatasetPolicy) -> Benchmark:
+def _olmes(id: str, locale: MbppLocale, subjects: ListOfSubjects, dataset: DatasetPolicy) -> Benchmark:
     return execution(
         id,
         dataset_path=MBPP_ELLAMIND_DATASET_PATH,
@@ -142,14 +141,11 @@ def _olmes(id: str, locale: MbppLocale, subjects: ListOfSubjects, lang: Language
         answer=ReconstructProgram(olmes_reconstruct, stop_sequences=OLMES_STOPS),
         fewshot_source=SampleSplit(),  # EllaMind ships only a test split; sample (leak-safe) from it
         subjects=subjects,
-        language=lang,
         dataset=dataset,
     )
 
 
-def _bpb_olmes(
-    id: str, locale: MbppLocale, subjects: ListOfSubjects, lang: Language, dataset: DatasetPolicy
-) -> Benchmark:
+def _bpb_olmes(id: str, locale: MbppLocale, subjects: ListOfSubjects, dataset: DatasetPolicy) -> Benchmark:
     # The BPB_OLMES prompt carries no instruction wrapper, so nothing of the locale is rendered.
     reader = SingleGoldReader(
         question=lambda item: _norm_text(item) + "\n```python\n",
@@ -163,14 +159,11 @@ def _bpb_olmes(
         styler=styler,
         fewshot=FewShot(SampleSplit(), ChoiceRenderer(reader, styler)),
         subjects=subjects,
-        language=lang,
         dataset=dataset,
     )
 
 
-def _evalplus(
-    id: str, locale: MbppLocale, subjects: ListOfSubjects, lang: Language, dataset: DatasetPolicy
-) -> Benchmark:
+def _evalplus(id: str, locale: MbppLocale, subjects: ListOfSubjects, dataset: DatasetPolicy) -> Benchmark:
     return execution(
         id,
         dataset_path=MBPP_ELLAMIND_DATASET_PATH,
@@ -180,14 +173,11 @@ def _evalplus(
         answer=ReconstructProgram(evalplus_reconstruct, stop_sequences=["```", "\nassert", locale.preamble_stop]),
         fewshot_source=SampleSplit(),
         subjects=subjects,
-        language=lang,
         dataset=dataset,
     )
 
 
-def _bpb_evalplus(
-    id: str, locale: MbppLocale, subjects: ListOfSubjects, lang: Language, dataset: DatasetPolicy
-) -> Benchmark:
+def _bpb_evalplus(id: str, locale: MbppLocale, subjects: ListOfSubjects, dataset: DatasetPolicy) -> Benchmark:
     reader = SingleGoldReader(
         question=_MbppInstruction(locale).evalplus,
         gold=lambda item: "\n" + _norm_code(item) + "\n" + END,
@@ -202,14 +192,11 @@ def _bpb_evalplus(
         styler=styler,
         fewshot=FewShot(SampleSplit(), ChoiceRenderer(reader, styler)),
         subjects=subjects,
-        language=lang,
         dataset=dataset,
     )
 
 
-def _evalplus_instruct(
-    id: str, locale: MbppLocale, subjects: ListOfSubjects, lang: Language, dataset: DatasetPolicy
-) -> Benchmark:
+def _evalplus_instruct(id: str, locale: MbppLocale, subjects: ListOfSubjects, dataset: DatasetPolicy) -> Benchmark:
     return execution(
         id,
         dataset_path=MBPP_ELLAMIND_DATASET_PATH,
@@ -219,7 +206,6 @@ def _evalplus_instruct(
         answer=ReconstructProgram(instruct_reconstruct, stop_sequences=[]),
         fewshot_source=SampleSplit(),
         subjects=subjects,
-        language=lang,
         dataset=dataset,
     )
 
@@ -235,14 +221,12 @@ _BUILDERS: dict[TaskVariant, _Builder] = {
 
 def mbpp_ellamind(task_variant: TaskVariant, language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
     """Build ``MBPP{language}_{variant}``, e.g. ``mbpp_ellamind("OLMES", "DE")``."""
-    ellamind_lang = ellamind_language(language)
-    lang, config = ellamind_lang.language, ellamind_lang.config
+    config = ellamind_language(language).config
     dataset_policy = dataset if dataset is not None else pinned_by_framework(MBPP_ELLAMIND_DATASET_PATH)
     return _BUILDERS[task_variant](
         _ID_TEMPLATES[task_variant].format(language=language),
         _LOCALES[language],
         ListOfSubjects([config]),
-        lang,
         dataset_policy,
     )
 

@@ -16,7 +16,6 @@ from eval_framework.eval_kind import Generative, ItemText
 from eval_framework.fewshot import FewShot, FewshotExample, FewShotSplit, FunctionRenderer
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.metrics.completion.f1 import F1, F1SquadNormalized
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 
@@ -64,7 +63,6 @@ def squad_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         sample_split="validation",
         fewshot=FewShot(FewShotSplit("train"), FunctionRenderer(_olmes_demo)),
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 
@@ -130,7 +128,6 @@ def _squad2_ma(id: str, *, system_prompt: ItemText | None, dataset: DatasetPolic
         sample_split="validation",
         fewshot=FewShot(FewShotSplit("train"), FunctionRenderer(_ma_demo)),
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 

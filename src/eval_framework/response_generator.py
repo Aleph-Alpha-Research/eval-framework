@@ -20,29 +20,13 @@ from eval_framework.shared.types import (
     Loglikelihood,
     RawLoglikelihood,
 )
-from eval_framework.tasks.base import RANDOM_SEED, Language
+from eval_framework.tasks.base import RANDOM_SEED
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import Registry, registry
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag
 
 logger = logging.getLogger(__name__)
-
-
-def map_language_to_value(
-    language: Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None,
-) -> str | dict[str, str] | dict[str, tuple[str, str]] | None:
-    if language is None:
-        return None
-    elif isinstance(language, Language):
-        return language.value
-    elif isinstance(language, dict):
-        if isinstance(list(language.values())[0], Language):
-            return {k: v.value for k, v in language.items()}  # type: ignore[union-attr]
-        else:
-            return {k: (v[0].value, v[1].value) for k, v in language.items()}  # type: ignore[index]
-    else:
-        raise ValueError(f"Invalid language: {language}")
 
 
 def _require_judge_when_task_uses_one(benchmark: Benchmark, config: EvalConfig) -> None:
@@ -290,8 +274,6 @@ class ResponseGenerator:
         metadata = self.config.model_dump(mode="json")
         metadata["llm_name"] = self.llm.name
         metadata["task_name"] = self.task_name
-        language = getattr(self.task, "LANGUAGE", None)
-        metadata["language"] = map_language_to_value(language)
         metadata["metrics"] = [m.NAME for m in all_metrics] if all_metrics is not None else []
         metadata["primary_metrics"] = getattr(self.task, "PRIMARY_METRICS", None)
         metadata["eval_framework_version"] = eval_framework_version

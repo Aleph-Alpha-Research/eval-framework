@@ -7,7 +7,6 @@ A curated subset of HellaSwag, read identically (sentence completion, scored as 
 from eval_framework.benchmarks.hellaswag import HellaswagReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle, TaskStyler
@@ -28,7 +27,6 @@ def _goldenswag_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy | 
         sample_split="validation",
         fewshot_split="validation",
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 

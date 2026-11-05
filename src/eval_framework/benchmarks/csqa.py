@@ -9,7 +9,6 @@ from typing import Any, final, override
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import MCStyle
@@ -39,7 +38,6 @@ def csqa_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         sample_split="train",
         fewshot_split="train",
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 

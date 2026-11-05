@@ -17,7 +17,6 @@ from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Generative
 from eval_framework.fewshot import NoFewShot
 from eval_framework.metrics.completion.multipl_e_assertion import MultiPLECodeAssertion, MultiPLEMetricContext
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 
@@ -70,7 +69,6 @@ def _multipl_e(id: str, *, prefix: str, lang: str, dataset: DatasetPolicy | None
         sample_split="test",
         fewshot=NoFewShot(),  # 0-shot only; MultiPL-E has no gold examples to draw from
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 

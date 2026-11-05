@@ -156,8 +156,7 @@ def hendrycks_math_ellamind(
     """Build ``MATHMinerva{language}_{variant}``, e.g. ``hendrycks_math_ellamind("OLMES", "DE")``."""
     locale = _LOCALES[language]
     prompt = _MinervaPrompt(locale)
-    ellamind_lang = ellamind_language(language)
-    lang, config = ellamind_lang.language, ellamind_lang.config
+    config = ellamind_language(language).config
 
     kind: EvalKind
     answer: AnswerPolicy
@@ -184,7 +183,6 @@ def hendrycks_math_ellamind(
         fewshot=FewShot(SampleSplit(keep=_single_paragraph_solution), FunctionRenderer(prompt.demo)),
         subjects=ListOfSubjects([config]),
         dataset_policy=dataset if dataset is not None else pinned_by_framework(HENDRYCKS_MATH_ELLAMIND_DATASET_PATH),
-        language=lang,
     )
 
 

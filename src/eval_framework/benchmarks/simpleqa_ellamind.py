@@ -47,7 +47,6 @@ def _simpleqa_ellamind_benchmark(
         fewshot_split="eval",
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=dataset_policy,
-        language=Language.DEU,
     )
 
 

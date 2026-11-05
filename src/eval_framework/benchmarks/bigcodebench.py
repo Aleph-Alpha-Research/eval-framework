@@ -18,7 +18,6 @@ from eval_framework.metrics.completion.code_execution_pass_at_one import (
 )
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.utils import (
@@ -116,7 +115,6 @@ def bigcodebench_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         fewshot=fewshot,
         subjects=_SUBJECTS,
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 

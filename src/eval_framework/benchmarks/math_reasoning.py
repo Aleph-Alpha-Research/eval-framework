@@ -144,7 +144,6 @@ def _math500(id: str, strip: Callable[[str], str], dataset: DatasetPolicy | None
         fewshot=NoFewShot(),
         subjects=NoSubject(),
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 
@@ -199,12 +198,12 @@ def aime(
     sample_split: str,
     build_prompt: ItemText = _aime_default_prompt,
     subjects: SubjectsSelector = NoSubject(),
-    language: Language = Language.ENG,
+    language: Language | None = None,
 ) -> Benchmark:
     """Build an AIME-style boxed-answer benchmark: 0-shot generative, boxed extraction with the preserved MATH
     normalisation (its bug is inert on integer answers), scored by ``MathReasoningCompletion``. Callers vary the
-    prompt (``build_prompt``, defaulting to the English NeMo-Skills template), dataset, subjects and language —
-    e.g. localized AIME variants in the companion package reuse this."""
+    prompt (``build_prompt``, defaulting to the English NeMo-Skills template), dataset and subjects —
+    e.g. localized AIME variants in the companion package reuse this. ``language`` is deprecated and ignored."""
     kind = Generative(
         build_prompt=build_prompt,
         cue="",
@@ -220,7 +219,6 @@ def aime(
         fewshot=NoFewShot(),
         subjects=subjects,
         dataset_policy=dataset_policy,
-        language=language,
     )
 
 
@@ -281,7 +279,6 @@ def gsm8k_reasoning(dataset: DatasetPolicy | None = None) -> Benchmark:
         fewshot=NoFewShot(),
         subjects=ListOfSubjects(["main"]),
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 
@@ -377,7 +374,6 @@ def _mathminerva_olmes(id: str, stop_sequences: list[str], dataset: DatasetPolic
         fewshot=FewShot(Predefined(_OLMES_FEWSHOTS, count=4, label=id), FunctionRenderer(_olmes_generative_demo)),
         subjects=ListOfSubjects(_MATH_SUBJECTS),
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 
@@ -425,7 +421,6 @@ def mathminerva_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
         fewshot=fewshot,
         subjects=ListOfSubjects(_MATH_SUBJECTS),
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 

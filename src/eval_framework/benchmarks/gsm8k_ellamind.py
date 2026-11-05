@@ -105,7 +105,6 @@ def gsm8k_ellamind_platinum(language: LanguageCode, dataset: DatasetPolicy | Non
         fewshot=fewshot,
         subjects=ListOfSubjects([config]),
         dataset_policy=_ellamind_dataset(dataset),
-        language=lang,
     )
 
 
@@ -121,7 +120,6 @@ def gsm8k_ellamind_bpb_platinum(language: LanguageCode, dataset: DatasetPolicy |
         fewshot_split="test",
         subjects=ListOfSubjects([config]),
         dataset_policy=_ellamind_dataset(dataset),
-        language=lang,
     )
 
 

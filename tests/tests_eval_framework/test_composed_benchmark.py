@@ -6,7 +6,7 @@ from datasets import Dataset, DatasetDict
 
 from eval_framework.answer import ExtractFromCompletion, PickFromCandidates
 from eval_framework.choices import ChoiceFields, ChoiceReader
-from eval_framework.composed import ComposedBenchmark, ComposedEval, LanguageSpec
+from eval_framework.composed import ComposedBenchmark, ComposedEval
 from eval_framework.contract import ResponseType, Sample
 from eval_framework.eval_kind import Choice, Generative, SampleBody, assemble_messages
 from eval_framework.fewshot import (
@@ -137,7 +137,6 @@ def _make_benchmark(
     fewshot: FewShotPolicy | None = None,
     subjects: SubjectsSelector = _DUMMY_SELECTOR,
     dataset_policy: DatasetPolicy | None = None,
-    language: LanguageSpec = None,
 ) -> ComposedBenchmark:
     """Build a ``ComposedBenchmark`` for tests, defaulting to dummies for every argument the test does not provide."""
     resolved_styler = styler or _DummyStyler()
@@ -150,7 +149,6 @@ def _make_benchmark(
         fewshot=fewshot or FewShot(SampleSplit(), ChoiceRenderer(reader, resolved_styler)),
         subjects=subjects,
         dataset_policy=dataset_policy or _DummyDatasetPolicy(),
-        language=language,
     )
 
 
@@ -164,7 +162,6 @@ def _make_eval(
     sample_split: str = _DUMMY_SPLIT,
     fewshot: FewShotPolicy | None = None,
     subjects: Subjects = _DUMMY_EVAL_SUBJECTS,
-    language: LanguageSpec = None,
     rnd: random.Random = _DUMMY_RNG,
 ) -> ComposedEval:
     """Build a ``ComposedEval`` for tests, defaulting to dummies for every argument the test does not provide."""
@@ -178,7 +175,6 @@ def _make_eval(
         sample_split=sample_split,
         fewshot=policy.bind(num_fewshot),
         subjects=subjects,
-        language=language,
         rnd=rnd,
     )
 
@@ -471,7 +467,6 @@ def test_choice_wires_the_kind_and_fewshot_from_one_reader_and_styler() -> None:
         sample_split="test",
         fewshot_split="train",
         dataset_policy=DatasetStub({"test": [{"q": "eval"}], "train": [{"q": "shot"}]}),
-        language=None,
     )
 
     # The demonstration (USER prompt, ASSISTANT cue + answer) and the eval item share the styler's formatting.
@@ -570,7 +565,6 @@ def test_model_cleanup_runs_before_answer_extraction() -> None:
         sample_split=_DUMMY_SPLIT,
         fewshot=NoFewShot().bind(0),
         subjects=_DUMMY_EVAL_SUBJECTS,
-        language=None,
         rnd=_DUMMY_RNG,
     )
     sample = Sample(

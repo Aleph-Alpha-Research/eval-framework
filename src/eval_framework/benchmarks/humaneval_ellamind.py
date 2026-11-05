@@ -24,7 +24,6 @@ from eval_framework.contract import Benchmark
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle
@@ -53,20 +52,17 @@ def humaneval_de_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         build_prompt=v2_prompt,
         fewshot_target=olmes_target,
         subjects=_SUBJECTS,
-        language=Language.DEU,
         dataset=_dataset(dataset),
     )
 
 
 def humaneval_olmes_v2(language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
-    ellamind_lang = ellamind_language(language)
-    lang, config = ellamind_lang.language, ellamind_lang.config
+    config = ellamind_language(language).config
     return v2_execution(
         f"HumanEval{language}_OLMES_V2",
         dataset_path=HUMANEVAL_ELLAMIND_DATASET_PATH,
         metrics=[CodeCompletionAssertion],
         subjects=ListOfSubjects([config]),
-        language=lang,
         dataset=_dataset(dataset),
     )
 
@@ -81,20 +77,17 @@ def humaneval_de_bpb_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         question=lambda item: item["prompt"].strip("\n"),
         gold=lambda item: item["canonical_solution"],
         subjects=_SUBJECTS,
-        language=Language.DEU,
         dataset=_dataset(dataset),
     )
 
 
 def humaneval_bpb_olmes_v2(language: LanguageCode, dataset: DatasetPolicy | None = None) -> Benchmark:
     """``HumanEval{language}_BPB_OLMES_V2`` for a language token of ``LanguageCode``, e.g. ``"DE"`` or ``"FR"``."""
-    ellamind_lang = ellamind_language(language)
-    lang, config = ellamind_lang.language, ellamind_lang.config
+    config = ellamind_language(language).config
     return v2_bpb(
         f"HumanEval{language}_BPB_OLMES_V2",
         dataset_path=HUMANEVAL_ELLAMIND_DATASET_PATH,
         subjects=ListOfSubjects([config]),
-        language=lang,
         dataset=_dataset(dataset),
     )
 
@@ -138,7 +131,6 @@ def humaneval_de_instruct(dataset: DatasetPolicy | None = None) -> Benchmark:
         fewshot_target=_instruct_target,
         answer=ReconstructProgram(_instruct_reconstruct, stop_sequences=[], max_tokens=1024),
         subjects=_SUBJECTS,
-        language=Language.DEU,
         dataset=_dataset(dataset),
     )
 

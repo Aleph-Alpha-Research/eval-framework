@@ -18,7 +18,6 @@ from eval_framework.eval_kind import Choice, Generative
 from eval_framework.fewshot import FewShot, FewshotExample, FunctionRenderer, Predefined
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletionOLMES
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle
@@ -181,7 +180,6 @@ def gsm8k_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         fewshot=fewshot,
         subjects=ListOfSubjects(["main"]),
         dataset_policy=_gsm8k_dataset(dataset),
-        language=Language.ENG,
     )
 
 
@@ -195,7 +193,6 @@ def gsm8k_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
         fewshot=FewShot(Predefined(FEWSHOT_ITEMS, count=_NUM_FEWSHOT, label="GSM8K"), FunctionRenderer(_bpb_demo)),
         subjects=ListOfSubjects(["main"]),
         dataset_policy=_gsm8k_dataset(dataset),
-        language=Language.ENG,
     )
 
 

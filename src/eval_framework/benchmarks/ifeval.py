@@ -8,13 +8,12 @@ The instruction checks run from a per-sample ``IFEvalMetricContext``, so the tas
 from typing import TYPE_CHECKING, Any
 
 from eval_framework.answer import ExtractFromCompletion
-from eval_framework.composed import ComposedBenchmark, LanguageSpec
+from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Generative
 from eval_framework.fewshot import NoFewShot
 from eval_framework.metrics.completion.ifeval import IFEvalMetric, IFEvalMetricContext
 from eval_framework.metrics.completion.language_checker import LanguageRawConsistencyChecker
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 
@@ -45,7 +44,6 @@ def _ifeval(
     *,
     dataset_path: str,
     metrics: list[type["BaseMetric"]],
-    language: LanguageSpec,
     dataset: DatasetPolicy | None,
 ) -> Benchmark:
     kind = Generative(
@@ -64,14 +62,11 @@ def _ifeval(
         sample_split="train",
         fewshot=NoFewShot(),
         dataset_policy=dataset_policy,
-        language=language,
     )
 
 
 def ifeval(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _ifeval(
-        "IFEval", dataset_path=IFEVAL_DATASET_PATH, metrics=[IFEvalMetric], language=Language.ENG, dataset=dataset
-    )
+    return _ifeval("IFEval", dataset_path=IFEVAL_DATASET_PATH, metrics=[IFEvalMetric], dataset=dataset)
 
 
 def ifeval_de(dataset: DatasetPolicy | None = None) -> Benchmark:
@@ -79,7 +74,6 @@ def ifeval_de(dataset: DatasetPolicy | None = None) -> Benchmark:
         "IFEvalDe",
         dataset_path=IFEVAL_DE_DATASET_PATH,
         metrics=[IFEvalMetric, LanguageRawConsistencyChecker],
-        language=Language.DEU,
         dataset=dataset,
     )
 
