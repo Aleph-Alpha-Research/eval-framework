@@ -20,7 +20,6 @@ from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.fewshot import NoFewShot
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle, MCStyle, TaskStyler
@@ -170,7 +169,6 @@ def _mmlu_choice(
         fewshot_split="dev",
         subjects=ListOfSubjects(MMLU_SUBJECTS),
         dataset_policy=_mmlu_dataset(dataset),
-        language=Language.ENG,
     )
 
 
@@ -209,7 +207,6 @@ def mmlu_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
         fewshot=NoFewShot(),
         subjects=ListOfSubjects(MMLU_SUBJECTS),
         dataset_policy=_mmlu_dataset(dataset),
-        language=Language.ENG,
     )
 
 

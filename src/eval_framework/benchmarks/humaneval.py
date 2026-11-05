@@ -12,14 +12,13 @@ from typing import TYPE_CHECKING, Any, override
 
 from eval_framework.answer import AnswerPolicy, ReconstructProgram
 from eval_framework.choices import ChoiceFields, ChoiceReader
-from eval_framework.composed import ComposedBenchmark, LanguageSpec
+from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Generative, ItemText
 from eval_framework.fewshot import FewShot, FewshotExample, FunctionRenderer, SampleSplit
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import SubjectsSelector
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle
@@ -111,7 +110,6 @@ def execution(
     fewshot_target: ItemText,  # item -> the demonstration solution
     answer: AnswerPolicy | None = None,
     subjects: SubjectsSelector | None = None,
-    language: LanguageSpec = Language.ENG,
     dataset: DatasetPolicy | None,
 ) -> Benchmark:
     """A code-generation-scored-by-execution benchmark. ``answer`` defaults to the standard HumanEval
@@ -142,7 +140,6 @@ def execution(
         fewshot=fewshot,
         subjects=subjects,
         dataset_policy=dataset_policy,
-        language=language,
     )
 
 
@@ -154,7 +151,6 @@ def bpb(
     question: ItemText,
     gold: ItemText,
     subjects: SubjectsSelector | None = None,
-    language: LanguageSpec = Language.ENG,
     dataset: DatasetPolicy | None,
 ) -> Benchmark:
     """A BPB (loglikelihood-of-the-gold-solution) benchmark: one candidate, scored by ``styler``."""
@@ -167,7 +163,6 @@ def bpb(
         fewshot_split="test",
         subjects=subjects,
         dataset_policy=dataset_policy,
-        language=language,
     )
 
 
@@ -193,11 +188,10 @@ def v2_execution(
     dataset_path: str,
     metrics: list[type["BaseMetric"]],
     subjects: SubjectsSelector | None = None,
-    language: LanguageSpec = Language.ENG,
     dataset: DatasetPolicy | None,
 ) -> Benchmark:
-    """The ``_OLMES_V2`` execution shape (rstrip + fenced), retargetable to another dataset / metric /
-    language — the building block ``humaneval_plus`` and ``humaneval_ellamind`` reuse."""
+    """The ``_OLMES_V2`` execution shape (rstrip + fenced), retargetable to another dataset / metric —
+    the building block ``humaneval_plus`` and ``humaneval_ellamind`` reuse."""
     return execution(
         id,
         dataset_path=dataset_path,
@@ -205,7 +199,6 @@ def v2_execution(
         build_prompt=v2_prompt,
         fewshot_target=_v2_target,
         subjects=subjects,
-        language=language,
         dataset=dataset,
     )
 
@@ -215,11 +208,10 @@ def v2_bpb(
     *,
     dataset_path: str,
     subjects: SubjectsSelector | None = None,
-    language: LanguageSpec = Language.ENG,
     dataset: DatasetPolicy | None,
 ) -> Benchmark:
-    """The ``BPB_V2`` loglikelihood shape (fenced gold, no leading space), retargetable to another dataset /
-    language — the building block ``humaneval_plus`` and ``humaneval_ellamind`` reuse."""
+    """The ``BPB_V2`` loglikelihood shape (fenced gold, no leading space), retargetable to another dataset —
+    the building block ``humaneval_plus`` and ``humaneval_ellamind`` reuse."""
     return bpb(
         id,
         dataset_path=dataset_path,
@@ -227,7 +219,6 @@ def v2_bpb(
         question=v2_prompt,
         gold=_v2_target,
         subjects=subjects,
-        language=language,
         dataset=dataset,
     )
 

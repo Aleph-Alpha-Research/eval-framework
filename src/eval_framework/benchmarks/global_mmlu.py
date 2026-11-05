@@ -11,7 +11,7 @@ from datasets import DatasetDict
 
 from eval_framework.answer import PickFromCandidates
 from eval_framework.benchmarks.mmlu import MMLU_SUBJECTS
-from eval_framework.composed import ComposedBenchmark, LanguageSpec
+from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
 from eval_framework.fewshot import FewShot, FewshotExample, FewShotSplit, FunctionRenderer
@@ -23,7 +23,6 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariantsLoglikelihood
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.utils import get_n_letters
@@ -470,25 +469,8 @@ LANGUAGE_ANSWER_TEXT_MAP = {
     "ar": "الإجابة",
 }
 
-LANGUAGE_NAME_MAP = {
-    "fr": Language.FRA,
-    "de": Language.DEU,
-    "es": Language.SPA,
-    "it": Language.ITA,
-    "pt": Language.POR,
-    "ar": Language.ARB,
-}
-
-
 _OPTION_KEYS = {"A": "option_a", "B": "option_b", "C": "option_c", "D": "option_d"}
 _KEYS = get_n_letters(4)  # A, B, C, D
-
-# Per-subject language, keyed by the subject label — carried only in run metadata (not the prompt).
-GLOBAL_MMLU_LANGUAGE_SPEC: dict[str, Language] = {
-    str((lang, subject)): LANGUAGE_NAME_MAP[lang]
-    for lang, subjects in LANGUAGE_SUBJECTS_MAP.items()
-    for subject in subjects
-}
 
 
 def _lang_and_subject(subject_label: str) -> tuple[str, str]:
@@ -598,7 +580,7 @@ def _global_mmlu_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
     return dataset if dataset is not None else _GlobalMmluDataset(pinned_by_framework(GLOBAL_MMLU_DATASET_PATH))
 
 
-def _global_mmlu(id: str, subjects: ListOfSubjects, language: LanguageSpec, dataset: DatasetPolicy | None) -> Benchmark:
+def _global_mmlu(id: str, subjects: ListOfSubjects, dataset: DatasetPolicy | None) -> Benchmark:
     return ComposedBenchmark.compose(
         id=id,
         kind=_GlobalMmluChoice(),
@@ -607,18 +589,17 @@ def _global_mmlu(id: str, subjects: ListOfSubjects, language: LanguageSpec, data
         fewshot=FewShot(FewShotSplit("dev"), FunctionRenderer(_global_mmlu_demo)),
         subjects=subjects,
         dataset_policy=_global_mmlu_dataset(dataset),
-        language=language,
     )
 
 
 def global_mmlu(dataset: DatasetPolicy | None = None) -> Benchmark:
     subjects = ListOfSubjects([str(pair) for pair in product(GLOBAL_MMLU_LANGUAGES, MMLU_SUBJECTS)])
-    return _global_mmlu("GlobalMMLU", subjects, GLOBAL_MMLU_LANGUAGE_SPEC, dataset)
+    return _global_mmlu("GlobalMMLU", subjects, dataset)
 
 
 def global_mmlu_german(dataset: DatasetPolicy | None = None) -> Benchmark:
     subjects = ListOfSubjects([str(("de", subject)) for subject in MMLU_SUBJECTS])
-    return _global_mmlu("GlobalMMLU_German", subjects, Language.DEU, dataset)
+    return _global_mmlu("GlobalMMLU_German", subjects, dataset)
 
 
 GLOBAL_MMLU_BENCHMARKS: list[Benchmark] = [global_mmlu(), global_mmlu_german()]

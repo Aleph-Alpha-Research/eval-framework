@@ -14,7 +14,6 @@ def markdown_doc(
     response_type: str,
     metrics: Sequence[str],
     subjects: Any,
-    language: Any,
     num_fewshot: int,
     formatters: Sequence[BaseFormatter],
     example_messages: list[Message] | None,
@@ -38,8 +37,6 @@ def markdown_doc(
     buf.write(f"METRICS = [{', '.join(metrics)}]".strip() + "\n")
     if subjects is not None:
         buf.write(f"SUBJECTS = {subjects!r}".strip() + "\n")
-    if language is not None:
-        buf.write(f"LANGUAGE = {language!r}".strip() + "\n")
     buf.write("````\n\n")
 
     if example_messages is not None:

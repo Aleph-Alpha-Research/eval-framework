@@ -148,7 +148,6 @@ def _mmlu_prox_benchmark(
         subjects=ListOfSubjects(MMLU_PRO_SUBJECTS),
         # The language axis lives in the dataset policy so that we can select the right question/answer cues.
         dataset_policy=dataset_policy,
-        language=_MMLU_PROX_LANGUAGES[language],
     )
 
 
@@ -331,7 +330,6 @@ def _mmlu_prox_cot_benchmark(
         fewshot=fewshot,
         subjects=ListOfSubjects(MMLU_PRO_SUBJECTS),
         dataset_policy=dataset_policy,
-        language=Language.DEU,
     )
 
 

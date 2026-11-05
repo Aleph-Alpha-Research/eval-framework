@@ -16,7 +16,6 @@ from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FewshotExample, SampleSplit
 from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import PartialEvalAccuracy
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle
@@ -93,7 +92,6 @@ def winogrande_cloze(dataset: DatasetPolicy | None = None) -> Benchmark:
         fewshot=FewShot(SampleSplit(), ChoiceRenderer(WinograndeReader(), fewshot_styler)),
         subjects=ListOfSubjects(["winogrande_xl"]),
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 

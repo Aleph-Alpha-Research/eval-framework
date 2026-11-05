@@ -32,7 +32,6 @@ def _winogrande_choice(id: str, styler: TaskStyler, dataset: DatasetPolicy | Non
         fewshot_split="validation",
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=_winogrande_dataset(dataset),
-        language=Language.DEU,
     )
 
 
@@ -56,7 +55,6 @@ def winogrande_ellamind_partial_eval_de(dataset: DatasetPolicy | None = None) ->
         fewshot=FewShot(SampleSplit(), ChoiceRenderer(WinograndeReader(), fewshot_styler)),
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=_winogrande_dataset(dataset),
-        language=Language.DEU,
     )
 
 

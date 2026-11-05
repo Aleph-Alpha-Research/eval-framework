@@ -50,7 +50,6 @@ def _siqa_ellamind_benchmark(
         fewshot_split="validation",
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=dataset_policy,
-        language=Language.DEU,
     )
 
 

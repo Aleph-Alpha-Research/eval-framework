@@ -42,7 +42,6 @@ def _hle_ellamind_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy 
         fewshot_split="test",
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=dataset_policy,
-        language=Language.DEU,
     )
 
 

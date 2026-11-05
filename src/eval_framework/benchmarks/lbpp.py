@@ -39,7 +39,6 @@ from eval_framework.eval_kind import Choice, Generative
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FewshotExample, FunctionRenderer, SampleSplit
 from eval_framework.metrics.completion.code_assertion import LBPPCodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle
@@ -164,7 +163,6 @@ def lbpp(dataset: DatasetPolicy | None = None) -> Benchmark:
         sample_split=_SAMPLE_SPLIT,
         fewshot=FewShot(SampleSplit(), few_shot_prompt),
         dataset_policy=_dataset(dataset, "python"),
-        language=Language.ENG,
     )
 
 
@@ -183,7 +181,6 @@ def lbpp_bpb(dataset: DatasetPolicy | None = None, language: str = "python") -> 
         sample_split=_SAMPLE_SPLIT,
         fewshot=FewShot(SampleSplit(), ChoiceRenderer(reader, styler)),
         dataset_policy=_dataset(dataset, language),
-        language=Language.ENG,
     )
 
 

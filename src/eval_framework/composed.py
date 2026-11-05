@@ -24,8 +24,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# The language(s) a benchmark tests: a single language, a per-subtopic mapping, or None (not language-specific).
-LanguageSpec = Language | dict[str, Language] | dict[str, tuple[Language, Language]] | None
+# Deprecated: benchmarks no longer declare a language — ``compose``/``choice`` accept and ignore the
+# parameter until all callers stop passing it.
+LanguageSpec = Language | dict[str, Language] | None
 
 
 @final
@@ -40,7 +41,6 @@ class ComposedEval(Eval):
         sample_split: str,
         fewshot: FewShotGenerator,
         subjects: Subjects,
-        language: LanguageSpec,
         rnd: random.Random,
     ) -> None:
         self._display_name = display_name
@@ -50,7 +50,6 @@ class ComposedEval(Eval):
         self.sample_split = sample_split
         self._fewshot = fewshot
         self._subjects = subjects
-        self.language = language
         self.rnd = rnd
 
     def _load_dataset(self, load_key: str | None) -> list[dict[str, Any]]:
@@ -224,7 +223,6 @@ class ComposedBenchmark(Benchmark):
         sample_split: str,
         fewshot: FewShotPolicy,
         dataset_policy: DatasetPolicy,
-        language: LanguageSpec,
     ) -> None:
         self._id = id
         self._display_name = display_name
@@ -233,7 +231,6 @@ class ComposedBenchmark(Benchmark):
         self._answer = answer
         self.sample_split = sample_split
         self._fewshot = fewshot
-        self.language = language
         self.dataset_policy = dataset_policy
 
     @classmethod
@@ -247,11 +244,11 @@ class ComposedBenchmark(Benchmark):
         fewshot: FewShotPolicy,
         subjects: SubjectsSelector | None = None,
         dataset_policy: DatasetPolicy,
-        language: LanguageSpec,
+        language: LanguageSpec = None,
         display_name: str | None = None,
     ) -> Self:
         """Build a ``ComposedBenchmark`` from its inputs; ``subjects`` defaults to ``NoSubject``
-        (a single unnamed slice) and ``display_name`` to ``id``."""
+        (a single unnamed slice) and ``display_name`` to ``id``. ``language`` is deprecated and ignored."""
         return cls(
             id=id,
             display_name=display_name if display_name is not None else id,
@@ -260,7 +257,6 @@ class ComposedBenchmark(Benchmark):
             answer=answer,
             sample_split=sample_split,
             fewshot=fewshot,
-            language=language,
             dataset_policy=dataset_policy,
         )
 
@@ -275,13 +271,14 @@ class ComposedBenchmark(Benchmark):
         fewshot_split: str,
         subjects: SubjectsSelector | None = None,
         dataset_policy: DatasetPolicy,
-        language: LanguageSpec,
+        language: LanguageSpec = None,
         display_name: str | None = None,
     ) -> Self:
         """Build a choice-based benchmark. The same ``reader`` + ``styler`` drive both the scored ``Choice``
         and its matching few-shot demonstrations, so they are given once. A choice is always scored by
         loglikelihood over its candidates, so the answer is fixed to ``PickFromCandidates``. The few-shot
-        source is picked from whether ``fewshot_split`` is the eval split (leak-safe) or a separate one."""
+        source is picked from whether ``fewshot_split`` is the eval split (leak-safe) or a separate one.
+        ``language`` is deprecated and ignored."""
         source = SampleSplit() if fewshot_split == sample_split else FewShotSplit(fewshot_split)
         return cls.compose(
             id=id,
@@ -292,7 +289,6 @@ class ComposedBenchmark(Benchmark):
             fewshot=FewShot(source, ChoiceRenderer(reader, styler)),
             subjects=subjects,
             dataset_policy=dataset_policy,
-            language=language,
         )
 
     @override
@@ -321,7 +317,6 @@ class ComposedBenchmark(Benchmark):
             sample_split=self.sample_split,
             fewshot=fewshot,
             subjects=subjects,
-            language=self.language,
             loader=self.dataset_policy.loader(custom_hf_revision),
             rnd=random.Random(seed),
         )
@@ -360,7 +355,6 @@ class ComposedBenchmark(Benchmark):
             sample_split=self.sample_split,
             fewshot=self._fewshot.bind(doc.example_shots),
             subjects=subjects,
-            language=self.language,
             loader=loader,
             rnd=random.Random(RANDOM_SEED),
         )
@@ -377,7 +371,6 @@ class ComposedBenchmark(Benchmark):
             response_type=self.response_type().name,
             metrics=[m.__name__ for m in self.metrics()],
             subjects=[subject.label for subject in subjects],
-            language=self.language,
             num_fewshot=doc.example_shots,
             formatters=formatters,
             example_messages=sample.messages,

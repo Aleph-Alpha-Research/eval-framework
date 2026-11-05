@@ -51,7 +51,6 @@ def _gpqa_ellamind_benchmark(id: str, styler: TaskStyler, dataset: DatasetPolicy
         fewshot_split="train",
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=dataset_policy,
-        language=Language.DEU,
     )
 
 
@@ -138,7 +137,6 @@ def gpqa_ellamind_diamond_cot_de(dataset: DatasetPolicy | None = None) -> Benchm
         fewshot=NoFewShot(),
         subjects=ListOfSubjects(["deu"]),
         dataset_policy=_diamond_dataset(dataset),
-        language=Language.DEU,
     )
 
 

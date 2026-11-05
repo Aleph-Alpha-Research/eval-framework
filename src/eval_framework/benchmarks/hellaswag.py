@@ -12,7 +12,6 @@ from typing import Any, final, override
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import ClozeStyle
@@ -54,7 +53,6 @@ def _hellaswag_benchmark(
         sample_split=sample_split,
         fewshot_split=fewshot_split,
         dataset_policy=dataset_policy,
-        language=Language.ENG,
     )
 
 

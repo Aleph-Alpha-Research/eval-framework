@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, override
 
 from eval_framework.answer import AnswerPolicy, PickFromCandidates, ReconstructProgram
 from eval_framework.choices import ChoiceFields, ChoiceReader
-from eval_framework.composed import ComposedBenchmark, LanguageSpec
+from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice, Generative, ItemText
 from eval_framework.fewshot import (
@@ -30,7 +30,6 @@ from eval_framework.fewshot import (
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects, SubjectsSelector
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle
@@ -137,7 +136,6 @@ def execution(
     answer: AnswerPolicy,
     fewshot_source: FewShotSource,
     subjects: SubjectsSelector | None = None,
-    language: LanguageSpec = Language.ENG,
     dataset: DatasetPolicy | None,
     metrics: list[type["BaseMetric"]] | None = None,
 ) -> Benchmark:
@@ -164,7 +162,6 @@ def execution(
         fewshot=fewshot,
         subjects=subjects,
         dataset_policy=dataset_policy,
-        language=language,
     )
 
 
@@ -176,7 +173,6 @@ def bpb(
     styler: BPBStyle,
     fewshot: FewShotPolicy,
     subjects: SubjectsSelector | None = None,
-    language: LanguageSpec = Language.ENG,
     dataset: DatasetPolicy | None,
 ) -> Benchmark:
     """A BPB (loglikelihood-of-the-gold-solution) benchmark: one candidate, scored by ``styler``. The few-shot
@@ -190,7 +186,6 @@ def bpb(
         fewshot=fewshot,
         subjects=subjects,
         dataset_policy=dataset_policy,
-        language=language,
     )
 
 
