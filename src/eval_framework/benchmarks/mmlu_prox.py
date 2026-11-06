@@ -1,10 +1,23 @@
 """MMLU-ProX: multilingual MMLU-Pro.
 
 https://huggingface.co/datasets/li-lab/MMLU-ProX
+
+Each language is one config of the dataset ("de", "fr", "it", "es", "pt", "ru", "uk", "hu"); its
+subjects are the 14 MMLU-Pro categories. The Lite variants run on ``li-lab/MMLU-ProX-Lite`` (a 588-row
+test subset per language, same validation split).
+
+Variants, per language and for both the full and the Lite dataset:
+
+- ``MC`` / ``MC_OLMES``: multiple choice, scored over the letter labels (OLMES: space-prefixed labels).
+- ``Cloze`` / ``BPB``: options hidden, scored over the option texts, or BPB of the gold option.
+
+Adding a language: extend ``LanguageCode`` and add its wording to ``_LOCALES``. The chain-of-thought variants
+(``COT`` / ``COT_V2``) are German only and built separately.
 """
 
 import re
-from typing import Any, final, override
+from dataclasses import dataclass
+from typing import Any, Literal, assert_never, final, get_args, override
 
 from datasets import DatasetDict
 
@@ -27,6 +40,15 @@ from eval_framework.tasks.utils import get_n_letters
 from template_formatting.formatter import Message
 
 _MMLU_MAX_NUM_OPTIONS = 10  # MMLU-Pro(X) has at most 10 options
+
+TaskVariant = Literal["MC", "MC_OLMES", "Cloze", "BPB"]
+
+LanguageCode = Literal["DE", "FR", "IT", "ES", "PT", "RU", "UK", "HU"]
+_LANGUAGES: tuple[LanguageCode, ...] = get_args(LanguageCode)
+
+
+def _task_id(task_variant: TaskVariant, language: LanguageCode, lite: bool) -> str:
+    return f"MMLUProX{'Lite' if lite else ''}_LiLab_{language}_{task_variant}"
 
 
 @final
@@ -98,46 +120,226 @@ class MMLUProXDatasetPolicy(DatasetPolicy):
         return self._pinned.documentation()
 
 
-# Supported languages: HF config -> Language enum. Extend together with the styler blocks below.
-_MMLU_PROX_LANGUAGES = {"de": Language.DEU}
+@dataclass(frozen=True, kw_only=True)
+class MMLUProXLocale:
+    """One language of MMLU-ProX: its dataset config, and the wording of the choice-variant preambles."""
 
-# German category names, following the lm-evaluation-harness MMLU-ProX/de task descriptions.
-_CATEGORY_NAMES_DE = {
-    "biology": "Biologie",
-    "business": "Wirtschaft",
-    "chemistry": "Chemie",
-    "computer science": "Informatik",
-    "economics": "Ökonomie",
-    "engineering": "Ingenieurwesen",
-    "health": "Gesundheit",
-    "history": "Geschichte",
-    "law": "Recht",
-    "math": "Mathematik",
-    "other": "Sonstiges",
-    "philosophy": "Philosophie",
-    "physics": "Physik",
-    "psychology": "Psychologie",
+    config: str
+    """The HuggingFace config holding the language (``de``)."""
+    language: Language
+    """The framework language; also selects the question/answer cues of the choice stylers."""
+    category_names: dict[str, str]
+    """MMLU-Pro category -> its name in the language, as filled into ``{category}`` of the preambles."""
+    mc_template: str
+    """Opens a prompt that shows the answer options; ``{category}`` is the category name."""
+    cloze_template: str
+    """Opens a prompt that hides the answer options, so it must not claim multiple choice."""
+
+    def __post_init__(self) -> None:
+        if set(self.category_names) != set(MMLU_PRO_SUBJECTS):
+            raise ValueError(f"category_names must name exactly the MMLU-Pro categories, got {self.category_names}")
+        for preamble in (self.mc_template, self.cloze_template):
+            if "{category}" not in preamble:
+                raise ValueError(f"preamble must contain '{{category}}': {preamble!r}")
+
+    def mc_preamble(self, subject: str) -> str:
+        return self.mc_template.format(category=self.category_names[subject])
+
+    def cloze_preamble(self, subject: str) -> str:
+        return self.cloze_template.format(category=self.category_names[subject])
+
+
+# Category names are taken from https://github.com/EleutherAI/lm-evaluation-harness/blob/d6de81643928d653435c431bae19945d41d32520/lm_eval/tasks/mmlu_prox/lang_libs.py
+_LOCALES: dict[LanguageCode, MMLUProXLocale] = {
+    "DE": MMLUProXLocale(
+        config="de",
+        language=Language.DEU,
+        # Following the lm-evaluation-harness MMLU-ProX/de task descriptions.
+        category_names={
+            "biology": "Biologie",
+            "business": "Wirtschaft",
+            "chemistry": "Chemie",
+            "computer science": "Informatik",
+            "economics": "Ökonomie",
+            "engineering": "Ingenieurwesen",
+            "health": "Gesundheit",
+            "history": "Geschichte",
+            "law": "Recht",
+            "math": "Mathematik",
+            "other": "Sonstiges",
+            "philosophy": "Philosophie",
+            "physics": "Physik",
+            "psychology": "Psychologie",
+        },
+        mc_template="Die folgenden sind Multiple-Choice-Fragen (mit Antworten) über {category}.",
+        cloze_template="Die folgenden sind Fragen (mit Antworten) über {category}.",
+    ),
+    "FR": MMLUProXLocale(
+        config="fr",
+        language=Language.FRA,
+        category_names={
+            "biology": "biologie",
+            "business": "commerce",
+            "chemistry": "chimie",
+            "computer science": "informatique",
+            "economics": "économie",
+            "engineering": "ingénierie",
+            "health": "santé",
+            "history": "histoire",
+            "law": "droit",
+            "math": "mathématiques",
+            "other": "autre",
+            "philosophy": "philosophie",
+            "physics": "physique",
+            "psychology": "psychologie",
+        },
+        mc_template="Voici des questions à choix multiples (avec réponses) concernant {category}.",
+        cloze_template="Voici des questions (avec réponses) concernant {category}.",
+    ),
+    "IT": MMLUProXLocale(
+        config="it",
+        language=Language.ITA,
+        category_names={
+            "biology": "biologia",
+            "business": "affari",
+            "chemistry": "chimica",
+            "computer science": "informatica",
+            "economics": "economia",
+            "engineering": "ingegneria",
+            "health": "salute",
+            "history": "storia",
+            "law": "diritto",
+            "math": "matematica",
+            "other": "altro",
+            "philosophy": "filosofia",
+            "physics": "fisica",
+            "psychology": "psicologia",
+        },
+        mc_template="Le seguenti sono domande a scelta multipla (con risposte) riguardanti {category}.",
+        cloze_template="Di seguito sono riportate delle domande (con risposte) relative a {category}.",
+    ),
+    "ES": MMLUProXLocale(
+        config="es",
+        language=Language.SPA,
+        # Question/answer cues: "Pregunta:" / "Respuesta:"
+        category_names={
+            "biology": "biología",
+            "business": "negocios",
+            "chemistry": "química",
+            "computer science": "informática",
+            "economics": "economía",
+            "engineering": "ingeniería",
+            "health": "salud",
+            "history": "historia",
+            "law": "derecho",
+            "math": "matemáticas",
+            "other": "otro",
+            "philosophy": "filosofía",
+            "physics": "física",
+            "psychology": "psicología",
+        },
+        mc_template="Las siguientes son preguntas de opción múltiple (con respuestas) sobre {category}.",
+        cloze_template="Las siguientes son preguntas (con respuestas) sobre {category}.",
+    ),
+    "PT": MMLUProXLocale(
+        config="pt",
+        language=Language.POR,
+        # Question/answer cues: "Pergunta:" / "Resposta:"
+        category_names={
+            "biology": "biologia",
+            "business": "negócios",
+            "chemistry": "química",
+            "computer science": "ciência da computação",
+            "economics": "economia",
+            "engineering": "engenharia",
+            "health": "saúde",
+            "history": "história",
+            "law": "direito",
+            "math": "matemática",
+            "other": "outro",
+            "philosophy": "filosofia",
+            "physics": "física",
+            "psychology": "psicologia",
+        },
+        mc_template="As seguintes são questões de múltipla escolha (com respostas) sobre {category}.",
+        cloze_template="As seguintes são perguntas (com respostas) sobre {category}.",
+    ),
+    "RU": MMLUProXLocale(
+        config="ru",
+        language=Language.RUS,
+        # Question/answer cues: "Вопрос:" / "Ответ:"
+        category_names={
+            "biology": "Биология",
+            "business": "Бизнес",
+            "chemistry": "Химия",
+            "computer science": "Информатика",
+            "economics": "Экономика",
+            "engineering": "Инженерия",
+            "health": "Здравоохранение",
+            "history": "История",
+            "law": "Право",
+            "math": "Математика",
+            "other": "Другое",
+            "philosophy": "Философия",
+            "physics": "Физика",
+            "psychology": "Психология",
+        },
+        mc_template="Ниже приведены вопросы с множественным выбором (с ответами) по теме {category}.",
+        cloze_template="Ниже приведены вопросы (с ответами) по теме {category}.",
+    ),
+    "UK": MMLUProXLocale(
+        config="uk",
+        language=Language.UKR,
+        # Question/answer cues: "Запитання:" / "Відповідь:"
+        category_names={
+            "biology": "біологія",
+            "business": "бізнес",
+            "chemistry": "хімія",
+            "computer science": "інформатика",
+            "economics": "економіка",
+            "engineering": "інженерія",
+            "health": "здоров'я",
+            "history": "історія",
+            "law": "право",
+            "math": "математика",
+            "other": "інше",
+            "philosophy": "філософія",
+            "physics": "фізика",
+            "psychology": "психологія",
+        },
+        mc_template="Нижче наведено запитання з множинним вибором (з відповідями) щодо {category}.",
+        cloze_template="Нижче наведено запитання (з відповідями) щодо {category}.",
+    ),
+    "HU": MMLUProXLocale(
+        config="hu",
+        language=Language.HUN,
+        # Question/answer cues: "Kérdés:" / "Válasz:"
+        category_names={
+            "biology": "biológia",
+            "business": "üzlet",
+            "chemistry": "kémia",
+            "computer science": "informatika",
+            "economics": "közgazdaságtan",
+            "engineering": "mérnöki tudományok",
+            "health": "egészség",
+            "history": "történelem",
+            "law": "jog",
+            "math": "matematika",
+            "other": "egyéb",
+            "philosophy": "filozófia",
+            "physics": "fizika",
+            "psychology": "pszichológia",
+        },
+        mc_template="Az alábbiak többválasztásos kérdések (válaszokkal) a {category} témakörben.",
+        cloze_template="Az alábbiak a {category} témakörhöz kapcsolódó kérdések (válaszokkal együtt).",
+    ),
 }
 
 
-def _mc_preamble_de(subject: str) -> str:
-    return f"Die folgenden sind Multiple-Choice-Fragen (mit Antworten) über {_CATEGORY_NAMES_DE[subject]}."
+# --- choice (loglikelihood) variants -------------------------------------------------------------------------
 
 
-def _cloze_preamble_de(subject: str) -> str:
-    # Cloze/BPB prompts show no answer options, so the preamble must not claim multiple choice.
-    return f"Die folgenden sind Fragen (mit Antworten) über {_CATEGORY_NAMES_DE[subject]}."
-
-
-def _mmlu_prox_benchmark(
-    id: str,
-    styler: TaskStyler,
-    language: str,
-    lite: bool = False,
-    dataset: DatasetPolicy | None = None,
-) -> Benchmark:
-    dataset_path = "li-lab/MMLU-ProX-Lite" if lite else "li-lab/MMLU-ProX"
-    dataset_policy = dataset if dataset is not None else MMLUProXDatasetPolicy(dataset_path, language)
+def _choice_benchmark(id: str, styler: TaskStyler, locale: MMLUProXLocale, dataset: DatasetPolicy) -> Benchmark:
     return ComposedBenchmark.choice(
         id=id,
         reader=MMLUProXReader(),
@@ -147,88 +349,40 @@ def _mmlu_prox_benchmark(
         # The subjects are the 14 MMLU-Pro categories (identical in MMLU-ProX)
         subjects=ListOfSubjects(MMLU_PRO_SUBJECTS),
         # The language axis lives in the dataset policy so that we can select the right question/answer cues.
-        dataset_policy=dataset_policy,
-        language=_MMLU_PROX_LANGUAGES[language],
+        dataset_policy=dataset,
+        language=locale.language,
     )
 
 
-def mmlu_prox_lilab_de_mc(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_prox_benchmark(
-        "MMLUProX_LiLab_DE_MC",
-        MCStyle.for_language(Language.DEU, initial_prompt=_mc_preamble_de),
-        "de",
-        dataset=dataset,
-    )
+def _styler(task_variant: TaskVariant, locale: MMLUProXLocale) -> TaskStyler:
+    match task_variant:
+        case "MC":
+            return MCStyle.for_language(locale.language, initial_prompt=locale.mc_preamble)
+        case "MC_OLMES":
+            return MCStyle.for_language(locale.language, space_prefixed_labels=True, initial_prompt=locale.mc_preamble)
+        case "Cloze":
+            return ClozeStyle.for_language(locale.language, initial_prompt=locale.cloze_preamble)
+        case "BPB":
+            return BPBStyle.for_language(locale.language, initial_prompt=locale.cloze_preamble)
+        case _:
+            assert_never(task_variant)
 
 
-def mmlu_prox_lilab_de_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_prox_benchmark(
-        "MMLUProX_LiLab_DE_MC_OLMES",
-        MCStyle.for_language(Language.DEU, space_prefixed_labels=True, initial_prompt=_mc_preamble_de),
-        "de",
-        dataset=dataset,
-    )
-
-
-def mmlu_prox_lite_lilab_de_mc(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_prox_benchmark(
-        "MMLUProXLite_LiLab_DE_MC",
-        MCStyle.for_language(Language.DEU, initial_prompt=_mc_preamble_de),
-        "de",
-        lite=True,
-        dataset=dataset,
-    )
-
-
-def mmlu_prox_lite_lilab_de_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_prox_benchmark(
-        "MMLUProXLite_LiLab_DE_MC_OLMES",
-        MCStyle.for_language(Language.DEU, space_prefixed_labels=True, initial_prompt=_mc_preamble_de),
-        "de",
-        lite=True,
-        dataset=dataset,
-    )
-
-
-def mmlu_prox_lilab_de_cloze(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_prox_benchmark(
-        "MMLUProX_LiLab_DE_CLOZE",
-        ClozeStyle.for_language(Language.DEU, initial_prompt=_cloze_preamble_de),
-        "de",
-        dataset=dataset,
-    )
-
-
-def mmlu_prox_lite_lilab_de_cloze(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_prox_benchmark(
-        "MMLUProXLite_LiLab_DE_CLOZE",
-        ClozeStyle.for_language(Language.DEU, initial_prompt=_cloze_preamble_de),
-        "de",
-        lite=True,
-        dataset=dataset,
-    )
-
-
-def mmlu_prox_lilab_de_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_prox_benchmark(
-        "MMLUProX_LiLab_DE_BPB",
-        BPBStyle.for_language(Language.DEU, initial_prompt=_cloze_preamble_de),
-        "de",
-        dataset=dataset,
-    )
-
-
-def mmlu_prox_lite_lilab_de_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _mmlu_prox_benchmark(
-        "MMLUProXLite_LiLab_DE_BPB",
-        BPBStyle.for_language(Language.DEU, initial_prompt=_cloze_preamble_de),
-        "de",
-        lite=True,
-        dataset=dataset,
+def mmlu_prox(
+    task_variant: TaskVariant, language: LanguageCode, lite: bool = False, dataset: DatasetPolicy | None = None
+) -> Benchmark:
+    """Build ``MMLUProX[Lite]_LiLab_{language}_{variant}``, e.g. ``mmlu_prox("MC", "DE")``."""
+    locale = _LOCALES[language]
+    dataset_path = "li-lab/MMLU-ProX-Lite" if lite else "li-lab/MMLU-ProX"
+    dataset_policy = dataset if dataset is not None else MMLUProXDatasetPolicy(dataset_path, locale.config)
+    return _choice_benchmark(
+        _task_id(task_variant, language, lite), _styler(task_variant, locale), locale, dataset_policy
     )
 
 
 # --- chain-of-thought (generative) variants ------------------------------------------------------------------
+
+_mc_preamble_de = _LOCALES["DE"].mc_preamble
 
 # Cue closing every v1 prompt, and the prefix the dataset's ``cot_content`` starts with instead of it.
 _COT_CUE_DE = "Antwort: Denken wir Schritt für Schritt nach."
@@ -409,16 +563,14 @@ def mmlu_prox_lite_lilab_de_cot_v2(dataset: DatasetPolicy | None = None) -> Benc
 
 
 MMLU_PROX_BENCHMARKS: list[Benchmark] = [
-    mmlu_prox_lilab_de_mc(),
-    mmlu_prox_lilab_de_mc_olmes(),
-    mmlu_prox_lilab_de_cloze(),
-    mmlu_prox_lilab_de_bpb(),
+    *(
+        mmlu_prox(task_variant, language, lite=lite)
+        for lite in (False, True)
+        for language in _LANGUAGES
+        for task_variant in get_args(TaskVariant)
+    ),
     mmlu_prox_lilab_de_cot(),
     mmlu_prox_lilab_de_cot_v2(),
-    mmlu_prox_lite_lilab_de_mc(),
-    mmlu_prox_lite_lilab_de_mc_olmes(),
-    mmlu_prox_lite_lilab_de_cloze(),
-    mmlu_prox_lite_lilab_de_bpb(),
     mmlu_prox_lite_lilab_de_cot(),
     mmlu_prox_lite_lilab_de_cot_v2(),
 ]

@@ -2,7 +2,7 @@
 
 - the reader turns a raw row into ChoiceFields, dropping padded options
 - the dataset loader filters both splits to the requested category
-- prompt spec: build the real benchmarks (via their ``mmlu_prox_*`` constructors) over fictional rows
+- prompt spec: build the real benchmarks (via the ``mmlu_prox`` constructor) over fictional rows
   and assert the assembled messages, ground truth, and scored completions
 - CoT variants: prompt spec over the same fictional rows, plus answer extraction through the public
   completion boundary
@@ -13,6 +13,7 @@ loads the real pinned Hugging Face dataset.
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import partial
 from typing import Any
 
 import pytest
@@ -21,12 +22,9 @@ from eval_framework.benchmarks.mmlu_prox import (
     MMLU_PROX_BENCHMARKS,
     MMLUProXDatasetLoader,
     MMLUProXReader,
-    mmlu_prox_lilab_de_bpb,
-    mmlu_prox_lilab_de_cloze,
+    mmlu_prox,
     mmlu_prox_lilab_de_cot,
     mmlu_prox_lilab_de_cot_v2,
-    mmlu_prox_lilab_de_mc,
-    mmlu_prox_lilab_de_mc_olmes,
 )
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
@@ -231,10 +229,10 @@ _BPB = _ExpectedPrompt(
 @pytest.mark.parametrize(
     "make_benchmark, expected",
     [
-        pytest.param(mmlu_prox_lilab_de_mc, _MC, id="mc_de"),
-        pytest.param(mmlu_prox_lilab_de_mc_olmes, _MC_OLMES, id="mc_olmes_de"),
-        pytest.param(mmlu_prox_lilab_de_cloze, _CLOZE, id="cloze_de"),
-        pytest.param(mmlu_prox_lilab_de_bpb, _BPB, id="bpb_de"),
+        pytest.param(partial(mmlu_prox, "MC", "DE"), _MC, id="mc_de"),
+        pytest.param(partial(mmlu_prox, "MC_OLMES", "DE"), _MC_OLMES, id="mc_olmes_de"),
+        pytest.param(partial(mmlu_prox, "Cloze", "DE"), _CLOZE, id="cloze_de"),
+        pytest.param(partial(mmlu_prox, "BPB", "DE"), _BPB, id="bpb_de"),
     ],
 )
 def test_mmlu_prox_zeroshot_prompt(make_benchmark: Callable[..., Benchmark], expected: _ExpectedPrompt) -> None:
@@ -278,22 +276,22 @@ def _oneshot(
     "make_benchmark, expected",
     [
         pytest.param(
-            mmlu_prox_lilab_de_mc,
+            partial(mmlu_prox, "MC", "DE"),
             _oneshot(_MC_PREAMBLE, _MC_FEWSHOT_MESSAGES, _MC_EVAL_MESSAGES, _MC),
             id="mc_de",
         ),
         pytest.param(
-            mmlu_prox_lilab_de_mc_olmes,
+            partial(mmlu_prox, "MC_OLMES", "DE"),
             _oneshot(_MC_PREAMBLE, _MC_OLMES_FEWSHOT_MESSAGES, _MC_OLMES_EVAL_MESSAGES, _MC_OLMES),
             id="mc_olmes_de",
         ),
         pytest.param(
-            mmlu_prox_lilab_de_cloze,
+            partial(mmlu_prox, "Cloze", "DE"),
             _oneshot(_QA_PREAMBLE, _CLOZE_FEWSHOT_MESSAGES, _CLOZE_EVAL_MESSAGES, _CLOZE),
             id="cloze_de",
         ),
         pytest.param(
-            mmlu_prox_lilab_de_bpb,
+            partial(mmlu_prox, "BPB", "DE"),
             _oneshot(_QA_PREAMBLE, _CLOZE_FEWSHOT_MESSAGES, _CLOZE_EVAL_MESSAGES, _BPB),
             id="bpb_de",
         ),
@@ -309,7 +307,7 @@ def test_mmlu_prox_oneshot_prompt(make_benchmark: Callable[..., Benchmark], expe
 
 def test_mc_de_oneshot_flat_prompt() -> None:
     """The complete 1-shot MC prompt as a single string, for visual inspection."""
-    benchmark = mmlu_prox_lilab_de_mc(dataset=DatasetStub({"test": [_EVAL_ROW], "validation": [_FEWSHOT_ROW]}))
+    benchmark = mmlu_prox("MC", "DE", dataset=DatasetStub({"test": [_EVAL_ROW], "validation": [_FEWSHOT_ROW]}))
     sample = first_sample(benchmark, num_fewshot=1, custom_subjects=["history"])
     assert ConcatFormatter().format(sample.messages, output_mode="string") == (
         """Die folgenden sind Multiple-Choice-Fragen (mit Antworten) über Geschichte.
