@@ -9,12 +9,13 @@ import pytest
 from eval_framework.contract import ResponseType
 from eval_framework.metrics.loglikelihood.bits_per_byte import BitsPerByteLoglikelihood
 from eval_framework.tasks import task_style
-from eval_framework.tasks.base import Language, TaskStyle
 from eval_framework.tasks.task_style import (
     BPBStyle,
     ClozeStyle,
+    Language,
     MCCompletionStyle,
     MCStyle,
+    TaskStyle,
     answer_key_to_index,
     format_mc_prompt,
     question_cue_text,
@@ -316,19 +317,19 @@ class TestBPBStyle:
 
 
 @pytest.fixture
-def swe_without_defaults(monkeypatch: pytest.MonkeyPatch) -> Language:
-    """Swedish with no language defaults, whether or not the real table gains them later."""
-    monkeypatch.delitem(task_style._DEFAULT_QUESTION_CUE_TEXT, Language.SWE, raising=False)
-    return Language.SWE
+def language_without_defaults(monkeypatch: pytest.MonkeyPatch) -> Language:
+    """Polish with its wording entry removed: every member ships with one, so the miss is provoked."""
+    monkeypatch.delitem(task_style._DEFAULT_QUESTION_CUE_TEXT, Language.POL)
+    return Language.POL
 
 
-def test_question_cue_text_unknown_language_raises(swe_without_defaults: Language) -> None:
-    with pytest.raises(ValueError, match="SWE"):
-        question_cue_text(swe_without_defaults)
+def test_question_cue_text_unknown_language_raises(language_without_defaults: Language) -> None:
+    with pytest.raises(ValueError, match="POL"):
+        question_cue_text(language_without_defaults)
 
 
-def test_for_language_unknown_language_keeps_styler_defaults(swe_without_defaults: Language) -> None:
+def test_for_language_unknown_language_keeps_styler_defaults(language_without_defaults: Language) -> None:
     """The lenient counterpart: a styler built for a language without defaults keeps its own (English) ones."""
-    styler = ClozeStyle.for_language(swe_without_defaults)
+    styler = ClozeStyle.for_language(language_without_defaults)
     assert styler.question_prefix == "Question: "
     assert styler.get_cue_text() == "Answer:"

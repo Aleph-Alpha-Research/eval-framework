@@ -27,10 +27,9 @@ from eval_framework.metrics.completion.minerva_math_utils import (
     strip_string_hendrycks,
 )
 from eval_framework.subjects import ListOfSubjects, NoSubject, SubjectsSelector
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import BPBStyle
+from eval_framework.tasks.task_style import BPBStyle, Language
 
 MATH500_DATASET_PATH = "HuggingFaceH4/MATH-500"
 

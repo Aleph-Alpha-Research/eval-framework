@@ -483,7 +483,6 @@ dependencies = [
     { name = "pycountry" },
     { name = "pydantic" },
     { name = "python-dotenv" },
-    { name = "python-iso639" },
     { name = "pyyaml" },
     { name = "scipy" },
     { name = "sympy" },
@@ -527,7 +526,6 @@ requires-dist = [
     { name = "pycountry", specifier = ">=26.2.16,<27" },
     { name = "pydantic", specifier = ">=2.14.2,<3" },
     { name = "python-dotenv", specifier = ">=1.2.4,<2" },
-    { name = "python-iso639", specifier = ">=2026.7.23" },
     { name = "pyyaml", specifier = ">=6.0.3,<7" },
     { name = "scipy", specifier = ">=1.18.1,<2" },
     { name = "sympy", specifier = ">=1.14.0,<2" },
@@ -2152,15 +2150,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/74/26/2fbeedb218a787a5eea551c7532cac4e009f83d689dd2faa0d0353473f86/python_dotenv-1.2.4.tar.gz", hash = "sha256:f0d53e69935a851c0dcc78f3ab7aaccd8cabef0b92382b576b824212902873c0", size = 60824, upload-time = "2026-10-01T05:36:10Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/60/d1/38f3a3405989a89ac18390803e70c6ad7c7760da4f9b83cbeca0c44a0c72/python_dotenv-1.2.4-py3-none-any.whl", hash = "sha256:42269a8a5b3fd54ffa6f3d84b18abed50064717576b4ecf03dc4a55d8aa04fdc", size = 23266, upload-time = "2026-10-01T05:36:08.633Z" },
-]
-
-[[package]]
-name = "python-iso639"
-version = "2026.7.23"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2d/06/ca328611455fa6c959524154c10b7f0295bd75c44e7a43a4f3c12a45d6ff/python_iso639-2026.7.23.tar.gz", hash = "sha256:c176522e92cc76b3581cd354e5544330980a36b017d7c291717eface84eaff57", size = 174039, upload-time = "2026-07-23T13:19:00.862Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/6c/5b/de4df88c0f0a621925e486bf23f904fe1f62ad092d6e1df00e7f60174df4/python_iso639-2026.7.23-py3-none-any.whl", hash = "sha256:d678638207411a02c06f28aa965b8081df0766f59ed311071960161fe3a77af2", size = 167905, upload-time = "2026-07-23T13:18:59.63Z" },
 ]
 
 [[package]]
