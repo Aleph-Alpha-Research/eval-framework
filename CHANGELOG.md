@@ -14,6 +14,27 @@
 
 ### Bug Fixes
 
+## [0.21.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.20.1...v0.21.0) (2026-11-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* BaseTask removed
+
+### Features
+
+* BaseTask removed ([5505066](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5505066d448a1cf9a40a9d943d56223250e2634b))
+
+
+### Bug Fixes
+
+* pin allenai/social_i_qa in frozen dataset revisions ([#491](https://github.com/Aleph-Alpha-Research/eval-framework/issues/491)) ([758b914](https://github.com/Aleph-Alpha-Research/eval-framework/commit/758b914058012e90ee073c01f8b854a5327dccd1))
+
+
+### Documentation
+
+* Documentation no longer mentions BaskTask ([d5971f9](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d5971f97c72457456191211d85a8aeb8393f7a20))
+
 ## [0.20.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.20.0...v0.20.1) (2026-11-05)
 
 
