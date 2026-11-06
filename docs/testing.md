@@ -15,8 +15,7 @@ This repository contains a large and diverse test suite. To keep iteration fast,
   - Tag setup and HuggingFace datasets cache pull (2 min)
   - Docker image build (5 min)
   - UV install dependency tests (1 min)
-  - CPU tests excluding slow/external tests (3 min)
-  - CPU slow tests (3–4 min)
+  - CPU tests excluding external tests (3 min)
   - Formatter hash tests (3 min)
 
 **Recommended local command:**
@@ -25,7 +24,7 @@ For most contributors, running the CPU fast tests is sufficient:
 ```bash
 # Run the tests that PR CI runs
 uv run pytest -n auto --max-worker-restart=0 -v \
-    -m "not cpu_slow and not external_api and not formatter_hash"
+    -m "not external_api and not formatter_hash"
 ````
 
 ---
