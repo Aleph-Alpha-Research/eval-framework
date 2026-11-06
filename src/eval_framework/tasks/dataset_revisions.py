@@ -73,6 +73,21 @@ class HfDatasetRevisions:
                 logger.info("%s: %s -> %s", path, sha, latest)
             self._revisions[path] = latest or sha
 
+    def missing_references(self, api: HfApi) -> list[str]:
+        """The pins whose revisions are no longer reachable on the Hub, with the failure reason.
+
+        Intended to run on a CI schedule, so a yanked revision or a removed dataset is noticed
+        before it breaks an eval run. An empty list means every pin is still reachable.
+        """
+        missing = []
+        for path, sha in self._revisions.items():
+            try:
+                api.dataset_info(path, revision=sha, timeout=100.0)
+            except Exception as exc:
+                logger.warning("Pinned revision %s of %s is unreachable: %s", sha, path, exc)
+                missing.append(f"{path} @ {sha}: {exc}")
+        return missing
+
 
 @lru_cache
 def _revisions_from_file(lockfile: Path) -> HfDatasetRevisions:
