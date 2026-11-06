@@ -1,0 +1,31 @@
+name: Verify dataset revision pins
+
+on:
+  schedule:
+    # Daily 04:00 UTC
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  UV_LINK_MODE: symlink
+  UV_LOCKED: 1
+
+jobs:
+  verify-dataset-revisions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "~=0.8.16"
+
+      - name: Verify pinned dataset revisions are reachable
+        env:
+          HF_TOKEN: ${{ secrets.HUGGINGFACE_API_KEY }}
+        run: uv run python scripts/verify_hf_datasets.py

@@ -58,6 +58,26 @@ def test_update_to_latest_keeps_pin_when_lookup_fails() -> None:
     assert revisions.to_dict() == {"Some/evaltask": "old-sha"}
 
 
+def test_missing_references_is_empty_when_every_pin_is_reachable() -> None:
+    # Given a pin whose revision the Hub still serves
+    api = MagicMock()
+    revisions = dr.HfDatasetRevisions({"org/data": "pinned-sha"})
+
+    # When checking, then nothing is reported and the pinned revision itself was queried
+    assert revisions.missing_references(api) == []
+    api.dataset_info.assert_called_once_with("org/data", revision="pinned-sha", timeout=100.0)
+
+
+def test_missing_references_reports_every_unreachable_pin_with_its_reason() -> None:
+    # Given two unreachable pins around a reachable one
+    api = MagicMock()
+    api.dataset_info.side_effect = [RuntimeError("yanked"), None, RuntimeError("gone")]
+    revisions = dr.HfDatasetRevisions({"org/a": "sha-a", "org/b": "sha-b", "org/c": "sha-c"})
+
+    # When checking, then exactly the unreachable pins are reported
+    assert revisions.missing_references(api) == ["org/a @ sha-a: yanked", "org/c @ sha-c: gone"]
+
+
 def test_hf_dataset_revisions_file_round_trip(tmp_path: Path) -> None:
     """Revisions written with ``to_file`` load back identically with ``from_file``."""
     lockfile = tmp_path / "hf-dataset-revisions.json"
