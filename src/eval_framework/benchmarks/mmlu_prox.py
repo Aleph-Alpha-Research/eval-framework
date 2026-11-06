@@ -19,10 +19,9 @@ from eval_framework.fewshot import FewShot, FewshotExample, FewShotPolicy, FewSh
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, InitialPrompt, MCStyle, TaskStyler
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, InitialPrompt, Language, MCStyle, TaskStyler
 from eval_framework.tasks.utils import get_n_letters
 from template_formatting.formatter import Message
 

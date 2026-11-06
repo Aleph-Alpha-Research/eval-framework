@@ -20,7 +20,6 @@ demonstrations from the same pair:
         sample_split="test",
         fewshot_split="train",
         dataset_policy=Pinned("my/dataset"),
-        language=Language.ENG,
     )
 
 Task families with MC, Cloze and BPB variants share the reader and differ only in the styler each
@@ -31,6 +30,7 @@ import hashlib
 import random
 from abc import ABC, abstractmethod
 from collections.abc import Callable
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Self, final
 
 from eval_framework.contract import ResponseType
@@ -45,11 +45,35 @@ from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariant
 from eval_framework.metrics.loglikelihood.confidence_weighted_accuracy import ConfidenceWeightedAccuracy
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
 from eval_framework.metrics.loglikelihood.ternary import TernaryScore
-from eval_framework.tasks.base import Language, TaskStyle
 from eval_framework.tasks.utils import get_n_letters
 
 if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
+
+
+class TaskStyle(Enum):
+    MULTIPLE_CHOICE = "multiple_choice"
+    CLOZE = "cloze"
+    BPB = "bpb"
+
+
+class Language(Enum):
+    """A language the stylers have default question/answer wording for.
+
+    Members are named by ISO 639-3 code and valued by English name
+    """
+
+    ENG = "English"
+    DEU = "German"
+    FRA = "French"
+    SPA = "Spanish"
+    ITA = "Italian"
+    CES = "Czech"
+    DAN = "Danish"
+    FIN = "Finnish"
+    NLD = "Dutch"
+    POL = "Polish"
+
 
 # A subject-templated preamble: maps a subject label to the preamble text (e.g. MMLU's
 # "... about {subject}."). Fixed preambles simply ignore the argument.
