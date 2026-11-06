@@ -12,9 +12,10 @@ from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotGenerator, Fe
 from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import Completion, Error, RawCompletion
 from eval_framework.subjects import NoSubject, Subjects, SubjectsSelector
-from eval_framework.tasks.base import RANDOM_SEED, Language
+from eval_framework.tasks.base import RANDOM_SEED
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.markdown_doc import markdown_doc as render_markdown_doc
+from eval_framework.tasks.task_style import Language
 from template_formatting.formatter import BaseFormatter, Message, Role
 
 if TYPE_CHECKING:

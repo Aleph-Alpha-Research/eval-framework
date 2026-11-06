@@ -13,10 +13,9 @@ from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.fewshot import ChoiceRenderer, FewShot, SampleSplit
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import ClozeStyle, MCStyle, TaskStyler
+from eval_framework.tasks.task_style import ClozeStyle, Language, MCStyle, TaskStyler
 
 
 def _winogrande_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:

@@ -1,51 +1,8 @@
-from enum import Enum
-from typing import Any
-
-import iso639
+# The companion still imports ``Language`` from here; the alias form keeps it a re-export
+# under ``no_implicit_reexport``.
+from eval_framework.tasks.task_style import Language as Language
 
 RANDOM_SEED = 42
-
-
-class TaskStyle(Enum):
-    MULTIPLE_CHOICE = "multiple_choice"
-    CLOZE = "cloze"
-    BPB = "bpb"
-
-
-class Language(Enum):
-    ENG = "English"
-    DEU = "German"
-    FRA = "French"
-    ITA = "Italian"
-    SPA = "Spanish"
-    POR = "Portuguese"
-    NLD = "Dutch"
-    CES = "Czech"
-    DAN = "Danish"
-    FIN = "Finnish"
-    SWE = "Swedish"
-    ARB = "Arabic"
-    POL = "Polish"
-    RUS = "Russian"
-    UKR = "Ukrainian"
-    HRV = "Croatian"
-    SRP = "Serbian"
-
-    @classmethod
-    def add_members(cls, new_members: dict[str, Any]) -> type["Language"]:
-        members = {member.name: member.value for member in cls}
-        for name, value in new_members.items():
-            if name not in members:
-                members[name] = value
-        return Enum(cls.__name__, members)  # type: ignore[return-value]
-
-
-languages: dict[str, str] = {}
-for language in iso639.ALL_LANGUAGES:
-    enum_name = language.part3.upper()
-    languages[enum_name] = language.name
-
-Language: type[Enum] = Language.add_members(languages)  # type: ignore[no-redef]
 
 
 def _subject_parts(subject: object) -> tuple[str, ...]:
