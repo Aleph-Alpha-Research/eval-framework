@@ -45,7 +45,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
-- **openai** 3.45.0 - https://github.com/openai/openai-python
+- **openai** 3.46.0 - https://github.com/openai/openai-python
 - **opentelemetry-api** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
 - **opentelemetry-exporter-http-transport** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
 - **opentelemetry-exporter-otlp-common** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
@@ -133,8 +133,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **markdown-it-py** 4.2.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
 - **platformdirs** 4.14.5 - https://github.com/tox-dev/platformdirs
-- **pydantic** 2.14.2 - https://github.com/pydantic/pydantic
-- **pydantic_core** 2.50.2 - https://github.com/pydantic
+- **pydantic** 2.14.3 - https://github.com/pydantic/pydantic
+- **pydantic_core** 2.50.4 - https://github.com/pydantic
 - **PyYAML** 6.0.3 - https://pyyaml.org/
 - **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
 - **rich** 15.0.0 - https://github.com/Textualize/rich
@@ -11995,7 +11995,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### openai 3.45.0 (Apache-2.0)
+### openai 3.46.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -16742,7 +16742,7 @@ DAMAGES.
                      END OF TERMS AND CONDITIONS
 ```
 
-### pydantic 2.14.2 (MIT)
+### pydantic 2.14.3 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -16768,7 +16768,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### pydantic_core 2.50.2 (MIT)
+### pydantic_core 2.50.4 (MIT)
 
 ```text
 The MIT License (MIT)

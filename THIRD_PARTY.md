@@ -84,7 +84,7 @@ and first-party/internal packages are excluded.
 | `platformdirs` | `4.14.5` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.1` |
-| `pydantic-core` | `2.50.2` |
+| `pydantic-core` | `2.50.4` |
 | `pygments` | `2.21.0` |
 | `python-dateutil` | `4.0.0` |
 | `referencing` | `0.37.0` |
