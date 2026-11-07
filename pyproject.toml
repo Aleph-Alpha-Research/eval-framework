@@ -62,7 +62,7 @@ dev = [
   "pytest-mock>=3.17.0",
   "pytest-xdist>=3.8.0,<4",
   "pytest-sugar>1.1,<2",
-  "types-pyyaml>=6.0.12.20261030,<7",
+  "types-pyyaml>=6.0.12.20261103,<7",
   "types-python-dateutil>=2.9.0.20261029,<3",
   "types-requests>=2.33.0.20261030,<3",
   "plotly>=7.1.0,<8",
