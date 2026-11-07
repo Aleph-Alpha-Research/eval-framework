@@ -27,7 +27,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache 2.0 License
 
-- **transformers** 5.22.1 - https://github.com/huggingface/transformers
+- **transformers** 5.22.2 - https://github.com/huggingface/transformers
 
 ## Apache Software License; MIT License
 
@@ -63,7 +63,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0 AND CNRI-Python
 
-- **regex** 2026.9.29 - https://github.com/mrabarnett/mrab-regex
+- **regex** 2026.11.7 - https://github.com/mrabarnett/mrab-regex
 
 ## Apache-2.0 OR BSD-2-Clause
 
@@ -77,7 +77,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## BSD-3-Clause
 
 - **antlr4-python3-runtime** 4.11.0 - http://www.antlr.org
-- **click** 8.5.0 - https://github.com/pallets/click/
+- **click** 8.5.1 - https://github.com/pallets/click/
 - **cloudpickle** 3.1.2 - https://github.com/cloudpipe/cloudpickle
 - **dill** 0.4.1 - https://github.com/uqfoundation/dill
 - **fsspec** 2026.7.0 - https://github.com/fsspec/filesystem_spec
@@ -127,7 +127,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
 - **filelock** 4.2.9 - https://github.com/tox-dev/filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
-- **jiter** 0.18.0 - https://github.com/pydantic/jiter/
+- **jiter** 0.19.0 - https://github.com/pydantic/jiter/
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
 - **jsonschema-specifications** 2025.9.1 - https://github.com/python-jsonschema/jsonschema-specifications
 - **markdown-it-py** 4.2.0 - https://github.com/executablebooks/markdown-it-py
@@ -142,7 +142,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **tiktoken** 0.14.0 - https://github.com/openai/tiktoken
 - **truststore** 0.10.5 - https://github.com/sethmlarson/truststore
-- **typer** 0.27.3 - https://github.com/fastapi/typer
+- **typer** 0.28.0 - https://github.com/fastapi/typer
 - **typing-inspection** 0.4.5 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.8.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
 - **wandb** 0.31.0 - https://github.com/wandb/wandb
@@ -321,7 +321,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### click 8.5.0 (BSD-3-Clause)
+### click 8.5.1 (BSD-3-Clause)
 
 ```text
 Copyright 2014 Pallets
@@ -2148,7 +2148,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### jiter 0.18.0 (MIT)
+### jiter 0.19.0 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -17159,7 +17159,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### regex 2026.9.29 (Apache-2.0 AND CNRI-Python)
+### regex 2026.11.7 (Apache-2.0 AND CNRI-Python)
 
 ```text
 This work was derived from the 're' module of CPython 2.6 and CPython 3.1,
@@ -19034,7 +19034,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### transformers 5.22.1 (Apache 2.0 License)
+### transformers 5.22.2 (Apache 2.0 License)
 
 ```text
 Copyright 2018- The Hugging Face team. All rights reserved.
@@ -19268,7 +19268,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### typer 0.27.3 (MIT)
+### typer 0.28.0 (MIT)
 
 ```text
 The MIT License (MIT)
