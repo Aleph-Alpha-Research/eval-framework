@@ -14,6 +14,27 @@
 
 ### Bug Fixes
 
+## [0.22.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.21.0...v0.22.0) (2026-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove full-dataset end-to-end test and the cpu_slow CI job
+
+### Features
+
+* language removed from metadata and markdown doc ([5bc8ae0](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5bc8ae0f5e89d4a573a673ee534a7220f391e141))
+
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=3.44.0,&lt;4 ([91ec8af](https://github.com/Aleph-Alpha-Research/eval-framework/commit/91ec8af67af42458edb24fbd3ea5ac08680fb0cf))
+
+
+### Tests
+
+* remove full-dataset end-to-end test and the cpu_slow CI job ([dcc06a2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/dcc06a27104373b779a42f0b8f0bf661df976474))
+
 ## [0.21.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.20.1...v0.21.0) (2026-11-06)
 
 
