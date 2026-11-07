@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 
-from eval_framework.tasks.base import Language
+from eval_framework.tasks.task_style import Language
 
 LanguageCode = Literal["CS", "DA", "DE", "ES", "FI", "FR", "IT", "NL", "PL"]
 

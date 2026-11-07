@@ -18,10 +18,16 @@ from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.fewshot import NoFewShot
 from eval_framework.subjects import ListOfSubjects
-from eval_framework.tasks.base import Language
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, shuffle_correct_with_distractors
+from eval_framework.tasks.task_style import (
+    BPBStyle,
+    ClozeStyle,
+    Language,
+    MCStyle,
+    TaskStyler,
+    shuffle_correct_with_distractors,
+)
 from eval_framework.tasks.utils import get_n_letters
 
 GPQA_ELLAMIND_DATASET_PATH = "ellamind/gpqa-multilingual"
