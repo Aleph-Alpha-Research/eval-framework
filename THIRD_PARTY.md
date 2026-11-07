@@ -21,7 +21,7 @@ and first-party/internal packages are excluded.
 | `mysql-connector-python` | `>=26.10.0,<27` |
 | `nltk` | `>=3.10.4,<4` |
 | `numpy` | `>=2.5.4` |
-| `openai` | `>=3.42.1,<4` |
+| `openai` | `>=3.44.0,<4` |
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.2,<3` |
@@ -45,7 +45,7 @@ and first-party/internal packages are excluded.
 | `attrs` | `26.1.0` |
 | `certifi` | `2026.10.23` |
 | `charset-normalizer` | `3.5.2` |
-| `click` | `8.5.0` |
+| `click` | `8.5.1` |
 | `cloudpickle` | `3.1.2` |
 | `colorama` | `0.4.6` |
 | `cwevals` | `0.0.1b1` |
@@ -64,7 +64,7 @@ and first-party/internal packages are excluded.
 | `httpx2-jsfetch` | `1.0` |
 | `huggingface-hub` | `2.4.0` |
 | `idna` | `3.20` |
-| `jiter` | `0.18.0` |
+| `jiter` | `0.19.0` |
 | `joblib` | `1.6.0` |
 | `jsonschema-specifications` | `2025.9.1` |
 | `markdown-it-py` | `4.2.0` |
@@ -88,7 +88,7 @@ and first-party/internal packages are excluded.
 | `pygments` | `2.21.0` |
 | `python-dateutil` | `4.0.0` |
 | `referencing` | `0.37.0` |
-| `regex` | `2026.9.29` |
+| `regex` | `2026.11.7` |
 | `requests` | `2.34.2` |
 | `rich` | `15.0.0` |
 | `rpds-py` | `2026.9.1` |
@@ -99,7 +99,7 @@ and first-party/internal packages are excluded.
 | `tokenizers` | `0.23.3` |
 | `tqdm` | `4.70.1` |
 | `truststore` | `0.10.5` |
-| `typer` | `0.27.3` |
+| `typer` | `0.28.0` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.5` |
 | `tzdata` | `2026.6` |
