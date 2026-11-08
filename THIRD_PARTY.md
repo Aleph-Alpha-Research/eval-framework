@@ -21,7 +21,7 @@ and first-party/internal packages are excluded.
 | `mysql-connector-python` | `>=26.10.0,<27` |
 | `nltk` | `>=3.10.4,<4` |
 | `numpy` | `>=2.5.4` |
-| `openai` | `>=3.44.0,<4` |
+| `openai` | `>=3.45.0,<4` |
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.2,<3` |

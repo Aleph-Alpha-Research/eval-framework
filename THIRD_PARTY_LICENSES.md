@@ -55,7 +55,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **opentelemetry-sdk** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-sdk
 - **opentelemetry-semantic-conventions** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-semantic-conventions
 - **pyarrow** 26.0.1 - https://arrow.apache.org/
-- **python-iso639** 2026.7.23 - https://github.com/jacksonllee/iso639
+- **python-iso639** 2026.11.7 - https://github.com/jacksonllee/iso639
 - **requests** 2.34.2 - https://github.com/psf/requests
 - **safetensors** 0.8.0 - https://github.com/huggingface/safetensors
 - **tokenizers** 0.23.3 - https://github.com/huggingface/tokenizers
@@ -16915,7 +16915,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### python-iso639 2026.7.23 (Apache-2.0)
+### python-iso639 2026.11.7 (Apache-2.0)
 
 ```text
 Apache License
