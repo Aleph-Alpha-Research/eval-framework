@@ -60,7 +60,6 @@ Documentation Overview
    :caption: User Guides
 
    naming_convention.md
-   benchmarks_and_metrics.md
    controlling_upload_results.md
    docker_guide.md
    model_arguments.md
