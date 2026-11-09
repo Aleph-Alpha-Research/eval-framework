@@ -64,7 +64,6 @@ DEBUG=false
 
 | Dockerfile              | Purpose                                     |
 | ----------------------- | ------------------------------------------- |
-| `Dockerfile`            | Main evaluation framework with CUDA support |
 | `src/eval_framework/tasks/Dockerfile_codebench`  | Specialized for BigCodeBench coding tasks   |
 
 
