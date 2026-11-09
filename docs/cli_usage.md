@@ -57,17 +57,6 @@ The LLM judge is always an `eval_framework.llm.openai.OpenAIModel`.
 Arguments to pass to the judge `OpenAIModel` constructor as key=value pairs; `model_name` is required (e.g.
 `model_name="gpt-4o"`). Setting this enables the LLM judge, which is required for tasks scored with LLM-judge metrics.
 
-### Perturbations
-
-**`--perturbation-type TYPE`**
-The type of perturbation to apply to task instructions. Note that this may not make sense for some prompts for example, those containing math and code.
-
-**`--perturbation-probability PROBABILITY`**
-The probability of applying a perturbation to each word or character (between 0.0 and 1.0).
-
-**`--perturbation-seed SEED`**
-Random seed controlling perturbations.
-
 ### Logging & Tracking
 
 **`--wandb-project WANDB_PROJECT`**
