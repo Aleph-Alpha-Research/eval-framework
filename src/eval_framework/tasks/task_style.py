@@ -63,16 +63,16 @@ class Language(Enum):
     Members are named by ISO 639-3 code and valued by English name
     """
 
-    ENG = "English"
-    DEU = "German"
-    FRA = "French"
-    SPA = "Spanish"
-    ITA = "Italian"
     CES = "Czech"
     DAN = "Danish"
+    DEU = "German"
+    ENG = "English"
     FIN = "Finnish"
+    FRA = "French"
+    ITA = "Italian"
     NLD = "Dutch"
     POL = "Polish"
+    SPA = "Spanish"
 
 
 # A subject-templated preamble: maps a subject label to the preamble text (e.g. MMLU's
