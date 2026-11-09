@@ -37,7 +37,6 @@ For more detailed CLI usage instructions, see the [CLI Usage Guide](https://alep
 ### Python
 
 ```Python
-
 from pathlib import Path
 
 from eval_framework.llm.openai import OpenAIModel
