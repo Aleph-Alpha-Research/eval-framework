@@ -1,40 +1,39 @@
 Eval-Framework Documentation
 ============================
 
-A **production-ready framework for evaluating large language models** across 90+ benchmarks, covering reasoning, coding, safety, and long-context tasks. The framework provides flexible model integration, custom benchmarks and metrics, perturbation testing, rich outputs, and statistical analysis. It supports local evaluation against any OpenAI-compatible endpoint.
+A suite of curated benchmarks for evaluating **L**arge **L**anguage **M**odels (LLMs)
 
-.. image:: eval-framework.png
-   :alt: Eval-Framework
-   :align: center
+Benchmarks in this suite are:
 
-Key Features
-------------
+- Validated: Benchmarks implemented in this suite are required to have reproduced published results
+- Legal: The data is legal to exist and to use. Some datasets are subject to third party licenses
+- Comprehensive: For a list of supported benchmarks execute the CLI tool or check the benchmarks
+  source directory. https://github.com/Aleph-Alpha-Research/eval-framework/tree/main/src/eval_framework/benchmarks
 
-- **Extensibility:** Easily add custom models, benchmarks, and metrics.
-- **Comprehensive Benchmarks:** 90+ tasks covering reasoning, coding, math, knowledge, long-context, and safety.
-- **Flexible Model Integration:** OpenAI-compatible endpoints and BaseLLM-based models.
-- **Robust Metrics:** Completion metrics, loglikelihood metrics, LLM-as-a-judge evaluations, and efficiency metrics.
-- **Perturbation Testing & Analysis:** Configurable perturbation types, confidence intervals, and significance testing.
-- **Docker Support:** Pre-configured for local or distributed setups.
 
 Quick Start
 -----------
 
-The codebase is compatible with **Python 3.12**.
+Running a benchmark locally.
 
-Install the library via uv (recommended):
+Clone the repository
 
 .. code-block:: bash
 
-   # Clone the repository
-   git clone https://github.com/Aleph-Alpha-Research/eval-framework/tree/main
-   cd eval-framework
+    git clone https://github.com/Aleph-Alpha-Research/eval-framework/tree/main
+    cd eval-framework
 
-   # Install all dependencies
+Setup the Python environment. We recommend using `uv https://docs.astral.sh/uv/getting-started/installation/`:
+
+.. code-block:: bash
+
    uv sync
 
-Now, you can run a single benchmark locally. The example talks to the OpenAI API and needs ``OPENAI_API_KEY`` to be set;
-any OpenAI-compatible server (for example vLLM) can be targeted by adding ``base_url=http://host:port/v1`` to ``--llm-args``:
+By default Open AIs API is used. You can explicitly specify an OpenAI compatible endpoint by
+passing ``base_url=http://host:port/v1`` together with the `--llm-args` options. Some metrics make
+use of the additional information provided by vLLM and won't work with OpenAI. In this exapmle we
+stick with the default. Therfore the ``OPENAI_API_KEY`` environment variable needs to contain an API
+token.
 
 .. code-block:: bash
 
@@ -72,9 +71,8 @@ Documentation Overview
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contributing Guidelines
+   :caption: Testing Guidelines
 
-   CONTRIBUTING.md
    testing.md
 
 .. toctree::
@@ -101,7 +99,9 @@ Licensed under the [Apache License 2.0](LICENSE).
 Funding
 -------
 
-This project has received funding from the European Union’s Digital Europe Programme under grant agreement No. 101195233 (OpenEuroLLM). The contents of this publication are the sole responsibility of the OpenEuroLLM consortium.
+This project has received funding from the European Union’s Digital Europe Programme under grant
+agreement No. 101195233 (OpenEuroLLM). The contents of this publication are the sole responsibility
+of the OpenEuroLLM consortium.
 
 .. image:: OELLM_1.png
    :width: 100px
