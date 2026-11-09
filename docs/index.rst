@@ -61,7 +61,6 @@ Documentation Overview
 
    naming_convention.md
    controlling_upload_results.md
-   docker_guide.md
    model_arguments.md
    overview_dataloading.md
    understanding_results_guide.md
