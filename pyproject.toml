@@ -71,7 +71,7 @@ dev = [
 docs = [
   "sphinx>=8.2.3,<9",
   "furo>=2025.12.19",
-  "sphinx-autodoc-typehints>=2",
+  "sphinx-autodoc-typehints>=2.5.0",
   "myst-parser>=5.1.0,<6",
   "pallets-sphinx-themes>=2.5.0",
 ]

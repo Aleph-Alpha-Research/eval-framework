@@ -490,7 +490,7 @@ docs = [
     { name = "myst-parser", specifier = ">=5.1.0,<6" },
     { name = "pallets-sphinx-themes", specifier = ">=2.5.0" },
     { name = "sphinx", specifier = ">=8.2.3,<9" },
-    { name = "sphinx-autodoc-typehints", specifier = ">=2" },
+    { name = "sphinx-autodoc-typehints", specifier = ">=2.5.0" },
 ]
 
 [[package]]
