@@ -73,7 +73,7 @@ docs = [
   "furo>=2024.8.6",
   "sphinx-autodoc-typehints>=2",
   "myst-parser>=4,<5",
-  "pallets-sphinx-themes>=2.3",
+  "pallets-sphinx-themes>=2.5.0",
 ]
 
 [build-system]
