@@ -69,7 +69,7 @@ dev = [
   "pip-licenses>=5.5.5",
 ]
 docs = [
-  "sphinx>=8,<9",
+  "sphinx>=8.2.3,<9",
   "furo>=2025.12.19",
   "sphinx-autodoc-typehints>=2",
   "myst-parser>=4,<5",
