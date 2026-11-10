@@ -610,7 +610,7 @@ dev = [
 ]
 docs = [
     { name = "furo", specifier = ">=2025.12.19" },
-    { name = "myst-parser", specifier = ">=4,<5" },
+    { name = "myst-parser", specifier = ">=4.0.1,<5" },
     { name = "pallets-sphinx-themes", specifier = ">=2.5.0" },
     { name = "sphinx", specifier = ">=8,<9" },
     { name = "sphinx-autodoc-typehints", specifier = ">=2" },
