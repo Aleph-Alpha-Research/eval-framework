@@ -14,6 +14,23 @@
 
 ### Bug Fixes
 
+## [0.22.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.22.1...v0.22.2) (2026-11-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency transformers to &gt;=5.22.2,&lt;6 ([04842bb](https://github.com/Aleph-Alpha-Research/eval-framework/commit/04842bbafaf1b44a3d5238c578379c081b208a2d))
+
+
+### Documentation
+
+* mentioning of top level dockerfile removed ([0792174](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0792174f18ec5c220035d60e9ac779aeadc8044b))
+* perturbation arguments removed from cli docs ([a8051f9](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a8051f9af188820875f629b13a8915e6e0288598))
+* redo index.rst ([4d4e660](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4d4e66032297cf472e86119127e627c3be353729))
+* removed outdated docker guide ([6a6d29a](https://github.com/Aleph-Alpha-Research/eval-framework/commit/6a6d29a86081ef3b171bb9b3755f9ff6d7561f9c))
+* trim down contributing.md ([c13f118](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c13f118474205fa5bd9be9ef25bed46ba15c3721))
+* unmaintained list of benchmarks removed from docs ([707b2e4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/707b2e455f6979b1ad9c8ce531998a50a060f0a7))
+
 ## [0.22.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.22.0...v0.22.1) (2026-11-09)
 
 
