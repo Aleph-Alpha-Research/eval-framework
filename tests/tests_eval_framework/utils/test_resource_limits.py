@@ -47,6 +47,19 @@ def test_time_limited_restores_the_previous_sigalrm_handler() -> None:
         signal.signal(signal.SIGALRM, original)
 
 
+def test_time_limited_refuses_to_replace_a_handler_installed_outside_python(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Python reports a handler that was in place before it started (e.g. when embedded) as None, and could
+    # not reinstate it once replaced.
+    real_handler = signal.getsignal(signal.SIGALRM)
+    monkeypatch.setattr(signal, "getsignal", lambda signum: None)
+
+    with pytest.raises(RuntimeError):
+        time_limited(1)(lambda: None)()
+
+    monkeypatch.undo()
+    assert signal.getsignal(signal.SIGALRM) is real_handler
+
+
 linux_only = pytest.mark.skipif(not sys.platform.startswith("linux"), reason="memory_limited only caps on Linux")
 
 
