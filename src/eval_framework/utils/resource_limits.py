@@ -29,6 +29,9 @@ def time_limited(seconds: int) -> Callable[[Callable[P, R]], Callable[P, R]]:
             def _raise_timeout(signum: int, frame: FrameType | None) -> None:
                 raise TimeoutError(f"{func.__qualname__} exceeded {seconds}s")
 
+            if signal.getsignal(signal.SIGALRM) is None:
+                # Installed before Python started (e.g. when embedded); it could not be reinstated afterwards.
+                raise RuntimeError(f"{func.__qualname__} would replace a SIGALRM handler installed outside Python")
             previous_handler = signal.signal(signal.SIGALRM, _raise_timeout)
             signal.alarm(seconds)
             try:
