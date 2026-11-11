@@ -19,8 +19,9 @@ def time_limited(seconds: int) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """Raise ``TimeoutError`` from the decorated call once it has run for ``seconds``.
 
     Uses SIGALRM: Unix only, callable only from the main thread (``signal.signal`` raises ``ValueError``
-    elsewhere), and a single process-wide timer, so limited calls must not nest. Long-running native code
-    is only interrupted once it returns to the interpreter.
+    elsewhere), and a single process-wide timer, so it raises ``RuntimeError`` rather than cancel an alarm
+    that is already pending (e.g. when nested). Long-running native code is only interrupted once it returns
+    to the interpreter.
     """
 
     def decorator(func: Callable[P, R]) -> Callable[P, R]:
@@ -29,6 +30,9 @@ def time_limited(seconds: int) -> Callable[[Callable[P, R]], Callable[P, R]]:
             def _raise_timeout(signum: int, frame: FrameType | None) -> None:
                 raise TimeoutError(f"{func.__qualname__} exceeded {seconds}s")
 
+            if signal.getitimer(signal.ITIMER_REAL)[0] > 0:
+                # One process-wide timer: arming ours would silently cancel the pending one.
+                raise RuntimeError(f"{func.__qualname__} cannot run while another alarm is pending")
             if signal.getsignal(signal.SIGALRM) is None:
                 # Installed before Python started (e.g. when embedded); it could not be reinstated afterwards.
                 raise RuntimeError(f"{func.__qualname__} would replace a SIGALRM handler installed outside Python")

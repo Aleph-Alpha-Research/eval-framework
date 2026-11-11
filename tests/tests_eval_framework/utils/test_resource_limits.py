@@ -60,6 +60,17 @@ def test_time_limited_refuses_to_replace_a_handler_installed_outside_python(monk
     assert signal.getsignal(signal.SIGALRM) is real_handler
 
 
+def test_time_limited_refuses_to_cancel_a_pending_alarm() -> None:
+    signal.alarm(100)  # an outer timer, e.g. an enclosing time_limited call
+    try:
+        with pytest.raises(RuntimeError):
+            time_limited(1)(lambda: None)()
+
+        assert signal.alarm(0) > 0  # still pending: returns the seconds left
+    finally:
+        signal.alarm(0)
+
+
 linux_only = pytest.mark.skipif(not sys.platform.startswith("linux"), reason="memory_limited only caps on Linux")
 
 
