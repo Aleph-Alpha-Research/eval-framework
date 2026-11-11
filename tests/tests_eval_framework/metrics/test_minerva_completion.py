@@ -84,6 +84,19 @@ class TestMathMinervaCompletion:
 
         assert is_equiv_minerva(long_expr, long_expr) is True
 
+    def test_is_equiv_minerva_refuses_candidates_sympy_cannot_evaluate(self) -> None:
+        # Parses as (1375631537523!)!, which sympy evaluates eagerly in C: the timeout
+        # never fires and memory grows by tens of GiB per second (observed on
+        # MATHMinerva_OLMES_NONL, number_theory_1655).
+        start = time.perf_counter()
+        result = is_equiv_minerva("13756315375\n23!!", "9")
+
+        assert result is False
+        assert time.perf_counter() - start < 1.0
+
+    def test_is_equiv_minerva_still_evaluates_small_factorials(self) -> None:
+        assert is_equiv_minerva("5!", "120") is True
+
     def test_metric_defaults_to_english_but_can_select_german(self) -> None:
         german = "Finale Antwort: Die finale Antwort lautet 24. Ich hoffe, die Antwort ist korrekt."
         default_results = MathMinervaCompletion().calculate(make_completion(german, "24"))

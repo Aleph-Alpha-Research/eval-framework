@@ -389,6 +389,11 @@ def strip_string_hendrycks(string: str) -> str:
 # MATH gold answers stay under ~80 chars.
 _PLAUSIBLE_ANSWER_LEN = 128
 
+# Nested factorials (`23!!` parses as (23!)!) and factorials or powers of huge
+# literals. Sympy evaluates these eagerly in C code, where the timeout can't
+# interrupt it, growing by tens of GiB per second until the process is killed.
+_UNEVALUABLE = re.compile(r"!\s*!|\d{8,}\s*!|\^\s*\{?\s*\d+\s*\^")
+
 
 def is_equiv_minerva(x1: str, x2: str, timeout_seconds: int = 5) -> bool:
     """Sympy-based equivalence (Minerva)."""
@@ -396,6 +401,8 @@ def is_equiv_minerva(x1: str, x2: str, timeout_seconds: int = 5) -> bool:
     # 1000+ char strings until the timeout. A side far longer than the other can't
     # be an equivalent final answer, so refuse it before parsing.
     if max(len(x1), len(x2)) > max(_PLAUSIBLE_ANSWER_LEN, 3 * min(len(x1), len(x2))):
+        return False
+    if _UNEVALUABLE.search(x1) or _UNEVALUABLE.search(x2):
         return False
 
     def _timeout_handler(signum: Any, frame: Any) -> None:
