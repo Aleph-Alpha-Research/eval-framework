@@ -34,9 +34,6 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
                     code_execution_trace=traceback.format_exc(),
                 )
             ]
-        except Exception as e:
-            # Any other sandbox/Docker error (e.g. an image pull rate limit) is an infra failure.
-            return self._record_or_raise(e)
 
         # Split and filter out empty strings
         output_parts = [part for part in output.split() if part.strip()]

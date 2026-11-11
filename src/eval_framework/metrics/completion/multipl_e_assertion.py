@@ -117,9 +117,6 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
                 traceback=traceback.format_exc(),
             )
             return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=error)]
-        except Exception as exc:
-            # Any other sandbox/Docker error (e.g. an image pull rate limit) is an infra failure.
-            return self._record_or_raise(exc)
 
         return [
             MetricResult(

@@ -44,7 +44,6 @@ class Eval(ABC):
         samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-        fail_on_error: bool = True,
     ) -> list[Completion]:
         """Run ``llm`` over ``samples`` and return their completions."""
 

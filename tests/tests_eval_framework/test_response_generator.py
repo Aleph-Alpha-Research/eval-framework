@@ -1,26 +1,20 @@
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 from unittest.mock import Mock
 
 import pytest
 from dateutil import parser
-from openai.types.chat.completion_create_params import ResponseFormat
 
-from eval_framework.answer import ExtractFromCompletion
-from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
-from eval_framework.eval_kind import Generative
-from eval_framework.fewshot import NoFewShot
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator, repeat_samples
 from eval_framework.result_processors.base import ResultProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
-from eval_framework.shared.types import Completion, RawCompletion, RawLoglikelihood
+from eval_framework.shared.types import Completion, RawCompletion
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import Registry
 from template_formatting.formatter import Message, Role
-from tests.tests_eval_framework.benchmarks.utils import DatasetStub
 from tests.tests_eval_framework.conftest import MockLLM
 
 
@@ -251,9 +245,7 @@ class _PrecedenceStub(Eval, Benchmark):
             possible_completions=None,
         )
 
-    def generate_completions(
-        self, llm, samples, stop_sequences=None, max_tokens=None, fail_on_error=True
-    ) -> list[Completion]:
+    def generate_completions(self, llm, samples, stop_sequences=None, max_tokens=None) -> list[Completion]:
         self.called_stop_sequences = stop_sequences
         self.called_max_tokens = max_tokens
         return [
@@ -472,24 +464,6 @@ def test_with_wrong_loaded_metadata(tmp_path: Path) -> None:
                 generator.generate()
 
 
-class SaboteurLLM(BaseLLM):
-    """LLM that always raises — drives the fail_on_error code path without mocks."""
-
-    def generate_from_messages(
-        self,
-        messages: list[Sequence[Message]],
-        stop_sequences: list[str] | None = None,
-        max_tokens: int | None = None,
-        temperature: float | None = None,
-        top_p: float | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> list[RawCompletion]:
-        raise RuntimeError("inference connection failed")
-
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
-        raise RuntimeError("inference connection failed")
-
-
 class NoopResultProcessor(ResultProcessor):
     """No-op result processor sufficient for ResponseGenerator's metadata + IO calls."""
 
@@ -509,72 +483,3 @@ class NoopResultProcessor(ResultProcessor):
     def save_aggregated_results(self, result: dict) -> None: ...
     def load_metrics_results(self) -> list:
         return []
-
-
-def _stub_registry() -> Registry:
-    """A registry holding one single-sample benchmark ("StubBenchmark"), no HF dataset loader."""
-    kind = Generative(
-        build_prompt=lambda item: item["question"],
-        cue="",
-        ground_truth=lambda item: item["answer"],
-        metrics=[],
-    )
-    benchmark = ComposedBenchmark.compose(
-        id="StubBenchmark",
-        kind=kind,
-        answer=ExtractFromCompletion(lambda completion_text: completion_text),
-        sample_split="test",
-        fewshot=NoFewShot(),
-        dataset_policy=DatasetStub({"test": [{"question": "Hello", "answer": "A"}]}),
-    )
-    registry = Registry()
-    registry.add(benchmark)
-    return registry
-
-
-def test_fail_on_error_propagates_llm_failure() -> None:
-    # Given a generator configured with fail_on_error=True against an LLM that always raises
-    config = EvalConfig(
-        task_name="StubBenchmark",
-        num_fewshot=0,
-        num_samples=1,
-        llm_class=SaboteurLLM,
-        save_intermediate_results=False,
-        fail_on_error=True,
-    )
-    generator = ResponseGenerator(
-        SaboteurLLM(),
-        config,
-        NoopResultProcessor(),  # type: ignore[arg-type]
-        benchmark_registry=_stub_registry(),
-    )
-
-    # Then the original exception propagates
-    with pytest.raises(RuntimeError, match="inference connection failed"):
-        # When running the generator
-        generator.generate()
-
-
-def test_fail_on_error_disabled_swallows_llm_failure() -> None:
-    # Given a generator with the default fail_on_error=False against an LLM that always raises
-    config = EvalConfig(
-        task_name="StubBenchmark",
-        num_fewshot=0,
-        num_samples=1,
-        llm_class=SaboteurLLM,
-        save_intermediate_results=False,
-    )
-    generator = ResponseGenerator(
-        SaboteurLLM(),
-        config,
-        NoopResultProcessor(),  # type: ignore[arg-type]
-        benchmark_registry=_stub_registry(),
-    )
-
-    # When running the generator
-    responses = generator.generate()
-
-    # Then the failure is captured per-sample as an Error, not raised
-    assert len(responses) == 1
-    assert responses[0].error is not None
-    assert responses[0].error.error_class == "RuntimeError"

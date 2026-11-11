@@ -117,12 +117,6 @@ def generate_output_dir(llm_name: str, config: EvalConfig) -> Path:
     # Include the hash in the directory name
     dir_name = f"{params_str}_{config_hash}"
 
-    # add timestamp to dir in debug mode
-    if os.environ.get("DEBUG", "FALSE").lower() == "true":
-        # Generate the timestamp
-        timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
-        dir_name += f"_{timestamp}"
-
     # Combine all components to form the full output directory path
     output_dir = config.output_dir / llm_name / f"{version_str}_{config.task_name}" / dir_name
 

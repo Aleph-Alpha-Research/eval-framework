@@ -1,6 +1,5 @@
 import logging
 import random
-import traceback
 from collections.abc import Iterable, Sequence
 from typing import TYPE_CHECKING, Any, Self, final, override
 
@@ -9,8 +8,7 @@ from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.eval_kind import Choice, EvalKind
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotGenerator, FewShotPolicy, FewShotSplit, SampleSplit
-from eval_framework.shared.errors import raise_errors
-from eval_framework.shared.types import Completion, Error, RawCompletion
+from eval_framework.shared.types import Completion, RawCompletion
 from eval_framework.subjects import NoSubject, Subjects, SubjectsSelector
 from eval_framework.tasks.base import RANDOM_SEED
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
@@ -110,39 +108,19 @@ class ComposedEval(Eval):
         samples: list[Sample],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
-        fail_on_error: bool = True,
     ) -> list[Completion]:
         """
         Generates completions for the sample.
         :param sample: sample to generate completions for
         :param stop_sequences: stop sequences to use in completion generation
         :param max_tokens: maximum tokens to use in completion generation
-        :param fail_on_error: if True, re-raise the original exception instead of capturing it
-                              into a per-sample Error completion
         :return: completion
         """
         if stop_sequences is None:
             stop_sequences = []
 
         raw_completions: list[RawCompletion]
-        try:
-            raw_completions = llm.generate(samples=samples, stop_sequences=stop_sequences, max_tokens=max_tokens)
-        except Exception as e:
-            if raise_errors() or fail_on_error:
-                raise
-            logger.info(f"Error: {e.__class__.__name__} {e}")
-            raw_completions = [
-                RawCompletion(
-                    prompt="",
-                    prompt_num_tokens=0,
-                    completion="",
-                    completion_num_tokens=0,
-                    raw_completion_error=Error(
-                        error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc()
-                    ),
-                )
-                for _ in range(len(samples))
-            ]
+        raw_completions = llm.generate(samples=samples, stop_sequences=stop_sequences, max_tokens=max_tokens)
 
         completion_list = []
         for idx, sample in enumerate(samples):
@@ -155,21 +133,14 @@ class ComposedEval(Eval):
             else:
                 messages = sample.messages + [Message(role=Role.ASSISTANT, content=raw_completion.completion)]
 
-            try:
-                error = None
-                # First the model-specific cleanup, then the answer policy's extraction.
-                completion = llm.post_process_completion(raw_completion.completion, sample)
-                completion = self._answer.extract_answer(
-                    completion,
-                    context=sample.context,
-                    ground_truth=sample.ground_truth,
-                    messages=sample.messages,
-                )
-            except Exception as e:
-                if raise_errors() or fail_on_error:
-                    raise
-                error = Error(error_class=e.__class__.__name__, message=str(e), traceback=traceback.format_exc())
-                completion = ""
+            # First the model-specific cleanup, then the answer policy's extraction.
+            completion = llm.post_process_completion(raw_completion.completion, sample)
+            completion = self._answer.extract_answer(
+                completion,
+                context=sample.context,
+                ground_truth=sample.ground_truth,
+                messages=sample.messages,
+            )
 
             completion_list.append(
                 Completion(
@@ -187,7 +158,7 @@ class ComposedEval(Eval):
                     raw_completion_reasoning=raw_completion.reasoning,
                     raw_completion_finish_reason=raw_completion.finish_reason,
                     context=sample.context,
-                    error=raw_completion.raw_completion_error or error,
+                    error=raw_completion.raw_completion_error,
                 )
             )
         return completion_list
