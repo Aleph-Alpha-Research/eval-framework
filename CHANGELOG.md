@@ -14,6 +14,13 @@
 
 ### Bug Fixes
 
+## [0.22.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.22.2...v0.22.3) (2026-11-11)
+
+
+### Features
+
+* multi-lingual MMLU ProX ([2feaa4f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2feaa4f5216595ce793cafb698e5aefa9eeb6ecc))
+
 ## [0.22.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.22.1...v0.22.2) (2026-11-10)
 
 
