@@ -1,3 +1,4 @@
+import gc
 import signal
 import sys
 import threading
@@ -76,23 +77,32 @@ def test_time_limited_refuses_to_cancel_a_pending_alarm() -> None:
 linux_only = pytest.mark.skipif(not sys.platform.startswith("linux"), reason="memory_limited only caps on Linux")
 
 
-# The limit caps new address space, not allocation size: glibc may serve blocks below its mmap threshold
-# (raised dynamically up to 32 MiB) from memory the process already holds. Above it every allocation is a
-# fresh mapping, so the boundary is exact (64 MiB less 24 bytes of allocator overhead) whatever ran before.
+# The limit caps the net growth of the address space, not the allocation size:
+# - glibc may serve blocks below its mmap threshold (raised dynamically up to 32 MiB) from memory the process
+#   already holds, so both sizes below stay above it;
+# - memory freed during the call (e.g. CPython releasing an empty 1 MiB arena) makes room, and memory
+#   allocated meanwhile takes it. In a pytest worker that has run other tests this shifts the boundary by a
+#   few MiB, so both sizes keep 16 MiB clear of the headroom, and earlier tests' garbage is collected first
+#   so a collection pass can't free a large block mid-call.
 @memory_limited(64 * 2**20)
-def _allocate_mib(mib: int) -> int:
+def _allocate_mib_capped(mib: int) -> int:
     return np.ones(mib * 2**20, dtype=np.uint8).nbytes
 
 
-@linux_only
-def test_memory_limited_allows_an_allocation_just_within_the_headroom() -> None:
-    assert _allocate_mib(63) == 63 * 2**20
+def _allocate_mib(mib: int) -> int:
+    gc.collect()
+    return _allocate_mib_capped(mib)
 
 
 @linux_only
-def test_memory_limited_refuses_an_allocation_just_beyond_the_headroom() -> None:
+def test_memory_limited_allows_an_allocation_within_the_headroom() -> None:
+    assert _allocate_mib(48) == 48 * 2**20
+
+
+@linux_only
+def test_memory_limited_refuses_an_allocation_beyond_the_headroom() -> None:
     with pytest.raises(MemoryError):
-        _allocate_mib(65)
+        _allocate_mib(80)
 
 
 @linux_only
