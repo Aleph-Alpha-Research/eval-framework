@@ -1,6 +1,5 @@
 import logging
 import time
-import traceback
 from collections.abc import Callable, Iterable
 from datetime import UTC, datetime
 from functools import partial
@@ -13,10 +12,8 @@ from eval_framework.contract import Benchmark, ResponseType, Sample
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
-from eval_framework.shared.errors import raise_errors
 from eval_framework.shared.types import (
     Completion,
-    Error,
     Loglikelihood,
     RawLoglikelihood,
 )
@@ -98,26 +95,7 @@ class ResponseGenerator:
         :return: loglikelihoods
         """
         raw_loglikelihoods: list[RawLoglikelihood]
-        try:
-            raw_loglikelihoods = self.llm.logprobs(samples)
-        except Exception as e:
-            if raise_errors() or self.config.fail_on_error:
-                raise
-            logger.info(f"Error: {e.__class__.__name__} {e}")
-            raw_loglikelihoods = [
-                RawLoglikelihood(
-                    prompt="",
-                    prompt_num_tokens=0,
-                    loglikelihoods={},
-                    loglikelihoods_num_tokens={},
-                    raw_loglikelihood_error=Error(
-                        error_class=e.__class__.__name__,
-                        message=str(e),
-                        traceback=traceback.format_exc(),
-                    ),
-                )
-                for _ in range(len(samples))
-            ]
+        raw_loglikelihoods = self.llm.logprobs(samples)
 
         loglikelihood_list = []
         for idx, sample in enumerate(samples):
@@ -154,7 +132,6 @@ class ResponseGenerator:
                     self.llm,
                     stop_sequences=stop_sequences,
                     max_tokens=max_tokens,
-                    fail_on_error=self.config.fail_on_error,
                 )
             case ResponseType.LOGLIKELIHOODS:
                 return self._generate_loglikelihoods

@@ -53,9 +53,6 @@ Create a `.env` file in the project root:
 # API Keys (if using external models)
 HF_TOKEN="your_huggingface_token"        # For private HuggingFace models
 OPENAI_API_KEY="your_openai_key"         # For OpenAI models as judges
-
-# Debug mode
-DEBUG=false
 ```
 
 ## Docker Installation

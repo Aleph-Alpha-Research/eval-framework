@@ -108,7 +108,6 @@ class EvaluationGenerator:
             else:
                 raw_metric = metric_class()
             metric = cast(BaseMetric[Completion | Loglikelihood], raw_metric)
-            metric.fail_on_error = self.config.fail_on_error
 
             metric.prepare(responses)
             logger.info(f"Starting calculation of {metric.NAME}")
