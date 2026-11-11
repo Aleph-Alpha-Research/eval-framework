@@ -8,7 +8,7 @@ import re
 from sympy import simplify
 from sympy.parsing.latex import parse_latex
 
-from eval_framework.utils.resource_limits import time_limited
+from eval_framework.utils.resource_limits import memory_limited, time_limited
 
 logger = logging.getLogger(__name__)
 
@@ -393,8 +393,11 @@ _PLAUSIBLE_ANSWER_LEN = 128
 
 
 _SYMPY_TIMEOUT_S = 5
+# Real answers need a few MB; a power tower such as 2^{2^{325^5}} asks for hundreds of GB.
+_SYMPY_MEMORY_HEADROOM_BYTES = 2**30
 
 
+@memory_limited(_SYMPY_MEMORY_HEADROOM_BYTES)
 @time_limited(_SYMPY_TIMEOUT_S)
 def _sympy_equiv(x1: str, x2: str) -> bool:
     return simplify(parse_latex(x1) - parse_latex(x2)) == 0

@@ -1,5 +1,9 @@
 import logging
+import resource
+import subprocess
+import sys
 import time
+from pathlib import Path
 
 import pytest
 
@@ -22,6 +26,55 @@ def make_completion(completion: str, ground_truth: str | list[str]) -> Completio
         raw_completion=completion,
         raw_completion_num_tokens=None,
     )
+
+
+def _resident_bytes(pid: int) -> int:
+    # /proc/<pid>/statm: sizes in pages, "total resident shared text lib data dirty"
+    _total, resident, *_ = Path(f"/proc/{pid}/statm").read_text().split()
+    return int(resident) * resource.getpagesize()
+
+
+def _run_with_memory_growth_ceiling(setup: str, run: str, ceiling_bytes: int, timeout_s: float) -> str:
+    """Run ``setup`` then ``run`` in a fresh interpreter and return what ``run`` prints.
+
+    Kills the child as soon as its resident memory has grown more than ``ceiling_bytes`` beyond what it
+    held after ``setup`` (the imports alone take a few hundred MB), and fails the test then or on timeout.
+    Polls rather than capping the child, since a cap would itself turn the allocation under test into a
+    MemoryError.
+    """
+    # The child waits after setup until the baseline is taken, so the run can't inflate it.
+    code = f"{setup}\nimport sys\nprint('ready', flush=True)\nsys.stdin.readline()\n{run}"
+    proc = subprocess.Popen(
+        [sys.executable, "-c", code],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    assert proc.stdin is not None and proc.stdout is not None
+    failure = None
+    try:
+        if proc.stdout.readline() != "ready\n":
+            failure = "setup failed"
+        else:
+            baseline = _resident_bytes(proc.pid)
+            proc.stdin.write("go\n")
+            proc.stdin.flush()
+            deadline = time.monotonic() + timeout_s
+            while failure is None and proc.poll() is None:
+                grown = _resident_bytes(proc.pid) - baseline
+                if grown > ceiling_bytes:
+                    failure = f"killed after growing {grown / 2**20:.0f} MiB (ceiling {ceiling_bytes / 2**20:.0f} MiB)"
+                elif time.monotonic() > deadline:
+                    failure = f"killed after {timeout_s}s"
+                time.sleep(0.005)
+    finally:
+        proc.kill()  # no-op once it has exited
+        stdout, stderr = proc.communicate()
+    if failure is not None:
+        pytest.fail(f"{failure}; stderr tail:\n{stderr[-2000:]}")
+    assert proc.returncode == 0, f"exit code {proc.returncode}; stderr tail:\n{stderr[-2000:]}"
+    return stdout
 
 
 class TestMathMinervaCompletion:
@@ -93,6 +146,24 @@ class TestMathMinervaCompletion:
 
         assert len(caplog.records) == 1
         assert "TypeError" in caplog.records[0].getMessage()
+
+    @pytest.mark.skipif(not sys.platform.startswith("linux"), reason="measures memory via /proc")
+    def test_is_equiv_minerva_stays_within_memory_on_power_towers(self) -> None:
+        # SymPy evaluates integer powers eagerly: 2^{325^5} alone is ~450 GB of digits. With memory
+        # overcommit (as on the eval pods) the allocation succeeds and the process is OOM-killed
+        # while filling it, taking the whole eval run with it.
+        # The child imports only the module under test (~90 MB). The warm-up check loads what simplify imports
+        # lazily (numpy's OpenBLAS reserves per-core buffers), as thousands of checks would in a real run, so
+        # the check under test grows the child by well under 1 MB.
+        setup = (
+            "from eval_framework.metrics.completion.minerva_math_utils import is_equiv_minerva\n"
+            "is_equiv_minerva('1', '1')\n"
+        )
+        run = "print(is_equiv_minerva('2^{2^{325^{5}}}', '1'))"
+
+        stdout = _run_with_memory_growth_ceiling(setup, run, ceiling_bytes=50 * 2**20, timeout_s=60)
+
+        assert stdout.strip().splitlines()[-1] == "False"
 
     def test_metric_defaults_to_english_but_can_select_german(self) -> None:
         german = "Finale Antwort: Die finale Antwort lautet 24. Ich hoffe, die Antwort ist korrekt."
