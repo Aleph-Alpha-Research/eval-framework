@@ -2,12 +2,15 @@
 Minerva-style MATH answer extraction and equivalence (Lewkowycz et al. 2022).
 """
 
+import logging
 import re
 
 from sympy import simplify
 from sympy.parsing.latex import parse_latex
 
 from eval_framework.utils.resource_limits import time_limited
+
+logger = logging.getLogger(__name__)
 
 INVALID_ANSWER = "[invalidanswer]"
 END_SEQ = "I hope it is correct."
@@ -406,7 +409,8 @@ def is_equiv_minerva(x1: str, x2: str) -> bool:
         return False
     try:
         return _sympy_equiv(x1, x2)
-    except Exception:  # parse errors, TimeoutError, and ValueError from signal use off the main thread
+    except Exception as error:
+        logger.warning("Sympy equivalence check of %r vs %r failed, counting as not equivalent: %r", x1, x2, error)
         return False
 
 

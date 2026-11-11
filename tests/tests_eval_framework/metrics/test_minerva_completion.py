@@ -1,7 +1,9 @@
+import logging
 import time
 
 import pytest
 
+from eval_framework.metrics.completion import minerva_math_utils
 from eval_framework.metrics.completion.math_minerva_completion import MathMinervaCompletion
 from eval_framework.metrics.completion.minerva_math_utils import extract_answers, is_equiv_minerva
 from eval_framework.shared.types import Completion
@@ -83,6 +85,14 @@ class TestMathMinervaCompletion:
         long_expr = "+".join(["\\frac{1}{2}"] * 15)
 
         assert is_equiv_minerva(long_expr, long_expr) is True
+
+    def test_is_equiv_minerva_logs_a_failed_check(self, caplog: pytest.LogCaptureFixture) -> None:
+        with caplog.at_level(logging.WARNING, logger=minerva_math_utils.__name__):
+            # An equation can't be subtracted from a number.
+            assert is_equiv_minerva("x=3", "3") is False
+
+        assert len(caplog.records) == 1
+        assert "TypeError" in caplog.records[0].getMessage()
 
     def test_metric_defaults_to_english_but_can_select_german(self) -> None:
         german = "Finale Antwort: Die finale Antwort lautet 24. Ich hoffe, die Antwort ist korrekt."
