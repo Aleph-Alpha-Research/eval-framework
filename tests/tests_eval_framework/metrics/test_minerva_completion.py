@@ -1,5 +1,5 @@
 import logging
-import resource
+import mmap
 import subprocess
 import sys
 import time
@@ -31,7 +31,7 @@ def make_completion(completion: str, ground_truth: str | list[str]) -> Completio
 def _resident_bytes(pid: int) -> int:
     # /proc/<pid>/statm: sizes in pages, "total resident shared text lib data dirty"
     _total, resident, *_ = Path(f"/proc/{pid}/statm").read_text().split()
-    return int(resident) * resource.getpagesize()
+    return int(resident) * mmap.PAGESIZE
 
 
 def _run_with_memory_growth_ceiling(setup: str, run: str, ceiling_bytes: int, timeout_s: float) -> str:

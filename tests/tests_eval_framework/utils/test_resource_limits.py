@@ -1,4 +1,3 @@
-import resource
 import signal
 import sys
 import threading
@@ -9,6 +8,9 @@ import numpy as np
 import pytest
 
 from eval_framework.utils.resource_limits import memory_limited, time_limited
+
+if sys.platform != "win32":
+    import resource  # used by the Linux-only tests; absent on Windows
 
 pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="time_limited relies on SIGALRM")
 
