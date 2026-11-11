@@ -2,13 +2,15 @@
 Minerva-style MATH answer extraction and equivalence (Lewkowycz et al. 2022).
 """
 
+import multiprocessing
 import re
-import signal
-from typing import Any
+import resource
+import threading
+from multiprocessing.connection import Connection
+from multiprocessing.process import BaseProcess
 
-from sympy import SympifyError, simplify
+from sympy import simplify
 from sympy.parsing.latex import parse_latex
-from sympy.parsing.latex.errors import LaTeXParsingError
 
 INVALID_ANSWER = "[invalidanswer]"
 END_SEQ = "I hope it is correct."
@@ -390,39 +392,96 @@ def strip_string_hendrycks(string: str) -> str:
 _PLAUSIBLE_ANSWER_LEN = 128
 
 
-def is_equiv_minerva(x1: str, x2: str, timeout_seconds: int = 5) -> bool:
+def _sympy_equiv(x1: str, x2: str) -> bool:
+    try:
+        diff = parse_latex(x1) - parse_latex(x2)
+        return bool(simplify(diff) == 0)
+    except Exception:
+        return False
+
+
+_SYMPY_MEMORY_LIMIT_BYTES = 4 * 1024**3
+
+
+def _serve_sympy_equiv(connection: Connection, memory_limit: int) -> None:
+    # RLIMIT_DATA covers the heap and anonymous mappings, where a runaway
+    # integer grows, but not the libraries mapped at startup.
+    _, hard_limit = resource.getrlimit(resource.RLIMIT_DATA)
+    if hard_limit != resource.RLIM_INFINITY:
+        memory_limit = min(memory_limit, hard_limit)
+    try:
+        resource.setrlimit(resource.RLIMIT_DATA, (memory_limit, memory_limit))
+    except ValueError:
+        # macOS rejects the call and wouldn't enforce the limit; the timeout still bounds the damage.
+        pass
+    while True:
+        try:
+            x1, x2 = connection.recv()
+        except EOFError:
+            return
+        connection.send(_sympy_equiv(x1, x2))
+
+
+class _SympyWorker:
+    """Runs sympy equivalence checks in a child process capped in memory and wall time.
+
+    Sympy evaluates eagerly inside C code, e.g. `(23!)!` from a `23!!` candidate, where
+    no signal or timeout can interrupt it and memory grows by tens of GiB per second.
+    The child takes the hit: the parent kills it and starts a fresh one on the next call.
+    """
+
+    def __init__(self, memory_limit: int = _SYMPY_MEMORY_LIMIT_BYTES) -> None:
+        self._memory_limit = memory_limit
+        self._lock = threading.Lock()
+        self._process: BaseProcess | None = None
+        self._connection: Connection | None = None
+
+    def is_equiv(self, x1: str, x2: str, timeout_seconds: float) -> bool:
+        with self._lock:
+            connection = self._connect()
+            try:
+                connection.send((x1, x2))
+                if connection.poll(timeout_seconds):
+                    return bool(connection.recv())
+            except (EOFError, OSError):
+                pass
+            self._stop()
+            return False
+
+    def _connect(self) -> Connection:
+        if self._connection is None or self._process is None or not self._process.is_alive():
+            self._stop()
+            # spawn, not fork: the parent may be running threads, and the child only needs sympy.
+            context = multiprocessing.get_context("spawn")
+            self._connection, child_connection = context.Pipe()
+            self._process = context.Process(
+                target=_serve_sympy_equiv, args=(child_connection, self._memory_limit), daemon=True
+            )
+            self._process.start()
+            child_connection.close()
+        return self._connection
+
+    def _stop(self) -> None:
+        if self._process is not None and self._process.is_alive():
+            self._process.kill()
+            self._process.join()
+        if self._connection is not None:
+            self._connection.close()
+        self._process = None
+        self._connection = None
+
+
+_sympy_worker = _SympyWorker()
+
+
+def is_equiv_minerva(x1: str, x2: str, timeout_seconds: float = 5) -> bool:
     """Sympy-based equivalence (Minerva)."""
     # extract_answers can fall back to the whole completion; sympy grinds on such
     # 1000+ char strings until the timeout. A side far longer than the other can't
     # be an equivalent final answer, so refuse it before parsing.
     if max(len(x1), len(x2)) > max(_PLAUSIBLE_ANSWER_LEN, 3 * min(len(x1), len(x2))):
         return False
-
-    def _timeout_handler(signum: Any, frame: Any) -> None:
-        raise TimeoutError()
-
-    try:
-        signal.signal(signal.SIGALRM, _timeout_handler)
-        signal.alarm(timeout_seconds)
-        try:
-            parsed_x1 = parse_latex(x1)
-            parsed_x2 = parse_latex(x2)
-        except (LaTeXParsingError, SympifyError, TypeError):
-            return False
-        try:
-            diff = parsed_x1 - parsed_x2
-        except TypeError:
-            return False
-        try:
-            return simplify(diff) == 0
-        except (ValueError, TimeoutError):
-            return False
-        finally:
-            signal.alarm(0)
-    except Exception:
-        return False
-    finally:
-        signal.alarm(0)
+    return _sympy_worker.is_equiv(x1, x2, timeout_seconds)
 
 
 def is_equiv_hendrycks(str1: str | None, str2: str | None) -> bool:
