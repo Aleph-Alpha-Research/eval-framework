@@ -38,7 +38,7 @@ and first-party/internal packages are excluded.
 
 | Package | Version |
 |---|---|
-| `annotated-doc` | `0.0.5` |
+| `annotated-doc` | `0.0.6` |
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.16.0` |
 | `attrs` | `26.1.0` |
@@ -51,8 +51,8 @@ and first-party/internal packages are excluded.
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
 | `distro` | `1.9.0` |
-| `filelock` | `4.2.9` |
-| `fsspec` | `2026.7.0` |
+| `filelock` | `4.2.10` |
+| `fsspec` | `2026.9.0` |
 | `googleapis-common-protos` | `1.76.0` |
 | `h11` | `0.16.0` |
 | `hf-xet` | `1.8.0` |
@@ -66,7 +66,7 @@ and first-party/internal packages are excluded.
 | `jiter` | `0.19.0` |
 | `joblib` | `1.6.0` |
 | `jsonschema-specifications` | `2025.9.1` |
-| `markdown-it-py` | `3.0.0` |
+| `markdown-it-py` | `4.3.0` |
 | `mdurl` | `0.1.2` |
 | `mpmath` | `1.3.0` |
 | `multiprocess` | `0.70.19` |
@@ -98,9 +98,9 @@ and first-party/internal packages are excluded.
 | `tokenizers` | `0.23.3` |
 | `tqdm` | `4.70.1` |
 | `truststore` | `0.10.5` |
-| `typer` | `0.28.0` |
+| `typer` | `0.29.0` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.5` |
 | `tzdata` | `2026.6` |
 | `urllib3` | `2.8.0` |
-| `xxhash` | `4.0.2` |
+| `xxhash` | `4.1.0` |

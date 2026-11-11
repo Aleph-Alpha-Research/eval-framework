@@ -36,7 +36,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## Apache-2.0
 
 - **cwevals** 0.0.1b1 - https://github.com/wandb/core
-- **datasets** 5.1.0 - https://github.com/huggingface/datasets
+- **datasets** 5.2.0 - https://github.com/huggingface/datasets
 - **distro** 1.9.0 - https://github.com/python-distro/distro
 - **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
 - **googleapis-common-protos** 1.76.0 - https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos
@@ -45,7 +45,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
-- **openai** 3.46.0 - https://github.com/openai/openai-python
+- **openai** 3.49.0 - https://github.com/openai/openai-python
 - **opentelemetry-api** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
 - **opentelemetry-exporter-http-transport** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
 - **opentelemetry-exporter-otlp-common** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
@@ -71,7 +71,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 ## BSD-2-Clause
 
 - **Pygments** 2.21.0 - https://pygments.org
-- **xxhash** 4.0.2 - https://github.com/ifduyue/python-xxhash
+- **xxhash** 4.1.0 - https://github.com/ifduyue/python-xxhash
 
 ## BSD-3-Clause
 
@@ -79,7 +79,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **click** 8.5.1 - https://github.com/pallets/click/
 - **cloudpickle** 3.1.2 - https://github.com/cloudpipe/cloudpickle
 - **dill** 0.4.1 - https://github.com/uqfoundation/dill
-- **fsspec** 2026.7.0 - https://github.com/fsspec/filesystem_spec
+- **fsspec** 2026.9.0 - https://github.com/fsspec/filesystem_spec
 - **httpcore** 1.0.9 - https://www.encode.io/httpcore/
 - **httpcore2** 2.16.0 - https://github.com/pydantic/httpx2
 - **httpx** 0.28.1 - https://github.com/encode/httpx
@@ -119,17 +119,17 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## MIT
 
-- **annotated-doc** 0.0.5 - https://github.com/fastapi/annotated-doc
+- **annotated-doc** 0.0.6 - https://github.com/fastapi/annotated-doc
 - **annotated-types** 0.8.0 - https://github.com/annotated-types/annotated-types
 - **anyio** 4.16.0 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.2.9 - https://github.com/tox-dev/filelock
+- **filelock** 4.2.10 - https://github.com/tox-dev/filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jiter** 0.19.0 - https://github.com/pydantic/jiter/
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
 - **jsonschema-specifications** 2025.9.1 - https://github.com/python-jsonschema/jsonschema-specifications
-- **markdown-it-py** 3.0.0 - https://github.com/executablebooks/markdown-it-py
+- **markdown-it-py** 4.3.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
 - **platformdirs** 4.14.5 - https://github.com/tox-dev/platformdirs
 - **pydantic** 2.14.3 - https://github.com/pydantic/pydantic
@@ -141,7 +141,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **tiktoken** 0.14.0 - https://github.com/openai/tiktoken
 - **truststore** 0.10.5 - https://github.com/sethmlarson/truststore
-- **typer** 0.28.0 - https://github.com/fastapi/typer
+- **typer** 0.29.0 - https://github.com/fastapi/typer
 - **typing-inspection** 0.4.5 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.8.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
 - **wandb** 0.31.0 - https://github.com/wandb/wandb
@@ -166,7 +166,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Full license texts
 
-### annotated-doc 0.0.5 (MIT)
+### annotated-doc 0.0.6 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -596,7 +596,7 @@ Apache License
    limitations under the License.
 ```
 
-### datasets 5.1.0 (Apache-2.0)
+### datasets 5.2.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -1100,7 +1100,7 @@ Apache License
    limitations under the License.
 ```
 
-### filelock 4.2.9 (MIT)
+### filelock 4.2.10 (MIT)
 
 ```text
 MIT License
@@ -1126,7 +1126,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### fsspec 2026.7.0 (BSD-3-Clause)
+### fsspec 2026.9.0 (BSD-3-Clause)
 
 ```text
 BSD 3-Clause License
@@ -2576,7 +2576,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### markdown-it-py 3.0.0 (MIT)
+### markdown-it-py 4.3.0 (MIT)
 
 ```text
 MIT License
@@ -11994,7 +11994,7 @@ License: LGPL-2.1-or-later
     https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
-### openai 3.46.0 (Apache-2.0)
+### openai 3.49.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -19072,7 +19072,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### typer 0.28.0 (MIT)
+### typer 0.29.0 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -19493,7 +19493,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### xxhash 4.0.2 (BSD-2-Clause)
+### xxhash 4.1.0 (BSD-2-Clause)
 
 ```text
 Copyright (c) 2014-2026, Yue Du
