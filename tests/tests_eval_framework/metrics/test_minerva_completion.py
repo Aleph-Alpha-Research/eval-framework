@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 import pytest
+from sympy.external.gmpy import GROUND_TYPES
 
 from eval_framework.metrics.completion import minerva_math_utils
 from eval_framework.metrics.completion.math_minerva_completion import MathMinervaCompletion
@@ -164,6 +165,12 @@ class TestMathMinervaCompletion:
         stdout = _run_with_memory_growth_ceiling(setup, run, ceiling_bytes=50 * 2**20, timeout_s=60)
 
         assert stdout.strip().splitlines()[-1] == "False"
+
+    def test_sympy_does_not_compute_with_gmp(self) -> None:
+        # The memory cap relies on an oversized allocation raising MemoryError. Once gmpy2 is installed, sympy
+        # switches to GMP automatically, and GMP aborts the whole process instead: the power-tower check
+        # would crash the eval again.
+        assert GROUND_TYPES != "gmpy", "gmpy2 is installed; GMP aborts on the memory cap instead of raising"
 
     def test_metric_defaults_to_english_but_can_select_german(self) -> None:
         german = "Finale Antwort: Die finale Antwort lautet 24. Ich hoffe, die Antwort ist korrekt."
