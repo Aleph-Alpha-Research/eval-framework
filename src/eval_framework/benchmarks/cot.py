@@ -3,7 +3,8 @@
 A CoT variant asks the model to reason freely and conclude with a stated answer letter, which is pulled back
 out at scoring time (the injected ``ExtractFromCompletion``). The prompt surface — an optional preamble, the body,
 and any inert scored candidates — is injected per benchmark; the CoT contract is fixed here: one free-form
-sample, no assistant cue, the bare answer letter as ground truth, scored by accuracy.
+sample, no assistant cue, the bare answer letter as ground truth. The scoring metrics are supplied per benchmark
+(``AccuracyCompletion`` plus any extras, e.g. a language check for non-English variants).
 """
 
 import re
@@ -14,7 +15,6 @@ from eval_framework.answer import ExtractFromCompletion, first_match, last_match
 from eval_framework.choices import ChoiceReader
 from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
 from eval_framework.fewshot import FewshotExample
-from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.tasks.task_style import InitialPrompt
 from eval_framework.tasks.utils import get_n_letters
 from template_formatting.formatter import Message
@@ -64,7 +64,8 @@ def tulu_answer_v2(n_options: int) -> ExtractFromCompletion:
 class Cot(EvalKind):
     """Multiple-choice chain-of-thought (see the module docstring). ``build_prompt`` renders the body,
     ``preamble`` an optional subject-templated top line, and ``candidates`` any inert scored letters kept for
-    faithful parity with a loglikelihood baseline (free-form scoring ignores them)."""
+    faithful parity with a loglikelihood baseline (free-form scoring ignores them). ``metrics`` are the scoring
+    metrics."""
 
     def __init__(
         self,
@@ -73,15 +74,17 @@ class Cot(EvalKind):
         build_prompt: CotPrompt,
         preamble: InitialPrompt | None = None,
         candidates: CotCandidates | None = None,
+        metrics: list[type["BaseMetric"]],
     ) -> None:
         self._reader = reader
         self._build_prompt = build_prompt
         self._preamble = preamble
         self._candidates = candidates
+        self._metrics = metrics
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
-        return [AccuracyCompletion]
+        return self._metrics
 
     @override
     def messages(self, body: SampleBody, *, fewshot: list[FewshotExample], subject_label: str) -> list[Message]:

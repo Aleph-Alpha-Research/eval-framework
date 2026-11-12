@@ -17,6 +17,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.fewshot import NoFewShot
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -133,6 +134,7 @@ def _mmlu_pro_cot(id: str, answer: AnswerPolicy, dataset: DatasetPolicy | None =
         build_prompt=tulu3_cot_prompt,
         preamble=_mmlu_pro_preamble,
         candidates=_mmlu_pro_cot_candidates,
+        metrics=[AccuracyCompletion],
     )
     return ComposedBenchmark.compose(
         id=id,

@@ -17,6 +17,8 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.fewshot import NoFewShot
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.language_checker import GermanCompletionChecker
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -137,7 +139,11 @@ def gpqa_ellamind_diamond_bpb_de(dataset: DatasetPolicy | None = None) -> Benchm
 def gpqa_ellamind_diamond_cot_de(dataset: DatasetPolicy | None = None) -> Benchmark:
     return ComposedBenchmark.compose(
         id="GPQA_ELLAMIND_DIAMOND_COT_DE",
-        kind=Cot(GpqaReader(), build_prompt=tulu3_cot_prompt_de),
+        kind=Cot(
+            GpqaReader(),
+            build_prompt=tulu3_cot_prompt_de,
+            metrics=[AccuracyCompletion, GermanCompletionChecker],
+        ),
         answer=tulu_answer_de(),
         sample_split="train",
         fewshot=NoFewShot(),

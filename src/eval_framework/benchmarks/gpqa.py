@@ -22,6 +22,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.fewshot import NoFewShot
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -110,7 +111,12 @@ def gpqa_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
 def _gpqa_diamond_cot(id: str, answer: AnswerPolicy, dataset: DatasetPolicy | None = None) -> Benchmark:
     return ComposedBenchmark.compose(
         id=id,
-        kind=Cot(GpqaReader(), build_prompt=tulu3_cot_prompt, candidates=_gpqa_cot_candidates),
+        kind=Cot(
+            GpqaReader(),
+            build_prompt=tulu3_cot_prompt,
+            candidates=_gpqa_cot_candidates,
+            metrics=[AccuracyCompletion],
+        ),
         answer=answer,
         sample_split="train",
         fewshot=NoFewShot(),
