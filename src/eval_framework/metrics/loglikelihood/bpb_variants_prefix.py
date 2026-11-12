@@ -28,14 +28,11 @@ class PrefixBitsPerByte(BaseMetric[Loglikelihood]):
     _SIDECARS = ("PrefixBPB_rate", "PrefixBPB_entryCost", "PrefixBPB_contentBytes")
 
     def _all_error(self, message: str, response: Loglikelihood) -> list[MetricResult]:
-        err = response.error or Error(error_class="ValueError", message=message, traceback="")
+        err = Error(error_class="ValueError", message=message, traceback="")
         names = (self.NAME, *self._SIDECARS)
         return [MetricResult(metric_name=n, value=None, higher_is_better=False, error=err) for n in names]
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        if response.error:
-            return self._all_error("upstream error", response)
-
         ground_truth = select_ground_truth(response)
         if ground_truth is None:
             return self._all_error("No ground-truth answer found in loglikelihoods", response)

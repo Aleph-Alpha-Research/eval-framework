@@ -15,9 +15,6 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
     NAME = "BitsPerByte"
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        if response.error:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=False, error=response.error)]
-
         ground_truth_list = response.ground_truth_list
 
         # Find a ground-truth string that we have a loglikelihood for.
@@ -37,8 +34,7 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
                     metric_name=self.NAME,
                     value=None,
                     higher_is_better=False,
-                    error=response.error
-                    or Error(
+                    error=Error(
                         error_class="ValueError",
                         message="No ground-truth answer found in loglikelihoods",
                         traceback="",
@@ -53,8 +49,7 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
                     metric_name=self.NAME,
                     value=None,
                     higher_is_better=False,
-                    error=response.error
-                    or Error(
+                    error=Error(
                         error_class="ValueError",
                         message="Ground-truth answer has zero UTF-8 bytes",
                         traceback="",
@@ -69,6 +64,5 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
                 metric_name=self.NAME,
                 value=bits_per_byte,
                 higher_is_better=False,
-                error=response.error,
             )
         ]

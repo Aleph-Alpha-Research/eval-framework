@@ -19,20 +19,16 @@ class TokenCounts(BaseMetric[Completion]):
     KEYS = ["Completion", "Reasoning"]
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error:
-            values: dict[str, float | None] = {"Completion": None, "Reasoning": None}
-        else:
-            values = {
-                "Completion": response.raw_completion_num_tokens,
-                "Reasoning": response.raw_completion_reasoning_num_tokens,
-            }
+        values: dict[str, float | None] = {
+            "Completion": response.raw_completion_num_tokens,
+            "Reasoning": response.raw_completion_reasoning_num_tokens,
+        }
 
         return [
             MetricResult(
                 metric_name=f"{self.NAME}/{key}",
                 value=value,
                 higher_is_better=False,
-                error=response.error,
             )
             for key, value in values.items()
         ]

@@ -45,17 +45,6 @@ class MathMinervaCompletion(BaseMetric[Completion]):
         self.relaxed = relaxed if relaxed is not None else self.RELAXED
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error:
-            return [
-                MetricResult(
-                    metric_name=x,
-                    value=None,
-                    higher_is_better=True,
-                    error=response.error,
-                )
-                for x in self.NAMES
-            ]
-
         gold = response.ground_truth
         if isinstance(gold, list):
             gold = gold[0] if gold else None

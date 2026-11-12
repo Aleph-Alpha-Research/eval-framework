@@ -10,18 +10,15 @@ class ROUGE_2(BaseMetric[Completion]):
     NAME = "ROUGE-2"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         if response.completion == "":
-            return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True, error=response.error)]
+            return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True)]
         if None in response.ground_truth_list:
             raise LogicError("When calculating ROUGE-2 ground_truth cannot be None.")
 
         # ROUGE-2 captures word sequence similarity by focusing on bigrams,
         # which makes it sensitive to the order and co-occurrence of words to some extent.
         rouge = max([_calculate_rouge_2(response.completion, gt) for gt in response.ground_truth_list])  # type: ignore[arg-type]
-        return [MetricResult(metric_name=self.NAME, value=float(rouge), higher_is_better=True, error=response.error)]
+        return [MetricResult(metric_name=self.NAME, value=float(rouge), higher_is_better=True)]
 
 
 def _generate_bigrams(tokens: list[str]) -> list[tuple[str, str]]:

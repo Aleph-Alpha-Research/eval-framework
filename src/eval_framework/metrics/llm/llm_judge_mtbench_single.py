@@ -181,7 +181,6 @@ class MTBenchJudgeSingle(BaseLLMJudgeMetric):
                 higher_is_better=True,
                 llm_judge_prompt=prompt_to_judge.prompt_text,
                 llm_judge_response=f"{output[0].completion}",  # unprocessed AI feedback
-                error=output[0].raw_completion_error,
             )
         except Exception as e:
             logger.info(f"LLM judge failed to generate output for prompt: {prompt_to_judge.prompt_text}. Error: {e}")

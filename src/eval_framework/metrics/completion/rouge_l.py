@@ -9,18 +9,15 @@ class ROUGE_L(BaseMetric[Completion]):
     NAME = "ROUGE-L"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         if response.completion == "":
-            return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True, error=response.error)]
+            return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True)]
         if None in response.ground_truth_list:
             raise LogicError("When calculating ROUGE-L ground_truth cannot be None.")
 
         # ROUGE-L is essentially an F1 score, but it’s a specific F1 score based on
         # the Longest Common Subsequence (LCS) between a candidate summary and a reference summary.
         rouge = max([_calculate_rouge_l(response.completion, gt) for gt in response.ground_truth_list])  # type: ignore[arg-type]
-        return [MetricResult(metric_name=self.NAME, value=float(rouge), higher_is_better=True, error=response.error)]
+        return [MetricResult(metric_name=self.NAME, value=float(rouge), higher_is_better=True)]
 
 
 def _longest_common_subsequence_length(candidate_tokens: list[str], reference_tokens: list[str]) -> int:

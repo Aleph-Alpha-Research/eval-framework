@@ -12,10 +12,8 @@ class ROUGE_GEOMETRIC_MEAN(BaseMetric[Completion]):
     NAME = "ROUGE-Geometric-Mean"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
         if response.completion == "":
-            return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True, error=response.error)]
+            return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True)]
         if any(gt is None for gt in response.ground_truth_list):
             raise LogicError("When calculating ROUGE Geometric Mean ground_truth cannot be None.")
 
@@ -26,11 +24,7 @@ class ROUGE_GEOMETRIC_MEAN(BaseMetric[Completion]):
 
         # Calculate the geometric mean of ROUGE-1, ROUGE-2, and ROUGE-L
         if rouge_1 is None or rouge_2 is None or rouge_l is None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
+            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True)]
 
         geometric_mean = (rouge_1 * rouge_2 * rouge_l) ** (1 / 3)
-        return [
-            MetricResult(
-                metric_name=self.NAME, value=float(geometric_mean), higher_is_better=True, error=response.error
-            )
-        ]
+        return [MetricResult(metric_name=self.NAME, value=float(geometric_mean), higher_is_better=True)]

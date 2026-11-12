@@ -107,7 +107,6 @@ class RawCompletion(BaseCompletion):
         "why generation ended as reported by the backend, e.g. `stop`, `length` or `repetition`; "
         "None if the backend did not report it",
     ] = None
-    raw_completion_error: Error | None = None
 
 
 class Completion(BaseCompletion):
@@ -136,7 +135,6 @@ class Completion(BaseCompletion):
         "None if the backend did not report it",
     ] = None
     context: list[BaseMetricContext] | BaseMetricContext | None = None
-    error: Error | None = None
 
     @property
     def ground_truth_list(self) -> list[str] | list[None]:
@@ -232,14 +230,13 @@ class BaseLoglikelihood(BaseModel):
 
 
 class RawLoglikelihood(BaseLoglikelihood):
-    raw_loglikelihood_error: Error | None = None
+    """A model's loglikelihood result before the sample's identity (id, subject, ground truth) is attached."""
 
 
 class Loglikelihood(BaseLoglikelihood):
     id: int
     subject: str
     ground_truth: str | list[str]
-    error: Error | None = None
 
     @property
     def ground_truth_list(self) -> list[str] | list[None]:

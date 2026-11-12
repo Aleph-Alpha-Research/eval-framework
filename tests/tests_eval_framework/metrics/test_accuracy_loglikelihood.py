@@ -5,14 +5,12 @@ from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import (
     AccuracyLoglikelihood,
     AccuracyNormLoglikelihood,
 )
-from eval_framework.shared.types import Error, Loglikelihood
+from eval_framework.shared.types import Loglikelihood
 
 
 def create_loglikelihood(
     loglikelihoods: dict[str, float],
     ground_truth: str | list[str],
-    *,
-    error: Error | None = None,
 ) -> Loglikelihood:
     return Loglikelihood(
         id=1,
@@ -22,7 +20,6 @@ def create_loglikelihood(
         prompt_num_tokens=None,
         loglikelihoods=loglikelihoods,
         loglikelihoods_num_tokens={},
-        error=error,
     )
 
 
@@ -100,17 +97,6 @@ def test_accuracy_bayesian_uses_utf8_byte_lengths() -> None:
     metric.prepare([create_loglikelihood({"é": -2.0, "aaa": -4.0}, "é")])
 
     assert metric.length_decay == pytest.approx(-2.0)
-
-
-def test_accuracy_bayesian_ignores_errored_responses_when_estimating_slope() -> None:
-    error = Error(error_class="RuntimeError", message="failed", traceback="trace")
-    valid_response = create_loglikelihood({"a": -1.0, "aaa": -3.0}, "a")
-    errored_response = create_loglikelihood({"a": -1.0, "aaa": -101.0}, "a", error=error)
-    metric = AccuracyBayesianLoglikelihood()
-
-    metric.prepare([valid_response, errored_response])
-
-    assert metric.length_decay == pytest.approx(-1.0)
 
 
 def test_accuracy_bayesian_falls_back_to_zero_without_length_variation() -> None:

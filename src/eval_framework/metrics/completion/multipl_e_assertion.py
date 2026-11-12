@@ -101,9 +101,6 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
     NAME = "MultiPL-E Code Assertion"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         context = extract_context_metric(response, MultiPLEMetricContext)
 
         try:

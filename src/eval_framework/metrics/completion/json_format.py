@@ -29,17 +29,8 @@ class JsonFormat(BaseMetric[Completion]):
             "exact_match",
         ]
 
-        if response.error is not None:
-            return [
-                MetricResult(metric_name=f"{self.NAME}/{k}", value=None, higher_is_better=True, error=response.error)
-                for k in keys
-            ]
-
         if response.completion == "":
-            return [
-                MetricResult(metric_name=f"{self.NAME}/{k}", value=0.0, higher_is_better=True, error=response.error)
-                for k in keys
-            ]
+            return [MetricResult(metric_name=f"{self.NAME}/{k}", value=0.0, higher_is_better=True) for k in keys]
 
         json_dict, grading = self._extract_and_parse_json(response.completion)
 
@@ -60,7 +51,6 @@ class JsonFormat(BaseMetric[Completion]):
                 metric_name=f"{self.NAME}/{key}",
                 value=float(getattr(grading, key)) if getattr(grading, key) is not None else None,
                 higher_is_better=True,
-                error=response.error,
                 code_execution_trace=(grading.json_parsing_error or "") + (grading.schema_validation_error or ""),
             )
             results.append(result)

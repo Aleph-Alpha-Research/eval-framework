@@ -20,17 +20,8 @@ class CSVFormat(BaseMetric[Completion]):
     KEYS = ["has_csv", "is_separator_respected", "is_column_count_respected"]
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [
-                MetricResult(metric_name=f"{self.NAME}/{k}", value=None, higher_is_better=True, error=response.error)
-                for k in self.KEYS
-            ]
-
         if response.completion == "":
-            return [
-                MetricResult(metric_name=f"{self.NAME}/{k}", value=0.0, higher_is_better=True, error=response.error)
-                for k in self.KEYS
-            ]
+            return [MetricResult(metric_name=f"{self.NAME}/{k}", value=0.0, higher_is_better=True) for k in self.KEYS]
 
         grading = evaluate_csv_format(response)
 
@@ -40,7 +31,6 @@ class CSVFormat(BaseMetric[Completion]):
                 metric_name=f"{self.NAME}/{key}",
                 value=float(getattr(grading, key)),
                 higher_is_better=True,
-                error=response.error,
             )
             results.append(result)
         return results

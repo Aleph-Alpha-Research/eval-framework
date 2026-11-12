@@ -158,7 +158,6 @@ class ComposedEval(Eval):
                     raw_completion_reasoning=raw_completion.reasoning,
                     raw_completion_finish_reason=raw_completion.finish_reason,
                     context=sample.context,
-                    error=raw_completion.raw_completion_error,
                 )
             )
         return completion_list

@@ -167,7 +167,6 @@ class TestGridDifference:
             subject="",
             ground_truth=ground_truth,
             completion=completion,
-            error=None,
         )
 
         results = grid_difference_metric.calculate(mock_completion)

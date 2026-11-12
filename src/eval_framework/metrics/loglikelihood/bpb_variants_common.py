@@ -57,7 +57,7 @@ def select_ground_truth(response: Loglikelihood, candidates: list[str] | None = 
 
 
 def standard_bpb_error(message: str, response: Loglikelihood) -> list[MetricResult]:
-    err = response.error or Error(error_class="ValueError", message=message, traceback="")
+    err = Error(error_class="ValueError", message=message, traceback="")
     return [
         MetricResult(metric_name=name, value=None, higher_is_better=False, error=err) for name in STANDARD_METRIC_NAMES
     ]
@@ -78,7 +78,7 @@ def compute_standard_bpb_results(
     bits = -log_p_x / math.log(2)
 
     def ok(name: str, value: float | None) -> MetricResult:
-        return MetricResult(metric_name=name, value=value, higher_is_better=False, error=response.error)
+        return MetricResult(metric_name=name, value=value, higher_is_better=False)
 
     return [
         ok("BitsPerByte", bits / num_bytes),
@@ -99,9 +99,7 @@ def compute_prefix_bpb_results(response: Loglikelihood, ground_truth: str) -> li
     offset = 1 if ground_truth.startswith(" ") else 0
     content_bytes = int(round(float(byte_lens_arr.sum()))) - offset
     if content_bytes <= 0:
-        err = response.error or Error(
-            error_class="ValueError", message="Ground truth has zero content bytes", traceback=""
-        )
+        err = Error(error_class="ValueError", message="Ground truth has zero content bytes", traceback="")
         return [MetricResult(metric_name=n, value=None, higher_is_better=False, error=err) for n in PREFIX_METRIC_NAMES]
 
     name_for = {K_ENTRY: "PrefixBPB", K_RATE: "PrefixBPB_rate", K0: "PrefixBPB_entryCost"}
@@ -150,8 +148,6 @@ def build_prefix_item(response: Loglikelihood, ground_truth: str) -> PrefixItem 
 def collect_prefix_items(responses: list[Loglikelihood]) -> list[PrefixItem]:
     items: list[PrefixItem] = []
     for response in responses:
-        if response.error is not None:
-            continue
         ground_truth = select_ground_truth(response)
         if ground_truth is None:
             continue
@@ -205,9 +201,6 @@ def aggregate_prior_bpb_metrics(responses: list[Loglikelihood]) -> dict[str, flo
 
 
 def compute_all_bpb_results(response: Loglikelihood) -> list[MetricResult]:
-    if response.error:
-        return standard_bpb_error("upstream error", response)
-
     candidates = list_ground_truth_candidates(response)
     answer_text = select_ground_truth(response, candidates)
     if answer_text is None:

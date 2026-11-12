@@ -14,9 +14,6 @@ class LLMJudgeAvoidsNames(BaseLLMJudgeMetric):
         self._grader = ContainsNamesGrader(llm_judge)
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         language = Language(response.get_instruction_language())
 
         grading = self._grader.grade(
@@ -31,6 +28,5 @@ class LLMJudgeAvoidsNames(BaseLLMJudgeMetric):
                 higher_is_better=True,
                 llm_judge_prompt=grading.judge_prompt,
                 llm_judge_response=grading.judge_response,
-                error=response.error,
             )
         ]
