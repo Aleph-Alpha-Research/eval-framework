@@ -382,3 +382,12 @@ def test_file_result_processor_batch_custom_contexts(tmp_path: Path) -> None:
     assert completion2_loaded.context.debug_info == {"runtime": 1.25, "memory": 512}
     assert hasattr(completion2_loaded.context, "logs")
     assert completion2_loaded.context.logs == ["info: started", "debug: processing", "info: completed"]
+
+
+def test_generate_output_dir_ignores_the_judge_retry_attempts() -> None:
+    # How patiently the judge is retried does not change a score, so a run retried with more
+    # patience must find the results of its earlier attempt.
+    def config(**kwargs: int) -> EvalConfig:
+        return EvalConfig(output_dir=Path("/results"), task_name="MMLU", llm_class=MockLLM, **kwargs)  # type: ignore[arg-type]
+
+    assert generate_output_dir("llm", config(judge_retry_attempts=100)) == generate_output_dir("llm", config())

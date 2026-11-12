@@ -10,6 +10,7 @@ import pandas as pd
 import wandb
 from tqdm import tqdm
 
+from eval_framework.llm.retry import RetryPolicy
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.metrics.loglikelihood.bpb_variants_common import aggregate_prior_bpb_metrics, select_ground_truth
@@ -100,7 +101,9 @@ class EvaluationGenerator:
             raw_metric: BaseMetric[Any]
             if issubclass(metric_class, BaseLLMJudgeMetric):
                 if llm_judge is None:
-                    llm_judge = self.config.llm_judge().with_retry()
+                    llm_judge = self.config.llm_judge().with_retry(
+                        RetryPolicy(attempts=self.config.judge_retry_attempts)
+                    )
                 raw_metric = metric_class(
                     llm_judge=llm_judge,
                     randomize_order=self.config.randomize_judge_order,

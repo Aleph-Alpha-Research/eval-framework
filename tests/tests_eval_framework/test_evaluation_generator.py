@@ -165,6 +165,36 @@ def test_run_metric_calculators_retries_a_flaky_judge(tmp_path: Path, monkeypatc
     assert results[0].value == 1.0
 
 
+class ThrottledJudge(MockLLM):
+    """Fails more calls in a row than the default retry policy sits out, then answers."""
+
+    FAILURES = 6
+
+    def generate_from_messages(self, messages, *args, **kwargs):  # type: ignore[no-untyped-def]
+        if self.generate_counter < self.FAILURES:
+            self.generate_counter += 1
+            raise IndexError("list index out of range")
+        return super().generate_from_messages(messages, *args, **kwargs)
+
+
+def test_run_metric_calculators_retries_the_judge_as_often_as_configured(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Given a judge throttled for longer than the default retries last, and a config allowing more
+    monkeypatch.setattr("time.sleep", lambda _: None)
+    evaluator = _evaluator_with_metadata(
+        tmp_path, llm_judge_class=ThrottledJudge, judge_retry_attempts=ThrottledJudge.FAILURES + 1
+    )
+    evaluator.metrics = [JudgeAnswerMetric]
+
+    # When
+    results = evaluator._run_metric_calculators(_make_completions(1))  # type: ignore[arg-type]
+
+    # Then the sample is scored once the judge answers
+    assert results[0].error is None
+    assert results[0].value == 1.0
+
+
 def test_evaluator_run_completions(tmp_path: Path) -> None:
     llm = MockLLM()
 

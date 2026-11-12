@@ -24,6 +24,7 @@ KEYS_UNRELATED_TO_RESULTS = {
     "save_logs",
     "delete_output_dir_after_upload",
     "fail_on_error",
+    "judge_retry_attempts",
 }
 
 
@@ -47,6 +48,9 @@ class EvalConfig(BaseConfig):
     llm_judge_class: type[BaseLLM] | None = None
     judge_model_args: dict[str, Any] = Field(default_factory=dict)
     randomize_judge_order: bool = False
+    # How often one judge call is tried while the judge fails transiently, e.g. when rate limited.
+    # The pauses in between grow to a minute, so every further attempt waits out about one more.
+    judge_retry_attempts: Annotated[int, BeforeValidator(lambda v: 5 if v is None else v), Field(ge=1)] = 5
     batch_size: Annotated[int, Field(ge=1)] = 1
     description: str | None = None
     save_intermediate_results: Annotated[bool, BeforeValidator(lambda v: True if v is None else v)] = True
