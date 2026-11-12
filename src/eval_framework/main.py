@@ -68,7 +68,9 @@ def main(
             if additional_artifact.strip():
                 wandb.use_artifact(additional_artifact.strip())
 
-        if phase is not Phase.SCORE:
+        if phase is Phase.SCORE:
+            _require_finished_generation(file_processor)
+        else:
             response_generator.generate()
         if phase is Phase.GENERATE:
             return []
@@ -87,6 +89,16 @@ def main(
                 logger.warning("Could not delete output directory, some files remain.")
 
     return results
+
+
+def _require_finished_generation(file_processor: ResultsFileProcessor) -> None:
+    """Scoring the responses of an interrupted generate phase would pass for a result over all samples."""
+    # The response generator records its timing only once every sample has a response.
+    if "end_time" not in file_processor.load_metadata():
+        raise ValueError(
+            f"The generate phase has not finished in {file_processor.output_dir}; run it to completion "
+            "with the same configuration before the score phase."
+        )
 
 
 def _wandb_mode(project: str | None) -> Literal["online", "disabled"] | None:

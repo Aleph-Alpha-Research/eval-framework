@@ -1,7 +1,11 @@
 from pathlib import Path
 
+import pytest
+
+from eval_framework.contract import Sample
 from eval_framework.main import Phase, main
 from eval_framework.result_processors.result_processor import generate_output_dir
+from eval_framework.shared.types import RawLoglikelihood
 from eval_framework.tasks.eval_config import EvalConfig
 from tests.tests_eval_framework.conftest import MockLLM
 
@@ -45,3 +49,23 @@ def test_phases_run_apart_score_like_a_single_run(tmp_path: Path) -> None:
     single_dir = generate_output_dir(MockLLM().name, single_config)
     for filename in ("results.jsonl", "aggregated_results.json"):
         assert (split_dir / filename).read_text() == (single_dir / filename).read_text()
+
+
+class _DiesAfterFirstSample(MockLLM):
+    @property
+    def name(self) -> str:
+        return MockLLM().name  # so that its responses land where MockLLM's are looked for
+
+    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+        if self.logprob_counter >= 1:
+            raise ConnectionError("model went away")
+        return super().logprobs(samples)
+
+
+def test_score_phase_refuses_responses_of_an_unfinished_generate_phase(tmp_path: Path) -> None:
+    config = _config(tmp_path).model_copy(update={"fail_on_error": True})
+    with pytest.raises(ConnectionError):
+        main(_DiesAfterFirstSample(), config, phase=Phase.GENERATE)
+
+    with pytest.raises(ValueError, match="generate phase has not finished"):
+        main(MockLLM(), config, phase=Phase.SCORE)
