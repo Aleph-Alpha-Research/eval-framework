@@ -25,8 +25,11 @@ from eval_framework.benchmarks.mmlu_prox import (
     mmlu_prox,
     mmlu_prox_lilab_de_cot,
     mmlu_prox_lilab_de_cot_v2,
+    mmlu_prox_lite_lilab_de_cot,
+    mmlu_prox_lite_lilab_de_cot_v2,
 )
 from eval_framework.contract import Benchmark
+from eval_framework.metrics.completion.language_checker import GermanCompletionChecker
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
 from tests.tests_eval_framework.benchmarks.utils import (
     DatasetStub,
@@ -460,3 +463,18 @@ def test_cot_v2_zeroshot_prompt_has_no_assistant_cue() -> None:
 def test_cot_v2_answer_extraction(completion: str, expected: str) -> None:
     benchmark = mmlu_prox_lilab_de_cot_v2(dataset=DatasetStub(_COT_STUB_SPLITS))
     assert _extracted(benchmark, completion) == expected
+
+
+@pytest.mark.parametrize(
+    "make_benchmark",
+    [mmlu_prox_lilab_de_cot, mmlu_prox_lite_lilab_de_cot, mmlu_prox_lilab_de_cot_v2, mmlu_prox_lite_lilab_de_cot_v2],
+)
+def test_cot_checks_the_completion_is_german(make_benchmark: Callable[..., Benchmark]) -> None:
+    # Given a German CoT benchmark
+    benchmark = make_benchmark(dataset=DatasetStub(_COT_STUB_SPLITS))
+
+    # When listing its metrics
+    metrics = benchmark.metrics()
+
+    # Then a model drifting out of German is scored alongside accuracy
+    assert GermanCompletionChecker in metrics

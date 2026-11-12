@@ -19,6 +19,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.fewshot import NoFewShot
+from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -201,7 +202,12 @@ def mmlu_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
     # Free-form (completion) and 0-shot only, so it takes the general compose path with the shared Cot kind.
     return ComposedBenchmark.compose(
         id="MMLU_COT",
-        kind=Cot(MmluReader(), build_prompt=_mmlu_cot_prompt, preamble=_mmlu_cot_preamble),
+        kind=Cot(
+            MmluReader(),
+            build_prompt=_mmlu_cot_prompt,
+            preamble=_mmlu_cot_preamble,
+            metrics=[AccuracyCompletion],
+        ),
         answer=ExtractFromCompletion(first_match(_MMLU_COT_ANSWER_RE), ["Question:"]),
         sample_split="test",
         fewshot=NoFewShot(),

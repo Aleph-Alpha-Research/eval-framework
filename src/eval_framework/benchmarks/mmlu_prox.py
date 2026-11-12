@@ -31,6 +31,7 @@ from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
 from eval_framework.fewshot import FewShot, FewshotExample, FewShotPolicy, FewShotSplit, FunctionRenderer, NoFewShot
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.completion.accuracy_completion import AccuracyCompletion
+from eval_framework.metrics.completion.language_checker import GermanCompletionChecker
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
@@ -419,21 +420,31 @@ def _cot_body_de_v2(raw_question: str, choices: list[str]) -> str:
 
 @final
 class _AnswerColumnCot(EvalKind):
-    """Multiple-choice chain-of-thought over MMLU-ProX rows, scored by accuracy on the extracted letter.
+    """Multiple-choice chain-of-thought over MMLU-ProX rows, scored by ``metrics`` (accuracy on the extracted
+    letter, plus any extras).
 
     Differs from the shared ``Cot`` kind in two ways: the gold letter is the dataset's ``answer`` column
     rather than derived from ``answer_index`` (the two disagree on one test row, and the answer column is
     the correct one — see ``MMLUProXReader``), and the assistant cue is configurable (``""`` for none)."""
 
-    def __init__(self, reader: ChoiceReader, *, build_prompt: CotPrompt, preamble: InitialPrompt, cue: str) -> None:
+    def __init__(
+        self,
+        reader: ChoiceReader,
+        *,
+        build_prompt: CotPrompt,
+        preamble: InitialPrompt,
+        cue: str,
+        metrics: list[type[BaseMetric]],
+    ) -> None:
         self._reader = reader
         self._build_prompt = build_prompt
         self._preamble = preamble
         self._cue = cue
+        self._metrics = metrics
 
     @override
     def metrics(self) -> list[type[BaseMetric]]:
-        return [AccuracyCompletion]
+        return self._metrics
 
     @override
     def samples(self, item: dict[str, Any]) -> list[SampleBody]:
@@ -523,14 +534,26 @@ def mmlu_prox_lilab_de_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
     the Tülu-3 zero-shot prompt with "(A)"-style options, the regex "Therefore, the answer is (X)"
     and the stop sequence "Question:", and forbids fewshots.
     """
-    kind = _AnswerColumnCot(MMLUProXReader(), build_prompt=_cot_body_de, preamble=_cot_preamble_de, cue=_COT_CUE_DE)
+    kind = _AnswerColumnCot(
+        MMLUProXReader(),
+        build_prompt=_cot_body_de,
+        preamble=_cot_preamble_de,
+        cue=_COT_CUE_DE,
+        metrics=[AccuracyCompletion, GermanCompletionChecker],
+    )
     answer = ExtractFromCompletion(first_match(_COT_ANSWER_RE_DE))
     return _mmlu_prox_cot_benchmark("MMLUProX_LiLab_DE_COT", kind, answer, _cot_fewshot_de(), False, dataset)
 
 
 def mmlu_prox_lite_lilab_de_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
     """``mmlu_prox_lilab_de_cot`` on the MMLU-ProX-Lite subset (588 German test rows, same validation split)."""
-    kind = _AnswerColumnCot(MMLUProXReader(), build_prompt=_cot_body_de, preamble=_cot_preamble_de, cue=_COT_CUE_DE)
+    kind = _AnswerColumnCot(
+        MMLUProXReader(),
+        build_prompt=_cot_body_de,
+        preamble=_cot_preamble_de,
+        cue=_COT_CUE_DE,
+        metrics=[AccuracyCompletion, GermanCompletionChecker],
+    )
     answer = ExtractFromCompletion(first_match(_COT_ANSWER_RE_DE))
     return _mmlu_prox_cot_benchmark("MMLUProXLite_LiLab_DE_COT", kind, answer, _cot_fewshot_de(), True, dataset)
 
@@ -547,14 +570,26 @@ def mmlu_prox_lilab_de_cot_v2(dataset: DatasetPolicy | None = None) -> Benchmark
     step-by-step thinking, and options are labelled "(A) ..." to match the "(X)" answer format. v1 keeps
     lm-eval's wording and "A. ..." labels for parity.
     """
-    kind = _AnswerColumnCot(MMLUProXReader(), build_prompt=_cot_body_de_v2, preamble=_cot_preamble_de_v2, cue="")
+    kind = _AnswerColumnCot(
+        MMLUProXReader(),
+        build_prompt=_cot_body_de_v2,
+        preamble=_cot_preamble_de_v2,
+        cue="",
+        metrics=[AccuracyCompletion, GermanCompletionChecker],
+    )
     answer = ExtractFromCompletion(last_match(_COT_ANSWER_RE_DE_V2))
     return _mmlu_prox_cot_benchmark("MMLUProX_LiLab_DE_COT_V2", kind, answer, NoFewShot(), False, dataset)
 
 
 def mmlu_prox_lite_lilab_de_cot_v2(dataset: DatasetPolicy | None = None) -> Benchmark:
     """``mmlu_prox_lilab_de_cot_v2`` on the MMLU-ProX-Lite subset (588 German test rows, same validation split)."""
-    kind = _AnswerColumnCot(MMLUProXReader(), build_prompt=_cot_body_de_v2, preamble=_cot_preamble_de_v2, cue="")
+    kind = _AnswerColumnCot(
+        MMLUProXReader(),
+        build_prompt=_cot_body_de_v2,
+        preamble=_cot_preamble_de_v2,
+        cue="",
+        metrics=[AccuracyCompletion, GermanCompletionChecker],
+    )
     answer = ExtractFromCompletion(last_match(_COT_ANSWER_RE_DE_V2))
     return _mmlu_prox_cot_benchmark("MMLUProXLite_LiLab_DE_COT_V2", kind, answer, NoFewShot(), True, dataset)
 

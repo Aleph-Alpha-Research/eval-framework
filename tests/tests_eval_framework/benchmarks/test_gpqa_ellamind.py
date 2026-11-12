@@ -24,6 +24,7 @@ from eval_framework.benchmarks.gpqa_ellamind import (
     tulu_answer_de,
 )
 from eval_framework.contract import Benchmark
+from eval_framework.metrics.completion.language_checker import GermanCompletionChecker
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
 from tests.tests_eval_framework.benchmarks.utils import DatasetStub, assert_benchmark_formatter_hash, first_sample
 
@@ -196,3 +197,14 @@ def test_gpqa_cot_extracts_the_concluding_letter(completion: str, expected: str)
     # extract_answer runs at scoring time (not captured by the formatter hash), so exercise it directly.
     answer = tulu_answer_de()
     assert answer.extract_answer(completion, context=None, ground_truth=None, messages=[]) == expected
+
+
+def test_gpqa_diamond_cot_checks_the_completion_is_german() -> None:
+    # Given the German CoT benchmark
+    benchmark = gpqa_ellamind_diamond_cot_de(dataset=DatasetStub({"train": [_EVAL_ROW]}))
+
+    # When listing its metrics
+    metrics = benchmark.metrics()
+
+    # Then a model drifting out of German is scored alongside accuracy
+    assert GermanCompletionChecker in metrics
