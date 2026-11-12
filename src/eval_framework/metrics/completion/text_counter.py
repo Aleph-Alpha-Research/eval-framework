@@ -36,9 +36,6 @@ class WordCounter(BaseMetric[Completion]):
         return num_words
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         context = extract_context_metric(response, WordCounterMetricContext)
 
         assert context.comparison in ["less than", "at least"], f"'comparison' is not valid: {context.comparison}"
@@ -49,11 +46,7 @@ class WordCounter(BaseMetric[Completion]):
         if context.comparison == "at least":
             valid_word_count = num_words >= context.word_count
 
-        return [
-            MetricResult(
-                metric_name=self.NAME, value=float(valid_word_count), higher_is_better=True, error=response.error
-            )
-        ]
+        return [MetricResult(metric_name=self.NAME, value=float(valid_word_count), higher_is_better=True)]
 
 
 class SentenceCounterMetricContext(BaseMetricContext):
@@ -113,9 +106,6 @@ class SentenceCounter(BaseMetric[Completion]):
         return len(sentences)
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         context = extract_context_metric(response, SentenceCounterMetricContext)
 
         assert context.comparison in ["less than", "at least"], f"'comparison' is not valid: {context.comparison}"
@@ -126,11 +116,7 @@ class SentenceCounter(BaseMetric[Completion]):
         elif context.comparison == "at least":
             valid_sentence_count = num_sentences >= context.sentence_count
 
-        return [
-            MetricResult(
-                metric_name=self.NAME, value=float(valid_sentence_count), higher_is_better=True, error=response.error
-            )
-        ]
+        return [MetricResult(metric_name=self.NAME, value=float(valid_sentence_count), higher_is_better=True)]
 
 
 class ParagraphCounterMetricContext(BaseMetricContext):
@@ -147,9 +133,6 @@ class ParagraphCounter(BaseMetric[Completion]):
         return len(paragraphs)
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         context = extract_context_metric(response, ParagraphCounterMetricContext)
 
         assert context.comparison in ["less than", "at least"], f"'comparison' is not valid: {context.comparison}"
@@ -160,23 +143,16 @@ class ParagraphCounter(BaseMetric[Completion]):
         elif context.comparison == "at least":
             valid_paragraph_count = num_paragraphs >= context.paragraph_count
 
-        return [
-            MetricResult(
-                metric_name=self.NAME, value=float(valid_paragraph_count), higher_is_better=True, error=response.error
-            )
-        ]
+        return [MetricResult(metric_name=self.NAME, value=float(valid_paragraph_count), higher_is_better=True)]
 
 
 class ResponseToOriginalLengthRatio(BaseMetric[Completion]):
     NAME = "Response to Original Length Ratio"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         len_original = len(response.last_user_instruction)
         if len_original > 0:
             score = len(response.completion) / len_original
-            return [MetricResult(metric_name=self.NAME, value=score, higher_is_better=False, error=response.error)]
+            return [MetricResult(metric_name=self.NAME, value=score, higher_is_better=False)]
         else:
             return []

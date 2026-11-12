@@ -73,15 +73,6 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
         self.serializer = CallableSerializer()
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [
-                MetricResult(
-                    metric_name=self.NAME,
-                    value=None,
-                    higher_is_better=True,
-                    error=response.error,
-                )
-            ]
         try:
             context = extract_context_metric(response, CodeExecutionPassAtOneContext)
             parsed_context = RealtimeCodeExectionContext.from_context(context)
@@ -99,7 +90,6 @@ class CodeExecutionPassAtOne(BaseMetric[Completion]):
                 metric_name=self.NAME,
                 value=pass_at_k_value,
                 higher_is_better=True,
-                error=response.error,
                 code_execution_trace=output,
             )
         ]

@@ -23,7 +23,7 @@ class FinishReason(BaseMetric[Completion]):
 
     def calculate(self, response: Completion) -> list[MetricResult]:
         finish_reason = response.raw_completion_finish_reason
-        if response.error or finish_reason is None:
+        if finish_reason is None:
             values: dict[str, float | None] = {key: None for key in self.KEYS}
         else:
             values = {key: float(finish_reason.lower() == reason) for key, reason in self._REASONS.items()}
@@ -33,7 +33,6 @@ class FinishReason(BaseMetric[Completion]):
                 metric_name=f"{self.NAME}/{key}",
                 value=value,
                 higher_is_better=key == "Stop",
-                error=response.error,
             )
             for key, value in values.items()
         ]

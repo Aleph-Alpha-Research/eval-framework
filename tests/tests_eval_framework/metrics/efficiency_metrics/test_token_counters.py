@@ -1,5 +1,5 @@
 from eval_framework.metrics.efficiency.token_counters import TokenCounts
-from eval_framework.shared.types import Completion, Error
+from eval_framework.shared.types import Completion
 
 
 def _completion(**overrides: object) -> Completion:
@@ -42,12 +42,3 @@ def test_token_counts_reasoning_is_none_when_backend_did_not_report() -> None:
     by_name = {result.metric_name: result for result in results}
     assert by_name["TokenCounts/Completion"].value == 10
     assert by_name["TokenCounts/Reasoning"].value is None
-
-
-def test_token_counts_are_none_when_sample_errored() -> None:
-    error = Error(error_class="", message="", traceback="")
-    results = TokenCounts().calculate(_completion(error=error))
-    by_name = {result.metric_name: result for result in results}
-    assert by_name["TokenCounts/Completion"].value is None
-    assert by_name["TokenCounts/Reasoning"].value is None
-    assert all(result.error is error for result in results)

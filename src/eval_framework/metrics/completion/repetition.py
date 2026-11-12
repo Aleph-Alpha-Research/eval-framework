@@ -45,16 +45,6 @@ class WordRepetition(BaseMetric[Completion]):
             raise ValueError("window_size must be at least 1")
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [
-                MetricResult(
-                    metric_name=self.NAME,
-                    value=None,
-                    higher_is_better=self.HIGHER_IS_BETTER,
-                    error=response.error,
-                )
-            ]
-
         has_repetition = _has_repetition(
             text=response.completion,
             window_size=self.window_size,
@@ -66,7 +56,6 @@ class WordRepetition(BaseMetric[Completion]):
                 metric_name=self.NAME,
                 value=float(has_repetition),
                 higher_is_better=self.HIGHER_IS_BETTER,
-                error=response.error,
             )
         ]
 

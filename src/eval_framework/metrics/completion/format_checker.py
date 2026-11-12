@@ -17,9 +17,6 @@ class CheckJsonFormat(BaseMetric[Completion]):
         return completion
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         json_text = self._preprocess(response.completion)
 
         try:
@@ -28,9 +25,7 @@ class CheckJsonFormat(BaseMetric[Completion]):
         except ValueError as _:
             is_valid_json = False
 
-        return [
-            MetricResult(metric_name=self.NAME, value=float(is_valid_json), higher_is_better=True, error=response.error)
-        ]
+        return [MetricResult(metric_name=self.NAME, value=float(is_valid_json), higher_is_better=True)]
 
 
 class CheckPostScriptFormat(BaseMetric[Completion]):
@@ -44,13 +39,6 @@ class CheckPostScriptFormat(BaseMetric[Completion]):
     NAME = "Postscript Format"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         postscript_pattern = r"\s*(P\.S\.|P\.P\.S\.)"
         postscript = re.findall(postscript_pattern, response.completion, flags=re.MULTILINE)
-        return [
-            MetricResult(
-                metric_name=self.NAME, value=1.0 if postscript else 0.0, higher_is_better=True, error=response.error
-            )
-        ]
+        return [MetricResult(metric_name=self.NAME, value=1.0 if postscript else 0.0, higher_is_better=True)]

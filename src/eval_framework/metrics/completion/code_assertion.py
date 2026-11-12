@@ -12,9 +12,6 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
     PACKAGES: list[str] | None = None
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         # this will always be a list, if return is "" this will be an empty list
         code = response.completion
         try:

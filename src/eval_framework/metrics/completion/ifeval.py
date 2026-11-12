@@ -18,22 +18,6 @@ class IFEvalMetric(BaseMetric[Completion]):
     def calculate(self, response: Completion) -> list[MetricResult]:
         context = extract_context_metric(response, IFEvalMetricContext)
 
-        if response.error is not None:
-            return [
-                MetricResult(
-                    metric_name=f"{self.NAME}/prompt_level_strict_acc",
-                    value=None,
-                    higher_is_better=True,
-                    error=response.error,
-                ),
-                MetricResult(
-                    metric_name=f"{self.NAME}/prompt_level_loose_acc",
-                    value=None,
-                    higher_is_better=True,
-                    error=response.error,
-                ),
-            ]
-
         grading = process_results(context, [response.completion])
 
         results = [
@@ -41,13 +25,11 @@ class IFEvalMetric(BaseMetric[Completion]):
                 metric_name=f"{self.NAME}/prompt_level_strict_acc",
                 value=float(grading["prompt_level_strict_acc"]),
                 higher_is_better=True,
-                error=response.error,
             ),
             MetricResult(
                 metric_name=f"{self.NAME}/prompt_level_loose_acc",
                 value=float(grading["prompt_level_loose_acc"]),
                 higher_is_better=True,
-                error=response.error,
             ),
         ]
         # this framework does not support a custom aggregation step (see agg_inst_level_acc()) so work around
@@ -57,7 +39,6 @@ class IFEvalMetric(BaseMetric[Completion]):
                 metric_name=f"{self.NAME}/inst_level_strict_acc",
                 value=float(v),
                 higher_is_better=True,
-                error=response.error,
             )
             for v in grading["inst_level_strict_acc"]
         ]
@@ -66,7 +47,6 @@ class IFEvalMetric(BaseMetric[Completion]):
                 metric_name=f"{self.NAME}/inst_level_loose_acc",
                 value=float(v),
                 higher_is_better=True,
-                error=response.error,
             )
             for v in grading["inst_level_loose_acc"]
         ]

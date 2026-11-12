@@ -82,19 +82,6 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
             self._wait_for_db_containers()
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [
-                MetricResult(metric_name=f"{self.NAME}/{k}", value=None, higher_is_better=True, error=response.error)
-                for k in [
-                    "successfully_runs",
-                    "is_just_sql",
-                    "matches_results_count",
-                    "matches_column_count",
-                    "results_equal",
-                    "llm_quality_score",
-                ]
-            ]
-
         context = extract_context_metric(response, LLMJudgeSqlMetricContext)
 
         assert isinstance(response.ground_truth, str)
@@ -124,13 +111,11 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
                 metric_name=f"{self.NAME}/successfully_runs",
                 value=float(result is not None and result.success),
                 higher_is_better=True,
-                error=response.error,
             ),
             MetricResult(
                 metric_name=f"{self.NAME}/is_just_sql",
                 value=float(completion_query == completion_stripped),
                 higher_is_better=True,
-                error=response.error,
             ),
         ]
 
@@ -147,19 +132,16 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
                         metric_name=f"{self.NAME}/matches_results_count",
                         value=float(output_comparison.matches_results_count),
                         higher_is_better=True,
-                        error=response.error,
                     ),
                     MetricResult(
                         metric_name=f"{self.NAME}/matches_column_count",
                         value=float(output_comparison.matches_column_count),
                         higher_is_better=True,
-                        error=response.error,
                     ),
                     MetricResult(
                         metric_name=f"{self.NAME}/results_equal",
                         value=float(output_comparison.results_equal),
                         higher_is_better=True,
-                        error=response.error,
                     ),
                 ]
             )
@@ -178,7 +160,6 @@ class LLMJudgeSql(BaseLLMJudgeMetric):
                 higher_is_better=True,
                 llm_judge_prompt=grading.judge_prompt,
                 llm_judge_response=grading.judge_response,
-                error=response.error,
             )
         )
 

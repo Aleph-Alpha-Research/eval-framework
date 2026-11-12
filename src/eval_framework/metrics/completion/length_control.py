@@ -26,16 +26,6 @@ class LengthControl(BaseMetric[Completion]):
         self.tolerance = tolerance
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [
-                MetricResult(
-                    metric_name=f"{self.NAME}/fulfills_length_requirement",
-                    value=None,
-                    higher_is_better=True,
-                    error=response.error if response.error is not None else None,
-                )
-            ]
-
         expectations = json.loads(str(response.ground_truth))
         stripped_completion = response.completion.strip()
 
@@ -78,6 +68,5 @@ class LengthControl(BaseMetric[Completion]):
                 metric_name=f"{self.NAME}/fulfills_length_requirement",
                 value=float(fulfills_length_requirement),
                 higher_is_better=True,
-                error=response.error,
             ),
         ]

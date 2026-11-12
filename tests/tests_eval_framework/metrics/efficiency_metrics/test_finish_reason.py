@@ -1,7 +1,7 @@
 import pytest
 
 from eval_framework.metrics.efficiency.finish_reason import FinishReason
-from eval_framework.shared.types import Completion, Error
+from eval_framework.shared.types import Completion
 
 
 def _completion(**overrides: object) -> Completion:
@@ -47,11 +47,3 @@ def test_finish_reason_is_none_when_backend_did_not_report() -> None:
     assert len(results) == 3
     assert all(result.value is None for result in results)
     assert all(result.error is None for result in results)
-
-
-def test_finish_reason_is_none_when_sample_errored() -> None:
-    error = Error(error_class="", message="", traceback="")
-    results = FinishReason().calculate(_completion(raw_completion_finish_reason="repetition", error=error))
-    assert len(results) == 3
-    assert all(result.value is None for result in results)
-    assert all(result.error is error for result in results)

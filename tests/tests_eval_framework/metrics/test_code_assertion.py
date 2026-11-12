@@ -4,7 +4,7 @@ import pytest
 from llm_sandbox.exceptions import ImagePullError, SandboxTimeoutError
 
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
-from eval_framework.shared.types import Completion, Error
+from eval_framework.shared.types import Completion
 from eval_framework.tasks.utils import DockerReturnedEmptyOutput
 
 
@@ -212,23 +212,6 @@ print(score)
             ),
             0.0,
             id="code_execution_error_illegal_character",
-        ),
-        # 1. response.error is not None
-        pytest.param(
-            Completion(
-                id=1,
-                subject="test",
-                ground_truth="",
-                raw_completion="",
-                raw_completion_num_tokens=None,
-                completion="",
-                prompt="test",
-                prompt_num_tokens=None,
-                messages=None,
-                error=Error(error_class="TestError", message="Something went wrong", traceback="traceback details"),
-            ),
-            None,
-            id="response_has_error",
         ),
         # 2. unrelated print
         pytest.param(

@@ -237,11 +237,6 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
     NAME = "pairwise_judgement"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        response_error = response.error
-        if response_error:
-            logger.info(f"Skipped LLM judge as completion already had an error {response_error}")
-            return []
-
         prompts_to_judge: list[PromptToJudge] = generate_pair_judge_prompts(
             response, randomize_order=self._randomize_order
         )
@@ -266,7 +261,6 @@ class MTBenchJudgePair(BaseLLMJudgeMetric):
                 higher_is_better=True,
                 llm_judge_prompt=prompt_to_judge.prompt_text,
                 llm_judge_response=f"{output[0].completion}",  # unprocessed AI feedback
-                error=output[0].raw_completion_error,
             )
         except Exception as e:
             logger.info(f"LLM judge failed to generate output for prompt: {prompt_to_judge.prompt_text}. Error: {e}")

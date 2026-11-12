@@ -3,10 +3,10 @@ from typing import Any
 import pytest
 
 from eval_framework.metrics.loglikelihood.dcs import DistributionalCorrectnessScore
-from eval_framework.shared.types import Error, Loglikelihood
+from eval_framework.shared.types import Loglikelihood
 
 
-def make_response(loglikelihoods: dict[str, float], ground_truth: Any, error: Error | None = None) -> Loglikelihood:
+def make_response(loglikelihoods: dict[str, float], ground_truth: Any) -> Loglikelihood:
     return Loglikelihood(
         id=1,
         subject="test",
@@ -15,7 +15,6 @@ def make_response(loglikelihoods: dict[str, float], ground_truth: Any, error: Er
         prompt_num_tokens=None,
         loglikelihoods=loglikelihoods,
         loglikelihoods_num_tokens={k: -1 for k in loglikelihoods},
-        error=error,
     )
 
 
@@ -67,12 +66,3 @@ def test_dcs_normalisation() -> None:
     object.__setattr__(metric, "_softmax", fake_softmax)
     result = metric.calculate(response)[0]
     assert result.value == pytest.approx(0.93, rel=1e-6)
-
-
-def test_dcs_error() -> None:
-    metric = DistributionalCorrectnessScore()
-    err = Error(error_class="fail", message="fail", traceback="")
-    response = make_response({"A": -1.0}, "A", error=err)
-    result = metric.calculate(response)[0]
-    assert result.value is None
-    assert result.error == err

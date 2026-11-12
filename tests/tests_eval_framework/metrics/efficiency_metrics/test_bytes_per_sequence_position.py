@@ -6,7 +6,7 @@ from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     SequencePositionsCompletion,
     SequencePositionsLoglikelihood,
 )
-from eval_framework.shared.types import Completion, ConcatCompression, Error, Loglikelihood
+from eval_framework.shared.types import Completion, ConcatCompression, Loglikelihood
 
 log_likelihood_params = [
     pytest.param(
@@ -51,21 +51,6 @@ log_likelihood_params = [
         None,
         None,
         id="prompt_None",
-    ),
-    pytest.param(
-        Loglikelihood(
-            id=1,
-            subject="x",
-            ground_truth="big car",
-            prompt="test",
-            prompt_num_tokens=1,
-            loglikelihoods={"big car": -1.0, "small mouse house": -2.0},
-            loglikelihoods_num_tokens={"big car": 2, "small mouse house": 3},
-            error=Error(error_class="", message="", traceback=""),
-        ),
-        None,
-        None,
-        id="with_error",
     ),
 ]
 
@@ -137,23 +122,6 @@ completion_params = [
         None,
         None,
         id="prompt_None",
-    ),
-    pytest.param(
-        Completion(
-            id=1,
-            subject="x",
-            ground_truth="wow, a cute dog!",
-            prompt="test",
-            prompt_num_tokens=1,
-            messages=None,
-            completion="25",
-            raw_completion="the answer is 25",
-            raw_completion_num_tokens=4,
-            error=Error(error_class="", message="", traceback=""),
-        ),
-        None,
-        None,
-        id="with_error",
     ),
 ]
 

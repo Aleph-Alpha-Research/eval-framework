@@ -12,14 +12,9 @@ class AccuracyCompletion(BaseMetric[Completion]):
     NAME = "Accuracy Completion"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         ground_truths = response.ground_truth_list
         is_correct = any(response.completion == gt for gt in ground_truths)
-        return [
-            MetricResult(metric_name=self.NAME, value=float(is_correct), higher_is_better=True, error=response.error)
-        ]
+        return [MetricResult(metric_name=self.NAME, value=float(is_correct), higher_is_better=True)]
 
 
 class AccuracyCompletionWithEvaluate(AccuracyCompletion):
@@ -29,8 +24,6 @@ class AccuracyCompletionWithEvaluate(AccuracyCompletion):
         self.ignore_punctuation = ignore_punctuation
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
         ground_truths = response.ground_truth_list
         model_answer = response.completion
 
@@ -41,9 +34,7 @@ class AccuracyCompletionWithEvaluate(AccuracyCompletion):
             ignore_case=self.ignore_case,
             ignore_punctuation=self.ignore_punctuation,
         )["exact_match"]
-        return [
-            MetricResult(metric_name=self.NAME, value=float(is_correct), higher_is_better=True, error=response.error)
-        ]
+        return [MetricResult(metric_name=self.NAME, value=float(is_correct), higher_is_better=True)]
 
 
 class AccuracyCompletionOLMES(AccuracyCompletionWithEvaluate):

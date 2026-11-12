@@ -22,9 +22,6 @@ class TernaryScore(BaseLoglikelihoodMetric):
             raise ValueError(f"Invalid reward and penalty values: lc={self._lc}, lw={self._lw}. Require lc>=0, lw>=0.")
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         loglikelihoods, probs = self._compute_probabilities(response.loglikelihoods)
         ground_truths = self._gather_ground_truths(response)
 
@@ -39,4 +36,4 @@ class TernaryScore(BaseLoglikelihoodMetric):
         else:
             score = -self._lw
 
-        return [MetricResult(metric_name=self.NAME, value=score, higher_is_better=True, error=response.error)]
+        return [MetricResult(metric_name=self.NAME, value=score, higher_is_better=True)]

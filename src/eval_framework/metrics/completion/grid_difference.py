@@ -37,9 +37,6 @@ class GridDifference(BaseMetric[Completion]):
         return ""
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         input_grid = self.extract_grid_from_prompt(prompt=response.last_user_instruction).split()
         output_grid = response.completion.split()
 
@@ -65,13 +62,11 @@ class GridDifference(BaseMetric[Completion]):
                 metric_name=f"{self.NAME}_exact_match",
                 value=float(exact_match),
                 higher_is_better=True,
-                error=response.error,
             ),
-            MetricResult(metric_name=f"{self.NAME}_score", value=score, higher_is_better=True, error=response.error),
+            MetricResult(metric_name=f"{self.NAME}_score", value=score, higher_is_better=True),
             MetricResult(
                 metric_name=f"{self.NAME}_normalized_score",
                 value=normalized_score,
                 higher_is_better=True,
-                error=response.error,
             ),
         ]

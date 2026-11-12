@@ -6,12 +6,9 @@ class ExponentialSimilarity(BaseMetric[Completion]):
     NAME = "ExponentialSimilarity"
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         ground_truths = [gt for gt in response.ground_truth_list if gt is not None]
         if not ground_truths:
-            return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True, error=response.error)]
+            return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True)]
 
         try:
             # Try to calculate exponential similarity for each ground truth
@@ -27,11 +24,7 @@ class ExponentialSimilarity(BaseMetric[Completion]):
 
             # If we have any valid similarities, return the max
             if similarities:
-                return [
-                    MetricResult(
-                        metric_name=self.NAME, value=max(similarities), higher_is_better=True, error=response.error
-                    )
-                ]
+                return [MetricResult(metric_name=self.NAME, value=max(similarities), higher_is_better=True)]
             else:
                 # If all conversions failed, return an error
                 error = Error(

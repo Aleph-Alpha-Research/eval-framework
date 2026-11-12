@@ -222,17 +222,13 @@ class MathReasoningCompletion(BaseMetric[Completion]):
 
         # check if already correct symbolically
         if symb_is_correct:
-            return [
-                MetricResult(
-                    metric_name=self.NAME, value=float(symb_is_correct), higher_is_better=True, error=response.error
-                )
-            ]
+            return [MetricResult(metric_name=self.NAME, value=float(symb_is_correct), higher_is_better=True)]
         else:
             normalized_ground_truths = [
                 self.normalize_expression(gt) for gt in response.ground_truth_list if gt is not None
             ]
             res = self._any_str_correct([normalized_response], normalized_ground_truths)
-            return [MetricResult(metric_name=self.NAME, value=float(res), higher_is_better=True, error=response.error)]
+            return [MetricResult(metric_name=self.NAME, value=float(res), higher_is_better=True)]
 
     def _any_str_correct(self, response_list: list, ground_truths: list) -> bool:
         """

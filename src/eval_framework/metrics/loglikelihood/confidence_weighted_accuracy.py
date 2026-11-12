@@ -10,9 +10,6 @@ class ConfidenceWeightedAccuracy(BaseLoglikelihoodMetric):
         super().__init__(len_normalised=len_normalised)
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         loglikelihoods, probs = self._compute_probabilities(response.loglikelihoods)
         ground_truths = self._gather_ground_truths(response)
 
@@ -22,4 +19,4 @@ class ConfidenceWeightedAccuracy(BaseLoglikelihoodMetric):
 
         accuracy = p_c if best_key_norm in ground_truths else 0.0
 
-        return [MetricResult(metric_name=self.NAME, value=accuracy, higher_is_better=True, error=response.error)]
+        return [MetricResult(metric_name=self.NAME, value=accuracy, higher_is_better=True)]

@@ -9,9 +9,6 @@ class AccuracyLoglikelihood(BaseMetric[Loglikelihood]):
     NAME = "Accuracy Loglikelihood"
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         ground_truth_list = response.ground_truth_list
         completion_text = max(response.loglikelihoods, key=response.loglikelihoods.get)  # type: ignore[arg-type]
 
@@ -20,7 +17,6 @@ class AccuracyLoglikelihood(BaseMetric[Loglikelihood]):
                 metric_name=self.NAME,
                 value=float(completion_text in ground_truth_list),
                 higher_is_better=True,
-                error=response.error,
             )
         ]
 
@@ -29,9 +25,6 @@ class AccuracyNormLoglikelihood(BaseMetric[Loglikelihood]):
     NAME = "Accuracy Normalized Loglikelihood"
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         ground_truth_list = response.ground_truth_list
 
         output_len_normalized = {}
@@ -49,7 +42,6 @@ class AccuracyNormLoglikelihood(BaseMetric[Loglikelihood]):
                 metric_name=self.NAME,
                 value=float(model_output_len_normalized in ground_truth_list),
                 higher_is_better=True,
-                error=response.error,
             )
         ]
 
@@ -73,9 +65,6 @@ class AccuracyBayesianLoglikelihood(BaseMetric[Loglikelihood]):
         denominator = 0.0
 
         for response in responses:
-            if response.error is not None:
-                continue
-
             num_candidates = len(response.loglikelihoods)
             if num_candidates <= 1:
                 continue
@@ -95,9 +84,6 @@ class AccuracyBayesianLoglikelihood(BaseMetric[Loglikelihood]):
         self.length_decay = 0.0 if denominator == 0 else numerator / denominator
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         corrected_loglikelihoods = {
             completion: loglikelihood - self.length_decay * count_bytes(completion)
             for completion, loglikelihood in response.loglikelihoods.items()
@@ -109,7 +95,6 @@ class AccuracyBayesianLoglikelihood(BaseMetric[Loglikelihood]):
                 metric_name=self.NAME,
                 value=float(completion_text in response.ground_truth_list),
                 higher_is_better=True,
-                error=response.error,
             )
         ]
 
@@ -133,9 +118,6 @@ class PartialEvalAccuracy(BaseMetric[Loglikelihood]):
         self._pending: dict[int, tuple[float, bool]] = {}
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         item_id = response.id // 2  # Each item generates 2 samples, get a unique id for the pair
         logprob = next(iter(response.loglikelihoods.values()))
         is_correct = response.ground_truth == "True"

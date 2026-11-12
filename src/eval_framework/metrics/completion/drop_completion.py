@@ -22,17 +22,6 @@ class DropF1ExactMatch(BaseMetric[Completion]):
     KEYS = ["f1", "exact_match"]
 
     def calculate(self, response: Completion) -> list[MetricResult]:
-        if response.error is not None:
-            return [
-                MetricResult(
-                    metric_name=name,
-                    value=None,
-                    higher_is_better=True,
-                    error=response.error,
-                )
-                for name in [n.strip() for n in self.NAME.split("/")]
-            ]
-
         context = extract_context_metric(response, DropMetricContext)
         # Gold: list of tuples (stored as list of lists)
         answer_tuples = [list(a) for a in context.answer_tuples]
@@ -50,7 +39,6 @@ class DropF1ExactMatch(BaseMetric[Completion]):
                 metric_name=name,
                 value=out[key],
                 higher_is_better=True,
-                error=response.error,
             )
             for name, key in zip(self.NAMES, self.KEYS)
         ]

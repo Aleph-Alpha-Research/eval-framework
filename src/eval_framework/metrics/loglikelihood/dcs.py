@@ -22,9 +22,6 @@ class DistributionalCorrectnessScore(BaseLoglikelihoodMetric):
             raise ValueError(f"Invalid DCS loadings: lc={self._lc}, lw={self._lw}. Require lc>=0, lw>=0, and lc>=lw.")
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        if response.error is not None:
-            return [MetricResult(metric_name=self.NAME, value=None, higher_is_better=True, error=response.error)]
-
         loglikelihoods, probs = self._compute_probabilities(response.loglikelihoods)
         ground_truths = self._gather_ground_truths(response)
 
@@ -40,4 +37,4 @@ class DistributionalCorrectnessScore(BaseLoglikelihoodMetric):
 
         dcs = (self._lc * p_c - self._lw * p_w) * (1.0 - p_idk)
 
-        return [MetricResult(metric_name=self.NAME, value=float(dcs), higher_is_better=True, error=response.error)]
+        return [MetricResult(metric_name=self.NAME, value=float(dcs), higher_is_better=True)]
