@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from eval_framework.llm.openai import OpenAIModel
-from eval_framework.run import _build_config, run
+from eval_framework.run import _build_config, parse_args, run
 from tests.tests_eval_framework.conftest import MockLLM
 
 
@@ -98,6 +98,18 @@ def test_build_config_without_judge() -> None:
     config = _build_config(_kwargs({"model_name": "m"}, {}))
 
     assert config.llm_judge_class is None
+
+
+def test_build_config_with_judge_retry_attempts() -> None:
+    kwargs = {**_kwargs({"model_name": "m"}, {"model_name": "judge"}), "judge_retry_attempts": 60}
+
+    assert _build_config(kwargs).judge_retry_attempts == 60
+
+
+def test_judge_retry_attempts_is_a_cli_option(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("sys.argv", ["eval_framework", "--judge-retry-attempts", "60"])
+
+    assert parse_args().judge_retry_attempts == 60
 
 
 @pytest.mark.parametrize(

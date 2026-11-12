@@ -66,6 +66,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Randomize the order of answers presented to the LLM judge to mitigate position bias.",
     )
+    parser.add_argument(
+        "--judge-retry-attempts",
+        type=int,
+        required=False,
+        default=None,
+        help=(
+            "How often one judge call is tried while the judge fails transiently, e.g. when rate limited "
+            "(default: 5). The pauses in between grow to a minute, so each further attempt waits out "
+            "about one more minute."
+        ),
+    )
 
     parser.add_argument(
         "--task-subjects",
@@ -256,6 +267,7 @@ def _build_config(kwargs: dict) -> EvalConfig:
         wandb_upload_results=kwargs["wandb_upload_results"],
         llm_judge_class=OpenAIModel if judge_model_args else None,
         judge_model_args=judge_model_args,
+        judge_retry_attempts=kwargs.get("judge_retry_attempts"),
         batch_size=kwargs["batch_size"],
         description=kwargs["description"],
         randomize_judge_order=kwargs["randomize_judge_order"],

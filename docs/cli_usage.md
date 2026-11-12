@@ -57,6 +57,9 @@ The LLM judge is always an `eval_framework.llm.openai.OpenAIModel`.
 Arguments to pass to the judge `OpenAIModel` constructor as key=value pairs; `model_name` is required (e.g.
 `model_name="gpt-4o"`). Setting this enables the LLM judge, which is required for tasks scored with LLM-judge metrics.
 
+**`--judge-retry-attempts JUDGE_RETRY_ATTEMPTS`**
+How often one judge call is tried while the judge fails transiently, e.g. when rate limited (default: 5). The pauses in between grow to a minute, so each further attempt waits out about one more minute.
+
 ### Logging & Tracking
 
 **`--wandb-project WANDB_PROJECT`**
