@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from eval_framework.llm.openai import OpenAIModel
-from eval_framework.run import _build_config, run
+from eval_framework.run import _build_config, parse_args, run
 from tests.tests_eval_framework.conftest import MockLLM
 
 
@@ -72,6 +72,35 @@ def test_run_no_judge_model(mock_parse_args: Mock, tmp_path: Path) -> None:
     results_path = str(tmp_path / "NamedMockLLM" / f"{version_str}_{task_name}" / "*" / "results.jsonl")
     results_files = glob.glob(results_path)
     assert len(results_files) == 1
+
+
+@patch("eval_framework.run.OpenAIModel", NamedMockLLM)
+@patch("argparse.ArgumentParser.parse_args")
+def test_run_phases_apart(mock_parse_args: Mock, tmp_path: Path) -> None:
+    namespace = _namespace(tmp_path, "ARC", judge_model_args=[])
+    run_dir = tmp_path / "NamedMockLLM" / f"v{importlib.metadata.version('eval_framework')}_ARC" / "*"
+
+    mock_parse_args.return_value = Namespace(**vars(namespace), phase="generate")
+    run()
+
+    assert len(glob.glob(str(run_dir / "output.jsonl"))) == 1
+    assert glob.glob(str(run_dir / "results.jsonl")) == []
+
+    mock_parse_args.return_value = Namespace(**vars(namespace), phase="score")
+    run()
+
+    assert len(glob.glob(str(run_dir / "results.jsonl"))) == 1
+
+
+def test_phase_cannot_be_combined_with_a_task_suite(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr("sys.argv", ["eval_framework", "--task-suite", "suite.yaml", "--phase", "generate"])
+
+    with pytest.raises(SystemExit):
+        parse_args()
+
+    assert "--phase cannot be combined with --task-suite" in capsys.readouterr().err
 
 
 def _kwargs(llm_args: dict[str, str], judge_model_args: dict[str, str]) -> dict:

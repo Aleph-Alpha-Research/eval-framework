@@ -36,6 +36,9 @@ The maximum number of tokens to generate for each sample. Overwrites any task de
 **`--batch-size BATCH_SIZE`**
 Size of batch of samples to send to the LLM for evaluation in parallel. Use 1 for sequential running (default).
 
+**`--phase {generate,score}`**
+Run only one half of the evaluation. `generate` queries the model and saves its responses to `output.jsonl`; `score` computes the metrics over the responses an earlier `generate` saved to the same `--output-dir`, without querying the model. Pass the same arguments to both, since they locate the run's folder. This lets the model be shut down before a slow scoring step, e.g. an LLM judge. If not given, both halves run in one go. Cannot be combined with `--task-suite`.
+
 **`--task-suite PATH_TO_TASK_SUITE_FILE`**
 Path to a suite file (`.yaml` or `.py`) defining a set of tasks to run. Mutually exclusive with `--task-name`. Hyperparameter overrides and score aggregation methods can be configured within the suite file.
 
