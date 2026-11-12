@@ -14,6 +14,16 @@
 
 ### Bug Fixes
 
+## [0.22.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.22.3...v0.22.4) (2026-11-12)
+
+
+### Bug Fixes
+
+* cap the memory of the minerva sympy check ([da0f5a1](https://github.com/Aleph-Alpha-Research/eval-framework/commit/da0f5a12353408d9fe7143bc5dff5450d96756ab))
+* log failed sympy checks in minerva equivalence ([f1a30af](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f1a30af534b09fa4eb6ed98f3c8da46d176b8b96))
+* refuse to cancel a pending alarm in time_limited ([2a5bb69](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2a5bb69f4cc2987d2ba492e05b5ea2c087254a80))
+* refuse to replace a SIGALRM handler installed outside Python ([2d87f2d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/2d87f2d3cd369c9ecf447e0d65e94a681ec64de1))
+
 ## [0.22.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.22.2...v0.22.3) (2026-11-11)
 
 
