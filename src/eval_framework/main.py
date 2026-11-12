@@ -29,6 +29,8 @@ class Phase(StrEnum):
 
     GENERATE = "generate"
     """Query the model and save its responses, without scoring them."""
+    SCORE = "score"
+    """Score the responses a generate phase saved, without querying the model."""
 
 
 def main(
@@ -66,7 +68,8 @@ def main(
             if additional_artifact.strip():
                 wandb.use_artifact(additional_artifact.strip())
 
-        response_generator.generate()
+        if phase is not Phase.SCORE:
+            response_generator.generate()
         if phase is Phase.GENERATE:
             return []
 
