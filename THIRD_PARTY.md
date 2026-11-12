@@ -98,7 +98,7 @@ and first-party/internal packages are excluded.
 | `tokenizers` | `0.23.3` |
 | `tqdm` | `4.70.1` |
 | `truststore` | `0.10.5` |
-| `typer` | `0.29.0` |
+| `typer` | `0.29.1` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.5` |
 | `tzdata` | `2026.6` |

@@ -141,7 +141,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **tiktoken** 0.14.0 - https://github.com/openai/tiktoken
 - **truststore** 0.10.5 - https://github.com/sethmlarson/truststore
-- **typer** 0.29.0 - https://github.com/fastapi/typer
+- **typer** 0.29.1 - https://github.com/fastapi/typer
 - **typing-inspection** 0.4.5 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.8.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
 - **wandb** 0.31.0 - https://github.com/wandb/wandb
@@ -19072,7 +19072,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### typer 0.29.0 (MIT)
+### typer 0.29.1 (MIT)
 
 ```text
 The MIT License (MIT)
