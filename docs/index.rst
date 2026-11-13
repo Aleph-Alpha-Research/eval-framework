@@ -54,6 +54,7 @@ Documentation Overview
 
    installation.md
    cli_usage.md
+   python_usage.md
 
 .. toctree::
    :maxdepth: 1
@@ -66,6 +67,7 @@ Documentation Overview
    understanding_results_guide.md
    utilities.md
    wandb_integration.md
+   comparison_lm_evaluation_harness.md
 
 .. toctree::
    :maxdepth: 1
