@@ -98,6 +98,18 @@ uv run eval_framework \
 Every keyword argument of the `OpenAIModel` constructor can be set through `--llm-args`; see the
 [Model Arguments guide](model_arguments.md) for the full list.
 
+### Local default (llama.cpp)
+
+If `--llm-args` has no `base_url` and neither `OPENAI_API_KEY` nor `OPENAI_BASE_URL` is set, the CLI uses a local
+[llama.cpp](https://github.com/ggml-org/llama.cpp) `llama-server` at `http://localhost:8080/v1`. No API key is needed.
+
+* If a server is already listening on port 8080, it is used as is and `model_name` is only a label.
+* Otherwise the CLI runs `llama-server -hf <model_name>`, so `model_name` must be a Hugging Face GGUF repository
+  (e.g. `Qwen/Qwen3-0.6B-GGUF`). The server is stopped when the run ends, and its log is written to
+  `<output-dir>/llama-server.log`. This requires `llama-server` on the `PATH` (`brew install llama.cpp`).
+
+Interrupting a run with Ctrl-C may leave the started server running; check with `pgrep llama-server`.
+
 ## Running a Task Suite
 
 Task suites let you run multiple tasks in one command and aggregate their scores. You can define a suite in a `.yaml` file:

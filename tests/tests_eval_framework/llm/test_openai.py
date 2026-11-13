@@ -1,6 +1,6 @@
 import httpx
 import pytest
-from openai import AuthenticationError, RateLimitError, omit
+from openai import AuthenticationError, OpenAIError, RateLimitError, omit
 from openai.types.chat.completion_create_params import ResponseFormat
 from pytest_mock import MockerFixture
 
@@ -50,6 +50,19 @@ def _make_chat_response(
     response.choices[0].finish_reason = finish_reason
     response.usage.prompt_tokens = 5
     return response
+
+
+def test_self_hosted_endpoint_needs_no_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
+
+    OpenAIModel(model_name="m", base_url="http://localhost:8080/v1")
+
+    with pytest.raises(OpenAIError, match="Missing credentials"):
+        OpenAIModel(model_name="m")
+
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://localhost:8000/v1")
+    OpenAIModel(model_name="m")
 
 
 def test_generate_from_messages_keeps_reasoning_and_finish_reason(mocker: MockerFixture) -> None:
