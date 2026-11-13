@@ -1,6 +1,13 @@
 import argparse
 import datetime
 import logging
+import os
+import shutil
+import socket
+import subprocess
+import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +19,10 @@ from eval_framework.tasks.utils import close_pools
 from eval_framework.utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
+
+# llama.cpp's llama-server listens here by default, so the README quickstart needs no extra flags.
+LOCAL_PORT = 8080
+LOCAL_BASE_URL = f"http://localhost:{LOCAL_PORT}/v1"
 
 
 def parse_args() -> argparse.Namespace:
@@ -284,10 +295,49 @@ def _run_single_task(kwargs: dict) -> None:
     logger.info(f"time since start: {datetime.datetime.now() - now}")
 
 
+def _start_local_server(model: str, output_dir: Path) -> subprocess.Popen | None:
+    """Serve `model` (a Hugging Face GGUF repo) with llama-server, unless a server is already listening."""
+    try:
+        socket.create_connection(("localhost", LOCAL_PORT), timeout=1).close()
+        return None  # the user runs their own server; `model` is then only a label
+    except OSError:
+        pass
+    if shutil.which("llama-server") is None:
+        raise RuntimeError(
+            f"No server at {LOCAL_BASE_URL} and `llama-server` is not installed. Install llama.cpp "
+            "(`brew install llama.cpp`), or pass `base_url=...` in --llm-args, or set OPENAI_API_KEY."
+        )
+    output_dir.mkdir(parents=True, exist_ok=True)
+    log_path = output_dir / "llama-server.log"
+    print(f"Starting llama-server for {model} (first run downloads the model; log: {log_path})")
+    with open(log_path, "w") as log:
+        server = subprocess.Popen(
+            ["llama-server", "-hf", model, "--port", str(LOCAL_PORT)], stdout=log, stderr=subprocess.STDOUT
+        )
+    # No timeout: the download can take long. A failed start ends the process, which ends the wait.
+    while server.poll() is None:
+        try:
+            urllib.request.urlopen(f"http://localhost:{LOCAL_PORT}/health", timeout=2).close()
+            return server
+        except (urllib.error.URLError, OSError):  # not listening yet, or 503 while the model loads
+            time.sleep(1)
+    raise RuntimeError(f"llama-server exited while starting {model}; see {log_path}")
+
+
 def run_with_kwargs(kwargs: dict) -> None:
+    # Applied before the single-task/suite split: suites rebuild the config hash to find results,
+    # so both paths must see the same llm_args. OPENAI_BASE_URL counts as "configured" because the
+    # OpenAI SDK reads it; overriding it here would silently redirect the user's chosen endpoint.
+    llm_args = kwargs.get("llm_args", {})
+    use_local = "base_url" not in llm_args and not os.getenv("OPENAI_API_KEY") and not os.getenv("OPENAI_BASE_URL")
+    if use_local:
+        kwargs["llm_args"] = {**llm_args, "base_url": LOCAL_BASE_URL}
     task_suite_path = kwargs.pop("task_suite", None)
 
+    server = None
     try:
+        if use_local and "model_name" in llm_args:
+            server = _start_local_server(llm_args["model_name"], Path(kwargs.get("output_dir", "outputs")))
         if task_suite_path is not None:
             from eval_framework.suite import TaskSuite, run_suite
 
@@ -302,6 +352,8 @@ def run_with_kwargs(kwargs: dict) -> None:
         else:
             _run_single_task(kwargs)
     finally:
+        if server is not None:
+            server.kill()  # terminate() is ignored while the server is generating
         close_pools()
 
 

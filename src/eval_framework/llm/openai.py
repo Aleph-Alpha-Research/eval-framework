@@ -136,11 +136,10 @@ class OpenAIModel(BaseLLM):
             assert 0.0 <= top_p <= 1.0, "top_p must be between 0.0 and 1.0"
         self._top_p = top_p
 
-        self._client = OpenAI(
-            api_key=api_key if api_key is not None else os.getenv("OPENAI_API_KEY", ""),
-            organization=organization,
-            base_url=base_url,
-        )
+        # The SDK rejects an empty key, but self-hosted servers (llama.cpp, vLLM) need none.
+        self_hosted = base_url or os.getenv("OPENAI_BASE_URL")
+        api_key = api_key or os.getenv("OPENAI_API_KEY") or ("no-key" if self_hosted else None)
+        self._client = OpenAI(api_key=api_key, organization=organization, base_url=base_url)
 
         self._encoder: tiktoken.Encoding | PreTrainedTokenizerBase | None = self._get_encoder_or_none()
 
