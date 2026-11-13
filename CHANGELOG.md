@@ -14,6 +14,24 @@
 
 ### Bug Fixes
 
+## [0.23.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.22.4...v0.23.0) (2026-11-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* debug flag removed
+
+### Features
+
+* check German CoT completions stay in German (GPQA DE, MMLU-ProX DE) ([be06eb3](https://github.com/Aleph-Alpha-Research/eval-framework/commit/be06eb30c657838644aa3bcea1344901ec71074c))
+* debug flag removed ([c87c397](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c87c397c9874574588326db44e0f32069c0d5e0f))
+
+
+### Bug Fixes
+
+* **deps:** update dependency datasets to &gt;=5.2.0,&lt;6 ([3600b57](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3600b579d5beb9d5a2929d23f14adaaec6eea7ed))
+* **deps:** update dependency openai to &gt;=3.48.0,&lt;4 ([ddb93bd](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ddb93bdf10fd4194b4c9fe760e0c3ebb55dcab2e))
+
 ## [0.22.4](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.22.3...v0.22.4) (2026-11-12)
 
 
