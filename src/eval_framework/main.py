@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+from enum import StrEnum
 from typing import Literal
 
 import wandb
@@ -19,12 +20,26 @@ from eval_framework.utils.logging import setup_logging
 logger = logging.getLogger(__name__)
 
 
+class Phase(StrEnum):
+    """One half of an evaluation, to run it apart from the other.
+
+    Both halves meet in the output directory only, so they can run in separate processes: the
+    model is needed while generating, the judge (if any) while scoring.
+    """
+
+    GENERATE = "generate"
+    """Query the model and save its responses, without scoring them."""
+    SCORE = "score"
+    """Score the responses a generate phase saved, without querying the model."""
+
+
 def main(
     llm: BaseLLM,
     config: EvalConfig,
     verbosity: int = 1,
+    phase: Phase | None = None,
 ) -> list[Result]:
-    """Runs the entire evaluation process: responses generation and evaluation."""
+    """Runs the evaluation process: responses generation and evaluation, or only `phase` of it."""
     # Set up centralized logging early
     output_dir = generate_output_dir(llm.name, config)
     setup_logging(output_dir=output_dir, log_level=verbosity, log_filename="evaluation.log")
@@ -53,7 +68,12 @@ def main(
             if additional_artifact.strip():
                 wandb.use_artifact(additional_artifact.strip())
 
-        response_generator.generate()
+        if phase is Phase.SCORE:
+            _require_finished_generation(file_processor)
+        else:
+            response_generator.generate()
+        if phase is Phase.GENERATE:
+            return []
 
         evaluator = EvaluationGenerator(config, file_processor)
         results = evaluator.run_eval()
@@ -69,6 +89,16 @@ def main(
                 logger.warning("Could not delete output directory, some files remain.")
 
     return results
+
+
+def _require_finished_generation(file_processor: ResultsFileProcessor) -> None:
+    """Scoring the responses of an interrupted generate phase would pass for a result over all samples."""
+    # The response generator records its timing only once every sample has a response.
+    if "end_time" not in file_processor.load_metadata():
+        raise ValueError(
+            f"The generate phase has not finished in {file_processor.output_dir}; run it to completion "
+            "with the same configuration before the score phase."
+        )
 
 
 def _wandb_mode(project: str | None) -> Literal["online", "disabled"] | None:
