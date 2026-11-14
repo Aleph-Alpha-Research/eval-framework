@@ -1,0 +1,21 @@
+eval\_framework.benchmarks.utils package
+========================================
+
+Submodules
+----------
+
+eval\_framework.benchmarks.utils.ellamind\_languages module
+-----------------------------------------------------------
+
+.. automodule:: eval_framework.benchmarks.utils.ellamind_languages
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: eval_framework.benchmarks.utils
+   :members:
+   :show-inheritance:
+   :undoc-members:
