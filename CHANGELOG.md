@@ -14,6 +14,22 @@
 
 ### Bug Fixes
 
+## [0.24.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.23.0...v0.24.0) (2026-11-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* dead error handling code removed
+
+### Features
+
+* dead error handling code removed ([7dba1de](https://github.com/Aleph-Alpha-Research/eval-framework/commit/7dba1de9765a04dd5fe55eb281ec7fd6423b1bf2))
+
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=3.49.0,&lt;4 ([64054b0](https://github.com/Aleph-Alpha-Research/eval-framework/commit/64054b03dfa6c2cb7446059a9194e07b99574ff6))
+
 ## [0.23.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.22.4...v0.23.0) (2026-11-13)
 
 
