@@ -61,7 +61,7 @@ class ResultsFileProcessor(ResultProcessor):
             responses = []
 
         ids_list = [(resp.id, resp.subject) for resp in responses]
-        if len(ids_list) != len(set(ids_list)) and "mtbench" not in str(output_file):
+        if len(ids_list) != len(set(ids_list)):
             logger.info(
                 f"Error: {len(ids_list) - len(set(ids_list))} duplicate response IDs found, the file is corrupted. "
                 f"It will be renamed to {broken_file} and ignored"
