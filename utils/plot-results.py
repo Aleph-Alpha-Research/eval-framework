@@ -36,7 +36,6 @@ TASK_ALIASES: dict[str, str] = {}
 METRIC_ALIASES: dict[str, str] = {
     "Average Accuracy Loglikelihood": "Accuracy Loglikelihood",
     "Average Accuracy Completion": "Accuracy Completion",
-    "Average pairwise_judgement": "Pairwise Score",
 }
 
 # Pick from this list the first metric present in the benchmark results
@@ -44,7 +43,6 @@ PREFERED_METRICS: list[str] = [
     # "Average Bytes per Sequence Position",  # uncomment to plot bytes per sequence position (compression ratio)
     "Average Accuracy Loglikelihood",
     "Average Accuracy Completion",
-    "Average pairwise_judgement",
 ]
 
 # ----------
