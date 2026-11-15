@@ -98,7 +98,7 @@ This file provides high-level performance summaries across all evaluation sample
 ```
 
 **Metric Types:**
-- **`ErrorFreeRatio`**: Percentage of samples that completed without errors (1.0 = 100%)
+- **`ErrorFreeRatio`**: Share of samples the metric could score (1.0 = 100%). A failed model call aborts the run and is never counted here.
 - **`Average`**: Mean of the per-subject means (macro average), so every subject counts equally
 - **`Average (micro)`**: Mean over all samples, so larger subjects count more (micro average). Identical to `Average` for tasks without subjects.
 - **Subject-specific**: Metrics broken down by task subset (e.g., "ARC-Challenge" vs "ARC-Easy")
