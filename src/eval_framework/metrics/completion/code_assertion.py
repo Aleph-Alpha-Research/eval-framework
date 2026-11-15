@@ -46,7 +46,6 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
                 metric_name=self.NAME,
                 value=1.0 if success else 0.0,
                 higher_is_better=True,
-                error=None,
                 code_execution_trace=output,
             )
         ]
