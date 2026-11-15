@@ -48,16 +48,7 @@ class MathMinervaCompletion(BaseMetric[Completion]):
         gold = response.ground_truth
         if isinstance(gold, list):
             gold = gold[0] if gold else None
-        if not gold:
-            return [
-                MetricResult(
-                    metric_name=x,
-                    value=None,
-                    higher_is_better=True,
-                    error="No ground truth available",
-                )
-                for x in self.NAMES
-            ]
+        assert gold, f"No ground truth available for {response.subject}_{response.id}"
 
         raw = response.raw_completion or response.completion
         all_candidates = extract_answers(
