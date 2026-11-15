@@ -109,7 +109,7 @@ def compute_prefix_bpb_results(response: Loglikelihood, ground_truth: str) -> li
 
     def estimable(k: int, value: float | None) -> MetricResult:
         if content_bytes >= k and value is not None:
-            return MetricResult(metric_name=name_for[k], value=value, higher_is_better=False, error=None)
+            return MetricResult(metric_name=name_for[k], value=value, higher_is_better=False)
         err = Error(
             error_class="NotEstimable",
             message=f"ground truth has {content_bytes} content bytes < K={k}",
@@ -125,7 +125,6 @@ def compute_prefix_bpb_results(response: Loglikelihood, ground_truth: str) -> li
             metric_name="PrefixBPB_contentBytes",
             value=float(content_bytes),
             higher_is_better=False,
-            error=None,
         ),
     ]
 
