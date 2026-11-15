@@ -172,6 +172,11 @@ class TestMathMinervaCompletion:
         # would crash the eval again.
         assert GROUND_TYPES != "gmpy", "gmpy2 is installed; GMP aborts on the memory cap instead of raising"
 
+    @pytest.mark.parametrize("ground_truth", ["", []])
+    def test_metric_fails_on_a_sample_without_ground_truth(self, ground_truth: str | list[str]) -> None:
+        with pytest.raises(AssertionError, match="No ground truth available for test_1"):
+            MathMinervaCompletion().calculate(make_completion("The answer is 1", ground_truth))
+
     def test_metric_defaults_to_english_but_can_select_german(self) -> None:
         german = "Finale Antwort: Die finale Antwort lautet 24. Ich hoffe, die Antwort ist korrekt."
         default_results = MathMinervaCompletion().calculate(make_completion(german, "24"))
