@@ -44,21 +44,6 @@ class PromptTemplate(BaseModel):
         ]
 
 
-class FOFOPromptTemplate(PromptTemplate):
-    @staticmethod
-    def _format_string(template: str, format_dict: Mapping[str, str]) -> str:
-        if format_dict:
-            for key, value in format_dict.items():
-                assert template.count(key) == 1, f"Key {key} should only appear once in the template {template}"
-                template = template.replace(key, value)
-            return template
-        return template
-
-
-class PromptTemplateWithParseMap(PromptTemplate):
-    parse_map: Mapping[Any, Any]
-
-
 class GradingOutput(BaseModel):
     judge_prompt: str
     judge_response: str
