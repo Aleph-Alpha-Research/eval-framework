@@ -91,10 +91,9 @@ Any model served through an OpenAI-compatible API (the OpenAI API itself, vLLM, 
 ```bash
 uv run eval_framework \
     --llm-args model_name="Qwen/Qwen3-0.6B" base_url="http://localhost:8000/v1" \
-    --task-name "MMLU" \
+    --task-name "MMLU_COT" \
     --task-subjects "abstract_algebra" \
     --output-dir ./eval_results \
-    --num-fewshot 5 \
     --num-samples 10
 ```
 
