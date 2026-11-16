@@ -110,6 +110,7 @@ is needed. It runs `llama-server -hf <model_name>` on port 8080, so `model_name`
 * The server is stopped when the run ends, and its log is written to `<output-dir>/llama-server.log`.
 * `llama-server` must be on the `PATH` (`brew install llama.cpp`).
 * Port 8080 must be free. To use a server you started yourself, drop `--self-host` and pass `base_url=...` instead.
+* It cannot be combined with `--task-suite`, because a suite can set its own model per task.
 
 Ctrl-C stops the started server as well. If the run is terminated with SIGTERM instead (e.g. `kill`, or a cancelled
 cluster job), the server may keep running; check with `pgrep llama-server`.
