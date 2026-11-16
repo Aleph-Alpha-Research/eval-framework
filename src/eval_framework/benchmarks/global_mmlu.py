@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from eval_framework.metrics.base import BaseMetric
 
 GLOBAL_MMLU_DATASET_PATH = "CohereLabs/Global-MMLU"
-GLOBAL_MMLU_LANGUAGES = ["fr", "de", "es", "it", "pt", "ar"]
+GLOBAL_MMLU_LANGUAGES = ["fr", "de", "es", "it", "pt", "ar", "nl", "pl", "tr", "ru", "uk", "ro"]
 
 _OPTION_KEYS = {"A": "option_a", "B": "option_b", "C": "option_c", "D": "option_d"}
 _KEYS = get_n_letters(4)  # A, B, C, D
