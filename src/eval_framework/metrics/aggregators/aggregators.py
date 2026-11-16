@@ -1,11 +1,12 @@
-from typing import Any, Protocol
+from abc import ABC, abstractmethod
+from typing import Any
 
 import numpy as np
 import pandas as pd
 from scipy.special import comb
 
 
-class Aggregator(Protocol):
+class Aggregator(ABC):
     """Base class for metric aggregators.
 
     An aggregator collapses multiple evaluation rows for the same problem (the repeats of one
@@ -37,6 +38,7 @@ class Aggregator(Protocol):
 
     name: str
 
+    @abstractmethod
     def __call__(self, response_df: pd.DataFrame, identifier_columns: list[str], **kwargs: Any) -> pd.DataFrame: ...
 
 
@@ -125,7 +127,7 @@ class IdentifierMean(Aggregator):
         return response_df.groupby(identifier_columns).agg(agg_dict).reset_index()
 
 
-class Identity:
+class Identity(Aggregator):
     """No-op aggregator — returns the input unchanged.
 
     Use for metrics where each row is already a final score and no cross-attempt
