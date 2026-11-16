@@ -16,7 +16,8 @@ A suite of curated benchmarks for evaluating Large Language Models (LLMs).
   ([paper](https://arxiv.org/abs/2607.12767)), BitsPerByte on answers with corpus- and prior-level variants, and the
   distributional-correctness score ([Burns, 2025](https://openreview.net/forum?id=fiMZJJzZ7g)).
 - 🤷 **Abstention variants:** `ARC_IDK`, `MMLU_IDK`, `MMLU_PRO_IDK`, `PIQA_IDK` and `GoldenSwag_IDK` add a scored
-  "I don't know" answer, so a model can decline instead of guessing.
+  "I don't know" answer, so a model can decline instead of guessing. These tasks and the loglikelihood metrics
+  above need the [Python API](#python-api); the CLI cannot run them yet.
 - 🌍 **European languages:** EllaMind translations of ARC, CommonsenseQA, GPQA, GSM8K, HellaSwag, PIQA and more, in
   German, French, Spanish and Italian.
 - 📚 **250+ tasks:** including BigCodeBench, GoldenSwag, LBPP and MultiPL-E. Browse the
