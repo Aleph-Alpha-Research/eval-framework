@@ -344,8 +344,10 @@ def run_with_kwargs(kwargs: dict) -> None:
     if self_host:
         if "model_name" not in llm_args or "base_url" in llm_args:
             raise ValueError("--self-host needs `model_name` in --llm-args and cannot be combined with `base_url`.")
-        # Set before the single-task/suite split: suites rebuild the config hash to find results,
-        # so both paths must see the same llm_args.
+        # A suite can override `model_name` or `base_url` per task, so results could be recorded
+        # under a model other than the one served here.
+        if kwargs.get("task_suite") is not None:
+            raise ValueError("--self-host cannot be combined with --task-suite.")
         # llama-server needs no key, but the OpenAI SDK rejects an empty one.
         kwargs["llm_args"] = {"api_key": "no-key", **llm_args, "base_url": LOCAL_BASE_URL}
     task_suite_path = kwargs.pop("task_suite", None)

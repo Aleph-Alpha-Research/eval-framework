@@ -3,6 +3,7 @@ import importlib.metadata
 from argparse import Namespace
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -155,12 +156,19 @@ def test_run_with_kwargs_self_host_flag_starts_and_stops_the_server(start_local_
     start_local_server.return_value.wait.assert_called_once()
 
 
-@pytest.mark.parametrize("llm_args", [{}, {"model_name": "m", "base_url": "http://other/v1"}])
-def test_run_with_kwargs_self_host_flag_rejects_conflicting_llm_args(
-    start_local_server: Mock, llm_args: dict[str, str]
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"llm_args": {}},
+        {"llm_args": {"model_name": "m", "base_url": "http://other/v1"}},
+        {"llm_args": {"model_name": "m"}, "task_suite": "suite.yaml"},
+    ],
+)
+def test_run_with_kwargs_self_host_flag_rejects_conflicting_arguments(
+    start_local_server: Mock, kwargs: dict[str, Any]
 ) -> None:
     with pytest.raises(ValueError, match="--self-host"):
-        run_with_kwargs({"llm_args": llm_args, "self_host": True})
+        run_with_kwargs({**kwargs, "self_host": True})
 
     start_local_server.assert_not_called()
 
