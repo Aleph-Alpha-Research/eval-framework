@@ -122,21 +122,9 @@ def test_build_config_requires_model_names(
         _build_config(_kwargs(llm_args, judge_model_args))
 
 
-@pytest.mark.parametrize(
-    ("env", "llm_args", "expected"),
-    [
-        ({}, {"model_name": "m"}, LOCAL_BASE_URL),
-        ({"OPENAI_API_KEY": "k"}, {"model_name": "m"}, None),
-        ({"OPENAI_BASE_URL": "http://env/v1"}, {"model_name": "m"}, None),
-        ({}, {"model_name": "m", "base_url": "http://other/v1"}, "http://other/v1"),
-    ],
-)
-def test_run_with_kwargs_defaults_to_local_server(
-    monkeypatch: pytest.MonkeyPatch,
-    start_local_server: Mock,
-    env: dict[str, str],
-    llm_args: dict[str, str],
-    expected: str | None,
+@pytest.mark.parametrize("env", [{}, {"OPENAI_API_KEY": "k"}, {"OPENAI_BASE_URL": "http://env/v1"}])
+def test_run_with_kwargs_stays_remote_without_self_host_flag(
+    monkeypatch: pytest.MonkeyPatch, start_local_server: Mock, env: dict[str, str]
 ) -> None:
     for var in ("OPENAI_API_KEY", "OPENAI_BASE_URL"):
         monkeypatch.delenv(var, raising=False)
@@ -144,15 +132,45 @@ def test_run_with_kwargs_defaults_to_local_server(
         monkeypatch.setenv(var, value)
 
     with patch("eval_framework.run._run_single_task") as run_single_task:
-        run_with_kwargs({"llm_args": llm_args})
+        run_with_kwargs({"llm_args": {"model_name": "m"}})
 
-    assert run_single_task.call_args.args[0]["llm_args"].get("base_url") == expected
-    assert start_local_server.called == (expected == LOCAL_BASE_URL)
+    assert run_single_task.call_args.args[0] == {"llm_args": {"model_name": "m"}}
+    start_local_server.assert_not_called()
 
 
-def test_start_local_server_reuses_a_running_server(tmp_path: Path) -> None:
-    with patch("eval_framework.run.socket.create_connection"), patch("eval_framework.run.subprocess.Popen") as popen:
-        assert _start_local_server("m", tmp_path) is None
+def test_run_with_kwargs_self_host_flag_starts_and_stops_the_server(start_local_server: Mock) -> None:
+    start_local_server.return_value = Mock()
+
+    with patch("eval_framework.run._run_single_task") as run_single_task:
+        run_with_kwargs({"llm_args": {"model_name": "org/model-GGUF"}, "self_host": True, "output_dir": "out"})
+
+    assert run_single_task.call_args.args[0]["llm_args"] == {
+        "model_name": "org/model-GGUF",
+        "base_url": LOCAL_BASE_URL,
+        "api_key": "no-key",
+    }
+    assert "self_host" not in run_single_task.call_args.args[0]
+    start_local_server.assert_called_once_with("org/model-GGUF", Path("out"))
+    start_local_server.return_value.kill.assert_called_once()
+
+
+@pytest.mark.parametrize("llm_args", [{}, {"model_name": "m", "base_url": "http://other/v1"}])
+def test_run_with_kwargs_self_host_flag_rejects_conflicting_llm_args(
+    start_local_server: Mock, llm_args: dict[str, str]
+) -> None:
+    with pytest.raises(ValueError, match="--self-host"):
+        run_with_kwargs({"llm_args": llm_args, "self_host": True})
+
+    start_local_server.assert_not_called()
+
+
+def test_start_local_server_refuses_a_busy_port(tmp_path: Path) -> None:
+    with (
+        patch("eval_framework.run.socket.create_connection"),
+        patch("eval_framework.run.subprocess.Popen") as popen,
+        pytest.raises(RuntimeError, match="already in use"),
+    ):
+        _start_local_server("m", tmp_path)
 
     popen.assert_not_called()
 
