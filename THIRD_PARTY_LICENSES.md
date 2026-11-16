@@ -62,7 +62,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0 AND CNRI-Python
 
-- **regex** 2026.11.9 - https://github.com/mrabarnett/mrab-regex
+- **regex** 2026.11.15 - https://github.com/mrabarnett/mrab-regex
 
 ## Apache-2.0 OR BSD-2-Clause
 
@@ -99,7 +99,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
 
-- **numpy** 2.5.4 - https://numpy.org
+- **numpy** 2.5.5 - https://numpy.org
 
 ## GNU General Public License (GPL)
 
@@ -11054,7 +11054,7 @@ Apache License
    limitations under the License.
 ```
 
-### numpy 2.5.4 (BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0)
+### numpy 2.5.5 (BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0)
 
 ```text
 Copyright (c) 2005-2025, NumPy Developers.
@@ -11187,9 +11187,9 @@ License: BSD-3-Clause-Open-MPI
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-Name: GCC runtime library
-Files: numpy.libs/libgfortran*.so
-Description: dynamically linked to files compiled with gcc
+Name: GCC runtime library libgfortran
+Files: numpy.libs/libscipy_openblas*.so
+Description: statically linked to files compiled with gcc
 Availability: https://gcc.gnu.org/git/?p=gcc.git;a=tree;f=libgfortran
 License: GPL-3.0-or-later WITH GCC-exception-3.1
   Copyright (C) 2002-2017 Free Software Foundation, Inc.
@@ -11970,28 +11970,6 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
-
-Name: libquadmath
-Files: numpy.libs/libquadmath*.so
-Description: dynamically linked to files compiled with gcc
-Availability: https://gcc.gnu.org/git/?p=gcc.git;a=tree;f=libquadmath
-License: LGPL-2.1-or-later
-
-    GCC Quad-Precision Math Library
-    Copyright (C) 2010-2019 Free Software Foundation, Inc.
-    Written by Francois-Xavier Coudert  <fxcoudert@gcc.gnu.org>
-
-    This file is part of the libquadmath library.
-    Libquadmath is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
-
-    Libquadmath is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
-    https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 ```
 
 ### openai 3.51.0 (Apache-2.0)
@@ -16963,7 +16941,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### regex 2026.11.9 (Apache-2.0 AND CNRI-Python)
+### regex 2026.11.15 (Apache-2.0 AND CNRI-Python)
 
 ```text
 This work was derived from the 're' module of CPython 2.6 and CPython 3.1,
