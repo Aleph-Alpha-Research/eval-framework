@@ -19,7 +19,7 @@ include `model_name` (e.g. `--llm-args model_name="gpt-4o-mini" base_url="http:/
 Arguments to pass to the `OpenAIModel` constructor as key=value pairs. `model_name` is required.
 
 **`--self-host`**
-Serve `model_name` with llama.cpp for this run; see [Self-hosted model](#self-hosted-model---self-host). No API key is needed.
+Serve `model_name` with llama.cpp for this run; see "Self-hosted model" below. No API key is needed.
 
 **`--task-name TASK_NAME`**
 The name of the task to evaluate.
