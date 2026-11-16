@@ -25,19 +25,23 @@ A suite of curated benchmarks for evaluating Large Language Models (LLMs).
 ## Quick start
 
 The quickstart runs a small model on your machine with [llama.cpp](https://github.com/ggml-org/llama.cpp). No API key is needed.
-It requires [uv](https://docs.astral.sh/uv/getting-started/installation/).
+It requires Python 3.12 or newer.
+
+Install eval-framework, and llama.cpp, which provides the `llama-server` program that serves the model:
 
 ```bash
-git clone https://github.com/Aleph-Alpha-Research/eval-framework
-cd eval-framework
-uv sync
-brew install llama.cpp   # other platforms: see the llama.cpp install guide
+pip install eval-framework
+brew install llama.cpp   # macOS and Linux with Homebrew
 ```
+
+On other platforms, install llama.cpp with the
+[llama.cpp install guide](https://github.com/ggml-org/llama.cpp/blob/master/docs/install.md).
 
 Then run a benchmark:
 
 ```bash
-uv run eval_framework \
+eval_framework \
+    --self-host \
     --llm-args model_name=Qwen/Qwen3-0.6B-GGUF \
     --task-name MMLU_COT \
     --task-subjects abstract_algebra \
@@ -48,7 +52,7 @@ uv run eval_framework \
 
 **What happens here?**
 
-- The CLI starts the model with llama.cpp and stops it when the run ends.
+- `--self-host` starts the model with llama.cpp and stops it when the run ends.
 - It downloads the MMLU dataset and asks the model 10 abstract-algebra questions (the first run also downloads
 the model).
 - It writes the scores to `aggregated_results.json` and every prompt and answer to `output.jsonl`, in a run
@@ -66,6 +70,9 @@ folder under `./eval_results`.
 Scores are fractions between 0 and 1. This 0.6B model is only a smoke test that the pipeline works: it often
 runs out of tokens or misses the required answer format, so expect a low score.
 
+For all options, see the [CLI Usage Guide](https://aleph-alpha-research.github.io/eval-framework/cli_usage.html). For
+full documentation, visit our [Docs Page](https://aleph-alpha-research.github.io/eval-framework/).
+
 ## Other models
 
 Hosted or self-hosted, any OpenAI-compatible endpoint works:
@@ -73,11 +80,11 @@ Hosted or self-hosted, any OpenAI-compatible endpoint works:
 ```bash
 # OpenAI
 export OPENAI_API_KEY=...
-uv run eval_framework --llm-args model_name=gpt-4o-mini \
+eval_framework --llm-args model_name=gpt-4o-mini \
     --task-name MMLU_COT --task-subjects abstract_algebra --num-samples 10
 
 # Your own server, e.g. vLLM
-uv run eval_framework --llm-args model_name=<served model> base_url=http://localhost:8000/v1 \
+eval_framework --llm-args model_name=<served model> base_url=http://localhost:8000/v1 \
     --task-name MMLU_COT --task-subjects abstract_algebra --num-samples 10
 ```
 
