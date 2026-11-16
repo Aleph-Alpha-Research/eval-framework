@@ -39,10 +39,9 @@ token.
 
    uv run eval_framework \
         --llm-args model_name="gpt-4o-mini" \
-        --task-name "MMLU" \
+        --task-name "MMLU_COT" \
         --task-subjects "abstract_algebra" \
         --output-dir ./eval_results \
-        --num-fewshot 5 \
         --num-samples 10
 
 Documentation Overview
