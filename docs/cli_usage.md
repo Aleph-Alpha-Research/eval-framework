@@ -18,6 +18,9 @@ include `model_name` (e.g. `--llm-args model_name="gpt-4o-mini" base_url="http:/
 **`--llm-args [LLM_ARGS ...]`**
 Arguments to pass to the `OpenAIModel` constructor as key=value pairs. `model_name` is required.
 
+**`--self-host`**
+Serve `model_name` with llama.cpp for this run; see [Self-hosted model](#self-hosted-model---self-host). No API key is needed.
+
 **`--task-name TASK_NAME`**
 The name of the task to evaluate.
 
@@ -98,15 +101,15 @@ uv run eval_framework \
 Every keyword argument of the `OpenAIModel` constructor can be set through `--llm-args`; see the
 [Model Arguments guide](model_arguments.md) for the full list.
 
-### Local default (llama.cpp)
+### Self-hosted model (`--self-host`)
 
-If `--llm-args` has no `base_url` and neither `OPENAI_API_KEY` nor `OPENAI_BASE_URL` is set, the CLI uses a local
-[llama.cpp](https://github.com/ggml-org/llama.cpp) `llama-server` at `http://localhost:8080/v1`. No API key is needed.
+With `--self-host`, the CLI serves the model itself with [llama.cpp](https://github.com/ggml-org/llama.cpp) and no API key
+is needed. It runs `llama-server -hf <model_name>` on port 8080, so `model_name` must be a Hugging Face GGUF repository
+(e.g. `Qwen/Qwen3-0.6B-GGUF`).
 
-* If a server is already listening on port 8080, it is used as is and `model_name` is only a label.
-* Otherwise the CLI runs `llama-server -hf <model_name>`, so `model_name` must be a Hugging Face GGUF repository
-  (e.g. `Qwen/Qwen3-0.6B-GGUF`). The server is stopped when the run ends, and its log is written to
-  `<output-dir>/llama-server.log`. This requires `llama-server` on the `PATH` (`brew install llama.cpp`).
+* The server is stopped when the run ends, and its log is written to `<output-dir>/llama-server.log`.
+* `llama-server` must be on the `PATH` (`brew install llama.cpp`).
+* Port 8080 must be free. To use a server you started yourself, drop `--self-host` and pass `base_url=...` instead.
 
 Interrupting a run with Ctrl-C may leave the started server running; check with `pgrep llama-server`.
 

@@ -1,7 +1,6 @@
 import argparse
 import datetime
 import logging
-import os
 import shutil
 import socket
 import subprocess
@@ -20,7 +19,7 @@ from eval_framework.utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
 
-# llama.cpp's llama-server listens here by default, so the README quickstart needs no extra flags.
+# llama.cpp's llama-server listens here by default.
 LOCAL_PORT = 8080
 LOCAL_BASE_URL = f"http://localhost:{LOCAL_PORT}/v1"
 
@@ -41,6 +40,12 @@ def parse_args() -> argparse.Namespace:
         default=(),
         required=False,
         help="The arguments to pass to the LLM as key=value pairs.",
+    )
+    parser.add_argument(
+        "--self-host",
+        action="store_true",
+        help="Serve `model_name` (a Hugging Face GGUF repo) with llama.cpp's llama-server for this run. "
+        "No API key is needed.",
     )
     parser.add_argument(
         "--num-samples", type=int, required=False, help="The number of samples per subject to evaluate."
@@ -295,17 +300,21 @@ def _run_single_task(kwargs: dict) -> None:
     logger.info(f"time since start: {datetime.datetime.now() - now}")
 
 
-def _start_local_server(model: str, output_dir: Path) -> subprocess.Popen | None:
-    """Serve `model` (a Hugging Face GGUF repo) with llama-server, unless a server is already listening."""
+def _start_local_server(model: str, output_dir: Path) -> subprocess.Popen:
+    """Serve `model` (a Hugging Face GGUF repo) with llama-server."""
     try:
         socket.create_connection(("localhost", LOCAL_PORT), timeout=1).close()
-        return None  # the user runs their own server; `model` is then only a label
     except OSError:
         pass
+    else:
+        # Never reuse it: another model could answer and be recorded under `model`.
+        raise RuntimeError(
+            f"Port {LOCAL_PORT} is already in use, so --self-host cannot start llama-server. Stop that process, "
+            "or drop --self-host and pass `base_url=...` in --llm-args to use your own server."
+        )
     if shutil.which("llama-server") is None:
         raise RuntimeError(
-            f"No server at {LOCAL_BASE_URL} and `llama-server` is not installed. Install llama.cpp "
-            "(`brew install llama.cpp`), or pass `base_url=...` in --llm-args, or set OPENAI_API_KEY."
+            "--self-host needs `llama-server` on the PATH. Install llama.cpp (`brew install llama.cpp`)."
         )
     output_dir.mkdir(parents=True, exist_ok=True)
     log_path = output_dir / "llama-server.log"
@@ -325,18 +334,20 @@ def _start_local_server(model: str, output_dir: Path) -> subprocess.Popen | None
 
 
 def run_with_kwargs(kwargs: dict) -> None:
-    # Applied before the single-task/suite split: suites rebuild the config hash to find results,
-    # so both paths must see the same llm_args. OPENAI_BASE_URL counts as "configured" because the
-    # OpenAI SDK reads it; overriding it here would silently redirect the user's chosen endpoint.
     llm_args = kwargs.get("llm_args", {})
-    use_local = "base_url" not in llm_args and not os.getenv("OPENAI_API_KEY") and not os.getenv("OPENAI_BASE_URL")
-    if use_local:
-        kwargs["llm_args"] = {**llm_args, "base_url": LOCAL_BASE_URL}
+    self_host = kwargs.pop("self_host", False)
+    if self_host:
+        if "model_name" not in llm_args or "base_url" in llm_args:
+            raise ValueError("--self-host needs `model_name` in --llm-args and cannot be combined with `base_url`.")
+        # Set before the single-task/suite split: suites rebuild the config hash to find results,
+        # so both paths must see the same llm_args.
+        # llama-server needs no key, but the OpenAI SDK rejects an empty one.
+        kwargs["llm_args"] = {"api_key": "no-key", **llm_args, "base_url": LOCAL_BASE_URL}
     task_suite_path = kwargs.pop("task_suite", None)
 
     server = None
     try:
-        if use_local and "model_name" in llm_args:
+        if self_host:
             server = _start_local_server(llm_args["model_name"], Path(kwargs.get("output_dir", "outputs")))
         if task_suite_path is not None:
             from eval_framework.suite import TaskSuite, run_suite
