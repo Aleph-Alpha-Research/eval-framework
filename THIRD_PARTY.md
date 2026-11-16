@@ -21,7 +21,7 @@ and first-party/internal packages are excluded.
 | `mysql-connector-python` | `>=26.10.0,<27` |
 | `nltk` | `>=3.10.4,<4` |
 | `numpy` | `>=2.5.4` |
-| `openai` | `>=3.49.0,<4` |
+| `openai` | `>=3.50.0,<4` |
 | `psycopg2-binary` | `>=2.9.13,<3` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.3,<3` |
@@ -87,7 +87,7 @@ and first-party/internal packages are excluded.
 | `pygments` | `2.21.0` |
 | `python-dateutil` | `4.0.0` |
 | `referencing` | `0.37.0` |
-| `regex` | `2026.11.9` |
+| `regex` | `2026.11.15` |
 | `requests` | `2.34.2` |
 | `rich` | `15.0.0` |
 | `rpds-py` | `2026.9.1` |
