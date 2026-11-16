@@ -324,12 +324,17 @@ def _start_local_server(model: str, output_dir: Path) -> subprocess.Popen:
             ["llama-server", "-hf", model, "--port", str(LOCAL_PORT)], stdout=log, stderr=subprocess.STDOUT
         )
     # No timeout: the download can take long. A failed start ends the process, which ends the wait.
-    while server.poll() is None:
-        try:
-            urllib.request.urlopen(f"http://localhost:{LOCAL_PORT}/health", timeout=2).close()
-            return server
-        except (urllib.error.URLError, OSError):  # not listening yet, or 503 while the model loads
-            time.sleep(1)
+    try:
+        while server.poll() is None:
+            try:
+                urllib.request.urlopen(f"http://localhost:{LOCAL_PORT}/health", timeout=2).close()
+                return server
+            except (urllib.error.URLError, OSError):  # not listening yet, or 503 while the model loads
+                time.sleep(1)
+    except BaseException:  # e.g. Ctrl-C during the download: the caller has no handle to stop it yet
+        server.kill()
+        server.wait()
+        raise
     raise RuntimeError(f"llama-server exited while starting {model}; see {log_path}")
 
 
@@ -365,6 +370,7 @@ def run_with_kwargs(kwargs: dict) -> None:
     finally:
         if server is not None:
             server.kill()  # terminate() is ignored while the server is generating
+            server.wait()
         close_pools()
 
 

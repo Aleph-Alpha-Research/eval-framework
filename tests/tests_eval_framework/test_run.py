@@ -152,6 +152,7 @@ def test_run_with_kwargs_self_host_flag_starts_and_stops_the_server(start_local_
     assert "self_host" not in run_single_task.call_args.args[0]
     start_local_server.assert_called_once_with("org/model-GGUF", Path("out"))
     start_local_server.return_value.kill.assert_called_once()
+    start_local_server.return_value.wait.assert_called_once()
 
 
 @pytest.mark.parametrize("llm_args", [{}, {"model_name": "m", "base_url": "http://other/v1"}])
@@ -197,3 +198,18 @@ def test_start_local_server_launches_llama_server_and_waits_for_health(tmp_path:
         assert _start_local_server("org/model-GGUF", tmp_path) is popen.return_value
 
     assert popen.call_args.args[0] == ["llama-server", "-hf", "org/model-GGUF", "--port", "8080"]
+
+
+def test_start_local_server_stops_the_server_when_interrupted_during_startup(tmp_path: Path) -> None:
+    with (
+        patch("eval_framework.run.socket.create_connection", side_effect=OSError),
+        patch("eval_framework.run.shutil.which", return_value="/bin/llama-server"),
+        patch("eval_framework.run.subprocess.Popen") as popen,
+        patch("eval_framework.run.urllib.request.urlopen", side_effect=KeyboardInterrupt),
+        pytest.raises(KeyboardInterrupt),
+    ):
+        popen.return_value.poll.return_value = None
+        _start_local_server("org/model-GGUF", tmp_path)
+
+    popen.return_value.kill.assert_called_once()
+    popen.return_value.wait.assert_called_once()
