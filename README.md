@@ -26,19 +26,18 @@ A suite of curated benchmarks for evaluating Large Language Models (LLMs).
 ## Quick start
 
 The quickstart runs a small model on your machine with [llama.cpp](https://github.com/ggml-org/llama.cpp). No API key is needed.
-It requires Python 3.12 or newer.
+It requires [uv](https://docs.astral.sh/uv/getting-started/installation/), which also provides a suitable Python.
 
 Install eval-framework, and llama.cpp, which provides the `llama-server` program that serves the model:
 
 ```bash
-pip install eval-framework   # or: uv pip install eval-framework
-brew install llama.cpp       # macOS and Linux with Homebrew
+uv tool install eval-framework
+brew install llama.cpp   # macOS and Linux with Homebrew
 ```
 
 On other platforms, install llama.cpp with the
 [llama.cpp install guide](https://github.com/ggml-org/llama.cpp/blob/master/docs/install.md). To work from a clone of
-the repository with [uv](https://docs.astral.sh/uv/), see the
-[installation guide](https://aleph-alpha-research.github.io/eval-framework/installation.html).
+the repository, see the [installation guide](https://aleph-alpha-research.github.io/eval-framework/installation.html).
 
 Then run a benchmark:
 
