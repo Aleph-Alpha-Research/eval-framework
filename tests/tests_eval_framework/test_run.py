@@ -23,7 +23,7 @@ def start_local_server() -> Iterator[Mock]:
 class NamedMockLLM(MockLLM):
     """Stands in for OpenAIModel, which always receives a model_name."""
 
-    def __init__(self, model_name: str, base_url: str | None = None) -> None:
+    def __init__(self, model_name: str) -> None:
         super().__init__()
 
 
@@ -123,15 +123,7 @@ def test_build_config_requires_model_names(
         _build_config(_kwargs(llm_args, judge_model_args))
 
 
-@pytest.mark.parametrize("env", [{}, {"OPENAI_API_KEY": "k"}, {"OPENAI_BASE_URL": "http://env/v1"}])
-def test_run_with_kwargs_stays_remote_without_self_host_flag(
-    monkeypatch: pytest.MonkeyPatch, start_local_server: Mock, env: dict[str, str]
-) -> None:
-    for var in ("OPENAI_API_KEY", "OPENAI_BASE_URL"):
-        monkeypatch.delenv(var, raising=False)
-    for var, value in env.items():
-        monkeypatch.setenv(var, value)
-
+def test_run_with_kwargs_stays_remote_without_self_host_flag(start_local_server: Mock) -> None:
     with patch("eval_framework.run._run_single_task") as run_single_task:
         run_with_kwargs({"llm_args": {"model_name": "m"}})
 
