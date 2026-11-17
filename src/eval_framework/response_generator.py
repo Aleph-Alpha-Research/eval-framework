@@ -65,13 +65,6 @@ class ResponseGenerator:
         self.response_type = self.task.get_response_type()
 
     def _llm_task_param_precedence(self) -> tuple[list[str] | None, int | None]:
-        """
-        sets the stop_sequences and max_tokens values to be used in the completion generation.
-        Max token and stop sequence values have an order of precedence:
-
-        LLM attributes take precedence over task attributes, and therefore overload them.
-        :return: stop_sequences, max_tokens
-        """
         llm_stop_sequences = getattr(self.llm, "stop_sequences", None)
         llm_max_tokens = getattr(self.llm, "max_tokens", None)
         task_stop_sequences = self.task.get_stop_sequences()
@@ -89,11 +82,6 @@ class ResponseGenerator:
         return stop_sequences, max_tokens
 
     def _generate_loglikelihoods(self, samples: list[ResultCandidate]) -> list[Loglikelihood]:
-        """
-        Generate log likelihoods when a sample is run against the model.
-        :param sample: sample to run the task against
-        :return: loglikelihoods
-        """
         raw_loglikelihoods: list[RawLoglikelihood]
         raw_loglikelihoods = self.llm.logprobs(samples)
 
@@ -121,10 +109,6 @@ class ResponseGenerator:
     def _generative_output_type_selector(
         self,
     ) -> Callable[[list[ResultCandidate]], list[Completion] | list[Loglikelihood]]:
-        """
-        Selects the generative output type based on the response type.
-        :return: function to generate responses
-        """
         match self.response_type:
             case ResponseType.COMPLETION:
                 stop_sequences, max_tokens = self._llm_task_param_precedence()
@@ -140,7 +124,6 @@ class ResponseGenerator:
                 raise KeyError(f"Task type {self.task} not supported")
 
     def _run_task_against_model(self) -> list[Completion | Loglikelihood]:
-        """Runs the task against the model and generates responses."""
         logger.info(f"{RED}[ Running task {self.task.display_name()} against model ------------ ]{RESET}")
         self.start_time, monotonic_start = time.time(), time.monotonic()
         run_fn = self._generative_output_type_selector()
@@ -156,11 +139,6 @@ class ResponseGenerator:
         return responses
 
     def _map_subject_response_ids(self, responses: list[Completion | Loglikelihood]) -> dict[str, set[int]]:
-        """
-        Maps subject to response id
-        :param responses: list of responses
-        :return: mapping of subject to response id
-        """
         subject_response_id_mapping = {}
         if responses:
             response_subjects = {resp.subject for resp in responses}
@@ -177,14 +155,6 @@ class ResponseGenerator:
         subject_response_id_mapping: dict[str, set[int]],
         generative_output_function: Callable[[list[ResultCandidate]], list[Completion] | list[Loglikelihood]],
     ) -> list[Completion | Loglikelihood]:
-        """
-        Generates responses for the task and saves them along with metadata.
-        :param responses: list of responses
-        :param subject_response_id_mapping: mapping of subject to response id
-        :param generative_output_function: function to generate responses
-        :param metadata: metadata dictionary
-        :return: all responses
-        """
 
         def _process_batch(samples_batch: list[ResultCandidate]) -> None:
             if not samples_batch:
@@ -247,7 +217,6 @@ class ResponseGenerator:
         return responses
 
     def _get_metadata(self) -> dict[str, Any]:
-        """Prepares metadata dictionary from the configuration."""
         all_metrics = getattr(self.task, "METRICS", None)
         metadata = self.config.model_dump(mode="json")
         metadata["llm_name"] = self.llm.name
@@ -298,11 +267,6 @@ class ResponseGenerator:
 
 
 def repeat_samples(samples: Iterable[Sample], repeats: int) -> Iterable[ResultCandidate]:
-    """Flatten repeats into a single stream of samples.
-
-    After expansion original sample indices do not point to the same sample anymore. They
-    Original sample can be recovered by `original_index = expanded_index // repeats`.
-    """
     for sample in samples:
         base_id = sample.id * repeats
         for repeat_idx in range(repeats):
