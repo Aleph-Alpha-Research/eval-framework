@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from llm_sandbox.exceptions import ImagePullError, SandboxTimeoutError
 
-from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
+from eval_framework.metrics.completion.code_execution.python_assertion import CodeCompletionAssertion
 from eval_framework.metrics.completion.code_execution.sandbox import DockerReturnedEmptyOutput
 from eval_framework.shared.types import Completion
 
@@ -340,7 +340,7 @@ def test_code_assertion_propagates_image_pull_error() -> None:
     # An infra failure (image pull rate-limited) must abort the run, not be scored as value=0.
     metric = CodeCompletionAssertion()
     with patch(
-        "eval_framework.metrics.completion.code_assertion.run_python_code",
+        "eval_framework.metrics.completion.code_execution.python_assertion.run_python_code",
         side_effect=ImagePullError("python:3.12-slim", "429 toomanyrequests"),
     ):
         with pytest.raises(ImagePullError):
@@ -351,7 +351,7 @@ def test_code_assertion_scores_timeout_as_failure() -> None:
     # A code-execution timeout is the model's fault and stays a per-sample value=0.
     metric = CodeCompletionAssertion()
     with patch(
-        "eval_framework.metrics.completion.code_assertion.run_python_code",
+        "eval_framework.metrics.completion.code_execution.python_assertion.run_python_code",
         side_effect=SandboxTimeoutError("too slow"),
     ):
         results = metric.calculate(_completion())
@@ -364,7 +364,7 @@ def test_code_assertion_scores_empty_output_as_failure() -> None:
     # A code-execution timeout is the model's fault and stays a per-sample value=0.
     metric = CodeCompletionAssertion()
     with patch(
-        "eval_framework.metrics.completion.code_assertion.run_python_code",
+        "eval_framework.metrics.completion.code_execution.python_assertion.run_python_code",
         side_effect=DockerReturnedEmptyOutput("too slow"),
     ):
         results = metric.calculate(_completion())

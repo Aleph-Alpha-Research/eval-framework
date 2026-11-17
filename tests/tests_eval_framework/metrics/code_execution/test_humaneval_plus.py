@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from eval_framework.metrics.completion.code_assertion import HumanEvalPlusCodeCompletionAssertion
+from eval_framework.metrics.completion.code_execution.python_assertion import HumanEvalPlusCodeCompletionAssertion
 from eval_framework.shared.types import Completion
 
 
@@ -21,11 +21,13 @@ def _completion(completion_text: str = "print(True)") -> Completion:
 
 def test_calculate_installs_numpy_into_the_sandbox() -> None:
     # Given a completion, so run_python_code gets called; calculate() itself is inherited and
-    # already covered by test_code_assertion.py
+    # already covered by test_python_assertion.py
     metric = HumanEvalPlusCodeCompletionAssertion()
 
     # When
-    with patch("eval_framework.metrics.completion.code_assertion.run_python_code", return_value="True") as mock_run:
+    with patch(
+        "eval_framework.metrics.completion.code_execution.python_assertion.run_python_code", return_value="True"
+    ) as mock_run:
         metric.calculate(_completion())
 
     # Then numpy is requested for the sandbox, unlike the base CodeCompletionAssertion

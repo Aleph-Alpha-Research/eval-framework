@@ -15,7 +15,7 @@ from eval_framework.benchmarks.multipl_e import (
     _trim_at_stops,
 )
 from eval_framework.contract import Benchmark
-from eval_framework.metrics.completion.multipl_e_assertion import MultiPLEMetricContext
+from eval_framework.metrics.completion.code_execution.multipl_e_assertion import MultiPLEMetricContext
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,

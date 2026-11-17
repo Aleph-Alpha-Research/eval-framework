@@ -37,7 +37,7 @@ from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice, Generative
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FewshotExample, FunctionRenderer, SampleSplit
-from eval_framework.metrics.completion.code_assertion import LBPPCodeCompletionAssertion
+from eval_framework.metrics.completion.code_execution.python_assertion import LBPPCodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework

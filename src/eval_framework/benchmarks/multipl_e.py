@@ -16,7 +16,10 @@ from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Generative
 from eval_framework.fewshot import NoFewShot
-from eval_framework.metrics.completion.multipl_e_assertion import MultiPLECodeAssertion, MultiPLEMetricContext
+from eval_framework.metrics.completion.code_execution.multipl_e_assertion import (
+    MultiPLECodeAssertion,
+    MultiPLEMetricContext,
+)
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 

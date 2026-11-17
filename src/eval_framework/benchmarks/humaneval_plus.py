@@ -6,7 +6,7 @@ which needs numpy in the sandbox) differ.
 
 from eval_framework.benchmarks.humaneval import v2_bpb, v2_execution
 from eval_framework.contract import Benchmark
-from eval_framework.metrics.completion.code_assertion import HumanEvalPlusCodeCompletionAssertion
+from eval_framework.metrics.completion.code_execution.python_assertion import HumanEvalPlusCodeCompletionAssertion
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 
 HUMANEVAL_PLUS_DATASET_PATH = "evalplus/humanevalplus"
