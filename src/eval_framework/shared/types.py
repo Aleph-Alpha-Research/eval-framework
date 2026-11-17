@@ -259,8 +259,9 @@ def extract_context_metric[MetricContext: BaseMetricContext](
         return cast(MetricContext, response.context)
     else:
         assert len(response.context) > 0, "Expected context to be provided in the response"
-        context = [
-            metric_context for metric_context in response.context if isinstance(metric_context, metric_context_class)
-        ][0]
+        context = next(
+            (metric_context for metric_context in response.context if isinstance(metric_context, metric_context_class)),
+            None,
+        )
         assert context is not None, f"Expected {metric_context_class.__name__} to be provided in the response context"
         return cast(MetricContext, context)
