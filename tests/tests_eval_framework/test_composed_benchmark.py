@@ -573,7 +573,8 @@ def test_model_cleanup_runs_before_answer_extraction() -> None:
         rnd=_DUMMY_RNG,
     )
     sample = ResultCandidate(
-        id=0,
+        sample_id=0,
+        result_id=0,
         subject="stub",
         ground_truth=None,
         messages=[Message(role=Role.USER, content="a question")],

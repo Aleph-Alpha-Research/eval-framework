@@ -11,7 +11,8 @@ def _sidecar_result(
     subject: str = "subj",
 ) -> Result:
     return Result(
-        id=id_,
+        sample_id=id_,
+        result_id=id_,
         subject=subject,
         num_fewshot=0,
         llm_name="test",

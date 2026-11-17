@@ -56,7 +56,8 @@ class EvaluationGenerator:
 
             results.append(
                 Result(
-                    id=response.id,
+                    sample_id=response.sample_id,
+                    result_id=response.result_id,
                     metric_class_name=metric.__class__.__name__,
                     metric_name=metric_name,
                     num_fewshot=self.few_shot,
@@ -87,7 +88,7 @@ class EvaluationGenerator:
 
         subject_result_id_existing = set()
         for result in results:
-            subject_result_id_existing.add(f"{result.subject}_{result.id}_{result.metric_class_name}")
+            subject_result_id_existing.add(f"{result.subject}_{result.result_id}_{result.metric_class_name}")
 
         """
         we have three dimensions: subject, metric, sample_id
@@ -115,7 +116,8 @@ class EvaluationGenerator:
             pending = [
                 response
                 for response in responses
-                if f"{response.subject}_{response.id}_{metric.__class__.__name__}" not in subject_result_id_existing
+                if f"{response.subject}_{response.result_id}_{metric.__class__.__name__}"
+                not in subject_result_id_existing
             ]
             compute = partial(self._results_for, metric, llm_name=llm_name)
             desc = f"Calculating {metric.NAME}"
@@ -282,8 +284,7 @@ class EvaluationGenerator:
                     "key": r.key,
                     "value": r.value,
                     "error": r.error,
-                    # Repeats of one problem carry consecutive ids (see `repeat_samples`).
-                    "problem": r.id // self.config.repeats,
+                    "problem": r.sample_id,
                 }
                 for r in results
             ]
@@ -390,7 +391,7 @@ class EvaluationGenerator:
     ) -> dict[str, float | None]:
         """Corpus BPB and related estimators from the ``BitsPerByte_*`` companion fields.
 
-        ``leading_space_by_item`` maps (id, subject) to 1.0 when the ground truth begins with a
+        ``leading_space_by_item`` maps (result_id, subject) to 1.0 when the ground truth begins with a
         space (else 0.0), feeding the space-stripped corpus BPB. Result rows no longer carry the
         response text, so leading-space comes in from the loglikelihood responses.
         """
@@ -404,7 +405,7 @@ class EvaluationGenerator:
                 continue
             rows.append(
                 {
-                    "id": result.id,
+                    "result_id": result.result_id,
                     "subject": result.subject,
                     "key": result.key or "",
                     "metric_name": result.metric_name,
@@ -417,7 +418,7 @@ class EvaluationGenerator:
 
         data = pd.DataFrame(rows)
         pivot = data.pivot_table(
-            index=["id", "subject", "key"],
+            index=["result_id", "subject", "key"],
             columns="metric_name",
             values="value",
             aggfunc="first",
@@ -477,7 +478,8 @@ class EvaluationGenerator:
         for response in loglikelihood_responses:
             ground_truth = select_ground_truth(response)
             if ground_truth is not None:
-                leading_space_by_item[(response.id, response.subject)] = 1.0 if ground_truth.startswith(" ") else 0.0
+                item_key = (response.result_id, response.subject)
+                leading_space_by_item[item_key] = 1.0 if ground_truth.startswith(" ") else 0.0
         del responses
         aggregated_results = self._aggregate_results(metrics_results)
         results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results)

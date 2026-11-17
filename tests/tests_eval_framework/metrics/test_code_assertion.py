@@ -13,7 +13,8 @@ from eval_framework.tasks.utils import DockerReturnedEmptyOutput
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="",
                 raw_completion="""def floor_Min(A,B,N):
@@ -50,7 +51,8 @@ print(score)
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="",
                 raw_completion="""def floor_Min(A,B,N):
@@ -87,7 +89,8 @@ print(score)
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="",
                 raw_completion="""
@@ -120,7 +123,8 @@ print(score)
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="",
                 raw_completion="""def floor_Min(A,B,N):
@@ -157,7 +161,8 @@ print(score)
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="",
                 raw_completion="""def floor_Min(A,B,N):
@@ -178,7 +183,8 @@ print(score)
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="",
                 raw_completion="""def floor_Min(A,B,N):
@@ -216,7 +222,8 @@ print(score)
         # 2. unrelated print
         pytest.param(
             Completion(
-                id=2,
+                sample_id=2,
+                result_id=2,
                 subject="test",
                 ground_truth="",
                 raw_completion="""print("done")""",
@@ -232,7 +239,8 @@ print(score)
         # 3. multiple prints, last True
         pytest.param(
             Completion(
-                id=3,
+                sample_id=3,
+                result_id=3,
                 subject="test",
                 ground_truth="",
                 raw_completion="""print("one")\nprint("two")\nprint(True)""",
@@ -248,7 +256,8 @@ print(score)
         # 4. multiple prints, last False
         pytest.param(
             Completion(
-                id=4,
+                sample_id=4,
+                result_id=4,
                 subject="test",
                 ground_truth="",
                 raw_completion="""print("check")\nprint(False)""",
@@ -264,7 +273,8 @@ print(score)
         # 5. no print at all
         pytest.param(
             Completion(
-                id=5,
+                sample_id=5,
+                result_id=5,
                 subject="test",
                 ground_truth="",
                 raw_completion="""def foo(): return 1+1""",
@@ -280,7 +290,8 @@ print(score)
         # 6. syntax error before print
         pytest.param(
             Completion(
-                id=6,
+                sample_id=6,
+                result_id=6,
                 subject="test",
                 ground_truth="",
                 raw_completion="""def foo()""",
@@ -312,7 +323,8 @@ def test_code_assertion(response: Completion, expected_value: float) -> None:
 
 def _completion() -> Completion:
     return Completion(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="test",
         ground_truth="",
         raw_completion="print(True)",

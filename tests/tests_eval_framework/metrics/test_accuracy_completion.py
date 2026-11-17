@@ -9,7 +9,8 @@ from eval_framework.shared.types import Completion
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="correct",
                 prompt="test",
@@ -24,7 +25,8 @@ from eval_framework.shared.types import Completion
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="correct",
                 prompt="test",

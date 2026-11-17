@@ -46,7 +46,8 @@ def test_calculate_f1_function(reference: list[str], hypothesis: list[str], expe
 def test_f1_metric_class(ground_truth: str | list[str] | None, completion: str, expected: float) -> None:
     metric = F1()
     completion_obj = Completion(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="test",
         ground_truth=ground_truth,
         prompt="test prompt",

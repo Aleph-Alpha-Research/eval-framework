@@ -33,7 +33,8 @@ This file contains one JSON object per line, each representing a metric calculat
 **Structure:**
 ```json
 {
-  "id": 0,
+  "sample_id": 0,
+  "result_id": 0,
   "subject": "ARC-Easy",
   "num_fewshot": 3,
   "llm_name": "MyHuggingFaceModel",
@@ -51,14 +52,15 @@ This file contains one JSON object per line, each representing a metric calculat
 ```
 
 **Key Fields:**
-- **`id`**: Unique identifier for this evaluation sample
+- **`sample_id`**: Identifier of the input problem, shared by all repeats of the same sample
+- **`result_id`**: Identifier of the scored response, unique within a subject (distinguishes repeats)
 - **`subject`**: Task subset/category (e.g., "ARC-Easy", "ARC-Challenge")
 - **`metric_name`**: The specific metric being measured
 - **`value`**: The metric score (0.0 = incorrect, 1.0 = correct for binary metrics)
 - **`higher_is_better`**: Whether higher values indicate better performance
 - **`error`**: Any errors encountered during evaluation
 
-The prompt and the model's response are not repeated here; look them up in `output.jsonl` by `id` and `subject`.
+The prompt and the model's response are not repeated here; look them up in `output.jsonl` by `result_id` and `subject`.
 
 ### 2. `output.jsonl` - Raw Model Responses
 
@@ -67,7 +69,8 @@ Contains the raw model completions before metric calculation.
 **Structure:**
 ```json
 {
-  "id": 0,
+  "sample_id": 0,
+  "result_id": 0,
   "subject": "math",
   "ground_truth": "4",
   "prompt": "What is 2+2?",

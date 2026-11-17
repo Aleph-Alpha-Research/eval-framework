@@ -15,7 +15,8 @@ from template_formatting.formatter import Message, Role
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="en",
                 prompt="test",
@@ -30,7 +31,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="en",
                 prompt="test",
@@ -46,7 +48,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="de",
                 prompt="test",
@@ -61,7 +64,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="de",
                 prompt="test",
@@ -76,7 +80,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="fr",
                 prompt="test",
@@ -91,7 +96,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="fr",
                 prompt="test",
@@ -106,7 +112,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="es",
                 prompt="test",
@@ -121,7 +128,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="es",
                 prompt="test",
@@ -136,7 +144,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="it",
                 prompt="test",
@@ -151,7 +160,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="it",
                 prompt="test",
@@ -166,7 +176,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="nl",
                 prompt="test",
@@ -181,7 +192,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="nl",
                 prompt="test",
@@ -196,7 +208,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="pt",
                 prompt="test",
@@ -211,7 +224,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="pt",
                 prompt="test",
@@ -240,7 +254,8 @@ def test_language_checker(response: Completion, expected_value: float) -> None:
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="xx",
                 prompt="test",
@@ -254,7 +269,8 @@ def test_language_checker(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="no",
                 prompt="test",
@@ -268,7 +284,8 @@ def test_language_checker(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -293,7 +310,8 @@ def test_language_checker_errors(completion: Completion) -> None:
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -308,7 +326,8 @@ def test_language_checker_errors(completion: Completion) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -337,7 +356,8 @@ def test_language_consistency_checker(response: Completion, expected_value: floa
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -352,7 +372,8 @@ def test_language_consistency_checker(response: Completion, expected_value: floa
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",

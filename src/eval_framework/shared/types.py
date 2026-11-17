@@ -110,7 +110,8 @@ class RawCompletion(BaseCompletion):
 
 
 class Completion(BaseCompletion):
-    id: int
+    sample_id: Annotated[int, "identifier of the input problem; shared by all repeats of the same sample"]
+    result_id: Annotated[int, "identifier of this response; unique per subject, distinguishes repeats"]
     subject: str
     ground_truth: str | None | list[str]
     messages: list[Message] | None  # needed for LLM as a judge
@@ -234,7 +235,8 @@ class RawLoglikelihood(BaseLoglikelihood):
 
 
 class Loglikelihood(BaseLoglikelihood):
-    id: int
+    sample_id: Annotated[int, "identifier of the input problem; shared by all repeats of the same sample"]
+    result_id: Annotated[int, "identifier of this response; unique per subject, distinguishes repeats"]
     subject: str
     ground_truth: str | list[str]
     context: list[BaseMetricContext] | BaseMetricContext | None = None

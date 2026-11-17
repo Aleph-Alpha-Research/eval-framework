@@ -13,7 +13,8 @@ class _OtherContext(BaseMetricContext):
 
 def _response(context: list[BaseMetricContext] | BaseMetricContext | None) -> Completion:
     return Completion(
-        id=0,
+        sample_id=0,
+        result_id=0,
         subject="s",
         ground_truth="a",
         prompt="p",

@@ -10,7 +10,8 @@ from eval_framework.shared.types import Loglikelihood
     [
         pytest.param(
             Loglikelihood(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=["A"],
                 prompt="test",
@@ -23,7 +24,8 @@ from eval_framework.shared.types import Loglikelihood
         ),
         pytest.param(
             Loglikelihood(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=["C"],
                 prompt="test",
@@ -50,7 +52,8 @@ def test_probability_mass(response: Loglikelihood, expected_value: float) -> Non
     [
         pytest.param(
             Loglikelihood(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=["long_answer"],
                 prompt="test",
@@ -63,7 +66,8 @@ def test_probability_mass(response: Loglikelihood, expected_value: float) -> Non
         ),
         pytest.param(
             Loglikelihood(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=[""],
                 prompt="test",

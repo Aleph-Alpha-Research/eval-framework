@@ -11,7 +11,8 @@ from eval_framework.shared.types import Completion, ConcatCompression, Loglikeli
 log_likelihood_params = [
     pytest.param(
         Loglikelihood(
-            id=1,
+            sample_id=1,
+            result_id=1,
             subject="x",
             ground_truth="big car",
             prompt="test",
@@ -26,7 +27,8 @@ log_likelihood_params = [
     ),
     pytest.param(
         Loglikelihood(
-            id=1,
+            sample_id=1,
+            result_id=1,
             subject="x",
             ground_truth="big car",
             prompt="test",
@@ -40,7 +42,8 @@ log_likelihood_params = [
     ),
     pytest.param(
         Loglikelihood(
-            id=1,
+            sample_id=1,
+            result_id=1,
             subject="x",
             ground_truth="big car",
             prompt="test",
@@ -76,7 +79,8 @@ def test_bytes_loglikelihood(response: Loglikelihood, expected_sp: float | None,
 completion_params = [
     pytest.param(
         Completion(
-            id=1,
+            sample_id=1,
+            result_id=1,
             subject="x",
             ground_truth="wow, a cute dog!",
             prompt="test",
@@ -93,7 +97,8 @@ completion_params = [
     ),
     pytest.param(
         Completion(
-            id=1,
+            sample_id=1,
+            result_id=1,
             subject="x",
             ground_truth="wow, a cute dog!",
             prompt="test",
@@ -109,7 +114,8 @@ completion_params = [
     ),
     pytest.param(
         Completion(
-            id=1,
+            sample_id=1,
+            result_id=1,
             subject="x",
             ground_truth="wow, a cute dog!",
             prompt="test",

@@ -12,7 +12,8 @@ from eval_framework.shared.types import Completion
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -28,7 +29,8 @@ from eval_framework.shared.types import Completion
         ),
         pytest.param(
             Completion(
-                id=29,
+                sample_id=29,
+                result_id=29,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -44,7 +46,8 @@ from eval_framework.shared.types import Completion
         ),
         pytest.param(
             Completion(
-                id=28,
+                sample_id=28,
+                result_id=28,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -60,7 +63,8 @@ from eval_framework.shared.types import Completion
         ),
         pytest.param(
             Completion(
-                id=27,
+                sample_id=27,
+                result_id=27,
                 subject="test",
                 ground_truth=None,
                 prompt="test",

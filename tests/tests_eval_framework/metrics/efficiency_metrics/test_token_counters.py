@@ -4,7 +4,8 @@ from eval_framework.shared.types import Completion
 
 def _completion(**overrides: object) -> Completion:
     defaults: dict = {
-        "id": 1,
+        "sample_id": 1,
+        "result_id": 1,
         "subject": "x",
         "ground_truth": "gt",
         "prompt": "test",

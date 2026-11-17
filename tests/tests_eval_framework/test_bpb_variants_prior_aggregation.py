@@ -13,7 +13,8 @@ from eval_framework.shared.types import Loglikelihood, PerTokenScores
 
 def _response(ground_truth: str, bits: list[float], byte_lens: list[int]) -> Loglikelihood:
     return Loglikelihood(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="subj",
         ground_truth=ground_truth,
         prompt="p",
@@ -31,7 +32,8 @@ def test_mu_prior_default_is_111() -> None:
 def test_collect_prefix_items_skips_missing_per_token() -> None:
     with_token = _response("abc", [1.0, 1.0, 1.0], [1, 1, 1])
     without_token = Loglikelihood(
-        id=2,
+        sample_id=2,
+        result_id=2,
         subject="subj",
         ground_truth="x",
         prompt="p",

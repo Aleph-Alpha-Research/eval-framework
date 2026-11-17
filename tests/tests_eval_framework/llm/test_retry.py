@@ -11,7 +11,9 @@ from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message, Role
 
 MESSAGES: list[Sequence[Message]] = [[Message(role=Role.USER, content="judge this")]]
-SAMPLE = ResultCandidate(id=0, subject="s", messages=list(MESSAGES[0]), ground_truth=None, possible_completions=["a"])
+SAMPLE = ResultCandidate(
+    sample_id=0, result_id=0, subject="s", messages=list(MESSAGES[0]), ground_truth=None, possible_completions=["a"]
+)
 
 
 def _answer(completion: str = "an answer") -> list[RawCompletion]:

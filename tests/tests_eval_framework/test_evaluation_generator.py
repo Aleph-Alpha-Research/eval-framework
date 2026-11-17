@@ -58,7 +58,7 @@ class SerialProbeMetric(BaseMetric):
         time.sleep(0.02)
         with SerialProbeMetric.lock:
             SerialProbeMetric.in_flight -= 1
-        return [MetricResult(metric_name=self.NAME, value=float(response.id), higher_is_better=True)]
+        return [MetricResult(metric_name=self.NAME, value=float(response.result_id), higher_is_better=True)]
 
 
 class JudgeProbeMetric(BaseLLMJudgeMetric):
@@ -71,7 +71,7 @@ class JudgeProbeMetric(BaseLLMJudgeMetric):
     def calculate(self, response: Completion) -> list[MetricResult]:
         # Breaks on timeout rather than hanging if the calls are not truly concurrent.
         JudgeProbeMetric.barrier.wait()
-        return [MetricResult(metric_name=self.NAME, value=float(response.id), higher_is_better=True)]
+        return [MetricResult(metric_name=self.NAME, value=float(response.result_id), higher_is_better=True)]
 
 
 class FlakyJudge(MockLLM):
@@ -95,7 +95,8 @@ class JudgeAnswerMetric(BaseLLMJudgeMetric):
 def _make_completions(count: int) -> list[Completion]:
     return [
         Completion(
-            id=i,
+            sample_id=i,
+            result_id=i,
             subject="subject1",
             prompt="prompt",
             prompt_num_tokens=1,
@@ -311,7 +312,8 @@ def test_aggregate_results(tmp_path: Path) -> None:
     for subject, metric_name, key, value, error in responses:
         results.append(
             Result(
-                id=0,
+                sample_id=0,
+                result_id=0,
                 metric_name=metric_name,
                 num_fewshot=0,
                 key=key,
@@ -423,7 +425,8 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
     for subject, metric_name, key, sample_id, value, error in responses:
         results.append(
             Result(
-                id=sample_id,
+                sample_id=sample_id,
+                result_id=sample_id,
                 metric_name=metric_name,
                 num_fewshot=0,
                 key=key,
@@ -501,7 +504,8 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
     for subject, metric_name, key, sample_id, value, error in responses:
         results.append(
             Result(
-                id=sample_id,
+                sample_id=sample_id,
+                result_id=sample_id,
                 metric_name=metric_name,
                 num_fewshot=0,
                 key=key,

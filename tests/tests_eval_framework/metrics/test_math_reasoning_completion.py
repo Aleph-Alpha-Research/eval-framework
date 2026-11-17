@@ -12,7 +12,8 @@ def metric() -> MathReasoningCompletion:
 def make_completion(completion: str, ground_truth: str | list[str]) -> Completion:
     """Helper to create Completion objects for testing."""
     return Completion(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="test",
         ground_truth=ground_truth,
         prompt="test prompt",

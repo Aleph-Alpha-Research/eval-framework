@@ -9,7 +9,8 @@ from eval_framework.shared.types import Completion
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -32,7 +33,8 @@ from eval_framework.shared.types import Completion
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -55,7 +57,8 @@ from eval_framework.shared.types import Completion
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -78,7 +81,8 @@ from eval_framework.shared.types import Completion
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -117,7 +121,8 @@ def test_check_json_format(response: Completion, expected_value: float) -> None:
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -132,7 +137,8 @@ def test_check_json_format(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -147,7 +153,8 @@ def test_check_json_format(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -162,7 +169,8 @@ def test_check_json_format(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",

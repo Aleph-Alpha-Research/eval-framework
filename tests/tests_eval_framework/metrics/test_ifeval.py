@@ -17,7 +17,8 @@ def test_ifeval_metric() -> None:
     )
 
     completion = Completion(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="test",
         ground_truth="some ground truth",
         prompt=context.prompt,
