@@ -89,6 +89,20 @@ class ComposedEval(Eval):
                         break
 
     @override
+    def iterate_result_candidates(self, num_samples: int | None, *, repeats: int) -> Iterable[ResultCandidate]:
+        for sample in self.iterate_samples(num_samples):
+            for repeat_idx in range(repeats):
+                yield ResultCandidate(
+                    sample_id=sample.id,
+                    result_id=sample.id * repeats + repeat_idx,
+                    subject=sample.subject,
+                    messages=sample.messages,
+                    ground_truth=sample.ground_truth,
+                    possible_completions=sample.possible_completions,
+                    context=sample.context,
+                )
+
+    @override
     def get_metadata(self) -> dict[str, str | list[str]]:
         meta: dict[str, str | list[str]] = {
             "sample_split": self.sample_split,

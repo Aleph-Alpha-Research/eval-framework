@@ -257,6 +257,17 @@ class _PrecedenceStub(Eval, Benchmark):
             possible_completions=None,
         )
 
+    def iterate_result_candidates(self, num_samples: int | None, *, repeats: int) -> Iterable[ResultCandidate]:
+        for repeat_idx in range(repeats):
+            yield ResultCandidate(
+                sample_id=0,
+                result_id=repeat_idx,
+                subject="stub",
+                ground_truth="A",
+                messages=[Message(role=Role.USER, content="Hi")],
+                possible_completions=None,
+            )
+
     def generate_completions(
         self,
         llm: BaseLLM,
