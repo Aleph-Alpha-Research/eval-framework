@@ -1,6 +1,9 @@
 import math
 
+import pytest
+
 import eval_framework.metrics.loglikelihood.bpb_variants_common as bpb_common
+from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.loglikelihood.bpb_variants_prefix import PrefixBitsPerByte
 from eval_framework.shared.types import Loglikelihood, PerTokenScores
 
@@ -22,11 +25,11 @@ def _response(ground_truth: str, bits: list[float], byte_lens: list[int], others
     )
 
 
-def _by_name(results):
+def _by_name(results: list[MetricResult]) -> tuple[set[str], dict[str, MetricResult]]:
     return {r.metric_name for r in results}, {r.metric_name: r for r in results}
 
 
-def test_emits_headline_and_sidecars():
+def test_emits_headline_and_sidecars() -> None:
     resp = _response(" hello", [2.0, 3.0, 4.0], [2, 2, 2])  # offset=1, content=5 bytes
     results = PrefixBitsPerByte().calculate(resp)
     names, by = _by_name(results)
@@ -34,7 +37,7 @@ def test_emits_headline_and_sidecars():
     assert by["PrefixBPB_contentBytes"].value == 5.0
 
 
-def test_headline_equals_cost_over_k_entry(monkeypatch):
+def test_headline_equals_cost_over_k_entry(monkeypatch: pytest.MonkeyPatch) -> None:
     # 1 bit/byte => PrefixBPB = 1.0 at K_ENTRY
     monkeypatch.setattr(bpb_common, "K_ENTRY", 1)
     monkeypatch.setattr(bpb_common, "K_RATE", 4)
@@ -45,7 +48,7 @@ def test_headline_equals_cost_over_k_entry(monkeypatch):
     assert by["PrefixBPB_entryCost"].value == 2.0  # cost of first K0=2 bytes
 
 
-def test_not_estimable_when_ground_truth_too_short(monkeypatch):
+def test_not_estimable_when_ground_truth_too_short(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(bpb_common, "K_RATE", 32)
     resp = _response(" A", [5.0], [2])  # offset=1 -> 1 content byte
     _, by = _by_name(PrefixBitsPerByte().calculate(resp))
@@ -57,7 +60,7 @@ def test_not_estimable_when_ground_truth_too_short(monkeypatch):
     assert by["PrefixBPB_rate"].error.error_class == "NotEstimable"
 
 
-def test_errors_without_per_token():
+def test_errors_without_per_token() -> None:
     resp = Loglikelihood(
         id=1,
         subject="s",
@@ -71,7 +74,7 @@ def test_errors_without_per_token():
     assert all(r.value is None and r.error is not None for r in results)
 
 
-def test_ground_truth_selected_by_best_rule(monkeypatch):
+def test_ground_truth_selected_by_best_rule(monkeypatch: pytest.MonkeyPatch) -> None:
     import eval_framework.metrics.loglikelihood.bpb_variants_common as bpb_common
 
     monkeypatch.setattr(bpb_common, "ALIAS_RULE", "best")

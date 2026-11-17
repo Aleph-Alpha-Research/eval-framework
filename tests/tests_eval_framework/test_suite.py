@@ -1,5 +1,7 @@
 import textwrap
+from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -16,7 +18,7 @@ from eval_framework.suite import (
 
 
 @pytest.fixture(autouse=True)
-def _skip_registry_check():
+def _skip_registry_check() -> Iterator[None]:
     # This is a hack to skip the check for whether the task is registered.
     fake_registry = MagicMock()
     fake_registry.__contains__.return_value = True
@@ -58,7 +60,9 @@ class TestTaskSuiteValidation:
             ],
         )
         assert len(s.tasks) == 2
+        assert isinstance(s.tasks[0], TaskSuite)
         assert s.tasks[0].task_name == "MMLU"
+        assert isinstance(s.tasks[1], TaskSuite)
         assert s.tasks[1].max_tokens == 512
 
     def test_empty_tasks_raises(self) -> None:
@@ -81,9 +85,13 @@ class TestTaskSuiteValidation:
             ],
         )
         assert not s.is_leaf
+        assert isinstance(s.tasks[0], TaskSuite)
         assert not s.tasks[0].is_leaf
+        assert isinstance(s.tasks[1], TaskSuite)
         assert s.tasks[1].is_leaf
+        assert isinstance(s.tasks[0].tasks[0], TaskSuite)
         assert s.tasks[0].tasks[0].is_leaf
+        assert isinstance(s.tasks[0].tasks[1], TaskSuite)
         assert s.tasks[0].tasks[1].is_leaf
 
 
@@ -191,7 +199,7 @@ class TestResolveToEvalKwargs:
 
     def test_cli_kwargs_preserved(self) -> None:
         leaf = TaskSuite(tasks="T")
-        defaults = {}
+        defaults: dict[str, Any] = {}
         cli_kwargs = {
             "description": "M",
             "llm_args": {},

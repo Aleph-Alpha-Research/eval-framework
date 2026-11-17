@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
 from unittest.mock import Mock
@@ -17,7 +17,7 @@ from eval_framework.shared.types import BaseMetricContext, Completion, Loglikeli
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import Registry
 from eval_framework.tasks.task_style import ClozeStyle
-from template_formatting.formatter import Message, Role
+from template_formatting.formatter import BaseFormatter, Message, Role
 from tests.tests_eval_framework.benchmarks.utils import DatasetStub
 from tests.tests_eval_framework.conftest import MockLLM
 
@@ -215,13 +215,19 @@ class _PrecedenceStub(Eval, Benchmark):
     def metrics(self) -> list:
         return []
 
-    def subjects(self) -> list:
+    def subjects(self, tokens: list[str] | None = None) -> list[str]:
         return ["stub"]
 
-    def create(self, num_fewshot, custom_subjects, custom_hf_revision, seed=None) -> Eval:
+    def create(
+        self,
+        num_fewshot: int,
+        custom_subjects: list[str] | None,
+        custom_hf_revision: str | None,
+        seed: int | None = None,
+    ) -> Eval:
         return self
 
-    def markdown_doc(self, formatters) -> str:
+    def markdown_doc(self, formatters: Sequence[BaseFormatter]) -> str:
         return ""
 
     # Eval side.
@@ -249,7 +255,13 @@ class _PrecedenceStub(Eval, Benchmark):
             possible_completions=None,
         )
 
-    def generate_completions(self, llm, samples, stop_sequences=None, max_tokens=None) -> list[Completion]:
+    def generate_completions(
+        self,
+        llm: BaseLLM,
+        samples: list[Sample],
+        stop_sequences: list[str] | None = None,
+        max_tokens: int | None = None,
+    ) -> list[Completion]:
         self.called_stop_sequences = stop_sequences
         self.called_max_tokens = max_tokens
         return [

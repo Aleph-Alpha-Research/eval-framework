@@ -18,7 +18,7 @@ from eval_framework.fewshot import (
     NoFewShot,
     SampleSplit,
 )
-from eval_framework.metrics.base import BaseMetric
+from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesLoglikelihood,
     SequencePositionsLoglikelihood,
@@ -101,6 +101,10 @@ class _DummyStyler(TaskStyler):
 
 class _FakeMetric(BaseMetric[Any]):
     NAME = "FakeMetric"
+
+    @override
+    def calculate(self, response: Any) -> list[MetricResult]:
+        return []
 
 
 class _StubTaskStyler(TaskStyler):
