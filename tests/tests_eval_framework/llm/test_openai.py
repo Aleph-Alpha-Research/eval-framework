@@ -6,7 +6,7 @@ from openai import AuthenticationError, RateLimitError, omit
 from openai.types.chat.completion_create_params import ResponseFormat
 from pytest_mock import MockerFixture
 
-from eval_framework.contract import Sample
+from eval_framework.contract import ResultCandidate
 from eval_framework.llm.openai import (
     EmptyCompletionError,
     OpenAIEmbeddingModel,
@@ -168,7 +168,7 @@ def test_logprobs_sums_choice_tokens_from_vllm_prompt_logprobs(mocker: MockerFix
         mocker.MagicMock(model_extra={"prompt_logprobs": prompt_logprobs})
     ]
     model = OpenAIModel(model_name="some-vllm-model", formatter=ConcatFormatter())
-    sample = Sample(
+    sample = ResultCandidate(
         id=0,
         subject="s",
         messages=[Message(role=Role.USER, content="Q:")],
@@ -192,7 +192,7 @@ def test_logprobs_raises_when_server_returns_no_prompt_logprobs(mocker: MockerFi
     mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
     mock_client.completions.create.return_value.choices = [mocker.MagicMock(model_extra={})]
     model = OpenAIModel(model_name="some-model", formatter=ConcatFormatter())
-    sample = Sample(
+    sample = ResultCandidate(
         id=0,
         subject="s",
         messages=[Message(role=Role.USER, content="Q:")],
@@ -214,7 +214,7 @@ def test_logprobs_includes_token_straddling_prompt_and_choice(mocker: MockerFixt
         mocker.MagicMock(model_extra={"prompt_logprobs": prompt_logprobs})
     ]
     model = OpenAIModel(model_name="some-vllm-model", formatter=ConcatFormatter())
-    sample = Sample(
+    sample = ResultCandidate(
         id=0,
         subject="s",
         messages=[Message(role=Role.USER, content="Answer: ")],

@@ -4,14 +4,14 @@ from collections.abc import Sequence
 import pytest
 from openai.types.chat.completion_create_params import ResponseFormat
 
-from eval_framework.contract import Sample
+from eval_framework.contract import ResultCandidate
 from eval_framework.llm.base import BaseLLM
 from eval_framework.llm.retry import LLMUnavailable, RetryingLLM, RetryPolicy
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message, Role
 
 MESSAGES: list[Sequence[Message]] = [[Message(role=Role.USER, content="judge this")]]
-SAMPLE = Sample(id=0, subject="s", messages=list(MESSAGES[0]), ground_truth=None, possible_completions=["a"])
+SAMPLE = ResultCandidate(id=0, subject="s", messages=list(MESSAGES[0]), ground_truth=None, possible_completions=["a"])
 
 
 def _answer(completion: str = "an answer") -> list[RawCompletion]:
@@ -47,7 +47,7 @@ class ScriptedLLM(BaseLLM):
     ) -> list[RawCompletion]:
         return self._next()
 
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+    def logprobs(self, samples: list[ResultCandidate]) -> list[RawLoglikelihood]:
         return self._next()
 
 

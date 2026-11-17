@@ -7,7 +7,7 @@ from datasets import Dataset, DatasetDict
 from eval_framework.answer import ExtractFromCompletion, PickFromCandidates
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark, ComposedEval
-from eval_framework.contract import ResponseType, Sample
+from eval_framework.contract import ResponseType, ResultCandidate
 from eval_framework.eval_kind import Choice, Generative, SampleBody, assemble_messages
 from eval_framework.fewshot import (
     ChoiceRenderer,
@@ -559,7 +559,7 @@ def test_model_cleanup_runs_before_answer_extraction() -> None:
     # raw completion.
     class _MarkerLLM(MockLLM):
         @override
-        def post_process_completion(self, completion: str, sample: Sample) -> str:
+        def post_process_completion(self, completion: str, sample: ResultCandidate) -> str:
             return f"MODEL[{completion}]"
 
     task = ComposedEval(
@@ -572,7 +572,7 @@ def test_model_cleanup_runs_before_answer_extraction() -> None:
         subjects=_DUMMY_EVAL_SUBJECTS,
         rnd=_DUMMY_RNG,
     )
-    sample = Sample(
+    sample = ResultCandidate(
         id=0,
         subject="stub",
         ground_truth=None,

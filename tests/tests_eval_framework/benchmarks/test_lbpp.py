@@ -16,6 +16,7 @@ import pytest
 
 from eval_framework.benchmarks.lbpp import LBPP_BENCHMARKS, lbpp, lbpp_bpb
 from eval_framework.contract import Benchmark
+from eval_framework.response_generator import repeat_samples
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,
@@ -114,7 +115,7 @@ def _verdict(model_output: str) -> str:
     evaluation = lbpp(dataset=DatasetStub({"test": [_EVAL_ROW]})).create(
         num_fewshot=0, custom_subjects=None, custom_hf_revision=None
     )
-    sample = next(iter(evaluation.iterate_samples(1)))
+    sample = next(iter(repeat_samples(evaluation.iterate_samples(1), 1)))
     (completion,) = evaluation.generate_completions(
         StubLlm(model_output), [sample], stop_sequences=evaluation.get_stop_sequences()
     )

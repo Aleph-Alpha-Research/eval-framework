@@ -16,7 +16,7 @@ from openai.types.chat import (
 from openai.types.chat.completion_create_params import ResponseFormat
 from transformers import PreTrainedTokenizerBase
 
-from eval_framework.contract import Sample
+from eval_framework.contract import ResultCandidate
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import (
     ConcatCompression,
@@ -320,7 +320,7 @@ class OpenAIModel(BaseLLM):
             results = list(executor.map(_process_one, messages))
         return results
 
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+    def logprobs(self, samples: list[ResultCandidate]) -> list[RawLoglikelihood]:
         """
         Compute total log-probabilities for possible completions given each sample's prompt.
 
@@ -444,7 +444,7 @@ class OpenAIEmbeddingModel(BaseLLM):
             embeddings.append(embedding)
         return embeddings
 
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+    def logprobs(self, samples: list[ResultCandidate]) -> list[RawLoglikelihood]:
         raise NotImplementedError("Embedding model cannot return logprobs.")
 
     def __del__(self) -> None:

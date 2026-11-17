@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Self, final, override
 
 from eval_framework.answer import AnswerPolicy, PickFromCandidates
 from eval_framework.choices import ChoiceReader
-from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
+from eval_framework.contract import Benchmark, Eval, ResponseType, ResultCandidate, Sample
 from eval_framework.eval_kind import Choice, EvalKind, ItemContext
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotGenerator, FewShotPolicy, FewShotSplit, SampleSplit
 from eval_framework.shared.types import Completion, RawCompletion
@@ -105,7 +105,7 @@ class ComposedEval(Eval):
     def generate_completions(
         self,
         llm: "BaseLLM",
-        samples: list[Sample],
+        samples: list[ResultCandidate],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
     ) -> list[Completion]:

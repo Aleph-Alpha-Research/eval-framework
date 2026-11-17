@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from openai.types.chat.completion_create_params import ResponseFormat
 
-from eval_framework.contract import Sample
+from eval_framework.contract import ResultCandidate
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
 
@@ -53,7 +53,7 @@ class BaseLLM(ABC):
 
     def generate_from_samples(
         self,
-        samples: list[Sample],
+        samples: list[ResultCandidate],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
@@ -80,7 +80,7 @@ class BaseLLM(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+    def logprobs(self, samples: list[ResultCandidate]) -> list[RawLoglikelihood]:
         """
         This function is expected to raise errors which are caught and reported when running the eval.
         Please also make sure to raise an error in case of sequence length issues. We expect to always
@@ -90,7 +90,7 @@ class BaseLLM(ABC):
 
     def generate(
         self,
-        samples: list[Sample],
+        samples: list[ResultCandidate],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
@@ -122,7 +122,7 @@ class BaseLLM(ABC):
 
         return RetryingLLM(self, policy or RetryPolicy())
 
-    def post_process_completion(self, completion: str, sample: Sample) -> str:
+    def post_process_completion(self, completion: str, sample: ResultCandidate) -> str:
         """
         Model-specific post-processing of generated completions.
 
