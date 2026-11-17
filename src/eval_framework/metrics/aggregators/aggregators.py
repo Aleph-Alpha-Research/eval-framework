@@ -24,6 +24,15 @@ class Aggregator(ABC):
         the aggregated score. All non-identifier, non-value columns are preserved
         (typically via ``"first"``).
 
+    Besides the result columns (``value``, ``subject``, ``key``, ``problem``, ``metric_name``, ...), the
+    DataFrame has one ``context.<field>`` column per top-level scalar field (str, int, float, bool) of the
+    context of the row's sample, e.g. ``context.question_id``. Lists, dicts and nested models are left out.
+    An aggregator that collapses rows across samples groups by these instead of ``problem``, e.g.
+    ``response_df.groupby(["subject", "context.question_id", "context.model"])``.
+    Rows whose sample has no such field hold a missing value there, and pandas ``groupby`` silently drops
+    rows with a missing key (``dropna=True``): an aggregator grouping on ``context.*`` columns should check
+    them for missing values and raise rather than lose rows.
+
     Example input (``identifier_columns=["prompt"]``, 3 attempts per problem):
 
         | prompt         | value | subject |

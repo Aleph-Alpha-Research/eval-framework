@@ -1,6 +1,6 @@
 import logging
 import math
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 from typing import Any, cast
@@ -15,13 +15,59 @@ from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.metrics.loglikelihood.bpb_variants_common import aggregate_prior_bpb_metrics, select_ground_truth
 from eval_framework.metrics.loglikelihood.bpb_variants_estimators import summarize_all
 from eval_framework.result_processors.base import Result, ResultProcessor
-from eval_framework.shared.types import Completion, Loglikelihood
+from eval_framework.shared.types import BaseMetricContext, Completion, Loglikelihood
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import registry
 from eval_framework.utils.constants import RED, RESET
 from eval_framework.utils.tqdm_handler import get_disable_bar_flag
 
 logger = logging.getLogger(__name__)
+
+# Aggregators see each sample's context fields as extra columns of the aggregation DataFrame, named with this
+# prefix so they can't collide with the result columns (see the `Aggregator` docstring).
+_CONTEXT_COLUMN_PREFIX = "context."
+
+# A context field value that can be a grouping key: lists, dicts and nested models are not.
+ContextScalar = str | int | float | bool
+
+# (subject, response id) -> that response's context fields, as aggregation DataFrame columns.
+ContextColumns = Mapping[tuple[str, int], dict[str, ContextScalar]]
+
+
+def flatten_context(context: list[BaseMetricContext] | BaseMetricContext | None) -> dict[str, ContextScalar]:
+    """The top-level scalar fields of a response's context, merged across a list of contexts.
+
+    Non-scalar fields (lists, dicts, nested models such as test harnesses or gold structures) and None values are
+    left out. Works on contexts read back from output.jsonl, which are plain ``BaseMetricContext`` instances whose
+    fields are extras: ``model_dump`` includes those. Raises if two contexts in a list define the same field, since
+    which value wins would be arbitrary.
+    """
+    if context is None:
+        return {}
+    flat: dict[str, ContextScalar] = {}
+    seen: set[str] = set()
+    for metric_context in context if isinstance(context, list) else [context]:
+        for name, value in metric_context.model_dump().items():
+            if name in seen:
+                raise ValueError(f"Context field '{name}' is defined by more than one context in the list")
+            seen.add(name)
+            if isinstance(value, str | int | float | bool):
+                flat[name] = value
+    return flat
+
+
+def context_columns(responses: list[Completion | Loglikelihood]) -> ContextColumns:
+    """Flatten each response's context once into ``context.``-prefixed columns, keyed like its results.
+
+    Taken from the responses rather than the results because results don't carry context, and results reloaded
+    from results.jsonl on a resumed run never did; responses from output.jsonl always do.
+    """
+    columns: dict[tuple[str, int], dict[str, ContextScalar]] = {}
+    for response in responses:
+        flat = flatten_context(response.context)
+        if flat:
+            columns[(response.subject, response.id)] = {f"{_CONTEXT_COLUMN_PREFIX}{k}": v for k, v in flat.items()}
+    return columns
 
 
 class EvaluationGenerator:
@@ -272,7 +318,11 @@ class EvaluationGenerator:
 
         return aggregated_results
 
-    def _aggregate_results_with_aggregators(self, results: list[Result]) -> dict[str, float | None]:
+    def _aggregate_results_with_aggregators(
+        self, results: list[Result], contexts: ContextColumns
+    ) -> dict[str, float | None]:
+        """Aggregate with each metric's aggregators. ``contexts`` (see `context_columns`) adds the item fields of
+        each result's response as ``context.*`` columns, for aggregators that group across samples by them."""
         data = pd.DataFrame(
             [
                 {
@@ -284,6 +334,7 @@ class EvaluationGenerator:
                     "error": r.error,
                     # Repeats of one problem carry consecutive ids (see `repeat_samples`).
                     "problem": r.id // self.config.repeats,
+                    **contexts.get((r.subject, r.id), {}),
                 }
                 for r in results
             ]
@@ -478,9 +529,10 @@ class EvaluationGenerator:
             ground_truth = select_ground_truth(response)
             if ground_truth is not None:
                 leading_space_by_item[(response.id, response.subject)] = 1.0 if ground_truth.startswith(" ") else 0.0
+        contexts = context_columns(responses)
         del responses
         aggregated_results = self._aggregate_results(metrics_results)
-        results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results)
+        results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results, contexts)
         aggregated_results.update(results_with_aggregators)
         aggregated_results.update(self._aggregate_corpus_bpb_metrics(metrics_results, leading_space_by_item))
         aggregated_results.update(aggregate_prior_bpb_metrics(loglikelihood_responses))

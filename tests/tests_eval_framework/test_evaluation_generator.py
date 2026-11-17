@@ -437,7 +437,7 @@ def test_aggregate_results_with_aggregators(tmp_path: Path) -> None:
             )
         )
 
-    aggregated = evaluator._aggregate_results_with_aggregators(results)
+    aggregated = evaluator._aggregate_results_with_aggregators(results, {})
     # The pass@1 DF that gets aggregated is:
     # p1 s1 k1 2/3
     # p2 s1 k1 0
@@ -515,7 +515,7 @@ def test_aggregate_results_with_identifier_mean(tmp_path: Path) -> None:
             )
         )
 
-    aggregated = evaluator._aggregate_results_with_aggregators(results)
+    aggregated = evaluator._aggregate_results_with_aggregators(results, {})
 
     # The aggregator with IdentifierMean DF that gets aggregated is:
     # p1 s1 k1 2/3
