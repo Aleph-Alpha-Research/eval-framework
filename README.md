@@ -32,7 +32,7 @@ It requires [uv](https://docs.astral.sh/uv/getting-started/installation/), which
 Install eval-framework, and llama.cpp, which provides the `llama-server` program that serves the model:
 
 ```bash
-uv tool install eval-framework
+uv tool install git+https://github.com/Aleph-Alpha-Research/eval-framework
 brew install llama.cpp   # macOS and Linux with Homebrew
 ```
 
