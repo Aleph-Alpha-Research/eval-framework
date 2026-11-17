@@ -12,11 +12,11 @@ from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Generative
 from eval_framework.fewshot import FewShot, FewshotExample, FunctionRenderer, SampleSplit
-from eval_framework.metrics.completion.code_execution.python_tests import parse_unittest_output, unittest_merge_snippets
-from eval_framework.metrics.completion.code_execution_pass_at_one import (
+from eval_framework.metrics.completion.code_execution.pass_at_one import (
     CodeExecutionPassAtOneContext,
     CodeExecutionPassAtOneWithCodebench,
 )
+from eval_framework.metrics.completion.code_execution.python_tests import parse_unittest_output, unittest_merge_snippets
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.dataset_loading import DatasetPolicy

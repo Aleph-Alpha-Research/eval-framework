@@ -21,7 +21,7 @@ from eval_framework.benchmarks.humaneval import (
 )
 from eval_framework.benchmarks.utils.ellamind_languages import ellamind_language
 from eval_framework.contract import Benchmark
-from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
+from eval_framework.metrics.completion.code_execution.python_assertion import CodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.dataset_loading import DatasetPolicy

@@ -27,7 +27,7 @@ from eval_framework.fewshot import (
     FunctionRenderer,
     Predefined,
 )
-from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
+from eval_framework.metrics.completion.code_execution.python_assertion import CodeCompletionAssertion
 from eval_framework.shared.types import BaseMetricContext
 from eval_framework.subjects import ListOfSubjects, SubjectsSelector
 from eval_framework.tasks.dataset_loading import DatasetPolicy
