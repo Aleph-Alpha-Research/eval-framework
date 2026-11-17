@@ -8,7 +8,7 @@ from dateutil import parser
 
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
-from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
+from eval_framework.contract import Benchmark, Eval, ResponseType, ResultCandidate, Sample
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator, repeat_samples
 from eval_framework.result_processors.base import ResultProcessor
@@ -32,7 +32,7 @@ def test_generate_completions_message_handling() -> None:
     generator = ResponseGenerator(llm, config, result_processor)
 
     # Test case 1: With assistant cue message
-    sample_with_cue = Sample(
+    sample_with_cue = ResultCandidate(
         id=0,
         messages=[Message(role=Role.USER, content="Hello"), Message(role=Role.ASSISTANT, content="Cue: ")],
         ground_truth="Expected response",
@@ -41,7 +41,7 @@ def test_generate_completions_message_handling() -> None:
     )
 
     # Test case 2: Without assistant cue message
-    sample_without_cue = Sample(
+    sample_without_cue = ResultCandidate(
         id=1,
         messages=[Message(role=Role.USER, content="Hello")],
         ground_truth="Expected response",
@@ -258,7 +258,7 @@ class _PrecedenceStub(Eval, Benchmark):
     def generate_completions(
         self,
         llm: BaseLLM,
-        samples: list[Sample],
+        samples: list[ResultCandidate],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
     ) -> list[Completion]:

@@ -8,7 +8,7 @@ from typing import Any
 from tqdm import tqdm
 
 from eval_framework import __version__ as eval_framework_version
-from eval_framework.contract import Benchmark, ResponseType, Sample
+from eval_framework.contract import Benchmark, ResponseType, ResultCandidate, Sample
 from eval_framework.llm.base import BaseLLM
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
@@ -88,7 +88,7 @@ class ResponseGenerator:
         logger.info(f"Set stop_sequences to {stop_sequences}")
         return stop_sequences, max_tokens
 
-    def _generate_loglikelihoods(self, samples: list[Sample]) -> list[Loglikelihood]:
+    def _generate_loglikelihoods(self, samples: list[ResultCandidate]) -> list[Loglikelihood]:
         """
         Generate log likelihoods when a sample is run against the model.
         :param sample: sample to run the task against
@@ -119,7 +119,7 @@ class ResponseGenerator:
 
     def _generative_output_type_selector(
         self,
-    ) -> Callable[[list[Sample]], list[Completion] | list[Loglikelihood]]:
+    ) -> Callable[[list[ResultCandidate]], list[Completion] | list[Loglikelihood]]:
         """
         Selects the generative output type based on the response type.
         :return: function to generate responses
@@ -174,7 +174,7 @@ class ResponseGenerator:
         self,
         responses: list[Completion | Loglikelihood],
         subject_response_id_mapping: dict[str, set[int]],
-        generative_output_function: Callable[[list[Sample]], list[Completion] | list[Loglikelihood]],
+        generative_output_function: Callable[[list[ResultCandidate]], list[Completion] | list[Loglikelihood]],
     ) -> list[Completion | Loglikelihood]:
         """
         Generates responses for the task and saves them along with metadata.
@@ -185,7 +185,7 @@ class ResponseGenerator:
         :return: all responses
         """
 
-        def _process_batch(samples_batch: list[Sample]) -> None:
+        def _process_batch(samples_batch: list[ResultCandidate]) -> None:
             if not samples_batch:
                 return
             if len(samples_batch) > 1:
@@ -211,7 +211,7 @@ class ResponseGenerator:
         else:
             total_num_samples = self.num_samples * repeats
 
-        samples_batch: list[Sample] = []
+        samples_batch: list[ResultCandidate] = []
         with tqdm(
             total=total_num_samples,
             desc=f"Processing {self.response_type.value}",
@@ -296,7 +296,7 @@ class ResponseGenerator:
         return responses
 
 
-def repeat_samples(samples: Iterable[Sample], repeats: int) -> Iterable[Sample]:
+def repeat_samples(samples: Iterable[Sample], repeats: int) -> Iterable[ResultCandidate]:
     """Flatten repeats into a single stream of samples.
 
     After expansion original sample indices do not point to the same sample anymore. They
@@ -305,6 +305,11 @@ def repeat_samples(samples: Iterable[Sample], repeats: int) -> Iterable[Sample]:
     for sample in samples:
         base_id = sample.id * repeats
         for repeat_idx in range(repeats):
-            repeated_sample = sample.model_copy()
-            repeated_sample.id = base_id + repeat_idx
-            yield repeated_sample
+            yield ResultCandidate(
+                id=base_id + repeat_idx,
+                subject=sample.subject,
+                messages=sample.messages,
+                ground_truth=sample.ground_truth,
+                possible_completions=sample.possible_completions,
+                context=sample.context,
+            )

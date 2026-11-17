@@ -17,7 +17,7 @@ import pytest
 from datasets import Dataset, DatasetDict
 from openai.types.chat.completion_create_params import ResponseFormat
 
-from eval_framework.contract import Benchmark, Sample
+from eval_framework.contract import Benchmark, ResultCandidate, Sample
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
@@ -96,7 +96,7 @@ class StubLlm(BaseLLM):
     @override
     def generate_from_samples(
         self,
-        samples: list[Sample],
+        samples: list[ResultCandidate],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
@@ -112,7 +112,7 @@ class StubLlm(BaseLLM):
         ]
 
     @override
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+    def logprobs(self, samples: list[ResultCandidate]) -> list[RawLoglikelihood]:
         raise NotImplementedError
 
 

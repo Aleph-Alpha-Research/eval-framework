@@ -7,7 +7,7 @@ import pytest
 import wandb
 from openai.types.chat.completion_create_params import ResponseFormat
 
-from eval_framework.contract import Sample
+from eval_framework.contract import ResultCandidate
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.utils import close_pools
@@ -25,9 +25,9 @@ class MockLLM(BaseLLM):
     def __init__(self) -> None:
         self.generate_counter = 0
         self.logprob_counter = 0
-        self.logprob_samples: list[Sample] = []
+        self.logprob_samples: list[ResultCandidate] = []
 
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+    def logprobs(self, samples: list[ResultCandidate]) -> list[RawLoglikelihood]:
         rawloglikelihoods = []
         for sample in samples:
             self.logprob_counter += 1

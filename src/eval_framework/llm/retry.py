@@ -8,7 +8,7 @@ from typing import TypeVar
 
 from openai.types.chat.completion_create_params import ResponseFormat
 
-from eval_framework.contract import Sample
+from eval_framework.contract import ResultCandidate
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from template_formatting.formatter import Message
@@ -74,7 +74,7 @@ class RetryingLLM(BaseLLM):
 
     def generate_from_samples(
         self,
-        samples: list[Sample],
+        samples: list[ResultCandidate],
         stop_sequences: list[str] | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
@@ -87,10 +87,10 @@ class RetryingLLM(BaseLLM):
             )
         )
 
-    def logprobs(self, samples: list[Sample]) -> list[RawLoglikelihood]:
+    def logprobs(self, samples: list[ResultCandidate]) -> list[RawLoglikelihood]:
         return self._repeat(lambda: self._inner.logprobs(samples))
 
-    def post_process_completion(self, completion: str, sample: Sample) -> str:
+    def post_process_completion(self, completion: str, sample: ResultCandidate) -> str:
         return self._inner.post_process_completion(completion, sample)
 
     def _repeat(self, call: Callable[[], T]) -> T:
