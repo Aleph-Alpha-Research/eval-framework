@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+
 import numpy as np
 import pytest
 
@@ -27,7 +29,7 @@ from eval_framework.metrics.loglikelihood.bpb_variants_estimators import (
 )
 
 
-def test_constant_length_all_equal():
+def test_constant_length_all_equal() -> None:
     bits = np.array([10.0, 20.0, 30.0])
     n = np.array([5.0, 5.0, 5.0])
     expected = bits.mean() / 5.0
@@ -38,7 +40,7 @@ def test_constant_length_all_equal():
     assert s["ls_bpb_task_q"]["value"] == pytest.approx(expected)
 
 
-def test_nstar_mean_equals_corpus():
+def test_nstar_mean_equals_corpus() -> None:
     rng = np.random.default_rng(0)
     n = rng.uniform(4, 40, size=200)
     bits = 12.0 + 0.8 * n + rng.normal(0, 0.5, size=200)
@@ -47,7 +49,7 @@ def test_nstar_mean_equals_corpus():
     assert got == pytest.approx(corpus_bpb(bits, n), rel=1e-10)
 
 
-def test_nstar_inf_equals_beta():
+def test_nstar_inf_equals_beta() -> None:
     rng = np.random.default_rng(1)
     n = rng.uniform(4, 40, size=200)
     bits = 12.0 + 0.8 * n + rng.normal(0, 0.01, size=200)
@@ -56,7 +58,7 @@ def test_nstar_inf_equals_beta():
     assert got == pytest.approx(fit.slope, rel=1e-8)
 
 
-def test_synthetic_alpha_beta_recovery():
+def test_synthetic_alpha_beta_recovery() -> None:
     n = np.linspace(5, 50, 100)
     bits = 10.0 + 0.5 * n
     fit = ols_affine(n, bits)
@@ -64,7 +66,7 @@ def test_synthetic_alpha_beta_recovery():
     assert fit.slope == pytest.approx(0.5, abs=1e-8)
 
 
-def test_ls_bpb_weights_nonnegative_sum_to_one():
+def test_ls_bpb_weights_nonnegative_sum_to_one() -> None:
     rng = np.random.default_rng(2)
     n = rng.uniform(2, 80, size=300)
     bits = 8 + 0.4 * n
@@ -75,7 +77,7 @@ def test_ls_bpb_weights_nonnegative_sum_to_one():
     assert out["n_negative_weights"] == 0
 
 
-def test_bin_mass_sums_to_one_and_matches_internal_histogram():
+def test_bin_mass_sums_to_one_and_matches_internal_histogram() -> None:
     rng = np.random.default_rng(7)
     n = rng.uniform(1, 900, size=400)
     mass = bin_mass(n, COMMON_BINS)
@@ -86,7 +88,7 @@ def test_bin_mass_sums_to_one_and_matches_internal_histogram():
     assert np.allclose(out["q_mass"], mass)
 
 
-def test_q_mass_override_equals_matching_reference_sample():
+def test_q_mass_override_equals_matching_reference_sample() -> None:
     """Explicit q_mass matches bin_mass from a reference sample."""
     rng = np.random.default_rng(11)
     n = rng.uniform(1, 900, size=500)
@@ -97,7 +99,7 @@ def test_q_mass_override_equals_matching_reference_sample():
     assert from_mass["value"] == pytest.approx(from_sample["value"])
 
 
-def test_equal_task_weighting_is_insensitive_to_item_counts():
+def test_equal_task_weighting_is_insensitive_to_item_counts() -> None:
     """Equal task weighting does not grow with item count per task."""
     rng = np.random.default_rng(13)
     short = rng.uniform(1, 20, size=100)
@@ -113,7 +115,7 @@ def test_equal_task_weighting_is_insensitive_to_item_counts():
     assert np.abs(count_pool - small_pool).max() > 0.3
 
 
-def test_q_mass_rejects_bad_input():
+def test_q_mass_rejects_bad_input() -> None:
     n = np.array([5.0, 50.0, 500.0])
     bits = np.array([10.0, 40.0, 300.0])
     with pytest.raises(ValueError):
@@ -124,7 +126,7 @@ def test_q_mass_rejects_bad_input():
         ls_bpb(bits, n, bins=COMMON_BINS, q_mass=np.zeros(5))
 
 
-def test_improving_item_cannot_increase_corpus_or_ls():
+def test_improving_item_cannot_increase_corpus_or_ls() -> None:
     bits = np.array([10.0, 20.0, 30.0, 40.0])
     n = np.array([4.0, 8.0, 12.0, 20.0])
     c0 = corpus_bpb(bits, n)
@@ -135,13 +137,13 @@ def test_improving_item_cannot_increase_corpus_or_ls():
     assert ls_bpb(better, n)["value"] <= ls0 + 1e-12
 
 
-def test_negative_leverage_outside_range():
+def test_negative_leverage_outside_range() -> None:
     n = np.array([10.0, 12.0, 14.0, 16.0, 18.0])
     h = ols_leverage_weights(n, n_star=100.0)
     assert np.any(h < 0)
 
 
-def test_effective_length_undefined_when_beta_nonpositive():
+def test_effective_length_undefined_when_beta_nonpositive() -> None:
     n = np.array([4.0, 8.0, 16.0, 32.0])
     bits = np.array([40.0, 40.0, 39.0, 38.0])
     out = effective_length_bpb(bits, n)
@@ -161,37 +163,37 @@ def _affine_item(alpha: float, beta: float, length: int, offset: int = 0) -> Pre
     return PrefixItem(bits, byte_lens, offset=offset)
 
 
-def _proportional_item(beta: float, byte_lens: list[float]) -> PrefixItem:
+def _proportional_item(beta: float, byte_lens: Sequence[float]) -> PrefixItem:
     """alpha=0: token cost is beta * byte length, so C(k) = beta*k."""
     m = np.asarray(byte_lens, dtype=float)
     return PrefixItem(beta * m, m)
 
 
-def test_cumulative_cost_linear_inside_token():
+def test_cumulative_cost_linear_inside_token() -> None:
     # one token, 4 bytes, 8 bits -> 2 bits/byte, linear inside
-    assert cumulative_cost([8.0], [4.0], 0) == pytest.approx(0.0)
-    assert cumulative_cost([8.0], [4.0], 1) == pytest.approx(2.0)
-    assert cumulative_cost([8.0], [4.0], 4) == pytest.approx(8.0)
-    assert cumulative_cost([8.0], [4.0], 10) == pytest.approx(8.0)  # clamps at n
+    assert cumulative_cost(np.array([8.0]), np.array([4.0]), 0) == pytest.approx(0.0)
+    assert cumulative_cost(np.array([8.0]), np.array([4.0]), 1) == pytest.approx(2.0)
+    assert cumulative_cost(np.array([8.0]), np.array([4.0]), 4) == pytest.approx(8.0)
+    assert cumulative_cost(np.array([8.0]), np.array([4.0]), 10) == pytest.approx(8.0)  # clamps at n
 
 
-def test_cumulative_cost_zero_byte_token_included_at_boundary():
+def test_cumulative_cost_zero_byte_token_included_at_boundary() -> None:
     # zero-byte split-UTF8 token: cost at the boundary
-    bits = [3.0, 5.0, 7.0]
-    byte_lens = [3.0, 0.0, 2.0]
+    bits = np.array([3.0, 5.0, 7.0])
+    byte_lens = np.array([3.0, 0.0, 2.0])
     # at k=3 both the 3-byte and the 0-byte token are fully covered
     assert cumulative_cost(bits, byte_lens, 3) == pytest.approx(8.0)
     assert cumulative_cost(bits, byte_lens, 5) == pytest.approx(15.0)
 
 
-def test_alpha_zero_gives_constant_pbpb_equal_beta():
+def test_alpha_zero_gives_constant_pbpb_equal_beta() -> None:
     beta = 0.75
     items = [_proportional_item(beta, bl) for bl in ([2, 3, 5], [1, 4, 4, 2], [6, 1])]
     for k in (1, 2, 3, 5, 8):
         assert pbpb(items, k) == pytest.approx(beta, abs=1e-12)
 
 
-def test_constant_length_pbpb_equals_corpus_bpb():
+def test_constant_length_pbpb_equals_corpus_bpb() -> None:
     rng = np.random.default_rng(3)
     length = 6
     items = []
@@ -205,7 +207,7 @@ def test_constant_length_pbpb_equals_corpus_bpb():
     assert pbpb(items, length) == pytest.approx(corpus_bpb(bits_arr, n_arr), rel=1e-12)
 
 
-def test_synthetic_alpha_beta_recovery_prefix():
+def test_synthetic_alpha_beta_recovery_prefix() -> None:
     alpha, beta = 12.0, 0.4
     items = [_affine_item(alpha, beta, length) for length in (20, 30, 45, 60)]
     # PBPB(K) = alpha/K + beta
@@ -216,7 +218,7 @@ def test_synthetic_alpha_beta_recovery_prefix():
     assert continuation_rate(items, 1, 20) == pytest.approx(beta, abs=1e-9)
 
 
-def test_decomposition_identity_is_exact():
+def test_decomposition_identity_is_exact() -> None:
     rng = np.random.default_rng(4)
     items = []
     for _ in range(40):
@@ -230,7 +232,7 @@ def test_decomposition_identity_is_exact():
     assert (d["A"] + d["R"] * (k - k0)) / k == pytest.approx(d["pbpb"], rel=1e-12)
 
 
-def test_pbpb_is_monotone_under_worsening():
+def test_pbpb_is_monotone_under_worsening() -> None:
     rng = np.random.default_rng(5)
     items = []
     for _ in range(30):
@@ -243,7 +245,7 @@ def test_pbpb_is_monotone_under_worsening():
     assert pbpb(worse, 8) > base
 
 
-def test_coverage_drops_with_k_and_short_items_excluded():
+def test_coverage_drops_with_k_and_short_items_excluded() -> None:
     items = [
         PrefixItem(np.ones(2), np.ones(2)),  # 2 content bytes
         PrefixItem(np.ones(10), np.ones(10)),  # 10 content bytes
@@ -256,7 +258,7 @@ def test_coverage_drops_with_k_and_short_items_excluded():
     assert curve[2]["n_items"] == 1
 
 
-def test_leading_space_offset_excluded_from_denominator():
+def test_leading_space_offset_excluded_from_denominator() -> None:
     # " A": 2 bytes total, offset=1 -> 1 content byte; PBPB(1) divides by 1.
     with_offset = make_prefix_items([([4.0], [2.0])], choices=[" A"])
     assert with_offset[0].offset == 1
@@ -269,7 +271,7 @@ def test_leading_space_offset_excluded_from_denominator():
     assert pbpb(no_offset, 2) == pytest.approx(2.0)
 
 
-def test_pbpb_nan_when_no_support():
+def test_pbpb_nan_when_no_support() -> None:
     items = [PrefixItem(np.ones(3), np.ones(3))]
     assert np.isnan(pbpb(items, 10))
     assert np.isnan(entry_cost(items, 10))
@@ -279,7 +281,7 @@ def test_pbpb_nan_when_no_support():
 # Prior BPB
 
 
-def test_per_byte_cost_conserves_bits_and_length():
+def test_per_byte_cost_conserves_bits_and_length() -> None:
     item = PrefixItem(np.array([3.0, 5.0, 7.0]), np.array([2.0, 1.0, 3.0]))  # 6 content bytes
     pbc = per_byte_cost(item)
     assert len(pbc) == 6
@@ -289,32 +291,34 @@ def test_per_byte_cost_conserves_bits_and_length():
     assert pbc[2] == pytest.approx(5.0)  # the 1-byte token
 
 
-def test_per_byte_cost_offset_drops_leading_byte():
+def test_per_byte_cost_offset_drops_leading_byte() -> None:
     item = PrefixItem(np.array([4.0]), np.array([2.0]), offset=1)  # " A": 1 content byte
     pbc = per_byte_cost(item)
     assert len(pbc) == 1
     assert pbc[0] == pytest.approx(2.0)  # 4 bits over 2 bytes, one content byte kept
 
 
-def test_reference_self_prior_equals_corpus_bpb():
+def test_reference_self_prior_equals_corpus_bpb() -> None:
     """Reference prior with task lengths equals corpus BPB."""
     rng = np.random.default_rng(21)
-    items, bits_total, nbytes = [], [], []
+    items: list[PrefixItem] = []
+    bits_list: list[float] = []
+    nbytes_list: list[float] = []
     for _ in range(60):
         length = int(rng.integers(3, 40))
         b = rng.uniform(0.2, 4.0, size=length)
         m = rng.integers(1, 4, size=length).astype(float)
         it = PrefixItem(b, m)
         items.append(it)
-        bits_total.append(float(b.sum()))
-        nbytes.append(float(it.content_bytes))
-    bits_total = np.array(bits_total)
-    nbytes = np.array(nbytes)
+        bits_list.append(float(b.sum()))
+        nbytes_list.append(float(it.content_bytes))
+    bits_total = np.array(bits_list)
+    nbytes = np.array(nbytes_list)
     got = prior_bpb(items, prior="reference", ref_lengths=nbytes)["value"]
     assert got == pytest.approx(corpus_bpb(bits_total, nbytes), rel=1e-9)
 
 
-def test_flat_rate_gives_constant_for_any_prior():
+def test_flat_rate_gives_constant_for_any_prior() -> None:
     beta = 0.6
     items = [PrefixItem(beta * np.ones(n), np.ones(n)) for n in (5, 12, 30, 60)]
     for prior_kwargs in (
@@ -325,7 +329,7 @@ def test_flat_rate_gives_constant_for_any_prior():
         assert prior_bpb(items, **prior_kwargs)["value"] == pytest.approx(beta, abs=1e-9)
 
 
-def test_affine_gives_alpha_over_mu_plus_beta():
+def test_affine_gives_alpha_over_mu_plus_beta() -> None:
     alpha, beta, mu = 10.0, 0.4, 20.0
     # R(1)=alpha+beta, R(k>=2)=beta => Prior BPB = alpha/mu + beta; items long vs mu.
     items = []
@@ -337,7 +341,7 @@ def test_affine_gives_alpha_over_mu_plus_beta():
     assert got == pytest.approx(alpha / mu + beta, rel=1e-3)
 
 
-def test_prior_bpb_uses_late_bytes_and_is_monotone():
+def test_prior_bpb_uses_late_bytes_and_is_monotone() -> None:
     rng = np.random.default_rng(22)
     items = [PrefixItem(rng.uniform(0.3, 2.0, size=80), np.ones(80)) for _ in range(20)]
     base = prior_bpb(items, prior="geometric", mu=32.0)["value"]
@@ -347,7 +351,7 @@ def test_prior_bpb_uses_late_bytes_and_is_monotone():
     assert after > base  # late bytes raise the score
 
 
-def test_marginal_rate_curve_coverage_decreases():
+def test_marginal_rate_curve_coverage_decreases() -> None:
     items = [PrefixItem(np.ones(n), np.ones(n)) for n in (2, 10, 30)]
     k, R, cov = marginal_rate_curve(items)
     assert len(k) == 30

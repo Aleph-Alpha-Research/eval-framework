@@ -73,7 +73,7 @@ from eval_framework.tasks.base import resolve_overwrite_subjects
     ],
 )
 def test_subject_tokens_select_subjects_part_by_part(
-    subjects: list[str] | list[tuple], custom_subjects: list[str], expected_value: list[str] | list[tuple] | str
+    subjects: list[str | tuple], custom_subjects: list[str], expected_value: list[str] | list[tuple] | str
 ) -> None:
     if expected_value == "ValueError":
         with pytest.raises(ValueError):

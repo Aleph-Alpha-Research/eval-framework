@@ -1,7 +1,7 @@
 from eval_framework.metrics.aggregators.aggregators import closed_form_passatk
 
 
-def test_closed_form_passatk():
+def test_closed_form_passatk() -> None:
     assert closed_form_passatk(4, 2, 1) == 1 - 2 / 4
     assert closed_form_passatk(4, 2, 2) == 1 - 1 / 6
     assert closed_form_passatk(4, 2, 3) == 1

@@ -10,7 +10,7 @@ package_exists_mc = pytest.importorskip("mistral_common")
 package_exists_hf = pytest.importorskip("huggingface_hub")
 
 if package_exists_mc and package_exists_hf:
-    from huggingface_hub.utils import RepositoryNotFoundError
+    from huggingface_hub.errors import RepositoryNotFoundError
 
     from template_formatting.mistral_formatter import MagistralFormatter, MistralFormatter, MistralSerializer
 

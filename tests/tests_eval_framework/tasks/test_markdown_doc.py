@@ -1,12 +1,29 @@
+from collections.abc import Sequence
+from typing import Literal, overload
+
 from eval_framework.tasks.markdown_doc import markdown_doc
-from template_formatting.formatter import Message, Role
+from template_formatting.formatter import BaseFormatter, Message, Role
 
 
-class ExampleFormatter:
+class ExampleFormatter(BaseFormatter):
     """Test double that renders each message as ``ROLE: content`` so the doc reflects the actual messages."""
 
-    def format(self, messages: list[Message], output_mode: str = "string") -> str:
-        return "\n".join(f"{message.role.name}: {message.content}" for message in messages)
+    @overload
+    def format(self, messages: Sequence[Message], output_mode: Literal["string"] = ...) -> str: ...
+
+    @overload
+    def format(self, messages: Sequence[Message], output_mode: Literal["list"]) -> list[Message]: ...
+
+    def format(
+        self, messages: Sequence[Message], output_mode: Literal["string", "list"] = "string"
+    ) -> str | list[Message]:
+        if output_mode == "list":
+            return list(messages)
+        lines = []
+        for message in messages:
+            assert message.role is not None
+            lines.append(f"{message.role.name}: {message.content}")
+        return "\n".join(lines)
 
 
 def test_markdown_doc_with_examples() -> None:

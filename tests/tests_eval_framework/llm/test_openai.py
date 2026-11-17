@@ -1,4 +1,6 @@
-import httpx
+from collections.abc import Sequence
+
+import httpx2
 import pytest
 from openai import AuthenticationError, RateLimitError, omit
 from openai.types.chat.completion_create_params import ResponseFormat
@@ -18,9 +20,9 @@ from template_formatting.formatter import ConcatFormatter, Message, Role
 
 
 @pytest.mark.external_api
-def test_openai_embedding_model():
+def test_openai_embedding_model() -> None:
     model = OpenAIEmbeddingModel()
-    messages = [
+    messages: list[Sequence[Message]] = [
         [Message(role=Role.USER, content="This is a test input for embedding generation.")],
         [Message(role=Role.USER, content="Different message to test embedding generation.")],
     ]
@@ -91,7 +93,7 @@ def test_openai_chat_api_top_p_generate_from_messages(mocker: MockerFixture) -> 
     mock_client.chat.completions.create.return_value = _make_chat_response(mocker)
 
     model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18", top_p=0.85)
-    _MESSAGES = [[Message(role=Role.USER, content="Hello")]]
+    _MESSAGES: list[Sequence[Message]] = [[Message(role=Role.USER, content="Hello")]]
 
     model.generate_from_messages(_MESSAGES)
     call_kwargs = mock_client.chat.completions.create.call_args.kwargs
@@ -106,7 +108,7 @@ def test_openai_chat_api_forwards_response_format(mocker: MockerFixture) -> None
     mock_client = mocker.MagicMock()
     mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
     mock_client.chat.completions.create.return_value = _make_chat_response(mocker)
-    _MESSAGES = [[Message(role=Role.USER, content="Hello")]]
+    _MESSAGES: list[Sequence[Message]] = [[Message(role=Role.USER, content="Hello")]]
 
     OpenAIModel(model_name="gpt-4o-mini-2024-07-18").generate_from_messages(_MESSAGES)
     assert mock_client.chat.completions.create.call_args.kwargs["response_format"] is omit
@@ -138,7 +140,7 @@ def test_generate_from_messages_preserves_message_roles(mocker: MockerFixture) -
     mock_client.chat.completions.create.return_value = _make_chat_response(mocker)
 
     model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18")
-    messages = [
+    messages: list[Sequence[Message]] = [
         [
             Message(role=Role.SYSTEM, content="system prompt"),
             Message(role=Role.USER, content="user prompt"),
@@ -230,8 +232,8 @@ def test_logprobs_includes_token_straddling_prompt_and_choice(mocker: MockerFixt
 
 
 def _rate_limit_error() -> RateLimitError:
-    request = httpx.Request("POST", "https://openrouter.ai/api/v1/chat/completions")
-    return RateLimitError("throttled", response=httpx.Response(429, request=request), body=None)
+    request = httpx2.Request("POST", "https://openrouter.ai/api/v1/chat/completions")
+    return RateLimitError("throttled", response=httpx2.Response(429, request=request), body=None)
 
 
 def test_retrying_openai_model_recovers_from_a_rate_limit(mocker: MockerFixture) -> None:
@@ -288,9 +290,9 @@ def test_retrying_openai_model_raises_a_rejected_key_at_once(mocker: MockerFixtu
     mock_client = mocker.MagicMock()
     mocker.patch("eval_framework.llm.openai.OpenAI", return_value=mock_client)
     sleep = mocker.patch("time.sleep")
-    request = httpx.Request("POST", "https://openrouter.ai/api/v1/chat/completions")
+    request = httpx2.Request("POST", "https://openrouter.ai/api/v1/chat/completions")
     mock_client.chat.completions.create.side_effect = AuthenticationError(
-        "bad key", response=httpx.Response(401, request=request), body=None
+        "bad key", response=httpx2.Response(401, request=request), body=None
     )
     model = OpenAIModel(model_name="gpt-4o-mini-2024-07-18").with_retry()
 

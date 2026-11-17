@@ -107,7 +107,7 @@ plugins = "pydantic.mypy"
 disallow_untyped_defs = true
 ignore_missing_imports = true
 no_implicit_reexport = true
-files = ["src", "utils"]
+files = ["src", "utils", "tests"]
 
 [tool.pytest.ini_options]
 testpaths = ["./tests"]

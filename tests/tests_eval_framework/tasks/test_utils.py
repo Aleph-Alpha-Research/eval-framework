@@ -1,5 +1,6 @@
 import os
 import tempfile
+from collections.abc import Iterator
 from unittest.mock import MagicMock, patch
 
 import llm_sandbox
@@ -783,7 +784,7 @@ class TestGetOrCreatePool:
     """Tests for get_or_create_pool caching behaviour."""
 
     @pytest.fixture(autouse=True)
-    def reset_pools(self) -> None:
+    def reset_pools(self) -> Iterator[None]:
         """Isolate each test by clearing the module-level pool cache."""
         original = utils_module._pools.copy()
         utils_module._pools.clear()
