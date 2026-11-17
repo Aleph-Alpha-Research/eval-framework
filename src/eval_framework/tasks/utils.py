@@ -7,10 +7,8 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 import dill
-from llm_sandbox import SandboxSession
-from llm_sandbox.const import DefaultImage
 
-from eval_framework.metrics.completion.code_execution.sandbox import get_or_create_pool
+from eval_framework.metrics.completion.code_execution.sandbox import run_python_code
 
 logger = logging.getLogger(__name__)
 
@@ -39,53 +37,6 @@ def extract_python_code_from_response(llm_response: str) -> str:
 
 def get_n_letters(n: int) -> list[str]:
     return list(string.ascii_uppercase)[: max(0, n)]
-
-
-class DockerReturnedEmptyOutput(Exception):
-    """Raised when the docker returns an empty output."""
-
-
-def run_python_code(
-    code: str,
-    image: str | None = None,
-    dockerfile: str | None = None,
-    input_files: list[tuple[str, str]] | None = None,
-    timeout: int = 60,
-    packages: list[str] | None = None,
-    runtime_configs: dict[str, str] | None = None,
-) -> str:
-    """
-    Run code in a sandboxed environment.
-    :param code: The code to run.
-    :param image: Docker image to use.
-    :param dockerfile: Dockerfile to use.
-    :param input_files: pairs of host and docker paths, host files will be copied to the docker.
-    :param timeout: Timeout in seconds, 0 if no timeout.
-    :param packages: List of python packages to install with pip.
-    :return: The output of the code.
-    """
-
-    # Only one of image or dockerfile should be provided.
-    # we fallback to the default python image if no dockerfile is provided.
-    resolved_image = image or (DefaultImage.PYTHON if not dockerfile else None)
-    pool = get_or_create_pool(
-        resolved_image,
-        packages=packages,
-        dockerfile=dockerfile,
-        runtime_configs=runtime_configs,
-    )
-    with SandboxSession(pool=pool, lang="python", encoding_errors="replace") as session:
-        for host_file, docker_file in input_files or []:
-            session.copy_to_runtime(host_file, docker_file)
-
-        output = session.run(code, timeout=timeout)
-        out = (output.stderr + output.stdout).strip()
-        if isinstance(out, bytes):
-            out = out.decode("utf-8")
-
-        if not out.strip():
-            raise DockerReturnedEmptyOutput("Docker returned an empty output.")
-        return out
 
 
 def unittest_merge_snippets(code: str, test_code: str) -> str:
