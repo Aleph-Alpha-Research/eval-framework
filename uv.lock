@@ -478,7 +478,7 @@ dev = [
     { name = "pytest-xdist", specifier = ">=3.8.0,<4" },
     { name = "ruff", specifier = ">=0.17.5" },
     { name = "types-python-dateutil", specifier = ">=2.9.0.20261104,<3" },
-    { name = "types-pyyaml", specifier = ">=6.0.12.20261111,<7" },
+    { name = "types-pyyaml", specifier = ">=6.0.12.20261113,<7" },
     { name = "types-requests", specifier = ">=2.33.0.20261030,<3" },
 ]
 docs = [
