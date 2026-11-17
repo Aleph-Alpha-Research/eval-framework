@@ -382,3 +382,46 @@ def test_file_result_processor_batch_custom_contexts(tmp_path: Path) -> None:
     assert completion2_loaded.context.debug_info == {"runtime": 1.25, "memory": 512}
     assert hasattr(completion2_loaded.context, "logs")
     assert completion2_loaded.context.logs == ["info: started", "debug: processing", "info: completed"]
+
+
+def test_file_result_processor_loglikelihood_context_round_trip(tmp_path: Path) -> None:
+    """A Loglikelihood's context survives save/load, as a BaseMetricContext with its fields kept as extras."""
+
+    class CustomContext(BaseMetricContext):
+        item_id: str = "q-1"
+        weights: list[float] = [0.5, 1.0]
+
+    processor = ResultsFileProcessor(tmp_path)
+    processor.save_response(
+        Loglikelihood(
+            id=1,
+            subject="s",
+            prompt="p",
+            prompt_num_tokens=None,
+            ground_truth=" a",
+            loglikelihoods={" a": -0.5, " b": -1.5},
+            loglikelihoods_num_tokens={" a": 1, " b": 1},
+            context=CustomContext(),
+        )
+    )
+
+    [loaded] = processor.load_responses()
+
+    assert isinstance(loaded, Loglikelihood)
+    assert isinstance(loaded.context, BaseMetricContext)
+    assert loaded.context.model_dump() == {"item_id": "q-1", "weights": [0.5, 1.0]}
+
+
+def test_file_result_processor_loads_loglikelihood_written_without_context(tmp_path: Path) -> None:
+    """An output.jsonl line written before Loglikelihood had a context field still loads, with context None."""
+    pre_change_line = (
+        '{"prompt": "p", "prompt_num_tokens": null, "loglikelihoods": {" a": -0.5}, '
+        '"loglikelihoods_num_tokens": {" a": 1}, "loglikelihoods_per_token": {}, "concat_compression": null, '
+        '"id": 1, "subject": "s", "ground_truth": " a"}\n'
+    )
+    (tmp_path / "output.jsonl").write_text(pre_change_line)
+
+    [loaded] = ResultsFileProcessor(tmp_path).load_responses()
+
+    assert isinstance(loaded, Loglikelihood)
+    assert loaded.context is None
