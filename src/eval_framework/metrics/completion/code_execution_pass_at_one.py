@@ -6,16 +6,16 @@ from llm_sandbox.exceptions import SandboxTimeoutError
 from pydantic import ConfigDict
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.completion.code_execution.python_tests import (
+    ExecutionResult,
+    execute_python_code_with_tests,
+)
 from eval_framework.shared.types import (
     BaseMetricContext,
     Completion,
     extract_context_metric,
 )
-from eval_framework.tasks.utils import (
-    CallableSerializer,
-    ExecutionResult,
-    execute_python_code_with_tests,
-)
+from eval_framework.tasks.utils import CallableSerializer
 
 
 class CodeExecutionBaseContext(BaseMetricContext):
