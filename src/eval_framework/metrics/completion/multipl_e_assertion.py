@@ -9,7 +9,7 @@ from typing import Any, NamedTuple
 from llm_sandbox import SandboxSession
 from llm_sandbox.const import DefaultImage, SupportedLanguage
 from llm_sandbox.exceptions import SandboxTimeoutError
-from pydantic import Field
+from pydantic import ConfigDict
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import BaseMetricContext, Completion, Error, extract_context_metric
@@ -90,9 +90,16 @@ _CUSTOM_LANG_MAP: dict[str, _CustomLangConfig] = {
 class MultiPLEMetricContext(BaseMetricContext):
     """Context for MultiPL-E code execution."""
 
-    prompt: str = Field(description="Original function-signature prompt from the dataset")
-    tests: str = Field(description="Language-native test harness code from the dataset")
-    language: str = Field(description="Target programming language identifier (e.g. 'cpp', 'java', 'js')")
+    model_config = ConfigDict(use_attribute_docstrings=True)
+
+    prompt: str
+    """Original function-signature prompt from the dataset."""
+
+    tests: str
+    """Language-native test harness code from the dataset."""
+
+    language: str
+    """Target programming language identifier (e.g. 'cpp', 'java', 'js')."""
 
 
 class MultiPLECodeAssertion(BaseMetric[Completion]):

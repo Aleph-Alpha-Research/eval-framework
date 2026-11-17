@@ -3,7 +3,7 @@ from collections.abc import Callable
 from typing import Self
 
 from llm_sandbox.exceptions import SandboxTimeoutError
-from pydantic import Field
+from pydantic import ConfigDict
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
 from eval_framework.shared.types import (
@@ -19,37 +19,40 @@ from eval_framework.tasks.utils import (
 
 
 class CodeExecutionBaseContext(BaseMetricContext):
-    run_env: str = Field(description="Name of docker image to run unit-tests inside")
-    code_prompt: str = Field(description="Prompt to LLM for code generation")
-    test_code: str = Field(description="Python code that contains logic for unit test execution")
-    benchmark_timeout: int = Field(default=60, description="Time in seconds for the full test execution run")
-    package_downloads: dict[str, str | None] = Field(
-        description="a dictionary listing the packages and their respective names in PyPiinto the LLM sandbox"
-    )
+    model_config = ConfigDict(use_attribute_docstrings=True)
+
+    run_env: str
+    """Name of docker image to run unit-tests inside."""
+
+    code_prompt: str
+    """Prompt to LLM for code generation."""
+
+    test_code: str
+    """Python code that contains logic for unit test execution."""
+
+    benchmark_timeout: int = 60
+    """Time in seconds for the full test execution run."""
+
+    package_downloads: dict[str, str | None]
+    """A dictionary listing the packages and their respective names in PyPi into the LLM sandbox."""
 
 
 class CodeExecutionPassAtOneContext(CodeExecutionBaseContext):
-    snippet_merge_fn: str = Field(
-        description="logic for merging LLM generated code with test execution code;"
-        "this code will be passed into the sandbox to run the testing process"
-        "This code is serialized"
-    )
-    output_parse_fn: str = Field(
-        description="logic for parsing the output of test code execution run within the LLM sandbox"
-        "This code is serialized"
-    )
+    snippet_merge_fn: str
+    """Logic for merging LLM generated code with test execution code; this code will be passed into the sandbox
+    to run the testing process. This code is serialized."""
+
+    output_parse_fn: str
+    """Logic for parsing the output of test code execution run within the LLM sandbox. This code is serialized."""
 
 
 class RealtimeCodeExectionContext(CodeExecutionBaseContext):
-    snippet_merge_fn: Callable[[str, str], str] = Field(
-        description="logic for merging LLM generated code with test execution code;"
-        "this code will be passed into the sandbox to run the testing process"
-        "This code is deserialized"
-    )
-    output_parse_fn: Callable[[str], ExecutionResult] = Field(
-        description="logic for parsing the output of test code execution run within the LLM sandbox"
-        "This code is deserialized"
-    )
+    snippet_merge_fn: Callable[[str, str], str]
+    """Logic for merging LLM generated code with test execution code; this code will be passed into the sandbox
+    to run the testing process. This code is deserialized."""
+
+    output_parse_fn: Callable[[str], ExecutionResult]
+    """Logic for parsing the output of test code execution run within the LLM sandbox. This code is deserialized."""
 
     @classmethod
     def from_context(cls, context: CodeExecutionPassAtOneContext) -> Self:
