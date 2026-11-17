@@ -14,6 +14,31 @@
 
 ### Bug Fixes
 
+## [0.25.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.24.1...v0.25.0) (2026-11-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* unused llm judge metrics removed
+* adding languages to global mmlu's support set
+
+### Features
+
+* adding languages to global mmlu's support set ([d73f760](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d73f760d0f1af2bec11a4d6fdac453ad09e616d6))
+* unused llm judge metrics removed ([30e0da8](https://github.com/Aleph-Alpha-Research/eval-framework/commit/30e0da8da56117cc7e8063998a0b0a44eca74238))
+
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=3.51.0,&lt;4 ([40363ee](https://github.com/Aleph-Alpha-Research/eval-framework/commit/40363eeb9aab80bedcf2c06ec43a9e2c54a517f7))
+* **deps:** update dependency transformers to &gt;=5.23.0,&lt;6 ([54e0492](https://github.com/Aleph-Alpha-Research/eval-framework/commit/54e0492920fca52d42e318ab5f3764b91928964d))
+* minerva metric raises a AssertionError for a sample without ground truth ([0983931](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0983931bad15594a63e3fb9b37e49b5d75759296))
+
+
+### Documentation
+
+* ErrorFreeRatio counts samples a metric could not score ([ab17f97](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ab17f97c0ce1d6f1e3da518d31f2dc84fe9e2e1b))
+
 ## [0.24.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.24.0...v0.24.1) (2026-11-16)
 
 
