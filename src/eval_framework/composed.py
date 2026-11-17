@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Self, final, override
 from eval_framework.answer import AnswerPolicy, PickFromCandidates
 from eval_framework.choices import ChoiceReader
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
-from eval_framework.eval_kind import Choice, EvalKind
+from eval_framework.eval_kind import Choice, EvalKind, ItemContext
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotGenerator, FewShotPolicy, FewShotSplit, SampleSplit
 from eval_framework.shared.types import Completion, RawCompletion
 from eval_framework.subjects import NoSubject, Subjects, SubjectsSelector
@@ -244,17 +244,19 @@ class ComposedBenchmark(Benchmark):
         dataset_policy: DatasetPolicy,
         language: LanguageSpec = None,
         display_name: str | None = None,
+        context: ItemContext | None = None,
     ) -> Self:
         """Build a choice-based benchmark. The same ``reader`` + ``styler`` drive both the scored ``Choice``
         and its matching few-shot demonstrations, so they are given once. A choice is always scored by
         loglikelihood over its candidates, so the answer is fixed to ``PickFromCandidates``. The few-shot
         source is picked from whether ``fewshot_split`` is the eval split (leak-safe) or a separate one.
-        ``language`` is deprecated and ignored."""
+        ``context`` derives each scored sample's metric context from its item (see ``Choice``); the few-shot
+        demonstrations don't carry one. ``language`` is deprecated and ignored."""
         source = SampleSplit() if fewshot_split == sample_split else FewShotSplit(fewshot_split)
         return cls.compose(
             id=id,
             display_name=display_name,
-            kind=Choice(reader, styler),
+            kind=Choice(reader, styler, context),
             answer=PickFromCandidates(),
             sample_split=sample_split,
             fewshot=FewShot(source, ChoiceRenderer(reader, styler)),

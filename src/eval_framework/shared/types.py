@@ -237,6 +237,7 @@ class Loglikelihood(BaseLoglikelihood):
     id: int
     subject: str
     ground_truth: str | list[str]
+    context: list[BaseMetricContext] | BaseMetricContext | None = None
 
     @property
     def ground_truth_list(self) -> list[str] | list[None]:
@@ -249,7 +250,7 @@ MetricContext = TypeVar("MetricContext", bound=BaseMetricContext)
 
 
 def extract_context_metric[MetricContext: BaseMetricContext](
-    response: Completion, metric_context_class: type[MetricContext]
+    response: Completion | Loglikelihood, metric_context_class: type[MetricContext]
 ) -> MetricContext:
     assert response.context is not None, "Expected context to be provided in the response"
     if not isinstance(response.context, list):

@@ -6,15 +6,19 @@ from unittest.mock import Mock
 import pytest
 from dateutil import parser
 
+from eval_framework.choices import ChoiceFields, ChoiceReader
+from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark, Eval, ResponseType, Sample
 from eval_framework.llm.base import BaseLLM
 from eval_framework.response_generator import ResponseGenerator, repeat_samples
 from eval_framework.result_processors.base import ResultProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
-from eval_framework.shared.types import Completion, RawCompletion
+from eval_framework.shared.types import BaseMetricContext, Completion, Loglikelihood, RawCompletion
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.registry import Registry
+from eval_framework.tasks.task_style import ClozeStyle
 from template_formatting.formatter import Message, Role
+from tests.tests_eval_framework.benchmarks.utils import DatasetStub
 from tests.tests_eval_framework.conftest import MockLLM
 
 
@@ -483,3 +487,36 @@ class NoopResultProcessor(ResultProcessor):
     def save_aggregated_results(self, result: dict) -> None: ...
     def load_metrics_results(self) -> list:
         return []
+
+
+class _ItemContext(BaseMetricContext):
+    item_id: str
+
+
+def test_loglikelihood_response_carries_the_samples_context(tmp_path: Path) -> None:
+    # A loglikelihood metric reads per-item data from response.context, just as a generation metric does.
+    context = _ItemContext(item_id="q-1")
+
+    class _Reader(ChoiceReader):
+        def read(self, item: dict[str, Any]) -> ChoiceFields:
+            return ChoiceFields(raw_question=item["q"], choices=["x", "y"], correct_index=0)
+
+    benchmark = ComposedBenchmark.choice(
+        id="ContextChoiceStub",
+        reader=_Reader(),
+        styler=ClozeStyle(),
+        sample_split="test",
+        fewshot_split="test",
+        dataset_policy=DatasetStub({"test": [{"q": "eval"}]}),
+        context=lambda item: context,
+    )
+    registry = Registry()
+    registry.add(benchmark)
+    llm = MockLLM()
+    config = EvalConfig(task_name=benchmark.id(), num_fewshot=0, num_samples=1, llm_class=llm.__class__)
+    generator = ResponseGenerator(llm, config, ResultsFileProcessor(tmp_path), benchmark_registry=registry)
+
+    [response] = generator.generate()
+
+    assert isinstance(response, Loglikelihood)
+    assert response.context == context

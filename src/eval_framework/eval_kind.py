@@ -88,11 +88,13 @@ class EvalKind(ABC):
 @final
 class Choice(EvalKind):
     """Choice-based eval kind: wraps a reader (item -> ChoiceFields) and a styler (multiple-choice /
-    cloze / BPB), producing exactly one scored sample per item."""
+    cloze / BPB), producing exactly one scored sample per item. ``context`` derives the per-sample scoring
+    material a metric needs beyond the gold answer (see ``SampleBody.context``), as in ``Generative``."""
 
-    def __init__(self, reader: ChoiceReader, styler: "TaskStyler") -> None:
+    def __init__(self, reader: ChoiceReader, styler: "TaskStyler", context: "ItemContext | None" = None) -> None:
         self._reader = reader
         self._styler = styler
+        self._context: ItemContext = context if context is not None else NoContext
 
     @override
     def metrics(self) -> list[type["BaseMetric"]]:
@@ -109,6 +111,7 @@ class Choice(EvalKind):
                 cue=self._styler.get_cue_text(),
                 possible_completions=completions,
                 ground_truth=self._styler.get_ground_truth(fields.choices, fields.correct_index),
+                context=self._context(item),
             )
         ]
 
