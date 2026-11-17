@@ -4,8 +4,8 @@ import pytest
 from llm_sandbox.exceptions import ImagePullError, SandboxTimeoutError
 
 from eval_framework.metrics.completion.code_assertion import CodeCompletionAssertion
+from eval_framework.metrics.completion.code_execution.sandbox import DockerReturnedEmptyOutput
 from eval_framework.shared.types import Completion
-from eval_framework.tasks.utils import DockerReturnedEmptyOutput
 
 
 @pytest.mark.parametrize(

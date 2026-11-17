@@ -21,8 +21,8 @@ from eval_framework.benchmarks.mbpp import (
     olmes_reconstruct,
 )
 from eval_framework.contract import Benchmark
+from eval_framework.metrics.completion.code_execution.sandbox import run_python_code
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.utils import run_python_code
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,
