@@ -1,12 +1,7 @@
 import argparse
 import datetime
 import logging
-import shutil
-import socket
-import subprocess
-import time
-import urllib.error
-import urllib.request
+from contextlib import AbstractContextManager, nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -15,13 +10,10 @@ from eval_framework.main import main
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.task_loader import load_extra_tasks
 from eval_framework.tasks.utils import close_pools
+from eval_framework.utils.llama_server import LLAMA_SERVER_BASE_URL, llama_server
 from eval_framework.utils.logging import setup_logging
 
 logger = logging.getLogger(__name__)
-
-# llama.cpp's llama-server listens here by default.
-LOCAL_PORT = 8080
-LOCAL_BASE_URL = f"http://localhost:{LOCAL_PORT}/v1"
 
 
 def parse_args() -> argparse.Namespace:
@@ -300,48 +292,11 @@ def _run_single_task(kwargs: dict) -> None:
     logger.info(f"time since start: {datetime.datetime.now() - now}")
 
 
-def _start_local_server(model: str, output_dir: Path) -> subprocess.Popen:
-    """Serve `model` (a Hugging Face GGUF repo) with llama-server."""
-    try:
-        socket.create_connection(("localhost", LOCAL_PORT), timeout=1).close()
-    except OSError:
-        pass
-    else:
-        # Never reuse it: another model could answer and be recorded under `model`.
-        raise RuntimeError(
-            f"Port {LOCAL_PORT} is already in use, so --self-host cannot start llama-server. Stop that process, "
-            "or drop --self-host and pass `base_url=...` in --llm-args to use your own server."
-        )
-    if shutil.which("llama-server") is None:
-        raise RuntimeError(
-            "--self-host needs `llama-server` on the PATH. Install llama.cpp (`brew install llama.cpp`)."
-        )
-    output_dir.mkdir(parents=True, exist_ok=True)
-    log_path = output_dir / "llama-server.log"
-    print(f"Starting llama-server for {model} (first run downloads the model; log: {log_path})")
-    with open(log_path, "w") as log:
-        server = subprocess.Popen(
-            ["llama-server", "-hf", model, "--port", str(LOCAL_PORT)], stdout=log, stderr=subprocess.STDOUT
-        )
-    # No timeout: the download can take long. A failed start ends the process, which ends the wait.
-    try:
-        while server.poll() is None:
-            try:
-                urllib.request.urlopen(f"http://localhost:{LOCAL_PORT}/health", timeout=2).close()
-                return server
-            except (urllib.error.URLError, OSError):  # not listening yet, or 503 while the model loads
-                time.sleep(1)
-    except BaseException:  # e.g. Ctrl-C during the download: the caller has no handle to stop it yet
-        server.kill()
-        server.wait()
-        raise
-    raise RuntimeError(f"llama-server exited while starting {model}; see {log_path}")
-
-
 def run_with_kwargs(kwargs: dict) -> None:
-    llm_args = kwargs.get("llm_args", {})
-    self_host = kwargs.pop("self_host", False)
-    if self_host:
+    # Without --self-host there is no server to manage.
+    server: AbstractContextManager = nullcontext()
+    if kwargs.pop("self_host", False):
+        llm_args = kwargs.get("llm_args", {})
         if "model_name" not in llm_args or "base_url" in llm_args:
             raise ValueError("--self-host needs `model_name` in --llm-args and cannot be combined with `base_url`.")
         # A suite can override `model_name` or `base_url` per task, so results could be recorded
@@ -349,30 +304,26 @@ def run_with_kwargs(kwargs: dict) -> None:
         if kwargs.get("task_suite") is not None:
             raise ValueError("--self-host cannot be combined with --task-suite.")
         # llama-server needs no key, but the OpenAI SDK rejects an empty one.
-        kwargs["llm_args"] = {"api_key": "no-key", **llm_args, "base_url": LOCAL_BASE_URL}
+        kwargs["llm_args"] = {"api_key": "no-key", **llm_args, "base_url": LLAMA_SERVER_BASE_URL}
+        server = llama_server(llm_args["model_name"], Path(kwargs.get("output_dir", "outputs")))
     task_suite_path = kwargs.pop("task_suite", None)
 
-    server = None
     try:
-        if self_host:
-            server = _start_local_server(llm_args["model_name"], Path(kwargs.get("output_dir", "outputs")))
-        if task_suite_path is not None:
-            from eval_framework.suite import TaskSuite, run_suite
+        with server:
+            if task_suite_path is not None:
+                from eval_framework.suite import TaskSuite, run_suite
 
-            output_dir = kwargs.get("output_dir", "outputs")
-            log_level = kwargs.get("verbosity", 1)
-            setup_logging(output_dir, log_level=log_level)
+                output_dir = kwargs.get("output_dir", "outputs")
+                log_level = kwargs.get("verbosity", 1)
+                setup_logging(output_dir, log_level=log_level)
 
-            suite = TaskSuite.load(task_suite_path)
-            logger.info(f"Loaded task suite '{suite.name}' from {task_suite_path}")
-            result = run_suite(suite, kwargs)
-            logger.info(f"Suite '{suite.name}' completed. Aggregates: {result.aggregates}")
-        else:
-            _run_single_task(kwargs)
+                suite = TaskSuite.load(task_suite_path)
+                logger.info(f"Loaded task suite '{suite.name}' from {task_suite_path}")
+                result = run_suite(suite, kwargs)
+                logger.info(f"Suite '{suite.name}' completed. Aggregates: {result.aggregates}")
+            else:
+                _run_single_task(kwargs)
     finally:
-        if server is not None:
-            server.kill()  # terminate() is ignored while the server is generating
-            server.wait()
         close_pools()
 
 

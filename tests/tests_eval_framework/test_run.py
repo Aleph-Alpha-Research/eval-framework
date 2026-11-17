@@ -9,14 +9,15 @@ from unittest.mock import Mock, patch
 import pytest
 
 from eval_framework.llm.openai import OpenAIModel
-from eval_framework.run import LOCAL_BASE_URL, _build_config, _start_local_server, run, run_with_kwargs
+from eval_framework.run import _build_config, run, run_with_kwargs
+from eval_framework.utils.llama_server import LLAMA_SERVER_BASE_URL
 from tests.tests_eval_framework.conftest import MockLLM
 
 
 @pytest.fixture(autouse=True)
-def start_local_server() -> Iterator[Mock]:
+def llama_server() -> Iterator[Mock]:
     """No test may launch a real llama-server."""
-    with patch("eval_framework.run._start_local_server", return_value=None) as mock:
+    with patch("eval_framework.run.llama_server") as mock:
         yield mock
 
 
@@ -123,29 +124,27 @@ def test_build_config_requires_model_names(
         _build_config(_kwargs(llm_args, judge_model_args))
 
 
-def test_run_with_kwargs_stays_remote_without_self_host_flag(start_local_server: Mock) -> None:
+def test_run_with_kwargs_stays_remote_without_self_host_flag(llama_server: Mock) -> None:
     with patch("eval_framework.run._run_single_task") as run_single_task:
         run_with_kwargs({"llm_args": {"model_name": "m"}})
 
     assert run_single_task.call_args.args[0] == {"llm_args": {"model_name": "m"}}
-    start_local_server.assert_not_called()
+    llama_server.assert_not_called()
 
 
-def test_run_with_kwargs_self_host_flag_starts_and_stops_the_server(start_local_server: Mock) -> None:
-    start_local_server.return_value = Mock()
-
+def test_run_with_kwargs_self_host_flag_starts_and_stops_the_server(llama_server: Mock) -> None:
     with patch("eval_framework.run._run_single_task") as run_single_task:
         run_with_kwargs({"llm_args": {"model_name": "org/model-GGUF"}, "self_host": True, "output_dir": "out"})
 
     assert run_single_task.call_args.args[0]["llm_args"] == {
         "model_name": "org/model-GGUF",
-        "base_url": LOCAL_BASE_URL,
+        "base_url": LLAMA_SERVER_BASE_URL,
         "api_key": "no-key",
     }
     assert "self_host" not in run_single_task.call_args.args[0]
-    start_local_server.assert_called_once_with("org/model-GGUF", Path("out"))
-    start_local_server.return_value.kill.assert_called_once()
-    start_local_server.return_value.wait.assert_called_once()
+    llama_server.assert_called_once_with("org/model-GGUF", Path("out"))
+    llama_server.return_value.__enter__.assert_called_once()
+    llama_server.return_value.__exit__.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -157,59 +156,9 @@ def test_run_with_kwargs_self_host_flag_starts_and_stops_the_server(start_local_
     ],
 )
 def test_run_with_kwargs_self_host_flag_rejects_conflicting_arguments(
-    start_local_server: Mock, kwargs: dict[str, Any]
+    llama_server: Mock, kwargs: dict[str, Any]
 ) -> None:
     with pytest.raises(ValueError, match="--self-host"):
         run_with_kwargs({**kwargs, "self_host": True})
 
-    start_local_server.assert_not_called()
-
-
-def test_start_local_server_refuses_a_busy_port(tmp_path: Path) -> None:
-    with (
-        patch("eval_framework.run.socket.create_connection"),
-        patch("eval_framework.run.subprocess.Popen") as popen,
-        pytest.raises(RuntimeError, match="already in use"),
-    ):
-        _start_local_server("m", tmp_path)
-
-    popen.assert_not_called()
-
-
-def test_start_local_server_explains_a_missing_llama_server(tmp_path: Path) -> None:
-    with (
-        patch("eval_framework.run.socket.create_connection", side_effect=OSError),
-        patch("eval_framework.run.shutil.which", return_value=None),
-        pytest.raises(RuntimeError, match="brew install llama.cpp"),
-    ):
-        _start_local_server("m", tmp_path)
-
-
-def test_start_local_server_launches_llama_server_and_waits_for_health(tmp_path: Path) -> None:
-    with (
-        patch("eval_framework.run.socket.create_connection", side_effect=OSError),
-        patch("eval_framework.run.shutil.which", return_value="/bin/llama-server"),
-        patch("eval_framework.run.subprocess.Popen") as popen,
-        patch("eval_framework.run.urllib.request.urlopen", side_effect=[OSError, Mock()]),
-        patch("eval_framework.run.time.sleep"),
-    ):
-        popen.return_value.poll.return_value = None
-
-        assert _start_local_server("org/model-GGUF", tmp_path) is popen.return_value
-
-    assert popen.call_args.args[0] == ["llama-server", "-hf", "org/model-GGUF", "--port", "8080"]
-
-
-def test_start_local_server_stops_the_server_when_interrupted_during_startup(tmp_path: Path) -> None:
-    with (
-        patch("eval_framework.run.socket.create_connection", side_effect=OSError),
-        patch("eval_framework.run.shutil.which", return_value="/bin/llama-server"),
-        patch("eval_framework.run.subprocess.Popen") as popen,
-        patch("eval_framework.run.urllib.request.urlopen", side_effect=KeyboardInterrupt),
-        pytest.raises(KeyboardInterrupt),
-    ):
-        popen.return_value.poll.return_value = None
-        _start_local_server("org/model-GGUF", tmp_path)
-
-    popen.return_value.kill.assert_called_once()
-    popen.return_value.wait.assert_called_once()
+    llama_server.assert_not_called()
