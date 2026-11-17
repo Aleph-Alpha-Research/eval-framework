@@ -1,6 +1,3 @@
-import os
-import tempfile
-
 import llm_sandbox
 import pytest
 
@@ -11,38 +8,8 @@ from eval_framework.tasks.utils import (
     execute_python_code_with_tests,
     extract_imports,
     get_external_dependencies,
-    run_python_code,
     unittest_merge_snippets,
 )
-
-
-def test_run_python_code() -> None:
-    # GIVEN a code which prints out a file
-    with tempfile.TemporaryDirectory() as tmpdir:
-        content = "hello!"
-        filename = os.path.join(tmpdir, "o.txt")
-        code = f"""with open("{filename}", "r") as f:\n""" """  print(f.read())\n"""
-        with open(filename, "w") as f:
-            f.write(content)
-        # WHEN running it a docker with an injected file
-        output = run_python_code(code, image="python:3.13-slim", input_files=[(str(filename), filename)])
-        # THEN the code is executed and reads the correct content
-        assert content == output
-
-
-def test_run_python_code_timeout() -> None:
-    code = """import time\ntime.sleep(15)"""
-
-    with pytest.raises(llm_sandbox.exceptions.SandboxTimeoutError):
-        run_python_code(code, image="python:3.13-slim", timeout=2)
-
-
-def test_run_python_code_with_packages() -> None:
-    output = run_python_code("import pytest", image="python:3.13-slim")
-    assert "ModuleNotFoundError" in output
-    output = run_python_code("import pytest\nprint(pytest.__name__)", image="python:3.13-slim", packages=["pytest"])
-    assert "ModuleNotFoundError" not in output
-    assert "pytest" in output
 
 
 class TestParseUnittestOutput:

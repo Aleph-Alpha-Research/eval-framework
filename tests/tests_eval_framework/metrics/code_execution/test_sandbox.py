@@ -1,10 +1,13 @@
+import os
+import tempfile
 from collections.abc import Iterator
 from unittest.mock import MagicMock, patch
 
+import llm_sandbox
 import pytest
 
 import eval_framework.metrics.completion.code_execution.sandbox as sandbox_module
-from eval_framework.metrics.completion.code_execution.sandbox import get_or_create_pool
+from eval_framework.metrics.completion.code_execution.sandbox import get_or_create_pool, run_python_code
 
 
 class TestGetOrCreatePool:
@@ -110,3 +113,32 @@ class TestGetOrCreatePool:
             pool_with_pkgs_again = get_or_create_pool(dockerfile=dockerfile, packages=["numpy"])
             assert mock_create.call_count == 2
             assert pool_with_pkgs_again is pool_with_pkgs
+
+
+def test_run_python_code() -> None:
+    # GIVEN a code which prints out a file
+    with tempfile.TemporaryDirectory() as tmpdir:
+        content = "hello!"
+        filename = os.path.join(tmpdir, "o.txt")
+        code = f"""with open("{filename}", "r") as f:\n""" """  print(f.read())\n"""
+        with open(filename, "w") as f:
+            f.write(content)
+        # WHEN running it a docker with an injected file
+        output = run_python_code(code, image="python:3.13-slim", input_files=[(str(filename), filename)])
+        # THEN the code is executed and reads the correct content
+        assert content == output
+
+
+def test_run_python_code_timeout() -> None:
+    code = """import time\ntime.sleep(15)"""
+
+    with pytest.raises(llm_sandbox.exceptions.SandboxTimeoutError):
+        run_python_code(code, image="python:3.13-slim", timeout=2)
+
+
+def test_run_python_code_with_packages() -> None:
+    output = run_python_code("import pytest", image="python:3.13-slim")
+    assert "ModuleNotFoundError" in output
+    output = run_python_code("import pytest\nprint(pytest.__name__)", image="python:3.13-slim", packages=["pytest"])
+    assert "ModuleNotFoundError" not in output
+    assert "pytest" in output

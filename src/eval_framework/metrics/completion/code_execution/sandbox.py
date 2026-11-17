@@ -1,5 +1,6 @@
 """Running code in Docker sandboxes (via ``llm_sandbox``).
 
+- ``run_python_code``: for a Python snippet, optionally with pip packages, a custom image/Dockerfile, or input files
 - ``execute_in_default_image``: for a single file in a language llm-sandbox supports natively (``SupportedLanguage``)
 - ``execute_in_custom_image``: for everything else, e.g. a language llm-sandbox doesn't support, another image,
   extra files next to the code.
@@ -73,6 +74,53 @@ def close_pools() -> None:
 
 
 atexit.register(close_pools)
+
+
+class DockerReturnedEmptyOutput(Exception):
+    """Raised when the docker returns an empty output."""
+
+
+def run_python_code(
+    code: str,
+    image: str | None = None,
+    dockerfile: str | None = None,
+    input_files: list[tuple[str, str]] | None = None,
+    timeout: int = 60,
+    packages: list[str] | None = None,
+    runtime_configs: dict[str, str] | None = None,
+) -> str:
+    """
+    Run code in a sandboxed environment.
+    :param code: The code to run.
+    :param image: Docker image to use.
+    :param dockerfile: Dockerfile to use.
+    :param input_files: pairs of host and docker paths, host files will be copied to the docker.
+    :param timeout: Timeout in seconds, 0 if no timeout.
+    :param packages: List of python packages to install with pip.
+    :return: The output of the code.
+    """
+
+    # Only one of image or dockerfile should be provided.
+    # we fallback to the default python image if no dockerfile is provided.
+    resolved_image = image or (DefaultImage.PYTHON if not dockerfile else None)
+    pool = get_or_create_pool(
+        resolved_image,
+        packages=packages,
+        dockerfile=dockerfile,
+        runtime_configs=runtime_configs,
+    )
+    with SandboxSession(pool=pool, lang="python", encoding_errors="replace") as session:
+        for host_file, docker_file in input_files or []:
+            session.copy_to_runtime(host_file, docker_file)
+
+        output = session.run(code, timeout=timeout)
+        out = (output.stderr + output.stdout).strip()
+        if isinstance(out, bytes):
+            out = out.decode("utf-8")
+
+        if not out.strip():
+            raise DockerReturnedEmptyOutput("Docker returned an empty output.")
+        return out
 
 
 def execute_in_default_image(
