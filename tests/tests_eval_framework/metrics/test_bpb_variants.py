@@ -22,7 +22,8 @@ def _response(
     if bits is not None and byte_lens is not None:
         per_tok = {ground_truth: PerTokenScores(bits=bits, byte_lens=byte_lens)}
     return Loglikelihood(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="s",
         ground_truth=ground_truth,
         prompt="p",
@@ -41,7 +42,8 @@ def test_headline_matches_legacy_formula() -> None:
     ground_truth = " Paris"
     log_p = -2.5
     resp = Loglikelihood(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="s",
         ground_truth=ground_truth,
         prompt="p",
@@ -68,7 +70,8 @@ def test_emits_prefix_when_per_token_present(monkeypatch: pytest.MonkeyPatch) ->
 
 def test_omits_prefix_without_per_token() -> None:
     resp = Loglikelihood(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="s",
         ground_truth="A",
         prompt="p",
@@ -89,7 +92,8 @@ def test_omits_prefix_without_per_token() -> None:
 def test_first_alias_default(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(bpb_common, "ALIAS_RULE", "first")
     resp = Loglikelihood(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="s",
         ground_truth=["first", "second"],
         prompt="p",

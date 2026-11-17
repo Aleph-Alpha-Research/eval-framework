@@ -8,7 +8,8 @@ from eval_framework.shared.types import Loglikelihood
 
 def make_response(loglikelihoods: dict[str, float], ground_truth: Any) -> Loglikelihood:
     return Loglikelihood(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="test",
         ground_truth=ground_truth,
         prompt="test",

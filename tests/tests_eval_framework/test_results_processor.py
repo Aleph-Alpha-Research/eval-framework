@@ -80,7 +80,8 @@ def test_file_result_processor_save_and_load_results(tmp_path: Path) -> None:
     responses: list[Completion | Loglikelihood] = []
     responses.append(
         Completion(
-            id=1,
+            sample_id=1,
+            result_id=1,
             subject="math",
             ground_truth="4",
             prompt="What is 2+2?",
@@ -93,7 +94,8 @@ def test_file_result_processor_save_and_load_results(tmp_path: Path) -> None:
     )
     responses.append(
         Loglikelihood(
-            id=2,
+            sample_id=2,
+            result_id=2,
             subject="math",
             prompt="What is 2+2?",
             prompt_num_tokens=None,
@@ -143,7 +145,8 @@ def test_file_result_processor_load_invalid_output(tmp_path: Path) -> None:
 def test_file_result_processor_load_duplicate_output(tmp_path: Path) -> None:
     # GIVEN a valid jsonl file with duplicate IDs
     completion = Completion(
-        id=123,
+        sample_id=123,
+        result_id=123,
         subject="math",
         ground_truth="4",
         prompt="What is 2+2?",
@@ -170,7 +173,8 @@ def test_file_result_processor_save_and_load_metrics(tmp_path: Path) -> None:
     for i in range(2):
         results.append(
             Result(
-                id=i,
+                sample_id=i,
+                result_id=i,
                 subject="math",
                 num_fewshot=2,
                 llm_name="TestLLM",
@@ -216,7 +220,8 @@ def test_file_result_processor_custom_context(tmp_path: Path) -> None:
     # Create a Completion with our custom context
     custom_context = CustomContext()
     completion = Completion(
-        id=999,
+        sample_id=999,
+        result_id=999,
         subject="custom_context_test",
         ground_truth="test",
         prompt="Test with custom context",
@@ -271,7 +276,8 @@ def test_file_result_processor_list_of_custom_contexts(tmp_path: Path) -> None:
 
     # Create a Completion with our list of contexts
     completion = Completion(
-        id=888,
+        sample_id=888,
+        result_id=888,
         subject="multiple_contexts_test",
         ground_truth="test",
         prompt="Test with multiple custom contexts",
@@ -329,7 +335,8 @@ def test_file_result_processor_batch_custom_contexts(tmp_path: Path) -> None:
 
     # Create completions with custom contexts
     completion1 = Completion(
-        id=777,
+        sample_id=777,
+        result_id=777,
         subject="batch_test_1",
         ground_truth="answer1",
         prompt="Test prompt 1",
@@ -342,7 +349,8 @@ def test_file_result_processor_batch_custom_contexts(tmp_path: Path) -> None:
     )
 
     completion2 = Completion(
-        id=778,
+        sample_id=778,
+        result_id=778,
         subject="batch_test_2",
         ground_truth="answer2",
         prompt="Test prompt 2",
@@ -362,7 +370,7 @@ def test_file_result_processor_batch_custom_contexts(tmp_path: Path) -> None:
     assert len(loaded_responses) == 2
 
     # Check first completion's context
-    completion1_loaded = next(c for c in loaded_responses if c.id == 777)
+    completion1_loaded = next(c for c in loaded_responses if c.result_id == 777)
     assert isinstance(completion1_loaded, Completion), "Expected Completion object"
     assert completion1_loaded.context is not None
     assert isinstance(completion1_loaded.context, BaseMetricContext), "Expected BaseMetricContext"
@@ -372,7 +380,7 @@ def test_file_result_processor_batch_custom_contexts(tmp_path: Path) -> None:
     assert completion1_loaded.context.metrics == {"accuracy": 0.92, "f1": 0.88}
 
     # Check second completion's context
-    completion2_loaded = next(c for c in loaded_responses if c.id == 778)
+    completion2_loaded = next(c for c in loaded_responses if c.result_id == 778)
     assert isinstance(completion2_loaded, Completion), "Expected Completion object"
     assert completion2_loaded.context is not None
     assert isinstance(completion2_loaded.context, BaseMetricContext), "Expected BaseMetricContext"
@@ -394,7 +402,8 @@ def test_file_result_processor_loglikelihood_context_round_trip(tmp_path: Path) 
     processor = ResultsFileProcessor(tmp_path)
     processor.save_response(
         Loglikelihood(
-            id=1,
+            sample_id=1,
+            result_id=1,
             subject="s",
             prompt="p",
             prompt_num_tokens=None,
@@ -417,7 +426,7 @@ def test_file_result_processor_loads_loglikelihood_written_without_context(tmp_p
     pre_change_line = (
         '{"prompt": "p", "prompt_num_tokens": null, "loglikelihoods": {" a": -0.5}, '
         '"loglikelihoods_num_tokens": {" a": 1}, "loglikelihoods_per_token": {}, "concat_compression": null, '
-        '"id": 1, "subject": "s", "ground_truth": " a"}\n'
+        '"sample_id": 1, "result_id": 1, "subject": "s", "ground_truth": " a"}\n'
     )
     (tmp_path / "output.jsonl").write_text(pre_change_line)
 

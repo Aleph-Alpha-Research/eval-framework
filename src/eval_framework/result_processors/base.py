@@ -16,13 +16,19 @@ class Result(BaseModel):
     """One metric value for one sample.
 
     Prompt and response are deliberately not part of a result: they are in
-    output.jsonl under the same id and subject, and repeating them in every
+    output.jsonl under the same result_id and subject, and repeating them in every
     metric row multiplied results.jsonl by the number of metrics, which for
     long-context tasks meant gigabytes.
     """
 
-    model_config = ConfigDict(extra="forbid")
-    id: int
+    model_config = ConfigDict(extra="forbid", use_attribute_docstrings=True)
+
+    sample_id: int
+    """Identifier of the input problem; shared by all repeats of the same sample."""
+
+    result_id: int
+    """Identifier of the response this result scores; unique per subject, distinguishes repeats."""
+
     subject: str
     num_fewshot: int
     llm_name: str

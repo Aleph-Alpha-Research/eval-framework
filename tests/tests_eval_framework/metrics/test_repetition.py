@@ -26,7 +26,8 @@ def test_word_repetition(
 ) -> None:
     # Given
     completion = Completion(
-        id=0,
+        sample_id=0,
+        result_id=0,
         subject="en",
         ground_truth=None,
         prompt="",

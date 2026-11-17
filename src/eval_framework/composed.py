@@ -144,7 +144,8 @@ class ComposedEval(Eval):
 
             completion_list.append(
                 Completion(
-                    id=sample.id,
+                    sample_id=sample.sample_id,
+                    result_id=sample.result_id,
                     subject=sample.subject,
                     ground_truth=sample.ground_truth,
                     prompt=raw_completion.prompt,

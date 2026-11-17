@@ -33,7 +33,8 @@ def test_generate_completions_message_handling() -> None:
 
     # Test case 1: With assistant cue message
     sample_with_cue = ResultCandidate(
-        id=0,
+        sample_id=0,
+        result_id=0,
         messages=[Message(role=Role.USER, content="Hello"), Message(role=Role.ASSISTANT, content="Cue: ")],
         ground_truth="Expected response",
         subject="no subject",
@@ -42,7 +43,8 @@ def test_generate_completions_message_handling() -> None:
 
     # Test case 2: Without assistant cue message
     sample_without_cue = ResultCandidate(
-        id=1,
+        sample_id=1,
+        result_id=1,
         messages=[Message(role=Role.USER, content="Hello")],
         ground_truth="Expected response",
         subject="no subject",
@@ -266,7 +268,8 @@ class _PrecedenceStub(Eval, Benchmark):
         self.called_max_tokens = max_tokens
         return [
             Completion(
-                id=0,
+                sample_id=0,
+                result_id=0,
                 subject="stub",
                 ground_truth="A",
                 messages=[Message(role=Role.ASSISTANT, content="c")],
@@ -428,10 +431,11 @@ def test_response_generator_repeats_with_intermediate_results_writes_unique_ids(
     responses = generator.generate()
     assert len(responses) == repeats
 
-    # Re-loading should not treat the file as corrupted (duplicate (id, subject) pairs).
+    # Re-loading should not treat the file as corrupted (duplicate (result_id, subject) pairs).
     loaded = result_processor.load_responses()
     assert len(loaded) == repeats
-    assert len({(r.id, r.subject) for r in loaded}) == repeats
+    assert len({(r.result_id, r.subject) for r in loaded}) == repeats
+    assert {r.sample_id for r in loaded} == {0}  # all repeats share the one input problem
 
 
 def test_repeat_samples() -> None:
@@ -446,7 +450,8 @@ def test_repeat_samples() -> None:
     ]
     repeated = list(repeat_samples(samples, 3))
     assert len(repeated) == 3
-    assert [r.id for r in repeated] == [0, 1, 2]
+    assert [r.sample_id for r in repeated] == [0, 0, 0]
+    assert [r.result_id for r in repeated] == [0, 1, 2]
     for other in repeated[1:]:
         assert other.subject == repeated[0].subject
         assert other.ground_truth == repeated[0].ground_truth

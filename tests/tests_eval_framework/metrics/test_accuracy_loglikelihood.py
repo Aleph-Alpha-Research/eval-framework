@@ -13,7 +13,8 @@ def create_loglikelihood(
     ground_truth: str | list[str],
 ) -> Loglikelihood:
     return Loglikelihood(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="test",
         ground_truth=ground_truth,
         prompt="test",
@@ -28,7 +29,8 @@ def create_loglikelihood(
     [
         pytest.param(
             Loglikelihood(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth="A",
                 prompt="test",
@@ -55,7 +57,8 @@ def test_accuracy_loglikelihood(response: Loglikelihood, expected_value: float) 
     [
         pytest.param(
             Loglikelihood(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=" ",
                 prompt="test",

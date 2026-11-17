@@ -18,7 +18,8 @@ from template_formatting.formatter import Message, Role
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -34,7 +35,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -50,7 +52,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -66,7 +69,8 @@ from template_formatting.formatter import Message, Role
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -96,7 +100,8 @@ def test_word_counter(response: Completion, expected_value: float) -> None:
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -112,7 +117,8 @@ def test_word_counter(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -128,7 +134,8 @@ def test_word_counter(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -144,7 +151,8 @@ def test_word_counter(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -174,7 +182,8 @@ def test_sentence_counter(response: Completion, expected_value: float) -> None:
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -190,7 +199,8 @@ def test_sentence_counter(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -206,7 +216,8 @@ def test_sentence_counter(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -222,7 +233,8 @@ def test_sentence_counter(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -252,7 +264,8 @@ def test_paragraph_counter(response: Completion, expected_value: float) -> None:
     [
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -267,7 +280,8 @@ def test_paragraph_counter(response: Completion, expected_value: float) -> None:
         ),
         pytest.param(
             Completion(
-                id=1,
+                sample_id=1,
+                result_id=1,
                 subject="test",
                 ground_truth=None,
                 prompt="test",
@@ -293,7 +307,8 @@ def test_response_to_original_length_ratio(response: Completion, expected_value:
 
 def test_response_to_original_length_ratio_error() -> None:
     response = Completion(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="test",
         ground_truth=None,
         prompt="test",

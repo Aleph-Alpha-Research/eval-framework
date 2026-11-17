@@ -48,7 +48,7 @@ class MathMinervaCompletion(BaseMetric[Completion]):
         gold = response.ground_truth
         if isinstance(gold, list):
             gold = gold[0] if gold else None
-        assert gold, f"No ground truth available for {response.subject}_{response.id}"
+        assert gold, f"No ground truth available for {response.subject}_{response.result_id}"
 
         raw = response.raw_completion or response.completion
         all_candidates = extract_answers(
@@ -58,7 +58,7 @@ class MathMinervaCompletion(BaseMetric[Completion]):
             relaxed=self.relaxed,
         )
         # Grading can be killed by the pod's memory limit; the last line seen names the sample.
-        logger.info("Grading %s_%s gold=%r candidates=%r", response.subject, response.id, gold, all_candidates)
+        logger.info("Grading %s_%s gold=%r candidates=%r", response.subject, response.result_id, gold, all_candidates)
 
         exact_match = 0.0
         if all_candidates:

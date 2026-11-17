@@ -12,7 +12,8 @@ class TestROUGEMetrics:
     @pytest.fixture
     def completion_perfect(self) -> Completion:
         return Completion(
-            id=1,
+            sample_id=1,
+            result_id=1,
             subject="test",
             ground_truth="The capital of France is Paris.",
             prompt="What is the capital of France?",
@@ -27,7 +28,8 @@ class TestROUGEMetrics:
     @pytest.fixture
     def completion_partial(self) -> Completion:
         return Completion(
-            id=2,
+            sample_id=2,
+            result_id=2,
             subject="test",
             ground_truth="The Eiffel Tower is located in Paris, France and was completed in 1889.",
             prompt="Describe the Eiffel Tower.",
@@ -67,7 +69,8 @@ class TestROUGEMetrics:
 
     def test_multiple_ground_truths(self) -> None:
         completion = Completion(
-            id=3,
+            sample_id=3,
+            result_id=3,
             subject="test",
             ground_truth=[
                 "Python is a programming language.",
@@ -94,7 +97,8 @@ class TestROUGEMetrics:
 
     def test_realistic_qa_example(self) -> None:
         completion = Completion(
-            id=4,
+            sample_id=4,
+            result_id=4,
             subject="test",
             ground_truth="Albert Einstein published his theory of special relativity in 1905.",
             prompt="When did Einstein publish special relativity?",
@@ -117,7 +121,8 @@ class TestROUGEMetrics:
 
     def test_empty_ground_truth(self) -> None:
         completion_none_ground_truth = Completion(
-            id=5,
+            sample_id=5,
+            result_id=5,
             subject="test",
             ground_truth=None,
             prompt="test",
@@ -136,7 +141,8 @@ class TestROUGEMetrics:
 
     def test_empty_completion(self) -> None:
         completion_empty = Completion(
-            id=6,
+            sample_id=6,
+            result_id=6,
             subject="test",
             ground_truth="test",
             prompt="test",
@@ -153,7 +159,8 @@ class TestROUGEMetrics:
 
     def test_geometric_mean(self) -> None:
         completion = Completion(
-            id=4,
+            sample_id=4,
+            result_id=4,
             subject="test",
             ground_truth="Albert Einstein published his theory of special relativity in 1905.",
             prompt="When did Einstein publish special relativity?",

@@ -60,7 +60,7 @@ class ResultsFileProcessor(ResultProcessor):
             output_file.rename(broken_file)
             responses = []
 
-        ids_list = [(resp.id, resp.subject) for resp in responses]
+        ids_list = [(resp.result_id, resp.subject) for resp in responses]
         if len(ids_list) != len(set(ids_list)):
             logger.info(
                 f"Error: {len(ids_list) - len(set(ids_list))} duplicate response IDs found, the file is corrupted. "

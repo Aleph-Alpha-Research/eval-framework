@@ -89,7 +89,8 @@ def test_do_evaluate_single_output(
     if expected_answer is not None:
         ground_truth["expected_output"] = json.loads(expected_answer)
     completion = Completion(
-        id=0,
+        sample_id=0,
+        result_id=0,
         subject="en",
         ground_truth=json.dumps(ground_truth),
         prompt="",

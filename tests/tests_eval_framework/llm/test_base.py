@@ -5,7 +5,8 @@ from template_formatting.formatter import Message, Role
 def test_completion_languages() -> None:
     # GIVEN a completion without an explicit language key
     completion = Completion(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="test",
         ground_truth=None,
         prompt="test",
@@ -34,7 +35,8 @@ def test_completion_languages() -> None:
 def test_completion_instructions() -> None:
     # GIVEN a completion
     completion = Completion(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="test",
         ground_truth=None,
         prompt="test",

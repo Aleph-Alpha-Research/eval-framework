@@ -143,7 +143,8 @@ test_setups = [
 @pytest.mark.parametrize("sample_csv, asserts", test_setups)
 def test_csv_format_for_target(sample_csv: str, asserts: list[bool]) -> None:
     completion = Completion(
-        id=0,
+        sample_id=0,
+        result_id=0,
         subject="en",
         ground_truth='{"columns": ["Name", "Country", "Population"], "separator": "comma"}',
         prompt="",

@@ -6,7 +6,8 @@ from eval_framework.shared.types import Completion
 
 def _completion(completion_text: str = "print(True)") -> Completion:
     return Completion(
-        id=0,
+        sample_id=0,
+        result_id=0,
         subject="no_subject",
         ground_truth=None,
         prompt_num_tokens=None,

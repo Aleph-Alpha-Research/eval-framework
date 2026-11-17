@@ -103,7 +103,8 @@ class ResponseGenerator:
             assert sample.ground_truth is not None
             loglikelihood_list.append(
                 Loglikelihood(
-                    id=sample.id,
+                    sample_id=sample.sample_id,
+                    result_id=sample.result_id,
                     subject=sample.subject,
                     ground_truth=sample.ground_truth,
                     prompt=raw_loglikelihood.prompt,
@@ -164,7 +165,7 @@ class ResponseGenerator:
         if responses:
             response_subjects = {resp.subject for resp in responses}
             subject_response_id_mapping = {
-                response_subject: set([resp.id for resp in responses if resp.subject == response_subject])
+                response_subject: set([resp.result_id for resp in responses if resp.subject == response_subject])
                 for response_subject in response_subjects
             }
 
@@ -222,7 +223,7 @@ class ResponseGenerator:
                 subject = f" - Subject: {sample.subject}"
                 sample_index = i + 1
 
-                if sample.id in subject_response_id_mapping.get(sample.subject, []):
+                if sample.result_id in subject_response_id_mapping.get(sample.subject, []):
                     logger.info(
                         f"Task: {self.response_type.value}{subject} - Sample: {sample_index} - skipping, already done."
                     )
@@ -306,7 +307,8 @@ def repeat_samples(samples: Iterable[Sample], repeats: int) -> Iterable[ResultCa
         base_id = sample.id * repeats
         for repeat_idx in range(repeats):
             yield ResultCandidate(
-                id=base_id + repeat_idx,
+                sample_id=sample.id,
+                result_id=base_id + repeat_idx,
                 subject=sample.subject,
                 messages=sample.messages,
                 ground_truth=sample.ground_truth,

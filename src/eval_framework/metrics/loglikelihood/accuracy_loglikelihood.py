@@ -118,7 +118,7 @@ class PartialEvalAccuracy(BaseMetric[Loglikelihood]):
         self._pending: dict[int, tuple[float, bool]] = {}
 
     def calculate(self, response: Loglikelihood) -> list[MetricResult]:
-        item_id = response.id // 2  # Each item generates 2 samples, get a unique id for the pair
+        item_id = response.result_id // 2  # Each item generates 2 samples, get a unique id for the pair
         logprob = next(iter(response.loglikelihoods.values()))
         is_correct = response.ground_truth == "True"
 

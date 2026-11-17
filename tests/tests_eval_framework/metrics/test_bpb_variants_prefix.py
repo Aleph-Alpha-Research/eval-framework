@@ -14,7 +14,8 @@ def _response(ground_truth: str, bits: list[float], byte_lens: list[int], others
     for k, v in (others or {}).items():
         ll[k] = v
     return Loglikelihood(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="s",
         ground_truth=ground_truth,
         prompt="p",
@@ -62,7 +63,8 @@ def test_not_estimable_when_ground_truth_too_short(monkeypatch: pytest.MonkeyPat
 
 def test_errors_without_per_token() -> None:
     resp = Loglikelihood(
-        id=1,
+        sample_id=1,
+        result_id=1,
         subject="s",
         ground_truth="A",
         prompt="p",

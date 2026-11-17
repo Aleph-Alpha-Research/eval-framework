@@ -45,7 +45,8 @@ def test_length_control_for_target(
     expected_normalized_distance_to_target: float,
 ) -> None:
     completion = Completion(
-        id=0,
+        sample_id=0,
+        result_id=0,
         subject="en",
         ground_truth=json.dumps({"count": count_requirement, "unit": unit, "type": "target"}),
         prompt="",
@@ -100,7 +101,8 @@ def test_length_control_for_min(
     expected_normalized_distance_to_target: float,
 ) -> None:
     completion = Completion(
-        id=0,
+        sample_id=0,
+        result_id=0,
         subject="en",
         ground_truth=json.dumps({"count": min_count_requirement, "unit": unit, "type": "minimum"}),
         prompt="",
@@ -154,7 +156,8 @@ def test_length_control_for_max(
     expected_normalized_distance_to_target: float,
 ) -> None:
     completion = Completion(
-        id=0,
+        sample_id=0,
+        result_id=0,
         subject="en",
         ground_truth=json.dumps({"count": max_count_requirement, "unit": unit, "type": "maximum"}),
         prompt="",
