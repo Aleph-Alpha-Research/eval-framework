@@ -5,15 +5,74 @@
   extra files next to the code.
 """
 
+import atexit
+import logging
 import os
 import tempfile
+import threading
 import uuid
 from typing import Any, NamedTuple
 
 from llm_sandbox import SandboxSession
 from llm_sandbox.const import DefaultImage, SupportedLanguage
+from llm_sandbox.pool import PoolConfig, create_pool_manager
+from llm_sandbox.pool.base import ContainerPoolManager
 
-from eval_framework.tasks.utils import get_or_create_pool
+logger = logging.getLogger(__name__)
+
+
+_pools: dict[tuple[str | None, tuple[str, ...] | None], ContainerPoolManager] = {}
+_pools_lock = threading.Lock()
+
+
+# A ContainerPoolManager (from llm_sandbox) manages a pool of pre-warmed Docker containers
+# ready to execute sandboxed code. Spinning up a new container on every code execution is slow
+# and resource-intensive, so the pool keeps a configurable number of containers alive and idle
+# between uses. Each pool is scoped to a specific (image/dockerfile, packages) combination,
+# ensuring containers already have the right dependencies installed. The process-level singleton
+# cache in _pools means a given configuration only pays the startup cost once for the lifetime
+# of the process, and concurrent callers are protected by a lock.
+def get_or_create_pool(
+    image: str | None = None,
+    dockerfile: str | None = None,
+    packages: list[str] | None = None,
+    lang: str = "python",
+    min_pool_size: int = 1,
+    max_pool_size: int = 1,
+    max_container_uses: int = 100,
+    runtime_configs: dict[str, str] | None = None,
+) -> ContainerPoolManager:
+    assert image or dockerfile, "Either image or dockerfile must be provided"
+    key = (image or dockerfile, tuple(packages) if packages else None)
+    with _pools_lock:
+        if key not in _pools:
+            pool = create_pool_manager(
+                config=PoolConfig(
+                    min_pool_size=min_pool_size, max_container_uses=max_container_uses, max_pool_size=max_pool_size
+                ),
+                lang=lang,
+                image=image,
+                dockerfile=dockerfile,
+                keep_template=True,
+                libraries=packages,
+                runtime_configs=runtime_configs,
+            )
+            _pools[key] = pool
+        return _pools[key]
+
+
+def close_pools() -> None:
+    with _pools_lock:
+        pools = list(_pools.values())
+        _pools.clear()
+    for pool in pools:
+        try:
+            pool.close()
+        except Exception:
+            logger.exception("Error closing sandbox container pool")
+
+
+atexit.register(close_pools)
 
 
 def execute_in_default_image(

@@ -7,9 +7,9 @@ from typing import Any
 
 from eval_framework.llm.openai import OpenAIModel
 from eval_framework.main import main
+from eval_framework.metrics.completion.code_execution.sandbox import close_pools
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.task_loader import load_extra_tasks
-from eval_framework.tasks.utils import close_pools
 from eval_framework.utils.llama_server import LLAMA_SERVER_BASE_URL, llama_server
 from eval_framework.utils.logging import setup_logging
 
