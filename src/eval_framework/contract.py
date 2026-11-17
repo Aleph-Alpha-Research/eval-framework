@@ -54,6 +54,12 @@ class Eval(ABC):
         samples. A sample's ``id`` is its index within its subject, restarting at 0 for each subject."""
 
     @abstractmethod
+    def iterate_result_candidates(self, num_samples: int | None, *, repeats: int) -> Iterable[ResultCandidate]:
+        """Yield ``repeats`` result candidates per sample, consecutively. ``num_samples`` caps samples (not
+        candidates) per subject, as in ``iterate_samples``. ``sample_id`` is the sample's index within its
+        subject; ``result_id`` tells the repeats apart and is unique within a subject."""
+
+    @abstractmethod
     def generate_completions(
         self,
         llm: "BaseLLM",
