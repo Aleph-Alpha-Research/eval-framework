@@ -44,7 +44,7 @@ def test_winogrande_partial_eval_fans_one_item_into_a_scored_pair() -> None:
     benchmark = winogrande_cloze(dataset=DatasetStub({"train": [_EVAL_ROW]}))
 
     # When we assemble its samples (zero-shot)
-    samples = list(benchmark.create(0, None, None, seed=42).iterate_samples())
+    samples = list(benchmark.create(0, None, None, seed=42).iterate_result_candidates(None, repeats=1))
 
     # Then one item becomes two samples scoring the same suffix under "prefix + option"; option1 is correct
     assert len(samples) == 2

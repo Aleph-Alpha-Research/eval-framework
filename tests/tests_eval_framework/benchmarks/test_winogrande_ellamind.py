@@ -141,7 +141,7 @@ def test_winogrande_partial_eval_fans_one_item_into_a_scored_pair() -> None:
     benchmark = winogrande_ellamind_partial_eval_de(dataset=DatasetStub({"validation": [_EVAL_ROW]}))
 
     # When we assemble its samples (zero-shot)
-    samples = list(benchmark.create(0, None, None, seed=42).iterate_samples())
+    samples = list(benchmark.create(0, None, None, seed=42).iterate_result_candidates(None, repeats=1))
 
     # Then one item becomes two samples: same suffix scored, one option correct, prompt = "prefix + option"
     assert len(samples) == 2
@@ -157,7 +157,9 @@ def test_winogrande_partial_eval_uses_consecutive_ids_so_pairs_group_by_id_over_
     benchmark = winogrande_ellamind_partial_eval_de(dataset=DatasetStub({"validation": [_EVAL_ROW, _FEWSHOT_ROW]}))
 
     # When we assemble all samples
-    sample_ids = [s.id for s in benchmark.create(0, None, None, seed=42).iterate_samples()]
+    sample_ids = [
+        s.sample_id for s in benchmark.create(0, None, None, seed=42).iterate_result_candidates(None, repeats=1)
+    ]
 
     # Then ids run consecutively across the fan-out, so PartialEvalAccuracy's id // 2 pairs each item
     assert sample_ids == [0, 1, 2, 3]

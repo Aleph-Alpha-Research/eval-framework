@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterator, Sequence
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -48,13 +48,13 @@ class Eval(ABC):
     """The contract a caller relies on to run an evaluation"""
 
     @abstractmethod
-    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
+    def iterate_samples(self, num_samples: int | None = None) -> Iterator[Sample]:
         """Yield the eval's samples across all subjects. ``num_samples`` caps how many are yielded PER
         SUBJECT (``None`` = no cap), so a benchmark with S subjects yields up to ``S * num_samples``
         samples. A sample's ``id`` is its index within its subject, restarting at 0 for each subject."""
 
     @abstractmethod
-    def iterate_result_candidates(self, num_samples: int | None, *, repeats: int) -> Iterable[ResultCandidate]:
+    def iterate_result_candidates(self, num_samples: int | None, *, repeats: int) -> Iterator[ResultCandidate]:
         """Yield ``repeats`` result candidates per sample, consecutively. ``num_samples`` caps samples (not
         candidates) per subject, as in ``iterate_samples``. ``sample_id`` is the sample's index within its
         subject; ``result_id`` tells the repeats apart and is unique within a subject."""

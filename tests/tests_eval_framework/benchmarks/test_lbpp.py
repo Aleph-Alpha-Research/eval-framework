@@ -16,7 +16,6 @@ import pytest
 
 from eval_framework.benchmarks.lbpp import LBPP_BENCHMARKS, lbpp, lbpp_bpb
 from eval_framework.contract import Benchmark
-from eval_framework.response_generator import repeat_samples
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,
@@ -102,7 +101,11 @@ def test_the_canary_row_is_not_evaluated() -> None:
     benchmark = lbpp(dataset=DatasetStub({"test": [_CANARY_ROW, _EVAL_ROW]}))
 
     # When all samples are assembled
-    samples = list(benchmark.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None).iterate_samples())
+    samples = list(
+        benchmark.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None).iterate_result_candidates(
+            None, repeats=1
+        )
+    )
 
     # Then only the problem is evaluated
     assert [sample.messages[0].content for sample in samples] == [
@@ -115,7 +118,7 @@ def _verdict(model_output: str) -> str:
     evaluation = lbpp(dataset=DatasetStub({"test": [_EVAL_ROW]})).create(
         num_fewshot=0, custom_subjects=None, custom_hf_revision=None
     )
-    sample = next(iter(repeat_samples(evaluation.iterate_samples(1), 1)))
+    sample = next(evaluation.iterate_result_candidates(1, repeats=1))
     (completion,) = evaluation.generate_completions(
         StubLlm(model_output), [sample], stop_sequences=evaluation.get_stop_sequences()
     )

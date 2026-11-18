@@ -1,6 +1,6 @@
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterator, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, override
 from unittest.mock import Mock
 
 import pytest
@@ -248,16 +248,7 @@ class _PrecedenceStub(Eval, Benchmark):
     def display_name(self) -> str:
         return "PrecedenceStub"
 
-    def iterate_samples(self, num_samples: int | None = None) -> Iterable[Sample]:
-        yield Sample(
-            id=0,
-            subject="stub",
-            ground_truth="A",
-            messages=[Message(role=Role.USER, content="Hi")],
-            possible_completions=None,
-        )
-
-    def iterate_result_candidates(self, num_samples: int | None, *, repeats: int) -> Iterable[ResultCandidate]:
+    def iterate_result_candidates(self, num_samples: int | None, *, repeats: int) -> Iterator[ResultCandidate]:
         for repeat_idx in range(repeats):
             yield ResultCandidate(
                 sample_id=0,
@@ -267,6 +258,10 @@ class _PrecedenceStub(Eval, Benchmark):
                 messages=[Message(role=Role.USER, content="Hi")],
                 possible_completions=None,
             )
+
+    @override
+    def iterate_samples(self, num_samples: int | None = None) -> Iterator[Sample]:
+        raise NotImplementedError
 
     def generate_completions(
         self,
