@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Self, final, override
 
 from eval_framework.answer import AnswerPolicy, PickFromCandidates
 from eval_framework.choices import ChoiceReader
-from eval_framework.contract import Benchmark, Eval, ResponseType, ResultCandidate, Sample
+from eval_framework.contract import Benchmark, Eval, ResponseType, ResultCandidate
 from eval_framework.eval_kind import Choice, EvalKind, ItemContext
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotGenerator, FewShotPolicy, FewShotSplit, SampleSplit
 from eval_framework.shared.types import Completion, RawCompletion
@@ -59,18 +59,6 @@ class ComposedEval(Eval):
         self.rnd.shuffle(sample_rows)
         self._fewshot.prepare(hf_dataset, sample_split=self.sample_split, sample_rows=sample_rows)
         return sample_rows
-
-    @override
-    def iterate_samples(self, num_samples: int | None = None) -> Iterator[Sample]:
-        for candidate in self.iterate_result_candidates(num_samples, repeats=1):
-            yield Sample(
-                id=candidate.sample_id,
-                subject=candidate.subject,
-                messages=candidate.messages,
-                ground_truth=candidate.ground_truth,
-                possible_completions=candidate.possible_completions,
-                context=candidate.context,
-            )
 
     @override
     def iterate_result_candidates(self, num_samples: int | None, *, repeats: int) -> Iterator[ResultCandidate]:

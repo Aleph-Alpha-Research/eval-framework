@@ -13,7 +13,7 @@ Each evaluated sample passes through this pipeline:
    and the rows of the sample split are shuffled with a seeded RNG.
 2. **Sample creation** — the benchmark's `EvalKind` turns one dataset item (a `dict` row) into the scored
    sample: the prompt messages, the candidate completions (loglikelihood tasks), the ground truth, and any
-   per-sample metric context. The result is a `Sample` (`eval_framework.contract`).
+   per-sample metric context. The result is a `ResultCandidate` (`eval_framework.contract`), one per repeat.
 3. **Model response** — the model returns a `RawCompletion` (generated text) or `RawLoglikelihood`
    (a log-probability per candidate), defined in `eval_framework.shared.types`.
 4. **Answer extraction** — the `AnswerPolicy` post-processes the response into the scored `Completion` or

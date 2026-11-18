@@ -1,6 +1,6 @@
 from collections.abc import Iterator, Sequence
 from pathlib import Path
-from typing import Any, override
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
@@ -8,9 +8,9 @@ from dateutil import parser
 
 from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
-from eval_framework.contract import Benchmark, Eval, ResponseType, ResultCandidate, Sample
+from eval_framework.contract import Benchmark, Eval, ResponseType, ResultCandidate
 from eval_framework.llm.base import BaseLLM
-from eval_framework.response_generator import ResponseGenerator, repeat_samples
+from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.base import ResultProcessor
 from eval_framework.result_processors.result_processor import ResultsFileProcessor
 from eval_framework.shared.types import BaseMetricContext, Completion, Loglikelihood, RawCompletion
@@ -259,10 +259,6 @@ class _PrecedenceStub(Eval, Benchmark):
                 possible_completions=None,
             )
 
-    @override
-    def iterate_samples(self, num_samples: int | None = None) -> Iterator[Sample]:
-        raise NotImplementedError
-
     def generate_completions(
         self,
         llm: BaseLLM,
@@ -442,27 +438,6 @@ def test_response_generator_repeats_with_intermediate_results_writes_unique_ids(
     assert len(loaded) == repeats
     assert len({(r.result_id, r.subject) for r in loaded}) == repeats
     assert {r.sample_id for r in loaded} == {0}  # all repeats share the one input problem
-
-
-def test_repeat_samples() -> None:
-    samples = [
-        Sample(
-            id=0,
-            subject="foo",
-            ground_truth="bar",
-            messages=[Message(role=Role.USER, content="baz")],
-            possible_completions=None,
-        )
-    ]
-    repeated = list(repeat_samples(samples, 3))
-    assert len(repeated) == 3
-    assert [r.sample_id for r in repeated] == [0, 0, 0]
-    assert [r.result_id for r in repeated] == [0, 1, 2]
-    for other in repeated[1:]:
-        assert other.subject == repeated[0].subject
-        assert other.ground_truth == repeated[0].ground_truth
-        assert other.messages == repeated[0].messages
-        assert other.possible_completions == repeated[0].possible_completions
 
 
 def test_with_wrong_loaded_metadata(tmp_path: Path) -> None:
