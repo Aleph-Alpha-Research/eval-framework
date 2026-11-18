@@ -30,7 +30,6 @@ from eval_framework.benchmarks.mmlu_prox import (
 )
 from eval_framework.contract import Benchmark
 from eval_framework.metrics.completion.language_checker import GermanCompletionChecker
-from eval_framework.response_generator import repeat_samples
 from template_formatting.formatter import BaseFormatter, ConcatFormatter, Llama3Formatter, Message, Role
 from tests.tests_eval_framework.benchmarks.utils import (
     DatasetStub,
@@ -413,7 +412,7 @@ Antwort: Denken wir Schritt für Schritt nach."""  # noqa: E501 (lm-eval-shaped 
 
 def _extracted(benchmark: Benchmark, model_output: str) -> str:
     evaluation = benchmark.create(num_fewshot=0, custom_subjects=["history"], custom_hf_revision=None)
-    sample = next(iter(repeat_samples(evaluation.iterate_samples(1), 1)))
+    sample = next(evaluation.iterate_result_candidates(1, repeats=1))
     (completion,) = evaluation.generate_completions(StubLlm(model_output), [sample])
     return completion.completion
 

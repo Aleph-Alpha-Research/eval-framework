@@ -178,7 +178,7 @@ class ResponseGenerator:
         # Calculate total samples for progress bar - use num_samples or iterate to count
         if self.num_samples is None:
             # Count samples by iterating (this might be expensive for large datasets)
-            total_num_samples = sum(1 for _ in self.task.iterate_samples(None)) * repeats
+            total_num_samples = sum(1 for _ in self.task.iterate_result_candidates(None, repeats=repeats))
         else:
             total_num_samples = self.num_samples * repeats
 
@@ -188,8 +188,7 @@ class ResponseGenerator:
             desc=f"Processing {self.response_type.value}",
             disable=get_disable_bar_flag(),
         ) as pbar:
-            samples = self.task.iterate_samples(self.num_samples)
-            for i, sample in enumerate(repeat_samples(samples, repeats)):
+            for i, sample in enumerate(self.task.iterate_result_candidates(self.num_samples, repeats=repeats)):
                 subject = f" - Subject: {sample.subject}"
                 sample_index = i + 1
 

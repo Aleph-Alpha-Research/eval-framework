@@ -17,7 +17,7 @@ import pytest
 from datasets import Dataset, DatasetDict
 from openai.types.chat.completion_create_params import ResponseFormat
 
-from eval_framework.contract import Benchmark, ResultCandidate, Sample
+from eval_framework.contract import Benchmark, ResultCandidate
 from eval_framework.llm.base import BaseLLM
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
@@ -49,12 +49,14 @@ class DatasetStub(DatasetPolicy, DatasetLoader):
         return {"dataset_path": "stub"}
 
 
-def first_sample(benchmark: Benchmark, *, num_fewshot: int, custom_subjects: list[str] | None = None) -> Sample:
+def first_sample(
+    benchmark: Benchmark, *, num_fewshot: int, custom_subjects: list[str] | None = None
+) -> ResultCandidate:
     """Build the benchmark's eval (seed 42) and return its first assembled sample."""
     evaluation = benchmark.create(
         num_fewshot=num_fewshot, custom_subjects=custom_subjects, custom_hf_revision=None, seed=42
     )
-    return next(iter(evaluation.iterate_samples(1)))
+    return next(evaluation.iterate_result_candidates(1, repeats=1))
 
 
 def _seed_for_determinism() -> None:
@@ -129,24 +131,24 @@ def assert_benchmark_formatter_hash(
     )
 
 
-def _sample_for_hash(benchmark: Benchmark, *, num_fewshot: int) -> Sample:
+def _sample_for_hash(benchmark: Benchmark, *, num_fewshot: int) -> ResultCandidate:
     """First assembled sample (full HF data, seed 42), retrying 0-shot if the requested shot count can't
     be created."""
     _seed_for_determinism()
     try:
         instance = benchmark.create(num_fewshot=num_fewshot, custom_subjects=None, custom_hf_revision=None, seed=42)
-        return next(iter(instance.iterate_samples(1)))
+        return next(instance.iterate_result_candidates(1, repeats=1))
     except Exception as e:
         label = repr(benchmark.id())
         print(f"Failed to instantiate {label}: {e}; retrying with 0-shot", file=sys.stderr)
         try:
             instance = benchmark.create(num_fewshot=0, custom_subjects=None, custom_hf_revision=None, seed=42)
-            return next(iter(instance.iterate_samples(1)))
+            return next(instance.iterate_result_candidates(1, repeats=1))
         except Exception as inner:
             pytest.fail(f"Could not instantiate {label}: {inner} (with {num_fewshot}-shot it failed with: {e})")
 
 
-def _hash_payload(sample: Sample, formatter_cls: type[BaseFormatter]) -> str:
+def _hash_payload(sample: ResultCandidate, formatter_cls: type[BaseFormatter]) -> str:
     """The exact string hashed for a sample: the formatted prompt plus its completions and ground truth."""
     formatted_sample = formatter_cls().format(sample.messages, output_mode="string")
 
