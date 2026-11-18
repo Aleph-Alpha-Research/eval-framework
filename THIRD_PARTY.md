@@ -49,7 +49,7 @@ and first-party/internal packages are excluded.
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
 | `distro` | `1.9.0` |
-| `filelock` | `4.2.10` |
+| `filelock` | `4.2.11` |
 | `fsspec` | `2026.9.0` |
 | `googleapis-common-protos` | `1.76.0` |
 | `h11` | `0.16.0` |
@@ -78,7 +78,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.66b2` |
 | `packaging` | `26.3` |
 | `pandas` | `3.1.1` |
-| `platformdirs` | `4.14.5` |
+| `platformdirs` | `4.14.7` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.1` |
 | `pydantic-core` | `2.50.4` |
