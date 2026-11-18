@@ -109,7 +109,7 @@ class PartialEvalAccuracy(BaseMetric[Loglikelihood]):
     NOTE: The current implementation relies on the assumption that it comes in pairs of samples,
     which can be identified by having consecutive ids (odd and even). This is how it is implemented
     in the WinograndeCloze tasks, but if other tasks use this metric, it might not be the case and
-    require a more general implementation (e.g. storing `item_id` in the `Sample.context`).
+    require a more general implementation (e.g. storing `item_id` in the `ResultCandidate.context`).
     """
 
     NAME = "Partial Evaluation Accuracy"
