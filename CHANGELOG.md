@@ -14,6 +14,27 @@
 
 ### Bug Fixes
 
+## [0.26.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.25.0...v0.26.0) (2026-11-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* ids seperated into result and sample ids
+
+### Features
+
+* loglikelihood metrics contain per-sample context ([13c772f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/13c772f8f7a05a8a800e6ec0894221cac1ccb6ae))
+
+
+### Bug Fixes
+
+* extract_context_metric reports a missing context type instead of raising IndexError ([13e6d84](https://github.com/Aleph-Alpha-Research/eval-framework/commit/13e6d848d6cd8f2bb9853a88250c0fb771f5215d))
+
+
+### Code Refactoring
+
+* ids seperated into result and sample ids ([d995b39](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d995b392553fd82a3530340dd878d780c79e3333))
+
 ## [0.25.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.24.1...v0.25.0) (2026-11-17)
 
 
