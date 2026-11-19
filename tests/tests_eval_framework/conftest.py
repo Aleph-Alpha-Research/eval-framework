@@ -7,10 +7,11 @@ import pytest
 import wandb
 from openai.types.chat.completion_create_params import ResponseFormat
 
+import eval_framework.tasks  # noqa: F401  # avoid circular import
 from eval_framework.contract import ResultCandidate
 from eval_framework.llm.base import BaseLLM
+from eval_framework.metrics.completion.code_execution.sandbox import close_pools
 from eval_framework.shared.types import RawCompletion, RawLoglikelihood
-from eval_framework.tasks.utils import close_pools
 from template_formatting.formatter import Message
 from tests.tests_eval_framework.mock_wandb import MockArtifact, MockWandb, MockWandbApi, MockWandbRun
 

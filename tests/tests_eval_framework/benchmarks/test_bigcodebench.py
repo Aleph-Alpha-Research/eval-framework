@@ -16,10 +16,10 @@ from eval_framework.benchmarks.bigcodebench import (
     bigcodebench_olmes,
 )
 from eval_framework.contract import Benchmark
-from eval_framework.metrics.completion.code_execution_pass_at_one import CodeExecutionPassAtOneContext
+from eval_framework.metrics.completion.code_execution.pass_at_one import CodeExecutionPassAtOneContext
+from eval_framework.metrics.completion.code_execution.python_tests import extract_imports
 from eval_framework.tasks.utils import (
     BIG_CODE_BENCH_PACKAGE_MAPPING,
-    extract_imports,
     extract_python_code_from_response,
 )
 from template_formatting.formatter import (

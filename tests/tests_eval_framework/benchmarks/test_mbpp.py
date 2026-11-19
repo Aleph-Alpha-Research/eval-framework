@@ -21,8 +21,8 @@ from eval_framework.benchmarks.mbpp import (
     olmes_reconstruct,
 )
 from eval_framework.contract import Benchmark
+from eval_framework.metrics.completion.code_execution.sandbox import run_python_code
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.utils import run_python_code
 from template_formatting.formatter import (
     BaseFormatter,
     ConcatFormatter,
@@ -161,7 +161,8 @@ def test_instruct_reconstruct_extracts_code_block() -> None:
 def test_canonical_solutions_execute_end_to_end() -> None:
     # End-to-end smoke over the real dataset: expand each canonical solution with its gold asserts and run it
     # in the sandbox, confirming it passes. Reconstruction and the executing metric are covered separately
-    # (the reconstruct tests above and metrics/test_code_assertion.py); this pins their composition on real data.
+    # (the reconstruct tests above and metrics/code_execution/test_python_assertion.py); this pins their
+    # composition on real data.
     # _code_expander is called directly because in real use the LLM output is stop-truncated before reconstruction,
     # and a canonical solution may itself contain a stop sequence (a comment or assert) that would corrupt it.
     dataset = pinned_by_framework(MBPP_DATASET_PATH).loader(None).load("full")

@@ -1,8 +1,8 @@
 from llm_sandbox.exceptions import SandboxTimeoutError
 
 from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.completion.code_execution.sandbox import DockerReturnedEmptyOutput, run_python_code
 from eval_framework.shared.types import Completion
-from eval_framework.tasks.utils import DockerReturnedEmptyOutput, run_python_code
 
 
 class CodeCompletionAssertion(BaseMetric[Completion]):
