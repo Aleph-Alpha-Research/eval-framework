@@ -19,7 +19,7 @@ and first-party/internal packages are excluded.
 | `llm-sandbox` | `==0.3.46` |
 | `lxml` | `>=6.1.3,<7` |
 | `nltk` | `>=3.10.4,<4` |
-| `numpy` | `>=2.5.4` |
+| `numpy` | `>=2.5.5` |
 | `openai` | `>=3.51.0,<4` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.3,<3` |
@@ -36,20 +36,20 @@ and first-party/internal packages are excluded.
 
 | Package | Version |
 |---|---|
-| `annotated-doc` | `0.0.6` |
+| `annotated-doc` | `0.0.7` |
 | `annotated-types` | `0.8.0` |
 | `anyio` | `4.16.0` |
 | `attrs` | `26.1.0` |
 | `certifi` | `2026.10.23` |
 | `charset-normalizer` | `3.5.2` |
 | `click` | `8.5.1` |
-| `cloudpickle` | `3.1.2` |
+| `cloudpickle` | `3.1.3` |
 | `colorama` | `0.4.6` |
 | `cwevals` | `0.0.1b1` |
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
 | `distro` | `1.9.0` |
-| `filelock` | `4.2.11` |
+| `filelock` | `4.2.12` |
 | `fsspec` | `2026.9.0` |
 | `googleapis-common-protos` | `1.76.0` |
 | `h11` | `0.16.0` |
@@ -85,7 +85,7 @@ and first-party/internal packages are excluded.
 | `pygments` | `2.21.0` |
 | `python-dateutil` | `4.0.0` |
 | `referencing` | `0.37.0` |
-| `regex` | `2026.11.15` |
+| `regex` | `2026.11.19` |
 | `requests` | `2.34.2` |
 | `rich` | `15.0.0` |
 | `rpds-py` | `2026.9.1` |
@@ -96,7 +96,7 @@ and first-party/internal packages are excluded.
 | `tokenizers` | `0.23.3` |
 | `tqdm` | `4.70.1` |
 | `truststore` | `0.10.5` |
-| `typer` | `0.29.1` |
+| `typer` | `0.29.2` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.5` |
 | `tzdata` | `2026.6` |
