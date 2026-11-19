@@ -14,6 +14,22 @@
 
 ### Bug Fixes
 
+## [0.27.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.26.0...v0.27.0) (2026-11-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* removed iterate_samples, repeat_samples and Sample
+
+### Bug Fixes
+
+* **deps:** update dependency numpy to &gt;=2.5.5 ([aade58c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/aade58cbf8a45e69ad74c7b938cc34bfba1b2a2d))
+
+
+### Code Refactoring
+
+* removed iterate_samples, repeat_samples and Sample ([a22add8](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a22add82a4fd008d8fd2cd466edc8a3ef9bcd299))
+
 ## [0.26.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.25.0...v0.26.0) (2026-11-18)
 
 
