@@ -50,7 +50,6 @@ def _namespace(tmp_path: Path, task_name: str, judge_model_args: list[str]) -> N
         extra_tasks_dir=None,
         save_logs=True,
         delete_output_dir_after_upload=False,
-        randomize_judge_order=False,
         repeats=1,
         task_suite=None,
     )

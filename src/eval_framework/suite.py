@@ -341,7 +341,6 @@ def _load_aggregated_results(resolved_kwargs: dict[str, Any]) -> dict[str, Any]:
         batch_size=resolved_kwargs.get("batch_size", 1),
         repeats=resolved_kwargs.get("repeats", 1),
         description=resolved_kwargs.get("description"),
-        randomize_judge_order=resolved_kwargs.get("randomize_judge_order", False),
         delete_output_dir_after_upload=resolved_kwargs.get("delete_output_dir_after_upload", False),
     )
 

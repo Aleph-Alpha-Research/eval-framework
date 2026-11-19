@@ -70,12 +70,6 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
-        "--randomize-judge-order",
-        action="store_true",
-        help="Randomize the order of answers presented to the LLM judge to mitigate position bias.",
-    )
-
-    parser.add_argument(
         "--task-subjects",
         type=str,
         nargs="+",
@@ -266,7 +260,6 @@ def _build_config(kwargs: dict) -> EvalConfig:
         judge_model_args=judge_model_args,
         batch_size=kwargs["batch_size"],
         description=kwargs["description"],
-        randomize_judge_order=kwargs["randomize_judge_order"],
         delete_output_dir_after_upload=kwargs["delete_output_dir_after_upload"],
         repeats=kwargs["repeats"],
     )

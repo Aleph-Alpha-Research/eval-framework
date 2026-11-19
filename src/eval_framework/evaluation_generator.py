@@ -102,10 +102,7 @@ class EvaluationGenerator:
             if issubclass(metric_class, BaseLLMJudgeMetric):
                 if llm_judge is None:
                     llm_judge = self.config.llm_judge().with_retry()
-                raw_metric = metric_class(
-                    llm_judge=llm_judge,
-                    randomize_order=self.config.randomize_judge_order,
-                )
+                raw_metric = metric_class(llm_judge=llm_judge)
             else:
                 raw_metric = metric_class()
             metric = cast(BaseMetric[Completion | Loglikelihood], raw_metric)
