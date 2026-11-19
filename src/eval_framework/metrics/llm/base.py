@@ -8,9 +8,8 @@ class BaseLLMJudgeMetric(BaseMetric[Completion]):
     # backpressure against the judge API's rate limit.
     MAX_WORKERS = 100
 
-    def __init__(self, llm_judge: BaseLLM, randomize_order: bool = False) -> None:
+    def __init__(self, llm_judge: BaseLLM) -> None:
         self._llm_judge = llm_judge
-        self._randomize_order = randomize_order
 
     def _create_metric_result(
         self,
