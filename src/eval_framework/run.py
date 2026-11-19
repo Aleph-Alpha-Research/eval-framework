@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from eval_framework.llm.openai import OpenAIModel
-from eval_framework.main import main
+from eval_framework.main import Phase, main
 from eval_framework.tasks.eval_config import EvalConfig
 from eval_framework.tasks.task_loader import load_extra_tasks
 from eval_framework.tasks.utils import close_pools
@@ -174,6 +174,19 @@ def parse_args() -> argparse.Namespace:
         help="The args of the judge model used.",
     )
     parser.add_argument(
+        "--phase",
+        type=str,
+        choices=[phase.value for phase in Phase],
+        required=False,
+        default=None,
+        help=(
+            "Run only one half of the evaluation: 'generate' queries the model and saves its responses, "
+            "'score' computes the metrics over the responses an earlier 'generate' saved to the same "
+            "--output-dir, without querying the model. Both halves need the same arguments otherwise. "
+            "If not given, both run in one go."
+        ),
+    )
+    parser.add_argument(
         "--resource-cleanup",
         action="store_true",
         required=False,
@@ -225,6 +238,8 @@ def parse_args() -> argparse.Namespace:
 
     if args.task_suite and args.task_name:
         parser.error("--task-suite and --task-name are mutually exclusive.")
+    if args.task_suite and args.phase:
+        parser.error("--phase cannot be combined with --task-suite.")
 
     return args
 
@@ -279,7 +294,8 @@ def _run_single_task(kwargs: dict) -> None:
         load_extra_tasks(kwargs["extra_tasks_dir"])
 
     config = _build_config(kwargs)
-    main(llm=config.llm_class(**config.llm_args), config=config, verbosity=log_level)
+    phase = Phase(kwargs["phase"]) if kwargs.get("phase") else None
+    main(llm=config.llm_class(**config.llm_args), config=config, verbosity=log_level, phase=phase)
 
     logger.info(f"time since start: {datetime.datetime.now() - now}")
 
