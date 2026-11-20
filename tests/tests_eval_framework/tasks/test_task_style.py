@@ -304,9 +304,18 @@ class TestBPBStyle:
 
     def test_metrics_bpb_only(self) -> None:
         from eval_framework.metrics.loglikelihood.accuracy_loglikelihood import AccuracyLoglikelihood
-        from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariantsLoglikelihood
+        from eval_framework.metrics.loglikelihood.bpb_constituents import (
+            CorpusBitsPerByteLoglikelihood,
+            PrefixBitsPerByteLoglikelihood,
+            PriorBitsPerByteLoglikelihood,
+        )
 
-        assert self.styler.metrics == [BitsPerByteLoglikelihood, BitsPerByteVariantsLoglikelihood]
+        assert self.styler.metrics == [
+            BitsPerByteLoglikelihood,
+            CorpusBitsPerByteLoglikelihood,
+            PrefixBitsPerByteLoglikelihood,
+            PriorBitsPerByteLoglikelihood,
+        ]
         assert AccuracyLoglikelihood not in self.styler.metrics
 
     def test_for_language_german(self) -> None:
