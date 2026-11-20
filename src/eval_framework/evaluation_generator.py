@@ -12,6 +12,8 @@ from tqdm import tqdm
 
 from eval_framework.metrics.base import BaseMetric
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
+from eval_framework.metrics.loglikelihood.bpb_constituents import PriorBitsPerByteLoglikelihood
+from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariantsLoglikelihood
 from eval_framework.metrics.loglikelihood.bpb_variants_common import aggregate_prior_bpb_metrics, select_ground_truth
 from eval_framework.metrics.loglikelihood.bpb_variants_estimators import summarize_all
 from eval_framework.result_processors.base import Result, ResultProcessor
@@ -483,12 +485,19 @@ class EvaluationGenerator:
         aggregated_results.update(results_with_aggregators)
         # TODO: Corpus BPB and Prior BPB are collection-level metrics, but `BaseMetric` only offers a
         # per-response `calculate()`. They currently bypass the metric contract through these hard-coded
-        # calls in EvaluationGenerator, so they run for every loglikelihood response regardless of which
-        # metrics a task lists. This is unideal: we probably want a collection-level metric abstraction
-        # so that `CorpusBitsPerByteLoglikelihood` and `PriorBitsPerByteLoglikelihood` own their own
-        # aggregation (and only run when the task lists them).
+        # calls in EvaluationGenerator. This is unideal: we probably want a collection-level metric
+        # abstraction so that `CorpusBitsPerByteLoglikelihood` and `PriorBitsPerByteLoglikelihood` own
+        # their own aggregation, instead of being gated here by inspecting the task's metric list.
+        # Corpus BPB is gated implicitly: it pivots the `BitsPerByte_*` sidecar results, which only
+        # exist when the task lists `CorpusBitsPerByteLoglikelihood` (or the legacy variants class).
         aggregated_results.update(self._aggregate_corpus_bpb_metrics(metrics_results, leading_space_by_item))
-        aggregated_results.update(aggregate_prior_bpb_metrics(loglikelihood_responses))
+        # Prior BPB is computed straight from the responses, so gate it on the task requesting it.
+        prior_bpb_requested = any(
+            issubclass(metric, (PriorBitsPerByteLoglikelihood, BitsPerByteVariantsLoglikelihood))
+            for metric in self.metrics
+        )
+        if prior_bpb_requested:
+            aggregated_results.update(aggregate_prior_bpb_metrics(loglikelihood_responses))
 
         wandb.log(aggregated_results)
         self.result_processor.save_aggregated_results(aggregated_results)
