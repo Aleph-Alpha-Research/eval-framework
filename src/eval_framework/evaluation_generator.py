@@ -481,6 +481,12 @@ class EvaluationGenerator:
         aggregated_results = self._aggregate_results(metrics_results)
         results_with_aggregators = self._aggregate_results_with_aggregators(metrics_results)
         aggregated_results.update(results_with_aggregators)
+        # TODO: Corpus BPB and Prior BPB are collection-level metrics, but `BaseMetric` only offers a
+        # per-response `calculate()`. They currently bypass the metric contract through these hard-coded
+        # calls in EvaluationGenerator, so they run for every loglikelihood response regardless of which
+        # metrics a task lists. This is unideal: we probably want a collection-level metric abstraction
+        # so that `CorpusBitsPerByteLoglikelihood` and `PriorBitsPerByteLoglikelihood` own their own
+        # aggregation (and only run when the task lists them).
         aggregated_results.update(self._aggregate_corpus_bpb_metrics(metrics_results, leading_space_by_item))
         aggregated_results.update(aggregate_prior_bpb_metrics(loglikelihood_responses))
 

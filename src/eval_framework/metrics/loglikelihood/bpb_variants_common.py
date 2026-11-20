@@ -33,6 +33,10 @@ STANDARD_METRIC_NAMES = (
     "BitsPerByte_nAliases",
 )
 
+# The standard fields minus the ``BitsPerByte`` headline. These are the companion fields that feed
+# the corpus-level BPB aggregation; the headline is owned by ``BitsPerByteLoglikelihood``.
+CORPUS_SIDECAR_METRIC_NAMES = STANDARD_METRIC_NAMES[1:]
+
 PREFIX_METRIC_NAMES = (
     "PrefixBPB",
     "PrefixBPB_rate",
@@ -209,3 +213,31 @@ def compute_all_bpb_results(response: Loglikelihood) -> list[MetricResult]:
     results = compute_standard_bpb_results(response, answer_text, candidates)
     results.extend(compute_prefix_bpb_results(response, answer_text))
     return results
+
+
+def compute_corpus_bpb_sidecar_results(response: Loglikelihood) -> list[MetricResult]:
+    """The ``BitsPerByte_{bits,bytes,tokens,nAliases}`` companion fields, without the headline.
+
+    These are the per-item inputs the corpus-level BPB aggregation pivots over. The ``BitsPerByte``
+    headline is emitted separately by ``BitsPerByteLoglikelihood``; dropping it here is what lets the
+    constituent metrics emit each name exactly once.
+    """
+    candidates = list_ground_truth_candidates(response)
+    answer_text = select_ground_truth(response, candidates)
+    if answer_text is None:
+        results = standard_bpb_error("No ground-truth answer found in loglikelihoods", response)
+    else:
+        results = compute_standard_bpb_results(response, answer_text, candidates)
+    return [r for r in results if r.metric_name in CORPUS_SIDECAR_METRIC_NAMES]
+
+
+def compute_prefix_bpb_results_for_response(response: Loglikelihood) -> list[MetricResult]:
+    """Prefix BPB results for the selected ground truth, or ``[]`` when none applies.
+
+    Returns ``[]`` both when no ground truth is found and when the backend reported no per-token
+    logprobs, matching what ``compute_all_bpb_results`` contributes for prefix in those cases.
+    """
+    ground_truth = select_ground_truth(response)
+    if ground_truth is None:
+        return []
+    return compute_prefix_bpb_results(response, ground_truth)
