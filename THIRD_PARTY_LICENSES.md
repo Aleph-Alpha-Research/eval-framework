@@ -43,7 +43,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
-- **openai** 3.55.1 - https://github.com/openai/openai-python
+- **openai** 3.56.0 - https://github.com/openai/openai-python
 - **opentelemetry-api** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
 - **opentelemetry-exporter-http-transport** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-http-transport
 - **opentelemetry-exporter-otlp-common** 0.66b2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-common
@@ -122,8 +122,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **markdown-it-py** 4.3.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
 - **platformdirs** 4.14.7 - https://github.com/tox-dev/platformdirs
-- **pydantic** 2.14.3 - https://github.com/pydantic/pydantic
-- **pydantic_core** 2.50.4 - https://github.com/pydantic
+- **pydantic** 2.14.4 - https://github.com/pydantic/pydantic
+- **pydantic_core** 2.50.5 - https://github.com/pydantic
 - **PyYAML** 6.0.3 - https://pyyaml.org/
 - **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
 - **rich** 15.0.0 - https://github.com/Textualize/rich
@@ -3832,7 +3832,7 @@ Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
 ```
 
-### openai 3.55.1 (Apache-2.0)
+### openai 3.56.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -8525,7 +8525,7 @@ DAMAGES.
                      END OF TERMS AND CONDITIONS
 ```
 
-### pydantic 2.14.3 (MIT)
+### pydantic 2.14.4 (MIT)
 
 ```text
 The MIT License (MIT)
@@ -8551,7 +8551,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### pydantic_core 2.50.4 (MIT)
+### pydantic_core 2.50.5 (MIT)
 
 ```text
 The MIT License (MIT)

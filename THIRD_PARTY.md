@@ -20,7 +20,7 @@ and first-party/internal packages are excluded.
 | `lxml` | `>=6.1.3,<7` |
 | `nltk` | `>=3.10.4,<4` |
 | `numpy` | `>=2.5.5` |
-| `openai` | `>=3.51.0,<4` |
+| `openai` | `>=3.52.0,<4` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.3,<3` |
 | `python-dotenv` | `>=1.2.4,<2` |
@@ -81,7 +81,7 @@ and first-party/internal packages are excluded.
 | `platformdirs` | `4.14.7` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.1` |
-| `pydantic-core` | `2.50.4` |
+| `pydantic-core` | `2.50.5` |
 | `pygments` | `2.21.0` |
 | `python-dateutil` | `4.0.0` |
 | `referencing` | `0.37.0` |
