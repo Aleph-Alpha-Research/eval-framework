@@ -2,7 +2,7 @@ import re
 from collections.abc import Callable, Sequence
 from typing import NamedTuple, Self, TypeVar, cast
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from eval_framework.metrics.llm.graders.language import detect_language_of
 from eval_framework.utils.helpers import count_bytes
@@ -211,6 +211,20 @@ class Completion(BaseCompletion):
         return detected_language
 
 
+class TokenLogprob(BaseModel):
+    """One token covering (part of) a scored continuation, as the backend reported it.
+
+    ``logprob`` is the natural-log probability of the token; ``decoded_token`` is its
+    text. This is the transport-neutral form the LLM adapter forwards: it says nothing
+    about what the continuation is for (BPB, accuracy, ...). The framework derives
+    :class:`PerTokenScores` (bits and byte lengths) from these.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    logprob: float
+    decoded_token: str
+
+
 class PerTokenScores(BaseModel):
     """Per-token surprisal and byte length for one scored completion.
 
@@ -234,7 +248,14 @@ class BaseLoglikelihood(BaseModel):
     """Is empty if the model does not report per-choice token counts."""
 
     loglikelihoods_per_token: dict[str, PerTokenScores] = {}
-    """Choice -> per-token scores; keys match loglikelihoods; {} if the backend has no per-token logprobs."""
+    """Deprecated: derived per-token bits/byte lengths. Superseded by ``token_logprobs``, from which
+    the framework now derives these. Kept so old adapters and saved runs still feed prefix/Prior BPB.
+    Choice -> per-token scores; keys match loglikelihoods; {} if the backend has no per-token logprobs."""
+
+    token_logprobs: dict[str, list[TokenLogprob]] = Field(default_factory=dict)
+    """Scored continuation -> the raw tokens covering it, as the backend reported them; keys match
+    loglikelihoods. {} if the backend reports no per-token logprobs. Preferred over
+    ``loglikelihoods_per_token``: the framework derives bits/byte lengths from these."""
 
     concat_compression: ConcatCompression | None = None
     """Compression info for the concat formatter."""

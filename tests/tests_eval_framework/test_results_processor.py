@@ -434,3 +434,18 @@ def test_file_result_processor_loads_loglikelihood_written_without_context(tmp_p
 
     assert isinstance(loaded, Loglikelihood)
     assert loaded.context is None
+
+
+def test_file_result_processor_loads_loglikelihood_written_without_token_logprobs(tmp_path: Path) -> None:
+    """An output.jsonl line written before Loglikelihood had token_logprobs still loads, with it empty."""
+    pre_change_line = (
+        '{"prompt": "p", "prompt_num_tokens": null, "loglikelihoods": {" a": -0.5}, '
+        '"loglikelihoods_num_tokens": {" a": 1}, "loglikelihoods_per_token": {}, "concat_compression": null, '
+        '"sample_id": 1, "result_id": 1, "subject": "s", "ground_truth": " a"}\n'
+    )
+    (tmp_path / "output.jsonl").write_text(pre_change_line)
+
+    [loaded] = ResultsFileProcessor(tmp_path).load_responses()
+
+    assert isinstance(loaded, Loglikelihood)
+    assert loaded.token_logprobs == {}
