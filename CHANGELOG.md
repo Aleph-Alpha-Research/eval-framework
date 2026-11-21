@@ -14,6 +14,42 @@
 
 ### Bug Fixes
 
+## [0.28.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.27.0...v0.28.0) (2026-11-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* randomize_judge_order removed
+
+### Features
+
+* **cli:** make the local llama-server opt-in with --self-host ([dc5c90e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/dc5c90eac92ebee443d20b918458a5ce2f5c8e47))
+* **cli:** run a local llama-server when no API key is set ([36b71f8](https://github.com/Aleph-Alpha-Research/eval-framework/commit/36b71f818b350b8ebb09ec86107be7fb70373d1a))
+* randomize_judge_order removed ([8e3bb50](https://github.com/Aleph-Alpha-Research/eval-framework/commit/8e3bb5048d95a836177dbfc7827ba75c87d5df30))
+
+
+### Bug Fixes
+
+* **cli:** check that the server answering is the one --self-host started ([b23c4bc](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b23c4bc3976d95deb268fa74aa5adb4f76627987))
+* **cli:** reject --self-host together with --task-suite ([b751c41](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b751c41ca713b328c493242d3f64ee2ab15b6cb2))
+* **cli:** stop llama-server when startup is interrupted ([f6b82fa](https://github.com/Aleph-Alpha-Research/eval-framework/commit/f6b82fa483c90707c7a8814db4c2c6a7ad49693c))
+* **deps:** update dependency openai to &gt;=3.52.0,&lt;4 ([da4a63f](https://github.com/Aleph-Alpha-Research/eval-framework/commit/da4a63f941a4baa44c1f5c6fe511425c673766c4))
+* **deps:** update dependency openai to &gt;=3.54.0,&lt;4 ([a72f064](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a72f064c6a0fdf9dec53176bf09e2482ad2cdad8))
+
+
+### Documentation
+
+* **cli:** refer to the self-host section by name ([0453d6d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0453d6d626756064d4fedbb3a5d31159156abe04))
+* install from PyPI with uv in the installation guide ([5bce313](https://github.com/Aleph-Alpha-Research/eval-framework/commit/5bce313831cdfab2e210873fdc8d64157f3217e8))
+* install the quickstart from GitHub until PyPI has --self-host ([e858025](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e8580251959b4a4740d6b0a642bdb704a2eabfaa))
+* install the quickstart with pip and --self-host ([c8adc5c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c8adc5c0d8d7016a2ad7299a7869a76a5c1bed07))
+* install the quickstart with uv ([606a6a2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/606a6a2f35f075e1fb9a44b071f58848b833214d))
+* mention uv next to pip in the quickstart ([8e83b89](https://github.com/Aleph-Alpha-Research/eval-framework/commit/8e83b89e92d76b65a9c8eb945cc6132fcbfcdea1))
+* note that IDK tasks and loglikelihood metrics need the Python API ([fd42a73](https://github.com/Aleph-Alpha-Research/eval-framework/commit/fd42a737e99598ebef9b3f40141c145e00c57996))
+* restructure README around a local quickstart ([28fafaf](https://github.com/Aleph-Alpha-Research/eval-framework/commit/28fafaf69affe8f63f6baf6dc3d96fb43e753ca8))
+* state that loglikelihood metrics need a vLLM server ([96fab94](https://github.com/Aleph-Alpha-Research/eval-framework/commit/96fab94772b6a762191b4ce99936e31a38a1a16c))
+* use a task the CLI can run in the examples ([3f95150](https://github.com/Aleph-Alpha-Research/eval-framework/commit/3f9515088cdf402ee4bdd463ce3fe8e6642e97df))
+
 ## [0.27.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.26.0...v0.27.0) (2026-11-19)
 
 
