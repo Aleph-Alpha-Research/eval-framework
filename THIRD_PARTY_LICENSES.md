@@ -110,7 +110,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.16.0 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.2.12 - https://github.com/tox-dev/filelock
+- **filelock** 4.3.0 - https://github.com/tox-dev/filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jiter** 0.19.0 - https://github.com/pydantic/jiter/
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -1086,7 +1086,7 @@ Apache License
    limitations under the License.
 ```
 
-### filelock 4.2.12 (MIT)
+### filelock 4.3.0 (MIT)
 
 ```text
 MIT License

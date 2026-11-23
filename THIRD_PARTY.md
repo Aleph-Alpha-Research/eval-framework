@@ -20,9 +20,9 @@ and first-party/internal packages are excluded.
 | `lxml` | `>=6.1.3,<7` |
 | `nltk` | `>=3.10.4,<4` |
 | `numpy` | `>=2.5.5` |
-| `openai` | `>=3.55.1,<4` |
+| `openai` | `>=3.57.0,<4` |
 | `pycountry` | `>=26.2.16,<27` |
-| `pydantic` | `>=2.14.3,<3` |
+| `pydantic` | `>=2.14.4,<3` |
 | `python-dotenv` | `>=1.2.4,<2` |
 | `pyyaml` | `>=6.0.3,<7` |
 | `scipy` | `>=1.18.1,<2` |
@@ -49,7 +49,7 @@ and first-party/internal packages are excluded.
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
 | `distro` | `1.9.0` |
-| `filelock` | `4.2.12` |
+| `filelock` | `4.3.0` |
 | `fsspec` | `2026.9.0` |
 | `h11` | `0.16.0` |
 | `hf-xet` | `1.8.0` |
