@@ -14,6 +14,15 @@
 
 ### Bug Fixes
 
+## [0.28.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.28.1...v0.28.2) (2026-11-23)
+
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=3.56.0,&lt;4 ([6dd85aa](https://github.com/Aleph-Alpha-Research/eval-framework/commit/6dd85aa12fff66e4500d73199b3586b721cb98d6))
+* **deps:** update dependency openai to &gt;=3.57.0,&lt;4 ([dcaa0bd](https://github.com/Aleph-Alpha-Research/eval-framework/commit/dcaa0bd4454fc3286cd1ab146e247a469554adb3))
+* **deps:** update dependency pydantic to &gt;=2.14.4,&lt;3 ([a884a14](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a884a14d2b4442d3d0e05c5f5d4b53b1583ca4cf))
+
 ## [0.28.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.28.0...v0.28.1) (2026-11-22)
 
 
