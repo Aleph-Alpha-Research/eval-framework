@@ -42,7 +42,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
-- **openai** 3.57.0 - https://github.com/openai/openai-python
+- **openai** 3.58.0 - https://github.com/openai/openai-python
 - **opentelemetry-api** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
 - **opentelemetry-exporter-otlp-proto-common** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common
 - **opentelemetry-proto** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto
@@ -60,7 +60,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0 OR BSD-2-Clause
 
-- **packaging** 26.3 - https://github.com/pypa/packaging
+- **packaging** 26.4 - https://github.com/pypa/packaging
 
 ## BSD-2-Clause
 
@@ -109,8 +109,8 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **annotated-types** 0.8.0 - https://github.com/annotated-types/annotated-types
 - **anyio** 4.16.0 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
-- **charset-normalizer** 3.5.2 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.3.0 - https://github.com/tox-dev/filelock
+- **charset-normalizer** 3.5.3 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
+- **filelock** 4.3.1 - https://github.com/tox-dev/filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jiter** 0.19.0 - https://github.com/pydantic/jiter/
 - **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
@@ -280,7 +280,7 @@ one at http://mozilla.org/MPL/2.0/.
 @(#) $RCSfile: certdata.txt,v $ $Revision: 1.80 $ $Date: 2011/11/03 15:11:58 $
 ```
 
-### charset-normalizer 3.5.2 (MIT)
+### charset-normalizer 3.5.3 (MIT)
 
 ```text
 MIT License
@@ -1086,7 +1086,7 @@ Apache License
    limitations under the License.
 ```
 
-### filelock 4.3.0 (MIT)
+### filelock 4.3.1 (MIT)
 
 ```text
 MIT License
@@ -3622,7 +3622,7 @@ Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
 ```
 
-### openai 3.57.0 (Apache-2.0)
+### openai 3.58.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -4858,7 +4858,7 @@ Apache License
    limitations under the License.
 ```
 
-### packaging 26.3 (Apache-2.0 OR BSD-2-Clause)
+### packaging 26.4 (Apache-2.0 OR BSD-2-Clause)
 
 ```text
 This software is made available under the terms of *either* of the licenses

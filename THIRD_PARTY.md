@@ -24,12 +24,12 @@ and first-party/internal packages are excluded.
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.4,<3` |
 | `python-dotenv` | `>=1.2.4,<2` |
-| `pyyaml` | `>=6.0.3,<7` |
+| `pyyaml` | `>=6.0.4,<7` |
 | `scipy` | `>=1.18.1,<2` |
 | `sympy` | `>=1.14.0,<2` |
 | `tiktoken` | `>=0.14.0,<1` |
 | `transformers` | `>=5.23.0,<6` |
-| `wandb` | `>=0.31.0,<1` |
+| `wandb` | `>=0.31.2,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
 ## Transitive
@@ -41,7 +41,7 @@ and first-party/internal packages are excluded.
 | `anyio` | `4.16.0` |
 | `attrs` | `26.1.0` |
 | `certifi` | `2026.11.20` |
-| `charset-normalizer` | `3.5.2` |
+| `charset-normalizer` | `3.5.3` |
 | `click` | `8.5.1` |
 | `cloudpickle` | `3.1.3` |
 | `colorama` | `0.4.6` |
@@ -49,7 +49,7 @@ and first-party/internal packages are excluded.
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
 | `distro` | `1.9.0` |
-| `filelock` | `4.3.0` |
+| `filelock` | `4.3.1` |
 | `fsspec` | `2026.9.0` |
 | `h11` | `0.16.0` |
 | `hf-xet` | `1.8.0` |
@@ -72,7 +72,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-proto` | `1.45.2` |
 | `opentelemetry-sdk` | `1.45.2` |
 | `opentelemetry-semantic-conventions` | `0.66b2` |
-| `packaging` | `26.3` |
+| `packaging` | `26.4` |
 | `pandas` | `3.1.1` |
 | `platformdirs` | `4.14.8` |
 | `protobuf` | `7.36.2` |
