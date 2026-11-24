@@ -14,6 +14,15 @@
 
 ### Bug Fixes
 
+## [0.28.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.28.2...v0.28.3) (2026-11-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency pyyaml to &gt;=6.0.4,&lt;7 ([c70d80d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c70d80d8ce752e0365a532b992699f9d075e8bd0))
+* **deps:** update dependency wandb to &gt;=0.31.1,&lt;1 ([935b07c](https://github.com/Aleph-Alpha-Research/eval-framework/commit/935b07c8851bf950451e0e701ed27d1e9db6c0a8))
+* **deps:** update dependency wandb to &gt;=0.31.2,&lt;1 ([45aa615](https://github.com/Aleph-Alpha-Research/eval-framework/commit/45aa615e373c3de20827d66151012dfa69282ef1))
+
 ## [0.28.2](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.28.1...v0.28.2) (2026-11-23)
 
 
