@@ -42,7 +42,7 @@ dependencies = [
   "scipy>=1.18.1,<2",  # required for the aggregation of pass@k metrics
   "openai>=3.57.0,<4",
   "tiktoken>=0.14.0,<1",
-  "transformers[chat-template]>=5.23.0,<6",
+  "transformers[chat-template]>=5.24.0,<6",
 ]
 
 [project.urls]
