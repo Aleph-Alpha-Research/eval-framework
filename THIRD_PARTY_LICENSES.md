@@ -7,7 +7,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 | License (SPDX) | Count |
 |---|---|
-| `MIT` | 27 |
+| `MIT` | 23 |
 | `BSD-3-Clause` | 21 |
 | `Apache-2.0` | 20 |
 | `BSD-2-Clause` | 2 |
@@ -25,7 +25,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache 2.0 License
 
-- **transformers** 5.24.0 - https://github.com/huggingface/transformers
+- **transformers** 5.24.1 - https://github.com/huggingface/transformers
 
 ## Apache Software License; MIT License
 
@@ -42,7 +42,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
-- **openai** 3.58.0 - https://github.com/openai/openai-python
+- **openai** 3.59.0 - https://github.com/openai/openai-python
 - **opentelemetry-api** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
 - **opentelemetry-exporter-otlp-proto-common** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common
 - **opentelemetry-proto** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto
@@ -56,7 +56,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0 AND CNRI-Python
 
-- **regex** 2026.11.19 - https://github.com/mrabarnett/mrab-regex
+- **regex** 2026.11.23 - https://github.com/mrabarnett/mrab-regex
 
 ## Apache-2.0 OR BSD-2-Clause
 
@@ -113,17 +113,13 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **filelock** 4.3.1 - https://github.com/tox-dev/filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jiter** 0.19.0 - https://github.com/pydantic/jiter/
-- **jsonschema** 4.26.0 - https://github.com/python-jsonschema/jsonschema
-- **jsonschema-specifications** 2025.9.1 - https://github.com/python-jsonschema/jsonschema-specifications
 - **markdown-it-py** 4.3.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
 - **platformdirs** 4.14.8 - https://github.com/tox-dev/platformdirs
 - **pydantic** 2.14.4 - https://github.com/pydantic/pydantic
 - **pydantic_core** 2.50.5 - https://github.com/pydantic
 - **PyYAML** 6.0.4 - https://pyyaml.org/
-- **referencing** 0.37.0 - https://github.com/python-jsonschema/referencing
 - **rich** 15.0.0 - https://github.com/Textualize/rich
-- **rpds-py** 2026.9.1 - https://github.com/crate-py/rpds
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **tiktoken** 0.14.0 - https://github.com/openai/tiktoken
 - **truststore** 0.10.5 - https://github.com/sethmlarson/truststore
@@ -2022,54 +2018,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### jsonschema 4.26.0 (MIT)
-
-```text
-Copyright (c) 2013 Julian Berman
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-```
-
-### jsonschema-specifications 2025.9.1 (MIT)
-
-```text
-Copyright (c) 2022 Julian Berman
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-```
-
 ### langdetect 1.0.9 (Apache-2.0)
 
 ```text
@@ -3622,7 +3570,7 @@ Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
 ```
 
-### openai 3.58.0 (Apache-2.0)
+### openai 3.59.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -7895,31 +7843,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### referencing 0.37.0 (MIT)
-
-```text
-Copyright (c) 2022 Julian Berman
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-```
-
-### regex 2026.11.19 (Apache-2.0 AND CNRI-Python)
+### regex 2026.11.23 (Apache-2.0 AND CNRI-Python)
 
 ```text
 This work was derived from the 're' module of CPython 2.6 and CPython 3.1,
@@ -8333,30 +8257,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-```
-
-### rpds-py 2026.9.1 (MIT)
-
-```text
-Copyright (c) 2023 Julian Berman
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
 ```
 
 ### safetensors 0.8.0 (Apache-2.0)
@@ -9794,7 +9694,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### transformers 5.24.0 (Apache 2.0 License)
+### transformers 5.24.1 (Apache 2.0 License)
 
 ```text
 Copyright 2018- The Hugging Face team. All rights reserved.
