@@ -121,6 +121,27 @@ def test_mmlu_bpb_prompt() -> None:
     assert sample.possible_completions == [" 4"]
 
 
+def test_mmlu_bpb_oneshot_prompt() -> None:
+    # Given the BPB benchmark with a fewshot row (dev split) and the eval row (test split)
+    fewshot_row = {**_EVAL_ROW, "question": "What is 1 + 1?", "choices": ["1", "2", "3", "4"], "answer": 1}
+    benchmark = mmlu_bpb(dataset=DatasetStub({"test": [_EVAL_ROW], "dev": [fewshot_row]}))
+    # When we assemble its first sample (one-shot)
+    sample = first_sample(benchmark, num_fewshot=1)
+    # Then the preamble opens the first (fewshot) turn only, the demonstration answers with the full gold text,
+    # and only the eval row's gold text is scored
+    assert sample.messages == [
+        Message(
+            role=Role.USER,
+            content="The following are questions (with answers) about abstract algebra.\n\nQuestion: What is 1 + 1?\n",
+        ),
+        Message(role=Role.ASSISTANT, content="Answer: 2"),
+        Message(role=Role.USER, content="Question: What is 2 + 2?\n"),
+        Message(role=Role.ASSISTANT, content="Answer:"),
+    ]
+    assert sample.ground_truth == " 4"
+    assert sample.possible_completions == [" 4"]
+
+
 def test_mmlu_idk_prompt() -> None:
     # IDK: an abstention option "?" is scored; the preamble names the subject by its raw (underscored) key.
     benchmark = mmlu_idk(dataset=DatasetStub({"test": [_EVAL_ROW]}))
