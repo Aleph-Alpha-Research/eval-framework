@@ -4,7 +4,9 @@ https://huggingface.co/datasets/ybisk/piqa
 
 Each item is a goal with two candidate solutions (``sol1``, ``sol2``); ``label`` selects the correct one.
 The base task scores the full solution text (cloze); the OLMES variant shows the solutions as lettered
-options (multiple choice); the IDK variant lets the model abstain with an "I do not know" answer.
+options (multiple choice); the BPB variant uses the OLMES ``Goal:`` prompt without the options and scores only
+the BPB of the gold solution (validation split, train fewshots); the IDK variant lets the model abstain with an
+"I do not know" answer.
 """
 
 from typing import Any, final, override
@@ -14,7 +16,7 @@ from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_frozen
-from eval_framework.tasks.task_style import ClozeStyle, MCStyle, TaskStyler
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler
 
 _IDK_PREAMBLE = (
     "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
@@ -69,6 +71,16 @@ def piqa_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     )
 
 
+def piqa_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _piqa_benchmark(
+        "PIQA_AllenAI_EN_BPB",
+        BPBStyle(question_prefix="Goal: "),
+        sample_split="validation",
+        fewshot_split="train",
+        dataset=dataset,
+    )
+
+
 def piqa_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _piqa_benchmark(
         "PIQA_IDK",
@@ -79,4 +91,4 @@ def piqa_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     )
 
 
-PIQA_BENCHMARKS: list[Benchmark] = [piqa(), piqa_olmes(), piqa_idk()]
+PIQA_BENCHMARKS: list[Benchmark] = [piqa(), piqa_olmes(), piqa_bpb(), piqa_idk()]

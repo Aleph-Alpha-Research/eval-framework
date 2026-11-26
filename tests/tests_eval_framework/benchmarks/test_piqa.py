@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.piqa import _IDK_PREAMBLE, PIQA_BENCHMARKS, piqa, piqa_idk, piqa_olmes
+from eval_framework.benchmarks.piqa import _IDK_PREAMBLE, PIQA_BENCHMARKS, piqa, piqa_bpb, piqa_idk, piqa_olmes
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -82,6 +82,15 @@ _OLMES = _ExpectedPrompt(
     ground_truth=" A",
     possible_completions=[" A", " B"],
 )
+# BPB: the OLMES "Goal:" prompt without the options; scores only the gold solution text.
+_BPB = _ExpectedPrompt(
+    messages=[
+        Message(role=Role.USER, content="Goal: How do you dig a hole?\n"),
+        Message(role=Role.ASSISTANT, content="Answer:"),
+    ],
+    ground_truth=" Use a shovel to remove the dirt.",
+    possible_completions=[" Use a shovel to remove the dirt."],
+)
 # IDK: cloze plus an appended "I do not know" option, preceded once by the confidence preamble.
 _IDK = _ExpectedPrompt(
     messages=[
@@ -102,6 +111,7 @@ _IDK = _ExpectedPrompt(
     [
         pytest.param(piqa, "validation", _CLOZE, id="cloze"),
         pytest.param(piqa_olmes, "train", _OLMES, id="olmes"),
+        pytest.param(piqa_bpb, "validation", _BPB, id="bpb"),
         pytest.param(piqa_idk, "validation", _IDK, id="idk"),
     ],
 )
@@ -132,6 +142,11 @@ _OLMES_FEWSHOT_MESSAGES = [
     Message(role=Role.ASSISTANT, content="Answer: B"),
 ]
 
+_BPB_FEWSHOT_MESSAGES = [
+    Message(role=Role.USER, content="Goal: How do you light a candle?\n"),
+    Message(role=Role.ASSISTANT, content="Answer: Touch a lit match to the wick."),
+]
+
 
 def _oneshot(fewshot_messages: list[Message], eval_expected: _ExpectedPrompt) -> _ExpectedPrompt:
     return _ExpectedPrompt(
@@ -144,7 +159,8 @@ def _oneshot(fewshot_messages: list[Message], eval_expected: _ExpectedPrompt) ->
 @pytest.mark.parametrize(
     "make_benchmark, splits, expected",
     [
-        # Base/IDK draw few-shot from a separate split (validation/test); OLMES from its own (train).
+        # Base/IDK draw few-shot from a separate split (validation/test), BPB too (validation/train);
+        # OLMES from its own (train).
         pytest.param(
             piqa,
             {"validation": [_EVAL_ROW], "test": [_FEWSHOT_ROW]},
@@ -156,6 +172,12 @@ def _oneshot(fewshot_messages: list[Message], eval_expected: _ExpectedPrompt) ->
             {"train": [_FEWSHOT_ROW, _EVAL_ROW]},
             _oneshot(_OLMES_FEWSHOT_MESSAGES, _OLMES),
             id="olmes",
+        ),
+        pytest.param(
+            piqa_bpb,
+            {"validation": [_EVAL_ROW], "train": [_FEWSHOT_ROW]},
+            _oneshot(_BPB_FEWSHOT_MESSAGES, _BPB),
+            id="bpb",
         ),
     ],
 )
