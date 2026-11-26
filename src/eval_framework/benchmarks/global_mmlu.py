@@ -1,6 +1,14 @@
 """Global-MMLU: https://huggingface.co/datasets/CohereLabs/Global-MMLU
 
 MMLU translated into many languages; we evaluate French, German, Spanish, Italian, Portuguese and Arabic.
+
+Variants:
+
+- ``GlobalMMLU`` / ``GlobalMMLU_German``: multiple choice over all languages / German only, scored over the
+  letter labels. The language is part of each subject label, so these use a hand-written kind.
+- ``GlobalMMLU_Cohere_{lang}_BPB`` / ``GlobalMMLULite_Cohere_{lang}_BPB``: one task per language (e.g.
+  ``GlobalMMLU_Cohere_DE_BPB``), options hidden, BPB of the gold option's full text. Global-MMLU-Lite
+  (https://huggingface.co/datasets/CohereLabs/Global-MMLU-Lite) is a 400-question subset per language.
 """
 
 import ast
@@ -12,6 +20,7 @@ from datasets import DatasetDict
 from eval_framework.answer import PickFromCandidates
 from eval_framework.benchmarks.mmlu import MMLU_SUBJECTS
 from eval_framework.benchmarks.utils.global_mmlu_languages import GLOBAL_MMLU_LOCALES
+from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import EvalKind, SampleBody, assemble_messages
@@ -26,6 +35,7 @@ from eval_framework.metrics.loglikelihood.bpb_variants import BitsPerByteVariant
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.dataset_loading import DatasetLoader, DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
+from eval_framework.tasks.task_style import BPBStyle
 from eval_framework.tasks.utils import get_n_letters
 from template_formatting.formatter import Message
 
@@ -34,6 +44,28 @@ if TYPE_CHECKING:
 
 GLOBAL_MMLU_DATASET_PATH = "CohereLabs/Global-MMLU"
 GLOBAL_MMLU_LANGUAGES = ["fr", "de", "es", "it", "pt", "ar", "nl", "pl", "tr", "ru", "uk", "ro"]
+
+GLOBAL_MMLU_LITE_DATASET_PATH = "CohereLabs/Global-MMLU-Lite"
+# Our languages that Global-MMLU-Lite also has (it lacks nl, pl, tr, ru, uk and ro).
+GLOBAL_MMLU_LITE_LANGUAGES = ["fr", "de", "es", "it", "pt", "ar"]
+# Lite's test split covers only 43 of the 57 MMLU subjects (the same ones in every language).
+_LITE_MISSING_SUBJECTS = {
+    "abstract_algebra",
+    "anatomy",
+    "clinical_knowledge",
+    "college_computer_science",
+    "college_physics",
+    "computer_security",
+    "conceptual_physics",
+    "econometrics",
+    "formal_logic",
+    "high_school_biology",
+    "machine_learning",
+    "medical_genetics",
+    "moral_scenarios",
+    "world_religions",
+}
+GLOBAL_MMLU_LITE_SUBJECTS = [subject for subject in MMLU_SUBJECTS if subject not in _LITE_MISSING_SUBJECTS]
 
 _OPTION_KEYS = {"A": "option_a", "B": "option_b", "C": "option_c", "D": "option_d"}
 _KEYS = get_n_letters(4)  # A, B, C, D
@@ -81,8 +113,9 @@ class _GlobalMmluDataset(DatasetPolicy):
     """Global-MMLU's data policy: each subject is a ``(language, subject)`` pair — config by language,
     filtered by the ``subject`` column."""
 
-    def __init__(self, inner: DatasetPolicy) -> None:
+    def __init__(self, inner: DatasetPolicy, dataset_path: str) -> None:
         self._inner = inner
+        self._dataset_path = dataset_path
 
     @override
     def loader(self, custom_hf_revision: str | None) -> DatasetLoader:
@@ -90,7 +123,7 @@ class _GlobalMmluDataset(DatasetPolicy):
 
     @override
     def documentation(self) -> str:
-        url = f"https://huggingface.co/datasets/{GLOBAL_MMLU_DATASET_PATH}"
+        url = f"https://huggingface.co/datasets/{self._dataset_path}"
         return (
             f"- Link to dataset: [{url}]({url})\n"
             "- Each subject is a `(language, subject)` pair: the language selects the config, and the subject "
@@ -142,7 +175,11 @@ def _global_mmlu_demo(row: dict[str, Any]) -> FewshotExample:
 
 
 def _global_mmlu_dataset(dataset: DatasetPolicy | None) -> DatasetPolicy:
-    return dataset if dataset is not None else _GlobalMmluDataset(pinned_by_framework(GLOBAL_MMLU_DATASET_PATH))
+    return dataset if dataset is not None else _global_mmlu_pinned(GLOBAL_MMLU_DATASET_PATH)
+
+
+def _global_mmlu_pinned(dataset_path: str) -> DatasetPolicy:
+    return _GlobalMmluDataset(pinned_by_framework(dataset_path), dataset_path)
 
 
 def _global_mmlu(id: str, subjects: ListOfSubjects, dataset: DatasetPolicy | None) -> Benchmark:
@@ -167,4 +204,48 @@ def global_mmlu_german(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _global_mmlu("GlobalMMLU_German", subjects, dataset)
 
 
-GLOBAL_MMLU_BENCHMARKS: list[Benchmark] = [global_mmlu(), global_mmlu_german()]
+# --- per-language BPB variants ------------------------------------------------------------------------------
+
+
+@final
+class GlobalMmluReader(ChoiceReader):
+    """Reads a Global-MMLU (or -Lite) item: the question, its four options and the gold letter as an index."""
+
+    @override
+    def read(self, item: dict[str, Any]) -> ChoiceFields:
+        return ChoiceFields(
+            raw_question=item["question"].strip(),
+            choices=[item[_OPTION_KEYS[key]] for key in _KEYS],
+            correct_index=_KEYS.index(item["answer"]),
+        )
+
+
+def global_mmlu_bpb(language: str, lite: bool = False, dataset: DatasetPolicy | None = None) -> Benchmark:
+    """Build ``GlobalMMLU[Lite]_Cohere_{language}_BPB``, e.g. ``global_mmlu_bpb("de")``: the localized cloze prompt
+    (no options, no "multiple choice" in the preamble), scoring only the gold option's full text."""
+    locale = GLOBAL_MMLU_LOCALES[language]
+    styler = BPBStyle(
+        question_prefix=f"{locale.question_label}: ",
+        cue_text=f"{locale.answer_label}:",
+        initial_prompt=lambda subject_label: locale.cloze_preamble(_lang_and_subject(subject_label)[1]),
+    )
+    subjects = GLOBAL_MMLU_LITE_SUBJECTS if lite else MMLU_SUBJECTS
+    dataset_path = GLOBAL_MMLU_LITE_DATASET_PATH if lite else GLOBAL_MMLU_DATASET_PATH
+    return ComposedBenchmark.choice(
+        id=f"GlobalMMLU{'Lite' if lite else ''}_Cohere_{language.upper()}_BPB",
+        reader=GlobalMmluReader(),
+        styler=styler,
+        sample_split="test",
+        fewshot_split="dev",
+        # Same (language, subject) labels as the multiple-choice tasks, so the same loader serves them.
+        subjects=ListOfSubjects([str((language, subject)) for subject in subjects]),
+        dataset_policy=dataset if dataset is not None else _global_mmlu_pinned(dataset_path),
+    )
+
+
+GLOBAL_MMLU_BENCHMARKS: list[Benchmark] = [
+    global_mmlu(),
+    global_mmlu_german(),
+    *(global_mmlu_bpb(language) for language in GLOBAL_MMLU_LANGUAGES),
+    *(global_mmlu_bpb(language, lite=True) for language in GLOBAL_MMLU_LITE_LANGUAGES),
+]
