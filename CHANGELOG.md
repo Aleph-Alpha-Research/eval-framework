@@ -14,6 +14,32 @@
 
 ### Bug Fixes
 
+## [0.29.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.28.3...v0.29.0) (2026-11-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* unused metrics and the jsonschema dependency removed
+* move the code-execution metrics into the code_execution package
+* move the Python unit-test runner to code_execution.python_tests
+* move run_python_code to code_execution.sandbox
+
+### Features
+
+* unused metrics and the jsonschema dependency removed ([85ec13e](https://github.com/Aleph-Alpha-Research/eval-framework/commit/85ec13e95169e7459018976d80bd82fc9290f35a))
+
+
+### Bug Fixes
+
+* **deps:** update dependency transformers to &gt;=5.24.0,&lt;6 ([ee8e922](https://github.com/Aleph-Alpha-Research/eval-framework/commit/ee8e922342d8984174b8a148fbf35926400696c4))
+
+
+### Code Refactoring
+
+* move run_python_code to code_execution.sandbox ([c1c43a7](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c1c43a736128a26e4479919e864ff24b50b66936))
+* move the code-execution metrics into the code_execution package ([4c978d8](https://github.com/Aleph-Alpha-Research/eval-framework/commit/4c978d844f586405c3491695e220e22f137b91b6))
+* move the Python unit-test runner to code_execution.python_tests ([e6af8f0](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e6af8f06d24658294b123010022959ca7944ec46))
+
 ## [0.28.3](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.28.2...v0.28.3) (2026-11-24)
 
 
