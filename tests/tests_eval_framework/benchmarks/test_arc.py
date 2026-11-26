@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.arc import _IDK_PREAMBLE, ARC_BENCHMARKS, arc, arc_idk, arc_olmes
+from eval_framework.benchmarks.arc import _IDK_PREAMBLE, ARC_BENCHMARKS, arc, arc_bpb, arc_idk, arc_olmes
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -79,6 +79,12 @@ _OLMES = _ExpectedPrompt(
     ground_truth=" A",
     possible_completions=[" A", " B", " C", " D"],
 )
+# BPB: the cloze prompt, but only the gold answer text is scored.
+_BPB = _ExpectedPrompt(
+    messages=_CLOZE.messages,
+    ground_truth=" Oxygen",
+    possible_completions=[" Oxygen"],
+)
 # IDK: cloze plus an appended "I do not know." option, preceded once by the confidence preamble.
 _IDK = _ExpectedPrompt(
     messages=[
@@ -98,6 +104,7 @@ _IDK = _ExpectedPrompt(
     [
         pytest.param(arc, _CLOZE, id="cloze"),
         pytest.param(arc_olmes, _OLMES, id="olmes"),
+        pytest.param(arc_bpb, _BPB, id="bpb"),
         pytest.param(arc_idk, _IDK, id="idk"),
     ],
 )
@@ -141,6 +148,7 @@ def _oneshot(fewshot: list[Message], eval_expected: _ExpectedPrompt) -> _Expecte
     [
         pytest.param(arc, _CLOZE_FEWSHOT, _CLOZE, id="cloze"),
         pytest.param(arc_olmes, _OLMES_FEWSHOT, _OLMES, id="olmes"),
+        pytest.param(arc_bpb, _CLOZE_FEWSHOT, _BPB, id="bpb"),
     ],
 )
 def test_arc_oneshot_prompt(

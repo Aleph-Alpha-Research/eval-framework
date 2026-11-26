@@ -2,7 +2,8 @@
 
 Grade-school science multiple-choice questions, split into the ARC-Easy and ARC-Challenge subjects. The
 base task scores the full answer text (cloze); the OLMES variant shows the options as space-prefixed
-lettered choices and scores the letters; the IDK variant lets the model abstain with "I do not know".
+lettered choices and scores the letters; the BPB variant uses the cloze prompt but scores only the BPB of the
+gold answer; the IDK variant lets the model abstain with "I do not know".
 """
 
 from typing import Any, final, override
@@ -13,7 +14,7 @@ from eval_framework.contract import Benchmark
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import ClozeStyle, MCStyle, TaskStyler, answer_key_to_index
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler, answer_key_to_index
 
 _IDK_PREAMBLE = (
     "Answer only if you are confident, since mistakes may be penalised, while correct answers receive points. "
@@ -57,6 +58,10 @@ def arc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _arc_benchmark("ARC_OLMES", styler, dataset)
 
 
+def arc_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _arc_benchmark("ARC_AllenAI_EN_BPB", BPBStyle(question_prefix="Question: ", cue_text="Answer:"), dataset)
+
+
 def arc_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = ClozeStyle(
         question_prefix="Question: ", cue_text="Answer:", initial_prompt=lambda _subject: _IDK_PREAMBLE
@@ -64,4 +69,4 @@ def arc_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _arc_benchmark("ARC_IDK", styler, dataset)
 
 
-ARC_BENCHMARKS: list[Benchmark] = [arc(), arc_olmes(), arc_idk()]
+ARC_BENCHMARKS: list[Benchmark] = [arc(), arc_olmes(), arc_bpb(), arc_idk()]
