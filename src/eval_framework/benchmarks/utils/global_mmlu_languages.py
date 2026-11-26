@@ -56,6 +56,9 @@ class GlobalMMLULocale:
 
     subject_names: dict[str, str]
     preamble_template: str
+    """Opens a prompt that shows the answer options; ``{subject}`` is the subject name."""
+    cloze_preamble_template: str
+    """Opens a prompt that hides the answer options (BPB), so it must not claim multiple choice."""
     question_label: str
     answer_label: str
 
@@ -64,11 +67,15 @@ class GlobalMMLULocale:
             missing = sorted(set(MMLU_SUBJECTS) - set(self.subject_names))
             extra = sorted(set(self.subject_names) - set(MMLU_SUBJECTS))
             raise ValueError(f"subject_names must name exactly the MMLU subjects; missing {missing}, extra {extra}")
-        if "{subject}" not in self.preamble_template:
-            raise ValueError(f"preamble_template must contain '{{subject}}': {self.preamble_template!r}")
+        for template in (self.preamble_template, self.cloze_preamble_template):
+            if "{subject}" not in template:
+                raise ValueError(f"preamble templates must contain '{{subject}}': {template!r}")
 
     def preamble(self, subject: str) -> str:
         return self.preamble_template.format(subject=self.subject_names[subject])
+
+    def cloze_preamble(self, subject: str) -> str:
+        return self.cloze_preamble_template.format(subject=self.subject_names[subject])
 
 
 # Keyed by Global-MMLU language config.
@@ -134,6 +141,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "Religions du Monde",
         },
         preamble_template="Les questions suivantes sont des questions à choix multiples (avec réponses) sur {subject}.",
+        cloze_preamble_template="Les questions suivantes sont des questions (avec réponses) sur {subject}.",
         question_label="Question",
         answer_label="Réponse",
     ),
@@ -198,6 +206,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "Weltreligionen",
         },
         preamble_template="Die folgenden sind Multiple-Choice-Fragen (mit Antworten) über {subject}.",
+        cloze_preamble_template="Die folgenden sind Fragen (mit Antworten) über {subject}.",
         question_label="Frage",
         answer_label="Antwort",
     ),
@@ -262,6 +271,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "Religiones del Mundo",
         },
         preamble_template="Las siguientes son preguntas de opción múltiple (con respuestas) sobre {subject}.",
+        cloze_preamble_template="Las siguientes son preguntas (con respuestas) sobre {subject}.",
         question_label="Pregunta",
         answer_label="Respuesta",
     ),
@@ -326,6 +336,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "Religioni del Mondo",
         },
         preamble_template="Le seguenti sono domande a scelta multipla (con risposte) su {subject}.",
+        cloze_preamble_template="Le seguenti sono domande (con risposte) su {subject}.",
         question_label="Domanda",
         answer_label="Risposta",
     ),
@@ -390,6 +401,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "Religiões Mundiais",
         },
         preamble_template="As seguintes são perguntas de múltipla escolha (com respostas) sobre {subject}.",
+        cloze_preamble_template="As seguintes são perguntas (com respostas) sobre {subject}.",
         question_label="Pergunta",
         answer_label="Resposta",
     ),
@@ -454,6 +466,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "الديانات العالمية",
         },
         preamble_template="فيما يلي أسئلة اختيار من متعدد (مع الإجابات) حول {subject}.",
+        cloze_preamble_template="فيما يلي أسئلة (مع الإجابات) حول {subject}.",
         question_label="السؤال",
         answer_label="الإجابة",
     ),
@@ -518,6 +531,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "wereldreligies",
         },
         preamble_template="Hieronder volgen meerkeuzevragen (met antwoorden) over {subject}.",
+        cloze_preamble_template="Hieronder volgen vragen (met antwoorden) over {subject}.",
         question_label="Vraag",
         answer_label="Antwoord",
     ),
@@ -582,6 +596,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "religie świata",
         },
         preamble_template="Poniżej znajdują się pytania wielokrotnego wyboru (z odpowiedziami) dotyczące {subject}.",
+        cloze_preamble_template="Poniżej znajdują się pytania (z odpowiedziami) dotyczące {subject}.",
         question_label="Pytanie",
         answer_label="Odpowiedź",
     ),
@@ -646,6 +661,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "мировые религии",
         },
         preamble_template="Ниже приведены вопросы с множественным выбором (с ответами) по теме {subject}.",
+        cloze_preamble_template="Ниже приведены вопросы (с ответами) по теме {subject}.",
         question_label="Вопрос",
         answer_label="Ответ",
     ),
@@ -710,6 +726,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "світові релігії",
         },
         preamble_template="Нижче наведено запитання з множинним вибором (з відповідями) з теми {subject}.",
+        cloze_preamble_template="Нижче наведено запитання (з відповідями) з теми {subject}.",
         question_label="Запитання",
         answer_label="Відповідь",
     ),
@@ -774,6 +791,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "dünya dinleri",
         },
         preamble_template="Aşağıdakiler, {subject} hakkında çoktan seçmeli sorulardır (cevaplarıyla birlikte).",
+        cloze_preamble_template="Aşağıdakiler, {subject} hakkında sorulardır (cevaplarıyla birlikte).",
         question_label="Soru",
         answer_label="Cevap",
     ),
@@ -838,6 +856,7 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "world_religions": "religii mondiale",
         },
         preamble_template="Următoarele sunt întrebări cu variante de răspuns (cu răspunsuri) despre {subject}.",
+        cloze_preamble_template="Următoarele sunt întrebări (cu răspunsuri) despre {subject}.",
         question_label="Întrebare",
         answer_label="Răspuns",
     ),

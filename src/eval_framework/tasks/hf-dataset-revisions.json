@@ -1,5 +1,6 @@
 {
     "CohereLabs/Global-MMLU": "0e619dbeb34206cd48705a1a0ea7fb21cae09993",
+    "CohereLabs/Global-MMLU-Lite": "36c2fd756f19ccf13a9a96c8e53ccecc02192b8b",
     "CohereLabs/lbpp": "054f32b5c7a168003d230e34288f689955fd9866",
     "EleutherAI/drop": "619386fc7ffe6dace3cc6d3483c69b164ebf6bf3",
     "EleutherAI/hendrycks_math": "21a5633873b6a120296cce3e2df9d5550074f4a3",

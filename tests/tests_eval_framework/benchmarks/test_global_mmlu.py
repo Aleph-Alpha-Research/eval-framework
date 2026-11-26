@@ -10,7 +10,12 @@ from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.global_mmlu import GLOBAL_MMLU_BENCHMARKS, global_mmlu
+from eval_framework.benchmarks.global_mmlu import (
+    GLOBAL_MMLU_BENCHMARKS,
+    GLOBAL_MMLU_LITE_SUBJECTS,
+    global_mmlu,
+    global_mmlu_bpb,
+)
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -75,3 +80,43 @@ def test_global_mmlu_prompt_is_localized(
     ]
     assert sample.ground_truth == " B"
     assert sample.possible_completions == [" A", " B", " C", " D"]
+
+
+@pytest.mark.parametrize(
+    "language, preamble, question_word, answer_word",
+    [
+        ("de", "Die folgenden sind Fragen (mit Antworten) über Abstrakte Algebra.", "Frage", "Antwort"),
+        (
+            "fr",
+            "Les questions suivantes sont des questions (avec réponses) sur Algèbre Abstraite.",
+            "Question",
+            "Réponse",
+        ),
+    ],
+)
+def test_global_mmlu_bpb_prompt_is_localized_and_hides_the_options(
+    language: str, preamble: str, question_word: str, answer_word: str
+) -> None:
+    # Given the per-language BPB benchmark over one fictional row, with a demonstration row in the dev split
+    fewshot_row = {**_EVAL_ROW, "question": "What is 1+1?", "option_b": "2", "answer": "B"}
+    benchmark = global_mmlu_bpb(language, dataset=DatasetStub({"test": [_EVAL_ROW], "dev": [fewshot_row]}))
+    # When we assemble its first sample (one-shot)
+    sample = first_sample(benchmark, num_fewshot=1, custom_subjects=[str((language, "abstract_algebra"))])
+    # Then the preamble does not claim multiple choice, no options are shown, and only the gold text is scored
+    assert benchmark.id() == f"GlobalMMLU_Cohere_{language.upper()}_BPB"
+    assert sample.messages == [
+        Message(role=Role.USER, content=f"{preamble}\n\n{question_word}: What is 1+1?\n"),
+        Message(role=Role.ASSISTANT, content=f"{answer_word}: 2"),
+        Message(role=Role.USER, content=f"{question_word}: What is 2+2?\n"),
+        Message(role=Role.ASSISTANT, content=f"{answer_word}:"),
+    ]
+    assert sample.ground_truth == " 4"
+    assert sample.possible_completions == [" 4"]
+
+
+def test_global_mmlu_lite_bpb_covers_only_the_subjects_lite_has() -> None:
+    # Lite's test split has 43 of the 57 MMLU subjects; the Lite task offers exactly those.
+    benchmark = global_mmlu_bpb("de", lite=True)
+    assert benchmark.id() == "GlobalMMLULite_Cohere_DE_BPB"
+    assert len(GLOBAL_MMLU_LITE_SUBJECTS) == 43
+    assert "abstract_algebra" not in GLOBAL_MMLU_LITE_SUBJECTS
