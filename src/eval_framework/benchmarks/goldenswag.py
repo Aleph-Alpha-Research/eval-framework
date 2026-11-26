@@ -1,7 +1,8 @@
 """GoldenSwag: https://huggingface.co/datasets/PleIAs/GoldenSwag
 
 A curated subset of HellaSwag, read identically (sentence completion, scored as cloze — see
-``HellaswagReader``). ``GoldenSwag_IDK`` additionally lets the model abstain with an "I do not know" answer.
+``HellaswagReader``). ``GoldenSwag_PleIAs_EN_BPB`` scores only the BPB of the gold ending. ``GoldenSwag_IDK``
+additionally lets the model abstain with an "I do not know" answer.
 """
 
 from eval_framework.benchmarks.hellaswag import HellaswagReader
@@ -9,7 +10,7 @@ from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import ClozeStyle, TaskStyler
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, TaskStyler
 
 _IDK_PREAMBLE = (
     "Complete the sentence only if you are confident, since mistakes may be penalised, while correct "
@@ -35,6 +36,11 @@ def goldenswag(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _goldenswag_benchmark("GoldenSwag", cloze, dataset)
 
 
+def goldenswag_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
+    bpb = BPBStyle(question_prefix="", cue_text="", trailing_newline=False)
+    return _goldenswag_benchmark("GoldenSwag_PleIAs_EN_BPB", bpb, dataset)
+
+
 def goldenswag_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     cloze = ClozeStyle(
         question_prefix="", cue_text="", trailing_newline=False, initial_prompt=lambda _subject: _IDK_PREAMBLE
@@ -43,4 +49,4 @@ def goldenswag_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _goldenswag_benchmark("GoldenSwag_IDK", styler, dataset)
 
 
-GOLDENSWAG_BENCHMARKS: list[Benchmark] = [goldenswag(), goldenswag_idk()]
+GOLDENSWAG_BENCHMARKS: list[Benchmark] = [goldenswag(), goldenswag_bpb(), goldenswag_idk()]
