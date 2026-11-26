@@ -171,6 +171,10 @@ _LOCALES: dict[LanguageCode, MMLUProXLocale] = {
             "physics": "Physik",
             "psychology": "Psychologie",
         },
+        # XXX: "Die folgenden sind ..." is a stiff, literal translation of MMLU's English preamble (lm-eval uses
+        # "Im Folgenden sind ..."); it is kept so results stay comparable to earlier runs (#1372). Remove once both
+        # German preambles are reworded (e.g. "Es folgen Fragen (mit Antworten) zu {category}."), a prompt change
+        # of its own PR that should also reword Global-MMLU's German preambles, which share this wording.
         mc_template="Die folgenden sind Multiple-Choice-Fragen (mit Antworten) über {category}.",
         cloze_template="Die folgenden sind Fragen (mit Antworten) über {category}.",
     ),

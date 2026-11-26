@@ -205,6 +205,10 @@ GLOBAL_MMLU_LOCALES: dict[str, GlobalMMLULocale] = {
             "virology": "Virologie",
             "world_religions": "Weltreligionen",
         },
+        # XXX: "Die folgenden sind ..." is a stiff, literal translation of MMLU's English preamble with no upstream
+        # source; it is kept so results stay comparable to earlier runs (#1372). Remove once both German preambles
+        # are reworded (e.g. "Es folgen Fragen (mit Antworten) zu {subject}."), a prompt change of its own PR that
+        # should also reword MMLU-ProX's German preambles, which share this wording.
         preamble_template="Die folgenden sind Multiple-Choice-Fragen (mit Antworten) über {subject}.",
         cloze_preamble_template="Die folgenden sind Fragen (mit Antworten) über {subject}.",
         question_label="Frage",
