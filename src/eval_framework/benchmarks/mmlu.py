@@ -5,6 +5,7 @@ prompt is prefaced by a subject-templated preamble. The composed variants:
 
 * ``MMLU`` / ``MMLU_OLMES`` — score the letter labels; OLMES adds a space before each option label.
 * ``Full Text MMLU`` — shows the options as a bulleted list and scores the full answer text.
+* ``MMLU_CAIS_EN_BPB`` — hides the options (cloze prompt) and scores the BPB of the gold answer's full text.
 * ``MMLU_IDK`` — lets the model abstain with ``"?"`` and reports confidence-aware metrics.
 * ``MMLU_COT`` — the model reasons freely and concludes with the answer, which is regex-extracted from
   the generation (free-form completion, 0-shot).
@@ -23,7 +24,7 @@ from eval_framework.metrics.completion.accuracy_completion import AccuracyComple
 from eval_framework.subjects import ListOfSubjects
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import ClozeStyle, MCStyle, TaskStyler
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler
 from eval_framework.tasks.utils import get_n_letters
 
 # The 57 MMLU subjects; each is an HF config of ``cais/mmlu`` (also reused by GlobalMMLU).
@@ -127,6 +128,11 @@ def _full_text_preamble(subject_label: str) -> str:
     )
 
 
+def _bpb_preamble(subject_label: str) -> str:
+    # The options are hidden, so unlike the MC preamble it must not claim multiple choice.
+    return f"The following are questions (with answers) about {_humanized(subject_label)}."
+
+
 def _idk_preamble(subject_label: str) -> str:
     # Unlike the other variants, the IDK preamble names the subject by its raw (underscored) key.
     return (
@@ -191,6 +197,11 @@ def mmlu_full_text(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _mmlu_choice("FullTextMMLU", styler, dataset, display_name="Full Text MMLU")
 
 
+def mmlu_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
+    styler = BPBStyle(question_prefix="Question: ", cue_text="Answer:", initial_prompt=_bpb_preamble)
+    return _mmlu_choice("MMLU_CAIS_EN_BPB", styler, dataset)
+
+
 def mmlu_idk(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(
         question_prefix="Question: ", cue_text="Answer:", initial_prompt=_idk_preamble
@@ -216,4 +227,4 @@ def mmlu_cot(dataset: DatasetPolicy | None = None) -> Benchmark:
     )
 
 
-MMLU_BENCHMARKS: list[Benchmark] = [mmlu(), mmlu_olmes(), mmlu_full_text(), mmlu_idk(), mmlu_cot()]
+MMLU_BENCHMARKS: list[Benchmark] = [mmlu(), mmlu_olmes(), mmlu_full_text(), mmlu_bpb(), mmlu_idk(), mmlu_cot()]

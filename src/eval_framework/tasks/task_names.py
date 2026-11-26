@@ -129,7 +129,7 @@ def register_math_reasoning_tasks(registry: Registry) -> None:
 
 def register_mmlu_tasks(registry: Registry) -> None:
     """Register mmlu benchmark tasks."""
-    for benchmark in MMLU_BENCHMARKS:  # composed: MMLU, MMLU_OLMES, FullTextMMLU, MMLU_IDK, MMLU_COT
+    for benchmark in MMLU_BENCHMARKS:  # composed: MMLU, MMLU_OLMES, FullTextMMLU, MMLU_CAIS_EN_BPB, MMLU_IDK, MMLU_COT
         registry.add(benchmark)
 
 
