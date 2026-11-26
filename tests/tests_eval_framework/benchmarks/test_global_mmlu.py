@@ -120,3 +120,25 @@ def test_global_mmlu_lite_bpb_covers_only_the_subjects_lite_has() -> None:
     assert benchmark.id() == "GlobalMMLULite_Cohere_DE_BPB"
     assert len(GLOBAL_MMLU_LITE_SUBJECTS) == 43
     assert "abstract_algebra" not in GLOBAL_MMLU_LITE_SUBJECTS
+
+
+def test_global_mmlu_lite_bpb_oneshot_prompt() -> None:
+    # Given the German Lite BPB benchmark over one fictional row, with a demonstration row in the dev split
+    # (on astronomy: abstract_algebra is one of the subjects Lite lacks)
+    eval_row = {**_EVAL_ROW, "subject": "astronomy"}
+    fewshot_row = {**eval_row, "question": "What is 1+1?", "option_b": "2", "answer": "B"}
+    benchmark = global_mmlu_bpb("de", lite=True, dataset=DatasetStub({"test": [eval_row], "dev": [fewshot_row]}))
+    # When we assemble its first sample (one-shot)
+    sample = first_sample(benchmark, num_fewshot=1, custom_subjects=[str(("de", "astronomy"))])
+    # Then it is the same localized cloze prompt as the full Global-MMLU task
+    assert sample.messages == [
+        Message(
+            role=Role.USER,
+            content="Die folgenden sind Fragen (mit Antworten) über Astronomie.\n\nFrage: What is 1+1?\n",
+        ),
+        Message(role=Role.ASSISTANT, content="Antwort: 2"),
+        Message(role=Role.USER, content="Frage: What is 2+2?\n"),
+        Message(role=Role.ASSISTANT, content="Antwort:"),
+    ]
+    assert sample.ground_truth == " 4"
+    assert sample.possible_completions == [" 4"]
