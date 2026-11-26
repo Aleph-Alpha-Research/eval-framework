@@ -10,7 +10,13 @@ from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.goldenswag import _IDK_PREAMBLE, GOLDENSWAG_BENCHMARKS, goldenswag, goldenswag_idk
+from eval_framework.benchmarks.goldenswag import (
+    _IDK_PREAMBLE,
+    GOLDENSWAG_BENCHMARKS,
+    goldenswag,
+    goldenswag_bpb,
+    goldenswag_idk,
+)
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -58,6 +64,17 @@ def test_goldenswag_zeroshot_prompt() -> None:
     assert sample.messages == [Message(role=Role.USER, content=_QUESTION)]
     assert sample.ground_truth == _ENDINGS[0]
     assert sample.possible_completions == _ENDINGS
+
+
+def test_goldenswag_bpb_scores_only_the_gold_ending() -> None:
+    # Given the BPB benchmark over one fictional row
+    benchmark = goldenswag_bpb(dataset=DatasetStub({"validation": [_EVAL_ROW]}))
+    # When we assemble its first sample (zero-shot)
+    sample = first_sample(benchmark, num_fewshot=0)
+    # Then the prompt is the cloze one, but only the gold ending is scored
+    assert sample.messages == [Message(role=Role.USER, content=_QUESTION)]
+    assert sample.ground_truth == _ENDINGS[0]
+    assert sample.possible_completions == [_ENDINGS[0]]
 
 
 def test_goldenswag_idk_prepends_preamble_and_scores_an_abstention_option() -> None:
