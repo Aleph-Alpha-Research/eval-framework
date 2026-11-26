@@ -78,7 +78,7 @@ and first-party/internal packages are excluded.
 | `pydantic-core` | `2.50.5` |
 | `pygments` | `2.21.0` |
 | `python-dateutil` | `4.0.0` |
-| `regex` | `2026.11.23` |
+| `regex` | `2026.11.24` |
 | `requests` | `2.34.2` |
 | `rich` | `15.0.0` |
 | `safetensors` | `0.8.0` |
