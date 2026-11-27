@@ -13,8 +13,11 @@ import pytest
 
 from eval_framework.benchmarks.social_iqa import (
     SOCIAL_IQA_BENCHMARKS,
+    social_iqa_bpb,
     social_iqa_bpb_olmes,
+    social_iqa_cloze,
     social_iqa_cloze_olmes,
+    social_iqa_mc,
     social_iqa_mc_olmes,
 )
 from eval_framework.contract import Benchmark
@@ -217,3 +220,68 @@ def test_social_iqa_rc_olmes_evaluates_the_validation_split(make_benchmark: Call
     sample = first_sample(benchmark, num_fewshot=0)
     # Then it asks the validation row's question:
     assert sample.messages == _RC_EVAL_MESSAGES
+
+
+# ---------------------------------------------------------------------------
+# Generic MC, cloze and BPB: validation split, demonstrations drawn at random from train
+# ---------------------------------------------------------------------------
+
+# A dataset whose train split holds the only possible demonstration and whose validation split the eval row.
+_TRAIN_DEMO_VALIDATION_EVAL = {"train": [_OTHER_SPLIT_ROW], "validation": [_EVAL_ROW]}
+
+
+def test_social_iqa_mc_oneshot_prompt() -> None:
+    # Given the real generic Social IQa MC benchmark over a train demonstration and a validation row
+    benchmark = social_iqa_mc(dataset=DatasetStub(_TRAIN_DEMO_VALIDATION_EVAL))
+    # When we assemble its first sample (one-shot)
+    sample = first_sample(benchmark, num_fewshot=1)
+    # Then the train row, solved with its letter, precedes the validation row; options are lettered choices:
+    assert sample.messages == [
+        Message(
+            role=Role.USER,
+            content="Question: Jordan studied all night for the exam. How would Jordan feel afterwards?\n"
+            "A. Careless\nB. Tired\nC. Bored\n",
+        ),
+        Message(role=Role.ASSISTANT, content="Answer: B"),
+        Message(
+            role=Role.USER,
+            content="Question: Alex spilled coffee on a stranger. What will Alex want to do next?\n"
+            "A. Apologise\nB. Laugh\nC. Walk away\n",
+        ),
+        Message(role=Role.ASSISTANT, content="Answer:"),
+    ]
+    assert sample.ground_truth == " A"
+    assert sample.possible_completions == [" A", " B", " C"]
+
+
+# The train row solved with its full answer text, then the validation row's question without options.
+_RC_ONE_SHOT_MESSAGES = [
+    Message(
+        role=Role.USER, content="Question: Jordan studied all night for the exam. How would Jordan feel afterwards?\n"
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: Tired"),
+    Message(role=Role.USER, content="Question: Alex spilled coffee on a stranger. What will Alex want to do next?\n"),
+    Message(role=Role.ASSISTANT, content="Answer:"),
+]
+
+
+def test_social_iqa_cloze_oneshot_prompt() -> None:
+    # Given the real generic Social IQa cloze benchmark over a train demonstration and a validation row
+    benchmark = social_iqa_cloze(dataset=DatasetStub(_TRAIN_DEMO_VALIDATION_EVAL))
+    # When we assemble its first sample (one-shot)
+    sample = first_sample(benchmark, num_fewshot=1)
+    # Then the train row precedes the validation row's question, and every full answer text is scored:
+    assert sample.messages == _RC_ONE_SHOT_MESSAGES
+    assert sample.ground_truth == " Apologise"
+    assert sample.possible_completions == [" Apologise", " Laugh", " Walk away"]
+
+
+def test_social_iqa_bpb_oneshot_prompt() -> None:
+    # Given the real generic Social IQa BPB benchmark over a train demonstration and a validation row
+    benchmark = social_iqa_bpb(dataset=DatasetStub(_TRAIN_DEMO_VALIDATION_EVAL))
+    # When we assemble its first sample (one-shot)
+    sample = first_sample(benchmark, num_fewshot=1)
+    # Then the prompt is the cloze one, but only the gold answer's full text is scored:
+    assert sample.messages == _RC_ONE_SHOT_MESSAGES
+    assert sample.ground_truth == " Apologise"
+    assert sample.possible_completions == [" Apologise"]
