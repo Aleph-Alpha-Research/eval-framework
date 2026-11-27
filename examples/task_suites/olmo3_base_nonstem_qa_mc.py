@@ -67,7 +67,7 @@ _MMLU_OTHER = TaskSuite(
     task_subjects=MMLU_OTHER_SUBJECTS,
 )
 
-_CSQA = TaskSuite(name="csqa_mc_xlarge", tasks="CommonsenseQAMC_OLMES", num_fewshot=5)
+_CSQA = TaskSuite(name="csqa_mc_xlarge", tasks="CSQA_Tau_EN_MC_OLMES", num_fewshot=5)
 _PIQA = TaskSuite(name="piqa_mc_xlarge", tasks="PIQA_OLMES", num_fewshot=5)
 _SOCIALIQA = TaskSuite(name="socialiqa_mc_xlarge", tasks="SocialIQAMC_OLMES", num_fewshot=5)
 _DROP_MC = TaskSuite(name="drop_mc_gen2mc_xlarge", tasks="DropMC_OLMES", num_fewshot=5)

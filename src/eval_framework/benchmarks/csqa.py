@@ -32,7 +32,7 @@ def csqa_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(question_prefix="Question: ", cue_text="Answer:", space_prefixed_labels=True)
     dataset_policy = dataset if dataset is not None else pinned_by_framework("tau/commonsense_qa")
     return ComposedBenchmark.choice(
-        id="CommonsenseQAMC_OLMES",
+        id="CSQA_Tau_EN_MC_OLMES",
         reader=CommonsenseQaReader(),
         styler=styler,
         sample_split="train",
