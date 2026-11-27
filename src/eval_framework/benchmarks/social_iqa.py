@@ -3,14 +3,18 @@
 Commonsense reasoning about social situations: a context and question with three answer options
 (``answerA``/``answerB``/``answerC``) and a 1-indexed ``label`` marking the correct one. The variants:
 
-* ``SIQA_AllenAI_EN_MC_OLMES`` — the options are shown as space-prefixed lettered choices (" A. …") and the
-  model is scored over the letter labels. Mirrors OLMES' OLMo 3 Base Main task (``socialiqa:mc::xlarge``).
-* ``SIQA_AllenAI_EN_Cloze_OLMES`` — the options are hidden and the model is scored over the full answer texts.
-* ``SIQA_AllenAI_EN_BPB_OLMES`` — the cloze prompt, but only the BPB of the gold answer's full text is scored.
-  Cloze and BPB mirror OLMES' OLMo 3 Base Easy suite (``socialiqa:rc::olmes:full``,
-  ``socialiqa:rc:bpb::olmes:full``).
+* ``SIQA_AllenAI_EN_MC`` — the options are shown as lettered choices ("A. …") and the model is scored over the
+  letter labels.
+* ``SIQA_AllenAI_EN_Cloze`` — the options are hidden and the model is scored over the full answer texts.
+* ``SIQA_AllenAI_EN_BPB`` — the cloze prompt, but only the BPB of the gold answer's full text is scored.
 
-All show the first ``num_fewshot`` of OLMES' fixed demonstrations.
+These evaluate the validation split with demonstrations drawn at random from train. The ``_OLMES`` variants
+instead follow OLMES' OLMo 3 suites, showing the first ``num_fewshot`` of OLMES' fixed demonstrations:
+
+* ``SIQA_AllenAI_EN_MC_OLMES`` — the options are shown as space-prefixed lettered choices (" A. …").
+  Mirrors OLMo 3 Base Main (``socialiqa:mc::xlarge``).
+* ``SIQA_AllenAI_EN_Cloze_OLMES``, ``SIQA_AllenAI_EN_BPB_OLMES`` — mirror OLMo 3 Base Easy
+  (``socialiqa:rc::olmes:full``, ``socialiqa:rc:bpb::olmes:full``).
 
 ``allenai/social_i_qa`` ships only a (no-longer-supported) loading script on its main branch, so its
 frozen pin in ``frozen-hf-dataset-revisions.json`` points at a commit on Hugging Face's auto-generated
@@ -24,7 +28,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice
-from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotSource, FirstOf
+from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotSource, FewShotSplit, FirstOf
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_frozen
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler
@@ -132,8 +136,21 @@ def _social_iqa(
     )
 
 
+# The generic variants: the validation split, with demonstrations drawn at random from train.
+_FROM_TRAIN = FewShotSplit("train")
+
 # The OLMES variants: the first `num_fewshot` of OLMES' fixed demonstrations.
 _OLMES_DEMONSTRATIONS = FirstOf(_OLMES_FEWSHOT_EXAMPLES, label="Social IQa (OLMES demonstrations)")
+
+
+def social_iqa_mc(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _social_iqa(
+        "SIQA_AllenAI_EN_MC",
+        MCStyle(),
+        sample_split="validation",
+        fewshot_source=_FROM_TRAIN,
+        dataset=dataset,
+    )
 
 
 def social_iqa_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
@@ -151,6 +168,16 @@ def social_iqa_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     )
 
 
+def social_iqa_cloze(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _social_iqa(
+        "SIQA_AllenAI_EN_Cloze",
+        ClozeStyle(),
+        sample_split="validation",
+        fewshot_source=_FROM_TRAIN,
+        dataset=dataset,
+    )
+
+
 def social_iqa_cloze_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     """Matches OLMo 3 Base Easy, OLMES `socialiqa:rc::olmes:full`, which uses the full validation split."""
     return _social_iqa(
@@ -158,6 +185,16 @@ def social_iqa_cloze_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
         ClozeStyle(),
         sample_split="validation",
         fewshot_source=_OLMES_DEMONSTRATIONS,
+        dataset=dataset,
+    )
+
+
+def social_iqa_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _social_iqa(
+        "SIQA_AllenAI_EN_BPB",
+        BPBStyle(),
+        sample_split="validation",
+        fewshot_source=_FROM_TRAIN,
         dataset=dataset,
     )
 
@@ -173,4 +210,11 @@ def social_iqa_bpb_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     )
 
 
-SOCIAL_IQA_BENCHMARKS: list[Benchmark] = [social_iqa_mc_olmes(), social_iqa_cloze_olmes(), social_iqa_bpb_olmes()]
+SOCIAL_IQA_BENCHMARKS: list[Benchmark] = [
+    social_iqa_mc(),
+    social_iqa_mc_olmes(),
+    social_iqa_cloze(),
+    social_iqa_cloze_olmes(),
+    social_iqa_bpb(),
+    social_iqa_bpb_olmes(),
+]
