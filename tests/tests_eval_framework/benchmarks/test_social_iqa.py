@@ -1,9 +1,9 @@
 """Specification of the Social IQa task.
 
-The spec test builds the real benchmark (``social_iqa_mc_olmes``) over a fictional dataset and asserts the
-assembled messages, ground truth, and scored completions — so this file reads as Social IQa's prompt spec,
-with ``composed.py`` an implementation detail. Only the OLMES variant is registered. ``test_formatter_hash``
-separately pins it against the real HuggingFace data.
+The spec tests build the real benchmarks over a fictional dataset and assert the assembled messages,
+ground truth, and scored completions — so this file reads as Social IQa's prompt spec, with ``composed.py``
+an implementation detail. ``test_formatter_hash`` separately pins every registered variant against the
+real HuggingFace data.
 """
 
 from typing import Any
@@ -45,7 +45,8 @@ _EVAL_ROW: dict[str, Any] = {
     "answerC": "Walk away",
     "label": "1",
 }
-_FEWSHOT_ROW: dict[str, Any] = {
+# A row placed in the split a variant must NOT evaluate.
+_OTHER_SPLIT_ROW: dict[str, Any] = {
     "context": "Jordan studied all night for the exam.",
     "question": "How would Jordan feel afterwards?",
     "answerA": "Careless",
@@ -54,41 +55,83 @@ _FEWSHOT_ROW: dict[str, Any] = {
     "label": "2",
 }
 
-_EVAL_INSTRUCTION = (
-    "Question: Alex spilled coffee on a stranger. What will Alex want to do next?\n"
-    " A. Apologise\n B. Laugh\n C. Walk away\n"
-)
-_FEWSHOT_INSTRUCTION = (
-    "Question: Jordan studied all night for the exam. How would Jordan feel afterwards?\n"
-    " A. Careless\n B. Tired\n C. Bored\n"
-)
+# ---------------------------------------------------------------------------
+# MC, OLMES (OLMo 3 Base Main): train split, the first k OLMES demonstrations, lettered options, letters scored
+# ---------------------------------------------------------------------------
+
+# The first five OLMES demonstrations, each with its option menu and solved with the correct letter.
+_MC_OLMES_FIVE_SHOT_MESSAGES = [
+    Message(
+        role=Role.USER,
+        content="Question: Cameron decided to have a barbecue and gathered her friends together."
+        " How would Others feel as a result?\n A. like attending\n B. like staying home\n C. a good friend to have\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: A"),
+    Message(
+        role=Role.USER,
+        content="Question: Quinn wanted to help me clean my room up because it was so messy."
+        " What will Quinn want to do next?\n"
+        " A. Eat messy snacks\n B. help out a friend\n C. Pick up the dirty clothes\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: C"),
+    Message(
+        role=Role.USER,
+        content="Question: Jan needed to give out jobs for an upcoming project at work."
+        " What will Others want to do next?\n A. disagree with Jan\n B. get to work\n C. argue with the assignments\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: B"),
+    Message(
+        role=Role.USER,
+        content="Question: Their cat kept trying to escape out of the window, so Jan placed an obstacle in the way."
+        " How would Jan feel afterwards?\n"
+        " A. scared of losing the cat\n B. normal\n C. relieved for fixing the problem\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: C"),
+    Message(
+        role=Role.USER,
+        content="Question: Remy was an expert fisherman and was on the water with Kai. Remy baited Kai's hook."
+        " What will Remy want to do next?\n"
+        " A. cast the line\n B. put the boat in the water\n C. invite Kai out on the boat\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: A"),
+]
+# The eval row's own prompt: context + question with its option menu.
+_MC_OLMES_EVAL_MESSAGES = [
+    Message(
+        role=Role.USER,
+        content="Question: Alex spilled coffee on a stranger. What will Alex want to do next?\n"
+        " A. Apologise\n B. Laugh\n C. Walk away\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer:"),
+]
 
 
-def test_social_iqa_olmes_zeroshot_prompt() -> None:
-    # Given the real Social IQa (OLMES) benchmark over one fictional row on its sample split (train)
+def test_social_iqa_mc_olmes_zeroshot_prompt() -> None:
+    # Given the real Social IQa MC (OLMES) benchmark over one fictional row on its sample split (train)
     benchmark = social_iqa_mc_olmes(dataset=DatasetStub({"train": [_EVAL_ROW]}))
     # When we assemble its first sample (zero-shot)
     sample = first_sample(benchmark, num_fewshot=0)
     # Then the context+question is the shown question, options are space-prefixed letters, letters are scored:
-    assert sample.messages == [
-        Message(role=Role.USER, content=_EVAL_INSTRUCTION),
-        Message(role=Role.ASSISTANT, content="Answer:"),
-    ]
+    assert sample.messages == _MC_OLMES_EVAL_MESSAGES
     assert sample.ground_truth == " A"
     assert sample.possible_completions == [" A", " B", " C"]
 
 
-def test_social_iqa_olmes_oneshot_prepends_the_solved_demonstration() -> None:
-    # Given the benchmark drawing its fewshot demonstration from the same split (train)
-    benchmark = social_iqa_mc_olmes(dataset=DatasetStub({"train": [_FEWSHOT_ROW, _EVAL_ROW]}))
-    # When we assemble its first sample (one-shot)
-    sample = first_sample(benchmark, num_fewshot=1)
-    # Then the solved demonstration (cue + correct letter) precedes the eval row's own zero-shot prompt:
-    assert sample.messages == [
-        Message(role=Role.USER, content=_FEWSHOT_INSTRUCTION),
-        Message(role=Role.ASSISTANT, content="Answer: B"),
-        Message(role=Role.USER, content=_EVAL_INSTRUCTION),
-        Message(role=Role.ASSISTANT, content="Answer:"),
-    ]
+def test_social_iqa_mc_olmes_fiveshot_prompt() -> None:
+    # Given the real Social IQa MC (OLMES) benchmark over one fictional row on its sample split (train)
+    benchmark = social_iqa_mc_olmes(dataset=DatasetStub({"train": [_EVAL_ROW]}))
+    # When we assemble its first sample (five-shot)
+    sample = first_sample(benchmark, num_fewshot=5)
+    # Then the first five OLMES demonstrations, each solved with its letter, precede the eval row's prompt:
+    assert sample.messages == _MC_OLMES_FIVE_SHOT_MESSAGES + _MC_OLMES_EVAL_MESSAGES
     assert sample.ground_truth == " A"
     assert sample.possible_completions == [" A", " B", " C"]
+
+
+def test_social_iqa_mc_olmes_evaluates_the_train_split() -> None:
+    # Given the benchmark over a dataset whose train and validation splits hold different rows
+    benchmark = social_iqa_mc_olmes(dataset=DatasetStub({"train": [_EVAL_ROW], "validation": [_OTHER_SPLIT_ROW]}))
+    # When we assemble its first sample
+    sample = first_sample(benchmark, num_fewshot=0)
+    # Then it asks the train row's question:
+    assert sample.messages == _MC_OLMES_EVAL_MESSAGES
