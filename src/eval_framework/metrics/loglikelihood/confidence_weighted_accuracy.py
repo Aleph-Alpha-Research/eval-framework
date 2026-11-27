@@ -1,4 +1,4 @@
-from eval_framework.metrics.base import MetricResult
+from eval_framework.metrics.base import JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.loglikelihood.base import BaseLoglikelihoodMetric
 from eval_framework.shared.types import Loglikelihood
 
@@ -9,7 +9,7 @@ class ConfidenceWeightedAccuracy(BaseLoglikelihoodMetric):
     def __init__(self, *, len_normalised: bool = True) -> None:
         super().__init__(len_normalised=len_normalised)
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         loglikelihoods, probs = self._compute_probabilities(response.loglikelihoods)
         ground_truths = self._gather_ground_truths(response)
 

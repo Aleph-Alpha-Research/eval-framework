@@ -1,4 +1,4 @@
-from eval_framework.metrics.base import MetricResult
+from eval_framework.metrics.base import JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.loglikelihood.base import BaseLoglikelihoodMetric
 from eval_framework.shared.types import Loglikelihood
 
@@ -21,7 +21,7 @@ class DistributionalCorrectnessScore(BaseLoglikelihoodMetric):
         if not (self._lc >= 0 and self._lw >= 0 and self._lc >= self._lw):
             raise ValueError(f"Invalid DCS loadings: lc={self._lc}, lw={self._lw}. Require lc>=0, lw>=0, and lc>=lw.")
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         loglikelihoods, probs = self._compute_probabilities(response.loglikelihoods)
         ground_truths = self._gather_ground_truths(response)
 

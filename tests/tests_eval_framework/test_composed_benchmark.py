@@ -18,7 +18,7 @@ from eval_framework.fewshot import (
     NoFewShot,
     SampleSplit,
 )
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.efficiency.bytes_per_sequence_position import (
     BytesLoglikelihood,
     SequencePositionsLoglikelihood,
@@ -103,7 +103,7 @@ class _FakeMetric(BaseMetric[Any]):
     NAME = "FakeMetric"
 
     @override
-    def calculate(self, response: Any) -> list[MetricResult]:
+    def calculate(self, response: Any, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         return []
 
 

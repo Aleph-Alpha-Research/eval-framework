@@ -1,5 +1,5 @@
 from eval_framework.exceptions import LogicError
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.completion.f1 import calculate_f1
 from eval_framework.shared.types import Completion
 
@@ -9,7 +9,7 @@ class ROUGE_2(BaseMetric[Completion]):
 
     NAME = "ROUGE-2"
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         if response.completion == "":
             return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True)]
         if None in response.ground_truth_list:

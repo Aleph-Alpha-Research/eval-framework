@@ -5,7 +5,7 @@ Minerva-style MATH completion metric: exact_match and exact_match_flex.
 import logging
 
 from eval_framework.metrics.aggregators.aggregators import PassAtK
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.completion.minerva_math_utils import (
     extract_answers,
     is_equiv_hendrycks,
@@ -44,7 +44,7 @@ class MathMinervaCompletion(BaseMetric[Completion]):
         self.cot_style = cot_style if cot_style is not None else self.COT_STYLE
         self.relaxed = relaxed if relaxed is not None else self.RELAXED
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         gold = response.ground_truth
         if isinstance(gold, list):
             gold = gold[0] if gold else None

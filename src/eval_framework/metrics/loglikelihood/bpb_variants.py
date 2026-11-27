@@ -4,7 +4,7 @@ Emits the standard ``BitsPerByte`` ratio, corpus-aggregation fields, and prefix
 BPB when per-token logprobs exist.
 """
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.loglikelihood.bpb_variants_common import compute_all_bpb_results
 from eval_framework.shared.types import Loglikelihood
 
@@ -14,5 +14,5 @@ class BitsPerByteVariantsLoglikelihood(BaseMetric[Loglikelihood]):
 
     NAME = "BitsPerByteVariants"
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         return compute_all_bpb_results(response)

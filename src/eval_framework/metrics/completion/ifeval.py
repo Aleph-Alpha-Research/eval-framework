@@ -1,7 +1,7 @@
 from typing import Any
 
 from eval_framework.external.ifeval_impl.utils import process_results
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import BaseMetricContext, Completion, extract_context_metric
 
 
@@ -15,7 +15,7 @@ class IFEvalMetricContext(BaseMetricContext):
 class IFEvalMetric(BaseMetric[Completion]):
     NAME = "IFEval"
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         context = extract_context_metric(response, IFEvalMetricContext)
 
         grading = process_results(context, [response.completion])

@@ -7,7 +7,7 @@ import wandb
 
 from eval_framework.evaluation_generator import EvaluationGenerator
 from eval_framework.metrics.aggregators.aggregators import IdentifierMean, PassAtK
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.llm.base import BaseLLMJudgeMetric
 from eval_framework.response_generator import ResponseGenerator
 from eval_framework.result_processors.base import Result
@@ -20,7 +20,7 @@ from tests.tests_eval_framework.conftest import MockLLM
 class MockMetric:
     NAME = "MockMetric"
 
-    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Completion | Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         return [MetricResult(metric_name="MockMetric", value=1.0, higher_is_better=True)]
 
 
@@ -28,7 +28,7 @@ class MockPassAtKMetric(BaseMetric):
     NAME = "ExactMatch"
     AGGREGATORS = [PassAtK(k=1), PassAtK(k=2)]
 
-    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Completion | Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         return []
 
 
@@ -36,7 +36,7 @@ class MockIdentifierMeanMetric(BaseMetric):
     NAME = "ExactMatch"
     AGGREGATORS = [IdentifierMean()]
 
-    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Completion | Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         return []
 
 
@@ -51,7 +51,7 @@ class SerialProbeMetric(BaseMetric):
     in_flight = 0
     max_in_flight = 0
 
-    def calculate(self, response: Completion | Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Completion | Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         with SerialProbeMetric.lock:
             SerialProbeMetric.in_flight += 1
             SerialProbeMetric.max_in_flight = max(SerialProbeMetric.max_in_flight, SerialProbeMetric.in_flight)
@@ -68,7 +68,7 @@ class JudgeProbeMetric(BaseLLMJudgeMetric):
     MAX_WORKERS = PROBE_CONCURRENCY
     barrier = threading.Barrier(PROBE_CONCURRENCY, timeout=10)
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         # Breaks on timeout rather than hanging if the calls are not truly concurrent.
         JudgeProbeMetric.barrier.wait()
         return [MetricResult(metric_name=self.NAME, value=float(response.result_id), higher_is_better=True)]
@@ -87,7 +87,7 @@ class FlakyJudge(MockLLM):
 class JudgeAnswerMetric(BaseLLMJudgeMetric):
     NAME = "JudgeAnswer"
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         answer = self._llm_judge.generate_from_messages([[]])[0].completion
         return [MetricResult(metric_name=self.NAME, value=float("fake" in answer), higher_is_better=True)]
 

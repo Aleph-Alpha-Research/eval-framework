@@ -1,5 +1,5 @@
 from eval_framework.exceptions import LogicError
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.completion.rouge_1 import ROUGE_1
 from eval_framework.metrics.completion.rouge_2 import ROUGE_2
 from eval_framework.metrics.completion.rouge_l import ROUGE_L
@@ -11,7 +11,7 @@ class ROUGE_GEOMETRIC_MEAN(BaseMetric[Completion]):
 
     NAME = "ROUGE-Geometric-Mean"
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         if response.completion == "":
             return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True)]
         if any(gt is None for gt in response.ground_truth_list):

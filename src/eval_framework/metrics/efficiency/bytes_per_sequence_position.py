@@ -1,11 +1,11 @@
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import Completion, Loglikelihood
 
 
 class BytesLoglikelihood(BaseMetric[Loglikelihood]):
     NAME = "Bytes"
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         if response.concat_compression is None:
             value = None
         else:
@@ -17,7 +17,7 @@ class BytesLoglikelihood(BaseMetric[Loglikelihood]):
 class SequencePositionsLoglikelihood(BaseMetric[Loglikelihood]):
     NAME = "SequencePositions"
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         if response.concat_compression is None:
             value = None
         else:
@@ -28,7 +28,7 @@ class SequencePositionsLoglikelihood(BaseMetric[Loglikelihood]):
 class BytesCompletion(BaseMetric[Completion]):
     NAME = "Bytes"
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         if response.concat_compression is None:
             value = None
         else:
@@ -40,7 +40,7 @@ class BytesCompletion(BaseMetric[Completion]):
 class SequencePositionsCompletion(BaseMetric[Completion]):
     NAME = "SequencePositions"
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         if response.concat_compression is None:
             value = None
         else:

@@ -1,4 +1,4 @@
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import Completion
 
 
@@ -18,7 +18,7 @@ class TokenCounts(BaseMetric[Completion]):
     NAME = "TokenCounts"
     KEYS = ["Completion", "Reasoning"]
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         values: dict[str, float | None] = {
             "Completion": response.raw_completion_num_tokens,
             "Reasoning": response.raw_completion_reasoning_num_tokens,

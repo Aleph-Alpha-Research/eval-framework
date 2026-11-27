@@ -1,6 +1,6 @@
 import math
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import Error, Loglikelihood
 
 
@@ -14,7 +14,7 @@ class BitsPerByteLoglikelihood(BaseMetric[Loglikelihood]):
 
     NAME = "BitsPerByte"
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         ground_truth_list = response.ground_truth_list
 
         # Find a ground-truth string that we have a loglikelihood for.

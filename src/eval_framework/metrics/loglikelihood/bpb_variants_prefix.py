@@ -1,6 +1,6 @@
 """Deprecated wrapper for prefix BPB. Use ``BitsPerByteVariantsLoglikelihood``."""
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.loglikelihood.bpb_variants_common import (
     ALIAS_RULE,
     K0,
@@ -32,7 +32,7 @@ class PrefixBitsPerByte(BaseMetric[Loglikelihood]):
         names = (self.NAME, *self._SIDECARS)
         return [MetricResult(metric_name=n, value=None, higher_is_better=False, error=err) for n in names]
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         ground_truth = select_ground_truth(response)
         if ground_truth is None:
             return self._all_error("No ground-truth answer found in loglikelihoods", response)

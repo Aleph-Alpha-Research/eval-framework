@@ -1,13 +1,13 @@
 import numpy as np
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import Loglikelihood
 
 
 class ProbabilityMass(BaseMetric[Loglikelihood]):
     NAME = "Probability Mass"
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         assert isinstance(response.ground_truth, list)
         # https://docs.python.org/3.10/library/stdtypes.html?highlight=dictview#dictionary-view-objects
         in_ground_truths = [completion in response.ground_truth for completion in response.loglikelihoods]
@@ -22,7 +22,7 @@ class ProbabilityMass(BaseMetric[Loglikelihood]):
 class ProbabilityMassNorm(BaseMetric[Loglikelihood]):
     NAME = "Probability Mass Normalized"
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         assert isinstance(response.ground_truth, list)
         # len normalized
 

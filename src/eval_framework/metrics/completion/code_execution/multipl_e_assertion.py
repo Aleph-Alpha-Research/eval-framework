@@ -8,7 +8,7 @@ from llm_sandbox.const import SupportedLanguage
 from llm_sandbox.exceptions import SandboxTimeoutError
 from pydantic import ConfigDict
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.completion.code_execution.sandbox import (
     CustomLangConfig,
     execute_in_custom_image,
@@ -102,7 +102,7 @@ class MultiPLECodeAssertion(BaseMetric[Completion]):
 
     NAME = "MultiPL-E Code Assertion"
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         context = extract_context_metric(response, MultiPLEMetricContext)
 
         try:

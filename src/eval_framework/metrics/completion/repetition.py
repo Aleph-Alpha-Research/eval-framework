@@ -3,7 +3,7 @@ from collections import Counter
 from collections.abc import Sequence
 from typing import Final
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import Completion
 
 
@@ -44,7 +44,7 @@ class WordRepetition(BaseMetric[Completion]):
         if self.window_size < 1:
             raise ValueError("window_size must be at least 1")
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         has_repetition = _has_repetition(
             text=response.completion,
             window_size=self.window_size,

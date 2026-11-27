@@ -1,6 +1,6 @@
 import numpy as np
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import Loglikelihood
 from eval_framework.utils.helpers import count_bytes
 
@@ -8,7 +8,7 @@ from eval_framework.utils.helpers import count_bytes
 class AccuracyLoglikelihood(BaseMetric[Loglikelihood]):
     NAME = "Accuracy Loglikelihood"
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         ground_truth_list = response.ground_truth_list
         completion_text = max(response.loglikelihoods, key=response.loglikelihoods.get)  # type: ignore[arg-type]
 
@@ -24,7 +24,7 @@ class AccuracyLoglikelihood(BaseMetric[Loglikelihood]):
 class AccuracyNormLoglikelihood(BaseMetric[Loglikelihood]):
     NAME = "Accuracy Normalized Loglikelihood"
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         ground_truth_list = response.ground_truth_list
 
         output_len_normalized = {}
@@ -83,7 +83,7 @@ class AccuracyBayesianLoglikelihood(BaseMetric[Loglikelihood]):
 
         self.length_decay = 0.0 if denominator == 0 else numerator / denominator
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         corrected_loglikelihoods = {
             completion: loglikelihood - self.length_decay * count_bytes(completion)
             for completion, loglikelihood in response.loglikelihoods.items()
@@ -117,7 +117,7 @@ class PartialEvalAccuracy(BaseMetric[Loglikelihood]):
     def __init__(self) -> None:
         self._pending: dict[int, tuple[float, bool]] = {}
 
-    def calculate(self, response: Loglikelihood) -> list[MetricResult]:
+    def calculate(self, response: Loglikelihood, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         item_id = response.result_id // 2  # Each item generates 2 samples, get a unique id for the pair
         logprob = next(iter(response.loglikelihoods.values()))
         is_correct = response.ground_truth == "True"

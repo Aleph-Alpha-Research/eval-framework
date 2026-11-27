@@ -1,4 +1,4 @@
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import Completion
 
 
@@ -21,7 +21,7 @@ class FinishReason(BaseMetric[Completion]):
     KEYS = ["Stop", "Length", "Repetition"]
     _REASONS = {"Stop": "stop", "Length": "length", "Repetition": "repetition"}
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         finish_reason = response.raw_completion_finish_reason
         if finish_reason is None:
             values: dict[str, float | None] = {key: None for key in self.KEYS}

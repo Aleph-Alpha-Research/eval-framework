@@ -1,6 +1,6 @@
 from llm_sandbox.exceptions import SandboxTimeoutError
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.completion.code_execution.sandbox import DockerReturnedEmptyOutput, run_python_code
 from eval_framework.shared.types import Completion
 
@@ -11,7 +11,7 @@ class CodeCompletionAssertion(BaseMetric[Completion]):
     RUNTIME_CONFIGS: dict[str, str] | None = {"mem_limit": "512m"}
     PACKAGES: list[str] | None = None
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         # this will always be a list, if return is "" this will be an empty list
         code = response.completion
         try:

@@ -1,7 +1,7 @@
 """DROP completion metrics: F1 and exact match."""
 
 from eval_framework.external.drop_process_results import process_results
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import (
     BaseMetricContext,
     Completion,
@@ -21,7 +21,7 @@ class DropF1ExactMatch(BaseMetric[Completion]):
     NAME = "Drop F1"
     KEYS = ["f1", "exact_match"]
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         context = extract_context_metric(response, DropMetricContext)
         # Gold: list of tuples (stored as list of lists)
         answer_tuples = [list(a) for a in context.answer_tuples]

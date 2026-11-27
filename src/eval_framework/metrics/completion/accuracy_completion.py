@@ -4,14 +4,14 @@ from typing import Any
 
 import numpy as np
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import Completion
 
 
 class AccuracyCompletion(BaseMetric[Completion]):
     NAME = "Accuracy Completion"
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         ground_truths = response.ground_truth_list
         is_correct = any(response.completion == gt for gt in ground_truths)
         return [MetricResult(metric_name=self.NAME, value=float(is_correct), higher_is_better=True)]
@@ -23,7 +23,7 @@ class AccuracyCompletionWithEvaluate(AccuracyCompletion):
         self.ignore_case = ignore_case
         self.ignore_punctuation = ignore_punctuation
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         ground_truths = response.ground_truth_list
         model_answer = response.completion
 

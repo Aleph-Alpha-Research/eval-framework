@@ -3,7 +3,7 @@ import string
 from collections import Counter
 from typing import Any
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.shared.types import Completion
 
 
@@ -25,7 +25,7 @@ class F1(BaseMetric[Completion]):
         """Tokenizes text into a list of tokens using whitespace as the delimiter."""
         return self.normalize(text).split()
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         ground_truths = [gt for gt in response.ground_truth_list if gt is not None]
         if not ground_truths:
             return [MetricResult(metric_name=self.NAME, value=0.0, higher_is_better=True)]

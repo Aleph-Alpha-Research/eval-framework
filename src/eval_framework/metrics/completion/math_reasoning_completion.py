@@ -7,7 +7,7 @@ from sympy import Basic, S, SympifyError, factor, simplify
 from sympy.parsing.latex import parse_latex
 from sympy.parsing.latex.errors import LaTeXParsingError
 
-from eval_framework.metrics.base import BaseMetric, MetricResult
+from eval_framework.metrics.base import BaseMetric, JudgeProvider, MetricResult, no_judge
 from eval_framework.metrics.completion.minerva_math_utils import _normalize_latex_core
 from eval_framework.shared.types import Completion
 
@@ -180,7 +180,7 @@ class MathReasoningCompletion(BaseMetric[Completion]):
             except RecursionError:
                 list_of_expressions[i] = S.NaN
 
-    def calculate(self, response: Completion) -> list[MetricResult]:
+    def calculate(self, response: Completion, *, judge: JudgeProvider = no_judge) -> list[MetricResult]:
         """
         Calculate the accuracy of the completion
 
