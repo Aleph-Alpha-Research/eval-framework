@@ -4,6 +4,11 @@ Five-way multiple-choice commonsense questions. The variants:
 
 * ``CSQA_Tau_EN_MC_OLMES`` — the options are shown as space-prefixed lettered choices (" A. …") and the
   model is scored over the letter labels. Mirrors OLMES' OLMo 3 Base Main task (``csqa:mc::xlarge``).
+* ``CSQA_Tau_EN_Cloze_OLMES`` — the options are hidden and the model is scored over the full answer texts.
+* ``CSQA_Tau_EN_BPB_OLMES`` — the cloze prompt, but only the BPB of the gold answer's full text is scored.
+
+The cloze and BPB variants mirror OLMES' OLMo 3 Base Easy suite (``csqa:rc::olmes:full``,
+``csqa:rc:bpb::olmes:full``).
 """
 
 from typing import Any, final, override
@@ -16,7 +21,7 @@ from eval_framework.eval_kind import Choice
 from eval_framework.fewshot import ChoiceRenderer, FewShot, FirstOf
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
-from eval_framework.tasks.task_style import MCStyle, TaskStyler
+from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler
 
 _DATASET_PATH = "tau/commonsense_qa"
 
@@ -122,4 +127,14 @@ def csqa_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _csqa_olmes("CSQA_Tau_EN_MC_OLMES", styler, "train", dataset)
 
 
-CSQA_BENCHMARKS: list[Benchmark] = [csqa_mc_olmes()]
+def csqa_cloze_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
+    """Matches OLMo 3 Base Easy, OLMES `csqa:rc::olmes:full`, which uses the full validation split."""
+    return _csqa_olmes("CSQA_Tau_EN_Cloze_OLMES", ClozeStyle(), "validation", dataset)
+
+
+def csqa_bpb_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
+    """Matches OLMo 3 Base Easy, OLMES `csqa:rc:bpb::olmes:full`, which uses the full validation split."""
+    return _csqa_olmes("CSQA_Tau_EN_BPB_OLMES", BPBStyle(), "validation", dataset)
+
+
+CSQA_BENCHMARKS: list[Benchmark] = [csqa_mc_olmes(), csqa_cloze_olmes(), csqa_bpb_olmes()]

@@ -6,11 +6,12 @@ ground truth, and scored completions — so this file reads as CommonsenseQA's p
 against the real HuggingFace data.
 """
 
+from collections.abc import Callable
 from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.csqa import CSQA_BENCHMARKS, csqa_mc_olmes
+from eval_framework.benchmarks.csqa import CSQA_BENCHMARKS, csqa_bpb_olmes, csqa_cloze_olmes, csqa_mc_olmes
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -125,3 +126,63 @@ def test_csqa_mc_olmes_evaluates_the_train_split() -> None:
     sample = first_sample(benchmark, num_fewshot=0)
     # Then it asks the train row's question:
     assert sample.messages == _MC_EVAL_MESSAGES
+
+
+# ---------------------------------------------------------------------------
+# Cloze and BPB, OLMES (OLMo 3 Base Easy): validation split, the first k OLMES demonstrations, options hidden
+# ---------------------------------------------------------------------------
+
+# The first five OLMES demonstrations, each solved with its full answer text (not a letter).
+_RC_OLMES_FIVE_SHOT_MESSAGES = [
+    Message(role=Role.USER, content="Question: Sammy wanted to go to where the people were.  Where might he go?\n"),
+    Message(role=Role.ASSISTANT, content="Answer: populated areas"),
+    Message(
+        role=Role.USER, content="Question: Google Maps and other highway and street GPS services have replaced what?\n"
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: atlas"),
+    Message(
+        role=Role.USER, content="Question: The fox walked from the city into the forest, what was it looking for?\n"
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: natural habitat"),
+    Message(role=Role.USER, content="Question: What is it called when you slowly cook using a grill?\n"),
+    Message(role=Role.ASSISTANT, content="Answer: barbeque"),
+    Message(role=Role.USER, content="Question: What would you do if you want to be able to earn money?\n"),
+    Message(role=Role.ASSISTANT, content="Answer: apply for job"),
+]
+# The eval row's own prompt: the question only, no option menu.
+_RC_EVAL_MESSAGES = [
+    Message(role=Role.USER, content="Question: Where would you store a pillow you are not using?\n"),
+    Message(role=Role.ASSISTANT, content="Answer:"),
+]
+
+
+def test_csqa_cloze_olmes_fiveshot_prompt() -> None:
+    # Given the real CommonsenseQA cloze (OLMES) benchmark over one fictional row on its sample split (validation)
+    benchmark = csqa_cloze_olmes(dataset=DatasetStub({"validation": [_EVAL_ROW]}))
+    # When we assemble its first sample (five-shot)
+    sample = first_sample(benchmark, num_fewshot=5)
+    # Then the first five OLMES demonstrations precede the question, and every full answer text is scored:
+    assert sample.messages == _RC_OLMES_FIVE_SHOT_MESSAGES + _RC_EVAL_MESSAGES
+    assert sample.ground_truth == " cupboard"
+    assert sample.possible_completions == [" bedroom", " cupboard", " floor", " kitchen", " car"]
+
+
+def test_csqa_bpb_olmes_fiveshot_prompt() -> None:
+    # Given the real CommonsenseQA BPB (OLMES) benchmark over one fictional row on its sample split (validation)
+    benchmark = csqa_bpb_olmes(dataset=DatasetStub({"validation": [_EVAL_ROW]}))
+    # When we assemble its first sample (five-shot)
+    sample = first_sample(benchmark, num_fewshot=5)
+    # Then the prompt is the cloze one, but only the gold answer's full text is scored:
+    assert sample.messages == _RC_OLMES_FIVE_SHOT_MESSAGES + _RC_EVAL_MESSAGES
+    assert sample.ground_truth == " cupboard"
+    assert sample.possible_completions == [" cupboard"]
+
+
+@pytest.mark.parametrize("make_benchmark", [csqa_cloze_olmes, csqa_bpb_olmes], ids=["cloze", "bpb"])
+def test_csqa_rc_olmes_evaluates_the_validation_split(make_benchmark: Callable[..., Benchmark]) -> None:
+    # Given the benchmark over a dataset whose train and validation splits hold different rows
+    benchmark = make_benchmark(dataset=DatasetStub({"train": [_OTHER_SPLIT_ROW], "validation": [_EVAL_ROW]}))
+    # When we assemble its first sample
+    sample = first_sample(benchmark, num_fewshot=0)
+    # Then it asks the validation row's question:
+    assert sample.messages == _RC_EVAL_MESSAGES
