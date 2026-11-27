@@ -11,7 +11,15 @@ from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.csqa import CSQA_BENCHMARKS, csqa_bpb_olmes, csqa_cloze_olmes, csqa_mc_olmes
+from eval_framework.benchmarks.csqa import (
+    CSQA_BENCHMARKS,
+    csqa_bpb,
+    csqa_bpb_olmes,
+    csqa_cloze,
+    csqa_cloze_olmes,
+    csqa_mc,
+    csqa_mc_olmes,
+)
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -186,3 +194,65 @@ def test_csqa_rc_olmes_evaluates_the_validation_split(make_benchmark: Callable[.
     sample = first_sample(benchmark, num_fewshot=0)
     # Then it asks the validation row's question:
     assert sample.messages == _RC_EVAL_MESSAGES
+
+
+# ---------------------------------------------------------------------------
+# Generic MC, cloze and BPB: validation split, demonstrations drawn at random from train
+# ---------------------------------------------------------------------------
+
+# A dataset whose train split holds the only possible demonstration and whose validation split the eval row.
+_TRAIN_DEMO_VALIDATION_EVAL = {"train": [_OTHER_SPLIT_ROW], "validation": [_EVAL_ROW]}
+
+
+def test_csqa_mc_oneshot_prompt() -> None:
+    # Given the real generic CommonsenseQA MC benchmark over a train demonstration and a validation row
+    benchmark = csqa_mc(dataset=DatasetStub(_TRAIN_DEMO_VALIDATION_EVAL))
+    # When we assemble its first sample (one-shot)
+    sample = first_sample(benchmark, num_fewshot=1)
+    # Then the train row, solved with its letter, precedes the validation row; options are lettered choices:
+    assert sample.messages == [
+        Message(
+            role=Role.USER,
+            content="Question: What do people do when they are tired?\nA. run\nB. sleep\nC. eat\nD. sing\nE. swim\n",
+        ),
+        Message(role=Role.ASSISTANT, content="Answer: B"),
+        Message(
+            role=Role.USER,
+            content="Question: Where would you store a pillow you are not using?\n"
+            "A. bedroom\nB. cupboard\nC. floor\nD. kitchen\nE. car\n",
+        ),
+        Message(role=Role.ASSISTANT, content="Answer:"),
+    ]
+    assert sample.ground_truth == " B"
+    assert sample.possible_completions == [" A", " B", " C", " D", " E"]
+
+
+# The train row solved with its full answer text, then the validation row's question without options.
+_RC_ONE_SHOT_MESSAGES = [
+    Message(role=Role.USER, content="Question: What do people do when they are tired?\n"),
+    Message(role=Role.ASSISTANT, content="Answer: sleep"),
+    Message(role=Role.USER, content="Question: Where would you store a pillow you are not using?\n"),
+    Message(role=Role.ASSISTANT, content="Answer:"),
+]
+
+
+def test_csqa_cloze_oneshot_prompt() -> None:
+    # Given the real generic CommonsenseQA cloze benchmark over a train demonstration and a validation row
+    benchmark = csqa_cloze(dataset=DatasetStub(_TRAIN_DEMO_VALIDATION_EVAL))
+    # When we assemble its first sample (one-shot)
+    sample = first_sample(benchmark, num_fewshot=1)
+    # Then the train row precedes the validation row's question, and every full answer text is scored:
+    assert sample.messages == _RC_ONE_SHOT_MESSAGES
+    assert sample.ground_truth == " cupboard"
+    assert sample.possible_completions == [" bedroom", " cupboard", " floor", " kitchen", " car"]
+
+
+def test_csqa_bpb_oneshot_prompt() -> None:
+    # Given the real generic CommonsenseQA BPB benchmark over a train demonstration and a validation row
+    benchmark = csqa_bpb(dataset=DatasetStub(_TRAIN_DEMO_VALIDATION_EVAL))
+    # When we assemble its first sample (one-shot)
+    sample = first_sample(benchmark, num_fewshot=1)
+    # Then the prompt is the cloze one, but only the gold answer's full text is scored:
+    assert sample.messages == _RC_ONE_SHOT_MESSAGES
+    assert sample.ground_truth == " cupboard"
+    assert sample.possible_completions == [" cupboard"]
