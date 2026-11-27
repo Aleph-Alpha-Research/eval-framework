@@ -6,11 +6,17 @@ an implementation detail. ``test_formatter_hash`` separately pins every register
 real HuggingFace data.
 """
 
+from collections.abc import Callable
 from typing import Any
 
 import pytest
 
-from eval_framework.benchmarks.social_iqa import SOCIAL_IQA_BENCHMARKS, social_iqa_mc_olmes
+from eval_framework.benchmarks.social_iqa import (
+    SOCIAL_IQA_BENCHMARKS,
+    social_iqa_bpb_olmes,
+    social_iqa_cloze_olmes,
+    social_iqa_mc_olmes,
+)
 from eval_framework.contract import Benchmark
 from template_formatting.formatter import (
     BaseFormatter,
@@ -135,3 +141,79 @@ def test_social_iqa_mc_olmes_evaluates_the_train_split() -> None:
     sample = first_sample(benchmark, num_fewshot=0)
     # Then it asks the train row's question:
     assert sample.messages == _MC_OLMES_EVAL_MESSAGES
+
+
+# ---------------------------------------------------------------------------
+# Cloze and BPB, OLMES (OLMo 3 Base Easy): validation split, the first k OLMES demonstrations, options hidden
+# ---------------------------------------------------------------------------
+
+# The first five OLMES demonstrations, each solved with its full answer text (not a letter).
+_RC_OLMES_FIVE_SHOT_MESSAGES = [
+    Message(
+        role=Role.USER,
+        content="Question: Cameron decided to have a barbecue and gathered her friends together."
+        " How would Others feel as a result?\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: like attending"),
+    Message(
+        role=Role.USER,
+        content="Question: Quinn wanted to help me clean my room up because it was so messy."
+        " What will Quinn want to do next?\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: Pick up the dirty clothes"),
+    Message(
+        role=Role.USER,
+        content="Question: Jan needed to give out jobs for an upcoming project at work."
+        " What will Others want to do next?\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: get to work"),
+    Message(
+        role=Role.USER,
+        content="Question: Their cat kept trying to escape out of the window, so Jan placed an obstacle in the way."
+        " How would Jan feel afterwards?\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: relieved for fixing the problem"),
+    Message(
+        role=Role.USER,
+        content="Question: Remy was an expert fisherman and was on the water with Kai. Remy baited Kai's hook."
+        " What will Remy want to do next?\n",
+    ),
+    Message(role=Role.ASSISTANT, content="Answer: cast the line"),
+]
+# The eval row's own prompt: context + question only, no option menu.
+_RC_EVAL_MESSAGES = [
+    Message(role=Role.USER, content="Question: Alex spilled coffee on a stranger. What will Alex want to do next?\n"),
+    Message(role=Role.ASSISTANT, content="Answer:"),
+]
+
+
+def test_social_iqa_cloze_olmes_fiveshot_prompt() -> None:
+    # Given the real Social IQa cloze (OLMES) benchmark over one fictional row on its sample split (validation)
+    benchmark = social_iqa_cloze_olmes(dataset=DatasetStub({"validation": [_EVAL_ROW]}))
+    # When we assemble its first sample (five-shot)
+    sample = first_sample(benchmark, num_fewshot=5)
+    # Then the first five OLMES demonstrations precede the question, and every full answer text is scored:
+    assert sample.messages == _RC_OLMES_FIVE_SHOT_MESSAGES + _RC_EVAL_MESSAGES
+    assert sample.ground_truth == " Apologise"
+    assert sample.possible_completions == [" Apologise", " Laugh", " Walk away"]
+
+
+def test_social_iqa_bpb_olmes_fiveshot_prompt() -> None:
+    # Given the real Social IQa BPB (OLMES) benchmark over one fictional row on its sample split (validation)
+    benchmark = social_iqa_bpb_olmes(dataset=DatasetStub({"validation": [_EVAL_ROW]}))
+    # When we assemble its first sample (five-shot)
+    sample = first_sample(benchmark, num_fewshot=5)
+    # Then the prompt is the cloze one, but only the gold answer's full text is scored:
+    assert sample.messages == _RC_OLMES_FIVE_SHOT_MESSAGES + _RC_EVAL_MESSAGES
+    assert sample.ground_truth == " Apologise"
+    assert sample.possible_completions == [" Apologise"]
+
+
+@pytest.mark.parametrize("make_benchmark", [social_iqa_cloze_olmes, social_iqa_bpb_olmes], ids=["cloze", "bpb"])
+def test_social_iqa_rc_olmes_evaluates_the_validation_split(make_benchmark: Callable[..., Benchmark]) -> None:
+    # Given the benchmark over a dataset whose train and validation splits hold different rows
+    benchmark = make_benchmark(dataset=DatasetStub({"train": [_OTHER_SPLIT_ROW], "validation": [_EVAL_ROW]}))
+    # When we assemble its first sample
+    sample = first_sample(benchmark, num_fewshot=0)
+    # Then it asks the validation row's question:
+    assert sample.messages == _RC_EVAL_MESSAGES
