@@ -9,6 +9,7 @@ import numpy as np
 
 from eval_framework.metrics.base import MetricResult
 from eval_framework.metrics.loglikelihood.bpb_variants_estimators import PrefixItem, cumulative_cost, prior_bpb
+from eval_framework.metrics.loglikelihood.token_scores import per_token_scores_for
 from eval_framework.shared.types import Error, Loglikelihood
 
 # "Ground truth" is the target answer string. Other papers and eval frameworks call the
@@ -90,7 +91,7 @@ def compute_standard_bpb_results(
 
 
 def compute_prefix_bpb_results(response: Loglikelihood, ground_truth: str) -> list[MetricResult]:
-    per_token = (response.loglikelihoods_per_token or {}).get(ground_truth)
+    per_token = per_token_scores_for(response, ground_truth)
     if per_token is None or not per_token.bits:
         return []
 
@@ -130,7 +131,7 @@ def compute_prefix_bpb_results(response: Loglikelihood, ground_truth: str) -> li
 
 
 def build_prefix_item(response: Loglikelihood, ground_truth: str) -> PrefixItem | None:
-    per_token = (response.loglikelihoods_per_token or {}).get(ground_truth)
+    per_token = per_token_scores_for(response, ground_truth)
     if per_token is None or not per_token.bits:
         return None
     offset = 1 if ground_truth.startswith(" ") else 0
