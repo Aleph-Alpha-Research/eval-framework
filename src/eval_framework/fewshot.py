@@ -217,6 +217,41 @@ class Predefined(FewShotSource):
         return FewShotDoc(split=None, example_shots=self._count)
 
 
+@final
+class FirstOf(FewShotSource):
+    """A fixed, hand-written list of demonstrations (not drawn from the dataset), of which the first
+    ``num_fewshot`` are shown: the same ones, in the same order, for every item. Asking for more than the list
+    holds is an error."""
+
+    def __init__(self, items: list[dict[str, Any]], *, label: str) -> None:
+        self._items = items
+        self._label = label
+
+    @override
+    def resolve_count(self, num_fewshot: int) -> int:
+        if num_fewshot > len(self._items):
+            raise ValueError(
+                f"{self._label} has {len(self._items)} predefined demonstrations, but {num_fewshot} were requested."
+            )
+        return num_fewshot
+
+    @override
+    def build_pool(self, dataset: Mapping[str, Any], *, sample_split: str, sample_rows: list[dict[str, Any]]) -> Pool:
+        return self._items
+
+    @override
+    def draw(self, pool: Pool, *, item: dict[str, Any], count: int, rnd: random.Random) -> list[dict[str, Any]]:
+        return [pool[i] for i in range(count)]
+
+    @override
+    def metadata(self, sample_split: str) -> dict[str, str]:
+        return {"fewshot_split": "predefined"}
+
+    @override
+    def documentation(self, sample_split: str) -> FewShotDoc:
+        return FewShotDoc(split=None, example_shots=1)
+
+
 # ---------------------------------------------------------------------------
 # Policy (spec) -> generator (per-run worker)
 # ---------------------------------------------------------------------------
