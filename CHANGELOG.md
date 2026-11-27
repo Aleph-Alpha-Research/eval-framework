@@ -14,6 +14,27 @@
 
 ### Bug Fixes
 
+## [0.29.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.29.0...v0.29.1) (2026-11-27)
+
+
+### Features
+
+* add arc_bpb variant ([8c9cb91](https://github.com/Aleph-Alpha-Research/eval-framework/commit/8c9cb915e30824e83ddf68ee53301dede47f0254))
+* add goldenswag_bpb variant ([84b6d73](https://github.com/Aleph-Alpha-Research/eval-framework/commit/84b6d73d614225e5ed87e311372e6f3cf98ad3c5))
+* add mmlu_bpb variant ([da088e2](https://github.com/Aleph-Alpha-Research/eval-framework/commit/da088e2f512076175ef27a8c4a5594393d84cab8))
+* add per-language global_mmlu and global_mmlu_lite bpb variants ([98b1d3d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/98b1d3da110a4e98bb19e16a4b28d298c0fd11fe))
+* add piqa_bpb variant ([e029108](https://github.com/Aleph-Alpha-Research/eval-framework/commit/e029108742d7d27b1ab0b26c493410d903469609))
+
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=3.58.0,&lt;4 ([d9135c4](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d9135c4b70ef37126c6eb1fcebddfbc370393fc2))
+
+
+### Documentation
+
+* mark the german mmlu preambles for a later rewording ([b177f5d](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b177f5d24a6fee9e51f1e8c2351471d587428824))
+
 ## [0.29.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.28.3...v0.29.0) (2026-11-26)
 
 
