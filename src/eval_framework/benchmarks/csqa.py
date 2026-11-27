@@ -2,13 +2,18 @@
 
 Five-way multiple-choice commonsense questions. The variants:
 
-* ``CSQA_Tau_EN_MC_OLMES`` — the options are shown as space-prefixed lettered choices (" A. …") and the
-  model is scored over the letter labels. Mirrors OLMES' OLMo 3 Base Main task (``csqa:mc::xlarge``).
-* ``CSQA_Tau_EN_Cloze_OLMES`` — the options are hidden and the model is scored over the full answer texts.
-* ``CSQA_Tau_EN_BPB_OLMES`` — the cloze prompt, but only the BPB of the gold answer's full text is scored.
+* ``CSQA_Tau_EN_MC`` — the options are shown as lettered choices ("A. …") and the model is scored over the
+  letter labels.
+* ``CSQA_Tau_EN_Cloze`` — the options are hidden and the model is scored over the full answer texts.
+* ``CSQA_Tau_EN_BPB`` — the cloze prompt, but only the BPB of the gold answer's full text is scored.
 
-The cloze and BPB variants mirror OLMES' OLMo 3 Base Easy suite (``csqa:rc::olmes:full``,
-``csqa:rc:bpb::olmes:full``).
+These evaluate the validation split with demonstrations drawn at random from train. The ``_OLMES`` variants
+instead follow OLMES' OLMo 3 suites, showing the first ``num_fewshot`` of OLMES' fixed demonstrations:
+
+* ``CSQA_Tau_EN_MC_OLMES`` — the options are shown as space-prefixed lettered choices (" A. …").
+  Mirrors OLMo 3 Base Main (``csqa:mc::xlarge``).
+* ``CSQA_Tau_EN_Cloze_OLMES``, ``CSQA_Tau_EN_BPB_OLMES`` — mirror OLMo 3 Base Easy
+  (``csqa:rc::olmes:full``, ``csqa:rc:bpb::olmes:full``).
 """
 
 from typing import Any, final, override
@@ -18,7 +23,7 @@ from eval_framework.choices import ChoiceFields, ChoiceReader
 from eval_framework.composed import ComposedBenchmark
 from eval_framework.contract import Benchmark
 from eval_framework.eval_kind import Choice
-from eval_framework.fewshot import ChoiceRenderer, FewShot, FirstOf
+from eval_framework.fewshot import ChoiceRenderer, FewShot, FewShotSource, FewShotSplit, FirstOf
 from eval_framework.tasks.dataset_loading import DatasetPolicy
 from eval_framework.tasks.dataset_revisions import pinned_by_framework
 from eval_framework.tasks.task_style import BPBStyle, ClozeStyle, MCStyle, TaskStyler
@@ -104,16 +109,34 @@ def _dataset_policy(dataset: DatasetPolicy | None) -> DatasetPolicy:
     return dataset if dataset is not None else pinned_by_framework(_DATASET_PATH)
 
 
-def _csqa_olmes(id: str, styler: TaskStyler, sample_split: str, dataset: DatasetPolicy | None) -> Benchmark:
-    """A CommonsenseQA task showing the first ``num_fewshot`` of OLMES' fixed demonstrations."""
+def _csqa(
+    id: str, styler: TaskStyler, *, sample_split: str, fewshot_source: FewShotSource, dataset: DatasetPolicy | None
+) -> Benchmark:
     reader = CommonsenseQaReader()
     return ComposedBenchmark.compose(
         id=id,
         kind=Choice(reader, styler),
         answer=PickFromCandidates(),
         sample_split=sample_split,
-        fewshot=FewShot(FirstOf(_OLMES_FEWSHOT_EXAMPLES, label=id), ChoiceRenderer(reader, styler)),
+        fewshot=FewShot(fewshot_source, ChoiceRenderer(reader, styler)),
         dataset_policy=_dataset_policy(dataset),
+    )
+
+
+# The generic variants: the validation split, with demonstrations drawn at random from train.
+_FROM_TRAIN = FewShotSplit("train")
+
+# The OLMES variants: the first `num_fewshot` of OLMES' fixed demonstrations.
+_OLMES_DEMONSTRATIONS = FirstOf(_OLMES_FEWSHOT_EXAMPLES, label="CommonsenseQA (OLMES demonstrations)")
+
+
+def csqa_mc(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _csqa(
+        "CSQA_Tau_EN_MC",
+        MCStyle(),
+        sample_split="validation",
+        fewshot_source=_FROM_TRAIN,
+        dataset=dataset,
     )
 
 
@@ -123,18 +146,62 @@ def csqa_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     They use a random 10,000 subset of train + validation. We use the largest single split `train` as the
     approximation.
     """
-    styler = MCStyle(question_prefix="Question: ", cue_text="Answer:", space_prefixed_labels=True)
-    return _csqa_olmes("CSQA_Tau_EN_MC_OLMES", styler, "train", dataset)
+    return _csqa(
+        "CSQA_Tau_EN_MC_OLMES",
+        MCStyle(space_prefixed_labels=True),
+        sample_split="train",
+        fewshot_source=_OLMES_DEMONSTRATIONS,
+        dataset=dataset,
+    )
+
+
+def csqa_cloze(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _csqa(
+        "CSQA_Tau_EN_Cloze",
+        ClozeStyle(),
+        sample_split="validation",
+        fewshot_source=_FROM_TRAIN,
+        dataset=dataset,
+    )
 
 
 def csqa_cloze_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     """Matches OLMo 3 Base Easy, OLMES `csqa:rc::olmes:full`, which uses the full validation split."""
-    return _csqa_olmes("CSQA_Tau_EN_Cloze_OLMES", ClozeStyle(), "validation", dataset)
+    return _csqa(
+        "CSQA_Tau_EN_Cloze_OLMES",
+        ClozeStyle(),
+        sample_split="validation",
+        fewshot_source=_OLMES_DEMONSTRATIONS,
+        dataset=dataset,
+    )
+
+
+def csqa_bpb(dataset: DatasetPolicy | None = None) -> Benchmark:
+    return _csqa(
+        "CSQA_Tau_EN_BPB",
+        BPBStyle(),
+        sample_split="validation",
+        fewshot_source=_FROM_TRAIN,
+        dataset=dataset,
+    )
 
 
 def csqa_bpb_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     """Matches OLMo 3 Base Easy, OLMES `csqa:rc:bpb::olmes:full`, which uses the full validation split."""
-    return _csqa_olmes("CSQA_Tau_EN_BPB_OLMES", BPBStyle(), "validation", dataset)
+    return _csqa(
+        "CSQA_Tau_EN_BPB_OLMES",
+        BPBStyle(),
+        sample_split="validation",
+        fewshot_source=_OLMES_DEMONSTRATIONS,
+        dataset=dataset,
+    )
 
 
-CSQA_BENCHMARKS: list[Benchmark] = [csqa_mc_olmes(), csqa_cloze_olmes(), csqa_bpb_olmes()]
+CSQA_BENCHMARKS: list[Benchmark] = [
+    csqa_mc(),
+    csqa_mc_olmes(),
+    csqa_cloze(),
+    csqa_cloze_olmes(),
+    csqa_bpb(),
+    csqa_bpb_olmes(),
+]
