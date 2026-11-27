@@ -38,11 +38,11 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **distro** 1.9.0 - https://github.com/python-distro/distro
 - **google-crc32c** 1.9.0 - https://github.com/googleapis/python-crc32c
 - **hf-xet** 1.8.0 - https://github.com/huggingface/xet-core
-- **huggingface_hub** 2.4.0 - https://github.com/huggingface/huggingface_hub
+- **huggingface_hub** 2.5.0 - https://github.com/huggingface/huggingface_hub
 - **langdetect** 1.0.9 - https://github.com/Mimino666/langdetect
 - **lingua-language-detector** 2.2.0 - https://github.com/pemistahl/lingua-py
 - **nltk** 3.10.4 - https://www.nltk.org/
-- **openai** 3.59.0 - https://github.com/openai/openai-python
+- **openai** 3.60.0 - https://github.com/openai/openai-python
 - **opentelemetry-api** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
 - **opentelemetry-exporter-otlp-proto-common** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common
 - **opentelemetry-proto** 1.45.2 - https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-proto
@@ -56,7 +56,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 
 ## Apache-2.0 AND CNRI-Python
 
-- **regex** 2026.11.24 - https://github.com/mrabarnett/mrab-regex
+- **regex** 2026.11.25 - https://github.com/mrabarnett/mrab-regex
 
 ## Apache-2.0 OR BSD-2-Clause
 
@@ -76,7 +76,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **fsspec** 2026.9.0 - https://github.com/fsspec/filesystem_spec
 - **httpcore** 1.0.9 - https://www.encode.io/httpcore/
 - **httpcore2** 2.16.2 - https://github.com/pydantic/httpx2
-- **httpx** 0.28.1 - https://github.com/encode/httpx
+- **httpx** 0.29.0 - https://github.com/encode/httpx
 - **httpx2** 2.16.2 - https://github.com/pydantic/httpx2
 - **idna** 3.20 - https://github.com/kjd/idna
 - **joblib** 1.6.0 - https://joblib.readthedocs.io
@@ -123,7 +123,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **six** 1.17.0 - https://github.com/benjaminp/six
 - **tiktoken** 0.14.0 - https://github.com/openai/tiktoken
 - **truststore** 0.10.5 - https://github.com/sethmlarson/truststore
-- **typer** 0.29.2 - https://github.com/fastapi/typer
+- **typer** 0.29.3 - https://github.com/fastapi/typer
 - **typing-inspection** 0.4.5 - https://github.com/pydantic/typing-inspection
 - **urllib3** 2.8.0 - https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
 - **wandb** 0.31.2 - https://github.com/wandb/wandb
@@ -1646,7 +1646,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### httpx 0.28.1 (BSD-3-Clause)
+### httpx 0.29.0 (BSD-3-Clause)
 
 ```text
 Copyright © 2019, [Encode OSS Ltd](https://www.encode.io/).
@@ -1681,7 +1681,7 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### huggingface_hub 2.4.0 (Apache-2.0)
+### huggingface_hub 2.5.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -3570,7 +3570,7 @@ Public License instead of this License.  But first, please read
 <https://www.gnu.org/licenses/why-not-lgpl.html>.
 ```
 
-### openai 3.59.0 (Apache-2.0)
+### openai 3.60.0 (Apache-2.0)
 
 ```text
 Apache License
@@ -7843,7 +7843,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### regex 2026.11.24 (Apache-2.0 AND CNRI-Python)
+### regex 2026.11.25 (Apache-2.0 AND CNRI-Python)
 
 ```text
 This work was derived from the 're' module of CPython 2.6 and CPython 3.1,
@@ -9928,7 +9928,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-### typer 0.29.2 (MIT)
+### typer 0.29.3 (MIT)
 
 ```text
 The MIT License (MIT)

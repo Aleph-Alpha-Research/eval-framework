@@ -19,7 +19,7 @@ and first-party/internal packages are excluded.
 | `lxml` | `>=6.1.3,<7` |
 | `nltk` | `>=3.10.4,<4` |
 | `numpy` | `>=2.5.5` |
-| `openai` | `>=3.57.0,<4` |
+| `openai` | `>=3.58.0,<4` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.4,<3` |
 | `python-dotenv` | `>=1.2.4,<2` |
@@ -54,10 +54,10 @@ and first-party/internal packages are excluded.
 | `hf-xet` | `1.8.0` |
 | `httpcore` | `1.0.9` |
 | `httpcore2` | `2.16.2` |
-| `httpx` | `0.28.1` |
+| `httpx` | `0.29.0` |
 | `httpx2` | `2.16.2` |
 | `httpx2-jsfetch` | `1.0` |
-| `huggingface-hub` | `2.4.0` |
+| `huggingface-hub` | `2.5.0` |
 | `idna` | `3.20` |
 | `jiter` | `0.19.0` |
 | `joblib` | `1.6.0` |
@@ -78,7 +78,7 @@ and first-party/internal packages are excluded.
 | `pydantic-core` | `2.50.5` |
 | `pygments` | `2.21.0` |
 | `python-dateutil` | `4.0.0` |
-| `regex` | `2026.11.24` |
+| `regex` | `2026.11.25` |
 | `requests` | `2.34.2` |
 | `rich` | `15.0.0` |
 | `safetensors` | `0.8.0` |
@@ -88,7 +88,7 @@ and first-party/internal packages are excluded.
 | `tokenizers` | `0.23.3` |
 | `tqdm` | `4.70.1` |
 | `truststore` | `0.10.5` |
-| `typer` | `0.29.2` |
+| `typer` | `0.29.3` |
 | `typing-extensions` | `4.16.0` |
 | `typing-inspection` | `0.4.5` |
 | `tzdata` | `2026.6` |
