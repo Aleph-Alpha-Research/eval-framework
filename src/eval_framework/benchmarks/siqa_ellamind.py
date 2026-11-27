@@ -60,27 +60,27 @@ def _siqa_ellamind_benchmark(
 
 
 def siqa_ellamind_mc_easy_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _siqa_ellamind_benchmark("SIQA_ELLAMIND_MC_EASY_DE", MCStyle.for_language(Language.DEU), "easy", dataset)
+    return _siqa_ellamind_benchmark("SIQA_Ellamind_DE_MC_Easy", MCStyle.for_language(Language.DEU), "easy", dataset)
 
 
 def siqa_ellamind_mc_hard_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _siqa_ellamind_benchmark("SIQA_ELLAMIND_MC_HARD_DE", MCStyle.for_language(Language.DEU), "hard", dataset)
+    return _siqa_ellamind_benchmark("SIQA_Ellamind_DE_MC_Hard", MCStyle.for_language(Language.DEU), "hard", dataset)
 
 
 def siqa_ellamind_cloze_easy_de(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _siqa_ellamind_benchmark(
-        "SIQA_ELLAMIND_CLOZE_EASY_DE", ClozeStyle.for_language(Language.DEU), "easy", dataset
+        "SIQA_Ellamind_DE_Cloze_Easy", ClozeStyle.for_language(Language.DEU), "easy", dataset
     )
 
 
 def siqa_ellamind_cloze_hard_de(dataset: DatasetPolicy | None = None) -> Benchmark:
     return _siqa_ellamind_benchmark(
-        "SIQA_ELLAMIND_CLOZE_HARD_DE", ClozeStyle.for_language(Language.DEU), "hard", dataset
+        "SIQA_Ellamind_DE_Cloze_Hard", ClozeStyle.for_language(Language.DEU), "hard", dataset
     )
 
 
 def siqa_ellamind_bpb_de(dataset: DatasetPolicy | None = None) -> Benchmark:
-    return _siqa_ellamind_benchmark("SIQA_ELLAMIND_BPB_DE", BPBStyle.for_language(Language.DEU), "easy", dataset)
+    return _siqa_ellamind_benchmark("SIQA_Ellamind_DE_BPB", BPBStyle.for_language(Language.DEU), "easy", dataset)
 
 
 SIQA_ELLAMIND_BENCHMARKS: list[Benchmark] = [

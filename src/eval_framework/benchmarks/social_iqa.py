@@ -40,7 +40,7 @@ def social_iqa_mc_olmes(dataset: DatasetPolicy | None = None) -> Benchmark:
     styler = MCStyle(question_prefix="Question: ", cue_text="Answer:", space_prefixed_labels=True)
     dataset_policy = dataset if dataset is not None else pinned_frozen(SOCIAL_I_QA_DATASET_PATH)
     return ComposedBenchmark.choice(
-        id="SocialIQAMC_OLMES",
+        id="SIQA_AllenAI_EN_MC_OLMES",
         reader=SocialIqaReader(),
         styler=styler,
         sample_split="train",
