@@ -81,7 +81,7 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **idna** 3.20 - https://github.com/kjd/idna
 - **joblib** 1.6.0 - https://joblib.readthedocs.io
 - **jsonlines** 4.0.0 - https://github.com/wbolster/jsonlines
-- **lxml** 6.1.3 - https://lxml.de/
+- **lxml** 6.2.0 - https://lxml.de/
 - **mpmath** 1.3.0 - http://mpmath.org/
 - **multiprocess** 0.70.19 - https://github.com/uqfoundation/multiprocess
 - **pandas** 3.1.1 - https://pandas.pydata.org
@@ -110,12 +110,12 @@ runtime Python dependencies; dev-only and internal packages are excluded.
 - **anyio** 4.16.0 - https://anyio.readthedocs.io/en/stable/versionhistory.html
 - **attrs** 26.1.0 - https://www.attrs.org/en/stable/changelog.html
 - **charset-normalizer** 3.5.3 - https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
-- **filelock** 4.3.1 - https://github.com/tox-dev/filelock
+- **filelock** 4.3.2 - https://github.com/tox-dev/filelock
 - **h11** 0.16.0 - https://github.com/python-hyper/h11
 - **jiter** 0.19.0 - https://github.com/pydantic/jiter/
 - **markdown-it-py** 4.3.0 - https://github.com/executablebooks/markdown-it-py
 - **mdurl** 0.1.2 - https://github.com/executablebooks/mdurl
-- **platformdirs** 4.14.8 - https://github.com/tox-dev/platformdirs
+- **platformdirs** 4.14.9 - https://github.com/tox-dev/platformdirs
 - **pydantic** 2.14.4 - https://github.com/pydantic/pydantic
 - **pydantic_core** 2.50.5 - https://github.com/pydantic
 - **PyYAML** 6.0.4 - https://pyyaml.org/
@@ -1082,7 +1082,7 @@ Apache License
    limitations under the License.
 ```
 
-### filelock 4.3.1 (MIT)
+### filelock 4.3.2 (MIT)
 
 ```text
 MIT License
@@ -2268,7 +2268,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-### lxml 6.1.3 (BSD-3-Clause)
+### lxml 6.2.0 (BSD-3-Clause)
 
 ```text
 BSD 3-Clause License
@@ -4850,7 +4850,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-### platformdirs 4.14.8 (MIT)
+### platformdirs 4.14.9 (MIT)
 
 ```text
 MIT License
