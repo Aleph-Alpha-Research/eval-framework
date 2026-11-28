@@ -14,6 +14,38 @@
 
 ### Bug Fixes
 
+## [0.30.0](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.29.1...v0.30.0) (2026-11-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* SIQA_AllenAI_EN_MC_OLMES now shows OLMES' fixed demonstrations instead of random train items, so its prompts and scores change.
+* the SIQA task ids change: SocialIQAMC_OLMES is now SIQA_AllenAI_EN_MC_OLMES, and SIQA_ELLAMIND_{MC,CLOZE}_{EASY,HARD}_DE and SIQA_ELLAMIND_BPB_DE are now SIQA_Ellamind_DE_{MC,Cloze}_{Easy,Hard} and SIQA_Ellamind_DE_BPB.
+* CSQA_Tau_EN_MC_OLMES now shows OLMES' fixed demonstrations instead of random train items, so its prompts and scores change.
+* the CSQA task ids change: CommonsenseQAMC_OLMES is now CSQA_Tau_EN_MC_OLMES, and CSQA_ELLAMIND_{MC,CLOZE}_{EASY,HARD}_DE and CSQA_ELLAMIND_BPB_DE are now CSQA_Ellamind_DE_{MC,Cloze}_{Easy,Hard} and CSQA_Ellamind_DE_BPB.
+
+### Features
+
+* add a FirstOf few-shot source ([a616ba6](https://github.com/Aleph-Alpha-Research/eval-framework/commit/a616ba6e65896840ea611a1596db11bfd71e8857))
+* add csqa olmes cloze and bpb variants ([1e83011](https://github.com/Aleph-Alpha-Research/eval-framework/commit/1e83011418f5cf7608d5907b86cb60f27da30ee8))
+* add generic csqa mc, cloze and bpb variants ([81b5eae](https://github.com/Aleph-Alpha-Research/eval-framework/commit/81b5eaee5ce8fcde9456a1240e4f79edc864f0de))
+* add generic siqa mc, cloze and bpb variants ([d52ffb0](https://github.com/Aleph-Alpha-Research/eval-framework/commit/d52ffb09b4d2b136a391c683a5c42be75bbb1718))
+* add siqa olmes cloze and bpb variants ([b3f0332](https://github.com/Aleph-Alpha-Research/eval-framework/commit/b3f0332995ced8da3fcd32a15d478e760ae4a705))
+
+
+### Bug Fixes
+
+* **deps:** update dependency openai to &gt;=3.59.0,&lt;4 ([c1c30f0](https://github.com/Aleph-Alpha-Research/eval-framework/commit/c1c30f03d5d311b485fbf49c02c41f9d2dea04fb))
+* **deps:** update dependency transformers to &gt;=5.24.1,&lt;6 ([0418ea9](https://github.com/Aleph-Alpha-Research/eval-framework/commit/0418ea94649ea39c5387555f6cad43aa87bc8546))
+* use the OLMES demonstrations in the csqa mc variant ([034d1d8](https://github.com/Aleph-Alpha-Research/eval-framework/commit/034d1d8ef18de65cbf9a647104f6f870a6a9fe00))
+* use the OLMES demonstrations in the siqa mc variant ([82b70ff](https://github.com/Aleph-Alpha-Research/eval-framework/commit/82b70ffb0ba709cb79a931a8e4984c146b8b41f0))
+
+
+### Code Refactoring
+
+* rename all csqa tasks to follow naming convention ([6b22a82](https://github.com/Aleph-Alpha-Research/eval-framework/commit/6b22a82b407612f262816fd2e3e541847160c801))
+* rename the siqa tasks to follow the naming convention ([39a84d8](https://github.com/Aleph-Alpha-Research/eval-framework/commit/39a84d859c8872a5828d898ef0ac44e810abec3f))
+
 ## [0.29.1](https://github.com/Aleph-Alpha-Research/eval-framework/compare/v0.29.0...v0.29.1) (2026-11-27)
 
 
