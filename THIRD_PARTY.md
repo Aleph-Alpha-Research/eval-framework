@@ -19,7 +19,7 @@ and first-party/internal packages are excluded.
 | `lxml` | `>=6.1.3,<7` |
 | `nltk` | `>=3.10.4,<4` |
 | `numpy` | `>=2.5.5` |
-| `openai` | `>=3.58.0,<4` |
+| `openai` | `>=3.59.0,<4` |
 | `pycountry` | `>=26.2.16,<27` |
 | `pydantic` | `>=2.14.4,<3` |
 | `python-dotenv` | `>=1.2.4,<2` |
@@ -27,7 +27,7 @@ and first-party/internal packages are excluded.
 | `scipy` | `>=1.18.1,<2` |
 | `sympy` | `>=1.14.0,<2` |
 | `tiktoken` | `>=0.14.0,<1` |
-| `transformers` | `>=5.24.0,<6` |
+| `transformers` | `>=5.24.1,<6` |
 | `wandb` | `>=0.31.2,<1` |
 | `xmltodict` | `>=1.0.4,<1.1` |
 
@@ -48,7 +48,7 @@ and first-party/internal packages are excluded.
 | `defusedxml` | `0.7.1` |
 | `dill` | `0.4.1` |
 | `distro` | `1.9.0` |
-| `filelock` | `4.3.1` |
+| `filelock` | `4.3.2` |
 | `fsspec` | `2026.9.0` |
 | `h11` | `0.16.0` |
 | `hf-xet` | `1.8.0` |
@@ -72,7 +72,7 @@ and first-party/internal packages are excluded.
 | `opentelemetry-semantic-conventions` | `0.66b2` |
 | `packaging` | `26.4` |
 | `pandas` | `3.1.1` |
-| `platformdirs` | `4.14.8` |
+| `platformdirs` | `4.14.9` |
 | `protobuf` | `7.36.2` |
 | `pyarrow` | `26.0.1` |
 | `pydantic-core` | `2.50.5` |
