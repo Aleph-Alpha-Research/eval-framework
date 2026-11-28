@@ -1,0 +1,53 @@
+eval\_framework.metrics.completion.code\_execution package
+==========================================================
+
+Submodules
+----------
+
+eval\_framework.metrics.completion.code\_execution.multipl\_e\_assertion module
+-------------------------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.code_execution.multipl_e_assertion
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.code\_execution.pass\_at\_one module
+-----------------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.code_execution.pass_at_one
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.code\_execution.python\_assertion module
+---------------------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.code_execution.python_assertion
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.code\_execution.python\_tests module
+-----------------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.code_execution.python_tests
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.code\_execution.sandbox module
+-----------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.code_execution.sandbox
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: eval_framework.metrics.completion.code_execution
+   :members:
+   :show-inheritance:
+   :undoc-members:

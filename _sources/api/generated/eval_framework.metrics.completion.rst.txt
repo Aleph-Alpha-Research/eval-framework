@@ -1,0 +1,125 @@
+eval\_framework.metrics.completion package
+==========================================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   eval_framework.metrics.completion.code_execution
+
+Submodules
+----------
+
+eval\_framework.metrics.completion.accuracy\_completion module
+--------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.accuracy_completion
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.drop\_completion module
+----------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.drop_completion
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.f1 module
+--------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.f1
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.ifeval module
+------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.ifeval
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.language\_checker module
+-----------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.language_checker
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.math\_minerva\_completion module
+-------------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.math_minerva_completion
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.math\_reasoning\_completion module
+---------------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.math_reasoning_completion
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.minerva\_math\_utils module
+--------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.minerva_math_utils
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.repetition module
+----------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.repetition
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.rouge\_1 module
+--------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.rouge_1
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.rouge\_2 module
+--------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.rouge_2
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.rouge\_geometric\_mean module
+----------------------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.rouge_geometric_mean
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+eval\_framework.metrics.completion.rouge\_l module
+--------------------------------------------------
+
+.. automodule:: eval_framework.metrics.completion.rouge_l
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: eval_framework.metrics.completion
+   :members:
+   :show-inheritance:
+   :undoc-members:
