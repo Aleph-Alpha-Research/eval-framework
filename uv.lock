@@ -469,7 +469,7 @@ requires-dist = [
 dev = [
     { name = "mypy", specifier = ">=2.4.1,<3" },
     { name = "pip-licenses", specifier = ">=5.5.5" },
-    { name = "plotly", specifier = ">=7.1.0,<8" },
+    { name = "plotly", specifier = ">=7.2.0,<8" },
     { name = "pytest", specifier = ">=9.2.0,<10" },
     { name = "pytest-mock", specifier = ">=3.17.0" },
     { name = "pytest-sugar", specifier = ">1.1,<2" },
